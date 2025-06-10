@@ -1,0 +1,8 @@
+Laravel-сервер (backend)
+
+php artisan serve
+
+
+2. Vite-сервер (frontend)
+
+npm run dev

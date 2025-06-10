@@ -1,0 +1,33 @@
+{
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview"
+    },
+    "devDependencies": {
+        "@inertiajs/vue3": "^1.0.14",
+        "@tailwindcss/forms": "^0.5.7",
+        "@tailwindcss/typography": "^0.5.10",
+        "@vitejs/plugin-vue": "^5.0.2",
+        "autoprefixer": "^10.4.16",
+        "axios": "^1.6.5",
+        "laravel-vite-plugin": "^1.0.1",
+        "postcss": "^8.4.33",
+        "tailwindcss": "^3.4.1",
+        "vite": "^5.0.11",
+        "vue": "^3.4.15"
+    },
+    "dependencies": {
+        "@vuepic/vue-datepicker": "^7.4.1",
+        "vue-tel-input": "^8.3.1",
+        "pinia": "^2.1.7",
+        "pinia-plugin-persistedstate": "^3.2.1",
+        "@heroicons/vue": "^2.1.1",
+        "vue-toastification": "^2.0.0-rc.5",
+        "dayjs": "^1.11.10",
+        "lodash": "^4.17.21",
+        "vue3-google-map": "^0.18.0"
+    }
+}
