@@ -208,6 +208,29 @@ class ProjectController extends Controller
             'health_score' => $project->health_score,
         ]);
     }
+// Метод для получения метрик проекта
+public function getMetrics(Project $project)
+{
+    $this->authorize('view', $project);
+    
+    $metrics = $project->getDailyMetrics(30);
+    
+    return response()->json([
+        'metrics' => $metrics,
+    ]);
+}
+
+// Метод для получения активности проекта
+public function getActivities(Project $project)
+{
+    $this->authorize('view', $project);
+    
+    $activities = $project->getRecentActivities(50);
+    
+    return response()->json([
+        'activities' => $activities,
+    ]);
+}
 
     // Экспорт отчета по проекту
     public function exportReport(Project $project)
