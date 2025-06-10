@@ -8,7 +8,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectTaskController;
 use App\Http\Controllers\ProjectMilestoneController;
 use App\Http\Controllers\ProjectMemberController;
-use Inertia\Inertia;
+
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
