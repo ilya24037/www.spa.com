@@ -5,6 +5,9 @@
 .env.production
 .phpactor.json
 .phpunit.result.cache
+# Временные папки Google Drive
+.tmp.driveupload*/
+.tmp.drivedownload*/
 /.fleet
 /.idea
 /.nova
