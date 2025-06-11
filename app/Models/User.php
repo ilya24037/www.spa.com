@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -52,11 +53,35 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Отношение к профилю
+     * Профиль мастера
      */
-    public function profile()
+    public function masterProfile()
     {
-        return $this->hasOne(Profile::class);
+        return $this->hasOne(MasterProfile::class);
+    }
+
+    /**
+     * Бронирования клиента
+     */
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class, 'client_id');
+    }
+
+    /**
+     * Отзывы клиента
+     */
+    public function reviews()
+    {
+        return $this->hasMany(Review::class, 'client_id');
+    }
+
+    /**
+     * Реакции на отзывы
+     */
+    public function reviewReactions()
+    {
+        return $this->hasMany(ReviewReaction::class);
     }
 
     /**
@@ -92,18 +117,13 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Boot метод для автоматического создания профиля
+     * Проверка, есть ли у мастера активный профиль
      */
-    protected static function boot()
+    public function hasActiveMasterProfile()
     {
-        parent::boot();
-
-        static::created(function ($user) {
-            $user->profile()->create([
-                'bio' => '',
-                'city' => '',
-            ]);
-        });
+        return $this->isMaster() && 
+               $this->masterProfile && 
+               $this->masterProfile->status === 'active';
     }
 
     /**
@@ -111,99 +131,107 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function getAvatarUrlAttribute()
     {
+        // Если пользователь - мастер с аватаром
+        if ($this->isMaster() && $this->masterProfile && $this->masterProfile->avatar) {
+            return Storage::url($this->masterProfile->avatar);
+        }
+        
+        // Если есть аватар у пользователя
         if ($this->avatar) {
-            return asset('storage/' . $this->avatar);
+            return Storage::url($this->avatar);
         }
 
         // Возвращаем дефолтный аватар
-        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=0ea5e9&background=e0f2fe';
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=7F9CF5&background=EBF4FF';
     }
 
     /**
-     * Проекты, созданные пользователем
+     * Получить имя для отображения
      */
-    public function ownedProjects()
+    public function getDisplayNameAttribute()
     {
-        return $this->hasMany(Project::class, 'user_id');
-    }
-
-    /**
-     * Все проекты, в которых участвует пользователь
-     */
-    public function projects()
-    {
-        return $this->belongsToMany(Project::class, 'project_members')
-            ->withPivot('role', 'joined_at', 'is_active')
-            ->wherePivot('is_active', true);
-    }
-
-    /**
-     * Активные проекты пользователя
-     */
-    public function activeProjects()
-    {
-        return $this->projects()
-            ->whereIn('status', ['planning', 'active'])
-            ->orderBy('projects.created_at', 'desc');
-    }
-
-    /**
-     * Задачи, назначенные пользователю
-     */
-    public function assignedTasks()
-    {
-        return $this->hasMany(ProjectTask::class, 'assigned_to');
-    }
-
-    /**
-     * Активные задачи пользователя
-     */
-    public function activeTasks()
-    {
-        return $this->assignedTasks()
-            ->whereNotIn('status', ['done', 'blocked'])
-            ->orderBy('priority', 'desc')
-            ->orderBy('due_date');
-    }
-
-    /**
-     * Получить статистику пользователя по проектам
-     */
-    public function getProjectStats(): array
-    {
-        $totalProjects = $this->projects()->count();
-        $activeProjects = $this->activeProjects()->count();
-        $completedProjects = $this->projects()->where('status', 'completed')->count();
+        if ($this->isMaster() && $this->masterProfile) {
+            return $this->masterProfile->display_name;
+        }
         
-        $totalTasks = $this->assignedTasks()->count();
-        $completedTasks = $this->assignedTasks()->where('status', 'done')->count();
-        $overdueTasks = $this->assignedTasks()
-            ->where('due_date', '<', now())
-            ->whereNotIn('status', ['done', 'blocked'])
-            ->count();
+        return $this->name;
+    }
 
+    /**
+     * Получить статистику клиента
+     */
+    public function getClientStats(): array
+    {
+        if (!$this->isClient()) {
+            return [];
+        }
+
+        $totalBookings = $this->bookings()->count();
+        $completedBookings = $this->bookings()->where('status', 'completed')->count();
+        $totalReviews = $this->reviews()->count();
+        
         return [
-            'total_projects' => $totalProjects,
-            'active_projects' => $activeProjects,
-            'completed_projects' => $completedProjects,
-            'total_tasks' => $totalTasks,
-            'completed_tasks' => $completedTasks,
-            'overdue_tasks' => $overdueTasks,
-            'task_completion_rate' => $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100) : 0,
+            'total_bookings' => $totalBookings,
+            'completed_bookings' => $completedBookings,
+            'cancelled_bookings' => $this->bookings()->where('status', 'cancelled')->count(),
+            'total_reviews' => $totalReviews,
+            'total_spent' => $this->bookings()
+                ->where('payment_status', 'paid')
+                ->sum('total_price'),
         ];
     }
 
     /**
-     * Получить предстоящие дедлайны
+     * Получить статистику мастера
      */
-    public function getUpcomingDeadlines($days = 7)
+    public function getMasterStats(): array
     {
-        return $this->assignedTasks()
-            ->where('due_date', '<=', now()->addDays($days))
-            ->where('due_date', '>=', now())
-            ->whereNotIn('status', ['done', 'blocked'])
-            ->orderBy('due_date')
-            ->with(['project', 'milestone'])
+        if (!$this->isMaster() || !$this->masterProfile) {
+            return [];
+        }
+
+        return [
+            'total_services' => $this->masterProfile->services()->count(),
+            'active_services' => $this->masterProfile->activeServices()->count(),
+            'total_bookings' => $this->masterProfile->bookings()->count(),
+            'completed_bookings' => $this->masterProfile->completed_bookings,
+            'rating' => $this->masterProfile->rating,
+            'reviews_count' => $this->masterProfile->reviews_count,
+            'views_count' => $this->masterProfile->views_count,
+        ];
+    }
+
+    /**
+     * Получить предстоящие бронирования клиента
+     */
+    public function getUpcomingBookings($limit = 5)
+    {
+        return $this->bookings()
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->where('booking_date', '>=', now()->toDateString())
+            ->orderBy('booking_date')
+            ->orderBy('start_time')
+            ->with(['masterProfile.user', 'service'])
+            ->limit($limit)
             ->get();
+    }
+
+    /**
+     * Boot метод для автоматического создания профиля мастера
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($user) {
+            // Если создаётся мастер, создаём профиль
+            if ($user->role === 'master') {
+                $user->masterProfile()->create([
+                    'display_name' => $user->name,
+                    'city' => 'Москва',
+                    'status' => 'draft',
+                ]);
+            }
+        });
     }
 }
