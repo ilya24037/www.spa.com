@@ -22,12 +22,15 @@
     "dependencies": {
         "@heroicons/vue": "^2.1.1",
         "@vuepic/vue-datepicker": "^7.4.1",
+        "chart.js": "^4.4.9",
         "dayjs": "^1.11.10",
         "lodash": "^4.17.21",
         "pinia": "^2.3.1",
         "pinia-plugin-persistedstate": "^3.2.1",
+        "vue-chartjs": "^5.3.2",
         "vue-tel-input": "^8.3.1",
         "vue-toastification": "^2.0.0-rc.5",
-        "vue3-google-map": "^0.18.0"
+        "vue3-google-map": "^0.18.0",
+        "vuedraggable": "^4.1.0"
     }
 }
