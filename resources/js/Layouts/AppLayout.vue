@@ -1,11 +1,13 @@
 <!-- resources/js/Layouts/AppLayout.vue -->
 <template>
     <div class="min-h-screen bg-gray-50">
-        <!-- Шапка сайта - sticky с закругленными углами -->
-        <Navbar />
+        <!-- Шапка сайта с фиксированной высотой -->
+        <div class="header-wrapper">
+            <Navbar />
+        </div>
 
-        <!-- Основной контент с небольшим отступом сверху -->
-        <main class="pt-4">
+        <!-- Основной контент с правильным отступом -->
+        <main class="main-content">
             <slot />
         </main>
 
@@ -26,15 +28,18 @@ defineProps({
 })
 </script>
 
-<style>
-/* Глобальные стили для правильного позиционирования */
-body {
-  margin: 0;
-  padding: 0;
+<style scoped>
+.header-wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    /* Фиксированная высота шапки */
+    height: auto;
 }
 
-/* Убираем отступы у контейнеров, чтобы шапка была на всю ширину */
-.container {
-  max-width: 1280px;
+.main-content {
+    /* Отступ сверху равен примерной высоте шапки + небольшой зазор */
+    padding-top: 0;
+    min-height: calc(100vh - 100px);
 }
 </style>

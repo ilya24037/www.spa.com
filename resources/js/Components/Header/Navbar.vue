@@ -2,7 +2,7 @@
 <template>
   <header class="sticky top-0 z-50 bg-white shadow-md rounded-b-2xl">
     <!-- Основная навигация -->
-    <div class="px-4 sm:px-6 lg:px-8">
+    <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="flex items-center h-16 gap-4">
         <!-- Логотип -->
         <Logo />
@@ -27,7 +27,7 @@
 
     <!-- Дополнительная навигация -->
     <div class="bg-gray-50 border-t border-gray-200 rounded-b-2xl">
-      <div class="px-4 sm:px-6 lg:px-8">
+      <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <nav class="flex items-center justify-between py-2">
           <!-- Быстрые ссылки -->
           <div class="flex items-center gap-6 text-sm">
@@ -74,7 +74,7 @@
       leave-to-class="opacity-0 -translate-y-1"
     >
       <div v-if="showCatalog" class="absolute left-0 right-0 top-full bg-white shadow-xl z-50 rounded-b-2xl mt-px">
-        <div class="px-4 sm:px-6 lg:px-8 py-6">
+        <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
           <div class="grid grid-cols-4 gap-6">
             <div v-for="category in categories" :key="category.id">
               <h3 class="font-semibold text-gray-900 mb-3 flex items-center gap-2">

@@ -1,5 +1,6 @@
 <template>
-  <Link href="/favorites" class="relative flex flex-col items-center...">
+  <Link 
+    href="/favorites"
     class="relative flex flex-col items-center px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors group"
   >
     <div class="relative">
