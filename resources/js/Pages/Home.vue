@@ -29,7 +29,7 @@
                         <div class="bg-white rounded-lg shadow-sm p-4">
                             <h2 class="font-semibold text-lg mb-4">Фильтры</h2>
                             <FilterPanel 
-                                :initial-filters="initialFilters"
+                                :initial-filters="filters || {}"
                                 @filters-updated="handleFiltersUpdate"
                             />
                         </div>
@@ -45,7 +45,7 @@
                                         СПА-услуги в {{ currentDistrict || 'Москве' }}
                                     </h1>
                                     <p class="text-gray-600 mt-1">
-                                        {{ totalMasters }} {{ pluralize(totalMasters, ['объявление', 'объявления', 'объявлений']) }}
+                                        {{ total || 0 }} {{ pluralize(total || 0, ['объявление', 'объявления', 'объявлений']) }}
                                     </p>
                                 </div>
 
@@ -76,9 +76,9 @@
                             </div>
 
                             <!-- Карточки -->
-                            <div v-else-if="masters.length > 0" class="grid grid-cols-1 gap-4">
+                            <div v-else-if="mastersList.length > 0" class="grid grid-cols-1 gap-4">
                                 <div 
-                                    v-for="master in masters"
+                                    v-for="master in mastersList"
                                     :key="master.id"
                                     class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                                 >
@@ -100,10 +100,10 @@
                             </div>
 
                             <!-- Пагинация -->
-                            <div v-if="totalPages > 1" class="bg-white rounded-lg shadow-sm p-4">
+                            <div v-if="lastPage > 1" class="bg-white rounded-lg shadow-sm p-4">
                                 <Pagination 
                                     :current-page="currentPage"
-                                    :total-pages="totalPages"
+                                    :total-pages="lastPage"
                                     @page-changed="goToPage"
                                 />
                             </div>
@@ -127,22 +127,22 @@ import Pagination from '@/Components/Common/Pagination.vue'
 // Пропсы
 const props = defineProps({
     masters: {
-        type: Array,
+        type: [Array, Object],
         default: () => []
     },
     filters: {
         type: Object,
         default: () => ({})
     },
-    totalMasters: {
+    total: {
         type: Number,
         default: 0
     },
-    currentPage: {
+    current_page: {
         type: Number,
         default: 1
     },
-    totalPages: {
+    last_page: {
         type: Number,
         default: 1
     },
@@ -158,12 +158,21 @@ const sortBy = ref('default')
 const selectedMaster = ref(null)
 
 // Вычисляемые свойства
-const initialFilters = computed(() => ({
-    categories: [],
-    districts: [],
-    price_range: { min: 0, max: 50000 },
-    ...props.filters
-}))
+const mastersList = computed(() => {
+    // Если masters это объект с пагинацией
+    if (props.masters?.data) {
+        return props.masters.data
+    }
+    // Если masters это массив
+    if (Array.isArray(props.masters)) {
+        return props.masters
+    }
+    return []
+})
+
+const currentPage = computed(() => props.current_page || props.masters?.current_page || 1)
+const lastPage = computed(() => props.last_page || props.masters?.last_page || 1)
+const total = computed(() => props.total || props.masters?.total || 0)
 
 // Методы
 const pluralize = (count, forms) => {

@@ -21,9 +21,7 @@
                     ]"
                 >
                     <!-- Иконка -->
-                    <div class="flex-shrink-0">
-                        <component :is="getToastIcon(toast.type)" class="w-5 h-5" />
-                    </div>
+                    <div class="flex-shrink-0" v-html="getToastIcon(toast.type)"></div>
                     
                     <!-- Текст -->
                     <div class="flex-1">
@@ -46,7 +44,7 @@
 </template>
 
 <script setup>
-import { ref, defineExpose } from 'vue'
+import { ref } from 'vue' // Убрали defineExpose из импорта
 
 const toasts = ref([])
 let toastId = 0
@@ -102,11 +100,9 @@ const getToastClasses = (type) => {
 }
 
 const getToastIcon = (type) => {
-    return {
-        template: toastTypes[type]?.icon || toastTypes.info.icon
-    }
+    return toastTypes[type]?.icon || toastTypes.info.icon
 }
 
-// Экспортируем метод для родительского компонента
+// defineExpose используется без импорта
 defineExpose({ addToast })
 </script>
