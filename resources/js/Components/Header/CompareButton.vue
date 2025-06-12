@@ -1,6 +1,5 @@
 <template>
-  <Link 
-    :href="route('compare.index')"
+ <Link href="/compare" class="relative flex flex-col items-center...">
     class="relative flex flex-col items-center px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors group"
   >
     <div class="relative">

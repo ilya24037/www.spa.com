@@ -1,6 +1,6 @@
 <template>
   <div class="flex items-center">
-    <Link :href="route('home')" class="flex items-center group">
+    <Link href="/" class="flex items-center group">
       <!-- Логотип с анимацией -->
       <div class="relative">
         <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center transform group-hover:scale-105 transition-transform">

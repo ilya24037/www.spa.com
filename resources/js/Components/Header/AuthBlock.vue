@@ -4,7 +4,7 @@
     <div v-if="user" class="flex items-center gap-2">
       <!-- Профиль -->
       <Link 
-        :href="route('profile.show')"
+        href="/profile"
         class="flex flex-col items-center px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors group"
       >
         <div class="relative">
@@ -27,7 +27,7 @@
 
       <!-- Заказы -->
       <Link 
-        :href="route('bookings.index')"
+        href="/bookings"
         class="flex flex-col items-center px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors group"
       >
         <svg class="w-6 h-6 text-gray-600 group-hover:text-blue-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -42,13 +42,13 @@
     <!-- Неавторизованный пользователь -->
     <div v-else class="flex items-center gap-2">
       <Link 
-        :href="route('login')"
+        href="/login"
         class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
       >
         Войти
       </Link>
       <Link 
-        :href="route('register')"
+        href="/register"
         class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
       >
         Регистрация
@@ -57,7 +57,7 @@
 
     <!-- Кнопка разместить объявление -->
     <Link 
-      :href="route('masters.create')"
+      href="/masters/create"
       class="ml-2 px-5 py-2.5 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
     >
       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

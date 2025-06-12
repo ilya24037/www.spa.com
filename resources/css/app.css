@@ -1,3 +1,33 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* resources/css/app.css */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+@layer components {
+  /* Стили для шапки как на Ozon */
+  .ozon-header {
+    @apply sticky top-0 z-50 bg-white shadow-md rounded-b-2xl;
+  }
+  
+  /* Анимация появления тени при скролле */
+  .header-shadow {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .header-shadow-lg {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  }
+}
+
+/* Сброс отступов для правильного позиционирования */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Плавный скролл */
+html {
+  scroll-behavior: smooth;
+}
