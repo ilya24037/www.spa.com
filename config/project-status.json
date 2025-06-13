@@ -100,11 +100,11 @@
                 },
                 "booking": {
                     "name": "Model Booking",
-                    "done": false
+                    "done": true
                 },
                 "review": {
                     "name": "Model Review",
-                    "done": false
+                    "done": true
                 },
                 "schedule": {
                     "name": "Model Schedule",
@@ -137,11 +137,11 @@
                 },
                 "booking": {
                     "name": "BookingController",
-                    "done": false
+                    "done": true
                 },
                 "search": {
                     "name": "SearchController",
-                    "done": false
+                    "done": true
                 },
                 "review": {
                     "name": "ReviewController",
