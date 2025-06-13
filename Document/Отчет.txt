@@ -78,10 +78,10 @@ Frontend (package.json):
 📁 Структура файлов проекта:
 /
 ├── app/
-│   ├── Http/Controllers/ (контроллеры проектов - нужно заменить)
-│   ├── Models/ (модели проектов - нужно заменить)
+│   ├── Http/Controllers/ 
+│   ├── Models/ 
 ├── database/
-│   ├── migrations/ (миграции проектов - нужно переделать)
+│   ├── migrations/ 
 ├── resources/
 │   ├── js/
 │   │   ├── Pages/ (страницы для проектов)

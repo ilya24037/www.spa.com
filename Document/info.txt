@@ -1,1 +1,47 @@
 https://mailtrap.io/
+
+
+1. Автоматическая проверка всех файлов:
+php artisan project:status --check
+
+
+2. Обычный просмотр:
+
+php artisan project:status
+
+3. Ручное обновление (если нужно):
+php artisan project:status --update=features.search
+
+Обновление статуса задачи:
+bash# Отметить задачу как выполненную
+php artisan project:status --update=database.master_profiles
+
+# Обновить прогресс
+php artisan project:status --update=frontend.home_page --progress=80
+
+Экспорт отчета:
+
+php artisan project:status --export
+
+
+Автоматический подсчет выполненных файлов:
+
+// Добавить в команду
+private function countActualFiles()
+{
+    return [
+        'migrations' => count(glob(database_path('migrations/*.php'))),
+        'models' => count(glob(app_path('Models/*.php'))),
+        'controllers' => count(glob(app_path('Http/Controllers/*.php'))),
+        'components' => count(glob(resource_path('js/Components/*.vue'))),
+    ];
+}
+
+
+Интеграция с Git:
+
+php// Показать последние коммиты
+private function getRecentCommits()
+{
+    $commits = shell_exec('git log --oneline -5');
+    return explode("\n", trim($commits));
