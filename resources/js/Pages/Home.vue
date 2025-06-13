@@ -1,7 +1,7 @@
 <script setup>
 import { Head } from '@inertiajs/vue3'
 import Cards from '@/Components/Cards.vue'
-import Map from '@/Components/Map.vue'
+import Map from '@/Components/Map.vue' 
 import Filters from '@/Components/Filters.vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import SidebarColumn from '@/Components/SidebarColumn.vue'
@@ -28,34 +28,43 @@ defineOptions({ layout: AppLayout })
 <template>
   <Head title="СПА-услуги, массаж в Москве | Услуги на SPA.COM" />
   
-  <div class="flex gap-8">
-    <!-- Левая колонка — теперь через SidebarColumn -->
-    <aside class="w-[300px] shrink-0">
-      <SidebarColumn>
-        <Filters :filters="filters" :cities="cities" />
-      </SidebarColumn>
-    </aside>
-    
-    <!-- Правая колонка — карта и карточки -->
-    <section class="flex-1 space-y-6">
-      <!-- Заголовок -->
-      <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-900 mb-2">
-          СПА-услуги в Москве
-        </h1>
-        <p class="text-gray-600">
-          {{ cards.length }} {{ pluralize(cards.length, ['объявление', 'объявления', 'объявлений']) }}
-        </p>
-      </div>
+  <!-- Контейнер с отступами -->
+  <div class="container mx-auto px-4 py-8 max-w-7xl">
+    <div class="flex gap-8">
+      <!-- Левая колонка — фильтры с отступом -->
+      <aside class="w-[300px] shrink-0">
+        <div class="sticky top-4">
+          <SidebarColumn>
+            <Filters :filters="filters" :cities="cities" />
+          </SidebarColumn>
+        </div>
+      </aside>
       
-      <!-- Карта -->
-      <div class="rounded-xl shadow mb-2 flex items-center justify-center min-h-[200px] bg-white">
-        <Map :cards="cards" />
-      </div>
-      
-      <!-- Карточки -->
-      <Cards :cards="cards" />
-    </section>
+      <!-- Правая колонка — карта и карточки с отступами -->
+      <section class="flex-1 space-y-6 min-w-0">
+        <!-- Заголовок -->
+        <div class="mb-6">
+          <h1 class="text-2xl font-bold text-gray-900 mb-2">
+            СПА-услуги в Москве
+          </h1>
+          <p class="text-gray-600">
+            {{ cards.length }} {{ pluralize(cards.length, ['объявление', 'объявления', 'объявлений']) }}
+          </p>
+        </div>
+        
+        <!-- Карта с отступами -->
+        <div class="bg-white rounded-xl shadow-sm mb-6 overflow-hidden">
+          <div class="h-[300px]">
+            <Map :cards="cards" />
+          </div>
+        </div>
+        
+        <!-- Карточки -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+          <Cards :cards="cards" />
+        </div>
+      </section>
+    </div>
   </div>
 </template>
 
@@ -71,5 +80,8 @@ export default {
 </script>
 
 <style scoped>
-/* Дополнительные стили если нужны */
+/* Дополнительные стили для отладки */
+.container {
+  background: #f8fafc; /* Серый фон для видимости отступов */
+}
 </style>

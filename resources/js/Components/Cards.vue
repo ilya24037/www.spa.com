@@ -1,5 +1,23 @@
 <template>
   <div class="cards-container">
+    <!-- Заголовок с сортировкой -->
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-xl font-semibold text-gray-900">
+        {{ cards.length }} {{ pluralize(cards.length, ['мастер', 'мастера', 'мастеров']) }}
+      </h2>
+      <select 
+        v-model="sortBy" 
+        @change="handleSort"
+        class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      >
+        <option value="default">По популярности</option>
+        <option value="price_asc">Дешевле</option>
+        <option value="price_desc">Дороже</option>
+        <option value="rating">По рейтингу</option>
+      </select>
+    </div>
+    
+    <!-- Пустое состояние -->
     <div v-if="cards.length === 0" class="empty-state">
       <div class="text-center py-12">
         <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -10,7 +28,8 @@
       </div>
     </div>
     
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <!-- Сетка карточек -->
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div 
         v-for="card in cards" 
         :key="card.id"
@@ -63,7 +82,7 @@
         <div class="p-4">
           <!-- Цена -->
           <div class="text-xl font-bold text-gray-900 mb-2">
-            {{ formatPrice(card.pricePerHour) }}
+            {{ formatPrice(card.pricePerHour) }}/час
           </div>
 
           <!-- Имя и специализация -->
@@ -103,6 +122,7 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { router } from '@inertiajs/vue3'
 
 const props = defineProps({
@@ -112,9 +132,16 @@ const props = defineProps({
   }
 })
 
+const sortBy = ref('default')
+
 // Методы
 const formatPrice = (price) => {
   return new Intl.NumberFormat('ru-RU').format(price) + ' ₽'
+}
+
+const pluralize = (count, forms) => {
+  const cases = [2, 0, 1, 1, 1, 2]
+  return forms[(count % 100 > 4 && count % 100 < 20) ? 2 : cases[(count % 10 < 5) ? count % 10 : 5]]
 }
 
 const toggleFavorite = (card) => {
@@ -136,10 +163,13 @@ const callMaster = (card) => {
 const goToProfile = (cardId) => {
   router.visit(`/masters/${cardId}`)
 }
-</script>
 
-<style scoped>
-.cards-container {
-  /* Дополнительные стили */
+const handleSort = () => {
+  router.get('/', { 
+    sort: sortBy.value 
+  }, {
+    preserveState: true,
+    preserveScroll: true
+  })
 }
-</style>
+</script>

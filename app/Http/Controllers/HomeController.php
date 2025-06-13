@@ -9,8 +9,8 @@ class HomeController extends Controller
 {
     public function index(Request $request)
     {
-        // Тестовые данные мастеров
-        $masters = collect([
+        // Создаем коллекцию карточек
+        $cards = collect([
             [
                 'id' => 1,
                 'name' => 'Анна Иванова',
@@ -121,84 +121,46 @@ class HomeController extends Controller
         $sort = $request->get('sort', 'default');
 
         if ($search) {
-            $masters = $masters->filter(function($master) use ($search) {
-                return stripos($master['name'], $search) !== false || 
-                       stripos($master['specialization'], $search) !== false;
+            $cards = $cards->filter(function($card) use ($search) {
+                return stripos($card['name'], $search) !== false || 
+                       stripos($card['specialization'], $search) !== false;
             });
         }
 
         // Сортировка
         switch ($sort) {
             case 'price_asc':
-                $masters = $masters->sortBy('pricePerHour');
+                $cards = $cards->sortBy('pricePerHour')->values();
                 break;
             case 'price_desc':
-                $masters = $masters->sortByDesc('pricePerHour');
+                $cards = $cards->sortByDesc('pricePerHour')->values();
                 break;
             case 'rating':
-                $masters = $masters->sortByDesc('rating');
+                $cards = $cards->sortByDesc('rating')->values();
+                break;
+            default:
+                $cards = $cards->values();
                 break;
         }
 
-        // Пагинация (имитация)
-        $page = $request->get('page', 1);
-        $perPage = 12;
-        $total = $masters->count();
-        $masters = $masters->forPage($page, $perPage)->values();
+        // Отладочная информация
+        \Log::info('Cards count: ' . $cards->count());
+        \Log::info('Cards data: ' . $cards->toJson());
 
         return Inertia::render('Home', [
-            'masters' => [
-                'data' => $masters->toArray(),
-                'current_page' => (int) $page,
-                'last_page' => (int) ceil($total / $perPage),
-                'total' => $total
-            ],
+            'cards' => $cards->toArray(),
             'filters' => [
                 'search' => $search,
                 'category' => $category,
                 'sort' => $sort
             ],
-            'total' => $total,
-            'current_page' => (int) $page,
-            'last_page' => (int) ceil($total / $perPage),
-            'currentDistrict' => 'Москве',
-            'categories' => [
-                [
-                    'id' => 1,
-                    'name' => 'Классический массаж',
-                    'icon' => '',
-                    'children' => [
-                        ['id' => 11, 'name' => 'Расслабляющий', 'slug' => 'relaxing', 'services_count' => 45],
-                        ['id' => 12, 'name' => 'Лечебный', 'slug' => 'therapeutic', 'services_count' => 32]
-                    ]
-                ],
-                [
-                    'id' => 2,
-                    'name' => 'Спортивный массаж',
-                    'icon' => '',
-                    'children' => [
-                        ['id' => 21, 'name' => 'Восстановительный', 'slug' => 'recovery', 'services_count' => 28],
-                        ['id' => 22, 'name' => 'Подготовительный', 'slug' => 'preparation', 'services_count' => 15]
-                    ]
-                ],
-                [
-                    'id' => 3,
-                    'name' => 'Тайский массаж',
-                    'icon' => '',
-                    'children' => [
-                        ['id' => 31, 'name' => 'Традиционный', 'slug' => 'traditional', 'services_count' => 22],
-                        ['id' => 32, 'name' => 'С маслами', 'slug' => 'oil', 'services_count' => 18]
-                    ]
-                ],
-                [
-                    'id' => 4,
-                    'name' => 'Антицеллюлитный',
-                    'icon' => '',
-                    'children' => [
-                        ['id' => 41, 'name' => 'Вакуумный', 'slug' => 'vacuum', 'services_count' => 15],
-                        ['id' => 42, 'name' => 'Ручной', 'slug' => 'manual', 'services_count' => 25]
-                    ]
-                ]
+            'cities' => [
+                'Москва',
+                'Санкт-Петербург', 
+                'Новосибирск',
+                'Екатеринбург',
+                'Нижний Новгород',
+                'Казань'
             ]
         ]);
     }
