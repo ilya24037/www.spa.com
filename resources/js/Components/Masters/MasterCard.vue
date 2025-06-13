@@ -1,4 +1,3 @@
-// resources/js/Components/Masters/MasterCard.vue
 <template>
     <article 
         class="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group cursor-pointer"
@@ -112,8 +111,8 @@ const formatPrice = (price) => {
 const toggleFavorite = () => {
     isFavorite.value = !isFavorite.value
     
-    // Отправка запроса на сервер
-    router.post(route('favorites.toggle'), {
+    // Отправка запроса на сервер (используем простой URL вместо route helper)
+    router.post('/favorites/toggle', {
         master_id: props.master.id
     }, {
         preserveScroll: true,
@@ -127,6 +126,6 @@ const callMaster = () => {
 }
 
 const goToProfile = () => {
-    router.visit(route('masters.show', props.master.id))
+    router.visit(`/masters/${props.master.id}`)
 }
 </script>

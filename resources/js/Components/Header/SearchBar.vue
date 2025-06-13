@@ -154,8 +154,8 @@ const hideSuggestions = () => {
 
 const handleSearch = () => {
   if (searchQuery.value.trim()) {
-    router.get('/search', { 
-      q: searchQuery.value,
+    router.get('/', { 
+      search: searchQuery.value,
       category: searchCategory.value !== 'Везде' ? searchCategory.value : null
     })
   }

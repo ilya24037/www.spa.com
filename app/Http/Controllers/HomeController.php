@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MasterProfile;
-use App\Models\MassageCategory;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -11,151 +9,197 @@ class HomeController extends Controller
 {
     public function index(Request $request)
     {
-        // Валидация параметров фильтрации
-        $validated = $request->validate([
-            'category' => 'nullable|exists:massage_categories,slug',
-            'district' => 'nullable|string',
-            'metro' => 'nullable|string',
-            'price_min' => 'nullable|numeric|min:0',
-            'price_max' => 'nullable|numeric|min:0',
-            'rating' => 'nullable|numeric|min:0|max:5',
-            'home_service' => 'nullable|boolean',
-            'salon_service' => 'nullable|boolean',
-            'verified_only' => 'nullable|boolean',
-            'with_reviews' => 'nullable|boolean',
-            'sort' => 'nullable|in:default,price_asc,price_desc,rating,reviews,distance',
-            'page' => 'nullable|integer|min:1',
+        // Тестовые данные мастеров
+        $masters = collect([
+            [
+                'id' => 1,
+                'name' => 'Анна Иванова',
+                'specialization' => 'Классический массаж',
+                'age' => 28,
+                'height' => 165,
+                'rating' => 4.8,
+                'reviewsCount' => 142,
+                'pricePerHour' => 3000,
+                'photo' => 'https://images.unsplash.com/photo-1594824576852-29b94b89d043?w=400&h=600&fit=crop',
+                'photosCount' => 5,
+                'isAvailableNow' => true,
+                'phone' => '+79991234567',
+                'isFavorite' => false,
+                'latitude' => 55.7558,
+                'longitude' => 37.6173
+            ],
+            [
+                'id' => 2,
+                'name' => 'Елена Петрова',
+                'specialization' => 'Тайский массаж',
+                'age' => 32,
+                'height' => 170,
+                'rating' => 4.9,
+                'reviewsCount' => 98,
+                'pricePerHour' => 3500,
+                'photo' => 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=400&h=600&fit=crop',
+                'photosCount' => 7,
+                'isAvailableNow' => false,
+                'phone' => '+79991234568',
+                'isFavorite' => false,
+                'latitude' => 55.7612,
+                'longitude' => 37.6208
+            ],
+            [
+                'id' => 3,
+                'name' => 'Ольга Сидорова',
+                'specialization' => 'Спортивный массаж',
+                'age' => 26,
+                'height' => 168,
+                'rating' => 4.7,
+                'reviewsCount' => 156,
+                'pricePerHour' => 2800,
+                'photo' => 'https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=400&h=600&fit=crop',
+                'photosCount' => 4,
+                'isAvailableNow' => true,
+                'phone' => '+79991234569',
+                'isFavorite' => false,
+                'latitude' => 55.7489,
+                'longitude' => 37.6217
+            ],
+            [
+                'id' => 4,
+                'name' => 'Мария Козлова',
+                'specialization' => 'Антицеллюлитный массаж',
+                'age' => 30,
+                'height' => 172,
+                'rating' => 4.6,
+                'reviewsCount' => 89,
+                'pricePerHour' => 3200,
+                'photo' => 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=600&fit=crop',
+                'photosCount' => 6,
+                'isAvailableNow' => true,
+                'phone' => '+79991234570',
+                'isFavorite' => false,
+                'latitude' => 55.7558,
+                'longitude' => 37.6173
+            ],
+            [
+                'id' => 5,
+                'name' => 'Татьяна Смирнова',
+                'specialization' => 'Релакс массаж',
+                'age' => 35,
+                'height' => 165,
+                'rating' => 4.9,
+                'reviewsCount' => 203,
+                'pricePerHour' => 2900,
+                'photo' => 'https://images.unsplash.com/photo-1612531386530-97d2e4bb048d?w=400&h=600&fit=crop',
+                'photosCount' => 8,
+                'isAvailableNow' => false,
+                'phone' => '+79991234571',
+                'isFavorite' => false,
+                'latitude' => 55.7489,
+                'longitude' => 37.6217
+            ],
+            [
+                'id' => 6,
+                'name' => 'Наталья Волкова',
+                'specialization' => 'Лечебный массаж',
+                'age' => 40,
+                'height' => 168,
+                'rating' => 4.8,
+                'reviewsCount' => 175,
+                'pricePerHour' => 3800,
+                'photo' => 'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=400&h=600&fit=crop',
+                'photosCount' => 9,
+                'isAvailableNow' => true,
+                'phone' => '+79991234572',
+                'isFavorite' => false,
+                'latitude' => 55.7612,
+                'longitude' => 37.6208
+            ]
         ]);
 
-        // Строим запрос
-        $query = MasterProfile::query()
-            ->with(['user', 'services.category', 'reviews'])
-            ->where('status', 'active');
+        // Фильтрация и поиск
+        $search = $request->get('search');
+        $category = $request->get('category');
+        $sort = $request->get('sort', 'default');
 
-        // Применяем фильтры
-        if ($request->filled('district')) {
-            $query->where('district', $validated['district']);
-        }
-
-        if ($request->filled('metro')) {
-            $query->where('metro_station', $validated['metro']);
-        }
-
-        if ($request->filled('category')) {
-            $query->whereHas('services', function ($q) use ($validated) {
-                $q->whereHas('category', function ($q2) use ($validated) {
-                    $q2->where('slug', $validated['category']);
-                });
+        if ($search) {
+            $masters = $masters->filter(function($master) use ($search) {
+                return stripos($master['name'], $search) !== false || 
+                       stripos($master['specialization'], $search) !== false;
             });
-        }
-
-        if ($request->filled('price_min') || $request->filled('price_max')) {
-            $query->whereHas('services', function ($q) use ($validated) {
-                if (isset($validated['price_min'])) {
-                    $q->where('price', '>=', $validated['price_min']);
-                }
-                if (isset($validated['price_max'])) {
-                    $q->where('price', '<=', $validated['price_max']);
-                }
-            });
-        }
-
-        if ($request->filled('rating')) {
-            $query->where('rating', '>=', $validated['rating']);
-        }
-
-        if ($request->boolean('home_service')) {
-            $query->where('home_service', true);
-        }
-
-        if ($request->boolean('salon_service')) {
-            $query->where('salon_service', true);
-        }
-
-        if ($request->boolean('verified_only')) {
-            $query->where('is_verified', true);
-        }
-
-        if ($request->boolean('with_reviews')) {
-            $query->where('reviews_count', '>', 0);
         }
 
         // Сортировка
-        switch ($validated['sort'] ?? 'default') {
+        switch ($sort) {
             case 'price_asc':
-                $query->join('services', 'master_profiles.id', '=', 'services.master_profile_id')
-                    ->orderBy('services.price', 'asc')
-                    ->select('master_profiles.*');
+                $masters = $masters->sortBy('pricePerHour');
                 break;
             case 'price_desc':
-                $query->join('services', 'master_profiles.id', '=', 'services.master_profile_id')
-                    ->orderBy('services.price', 'desc')
-                    ->select('master_profiles.*');
+                $masters = $masters->sortByDesc('pricePerHour');
                 break;
             case 'rating':
-                $query->orderBy('rating', 'desc');
+                $masters = $masters->sortByDesc('rating');
                 break;
-            case 'reviews':
-                $query->orderBy('reviews_count', 'desc');
-                break;
-            default:
-                // Сначала премиум, потом по дате обновления
-                $query->orderBy('is_premium', 'desc')
-                    ->orderBy('updated_at', 'desc');
         }
 
-        // Пагинация
-        $masters = $query->paginate(20)->withQueryString();
-
-        // Получаем категории для фильтров
-        $categories = MassageCategory::where('is_active', true)
-            ->withCount('services')
-            ->orderBy('sort_order')
-            ->get();
-
-        // Получаем районы для фильтров (уникальные из базы)
-        $districts = MasterProfile::where('status', 'active')
-            ->whereNotNull('district')
-            ->distinct()
-            ->pluck('district');
+        // Пагинация (имитация)
+        $page = $request->get('page', 1);
+        $perPage = 12;
+        $total = $masters->count();
+        $masters = $masters->forPage($page, $perPage)->values();
 
         return Inertia::render('Home', [
-            'masters' => $masters->through(fn ($master) => [
-                'id' => $master->id,
-                'display_name' => $master->display_name,
-                'avatar' => $master->avatar,
-                'rating' => $master->rating,
-                'reviews_count' => $master->reviews_count,
-                'is_verified' => $master->is_verified,
-                'is_premium' => $master->is_premium,
-                'district' => $master->district,
-                'metro_station' => $master->metro_station,
-                'home_service' => $master->home_service,
-                'salon_service' => $master->salon_service,
-                'min_price' => $master->services->min('price'),
-                'services_count' => $master->services->count(),
-                'coordinates' => [
-                    'lat' => $master->latitude ?? 55.7558,
-                    'lng' => $master->longitude ?? 37.6173,
-                ],
-                'specializations' => $master->services->pluck('category.name')->unique()->take(3),
-            ]),
-            'filters' => array_merge([
-                'categories' => $categories,
-                'districts' => $districts,
-                'price_range' => [
-                    'min' => 0,
-                    'max' => 50000
-                ],
-            ], $validated),
-            'totalMasters' => $masters->total(),
-            'currentPage' => $masters->currentPage(),
-            'totalPages' => $masters->lastPage(),
-            'currentDistrict' => $validated['district'] ?? null,
-            'mapCenter' => [
-                'lat' => 55.7558,
-                'lng' => 37.6173
+            'masters' => [
+                'data' => $masters->toArray(),
+                'current_page' => (int) $page,
+                'last_page' => (int) ceil($total / $perPage),
+                'total' => $total
             ],
+            'filters' => [
+                'search' => $search,
+                'category' => $category,
+                'sort' => $sort
+            ],
+            'total' => $total,
+            'current_page' => (int) $page,
+            'last_page' => (int) ceil($total / $perPage),
+            'currentDistrict' => 'Москве',
+            'categories' => [
+                [
+                    'id' => 1,
+                    'name' => 'Классический массаж',
+                    'icon' => '',
+                    'children' => [
+                        ['id' => 11, 'name' => 'Расслабляющий', 'slug' => 'relaxing', 'services_count' => 45],
+                        ['id' => 12, 'name' => 'Лечебный', 'slug' => 'therapeutic', 'services_count' => 32]
+                    ]
+                ],
+                [
+                    'id' => 2,
+                    'name' => 'Спортивный массаж',
+                    'icon' => '',
+                    'children' => [
+                        ['id' => 21, 'name' => 'Восстановительный', 'slug' => 'recovery', 'services_count' => 28],
+                        ['id' => 22, 'name' => 'Подготовительный', 'slug' => 'preparation', 'services_count' => 15]
+                    ]
+                ],
+                [
+                    'id' => 3,
+                    'name' => 'Тайский массаж',
+                    'icon' => '',
+                    'children' => [
+                        ['id' => 31, 'name' => 'Традиционный', 'slug' => 'traditional', 'services_count' => 22],
+                        ['id' => 32, 'name' => 'С маслами', 'slug' => 'oil', 'services_count' => 18]
+                    ]
+                ],
+                [
+                    'id' => 4,
+                    'name' => 'Антицеллюлитный',
+                    'icon' => '',
+                    'children' => [
+                        ['id' => 41, 'name' => 'Вакуумный', 'slug' => 'vacuum', 'services_count' => 15],
+                        ['id' => 42, 'name' => 'Ручной', 'slug' => 'manual', 'services_count' => 25]
+                    ]
+                ]
+            ]
         ]);
     }
 }

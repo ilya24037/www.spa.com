@@ -4,7 +4,7 @@
     <div v-if="user" class="flex items-center gap-2">
       <!-- Профиль -->
       <Link 
-        href="/profile"
+        href="/profile/edit"
         class="flex flex-col items-center px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors group"
       >
         <div class="relative">
