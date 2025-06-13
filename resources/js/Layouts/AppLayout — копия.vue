@@ -1,20 +1,27 @@
-<!-- resources/js/Layouts/AppLayout.vue -->
 <template>
-    <div class="min-h-screen bg-gray-100 site-wrapper">
-        <!-- Единый контейнер для всего сайта -->
+    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 site-wrapper">
+        <!-- Контейнер с тенью -->
         <div class="site-container">
-            <!-- Шапка с закругленными нижними углами -->
-            <header class="sticky top-0 z-50 bg-white shadow-md header-rounded">
-                <Navbar />
+            <!-- Шапка как отдельная карточка -->
+            <header class="sticky top-4 z-50 mb-6">
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-200/50">
+                    <Navbar />
+                </div>
             </header>
 
-            <!-- Основной контент -->
-            <main class="flex-1 bg-white">
-                <slot />
+            <!-- Основной контент как карточка -->
+            <main class="flex-1">
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-200/50 overflow-hidden">
+                    <slot />
+                </div>
             </main>
 
-            <!-- Футер -->
-            <Footer v-if="!hideFooter" />
+            <!-- Футер как карточка -->
+            <footer v-if="!hideFooter" class="mt-6">
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-200/50">
+                    <Footer />
+                </div>
+            </footer>
         </div>
     </div>
 </template>
@@ -32,72 +39,31 @@ defineProps({
 </script>
 
 <style scoped>
-/* Обертка для отступов */
 .site-wrapper {
-    padding: 0 20px; /* Отступы от краев окна */
-    overflow-x: auto; /* Горизонтальный скролл при необходимости */
+    padding: 20px;
 }
 
 .site-container {
-    /* Фиксированная ширина */
-    width: 100%;
-    max-width: 1400px; /* Максимальная ширина как на Ozon */
-    min-width: 1200px; /* Минимальная ширина */
+    max-width: 1400px;
     margin: 0 auto;
-    background-color: white;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+    min-height: calc(100vh - 40px);
 }
 
-/* Закругленные нижние углы у шапки */
-.header-rounded {
-    border-bottom-left-radius: 16px;
-    border-bottom-right-radius: 16px;
-    overflow: hidden;
-}
-
-/* Для мобильных устройств */
 @media (max-width: 1240px) {
     .site-wrapper {
-        padding: 0 10px; /* Меньше отступы на маленьких экранах */
+        padding: 10px;
     }
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 768px) {
     .site-wrapper {
-        padding: 0; /* Убираем отступы */
-        overflow-x: visible;
+        padding: 8px;
     }
     
-    .site-container {
-        min-width: 100%;
-        max-width: 100%;
-        box-shadow: none;
+    .site-container header .bg-white,
+    .site-container main .bg-white,
+    .site-container footer .bg-white {
+        border-radius: 12px;
     }
-    
-    .header-rounded {
-        border-radius: 0; /* Убираем закругление на мобильных */
-    }
-}
-
-/* Стили для горизонтального скролла */
-.site-wrapper::-webkit-scrollbar {
-    height: 8px;
-}
-
-.site-wrapper::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
-}
-
-.site-wrapper::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 4px;
-}
-
-.site-wrapper::-webkit-scrollbar-thumb:hover {
-    background: #555;
 }
 </style>

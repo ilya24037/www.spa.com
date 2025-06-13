@@ -1,24 +1,24 @@
-<!-- resources/js/Layouts/AppLayout.vue -->
 <template>
-    <div class="min-h-screen bg-gray-100 site-wrapper">
-        <!-- Единый контейнер -->
-        <div class="site-container">
-            <!-- Шапка -->
-            <header class="sticky top-0 z-50 bg-white shadow-md rounded-b-2xl">
-                <Navbar />
-            </header>
-
-            <!-- Основной контент -->
-            <main class="flex-1 bg-white rounded-lg mt-4">
-                <slot />
-            </main>
-
-            <!-- Футер -->
-            <footer v-if="!hideFooter" class="bg-white rounded-lg mt-4 shadow-sm">
-                <Footer />
-            </footer>
-        </div>
-    </div>
+  <div class="min-h-screen flex flex-col bg-[#f5f7fa] text-gray-800">
+    <Container>
+      <!-- Белая шапка с закруглением снизу -->
+      <div class="sticky top-0 z-50 bg-white shadow rounded-b-2xl">
+        <Navbar />
+      </div>
+      
+      <!-- Белый фон контента, совпадает по ширине с шапкой -->
+      <main class="pt-6 pb-8">
+        <slot />
+      </main>
+      
+      <footer class="bg-gray-200 py-6 text-sm text-gray-600 text-center rounded-t-xl mt-12">
+        © {{ new Date().getFullYear() }} Animatorr — Все права защищены
+      </footer>
+    </Container>
+    
+    <!-- Компонент уведомлений -->
+    <ToastNotifications ref="toastRef" />
+  </div>
 </template>
 
 <script setup>
@@ -34,69 +34,31 @@ defineProps({
 </script>
 
 <style scoped>
-/* Обертка с отступами */
 .site-wrapper {
-    padding: 0 20px;
-    overflow-x: auto;
+    padding: 20px;
 }
 
 .site-container {
-    width: 100%;
     max-width: 1400px;
-    min-width: 1200px;
     margin: 0 auto;
-    /* Убираем белый фон и тень */
-    /* background-color: white; */
-    /* box-shadow: 0 0 20px rgba(0, 0, 0, 0.1); */
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+    min-height: calc(100vh - 40px);
 }
 
-/* Добавляем отступы между блоками */
-main {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-/* Мобильная адаптация */
 @media (max-width: 1240px) {
     .site-wrapper {
-        padding: 0 10px;
+        padding: 10px;
     }
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 768px) {
     .site-wrapper {
-        padding: 0;
-        overflow-x: visible;
+        padding: 8px;
     }
     
-    .site-container {
-        min-width: 100%;
+    .site-container header .bg-white,
+    .site-container main .bg-white,
+    .site-container footer .bg-white {
+        border-radius: 12px;
     }
-    
-    main {
-        border-radius: 0;
-        margin-top: 0;
-    }
-}
-
-/* Стилизация скроллбара */
-.site-wrapper::-webkit-scrollbar {
-    height: 8px;
-}
-
-.site-wrapper::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
-}
-
-.site-wrapper::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 4px;
-}
-
-.site-wrapper::-webkit-scrollbar-thumb:hover {
-    background: #555;
 }
 </style>

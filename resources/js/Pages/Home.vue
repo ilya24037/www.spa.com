@@ -28,39 +28,33 @@ defineOptions({ layout: AppLayout })
 <template>
   <Head title="СПА-услуги, массаж в Москве | Услуги на SPA.COM" />
   
-  <!-- Контейнер с отступами -->
-  <div class="container mx-auto px-4 py-8 max-w-7xl">
+  <div class="p-8">
     <div class="flex gap-8">
-      <!-- Левая колонка — фильтры с отступом -->
+      <!-- Фильтры -->
       <aside class="w-[300px] shrink-0">
         <div class="sticky top-4">
-          <SidebarColumn>
+          <div class="bg-gray-50/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50">
             <Filters :filters="filters" :cities="cities" />
-          </SidebarColumn>
+          </div>
         </div>
       </aside>
       
-      <!-- Правая колонка — карта и карточки с отступами -->
+      <!-- Контент -->
       <section class="flex-1 space-y-6 min-w-0">
-        <!-- Заголовок -->
         <div class="mb-6">
-          <h1 class="text-2xl font-bold text-gray-900 mb-2">
-            СПА-услуги в Москве
-          </h1>
-          <p class="text-gray-600">
-            {{ cards.length }} {{ pluralize(cards.length, ['объявление', 'объявления', 'объявлений']) }}
-          </p>
+          <h1 class="text-2xl font-bold text-gray-900 mb-2">СПА-услуги в Москве</h1>
+          <p class="text-gray-600">{{ cards.length }} объявлений</p>
         </div>
         
-        <!-- Карта с отступами -->
-        <div class="bg-white rounded-xl shadow-sm mb-6 overflow-hidden">
+        <!-- Карта -->
+        <div class="bg-gray-50/80 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-200/50">
           <div class="h-[300px]">
             <Map :cards="cards" />
           </div>
         </div>
         
         <!-- Карточки -->
-        <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="bg-gray-50/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50">
           <Cards :cards="cards" />
         </div>
       </section>

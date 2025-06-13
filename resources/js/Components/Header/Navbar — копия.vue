@@ -1,5 +1,6 @@
+<!-- resources/js/Components/Header/Navbar.vue -->
 <template>
-  <nav class="bg-white">
+  <header class="sticky top-0 z-50 bg-white shadow-md rounded-b-2xl">
     <!-- Основная навигация -->
     <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="flex items-center h-16 gap-4">
@@ -25,7 +26,7 @@
     </div>
 
     <!-- Дополнительная навигация -->
-    <div class="bg-gray-50 border-t border-gray-200">
+    <div class="bg-gray-50 border-t border-gray-200 rounded-b-2xl">
       <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <nav class="flex items-center justify-between py-2">
           <!-- Быстрые ссылки -->
@@ -72,7 +73,7 @@
       leave-from-class="opacity-100 translate-y-0"
       leave-to-class="opacity-0 -translate-y-1"
     >
-      <div v-if="showCatalog" class="absolute left-0 right-0 top-full bg-white shadow-xl z-50 border-t border-gray-200">
+      <div v-if="showCatalog" class="absolute left-0 right-0 top-full bg-white shadow-xl z-50 rounded-b-2xl mt-px">
         <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
           <div class="grid grid-cols-4 gap-6">
             <div v-for="category in categories" :key="category.id">
@@ -113,7 +114,7 @@
         </div>
       </div>
     </transition>
-  </nav>
+  </header>
 </template>
 
 <script setup>
@@ -153,7 +154,7 @@ const openAddressModal = () => {
 
 // Закрытие каталога при клике вне
 const handleClickOutside = (e) => {
-  if (showCatalog.value && !e.target.closest('nav')) {
+  if (showCatalog.value && !e.target.closest('header')) {
     showCatalog.value = false
   }
 }
@@ -162,3 +163,26 @@ if (typeof window !== 'undefined') {
   document.addEventListener('click', handleClickOutside)
 }
 </script>
+
+<style scoped>
+/* Дополнительные стили для точности как на Ozon */
+header {
+  /* Убираем стандартные радиусы у вложенных элементов сверху */
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* Плавная тень */
+header {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.3s ease;
+}
+
+/* Убираем лишние отступы на мобильных */
+@media (max-width: 640px) {
+  header {
+    border-bottom-left-radius: 1rem;
+    border-bottom-right-radius: 1rem;
+  }
+}
+</style>
