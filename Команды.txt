@@ -1,0 +1,13 @@
+Laravel-сервер (backend)
+
+php artisan serve
+
+
+2. Vite-сервер (frontend)
+
+npm run dev
+
+Команда для быстрой проверки структуры:
+# Windows PowerShell
+
+tree /F /A | Select-String -Pattern "\.(php|vue|js)$"

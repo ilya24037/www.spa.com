@@ -182,11 +182,13 @@
                 },
                 "booking_form": {
                     "name": "Форма бронирования",
-                    "done": false
+                    "done": true,
+                    "progress": 100
                 },
                 "calendar": {
                     "name": "Календарь записи",
-                    "done": false
+                    "done": true,
+                    "progress": 100
                 },
                 "review_form": {
                     "name": "Форма отзыва",
