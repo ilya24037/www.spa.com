@@ -1,60 +1,229 @@
 <template>
-    <Head :title="master.name" />
-    
-    <div class="container mx-auto px-4 py-8">
-        <div class="bg-white rounded-lg shadow-lg p-6">
-            <div class="flex items-start gap-6">
-                <img 
-                    :src="master.photo" 
-                    :alt="master.name"
-                    class="w-32 h-32 rounded-lg object-cover"
-                >
-                <div class="flex-1">
-                    <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ master.name }}</h1>
-                    <p class="text-xl text-gray-600 mb-4">{{ master.specialization }}</p>
-                    <div class="flex items-center gap-4 text-sm text-gray-500 mb-4">
-                        <span>{{ master.age }} лет</span>
-                        <span>рост {{ master.height }} см</span>
-                        <div class="flex items-center">
-                            <svg class="w-4 h-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                            </svg>
-                            <span>{{ master.rating }} ({{ master.reviewsCount }} отзывов)</span>
+    <AppLayout>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Шапка профиля -->
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <div class="flex flex-col md:flex-row gap-6">
+                    <!-- Фото -->
+                    <div class="flex-shrink-0">
+                        <img 
+                            :src="master.avatar || '/images/no-avatar.jpg'" 
+                            :alt="master.display_name"
+                            class="w-32 h-32 rounded-full object-cover"
+                        >
+                    </div>
+                    
+                    <!-- Основная информация -->
+                    <div class="flex-grow">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                                    {{ master.display_name }}
+                                    <span v-if="master.is_verified" class="text-green-500">
+                                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                                        </svg>
+                                    </span>
+                                </h1>
+                                
+                                <div class="flex items-center gap-4 mt-2 text-sm text-gray-600">
+                                    <div class="flex items-center">
+                                        <StarRating :rating="master.rating" />
+                                        <span class="ml-2">{{ master.rating }} ({{ master.reviews_count }} отзывов)</span>
+                                    </div>
+                                    <span>•</span>
+                                    <span>Опыт {{ master.experience_years }} лет</span>
+                                </div>
+                                
+                                <div class="flex items-center gap-2 mt-3">
+                                    <span v-if="master.home_service" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        Выезд на дом
+                                    </span>
+                                    <span v-if="master.salon_service" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                        Прием в салоне
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- Кнопки действий -->
+                            <div class="flex gap-2">
+                                <button 
+                                    @click="toggleFavorite"
+                                    class="p-2 rounded-lg border hover:bg-gray-50"
+                                    :class="{ 'text-red-500 border-red-500': isFavorite }"
+                                >
+                                    <HeartIcon class="w-5 h-5" />
+                                </button>
+                                <button 
+                                    @click="share"
+                                    class="p-2 rounded-lg border hover:bg-gray-50"
+                                >
+                                    <ShareIcon class="w-5 h-5" />
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                    <div class="text-2xl font-bold text-blue-600 mb-4">
-                        {{ formatPrice(master.pricePerHour) }}/час
-                    </div>
-                    <div class="flex gap-4">
-                        <button class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                            Записаться
-                        </button>
-                        <button class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                            Позвонить
-                        </button>
+                        
+                        <!-- Локация -->
+                        <div class="mt-4 text-gray-600">
+                            <div v-if="master.metro_station" class="flex items-center gap-2">
+                                <MapPinIcon class="w-4 h-4" />
+                                <span>{{ master.metro_station }}</span>
+                            </div>
+                            <div v-if="master.district" class="flex items-center gap-2 mt-1">
+                                <BuildingOfficeIcon class="w-4 h-4" />
+                                <span>{{ master.district }}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="mt-8">
-                <h2 class="text-xl font-semibold mb-4">Описание</h2>
-                <p class="text-gray-700">{{ master.description }}</p>
+
+            <!-- Табы -->
+            <div class="bg-white rounded-lg shadow-lg">
+                <div class="border-b">
+                    <nav class="flex -mb-px">
+                        <button
+                            v-for="tab in tabs"
+                            :key="tab.id"
+                            @click="activeTab = tab.id"
+                            :class="[
+                                'py-4 px-6 text-sm font-medium border-b-2 transition-colors',
+                                activeTab === tab.id
+                                    ? 'border-indigo-500 text-indigo-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                            ]"
+                        >
+                            {{ tab.name }}
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Контент табов -->
+                <div class="p-6">
+                    <!-- Услуги -->
+                    <div v-if="activeTab === 'services'">
+                        <div class="grid gap-4">
+                            <ServiceCard
+                                v-for="service in master.services"
+                                :key="service.id"
+                                :service="service"
+                                @book="openBookingModal(service)"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- О мастере -->
+                    <div v-if="activeTab === 'about'">
+                        <div class="prose max-w-none">
+                            <p>{{ master.bio }}</p>
+                            
+                            <h3 class="mt-6">Образование и сертификаты</h3>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+                                <div 
+                                    v-for="cert in master.certificates"
+                                    :key="cert.id"
+                                    class="border rounded-lg p-4 text-center"
+                                >
+                                    <img :src="cert.image" :alt="cert.name" class="w-full h-32 object-cover rounded mb-2">
+                                    <p class="text-sm">{{ cert.name }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Отзывы -->
+                    <div v-if="activeTab === 'reviews'">
+                        <ReviewsList :reviews="reviews" :master-id="master.id" />
+                    </div>
+
+                    <!-- Фото работ -->
+                    <div v-if="activeTab === 'portfolio'">
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            <img 
+                                v-for="(photo, index) in portfolio"
+                                :key="index"
+                                :src="photo"
+                                class="w-full h-48 object-cover rounded-lg cursor-pointer hover:opacity-90"
+                                @click="openGallery(index)"
+                            >
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Фиксированная панель записи -->
+            <div class="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4 md:hidden">
+                <button 
+                    @click="openBookingModal()"
+                    class="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium"
+                >
+                    Записаться
+                </button>
             </div>
         </div>
-    </div>
+
+        <!-- Модальное окно бронирования -->
+        <BookingModal 
+            v-if="showBookingModal"
+            :master="master"
+            :service="selectedService"
+            @close="showBookingModal = false"
+        />
+    </AppLayout>
 </template>
 
 <script setup>
-import { Head } from '@inertiajs/vue3'
+import { ref, computed } from 'vue'
+import { usePage } from '@inertiajs/vue3'
+import { HeartIcon, ShareIcon, MapPinIcon, BuildingOfficeIcon } from '@heroicons/vue/24/outline'
+import AppLayout from '@/Layouts/AppLayout.vue'
+import StarRating from '@/Components/StarRating.vue'
+import ServiceCard from '@/Components/Masters/ServiceCard.vue'
+import ReviewsList from '@/Components/Reviews/ReviewsList.vue'
+import BookingModal from '@/Components/Booking/BookingModal.vue'
+import { useMasterStore } from '@/stores/masterStore'
 
 const props = defineProps({
-    master: {
-        type: Object,
-        required: true
-    }
+    master: Object,
+    services: Array,
+    reviews: Array,
+    portfolio: Array
 })
 
-const formatPrice = (price) => {
-    return new Intl.NumberFormat('ru-RU').format(price) + ' ₽'
+const masterStore = useMasterStore()
+const activeTab = ref('services')
+const showBookingModal = ref(false)
+const selectedService = ref(null)
+
+const tabs = [
+    { id: 'services', name: 'Услуги' },
+    { id: 'about', name: 'О мастере' },
+    { id: 'reviews', name: 'Отзывы' },
+    { id: 'portfolio', name: 'Фото работ' }
+]
+
+const isFavorite = computed(() => masterStore.isInFavorites(props.master.id))
+
+const toggleFavorite = () => {
+    masterStore.toggleFavorite(props.master.id)
+}
+
+const share = () => {
+    if (navigator.share) {
+        navigator.share({
+            title: props.master.display_name,
+            text: `Мастер массажа ${props.master.display_name}`,
+            url: window.location.href
+        })
+    }
+}
+
+const openBookingModal = (service = null) => {
+    selectedService.value = service
+    showBookingModal.value = true
+}
+
+const openGallery = (index) => {
+    // TODO: Implement gallery viewer
 }
 </script>

@@ -44,5 +44,29 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+// API маршруты
+Route::prefix('api')->group(function () {
+    Route::get('/masters', [SearchController::class, 'index']);
+    Route::get('/masters/{master}', [MasterController::class, 'show']);
+    Route::get('/search/suggestions', [SearchController::class, 'suggestions']);
+    
+    Route::middleware('auth')->group(function () {
+        Route::get('/user', fn() => auth()->user()->load('masterProfile'));
+        Route::get('/favorites', [FavoriteController::class, 'index']);
+        Route::get('/bookings/available-slots', [BookingController::class, 'availableSlots']);
+    });
+});
+
+// Бронирования
+Route::middleware('auth')->group(function () {
+    Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
+    Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
+    Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
+    Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
+    Route::post('/bookings/{booking}/confirm', [BookingController::class, 'confirm'])->name('bookings.confirm');
+});
+
+// Поиск
+Route::get('/search', [SearchController::class, 'index'])->name('search');
 
 require __DIR__.'/auth.php';
