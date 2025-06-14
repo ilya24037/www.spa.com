@@ -27,3 +27,5 @@ Homestead.yaml
 npm-debug.log
 Thumbs.db
 yarn-error.log
+/storage/ai-sessions/*
+!/storage/ai-sessions/.gitkeep

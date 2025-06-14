@@ -8,6 +8,15 @@ php artisan serve
 npm run dev
 
 Команда для быстрой проверки структуры:
-# Windows PowerShell
+# Посмотреть информацию о последней сессии
 
-tree /F /A | Select-String -Pattern "\.(php|vue|js)$"
+php artisan ai:context --last-session
+
+
+# Полный анализ с метриками производительности
+
+php artisan ai:context --full
+
+# Быстрый контекст
+
+php artisan ai:context --quick
