@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div>
     <Head title="СПА-услуги, массаж в Москве | Услуги на SPA.COM" />
     
@@ -141,8 +141,8 @@
 <script setup>
 import { ref } from 'vue'
 import { Head, router } from '@inertiajs/vue3'
-import Cards from '@/Components/Cards.vue'
-import Map from '@/Components/Map.vue' 
+import Cards from '@/Components/Layout/CardsList.vue'
+import Map from '@/Components/Map/Map.vue' 
 import Filters from '@/Components/Filters.vue'
 import SearchBar from '@/Components/Header/SearchBar.vue'
 import Pagination from '@/Components/Common/Pagination.vue'

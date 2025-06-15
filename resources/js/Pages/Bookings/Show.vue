@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <AppLayout>
         <Head :title="`Бронирование №${booking.booking_number}`" />
 
@@ -344,7 +344,7 @@
 import { ref, computed } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
-import Modal from '@/Components/Modal.vue'
+import Modal from '@/Components/UI/Modal.vue'
 import { 
     StarIcon, 
     PhoneIcon, 

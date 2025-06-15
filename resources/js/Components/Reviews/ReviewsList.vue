@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div class="space-y-6">
         <!-- Заголовок с общим рейтингом -->
         <div class="flex items-center justify-between mb-6">
@@ -85,7 +85,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import StarRating from '@/Components/StarRating.vue'
+import StarRating from '@/Components/Common/StarRating.vue'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 
