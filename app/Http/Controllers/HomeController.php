@@ -20,7 +20,7 @@ class HomeController extends Controller
 
         // Строим запрос
         $query = MasterProfile::with(['user', 'services'])
-            ->where('is_active', true);
+            ->active(); // Используем scope вместо where('is_active', true)
 
         // Поиск по тексту
         if (!empty($filters['q'])) {
@@ -30,6 +30,7 @@ class HomeController extends Controller
                     $userQuery->where('name', 'like', "%{$searchTerm}%");
                 })
                 ->orWhere('bio', 'like', "%{$searchTerm}%")
+                ->orWhere('display_name', 'like', "%{$searchTerm}%") // Изменено с bio
                 ->orWhereHas('services', function($serviceQuery) use ($searchTerm) {
                     $serviceQuery->where('name', 'like', "%{$searchTerm}%");
                 });
@@ -63,6 +64,11 @@ class HomeController extends Controller
         // Фильтр по району
         if (!empty($filters['district'])) {
             $query->where('district', $filters['district']);
+        }
+
+        // Фильтр по метро
+        if (!empty($filters['metro'])) {
+            $query->where('metro_station', $filters['metro']); // Изменено с nearest_metro
         }
 
         // Фильтр по типу услуги
@@ -100,7 +106,7 @@ class HomeController extends Controller
             ->with('children')
             ->get();
 
-        $districts = MasterProfile::where('is_active', true)
+        $districts = MasterProfile::active() // Изменено
             ->select('district')
             ->distinct()
             ->whereNotNull('district')
