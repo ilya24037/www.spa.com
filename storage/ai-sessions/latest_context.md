@@ -1,5 +1,5 @@
 # 🤖 AI Context: SPA Platform - Платформа услуг массажа
-Дата генерации: 15.06.2025 10:32:13
+Дата генерации: 15.06.2025 13:51:48
 Версия Laravel: 12.17.0
 PHP: 8.2.12
 
@@ -66,6 +66,48 @@ PHP: 8.2.12
 - JavaScript: 4
 - Всего строк кода: 4,519
 
+**Дерево проекта:**
+```
+├── app/ (30 файлов)
+│   ├── Http/ (19 файлов)
+│   │   ├── Controllers/ (16 файлов)
+│   ├── Models/ (8 файлов)
+├── config/ (12 файлов)
+│   ├── app.php (4.2 KB)
+│   ├── auth.php (3.9 KB)
+│   ├── cache.php (3.4 KB)
+│   ├── database.php (6.1 KB)
+│   ├── filesystems.php (2.4 KB)
+│   ├── logging.php (4.2 KB)
+│   ├── mail.php (3.5 KB)
+│   ├── project-status.json (8.2 KB)
+│   ├── queue.php (3.7 KB)
+│   ├── sanctum.php (3 KB)
+│   ├── services.php (1 KB)
+│   ├── session.php (7.7 KB)
+├── database/ (18 файлов)
+│   ├── migrations/ (16 файлов)
+├── public/ (4 файлов)
+│   ├── index.php (543 B)
+├── resources/ (68 файлов)
+│   ├── js/ (66 файлов)
+│   │   ├── Components/ (38 файлов)
+│   │   ├── Pages/ (17 файлов)
+├── routes/ (3 файлов)
+│   ├── auth.php (2.3 KB)
+│   ├── console.php (210 B)
+│   ├── web.php (3.4 KB)
+├── .env.example (1.1 KB)
+├── AI_CONTEXT.md (6.1 KB)
+├── README.md (3.8 KB)
+├── composer.json (2.5 KB)
+├── jsconfig.json (223 B)
+├── package-lock.json (141.2 KB)
+├── package.json (1 KB)
+├── postcss.config.js (93 B)
+├── tailwind.config.js (576 B)
+├── vite.config.js (472 B)
+```
 
 ## ⚠️ НАЙДЕННЫЕ ПРОБЛЕМЫ И ЗАМЕТКИ
 ### 📝 TODO (2)
@@ -80,6 +122,66 @@ PHP: 8.2.12
 - Debug (`D:\www.spa.com\resources\js/stores/bookingStore.js:85`)
 _... и ещё 9_
 
+
+## 🗄️ АНАЛИЗ БАЗЫ ДАННЫХ
+**Миграций создано:** 16
+**Статус миграций:** ✅ Все выполнены (16)
+❌ **Статус БД:** Недоступна - SQLSTATE[42S02]: Base table or view not found: 1146 Table 'laravel_auth.sqlite_master' doesn't exist (Connection: mysql, SQL: SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%')
+
+## 🛣️ АНАЛИЗ МАРШРУТОВ
+**Всего маршрутов:** 28
+**API endpoints:** 0
+**Защищённых:** 8
+
+**По контроллерам:**
+- HomeController: 2 маршрутов
+- MasterController: 8 маршрутов
+- FavoriteController: 4 маршрутов
+- CompareController: 4 маршрутов
+- ProfileController: 4 маршрутов
+- SearchController: 3 маршрутов
+- BookingController: 6 маршрутов
+
+## 📦 ПРОВЕРКА ЗАВИСИМОСТЕЙ
+**Composer:** ✅ Заблокирован
+✅ **Все ключевые пакеты установлены**
+**NPM:** ✅ Заблокирован
+**node_modules:** ✅ Установлены
+
+## 🧩 АНАЛИЗ VUE КОМПОНЕНТОВ
+**Vue компоненты:** 20
+**Vue страницы:** 11
+
+**Наиболее используемые компоненты:**
+- Logo: используется 3 раз
+- AuthBlock: используется 2 раз
+- CatalogButton: используется 2 раз
+- CitySelector: используется 2 раз
+- CompareButton: используется 2 раз
+
+**⚠️ Неиспользуемые компоненты:** 7 (BookingModal — копия, Pagination, ToastNotifications)
+
+## 📈 МЕТРИКИ КАЧЕСТВА КОДА
+**Анализ кодовой базы:**
+- Средняя длина файла: 172 строк
+- Самый большой файл: Service.php (293 строк)
+- Дублирование кода: ⚠️ 12%
+- Покрытие тестами: ⚠️ 30%
+
+## ⚡ АНАЛИЗ ПРОИЗВОДИТЕЛЬНОСТИ
+**Production сборка:**
+- Размер сборки: 0 B
+- Файлов в сборке: 0
+
+**Статус оптимизаций:**
+- ❌ Gzip сжатие
+- ❌ Config кэш
+- ❌ Route кэш
+- ❌ Production build
+
+## 🔒 ПРОВЕРКА БЕЗОПАСНОСТИ
+**Найденные проблемы:**
+- ⚠️ APP_DEBUG включен (отключите в production)
 
 ## 🚀 РЕКОМЕНДУЕМЫЕ СЛЕДУЮЩИЕ ШАГИ
 
@@ -116,4 +218,4 @@ _... и ещё 9_
 4. ✅ Фокусируйся на MVP функциональности
 5. ✅ Давай конкретные команды для терминала
 
-*Этот контекст автоматически сгенерирован 15.06.2025 в 10:32*
+*Этот контекст автоматически сгенерирован 15.06.2025 в 13:51*
