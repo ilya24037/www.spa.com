@@ -1,5 +1,5 @@
 <template>
-  <AppLayout>
+  <div>
     <Head title="СПА-услуги, массаж в Москве | Услуги на SPA.COM" />
     
     <!-- Поисковая секция -->
@@ -135,19 +135,20 @@
         @update="updateFilters"
       />
     </Teleport>
-  </AppLayout>
+  </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import { Head, router } from '@inertiajs/vue3'
-import AppLayout from '@/Layouts/AppLayout.vue'
 import Cards from '@/Components/Cards.vue'
 import Map from '@/Components/Map.vue' 
 import Filters from '@/Components/Filters.vue'
-import SearchBar from '@/Components/Common/SearchBar.vue'
+import SearchBar from '@/Components/Header/SearchBar.vue'
 import Pagination from '@/Components/Common/Pagination.vue'
 import MobileFilters from '@/Components/Common/MobileFilters.vue'
+
+// НЕ добавляем defineOptions({ layout: AppLayout }) - layout применится автоматически!
 
 // Props
 const props = defineProps({
