@@ -7,7 +7,14 @@ php artisan serve
 
 npm run dev
 
+Способ 1 - Через меню:
+
 режимы
+
+.\smart-commit.bat
+
+
+
 
 powershell# Быстрый отчет
 php artisan ai:context --quick
