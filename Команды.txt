@@ -7,6 +7,13 @@ php artisan serve
 
 npm run dev
 
+
+smart-commit.bat        ← Оставить (главная система)
+auto-context.bat        ← Оставить (автослежение)
+auto-commit.bat         ← Оставить (автокоммиты)
+start-laravel.bat       ← Оставить (запуск сервера)
+
+
 Способ 1 - Через меню:
 
 режимы
