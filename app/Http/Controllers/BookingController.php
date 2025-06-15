@@ -6,164 +6,337 @@ use App\Models\Booking;
 use App\Models\MasterProfile;
 use App\Models\Service;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Carbon\Carbon;
 
 class BookingController extends Controller
 {
+    /**
+     * Список бронирований пользователя
+     */
+    public function index(Request $request)
+    {
+        $user = Auth::user();
+        
+        $bookings = Booking::with(['masterProfile.user', 'service', 'client'])
+            ->where(function($query) use ($user) {
+                // Показываем бронирования где пользователь - клиент
+                $query->where('client_id', $user->id);
+                
+                // Или где пользователь - мастер
+                if ($user->masterProfile) {
+                    $query->orWhere('master_profile_id', $user->masterProfile->id);
+                }
+            })
+            ->orderBy('booking_date', 'desc')
+            ->orderBy('booking_time', 'desc')
+            ->paginate(10);
+
+        return Inertia::render('Bookings/Index', [
+            'bookings' => $bookings,
+            'isMaster' => $user->role === 'master'
+        ]);
+    }
+
+    /**
+     * Форма создания бронирования
+     */
+    public function create(Request $request)
+    {
+        $masterProfileId = $request->get('master_id');
+        $serviceId = $request->get('service_id');
+        
+        if (!$masterProfileId || !$serviceId) {
+            return redirect()->route('masters.index')
+                ->with('error', 'Выберите мастера и услугу');
+        }
+
+        $masterProfile = MasterProfile::with(['user', 'services', 'schedules'])
+            ->findOrFail($masterProfileId);
+            
+        $service = Service::findOrFail($serviceId);
+        
+        // Проверяем, что услуга принадлежит мастеру
+        if (!$masterProfile->services->contains($service)) {
+            return redirect()->route('masters.show', $masterProfile)
+                ->with('error', 'Выбранная услуга не доступна у этого мастера');
+        }
+
+        return Inertia::render('Bookings/Create', [
+            'masterProfile' => $masterProfile,
+            'service' => $service,
+            'availableSlots' => $this->getAvailableSlots($masterProfile, $service)
+        ]);
+    }
+
+    /**
+     * Сохранение бронирования
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
             'master_profile_id' => 'required|exists:master_profiles,id',
             'service_id' => 'required|exists:services,id',
-            'booking_date' => 'required|date|after:today',
-            'start_time' => 'required|date_format:H:i',
-            'address' => 'required_if:is_home_service,true',
+            'booking_date' => 'required|date|after_or_equal:today',
+            'booking_time' => 'required|date_format:H:i',
             'client_name' => 'required|string|max:255',
             'client_phone' => 'required|string|max:20',
-            'client_email' => 'nullable|email',
             'client_comment' => 'nullable|string|max:500',
-            'is_home_service' => 'boolean',
-            'payment_method' => 'required|in:cash,card,online'
+            'address' => 'nullable|string|max:500',
+            'service_location' => 'required|in:home,salon'
         ]);
 
-        $service = Service::findOrFail($validated['service_id']);
-        $masterProfile = MasterProfile::findOrFail($validated['master_profile_id']);
+        // Проверяем доступность слота
+        $isAvailable = $this->checkSlotAvailability(
+            $validated['master_profile_id'],
+            $validated['booking_date'],
+            $validated['booking_time'],
+            $validated['service_id']
+        );
 
-        // Проверяем доступность времени
-        $existingBooking = Booking::where('master_profile_id', $validated['master_profile_id'])
-            ->where('booking_date', $validated['booking_date'])
-            ->where('start_time', $validated['start_time'])
-            ->whereIn('status', ['pending', 'confirmed'])
-            ->exists();
-
-        if ($existingBooking) {
-            return back()->withErrors(['start_time' => 'Это время уже занято']);
+        if (!$isAvailable) {
+            return back()->withErrors([
+                'booking_time' => 'Выбранное время уже занято'
+            ]);
         }
 
-        // Рассчитываем цены
-        $travelFee = $validated['is_home_service'] ? 500 : 0; // Фиксированная доплата за выезд
-        $totalPrice = $service->price + $travelFee;
+        // Получаем информацию об услуге для расчёта времени окончания
+        $service = Service::find($validated['service_id']);
+        $endTime = Carbon::parse($validated['booking_time'])
+            ->addMinutes($service->duration)
+            ->format('H:i');
 
-        // Создаем бронирование
+        // Создаём бронирование
         $booking = Booking::create([
             ...$validated,
-            'client_id' => auth()->id(),
-            'duration' => $service->duration,
-            'end_time' => Carbon::parse($validated['start_time'])->addMinutes($service->duration)->format('H:i'),
-            'service_price' => $service->price,
-            'travel_fee' => $travelFee,
-            'total_price' => $totalPrice,
+            'client_id' => Auth::id(),
+            'booking_end_time' => $endTime,
             'status' => 'pending',
+            'total_price' => $service->price,
             'payment_status' => 'pending'
         ]);
 
-        // TODO: Отправить уведомление мастеру
+        // Отправляем уведомления (в будущем)
+        // $this->sendNotifications($booking);
 
         return redirect()->route('bookings.show', $booking)
-            ->with('success', 'Заявка отправлена! Ожидайте подтверждения мастера.');
+            ->with('success', 'Бронирование успешно создано! Ожидайте подтверждения от мастера.');
     }
 
+    /**
+     * Просмотр бронирования
+     */
     public function show(Booking $booking)
     {
         // Проверяем доступ
-        if ($booking->client_id !== auth()->id() && 
-            $booking->masterProfile->user_id !== auth()->id()) {
-            abort(403);
+        $user = Auth::user();
+        if ($booking->client_id !== $user->id && 
+            (!$user->masterProfile || $booking->master_profile_id !== $user->masterProfile->id)) {
+            abort(403, 'У вас нет доступа к этому бронированию');
         }
 
-        $booking->load(['service', 'masterProfile.user', 'client']);
+        $booking->load(['masterProfile.user', 'service', 'client']);
 
         return Inertia::render('Bookings/Show', [
-            'booking' => $booking
+            'booking' => $booking,
+            'canManage' => $user->masterProfile && 
+                          $booking->master_profile_id === $user->masterProfile->id
         ]);
     }
 
-    public function index()
+    /**
+     * Отмена бронирования
+     */
+    public function cancel(Booking $booking)
     {
-        $bookings = Booking::where('client_id', auth()->id())
-            ->with(['service', 'masterProfile.user'])
-            ->orderBy('booking_date', 'desc')
-            ->orderBy('start_time', 'desc')
-            ->paginate(10);
-
-        return Inertia::render('Bookings/Index', [
-            'bookings' => $bookings
-        ]);
-    }
-
-    public function cancel(Request $request, Booking $booking)
-    {
-        // Проверяем права
-        if ($booking->client_id !== auth()->id() && 
-            $booking->masterProfile->user_id !== auth()->id()) {
+        $user = Auth::user();
+        
+        // Проверяем права на отмену
+        if ($booking->client_id !== $user->id && 
+            (!$user->masterProfile || $booking->master_profile_id !== $user->masterProfile->id)) {
             abort(403);
         }
 
-        $request->validate([
-            'reason' => 'required|string|max:255'
-        ]);
-
-        if (!$booking->canCancel()) {
-            return back()->withErrors(['error' => 'Невозможно отменить это бронирование']);
+        // Проверяем статус
+        if (!in_array($booking->status, ['pending', 'confirmed'])) {
+            return back()->with('error', 'Это бронирование нельзя отменить');
         }
 
-        $booking->cancel($request->reason, auth()->id());
+        // Проверяем время (за 2 часа до начала)
+        $bookingDateTime = Carbon::parse($booking->booking_date . ' ' . $booking->booking_time);
+        if (now()->diffInHours($bookingDateTime) < 2) {
+            return back()->with('error', 'Отмена возможна не позднее чем за 2 часа до начала');
+        }
+
+        $booking->update([
+            'status' => 'cancelled',
+            'cancelled_at' => now(),
+            'cancelled_by' => $user->id,
+            'cancellation_reason' => request('reason')
+        ]);
 
         return back()->with('success', 'Бронирование отменено');
     }
 
+    /**
+     * Подтверждение бронирования мастером
+     */
     public function confirm(Booking $booking)
     {
+        $user = Auth::user();
+        
         // Только мастер может подтвердить
-        if ($booking->masterProfile->user_id !== auth()->id()) {
+        if (!$user->masterProfile || $booking->master_profile_id !== $user->masterProfile->id) {
             abort(403);
         }
 
-        $booking->confirm();
+        if ($booking->status !== 'pending') {
+            return back()->with('error', 'Это бронирование уже обработано');
+        }
+
+        $booking->update([
+            'status' => 'confirmed',
+            'confirmed_at' => now()
+        ]);
+
+        // Отправить уведомление клиенту
+        // $this->notifyClient($booking);
 
         return back()->with('success', 'Бронирование подтверждено');
     }
 
-    // API метод для получения доступных слотов
-    public function availableSlots(Request $request)
+    /**
+     * Получение доступных слотов
+     */
+    private function getAvailableSlots(MasterProfile $masterProfile, Service $service)
     {
-        $request->validate([
-            'master_profile_id' => 'required|exists:master_profiles,id',
-            'service_id' => 'required|exists:services,id',
-            'date' => 'required|date|after_or_equal:today'
-        ]);
+        $slots = [];
+        $startDate = now();
+        $endDate = now()->addDays(14); // Показываем слоты на 2 недели вперёд
 
-        $date = Carbon::parse($request->date);
-        $dayOfWeek = $date->dayOfWeekIso;
-        
-        $masterProfile = MasterProfile::findOrFail($request->master_profile_id);
-        $service = Service::findOrFail($request->service_id);
-        
-        // Получаем расписание на этот день
-        $schedule = $masterProfile->schedules()
-            ->where('day_of_week', $dayOfWeek)
-            ->where('is_working_day', true)
-            ->first();
+        for ($date = $startDate; $date <= $endDate; $date->addDay()) {
+            $dayOfWeek = $date->dayOfWeek;
+            
+            // Получаем расписание на этот день недели
+            $schedule = $masterProfile->schedules()
+                ->where('day_of_week', $dayOfWeek)
+                ->where('is_working_day', true)
+                ->first();
+                
+            if (!$schedule) continue;
 
-        if (!$schedule) {
-            return response()->json(['slots' => []]);
+            // Генерируем слоты с учётом длительности услуги
+            $daySlots = $this->generateDaySlots(
+                $date->format('Y-m-d'),
+                $schedule,
+                $service,
+                $masterProfile
+            );
+
+            if (!empty($daySlots)) {
+                $slots[$date->format('Y-m-d')] = $daySlots;
+            }
         }
 
-        // Получаем все слоты
-        $allSlots = $schedule->getAvailableSlots($date);
+        return $slots;
+    }
 
-        // Получаем занятые слоты
-        $bookedSlots = Booking::where('master_profile_id', $request->master_profile_id)
+    /**
+     * Генерация слотов на день
+     */
+    private function generateDaySlots($date, $schedule, $service, $masterProfile)
+    {
+        $slots = [];
+        $serviceDuration = $service->duration; // в минутах
+        
+        $startTime = Carbon::parse($date . ' ' . $schedule->start_time);
+        $endTime = Carbon::parse($date . ' ' . $schedule->end_time);
+        $breakStart = $schedule->break_start ? Carbon::parse($date . ' ' . $schedule->break_start) : null;
+        $breakEnd = $schedule->break_end ? Carbon::parse($date . ' ' . $schedule->break_end) : null;
+
+        // Получаем существующие бронирования на этот день
+        $existingBookings = Booking::where('master_profile_id', $masterProfile->id)
             ->where('booking_date', $date)
             ->whereIn('status', ['pending', 'confirmed'])
-            ->pluck('start_time')
-            ->map(fn($time) => Carbon::parse($time)->format('H:i'))
-            ->toArray();
+            ->get();
 
-        // Фильтруем доступные слоты
-        $availableSlots = array_values(array_diff($allSlots, $bookedSlots));
+        $currentSlot = $startTime->copy();
+        
+        while ($currentSlot->copy()->addMinutes($serviceDuration) <= $endTime) {
+            // Пропускаем время обеда
+            if ($breakStart && $breakEnd) {
+                if ($currentSlot >= $breakStart && $currentSlot < $breakEnd) {
+                    $currentSlot = $breakEnd->copy();
+                    continue;
+                }
+                if ($currentSlot->copy()->addMinutes($serviceDuration) > $breakStart && 
+                    $currentSlot < $breakStart) {
+                    $currentSlot = $breakEnd->copy();
+                    continue;
+                }
+            }
 
-        return response()->json(['slots' => $availableSlots]);
+            // Проверяем, не занят ли слот
+            $isAvailable = true;
+            foreach ($existingBookings as $booking) {
+                $bookingStart = Carbon::parse($booking->booking_time);
+                $bookingEnd = Carbon::parse($booking->booking_end_time);
+                
+                if ($currentSlot >= $bookingStart && $currentSlot < $bookingEnd) {
+                    $isAvailable = false;
+                    break;
+                }
+                
+                if ($currentSlot->copy()->addMinutes($serviceDuration) > $bookingStart &&
+                    $currentSlot < $bookingStart) {
+                    $isAvailable = false;
+                    break;
+                }
+            }
+
+            if ($isAvailable && $currentSlot >= now()->addHours(2)) { // Минимум за 2 часа
+                $slots[] = [
+                    'time' => $currentSlot->format('H:i'),
+                    'available' => true
+                ];
+            }
+
+            $currentSlot->addMinutes(30); // Слоты каждые 30 минут
+        }
+
+        return $slots;
+    }
+
+    /**
+     * Проверка доступности слота
+     */
+    private function checkSlotAvailability($masterProfileId, $date, $time, $serviceId)
+    {
+        $service = Service::find($serviceId);
+        $endTime = Carbon::parse($time)->addMinutes($service->duration)->format('H:i:s');
+
+        // Проверяем пересечения с другими бронированиями
+        $conflict = Booking::where('master_profile_id', $masterProfileId)
+            ->where('booking_date', $date)
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->where(function($query) use ($time, $endTime) {
+                $query->where(function($q) use ($time, $endTime) {
+                    // Новое бронирование начинается во время существующего
+                    $q->where('booking_time', '<=', $time)
+                      ->where('booking_end_time', '>', $time);
+                })->orWhere(function($q) use ($time, $endTime) {
+                    // Новое бронирование заканчивается во время существующего
+                    $q->where('booking_time', '<', $endTime)
+                      ->where('booking_end_time', '>=', $endTime);
+                })->orWhere(function($q) use ($time, $endTime) {
+                    // Новое бронирование полностью перекрывает существующее
+                    $q->where('booking_time', '>=', $time)
+                      ->where('booking_end_time', '<=', $endTime);
+                });
+            })
+            ->exists();
+
+        return !$conflict;
     }
 }
