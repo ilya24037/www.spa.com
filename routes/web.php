@@ -5,68 +5,107 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MasterController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\CompareController;
+use App\Http\Controllers\BookingController;
+use App\Http\Controllers\SearchController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-// Главная страница с каталогом мастеров
+/*
+|--------------------------------------------------------------------------
+| Публичные маршруты
+|--------------------------------------------------------------------------
+*/
+
+// Главная страница
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// Дашборд (после авторизации)
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Поиск
+Route::get('/search', [SearchController::class, 'index'])->name('search');
 
-// Мастера
-Route::prefix('masters')->group(function () {
-    Route::get('/create', [MasterController::class, 'create'])->name('masters.create');
-    Route::post('/', [MasterController::class, 'store'])->name('masters.store');
-    Route::get('/{master}', [MasterController::class, 'show'])->name('masters.show');
-    Route::get('/{master}/edit', [MasterController::class, 'edit'])->name('masters.edit')->middleware('auth');
-    Route::put('/{master}', [MasterController::class, 'update'])->name('masters.update')->middleware('auth');
-    Route::delete('/{master}', [MasterController::class, 'destroy'])->name('masters.destroy')->middleware('auth');
+// Мастера (публичный просмотр)
+Route::get('/masters/{master}', [MasterController::class, 'show'])->name('masters.show');
+
+// Сравнение (работает без авторизации через сессию)
+Route::prefix('compare')->name('compare.')->group(function () {
+    Route::get('/', [CompareController::class, 'index'])->name('index');
+    Route::post('/add', [CompareController::class, 'add'])->name('add');
+    Route::delete('/{master}', [CompareController::class, 'remove'])->name('remove');
 });
 
-// Избранное
-Route::middleware('auth')->group(function () {
-    Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites');
-    Route::post('/favorites/toggle', [FavoriteController::class, 'toggle'])->name('favorites.toggle');
-});
+/*
+|--------------------------------------------------------------------------
+| API маршруты (для AJAX запросов)
+|--------------------------------------------------------------------------
+*/
 
-// Сравнение
-Route::get('/compare', [CompareController::class, 'index'])->name('compare');
-Route::post('/compare/add', [CompareController::class, 'add'])->name('compare.add');
-Route::delete('/compare/{master}', [CompareController::class, 'remove'])->name('compare.remove');
-
-// Профиль пользователя
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-// API маршруты
 Route::prefix('api')->group(function () {
-    Route::get('/masters', [SearchController::class, 'index']);
-    Route::get('/masters/{master}', [MasterController::class, 'show']);
+    // Публичные API
+    Route::get('/masters', [MasterController::class, 'apiIndex']);
+    Route::get('/masters/{master}', [MasterController::class, 'apiShow']);
+    Route::get('/search', [SearchController::class, 'search']);
     Route::get('/search/suggestions', [SearchController::class, 'suggestions']);
     
+    // Защищённые API
     Route::middleware('auth')->group(function () {
         Route::get('/user', fn() => auth()->user()->load('masterProfile'));
-        Route::get('/favorites', [FavoriteController::class, 'index']);
+        Route::get('/favorites', [FavoriteController::class, 'apiIndex']);
+        Route::post('/favorites/toggle', [FavoriteController::class, 'toggle']);
         Route::get('/bookings/available-slots', [BookingController::class, 'availableSlots']);
     });
 });
 
-// Бронирования
-Route::middleware('auth')->group(function () {
-    Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
-    Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
-    Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
-    Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
-    Route::post('/bookings/{booking}/confirm', [BookingController::class, 'confirm'])->name('bookings.confirm');
+/*
+|--------------------------------------------------------------------------
+| Защищённые маршруты (требуют авторизации)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth'])->group(function () {
+    
+    // Дашборд
+    Route::get('/dashboard', function () {
+        return Inertia::render('Dashboard');
+    })->name('dashboard');
+    
+    // Профиль пользователя
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', [ProfileController::class, 'edit'])->name('edit');
+        Route::patch('/', [ProfileController::class, 'update'])->name('update');
+        Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
+    });
+    
+    // Управление профилем мастера
+    Route::prefix('masters')->name('masters.')->group(function () {
+        Route::get('/create', [MasterController::class, 'create'])->name('create');
+        Route::post('/', [MasterController::class, 'store'])->name('store');
+        Route::get('/{master}/edit', [MasterController::class, 'edit'])->name('edit');
+        Route::put('/{master}', [MasterController::class, 'update'])->name('update');
+        Route::delete('/{master}', [MasterController::class, 'destroy'])->name('destroy');
+    });
+    
+    // Избранное
+    Route::prefix('favorites')->name('favorites.')->group(function () {
+        Route::get('/', [FavoriteController::class, 'index'])->name('index');
+        Route::post('/toggle', [FavoriteController::class, 'toggle'])->name('toggle');
+    });
+    
+    // Бронирования
+    Route::prefix('bookings')->name('bookings.')->group(function () {
+        Route::get('/', [BookingController::class, 'index'])->name('index');
+        Route::get('/create', [BookingController::class, 'create'])->name('create'); // ✅ ДОБАВЛЕН
+        Route::post('/', [BookingController::class, 'store'])->name('store');
+        Route::get('/{booking}', [BookingController::class, 'show'])->name('show');
+        Route::post('/{booking}/cancel', [BookingController::class, 'cancel'])->name('cancel');
+        Route::post('/{booking}/confirm', [BookingController::class, 'confirm'])->name('confirm');
+        Route::post('/{booking}/complete', [BookingController::class, 'complete'])->name('complete'); // ✅ ДОБАВЛЕН
+    });
 });
 
-// Поиск
-Route::get('/search', [SearchController::class, 'index'])->name('search');
+/*
+|--------------------------------------------------------------------------
+| Маршруты аутентификации
+|--------------------------------------------------------------------------
+*/
 
 require __DIR__.'/auth.php';
