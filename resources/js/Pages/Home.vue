@@ -64,10 +64,10 @@
         
         <!-- ProductGrid для карточек -->
         <div class="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-          <MasterCard 
+          <Card 
             v-for="master in masters.data"
             :key="master.id"
-            :master="master"
+            :card="master"
           />
         </div>
       </section>
@@ -80,7 +80,7 @@ import { ref } from 'vue'
 import { Head, router } from '@inertiajs/vue3'
 import Breadcrumbs from '@/Components/Common/Breadcrumbs.vue'
 import QuickTagsRow from '@/Components/Filters/QuickTagsRow.vue'
-import MasterCard from '@/Components/Cards/MasterCard.vue'
+import Card from '@/Components/Cards/Card.vue'
 import SimpleMap from '@/Components/Map/SimpleMap.vue'
 import Filters from '@/Components/Filters/Filters.vue'
 
