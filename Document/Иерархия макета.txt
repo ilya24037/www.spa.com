@@ -1,0 +1,19 @@
+<AppLayout>
+├─ <Topbar>           ← тонкая служебная линейка (акции, адрес, ссылки «Для бизнеса»)
+├─ <MainHeader>       ← логотип, кнопка «Каталог», поле поиска, иконки (вход, заказы, корзина)
+│   └─ position: sticky; top: 0; z-index: 50;
+├─ <Breadcrumbs>      ← «Одежда › Мужская одежда › …»
+├─ <CatalogTitle>     ← h1 «Футболки и поло мужские»
+├─ <QuickTagsRow>     ← горизонтальная лента чипсов-фильтров
+└─ <CatalogSection>   ← основной flex-контейнер
+    ├─ <FiltersSidebar>   (240-300 px) — слева
+    │   ├─ <CategoryTreeAccordion>
+    │   ├─ <PromoToggle>
+    │   ├─ <DeliveryRadioGroup>
+    │   ├─ <PriceRangeInput>
+    │   ├─ <BrandCheckboxList> …
+    └─ <ProductsArea>  — справа, flex-column
+        ├─ <Toolbar>
+        │   └─ <SortSelect> (dropdown «Популярные»)
+        └─ <ProductGrid>  ← CSS grid
+            └─ <ProductCard> × N

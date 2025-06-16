@@ -1,9 +1,10 @@
 <template>
-  <div class="min-h-screen bg-gray-100 flex flex-col"> <!-- Изменил на gray-100 -->
+  <div class="min-h-screen bg-gray-50">
+    <!-- БЕЗ Container, как на Ozon -->
     <div class="max-w-[1400px] mx-auto bg-white min-h-screen">
       
-      <!-- MainHeader с фиксированной высотой 64px -->
-      <header class="sticky top-0 z-50 bg-white shadow-md rounded-b-2xl h-16"> <!-- Добавил h-16 (64px) -->
+      <!-- Шапка с защитой -->
+      <header class="sticky top-0 z-50 bg-white shadow-sm rounded-b-2xl">
         <ErrorBoundary 
           error-title="Навигация временно недоступна"
           :show-reload="false"
@@ -12,8 +13,8 @@
         </ErrorBoundary>
       </header>
       
-      <!-- Основной контент с site-wrapper -->
-      <main class="site-wrapper"> <!-- Изменил на site-wrapper -->
+      <!-- Основной контент -->
+      <main class="pt-4 px-4">
         <slot />
       </main>
       
@@ -30,13 +31,7 @@
 
 <script setup>
 import Navbar from '@/Components/Header/Navbar.vue'
+// УБИРАЕМ импорт Container - как на Ozon!
 import ErrorBoundary from '@/Components/Common/ErrorBoundary.vue'
 import ToastNotifications from '@/Components/Common/ToastNotifications.vue'
 </script>
-
-<style scoped>
-/* Отступы по бокам через .site-wrapper как в документе */
-.site-wrapper {
-  @apply pt-4 px-4;
-}
-</style>
