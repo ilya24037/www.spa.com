@@ -181,7 +181,7 @@ import { Head, router } from '@inertiajs/vue3'
 import { Link } from '@inertiajs/vue3'
 import MasterCard from '@/Components/Masters/MasterCard.vue'
 import MastersMap from '@/Components/Map/SimpleMap.vue'
-import Filters from '@/Components/Filters.vue'
+import Filters from '@/Components/Filters/Filters.vue'
 import Pagination from '@/Components/Common/Pagination.vue'
 
 const props = defineProps({

@@ -6,10 +6,20 @@
         error-title="Ошибка загрузки шапки"
         error-message="Навигация временно недоступна"
       >
-        <header class="sticky top-0 z-50 bg-white border-b">
-          <Navbar />
+        <header class="sticky top-0 z-50">
+          <!-- Основной контейнер шапки с закруглением -->
+          <div class="bg-white shadow-md relative overflow-visible">
+            <!-- Navbar контент -->
+            <Navbar />
+            
+            <!-- Декоративный элемент для закругления нижних углов -->
+            <div class="absolute inset-x-0 -bottom-5 h-5 bg-white rounded-b-3xl shadow-md pointer-events-none"></div>
+          </div>
         </header>
       </ErrorBoundary>
+      
+      <!-- Отступ от шапки -->
+      <div class="h-6"></div>
       
       <!-- Основной контент -->
       <main>
@@ -54,3 +64,16 @@ onMounted(() => {
   })
 })
 </script>
+
+<style scoped>
+/* Убираем стандартную тень у липкой шапки при скролле */
+header {
+  transition: box-shadow 0.3s ease;
+}
+
+/* Дополнительная стилизация для лучшего визуального эффекта */
+.rounded-b-3xl {
+  border-bottom-left-radius: 1.5rem;
+  border-bottom-right-radius: 1.5rem;
+}
+</style>
