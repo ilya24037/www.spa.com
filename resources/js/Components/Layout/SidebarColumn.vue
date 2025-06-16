@@ -1,30 +1,39 @@
+<!-- resources/js/Components/Layout/SidebarWrapper.vue -->
 <template>
-  <div class="sidebar-column bg-white rounded-lg shadow-sm p-6 sticky top-4">
-    <slot />
-  </div>
+  <aside 
+    v-if="!isMobile || showMobile"
+    :class="[
+      'shrink-0 transition-all duration-300',
+      isMobile ? 'fixed inset-y-0 left-0 z-40 w-72' : 'w-64',
+      !isMobile && 'hidden lg:block'
+    ]"
+  >
+    <div 
+      :class="[
+        'bg-white rounded-lg shadow-sm h-full overflow-y-auto',
+        !isMobile && 'sticky p-4',
+        isMobile && 'p-6'
+      ]"
+      :style="!isMobile ? `top: ${stickyTop}px` : ''"
+    >
+      <slot />
+    </div>
+  </aside>
 </template>
 
-<style scoped>
-.sidebar-column {
-  min-height: fit-content;
-}
+<script setup>
+import { computed } from 'vue'
 
-/* Скроллбар для длинного контента */
-.sidebar-column::-webkit-scrollbar {
-  width: 4px;
-}
+const props = defineProps({
+  stickyTop: {
+    type: Number,
+    default: 110
+  },
+  showMobile: {
+    type: Boolean,
+    default: false
+  }
+})
 
-.sidebar-column::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 2px;
-}
-
-.sidebar-column::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 2px;
-}
-
-.sidebar-column::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-</style>
+const isMobile = computed(() => window.innerWidth < 1024)
+</script>
