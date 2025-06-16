@@ -1,5 +1,6 @@
 <template>
     <article 
+        :id="`master-${master.id}`"
         class="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group cursor-pointer"
         @click="goToProfile"
     >
@@ -43,31 +44,53 @@
                 </svg>
                 {{ master.photosCount }}
             </div>
+
+            <!-- Бейдж расстояния (показывается когда карта видна) -->
+            <div 
+                v-if="showDistance && master.distance"
+                class="absolute bottom-2 right-2 px-2 py-1 bg-white bg-opacity-90 text-gray-700 text-xs font-medium rounded-full"
+            >
+                {{ formatDistance(master.distance) }}
+            </div>
         </div>
 
         <!-- Информация -->
         <div class="p-4">
             <!-- Цена -->
             <div class="text-xl font-bold text-gray-900 mb-2">
-                {{ formatPrice(master.pricePerHour) }}
+                {{ formatPrice(master.pricePerHour || master.price_from || 1500) }}/час
             </div>
 
             <!-- Имя и специализация -->
-            <h3 class="font-medium text-gray-900 truncate">{{ master.name }}</h3>
-            <p class="text-sm text-gray-600 truncate mb-2">{{ master.specialization }}</p>
+            <h3 class="font-medium text-gray-900 truncate">{{ master.name || master.display_name || 'Мастер' }}</h3>
+            <p class="text-sm text-gray-600 truncate mb-2">{{ master.specialization || 'Массажист' }}</p>
 
             <!-- Характеристики -->
             <div class="text-xs text-gray-500 space-y-1">
-                <div>{{ master.age }} лет • рост {{ master.height }} см</div>
+                <div v-if="master.age || master.height">
+                    <span v-if="master.age">{{ master.age }} лет</span>
+                    <span v-if="master.age && master.height"> • </span>
+                    <span v-if="master.height">рост {{ master.height }} см</span>
+                </div>
                 
                 <!-- Рейтинг и отзывы -->
                 <div class="flex items-center">
                     <svg class="w-4 h-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                     </svg>
-                    <span class="font-medium">{{ master.rating }}</span>
+                    <span class="font-medium">{{ master.rating || '5.0' }}</span>
                     <span class="mx-1">•</span>
-                    <span>{{ master.reviewsCount }} отзывов</span>
+                    <span>{{ master.reviewsCount || master.reviews_count || 0 }} {{ pluralize(master.reviewsCount || master.reviews_count || 0, ['отзыв', 'отзыва', 'отзывов']) }}</span>
+                </div>
+
+                <!-- Дополнительные теги -->
+                <div v-if="master.home_service || master.certificates" class="flex flex-wrap gap-1 mt-2">
+                    <span v-if="master.home_service" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-800">
+                        Выезд
+                    </span>
+                    <span v-if="master.certificates" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-800">
+                        Сертификаты
+                    </span>
                 </div>
             </div>
 
@@ -96,6 +119,10 @@ const props = defineProps({
     master: {
         type: Object,
         required: true
+    },
+    showDistance: {
+        type: Boolean,
+        default: false
     }
 })
 
@@ -108,10 +135,22 @@ const formatPrice = (price) => {
     return new Intl.NumberFormat('ru-RU').format(price) + ' ₽'
 }
 
+const formatDistance = (distance) => {
+    if (distance < 1000) {
+        return `${distance} м`
+    }
+    return `${(distance / 1000).toFixed(1)} км`
+}
+
+const pluralize = (count, forms) => {
+    const cases = [2, 0, 1, 1, 1, 2]
+    return forms[(count % 100 > 4 && count % 100 < 20) ? 2 : cases[(count % 10 < 5) ? count % 10 : 5]]
+}
+
 const toggleFavorite = () => {
     isFavorite.value = !isFavorite.value
     
-    // Отправка запроса на сервер (используем простой URL вместо route helper)
+    // Отправка запроса на сервер
     router.post('/favorites/toggle', {
         master_id: props.master.id
     }, {
@@ -122,7 +161,12 @@ const toggleFavorite = () => {
 
 const callMaster = () => {
     // Логика для звонка мастеру
-    window.location.href = `tel:${props.master.phone}`
+    if (props.master.phone) {
+        window.location.href = `tel:${props.master.phone}`
+    } else {
+        // Если телефон недоступен, переходим в профиль
+        goToProfile()
+    }
 }
 
 const goToProfile = () => {
