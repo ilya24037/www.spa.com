@@ -2,16 +2,17 @@
 <template>
   <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
     <button
-      v-for="tag in tags"
+      v-for="tag in quickTags"
       :key="tag.id"
       @click="toggleTag(tag)"
       :class="[
         'rounded-xl px-3 py-1 whitespace-nowrap transition-colors text-sm',
-        selectedTags.includes(tag.id) 
+        isActive(tag.id) 
           ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' 
           : 'bg-gray-100 hover:bg-gray-200'
       ]"
     >
+      <span v-if="tag.icon" class="mr-1">{{ tag.icon }}</span>
       {{ tag.label }}
     </button>
   </div>
@@ -21,33 +22,35 @@
 import { ref } from 'vue'
 import { router } from '@inertiajs/vue3'
 
-const props = defineProps({
-  tags: {
-    type: Array,
-    default: () => [
-      { id: 'near', label: '🚶 Рядом со мной' },
-      { id: 'available', label: '✅ Свободен сегодня' },
-      { id: 'home', label: '🏠 Выезд на дом' },
-      { id: 'verified', label: '✓ Проверенные' },
-      { id: 'premium', label: '⭐ Премиум' },
-      { id: 'new', label: '🆕 Новые мастера' }
-    ]
-  }
-})
+const quickTags = [
+  { id: 'near', label: 'Рядом со мной', icon: '🚶' },
+  { id: 'today', label: 'Свободен сегодня', icon: '✅' },
+  { id: 'home', label: 'Выезд на дом', icon: '🏠' },
+  { id: 'verified', label: 'Проверенные', icon: '✓' },
+  { id: 'premium', label: 'Премиум', icon: '⭐' },
+  { id: 'new', label: 'Новые мастера', icon: '🆕' }
+]
 
-const selectedTags = ref([])
+const activeTags = ref([])
+
+const isActive = (tagId) => {
+  return activeTags.value.includes(tagId)
+}
 
 const toggleTag = (tag) => {
-  const index = selectedTags.value.indexOf(tag.id)
+  const index = activeTags.value.indexOf(tag.id)
+  
   if (index > -1) {
-    selectedTags.value.splice(index, 1)
+    activeTags.value.splice(index, 1)
   } else {
-    selectedTags.value.push(tag.id)
+    activeTags.value.push(tag.id)
   }
   
   // Применяем фильтры
   router.reload({
-    data: { quick_filters: selectedTags.value },
+    data: { 
+      quick_filters: activeTags.value 
+    },
     preserveState: true,
     preserveScroll: true
   })
@@ -55,7 +58,6 @@ const toggleTag = (tag) => {
 </script>
 
 <style scoped>
-/* Скрываем скроллбар */
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;

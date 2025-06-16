@@ -14,10 +14,15 @@
           {{ item.title }}
         </span>
         
-        <ChevronRightIcon 
+        <svg 
           v-if="index < items.length - 1"
           class="w-3 h-3 mx-2 text-gray-400"
-        />
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
       </li>
     </ol>
   </nav>
@@ -25,7 +30,6 @@
 
 <script setup>
 import { Link } from '@inertiajs/vue3'
-import { ChevronRightIcon } from '@heroicons/vue/24/solid'
 
 defineProps({
   items: {
