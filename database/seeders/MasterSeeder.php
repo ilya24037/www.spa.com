@@ -2,113 +2,96 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use App\Models\MasterProfile;
 use App\Models\MassageCategory;
+use App\Models\MasterProfile;
 use App\Models\Service;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class MasterSeeder extends Seeder
 {
-    public function run(): void
+    public function run()
     {
-        // Создаем категории массажа
-        $categories = [
-            ['name' => 'Классический массаж', 'slug' => 'classic', 'is_active' => true],
-            ['name' => 'Лечебный массаж', 'slug' => 'medical', 'is_active' => true],
-            ['name' => 'Расслабляющий массаж', 'slug' => 'relax', 'is_active' => true],
-            ['name' => 'Спортивный массаж', 'slug' => 'sport', 'is_active' => true],
-            ['name' => 'Антицеллюлитный массаж', 'slug' => 'anti-cellulite', 'is_active' => true],
-        ];
-
-        foreach ($categories as $category) {
-            MassageCategory::firstOrCreate(
-                ['slug' => $category['slug']],
-                $category
-            );
-        }
-
-        // Создаем тестовых мастеров
         $masters = [
             [
                 'name' => 'Анна Петрова',
-                'email' => 'anna@test.com',
-                'phone' => '+7 (999) 111-11-11',
-                'bio' => 'Профессиональный массажист с опытом работы более 10 лет. Специализируюсь на классическом и лечебном массаже.',
-                'experience_years' => 10,
+                'email' => 'anna@spa.test',
+                'phone' => '+7 (999) 123-45-67',
+                'bio' => 'Сертифицированный массажист с 8-летним опытом. Специализируюсь на классическом и лечебном массаже.',
+                'experience_years' => 8,
                 'district' => 'Центральный',
-                'metro_station' => 'Арбатская',
-                'price_from' => 2000,
+                'metro_station' => 'Чистые пруды',
+                'price_from' => 2500,
                 'rating' => 4.8,
                 'reviews_count' => 127,
                 'is_verified' => true,
                 'is_premium' => true,
                 'avatar' => 'https://i.pravatar.cc/300?img=1',
                 'certificates' => ['cert1.jpg', 'cert2.jpg'],
-                'latitude' => 55.7522,
-                'longitude' => 37.6156,
+                'latitude' => 55.7659,
+                'longitude' => 37.6444,
             ],
             [
                 'name' => 'Михаил Иванов',
-                'email' => 'mikhail@test.com',
-                'phone' => '+7 (999) 222-22-22',
-                'bio' => 'Специалист по лечебному и спортивному массажу. Работаю с профессиональными спортсменами.',
-                'experience_years' => 7,
+                'email' => 'mikhail@spa.test',
+                'phone' => '+7 (999) 234-56-78',
+                'bio' => 'Мастер спортивного и восстановительного массажа. Работаю с профессиональными спортсменами.',
+                'experience_years' => 10,
                 'district' => 'Северный',
-                'metro_station' => 'Сокольники',
-                'price_from' => 2500,
+                'metro_station' => 'Водный стадион',
+                'price_from' => 3000,
                 'rating' => 4.9,
                 'reviews_count' => 89,
                 'is_verified' => true,
                 'is_premium' => false,
-                'avatar' => 'https://i.pravatar.cc/300?img=2',
-                'certificates' => ['cert3.jpg'],
-                'latitude' => 55.7894,
-                'longitude' => 37.6791,
+                'avatar' => 'https://i.pravatar.cc/300?img=3',
+                'certificates' => ['cert3.jpg', 'cert4.jpg', 'cert5.jpg'],
+                'latitude' => 55.8396,
+                'longitude' => 37.4878,
             ],
             [
                 'name' => 'Елена Сидорова',
-                'email' => 'elena@test.com',
-                'phone' => '+7 (999) 333-33-33',
-                'bio' => 'Мастер расслабляющего и антицеллюлитного массажа. Использую натуральные масла и современные техники.',
+                'email' => 'elena@spa.test',
+                'phone' => '+7 (999) 345-67-89',
+                'bio' => 'Специалист по тайскому и релакс-массажу. Обучалась в Таиланде.',
                 'experience_years' => 5,
                 'district' => 'Южный',
-                'metro_station' => 'Павелецкая',
-                'price_from' => 1800,
+                'metro_station' => 'Автозаводская',
+                'price_from' => 2000,
                 'rating' => 4.7,
-                'reviews_count' => 65,
-                'is_verified' => false,
-                'is_premium' => false,
-                'avatar' => 'https://i.pravatar.cc/300?img=3',
-                'certificates' => [],
-                'latitude' => 55.7303,
-                'longitude' => 37.6388,
-            ],
-            [
-                'name' => 'Дмитрий Козлов',
-                'email' => 'dmitry@test.com',
-                'phone' => '+7 (999) 444-44-44',
-                'bio' => 'Профессиональный массажист, специализация - классический и спортивный массаж. Выезжаю на дом.',
-                'experience_years' => 8,
-                'district' => 'Западный',
-                'metro_station' => 'Кутузовская',
-                'price_from' => 3000,
-                'rating' => 5.0,
                 'reviews_count' => 156,
                 'is_verified' => true,
                 'is_premium' => true,
-                'avatar' => 'https://i.pravatar.cc/300?img=4',
-                'certificates' => ['cert4.jpg', 'cert5.jpg', 'cert6.jpg'],
-                'latitude' => 55.7407,
-                'longitude' => 37.5568,
+                'avatar' => 'https://i.pravatar.cc/300?img=5',
+                'certificates' => ['cert6.jpg'],
+                'latitude' => 55.7082,
+                'longitude' => 37.6574,
+            ],
+            [
+                'name' => 'Дмитрий Козлов',
+                'email' => 'dmitry@spa.test',
+                'phone' => '+7 (999) 456-78-90',
+                'bio' => 'Профессиональный массажист-реабилитолог. Помогаю восстановиться после травм.',
+                'experience_years' => 15,
+                'district' => 'Западный',
+                'metro_station' => 'Кунцевская',
+                'price_from' => 3500,
+                'rating' => 4.95,
+                'reviews_count' => 234,
+                'is_verified' => true,
+                'is_premium' => true,
+                'avatar' => 'https://i.pravatar.cc/300?img=8',
+                'certificates' => ['cert7.jpg', 'cert8.jpg', 'cert9.jpg', 'cert10.jpg'],
+                'latitude' => 55.7307,
+                'longitude' => 37.4461,
             ],
             [
                 'name' => 'Ольга Николаева',
-                'email' => 'olga@test.com',
-                'phone' => '+7 (999) 555-55-55',
-                'bio' => 'Сертифицированный специалист по всем видам массажа. Индивидуальный подход к каждому клиенту.',
+                'email' => 'olga@spa.test',
+                'phone' => '+7 (999) 567-89-01',
+                'bio' => 'Мастер антицеллюлитного и лимфодренажного массажа. Индивидуальный подход к каждому клиенту.',
                 'experience_years' => 12,
                 'district' => 'Восточный',
                 'metro_station' => 'Партизанская',
@@ -117,41 +100,33 @@ class MasterSeeder extends Seeder
                 'reviews_count' => 203,
                 'is_verified' => true,
                 'is_premium' => false,
-                'avatar' => 'https://i.pravatar.cc/300?img=5',
-                'certificates' => ['cert7.jpg', 'cert8.jpg'],
+                'avatar' => 'https://i.pravatar.cc/300?img=9',
+                'certificates' => ['cert11.jpg', 'cert12.jpg'],
                 'latitude' => 55.7944,
                 'longitude' => 37.7495,
             ],
         ];
 
         foreach ($masters as $masterData) {
-            // Проверяем, существует ли пользователь
-            $user = User::where('email', $masterData['email'])->first();
-            
-            if (!$user) {
-                // Создаем нового пользователя
-                $user = User::create([
+            // Создаем или находим пользователя
+            $user = User::firstOrCreate(
+                ['email' => $masterData['email']],
+                [
                     'name' => $masterData['name'],
-                    'email' => $masterData['email'],
                     'password' => Hash::make('password'),
                     'role' => 'master',
                     'email_verified_at' => now(),
-                ]);
-                
-                $this->command->info("✅ Создан пользователь: {$masterData['name']}");
-            } else {
-                $this->command->info("⚠️ Пользователь уже существует: {$masterData['name']}");
-            }
+                ]
+            );
+            
+            $this->command->info("✅ Обработан пользователь: {$masterData['name']}");
 
-            // Проверяем, есть ли у пользователя профиль мастера
-            if (!$user->masterProfile) {
-                // Создаем профиль мастера
-                $slug = Str::slug($masterData['name']) . '-' . Str::random(6);
-                
-                $masterProfile = MasterProfile::create([
-                    'user_id' => $user->id,
+            // Создаем или обновляем профиль мастера
+            $masterProfile = MasterProfile::updateOrCreate(
+                ['user_id' => $user->id],
+                [
                     'display_name' => $masterData['name'],
-                    'slug' => $slug,
+                    'slug' => Str::slug($masterData['name']) . '-' . Str::random(6),
                     'phone' => $masterData['phone'],
                     'bio' => $masterData['bio'],
                     'avatar' => $masterData['avatar'],
@@ -176,34 +151,45 @@ class MasterSeeder extends Seeder
                     'show_contacts' => true,
                     'whatsapp' => $masterData['phone'],
                     'telegram' => '@' . Str::slug($masterData['name']),
-                ]);
+                ]
+            );
 
-                // Создаем услуги для мастера
-                $categories = MassageCategory::inRandomOrder()->take(3)->get();
-                
-                foreach ($categories as $index => $category) {
-                    Service::create([
-                        'master_profile_id' => $masterProfile->id,
-                        'massage_category_id' => $category->id,
-                        'name' => $category->name,
-                        'description' => 'Профессиональный ' . strtolower($category->name) . ' с использованием современных техник и натуральных масел.',
-                        'price' => $masterData['price_from'] + ($index * 500),
-                        'duration' => rand(2, 4) * 30, // 60, 90 или 120 минут
-                        'status' => 'active',
-                        'is_active' => true,
-                        'for_men' => true,
-                        'for_women' => true,
-                        'for_children' => rand(0, 1) ? true : false,
-                        'for_pregnant' => false,
-                    ]);
-                }
+            $this->command->info("✅ Профиль мастера готов: {$masterData['name']}");
 
-                $this->command->info("✅ Создан профиль мастера: {$masterData['name']}");
-            } else {
-                $this->command->info("⚠️ Профиль мастера уже существует: {$masterData['name']}");
-            }
+            // Удаляем старые услуги мастера
+            Service::where('master_profile_id', $masterProfile->id)->delete();
+
+            // Создаем новые услуги для мастера
+$categories = MassageCategory::inRandomOrder()->take(3)->get();
+
+foreach ($categories as $index => $category) {
+    $serviceName = $category->name;
+    $slug = Str::slug($serviceName . ' ' . $masterData['name']) . '-' . Str::random(6);
+    
+    Service::create([
+        'master_profile_id' => $masterProfile->id,
+        'massage_category_id' => $category->id,
+        'name' => $serviceName,
+        'slug' => $slug,
+        'description' => 'Профессиональный ' . mb_strtolower($category->name) . ' с использованием современных техник и натуральных масел.',
+        'price' => $masterData['price_from'] + ($index * 500),
+        'price_home' => $masterData['price_from'] + ($index * 500) + 500, // +500р за выезд
+        'duration_minutes' => rand(2, 4) * 30, // 60, 90 или 120 минут
+        'status' => 'active',
+        'is_featured' => $index === 0, // Первая услуга - рекомендуемая
+        'is_new' => true,
+        'bookings_count' => rand(10, 100),
+        'rating' => rand(45, 50) / 10, // От 4.5 до 5.0
+        'views_count' => rand(100, 1000),
+        'instant_booking' => true,
+        'advance_booking_hours' => 2,
+        'cancellation_hours' => 24,
+    ]);
+}
+
+            $this->command->info("✅ Создано 3 услуги для мастера: {$masterData['name']}");
         }
 
-        $this->command->info('✅ Все тестовые мастера обработаны!');
+        $this->command->info('✅ Все тестовые мастера и их услуги созданы!');
     }
 }
