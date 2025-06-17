@@ -1,34 +1,39 @@
 <template>
-   
-<!-- Серый фон на всю страницу -->
+  <!-- Серый фон на всю страницу -->
   <div class="min-h-screen bg-gray-100">
     
-<!-- Контейнер с фиксированной шириной для всего сайта -->
+    <!-- Контейнер с фиксированной шириной для всего сайта -->
     <div class="max-w-[1400px] mx-auto min-h-screen">
       
+      <!-- НОВОЕ: Единая обертка с отступами для ВСЕГО контента -->
+      <div class="site-padding">
+        
+        <!-- Шапка с компенсацией отступов -->
+
+        <header class="sticky top-0 z-50 negative-margin">
+          <div class="site-padding">
+            
+<ErrorBoundary 
+              error-title="Навигация временно недоступна"
+              :show-reload="false"
+            >
+              <Navbar />
+            </ErrorBoundary>
+          </div>
+        </header>
+        
+        <!-- Основной контент уже имеет отступы от обертки -->
+        <main class="flex-1 py-6 lg:py-8">
+          <slot />
+        </main>
+        
+      </div>
       
-<!-- Шапка внутри контейнера -->
-      <header class="sticky top-0 z-50 bg-white shadow-sm">
-        <ErrorBoundary 
-          error-title="Навигация временно недоступна"
-          :show-reload="false"
-        >
-          <Navbar />
-        </ErrorBoundary>
-      </header>
-      
-      
-<!-- Основной контент -->
-      <main class="flex-1">
-        <slot />
-      </main>
-      
-      <!-- Футер -->
+      <!-- Футер может быть без отступов или с отступами -->
       <Footer />
     </div>
     
-    
-<!-- Глобальные уведомления (вне контейнера) -->
+    <!-- Глобальные уведомления (вне контейнера) -->
     <ToastNotifications />
   </div>
 </template>
@@ -51,3 +56,23 @@ provide('canRegister', page.props.canRegister)
 // Provide для sticky top (высота шапки)
 provide('stickyTop', 112) // высота двухуровневой шапки
 </script>
+
+<style scoped>
+/* Единые отступы для всего сайта */
+.site-padding {
+  @apply px-4 lg:px-6;
+}
+
+/* Компенсация отступов для элементов на всю ширину */
+.negative-margin {
+  margin-left: -1rem;
+  margin-right: -1rem;
+}
+
+@media (min-width: 1024px) {
+  .negative-margin {
+    margin-left: -1.5rem;
+    margin-right: -1.5rem;
+  }
+}
+</style>

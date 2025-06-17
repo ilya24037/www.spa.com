@@ -1,11 +1,12 @@
 ﻿<!-- resources/js/Pages/Home.vue -->
 <template>
   <AppLayout>
-    <!-- SEO title -->
+    
     <Head :title="`Массаж в ${currentCity} — найти мастера`" />
 
     <!-- Обертка с правильными отступами -->
-    <div class="px-4 lg:px-6 py-6 lg:py-8">
+
+    <div class=" py-6 lg:py-8">
       
       <!-- Хлебные крошки - отдельная белая плитка -->
       <div class="bg-white rounded-lg shadow-sm p-4 mb-4">

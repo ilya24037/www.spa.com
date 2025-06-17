@@ -1,13 +1,14 @@
 <!-- resources/js/Components/Header/Navbar.vue -->
 <template>
   <nav class="h-full bg-white shadow-md rounded-b-2xl overflow-hidden">
-    <!-- Десктопная версия -->
+    
+<!-- Десктопная версия -->
     <div class="hidden lg:block h-full">
       
       <div>
         <!-- Основная навигация -->
 
-        <div class="px-6 lg:px-8">
+        <div class="px-4 lg:px-6">
           <div class="flex items-center justify-between h-16">
             
 <!-- Левая часть -->
