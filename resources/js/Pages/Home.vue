@@ -9,15 +9,16 @@
     <div class=" py-6 lg:py-8">
       
       <!-- Хлебные крошки - отдельная белая плитка -->
-      <div class="bg-white rounded-lg shadow-sm p-4 mb-4">
+      
         <Breadcrumbs
-          :items="[
-            { title: 'Главная', href: '/' },
-            { title: 'Массажисты', href: '/masters' },
-            { title: currentCity }
-          ]"
-        />
-      </div>
+        :items="[
+          { title: 'Главная', href: '/' },
+          { title: 'Массажисты', href: '/masters' },
+          { title: currentCity }
+        ]"
+        class="mb-4"
+      />
+   
 
       <!-- Заголовок -->
       <div class="mb-6">

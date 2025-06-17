@@ -3,10 +3,12 @@
   <div class="min-h-screen bg-gray-100">
     
     <!-- Контейнер с фиксированной шириной для всего сайта -->
+
     <div class="max-w-[1400px] mx-auto min-h-screen">
       
       <!-- НОВОЕ: Единая обертка с отступами для ВСЕГО контента -->
-      <div class="site-padding">
+      
+<div class="site-padding">
         
         <!-- Шапка с компенсацией отступов -->
 
@@ -23,7 +25,8 @@
         </header>
         
         <!-- Основной контент уже имеет отступы от обертки -->
-        <main class="flex-1 py-6 lg:py-8">
+
+        <main class="flex-1">
           <slot />
         </main>
         

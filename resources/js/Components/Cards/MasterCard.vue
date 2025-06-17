@@ -1,7 +1,7 @@
 <!-- resources/js/Components/Cards/MasterCard.vue -->
 <template>
   <article 
-    class="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden cursor-pointer"
+    class="relative bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden cursor-pointer"
     @click="goToProfile"
   >
     <!-- Бейджи -->

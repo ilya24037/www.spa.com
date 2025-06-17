@@ -34,10 +34,10 @@
           </div>
         </div>
 
-        <!-- Вторая строка - обновляем стили -->
+        <!-- Вторая строка -->
 
-        <<div class="bg-gray-50 border-t border-gray-200">
-  <div class="px-6 lg:px-8">
+        <div class="bg-gray-50 border-t border-gray-200">
+          <div class="px-4 lg:px-6"> <!-- Теперь одинаковые отступы -->
             <div class="flex items-center justify-between h-12">
               <CitySelector 
                 :current-city="currentCity" 
