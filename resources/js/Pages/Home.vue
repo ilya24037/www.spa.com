@@ -1,109 +1,92 @@
 ﻿<!-- resources/js/Pages/Home.vue -->
 <template>
   <div>
-    <Head :title="`Массаж в ${currentCity} - найти мастера`" />
-    
-    <!-- Хлебные крошки -->
-    <Breadcrumbs :items="[
-      { title: 'Главная', href: '/' },
-      { title: 'Мастера массажа', href: '/masters' },
-      { title: currentCity }
-    ]" />
-    
-    <!-- Заголовок и количество -->
-    <div class="mb-4">
-      <h1 class="text-2xl font-bold">
-        Мастера массажа в {{ currentCity }}
-        <span class="text-gray-500 text-lg ml-2">({{ masters.total || 0 }})</span>
-      </h1>
-    </div>
-    
-    <!-- Быстрые фильтры -->
-    <QuickTagsRow class="mb-6" />
-    
-    <!-- Основной контент -->
-    
-<div class="flex gap-6">
-      
-<!-- FiltersSidebar -->
-      
-<SidebarWrapper :sticky-top="110">
-  <Filters :filters="filters" :categories="categories" />
-</SidebarWrapper>
+    <!-- SEO‑title -->
+    <Head :title="`Массаж в ${currentCity} — найти мастера`" />
 
-          <Filters 
-            :filters="filters" 
-            :categories="categories" 
-          />
-        </div>
-      </aside>
-      
+    <!-- Хлебные крошки -->
+    <Breadcrumbs
+      :items="[
+        { title: 'Главная', href: '/' },
+        { title: 'Массажисты', href: '/masters' },
+        { title: currentCity }
+      ]"
+      class="mb-4"
+    />
+
+    <!-- КНОПКА ФИЛЬТРОВ (мобилка) -->
+    <button
+      class="lg:hidden fixed bottom-6 right-6 z-40 bg-blue-600 text-white p-4 rounded-full shadow-lg"
+      @click="showFilters = true"
+    >
+      Фильтры
+    </button>
+
+    <!-- Основная раскладка -->
+    <div class="flex gap-6">
+      <!-- Боковая панель фильтров -->
+      <FiltersSidebar
+        v-model:show-mobile="showFilters"
+        @reset="resetFilters"
+      >
+        <PriceFilter      v-model="filters.price" />
+        <ServiceFilter    v-model="filters.service" />
+        <LocationFilter   v-model="filters.city" />
+      </FiltersSidebar>
+
       <!-- Контент -->
-      
-<section class="flex-1">
-        <!-- Сортировка -->
-        <div class="flex justify-between items-center mb-4">
-          <span class="text-sm text-gray-600">
-            Найдено {{ masters.data?.length || 0 }} мастеров
-          </span>
-          
-          <select 
-            v-model="sortBy"
-            @change="applySort"
-            class="px-3 py-2 border rounded-lg text-sm"
-          >
-            <option value="popular">Популярные</option>
-            <option value="price_asc">Сначала дешевле</option>
-            <option value="price_desc">Сначала дороже</option>
-            <option value="rating">По рейтингу</option>
-            <option value="distance">По расстоянию</option>
-          </select>
-        </div>
-        
-        <!-- Карта -->
-        <div class="rounded-lg shadow-sm mb-6 h-[300px] bg-white overflow-hidden">
-          <SimpleMap 
-            :cards="masters.data"
-            :center="{ lat: 55.7558, lng: 37.6173 }"
-          />
-        </div>
-        
-        <!-- ProductGrid для карточек -->
-        <div class="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-          <Card 
-            v-for="master in masters.data"
-            :key="master.id"
-            :card="master"
-          />
-        </div>
-      </section>
+      <main class="flex-1 space-y-6">
+        <!-- Карта с мастерами (центр — Пермь) -->
+        <SimpleMap
+          :cards="masters.data"
+          :center="{ lat: 58.0105, lng: 56.2502 }"
+        />
+
+        <!-- Сетка карточек мастеров -->
+        <CardGrid :items="masters.data" />
+      </main>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import { Head, router } from '@inertiajs/vue3'
-import Breadcrumbs from '@/Components/Common/Breadcrumbs.vue'
-import QuickTagsRow from '@/Components/Filters/QuickTagsRow.vue'
-import Card from '@/Components/Cards/Card.vue'
-import SimpleMap from '@/Components/Map/SimpleMap.vue'
-import Filters from '@/Components/Filters/Filters.vue'
+import { Head } from '@inertiajs/vue3'
 
+/* ───── UI-компоненты ───── */
+import Breadcrumbs     from '@/Components/UI/Breadcrumbs.vue'
+import FiltersSidebar  from '@/Components/Filters/FiltersSidebar.vue'
+import PriceFilter     from '@/Components/Filters/PriceFilter.vue'
+import ServiceFilter   from '@/Components/Filters/ServiceFilter.vue'
+import LocationFilter  from '@/Components/Filters/LocationFilter.vue'
+import SimpleMap       from '@/Components/Maps/SimpleMap.vue'
+import CardGrid        from '@/Components/Cards/CardGrid.vue'
+
+/* ───── Пропсы от Inertia ───── */
 const props = defineProps({
-  masters: Object,
-  filters: Object,
-  categories: Array,
-  currentCity: String
+  masters:      Object,
+  currentCity:  String,
 })
 
-const sortBy = ref('popular')
+/* ───── Локальное состояние ───── */
+const showFilters = ref(false)
+const filters = ref({
+  price:   [null, null],
+  service: null,
+  city:    null,
+})
 
-const applySort = () => {
-  router.reload({
-    data: { sort: sortBy.value },
-    preserveState: true,
-    preserveScroll: true
-  })
+function resetFilters () {
+  filters.value = { price: [null, null], service: null, city: null }
 }
 </script>
+
+<style scoped>
+/* кастомная анимация drawer (подключено в SidebarWrapper.vue) */
+.drawer-enter-active,
+.drawer-leave-active { transition: transform .3s ease; }
+.drawer-enter-from   { transform: translateX(100%); }
+.drawer-enter-to     { transform: translateX(0); }
+.drawer-leave-from   { transform: translateX(0); }
+.drawer-leave-to     { transform: translateX(100%); }
+</style>
