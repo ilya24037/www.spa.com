@@ -22,10 +22,15 @@
     <QuickTagsRow class="mb-6" />
     
     <!-- Основной контент -->
-    <div class="flex gap-6">
-      <!-- FiltersSidebar -->
-      <aside class="w-64 shrink-0 hidden lg:block">
-        <div class="bg-white rounded-lg p-4 shadow-sm sticky" style="top: 110px;">
+    
+<div class="flex gap-6">
+      
+<!-- FiltersSidebar -->
+      
+<SidebarWrapper :sticky-top="110">
+  <Filters :filters="filters" :categories="categories" />
+</SidebarWrapper>
+
           <Filters 
             :filters="filters" 
             :categories="categories" 
@@ -34,7 +39,8 @@
       </aside>
       
       <!-- Контент -->
-      <section class="flex-1">
+      
+<section class="flex-1">
         <!-- Сортировка -->
         <div class="flex justify-between items-center mb-4">
           <span class="text-sm text-gray-600">
