@@ -1,9 +1,10 @@
 <!-- resources/js/Components/Header/Navbar.vue -->
 <template>
-  <nav>
+  <nav class="h-full bg-white shadow-md rounded-b-2xl overflow-hidden">
     <!-- Десктопная версия -->
-    <div class="hidden lg:block">
-      <div class="bg-white border-b border-gray-200">
+    <div class="hidden lg:block h-full">
+      <!-- Убираем лишний bg-white и border-b -->
+      <div>
         <!-- Основная навигация -->
         <div class="container mx-auto px-4">
           <div class="flex items-center justify-between h-16">
@@ -29,7 +30,7 @@
           </div>
         </div>
 
-        <!-- Вторая строка -->
+        <!-- Вторая строка - обновляем стили -->
         <div class="bg-gray-50 border-t border-gray-100">
           <div class="container mx-auto px-4">
             <div class="flex items-center justify-between h-12">
