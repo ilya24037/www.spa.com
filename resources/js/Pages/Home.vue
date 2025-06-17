@@ -4,27 +4,25 @@
     <!-- SEO title -->
     <Head :title="`Массаж в ${currentCity} — найти мастера`" />
 
-    <!-- Основной контейнер -->
-    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
-      <!-- Хлебные крошки -->
-      <Breadcrumbs
-        :items="[
-          { title: 'Главная', href: '/' },
-          { title: 'Массажисты', href: '/masters' },
-          { title: currentCity }
-        ]"
-        class="mb-4"
-      />
+    <!-- Хлебные крошки -->
+    <Breadcrumbs
+      :items="[
+        { title: 'Главная', href: '/' },
+        { title: 'Массажисты', href: '/masters' },
+        { title: currentCity }
+      ]"
+      class="mb-4"
+    />
 
-      <!-- Заголовок страницы -->
-      <div class="mb-6">
-        <h1 class="text-2xl lg:text-3xl font-bold text-gray-900">
-          Массажисты в {{ currentCity }}
-        </h1>
-        <p class="text-gray-600 mt-1">
-          Найдено: <span class="font-semibold">{{ filteredCount }}</span> мастеров
-        </p>
-      </div>
+    <!-- Заголовок страницы -->
+    <div class="mb-6">
+      <h1 class="text-2xl lg:text-3xl font-bold text-gray-900">
+        Массажисты в {{ currentCity }}
+      </h1>
+      <p class="text-gray-600 mt-1">
+        Найдено: <span class="font-semibold">{{ filteredCount }}</span> мастеров
+      </p>
+    </div>
 
       <!-- Быстрые теги -->
       <QuickTagsRow class="mb-6" />
@@ -123,7 +121,6 @@
           </div>
         </div>
       </div>
-    </div>
 
     <!-- Мобильная кнопка фильтров -->
     <button
@@ -142,7 +139,7 @@
       :categories="categories"
       @close="showFilters = false"
       @update="updateFilters"
-    />
+/>
   </div>
 </template>
 
