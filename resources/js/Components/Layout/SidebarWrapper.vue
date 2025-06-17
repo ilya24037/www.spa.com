@@ -2,114 +2,316 @@
   <!-- Mobile: drawer via Teleport -->
   <Teleport to="body" v-if="isMobile">
     <Transition name="drawer">
-      <div v-if="showMobile" class="fixed inset-0 z-50 flex">
-        <!-- overlay -->
-        <div class="flex-1 bg-black/50" @click="closeMobile" />
+      <div v-if="modelValue" class="fixed inset-0 z-50 flex">
+        <!-- Overlay с анимацией -->
+        <div 
+          class="flex-1 bg-black/50 backdrop-blur-sm" 
+          @click="handleClose"
+          :class="{ 'pointer-events-none': isAnimating }"
+        />
 
-        <!-- sliding panel -->
+        <!-- Sliding panel -->
         <aside
-          class="w-72 bg-white h-full shadow-lg overflow-y-auto p-6 flex-shrink-0"
+          ref="drawerRef"
+          role="navigation"
+          :aria-label="ariaLabel"
+          :aria-hidden="!modelValue"
+          class="relative w-72 bg-white h-full shadow-2xl overflow-hidden flex-shrink-0"
+          :style="{ transform: `translateX(${dragOffset}px)` }"
           @touchstart="onTouchStart"
           @touchmove="onTouchMove"
+          @touchend="onTouchEnd"
         >
-          <slot />
+          <!-- Индикатор свайпа -->
+          <div 
+            v-if="showSwipeHint" 
+            class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-16 bg-gray-400/50 rounded-r-full"
+          />
+          
+          <!-- Заголовок (опционально) -->
+          <div v-if="$slots.header" class="sticky top-0 bg-white border-b border-gray-200 z-10">
+            <div class="p-4 flex items-center justify-between">
+              <slot name="header" />
+              <button
+                @click="handleClose"
+                class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                :aria-label="closeAriaLabel"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Контент с кастомным скроллом -->
+          <div 
+            ref="contentRef"
+            class="h-full overflow-y-auto overscroll-contain"
+            :class="[
+              contentClass,
+              { 'pb-20': hasBottomNav }
+            ]"
+            @scroll="onContentScroll"
+          >
+            <div class="p-6">
+              <slot />
+            </div>
+          </div>
+          
+          <!-- Футер (опционально) -->
+          <div v-if="$slots.footer" class="sticky bottom-0 bg-white border-t border-gray-200">
+            <div class="p-4">
+              <slot name="footer" />
+            </div>
+          </div>
         </aside>
       </div>
     </Transition>
   </Teleport>
 
   <!-- Desktop / Tablet ≥1024px -->
-  <aside v-else class="w-64 shrink-0 hidden lg:block">
+  <aside 
+    v-else 
+    :class="[
+      'shrink-0 hidden lg:block transition-all duration-300',
+      desktopWidth,
+      { 'lg:hidden': forceHideDesktop }
+    ]"
+  >
     <div
-      class="bg-white rounded-lg shadow-sm sticky overflow-y-auto p-4"
-      :style="`top: ${effectiveTop}px`"
+      ref="stickyRef"
+      class="bg-white rounded-lg shadow-sm sticky overflow-hidden transition-all duration-300"
+      :style="{ 
+        top: `${effectiveTop}px`,
+        maxHeight: `calc(100vh - ${effectiveTop + 20}px)`
+      }"
+      :class="[
+        desktopClass,
+        { 'ring-2 ring-primary-500': isHighlighted }
+      ]"
     >
-      <slot />
+      <!-- Desktop заголовок -->
+      <div v-if="$slots.header && showDesktopHeader" class="border-b border-gray-200">
+        <div class="p-4">
+          <slot name="header" />
+        </div>
+      </div>
+      
+      <!-- Desktop контент -->
+      <div 
+        class="overflow-y-auto overscroll-contain"
+        :class="contentClass"
+      >
+        <div class="p-4">
+          <slot />
+        </div>
+      </div>
+      
+      <!-- Desktop футер -->
+      <div v-if="$slots.footer && showDesktopFooter" class="border-t border-gray-200 mt-auto">
+        <div class="p-4">
+          <slot name="footer" />
+        </div>
+      </div>
     </div>
   </aside>
 </template>
 
-<script>
-import { ref, onMounted, onBeforeUnmount, watch, inject, defineProps, defineEmits } from 'vue'
+<script setup>
+import { ref, computed, onMounted, onBeforeUnmount, watch, inject, nextTick } from 'vue'
+import { useSwipeGesture } from '@/Composables/useSwipeGesture'
+import { useMediaQuery } from '@/Composables/useMediaQuery'
+import { useLockScroll } from '@/Composables/useLockScroll'
 
+// Props
 const props = defineProps({
-  /** Индивидуальный отступ от верха (если нужно переопределить inject) */
+  /** v-model для контроля видимости на мобильных */
+  modelValue: {
+    type: Boolean,
+    default: false,
+  },
+  /** Индивидуальный отступ от верха */
   stickyTop: {
     type: Number,
     default: undefined,
   },
-  /** Показ выдвижной панели на мобильных */
-  showMobile: {
+  /** Ширина на десктопе */
+  desktopWidth: {
+    type: String,
+    default: 'w-64',
+  },
+  /** Дополнительные классы для контента */
+  contentClass: {
+    type: String,
+    default: '',
+  },
+  /** Дополнительные классы для десктопа */
+  desktopClass: {
+    type: String,
+    default: '',
+  },
+  /** Показывать подсказку свайпа */
+  showSwipeHint: {
+    type: Boolean,
+    default: true,
+  },
+  /** Есть ли нижняя навигация (для отступа) */
+  hasBottomNav: {
     type: Boolean,
     default: false,
   },
-})
-
-const emit = defineEmits<{
-  (e: 'update:showMobile', value: boolean): void
-  (e: 'close'): void
-}>()
-
-// ────────── SSR‑safe реактивный детектор ширины ──────────
-const isMobile = ref(false)
-
-function updateIsMobile() {
-  isMobile.value = window.innerWidth < 1024
-}
-
-onMounted(() => {
-  updateIsMobile()
-  window.addEventListener('resize', updateIsMobile)
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', updateIsMobile)
-})
-
-// ─────────── Sticky отступ (через provide/inject) ───────────
-const injectedTop = inject<number>('stickyTop', 0)
-const effectiveTop = props.stickyTop ?? injectedTop
-
-// ─────────── Scroll‑lock для body при открытой панели ───────────
-watch(
-  () => props.showMobile,
-  (open) => {
-    if (isMobile.value) {
-      document.body.classList.toggle('overflow-hidden', open)
-    }
+  /** Принудительно скрыть на десктопе */
+  forceHideDesktop: {
+    type: Boolean,
+    default: false,
   },
-  { immediate: true }
-)
+  /** Показывать заголовок на десктопе */
+  showDesktopHeader: {
+    type: Boolean,
+    default: false,
+  },
+  /** Показывать футер на десктопе */
+  showDesktopFooter: {
+    type: Boolean,
+    default: false,
+  },
+  /** Подсветить сайдбар */
+  isHighlighted: {
+    type: Boolean,
+    default: false,
+  },
+  /** Aria-label для сайдбара */
+  ariaLabel: {
+    type: String,
+    default: 'Боковая панель',
+  },
+  /** Aria-label для кнопки закрытия */
+  closeAriaLabel: {
+    type: String,
+    default: 'Закрыть панель',
+  },
+})
 
-function closeMobile() {
-  emit('update:showMobile', false)
+// Emits
+const emit = defineEmits(['update:modelValue', 'close', 'open', 'swipe', 'scroll'])
+
+// Refs
+const drawerRef = ref(null)
+const contentRef = ref(null)
+const stickyRef = ref(null)
+
+// Composables
+const isMobile = useMediaQuery('(max-width: 1023px)')
+const { lockScroll, unlockScroll } = useLockScroll()
+
+// Swipe gesture
+const { dragOffset, isAnimating, onTouchStart, onTouchMove, onTouchEnd } = useSwipeGesture({
+  threshold: 50,
+  onSwipeLeft: () => {
+    handleClose()
+    emit('swipe', 'left')
+  },
+})
+
+// Sticky offset
+const injectedTop = inject('stickyTop', 80)
+const effectiveTop = computed(() => props.stickyTop ?? injectedTop)
+
+// Методы
+function handleClose() {
+  emit('update:modelValue', false)
   emit('close')
 }
 
-// ─────────── Swipe‑закрытие на touch устройствах ───────────
-let startX: number | null = null
-function onTouchStart(e: TouchEvent) {
-  startX = e.touches[0].clientX
+function handleOpen() {
+  emit('update:modelValue', true)
+  emit('open')
 }
-function onTouchMove(e: TouchEvent) {
-  if (startX === null) return
-  const diff = e.touches[0].clientX - startX
-  // если тянем влево > 80px – закрываем
-  if (diff < -80) {
-    startX = null
-    closeMobile()
+
+// Scroll tracking
+let lastScrollTop = 0
+function onContentScroll(e) {
+  const scrollTop = e.target.scrollTop
+  const scrollDirection = scrollTop > lastScrollTop ? 'down' : 'up'
+  lastScrollTop = scrollTop
+  
+  emit('scroll', {
+    scrollTop,
+    scrollDirection,
+    isAtTop: scrollTop === 0,
+    isAtBottom: scrollTop + e.target.clientHeight >= e.target.scrollHeight - 1
+  })
+}
+
+// Lock body scroll when mobile drawer is open
+watch(
+  () => props.modelValue && isMobile.value,
+  async (shouldLock) => {
+    await nextTick()
+    if (shouldLock) {
+      lockScroll()
+    } else {
+      unlockScroll()
+    }
   }
-}
+)
+
+// Cleanup
+onBeforeUnmount(() => {
+  unlockScroll()
+})
+
+// Expose methods
+defineExpose({
+  open: handleOpen,
+  close: handleClose,
+  scrollToTop: () => {
+    if (contentRef.value) {
+      contentRef.value.scrollTop = 0
+    }
+  }
+})
 </script>
 
 <style scoped>
-/* простая анимация выезда */
+/* Анимация drawer */
 .drawer-enter-active,
 .drawer-leave-active {
-  transition: transform 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.drawer-enter-from,
-.drawer-leave-to {
+
+.drawer-enter-from .bg-black\/50,
+.drawer-leave-to .bg-black\/50 {
+  opacity: 0;
+}
+
+.drawer-enter-from aside,
+.drawer-leave-to aside {
   transform: translateX(-100%);
+}
+
+/* Кастомный скроллбар */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Предотвращение прокрутки body на iOS */
+.overscroll-contain {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 </style>
