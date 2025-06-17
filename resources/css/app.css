@@ -1,31 +1,55 @@
-/* resources/css/app.css */
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
 @layer base {
+  /* Серый фон для всей страницы как на Ozon */
+  html {
+    @apply bg-gray-100;
+  }
+  
   body {
-    @apply bg-gray-50;
+    @apply bg-gray-100;
     margin: 0;
     padding: 0;
   }
 }
 
-@layer components {
-  /* Контейнер с ограничением ширины как на Ozon/Avito */
-  .container {
-    width: 100%;
-    margin-left: auto;
-    margin-right: auto;
+@layer utilities {
+  /* Тень для основного контейнера */
+  .shadow-xl {
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.08);
   }
+}
 
-  /* Фиксированные максимальные ширины */
-  .max-w-7xl {
-    max-width: 1280px;
+/* Адаптивность */
+@media (max-width: 1440px) {
+  .max-w-\[1400px\] {
+    max-width: 100%;
   }
+}
 
-  /* Убираем лишние отступы у шапки */
-  header {
-    width: 100%;
+/* Убираем тень на мобильных */
+@media (max-width: 768px) {
+  .shadow-xl {
+    box-shadow: none;
   }
+}
+
+/* Кастомный скроллбар */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400;
 }

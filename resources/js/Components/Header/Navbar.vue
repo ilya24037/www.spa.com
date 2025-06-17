@@ -3,12 +3,14 @@
   <nav class="h-full bg-white shadow-md rounded-b-2xl overflow-hidden">
     <!-- Десктопная версия -->
     <div class="hidden lg:block h-full">
-      <!-- Убираем лишний bg-white и border-b -->
+      
       <div>
         <!-- Основная навигация -->
-        <div class="container mx-auto px-4">
+
+        <div class="px-6 lg:px-8">
           <div class="flex items-center justify-between h-16">
-            <!-- Левая часть -->
+            
+<!-- Левая часть -->
             <div class="flex items-center flex-1">
               <Logo />
               <div class="ml-8 flex-1 max-w-3xl">
@@ -17,7 +19,8 @@
             </div>
 
             <!-- Правая часть -->
-            <div class="flex items-center ml-8 gap-4">
+            
+<div class="flex items-center ml-8 gap-4">
               <FavoritesButton />
               <CompareButton />
               <Link 
@@ -31,8 +34,9 @@
         </div>
 
         <!-- Вторая строка - обновляем стили -->
-        <div class="bg-gray-50 border-t border-gray-100">
-          <div class="container mx-auto px-4">
+
+        <<div class="bg-gray-50 border-t border-gray-200">
+  <div class="px-6 lg:px-8">
             <div class="flex items-center justify-between h-12">
               <CitySelector 
                 :current-city="currentCity" 

@@ -1,10 +1,14 @@
-<!-- resources/js/Layouts/AppLayout.vue -->
 <template>
-  <div class="min-h-screen bg-gray-100 flex flex-col">
+   
+<!-- Серый фон на всю страницу -->
+  <div class="min-h-screen bg-gray-100">
+    
+<!-- Контейнер с фиксированной шириной для всего сайта -->
     <div class="max-w-[1400px] mx-auto min-h-screen">
       
-      <!-- Шапка -->
-      <header class="sticky top-0 z-50 h-28">
+      
+<!-- Шапка внутри контейнера -->
+      <header class="sticky top-0 z-50 bg-white shadow-sm">
         <ErrorBoundary 
           error-title="Навигация временно недоступна"
           :show-reload="false"
@@ -13,8 +17,9 @@
         </ErrorBoundary>
       </header>
       
-      <!-- Основной контент - УПРОЩЁННЫЙ ПОДХОД -->
-      <main class="pt-6 px-4 lg:pt-8 lg:px-6 flex-1">
+      
+<!-- Основной контент -->
+      <main class="flex-1">
         <slot />
       </main>
       
@@ -22,7 +27,8 @@
       <Footer />
     </div>
     
-    <!-- Глобальные уведомления -->
+    
+<!-- Глобальные уведомления (вне контейнера) -->
     <ToastNotifications />
   </div>
 </template>
@@ -41,4 +47,7 @@ const page = usePage()
 provide('auth', page.props.auth)
 provide('canLogin', page.props.canLogin)
 provide('canRegister', page.props.canRegister)
+
+// Provide для sticky top (высота шапки)
+provide('stickyTop', 112) // высота двухуровневой шапки
 </script>
