@@ -1,68 +1,62 @@
+<!-- resources/js/Components/Filters/FiltersSidebar.vue -->
 <template>
-  <!-- Общая боковая обёртка -->
-  <SidebarWrapper :sticky-top="110" :show-mobile="showMobile">
-    <!-- Заголовок и кнопка сброса -->
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="font-semibold text-lg">Фильтры</h3>
-      <button
-        v-if="hasActiveFilters"
-        @click="$emit('reset')"
-        class="text-sm text-blue-600 hover:underline"
-      >
-        Сбросить
-      </button>
+  <aside 
+    class="w-60 flex-shrink-0"
+    :class="{ 'lg:block': true, 'hidden': !showMobile }"
+  >
+    <div class="bg-white rounded-lg shadow-sm overflow-hidden sticky top-20">
+      <!-- Заголовок с кнопкой сброса -->
+      <div class="flex items-center justify-between p-4 border-b">
+        <h3 class="font-semibold text-gray-900">Фильтры</h3>
+        <button
+          v-if="hasActiveFilters"
+          @click="$emit('reset')"
+          class="text-sm text-blue-600 hover:text-blue-700 transition-colors"
+        >
+          Сбросить все
+        </button>
+      </div>
+
+      <!-- Счетчик результатов -->
+      <div class="mx-4 mt-4 p-3 bg-blue-50 rounded-lg">
+        <p class="text-sm text-blue-900">
+          Найдено <span class="font-semibold">{{ resultsCount }}</span> мастеров
+        </p>
+      </div>
+
+      <!-- Контент фильтров -->
+      <div class="p-4 space-y-6 max-h-[calc(100vh-240px)] overflow-y-auto">
+        <slot />
+      </div>
+
+      <!-- Применить (для мобильной версии) -->
+      <div class="p-4 border-t lg:hidden">
+        <button
+          @click="$emit('apply')"
+          class="w-full h-12 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
+        >
+          Показать {{ resultsCount }} предложений
+        </button>
+      </div>
     </div>
-
-    <!-- Содержимое снаружи компонента -->
-    <slot />
-
-    <!-- Кнопка «Показать N объявлений» (mobile‑only) -->
-    <button
-      v-if="isMobile"
-      @click="$emit('apply')"
-      class="mt-6 w-full h-11 rounded-lg bg-blue-600 text-white font-medium"
-    >
-      Показать {{ resultsCount }} объявлений
-    </button>
-  </SidebarWrapper>
+  </aside>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
-import SidebarWrapper from '@/Components/Layout/SidebarWrapper.vue'
-
-/* ---------- props ---------- */
-const props = defineProps({
-  /** Кол‑во объявлений после фильтрации */
+defineProps({
   resultsCount: {
     type: Number,
-    required: true,
+    required: true
   },
-  /** Есть ли активные фильтры */
   hasActiveFilters: {
     type: Boolean,
-    default: false,
+    default: false
   },
-  /** Показ drawer на мобилке (контролируется родителем) */
   showMobile: {
     type: Boolean,
-    default: false,
-  },
+    default: false
+  }
 })
 
-/* ---------- helpers ---------- */
-const isMobile = ref(false)
-
-const onResize = () => {
-  isMobile.value = window.innerWidth < 1024
-}
-
-onMounted(() => {
-  onResize()
-  window.addEventListener('resize', onResize)
-})
+defineEmits(['reset', 'apply'])
 </script>
-
-<style scoped>
-/* Анимация draw‑in/draw‑out уже описана в SidebarWrapper → reuse */
-</style>

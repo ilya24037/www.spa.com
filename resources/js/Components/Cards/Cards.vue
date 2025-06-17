@@ -1,38 +1,57 @@
+<!-- resources/js/Components/Cards/Cards.vue -->
 <template>
   <div>
-    <!-- Сетка карточек -->
+    <!-- Режим сетки -->
     <div 
-  v-if="cards?.length > 0" 
-  class="grid gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
->
-      <Card
+      v-if="viewMode === 'grid'"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+    >
+      <MasterCard
         v-for="card in cards"
         :key="card.id"
-        :card="card"
+        :master="card"
+      />
+    </div>
+
+    <!-- Режим списка -->
+    <div 
+      v-else
+      class="space-y-4"
+    >
+      <MasterCardList
+        v-for="card in cards"
+        :key="card.id"
+        :master="card"
       />
     </div>
 
     <!-- Пустое состояние -->
     <div 
-      v-else 
-      class="bg-white rounded-lg shadow-sm p-12 text-center"
+      v-if="cards.length === 0"
+      class="text-center py-12"
     >
       <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
-      <h3 class="text-lg font-medium text-gray-900 mb-2">Ничего не найдено</h3>
-      <p class="text-gray-500">Попробуйте изменить параметры поиска</p>
+      <p class="text-gray-500">Мастера не найдены</p>
+      <p class="text-sm text-gray-400 mt-2">Попробуйте изменить параметры поиска</p>
     </div>
   </div>
 </template>
 
 <script setup>
-import Card from './Card.vue'
+import MasterCard from './MasterCard.vue'
+import MasterCardList from './MasterCardList.vue'
 
 defineProps({
   cards: {
     type: Array,
     default: () => []
+  },
+  viewMode: {
+    type: String,
+    default: 'grid',
+    validator: (value) => ['grid', 'list'].includes(value)
   }
 })
 </script>

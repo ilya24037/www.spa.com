@@ -1,68 +1,68 @@
-<!-- resources/js/Components/Filters/QuickTagsRow.vue -->
+<!-- resources/js/Components/Filters/ServiceFilter.vue (fixed) -->
 <template>
-  <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-    <button
-      v-for="tag in quickTags"
-      :key="tag.id"
-      @click="toggleTag(tag)"
-      :class="[
-        'rounded-xl px-3 py-1 whitespace-nowrap transition-colors text-sm',
-        isActive(tag.id) 
-          ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' 
-          : 'bg-gray-100 hover:bg-gray-200'
-      ]"
-    >
-      <span v-if="tag.icon" class="mr-1">{{ tag.icon }}</span>
-      {{ tag.label }}
-    </button>
+  <div>
+    <h4 class="text-sm font-medium mb-2">Услуга</h4>
+
+    <!-- Поиск по списку -->
+    <input
+      v-model="search"
+      type="text"
+      placeholder="Найти услугу…"
+      class="mb-2 w-full border rounded px-2 py-1 text-sm"
+    />
+
+    <!-- Список чекбоксов -->
+    <div class="max-h-60 overflow-y-auto pr-1 space-y-1">
+      <label
+        v-for="opt in filteredOptions"
+        :key="opt.value"
+        class="flex items-center gap-2 text-sm"
+      >
+        <input
+          type="checkbox"
+          :value="opt.value"
+          v-model="localSelected"
+          class="shrink-0 rounded border-gray-300 focus:ring-blue-500"
+        />
+        <span>{{ opt.label }}</span>
+      </label>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { router } from '@inertiajs/vue3'
+import { ref, computed, watch } from 'vue'
 
-const quickTags = [
-  { id: 'near', label: 'Рядом со мной', icon: '🚶' },
-  { id: 'today', label: 'Свободен сегодня', icon: '✅' },
-  { id: 'home', label: 'Выезд на дом', icon: '🏠' },
-  { id: 'verified', label: 'Проверенные', icon: '✓' },
-  { id: 'premium', label: 'Премиум', icon: '⭐' },
-  { id: 'new', label: 'Новые мастера', icon: '🆕' }
-]
+/* ─── props & emits ─── */
+const emit = defineEmits(['update:modelValue'])
+const props = defineProps({
+  /** Выбранные услуги */
+  modelValue: { type: Array, default: () => [] },
+  /** Массив { value, label } всех доступных услуг */
+  options:    { type: Array, default: () => [] },
+})
 
-const activeTags = ref([])
+/* ─── локальное состояние ─── */
+const search        = ref('')
+// всегда массив, даже если сверху пришёл null/undefined
+const localSelected = ref(Array.isArray(props.modelValue) ? [...props.modelValue] : [])
 
-const isActive = (tagId) => {
-  return activeTags.value.includes(tagId)
-}
+/* синхронизация вниз → вверх */
+watch(localSelected, v => emit('update:modelValue', v))
+/* и наоборот (если родитель сбросил фильтр) */
+watch(
+  () => props.modelValue,
+  v => {
+    if (Array.isArray(v)) localSelected.value = [...v]
+    else localSelected.value = []
+  },
+)
 
-const toggleTag = (tag) => {
-  const index = activeTags.value.indexOf(tag.id)
-  
-  if (index > -1) {
-    activeTags.value.splice(index, 1)
-  } else {
-    activeTags.value.push(tag.id)
-  }
-  
-  // Применяем фильтры
-  router.reload({
-    data: { 
-      quick_filters: activeTags.value 
-    },
-    preserveState: true,
-    preserveScroll: true
-  })
-}
+/* ─── поиск по списку ─── */
+const filteredOptions = computed(() => {
+  const q = search.value.trim().toLowerCase()
+  return q
+    ? props.options.filter(o => o.label.toLowerCase().includes(q))
+    : props.options
+})
 </script>
-
-<style scoped>
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-</style>
