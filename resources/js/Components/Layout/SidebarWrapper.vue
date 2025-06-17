@@ -29,7 +29,7 @@
   </aside>
 </template>
 
-<script setup lang="ts">
+<script>
 import { ref, onMounted, onBeforeUnmount, watch, inject, defineProps, defineEmits } from 'vue'
 
 const props = defineProps({

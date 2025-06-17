@@ -23,7 +23,7 @@
 
 <script setup>
 import { Head, Link } from '@inertiajs/vue3'
-import MasterCard from '@/Components/Masters/MasterCard.vue'
+import MasterCard from '@/Components/Cards/MasterCard.vue'
 
 defineProps({
     favorites: {

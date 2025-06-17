@@ -4,6 +4,8 @@
     <!-- SEO title -->
     <Head :title="`Массаж в ${currentCity} — найти мастера`" />
 
+    <!-- БЕЗ ЛИШНИХ ОБЁРТОК - СРАЗУ КОНТЕНТ -->
+    
     <!-- Хлебные крошки -->
     <Breadcrumbs
       :items="[
@@ -14,7 +16,8 @@
       class="mb-4"
     />
 
-    <!-- Заголовок страницы -->
+    <!-- Заголовок -->
+
     <div class="mb-6">
       <h1 class="text-2xl lg:text-3xl font-bold text-gray-900">
         Массажисты в {{ currentCity }}
@@ -24,122 +27,42 @@
       </p>
     </div>
 
-      <!-- Быстрые теги -->
-      <QuickTagsRow class="mb-6" />
+    <!-- Быстрые теги -->
 
-      <!-- Основной контент с фильтрами -->
-      <div class="flex gap-6">
-        <!-- Фильтры слева (используем ваш FiltersSidebar + Filters) -->
-        <aside class="w-60 flex-shrink-0 hidden lg:block">
-          <FiltersSidebar
-            :results-count="filteredCount"
-            :has-active-filters="hasActiveFilters"
-            @reset="resetFilters"
-          >
-            <Filters 
-              :filters="filters"
-              :categories="categories"
-              @update="updateFilters"
-            />
-          </FiltersSidebar>
-        </aside>
+    <QuickTagsRow class="mb-6" />
 
-        <!-- Правая часть с картой и карточками -->
-        <div class="flex-1 min-w-0">
-          <!-- Карта -->
-          <div class="mb-6">
-            <div class="h-[400px] rounded-lg overflow-hidden shadow-sm">
-              <SimpleMap
-                :cards="filteredMasters"
-                :center="{ lat: 58.0105, lng: 56.2502 }"
-              />
-            </div>
-          </div>
+    <!-- Основной контент - КАК В АРХИВЕ -->
 
-          <!-- Панель инструментов -->
-          <div class="flex items-center justify-between mb-4">
-            <!-- Переключатель вида -->
-            <div class="flex items-center gap-2">
-              <button
-                @click="viewMode = 'grid'"
-                :class="[
-                  'p-2 rounded-lg transition-colors',
-                  viewMode === 'grid' 
-                    ? 'bg-blue-100 text-blue-600' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                ]"
-              >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                </svg>
-              </button>
-              <button
-                @click="viewMode = 'list'"
-                :class="[
-                  'p-2 rounded-lg transition-colors',
-                  viewMode === 'list' 
-                    ? 'bg-blue-100 text-blue-600' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                ]"
-              >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-            </div>
+    <div class="flex gap-6">
+      
+<!-- Фильтры слева -->
+      <SidebarWrapper 
+        :show-mobile="showFilters"
+        @update:show-mobile="showFilters = $event"
+      >
+        <Filters 
+          :filters="filters"
+          :categories="categories"
+          @update="updateFilters"
+        />
+      </SidebarWrapper>
 
-            <!-- Сортировка -->
-            <select
-              v-model="sortBy"
-              @change="applySort"
-              class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="popular">Популярные</option>
-              <option value="price_asc">Сначала дешевле</option>
-              <option value="price_desc">Сначала дороже</option>
-              <option value="rating">По рейтингу</option>
-              <option value="distance">По расстоянию</option>
-            </select>
-          </div>
-
-          <!-- Карточки (grid) -->
-          <Cards 
-            v-if="viewMode === 'grid'"
-            :cards="sortedMasters"
-          />
-
-          <!-- Карточки (list) - используем MasterCardList -->
-          <div 
-            v-else
-            class="space-y-4"
-          >
-            <MasterCardList 
-              v-for="master in sortedMasters"
-              :key="master.id"
-              :card="master"
-            />
-          </div>
+      <!-- Контент справа -->
+      <section class="flex-1 space-y-6">
+        <!-- Карта -->
+        <div class="h-[400px] rounded-lg overflow-hidden shadow-sm bg-white">
+          <SimpleMap :cards="filteredMasters" />
         </div>
-      </div>
 
-    <!-- Мобильная кнопка фильтров -->
-    <button
-      class="lg:hidden fixed bottom-6 right-6 z-40 bg-blue-600 text-white p-4 rounded-full shadow-lg"
-      @click="showFilters = true"
-    >
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-      </svg>
+        <!-- Карточки -->
+        <Cards :cards="sortedMasters" />
+      </section>
+    </div>
+
+    <!-- Мобильная кнопка внизу -->
+    <button class="lg:hidden fixed bottom-6 right-6 z-40">
+      <!-- ... -->
     </button>
-
-    <!-- Мобильные фильтры -->
-    <MobileFilters
-      :show="showFilters"
-      :filters="filters"
-      :categories="categories"
-      @close="showFilters = false"
-      @update="updateFilters"
-/>
   </div>
 </template>
 
@@ -149,13 +72,13 @@ import { Head } from '@inertiajs/vue3'
 
 // Импорты ТОЛЬКО существующих компонентов
 import Breadcrumbs from '@/Components/Common/Breadcrumbs.vue'
-import FiltersSidebar from '@/Components/Filters/FiltersSidebar.vue'
+import SidebarWrapper from '@/Components/Layout/SidebarWrapper.vue'
 import Filters from '@/Components/Filters/Filters.vue'
 import QuickTagsRow from '@/Components/Filters/QuickTagsRow.vue'
 import Cards from '@/Components/Cards/Cards.vue'
 import MasterCardList from '@/Components/Cards/MasterCardList.vue' 
 import SimpleMap from '@/Components/Map/SimpleMap.vue'
-import MobileFilters from '@/Components/Common/MobileFilters.vue'
+
 
 // Props из Inertia
 const props = defineProps({
