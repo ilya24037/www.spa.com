@@ -29,13 +29,9 @@
         <main class="flex-1">
           <slot />
         </main>
-        
+        </div>
       </div>
-      
-      <!-- Футер может быть без отступов или с отступами -->
-      <Footer />
-    </div>
-    
+         
     <!-- Глобальные уведомления (вне контейнера) -->
     <ToastNotifications />
   </div>
@@ -45,7 +41,6 @@
 import { provide } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 import Navbar from '@/Components/Header/Navbar.vue'
-import Footer from '@/Components/Footer/Footer.vue'
 import ErrorBoundary from '@/Components/Common/ErrorBoundary.vue'
 import ToastNotifications from '@/Components/Common/ToastNotifications.vue'
 

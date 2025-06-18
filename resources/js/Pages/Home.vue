@@ -179,7 +179,6 @@ import { Head } from '@inertiajs/vue3'
 import Breadcrumbs from '@/Components/Common/Breadcrumbs.vue'
 import SidebarWrapper from '@/Components/Layout/SidebarWrapper.vue'
 import Filters from '@/Components/Filters/Filters.vue'
-import QuickTagsRow from '@/Components/Filters/QuickTagsRow.vue'
 import Cards from '@/Components/Cards/Cards.vue'
 import SimpleMap from '@/Components/Map/SimpleMap.vue'
 
