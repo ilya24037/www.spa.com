@@ -1,6 +1,6 @@
 <!-- resources/js/Components/Header/Navbar.vue -->
 <template>
-  <nav class="h-full bg-white shadow-md rounded-b-2xl">
+  <nav class="h-full bg-white shadow-md rounded-b-2xl overflow-hidden">
     <!-- Десктопная версия -->
     <div class="hidden lg:block h-full">
       <div>
