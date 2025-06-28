@@ -32,7 +32,8 @@
                 <!-- Меню пользователя -->
                 <UserMenu 
                   :show-wallet="true"
-                  :show-profile-switcher="true"
+                  :show-profile-switcher="false"
+                  :show-online-status="true"
                 />
               </template>
               
@@ -123,7 +124,7 @@ import QuickLinks from './QuickLinks.vue'
 import CatalogDropdown from './CatalogDropdown.vue'
 import CityModal from './CityModal.vue'
 import MobileMenu from './MobileMenu.vue'
-import UserMenu from './UserMenu.vue' // Новый компонент
+import UserMenu from './UserMenu.vue'
 
 // Данные страницы
 const page = usePage()

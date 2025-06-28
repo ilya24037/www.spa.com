@@ -18,16 +18,27 @@
           </button>
         </div>
 
-        <!-- Меню бургер -->
-        <button 
-          @click="showMenu = !showMenu"
-          class="p-2 rounded-lg hover:bg-gray-100"
-        >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path v-if="!showMenu" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-            <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
+        <!-- Правая часть: UserMenu или кнопка меню -->
+        <div class="flex items-center gap-2">
+          <!-- Если авторизован - показываем UserMenu -->
+          <UserMenu 
+            v-if="isAuthenticated"
+            :show-wallet="true"
+            :show-profile-switcher="false"
+            :show-online-status="false"
+          />
+          
+          <!-- Меню бургер -->
+          <button 
+            @click="showMenu = !showMenu"
+            class="p-2 rounded-lg hover:bg-gray-100"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path v-if="!showMenu" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+              <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <!-- Поиск -->
@@ -73,47 +84,42 @@
     >
       <div v-if="showMenu" class="absolute top-full left-0 right-0 bg-white shadow-lg z-50">
         <div class="p-4 space-y-4">
-          <!-- Разместить объявление -->
-          <Link 
-            href="/masters/create"
-            class="block w-full bg-blue-600 text-white text-center py-3 rounded-lg font-medium"
-          >
-            Разместить объявление
-          </Link>
+          <!-- Для авторизованных -->
+          <template v-if="isAuthenticated">
+            <!-- Разместить объявление -->
+            <Link 
+              href="/masters/create"
+              class="block w-full bg-blue-600 text-white text-center py-3 rounded-lg font-medium"
+            >
+              Разместить объявление
+            </Link>
+          </template>
+          
+          <!-- Для неавторизованных -->
+          <template v-else>
+            <Link 
+              href="/login"
+              class="block w-full bg-blue-600 text-white text-center py-3 rounded-lg font-medium"
+            >
+              Войти
+            </Link>
+            <Link 
+              href="/register"
+              class="block w-full border border-blue-600 text-blue-600 text-center py-3 rounded-lg font-medium"
+            >
+              Регистрация
+            </Link>
+          </template>
 
-          <!-- Навигация -->
+          <!-- Общая навигация -->
           <nav class="space-y-2">
             <Link href="/favorites" class="flex items-center justify-between py-2">
               <span>Избранное</span>
-              <span v-if="favoritesCount > 0" class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                {{ favoritesCount }}
-              </span>
             </Link>
             <Link href="/compare" class="flex items-center justify-between py-2">
-              <span>Сравнить</span>
-              <span v-if="compareCount > 0" class="text-red-500 text-sm font-bold">
-                {{ compareCount }}
-              </span>
+              <span>Сравнение</span>
             </Link>
           </nav>
-
-          <!-- Категории -->
-          <div class="border-t pt-4">
-            <h4 class="font-semibold mb-2">Услуги</h4>
-            <nav class="space-y-2 text-sm">
-              <Link href="/services/massage" class="block py-1 text-gray-600">Массаж</Link>
-              <Link href="/services/spa" class="block py-1 text-gray-600">СПА</Link>
-              <Link href="/services/cosmetology" class="block py-1 text-gray-600">Косметология</Link>
-              <Link href="/services/at-home" class="block py-1 text-gray-600">На дому</Link>
-            </nav>
-          </div>
-
-          <!-- Авторизация -->
-          <div v-if="!user" class="border-t pt-4">
-            <Link href="/login" class="block text-center text-blue-600 font-medium">
-              Войти или зарегистрироваться
-            </Link>
-          </div>
         </div>
       </div>
     </Transition>
@@ -121,29 +127,35 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { Link, usePage } from '@inertiajs/vue3'
-import { router } from '@inertiajs/vue3'
+import { ref } from 'vue'
+import { Link } from '@inertiajs/vue3'
 import Logo from './Logo.vue'
+import UserMenu from './UserMenu.vue'
 
-const props = defineProps({
-  currentCity: String
+// Props
+defineProps({
+  currentCity: {
+    type: String,
+    required: true
+  },
+  isAuthenticated: {
+    type: Boolean,
+    default: false
+  }
 })
 
-const emit = defineEmits(['toggle-catalog', 'open-city-modal'])
+// Emits
+defineEmits(['toggle-catalog', 'open-city-modal'])
 
-const page = usePage()
+// Состояние
 const showMenu = ref(false)
 const searchQuery = ref('')
 
-const user = computed(() => page.props.auth?.user)
-const favoritesCount = computed(() => page.props.favoritesCount || 0)
-const compareCount = computed(() => page.props.compareCount || 0)
-
+// Методы
 const search = () => {
   if (searchQuery.value.trim()) {
-    router.get('/search', { q: searchQuery.value })
-    showMenu.value = false
+    // Переход на страницу поиска
+    window.location.href = `/search?q=${encodeURIComponent(searchQuery.value)}`
   }
 }
 </script>
