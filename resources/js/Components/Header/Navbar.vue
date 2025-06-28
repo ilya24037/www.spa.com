@@ -30,11 +30,15 @@
                 </Link>
                 
                 <!-- Меню пользователя -->
-                <UserMenu 
-                  :show-wallet="true"
-                  :show-profile-switcher="false"
-                  :show-online-status="true"
-                />
+              
+<UserMenu 
+  :show-wallet="true"
+  :show-profile-switcher="false"
+  :show-online-status="true"
+/>
+
+
+
               </template>
               
               <!-- Для неавторизованных -->

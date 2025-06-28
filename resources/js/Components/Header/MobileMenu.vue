@@ -21,12 +21,17 @@
         <!-- Правая часть: UserMenu или кнопка меню -->
         <div class="flex items-center gap-2">
           <!-- Если авторизован - показываем UserMenu -->
-          <UserMenu 
-            v-if="isAuthenticated"
-            :show-wallet="true"
-            :show-profile-switcher="false"
-            :show-online-status="false"
-          />
+          <!-- Временно отключено UserMenu -->
+
+<UserMenu 
+  v-if="isAuthenticated"
+  :show-wallet="true"
+  :show-profile-switcher="false"
+  :show-online-status="false"
+/>
+
+
+
           
           <!-- Меню бургер -->
           <button 
