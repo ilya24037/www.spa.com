@@ -1,6 +1,6 @@
 ﻿<!-- resources/js/Pages/Home.vue -->
 <template>
-
+  <AppLayout>
     
     <Head :title="`Массаж в ${currentCity} — найти мастера`" />
 
@@ -168,6 +168,7 @@
       </button>
       
     </div>
+  </AppLayout>
 </template>
 
 <script setup>
