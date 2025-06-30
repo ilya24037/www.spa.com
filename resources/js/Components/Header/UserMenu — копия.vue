@@ -20,7 +20,7 @@
     </button>
 
     <!-- ================= Popover ================= -->
-    <teleport to="body">
+    <teleport to="#overlay-root">
       <Transition
         enter-active-class="transition ease-out duration-100"
         enter-from-class="transform opacity-0 scale-95"
@@ -127,29 +127,8 @@ watch(isOpen, async (open) => {
   if (open && btn.value) {
     await nextTick()
     cleanup = autoUpdate(btn.value, menu.value, () => {
-      computePosition(btn.value, menu.value, { 
-        strategy: 'fixed', 
-        placement: 'bottom', // Изменено с 'bottom-end' на 'bottom'
-        middleware: [
-          offset(8),
-          flip(),
-          shift({ 
-            padding: 8,
-            crossAxis: true // Добавлено для корректировки по горизонтали
-          })
-        ] 
-      })
-        .then(({x, y}) => {
-          // Корректируем позицию X, чтобы правый край меню был выровнен с правым краем кнопки
-          const btnWidth = btn.value.offsetWidth
-          const menuWidth = 288 // 72 * 4 (w-72 = 18rem = 288px)
-          const adjustedX = x + btnWidth - menuWidth
-          
-          menuStyles.value = { 
-            left: `${adjustedX}px`, 
-            top: `${y}px` 
-          }
-        })
+      computePosition(btn.value, menu.value, { strategy:'fixed', placement:'bottom-end', middleware:[offset(8), flip(), shift({ padding:8 })] })
+        .then(({x,y}) => { menuStyles.value = { left:`${x}px`, top:`${y}px` } })
     })
   } else { cleanup() }
 })
