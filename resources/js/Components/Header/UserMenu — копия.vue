@@ -1,31 +1,49 @@
 <!-- resources/js/Components/Header/UserMenu.vue -->
 <template>
-  <div class="relative">
-    <!-- Кнопка профиля -->
-    <button
+  <!-- Обёртка для hover-области -->
+  <div 
+    class="relative"
+    @mouseenter="handleMouseEnter"
+    @mouseleave="handleMouseLeave"
+  >
+    <!-- Кликабельная ссылка на Dashboard -->
+    <Link
       ref="buttonRef"
-      @click="toggleMenu"
-      class="flex items-center gap-2 p-1 rounded-lg hover:bg-gray-100 transition-colors group"
+      href="/dashboard"
+      class="flex items-center gap-2 p-1 rounded-lg transition-colors hover:bg-gray-100 group"
     >
       <div class="relative">
-        <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-medium text-lg" 
-             :style="{ backgroundColor: avatarColor }">
+        <div
+          class="w-10 h-10 rounded-full flex items-center justify-center text-white font-medium text-lg"
+          :style="{ backgroundColor: avatarColor }"
+        >
           {{ avatarLetter }}
         </div>
       </div>
       <span class="hidden lg:block text-sm font-medium text-gray-700 group-hover:text-gray-900">
         {{ userName }}
       </span>
-      <svg class="w-4 h-4 text-gray-500 transition-transform duration-200" 
-           :class="{ 'rotate-180': isOpen }" 
-           viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+      <svg
+        class="w-4 h-4 text-gray-500 transition-transform duration-200"
+        :class="{ 'rotate-180': isOpen }"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
       </svg>
-    </button>
+    </Link>
 
-    <!-- Портал для меню (как на Ozon, Avito) -->
+    <!-- Невидимый "мост" между кнопкой и меню -->
+    <div 
+      v-if="isOpen"
+      class="absolute top-full left-0 right-0 h-2"
+      style="z-index: 9999"
+    />
+
+    <!-- Выпадающее меню -->
     <Teleport to="body">
-      <!-- Оверлей для закрытия по клику -->
+      <!-- Оверлей для закрытия при клике вне меню -->
       <div 
         v-if="isOpen" 
         @click="closeMenu" 
@@ -33,7 +51,7 @@
         style="z-index: 9998"
       />
       
-      <!-- Выпадающее меню -->
+      <!-- Меню -->
       <Transition
         enter-active-class="transition ease-out duration-100"
         enter-from-class="transform opacity-0 scale-95"
@@ -42,27 +60,36 @@
         leave-from-class="transform opacity-100 scale-100"
         leave-to-class="transform opacity-0 scale-95"
       >
-        <div 
-          v-if="isOpen" 
+        <div
+          v-if="isOpen"
           ref="menuRef"
           :style="menuStyles"
+          @mouseenter="handleMouseEnter"
+          @mouseleave="handleMouseLeave"
           class="fixed w-72 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden"
           style="z-index: 9999"
         >
-          <!-- Шапка профиля (как на Авито) -->
+          <!-- Шапка профиля -->
           <div class="p-4 border-b border-gray-100">
-            <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-xl" 
-                   :style="{ backgroundColor: avatarColor }">
+            <Link 
+              href="/dashboard"
+              class="flex items-center gap-3 hover:bg-gray-50 -m-2 p-2 rounded-lg transition-colors"
+              @click="closeMenu"
+            >
+              <div
+                class="w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-xl"
+                :style="{ backgroundColor: avatarColor }"
+              >
                 {{ avatarLetter }}
               </div>
               <div class="flex-1 min-w-0">
                 <p class="font-semibold text-gray-900 truncate">{{ userName }}</p>
                 <p v-if="userEmail" class="text-sm text-gray-500">{{ userEmail }}</p>
+                <p class="text-sm text-blue-600 hover:text-blue-700">Личный кабинет →</p>
               </div>
-            </div>
+            </Link>
             
-            <!-- Рейтинг (опционально, как на Авито) -->
+            <!-- Рейтинг (если есть) -->
             <div v-if="user.rating" class="mt-3 flex items-center gap-2">
               <span class="text-lg font-bold">{{ user.rating }}</span>
               <div class="flex">
@@ -72,26 +99,24 @@
             </div>
           </div>
 
-          <!-- Секции меню (как на больших сайтах) -->
-          <!-- Основные действия -->
+          <!-- Пункты меню -->
           <div class="py-2">
             <Link 
-              href="/profile" 
+              href="/masters/create" 
               class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
               @click="closeMenu"
             >
-              <span class="text-gray-400">📋</span>
-              <span class="flex-1">Мои объявления</span>
-              <span v-if="user.ads_count" class="text-sm text-gray-500">{{ user.ads_count }}</span>
+              <span class="text-gray-400">📝</span>
+              <span class="flex-1">Создать анкету мастера</span>
             </Link>
             
             <Link 
-              href="/orders" 
+              href="/bookings" 
               class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
               @click="closeMenu"
             >
-              <span class="text-gray-400">🛍️</span>
-              <span class="flex-1">Заказы</span>
+              <span class="text-gray-400">📅</span>
+              <span class="flex-1">Мои бронирования</span>
             </Link>
             
             <Link 
@@ -105,53 +130,21 @@
             </Link>
           </div>
 
-          <!-- Разделитель -->
-          <div class="border-t border-gray-100"></div>
-
-          <!-- Коммуникации -->
-          <div class="py-2">
-            <Link 
-              href="/profile/messenger" 
-              class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
-              @click="closeMenu"
-            >
-              <span class="text-gray-400">💬</span>
-              <span class="flex-1">Сообщения</span>
-              <span v-if="user.unread_messages" class="px-2 py-0.5 text-xs bg-red-500 text-white rounded-full">
-                {{ user.unread_messages }}
-              </span>
-            </Link>
-            
-            <Link 
-              href="/profile/notifications" 
-              class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
-              @click="closeMenu"
-            >
-              <span class="text-gray-400">🔔</span>
-              <span class="flex-1">Уведомления</span>
-              <span v-if="user.unread_notifications" class="text-sm text-gray-500">
-                {{ user.unread_notifications }}
-              </span>
-            </Link>
-          </div>
-
-          <!-- Разделитель -->
-          <div class="border-t border-gray-100"></div>
+          <div class="border-t border-gray-100" />
 
           <!-- Настройки -->
           <div class="py-2">
             <Link 
-              href="/profile/settings" 
+              href="/profile" 
               class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
               @click="closeMenu"
             >
               <span class="text-gray-400">⚙️</span>
-              <span class="flex-1">Настройки</span>
+              <span class="flex-1">Настройки профиля</span>
             </Link>
           </div>
 
-          <!-- Разделитель -->
-          <div class="border-t border-gray-100"></div>
+          <div class="border-t border-gray-100" />
 
           <!-- Выход -->
           <div class="py-2">
@@ -181,7 +174,7 @@ const page = usePage()
 const user = computed(() => page.props.auth?.user || {})
 const userName = computed(() => {
   const fullName = user.value.display_name || user.value.name || 'Пользователь'
-  return fullName.split(' ')[0] // Берём только первое слово (имя)
+  return fullName.split(' ')[0]
 })
 const userEmail = computed(() => user.value.email || '')
 
@@ -195,21 +188,46 @@ const isOpen = ref(false)
 const buttonRef = ref(null)
 const menuRef = ref(null)
 const menuStyles = ref({})
+let hoverTimeout = null
+let isHovering = ref(false)
 
-// Функция позиционирования (как на больших сайтах)
+// Обработка hover с задержкой
+const handleMouseEnter = () => {
+  isHovering.value = true
+  clearTimeout(hoverTimeout)
+  isOpen.value = true
+}
+
+const handleMouseLeave = () => {
+  isHovering.value = false
+  clearTimeout(hoverTimeout)
+  hoverTimeout = setTimeout(() => {
+    if (!isHovering.value) {
+      isOpen.value = false
+    }
+  }, 200) // Задержка 200мс перед закрытием
+}
+
+const closeMenu = () => {
+  isOpen.value = false
+  clearTimeout(hoverTimeout)
+}
+
+// Позиционирование меню
 const updatePosition = () => {
   if (!buttonRef.value || !menuRef.value) return
   
-  const button = buttonRef.value.getBoundingClientRect()
+  const button = buttonRef.value.$el || buttonRef.value
+  const rect = button.getBoundingClientRect()
   const menu = menuRef.value
-  const menuWidth = 288 // w-72 = 18rem = 288px
+  const menuWidth = 288 // w-72
   const menuHeight = menu.offsetHeight
   
-  // Вычисляем позицию
-  let top = button.bottom + 8
-  let left = button.left
+  // Позиционируем прямо под кнопкой без отступа
+  let top = rect.bottom + 2 // Минимальный отступ
+  let left = rect.left
   
-  // Проверка выхода за границы viewport
+  // Проверка границ viewport
   if (left < 8) {
     left = 8
   }
@@ -218,27 +236,16 @@ const updatePosition = () => {
     left = window.innerWidth - menuWidth - 8
   }
   
-  // Если не помещается снизу, показываем сверху
   if (top + menuHeight > window.innerHeight - 8) {
-    top = button.top - menuHeight - 8
+    top = rect.top - menuHeight - 2
   }
   
   menuStyles.value = {
     top: `${top}px`,
     left: `${left}px`,
-    // Добавляем transform для GPU ускорения (как на больших сайтах)
     transform: 'translate3d(0, 0, 0)',
     willChange: 'transform'
   }
-}
-
-// Переключение меню
-const toggleMenu = () => {
-  isOpen.value = !isOpen.value
-}
-
-const closeMenu = () => {
-  isOpen.value = false
 }
 
 // Обновление позиции при открытии
@@ -256,7 +263,7 @@ const handleEscape = (e) => {
   }
 }
 
-// Обновление позиции при скролле/ресайзе (как на больших сайтах)
+// Обновление позиции при скролле/ресайзе
 const handleScroll = () => {
   if (isOpen.value) {
     updatePosition()
@@ -271,6 +278,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  clearTimeout(hoverTimeout)
   document.removeEventListener('keydown', handleEscape)
   window.removeEventListener('scroll', handleScroll, true)
   window.removeEventListener('resize', handleScroll)
