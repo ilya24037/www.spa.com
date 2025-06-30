@@ -7,7 +7,6 @@ use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\CompareController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\SearchController;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -17,24 +16,18 @@ use Inertia\Inertia;
 |--------------------------------------------------------------------------
 */
 
-// Главная
 Route::get('/', [HomeController::class, 'index'])->name('home');
-
-// Поиск
 Route::get('/search', [SearchController::class, 'index'])->name('search');
 
-// Карточка мастера  (авито-стиль «slug-id», id обязательно число)
+/*  Карточка мастера  →   /masters/<slug>-<id>  */
 Route::get('/masters/{slug}-{master}', [MasterController::class, 'show'])
-     ->where([
-         'master' => '[0-9]+',   // id
-         'slug'   => '.*',       // всё, что до тире
-     ])
-     ->name('masters.show');
+    ->where(['master' => '[0-9]+', 'slug' => '.*'])
+    ->name('masters.show');
 
-// Сравнение (гость)
+/*  Сравнение (доступно без авторизации)  */
 Route::prefix('compare')->name('compare.')->group(function () {
-    Route::get('/',          [CompareController::class, 'index' ])->name('index');
-    Route::post('/add',      [CompareController::class, 'add'   ])->name('add');
+    Route::get('/', [CompareController::class, 'index'])->name('index');
+    Route::post('/add', [CompareController::class, 'add'])->name('add');
     Route::delete('/{master}', [CompareController::class, 'remove'])
         ->whereNumber('master')
         ->name('remove');
@@ -45,16 +38,15 @@ Route::prefix('compare')->name('compare.')->group(function () {
 | API-маршруты (AJAX)
 |--------------------------------------------------------------------------
 */
-
 Route::prefix('api')->group(function () {
-    // Публичные API
-    Route::get('/masters',          [MasterController::class, 'apiIndex']);
-    Route::get('/masters/{master}', [MasterController::class, 'apiShow'])
-        ->whereNumber('master');
-    Route::get('/search',           [SearchController::class, 'search']);
+
+    /* публичные */
+    Route::get('/masters', [MasterController::class, 'apiIndex']);
+    Route::get('/masters/{master}', [MasterController::class, 'apiShow'])->whereNumber('master');
+    Route::get('/search', [SearchController::class, 'search']);
     Route::get('/search/suggestions', [SearchController::class, 'suggestions']);
 
-    // Защищённые API
+    /* защищённые */
     Route::middleware('auth')->group(function () {
         Route::get('/user', fn () => auth()->user()->load('masterProfile'));
         Route::get('/favorites', [FavoriteController::class, 'apiIndex']);
@@ -65,51 +57,60 @@ Route::prefix('api')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Приватные маршруты (авторизация обязательна)
+| Приватные маршруты (только для авторизованных)
 |--------------------------------------------------------------------------
 */
-
 Route::middleware('auth')->group(function () {
 
-    // Дашборд
-    Route::get('/dashboard', fn () => Inertia::render('Dashboard'))
-         ->name('dashboard');
+    /*
+    |----------------------------------------------------------------------
+    | Личный кабинет   (как у Avito:  /profile  →  список объявлений)
+    |----------------------------------------------------------------------
+    */
+    Route::get('/profile', fn () => Inertia::render('Dashboard'))
+        ->name('profile.dashboard');
 
-    // Профиль пользователя
+    /*  alias /dashboard  → /profile (необязательный)  */
+    Route::redirect('/dashboard', '/profile');
+
+    /*
+    | Профиль пользователя (редактирование / пароль / удаление)
+    | Урлы:  /profile/edit, /profile   [PATCH|DELETE]
+    */
     Route::prefix('profile')->name('profile.')->group(function () {
-        Route::get('/',    [ProfileController::class, 'edit'  ])->name('edit');
-        Route::patch('/',  [ProfileController::class, 'update'])->name('update');
-        Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
+        Route::get('/edit',  [ProfileController::class, 'edit'])->name('edit');
+        Route::patch('/',    [ProfileController::class, 'update'])->name('update');
+        Route::delete('/',   [ProfileController::class, 'destroy'])->name('destroy');
     });
 
-    // ЛК мастера (CRUD)
+    /*
+    | ЛК мастера  (/masters/create, /masters/{id}/edit, …)
+    */
     Route::prefix('masters')->name('masters.')->group(function () {
-        // форма размещения объявления
-        Route::get('/create', [MasterController::class, 'create'])->name('create');
-        // сохранение
-        Route::post('/',       [MasterController::class, 'store' ])->name('store');
-        // редактирование
-        Route::get('/{master}/edit', [MasterController::class, 'edit'])
-             ->whereNumber('master')->name('edit');
-        Route::put('/{master}',      [MasterController::class, 'update'])
-             ->whereNumber('master')->name('update');
-        Route::delete('/{master}',   [MasterController::class, 'destroy'])
-             ->whereNumber('master')->name('destroy');
+        Route::get('/create',               [MasterController::class, 'create'])->name('create');
+        Route::post('/',                    [MasterController::class, 'store'])->name('store');
+        Route::get('/{master}/edit',        [MasterController::class, 'edit'])->whereNumber('master')->name('edit');
+        Route::put('/{master}',             [MasterController::class, 'update'])->whereNumber('master')->name('update');
+        Route::delete('/{master}',          [MasterController::class, 'destroy'])->whereNumber('master')->name('destroy');
     });
 
-    // Избранное
+    /*
+    | Избранное
+    */
     Route::prefix('favorites')->name('favorites.')->group(function () {
-        Route::get('/',        [FavoriteController::class, 'index' ])->name('index');
+        Route::get('/',        [FavoriteController::class, 'index'])->name('index');
         Route::post('/toggle', [FavoriteController::class, 'toggle'])->name('toggle');
     });
 
-    // Бронирования
+    /*
+    | Бронирования
+    */
     Route::prefix('bookings')->name('bookings.')->group(function () {
-        Route::get('/',              [BookingController::class, 'index' ])->name('index');
-        Route::get('/create',        [BookingController::class, 'create'])->name('create');
-        Route::post('/',             [BookingController::class, 'store' ])->name('store');
-        Route::get('/{booking}',     [BookingController::class, 'show' ])->name('show');
-        Route::post('/{booking}/cancel',   [BookingController::class, 'cancel' ])->name('cancel');
+        Route::get('/',                    [BookingController::class, 'index'])->name('index');
+        Route::get('/create',              [BookingController::class, 'create'])->name('create');
+        Route::post('/',                   [BookingController::class, 'store'])->name('store');
+        Route::get('/{booking}',           [BookingController::class, 'show'])->name('show');
+        Route::post('/{booking}/cancel',   [BookingController::class, 'cancel'])->name('cancel');
         Route::post('/{booking}/confirm',  [BookingController::class, 'confirm'])->name('confirm');
         Route::post('/{booking}/complete', [BookingController::class, 'complete'])->name('complete');
     });
@@ -117,8 +118,7 @@ Route::middleware('auth')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Маршруты аутентификации (Laravel Breeze / Jetstream и т.д.)
+| Аутентификация  (Laravel Breeze / Jetstream)
 |--------------------------------------------------------------------------
 */
-
 require __DIR__.'/auth.php';
