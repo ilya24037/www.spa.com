@@ -1,5 +1,4 @@
 <template>
-    <AppLayout>
         <Head title="Оформление бронирования" />
 
         <div class="container mx-auto px-4 py-8 max-w-4xl">
@@ -321,7 +320,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
-import AppLayout from '@/Layouts/AppLayout.vue'
 import { StarIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/solid'
 import { format, addDays, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameDay, isToday, isSameMonth } from 'date-fns'
 import { ru } from 'date-fns/locale'

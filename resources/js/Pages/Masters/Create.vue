@@ -126,7 +126,6 @@
 
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3'
-// УДАЛИТЕ импорт AppLayout - он не нужен!
 
 const form = useForm({
     name: '',

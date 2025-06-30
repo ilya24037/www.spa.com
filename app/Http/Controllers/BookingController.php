@@ -63,7 +63,7 @@ class BookingController extends Controller
                 ->with('error', 'Выбранная услуга не доступна у этого мастера');
         }
 
-        return Inertia::render('Bookings/Create', [
+        return Inertia::render('Bookings/NewBooking', [  // ← ИЗМЕНЕНО С 'Bookings/Create'
             'masterProfile' => $masterProfile,
             'service' => $service,
             'availableSlots' => $this->getAvailableSlots($masterProfile, $service)

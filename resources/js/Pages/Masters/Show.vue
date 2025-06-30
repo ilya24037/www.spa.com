@@ -1,5 +1,4 @@
 ﻿<template>
-    <AppLayout>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <!-- Шапка профиля -->
             <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
@@ -168,15 +167,13 @@
             :master="master"
             :service="selectedService"
             @close="showBookingModal = false"
-        />
-    </AppLayout>
+        /> 
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 import { HeartIcon, ShareIcon, MapPinIcon, BuildingOfficeIcon } from '@heroicons/vue/24/outline'
-import AppLayout from '@/Layouts/AppLayout.vue'
 import StarRating from '@/Components/Common/StarRating.vue'
 import ServiceCard from '@/Components/Cards/ServiceCard.vue'
 import ReviewsList from '@/Components/Reviews/ReviewsList.vue'
