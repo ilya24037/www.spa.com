@@ -126,11 +126,39 @@ const closeMenu  = () => { isOpen.value = false }
 watch(isOpen, async (open) => {
   if (open && btn.value) {
     await nextTick()
+    
     cleanup = autoUpdate(btn.value, menu.value, () => {
-      computePosition(btn.value, menu.value, { strategy:'fixed', placement:'bottom-end', middleware:[offset(8), flip(), shift({ padding:8 })] })
-        .then(({x,y}) => { menuStyles.value = { left:`${x}px`, top:`${y}px` } })
+      // Получаем позицию кнопки
+      const btnRect = btn.value.getBoundingClientRect()
+      
+      computePosition(btn.value, menu.value, { 
+        strategy: 'fixed',
+        placement: 'bottom-end',
+        middleware: [
+          offset(8),
+          flip(),
+          shift({ 
+            padding: 8,
+            crossAxis: false
+          })
+        ] 
+      })
+        .then(({x, y, placement}) => {
+          // Для правильного выравнивания по правому краю
+          const menuWidth = 288 // w-72 = 18rem = 288px
+          
+          // Вычисляем позицию так, чтобы правый край меню совпадал с правым краем кнопки
+          const rightEdgeX = btnRect.right - menuWidth
+          
+          menuStyles.value = { 
+            left: `${rightEdgeX}px`, 
+            top: `${y}px` 
+          }
+        })
     })
-  } else { cleanup() }
+  } else { 
+    cleanup() 
+  }
 })
 
 /* close on outside / esc */
