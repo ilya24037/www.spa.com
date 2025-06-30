@@ -1,6 +1,6 @@
 <!-- resources/js/Components/Header/Navbar.vue -->
 <template>
-  <nav class="h-full bg-white shadow-md rounded-b-2xl">
+  <nav class="h-full bg-white shadow-md rounded-b-2xl overflow-hidden relative">
     <!-- Десктопная версия -->
     <div class="hidden lg:block h-full">
       <div>
@@ -19,28 +19,25 @@
             <div class="flex items-center ml-8 gap-4">
               <FavoritesButton />
               <CompareButton />
-              
+
               <!-- Для авторизованных пользователей -->
               <template v-if="isAuthenticated">
+                <!-- Меню пользователя (аватар) -->
+                <UserMenu 
+                  :show-wallet="true"
+                  :show-profile-switcher="false"
+                  :show-online-status="true"
+                />
+
+                <!-- Кнопка разместить объявление -->
                 <Link 
                   href="/masters/create"
                   class="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition font-medium whitespace-nowrap"
                 >
                   Разместить объявление
                 </Link>
-                
-                <!-- Меню пользователя -->
-              
-<UserMenu 
-  :show-wallet="true"
-  :show-profile-switcher="false"
-  :show-online-status="true"
-/>
-
-
-
               </template>
-              
+
               <!-- Для неавторизованных -->
               <template v-else>
                 <Link 
