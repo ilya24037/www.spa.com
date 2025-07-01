@@ -54,7 +54,7 @@ class ProfileController extends Controller
         
         // Статистика пользователя
         $userStats = [
-            'rating' => $user->reviews()->avg('rating') ?: 0,
+            'rating' => $user->reviews()->avg('rating_overall') ?: 0,
             'reviewsCount' => $user->reviews()->count(),
             'balance' => $user->balance ?? 0,
         ];

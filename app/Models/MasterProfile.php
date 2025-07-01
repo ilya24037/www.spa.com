@@ -14,7 +14,7 @@ class MasterProfile extends Model
     use HasFactory;
 
     /**
-     * The attributes that are mass assignable.
+     * Атрибуты, пригодные для массового присвоения.
      */
     protected $fillable = [
         'user_id',
@@ -48,23 +48,24 @@ class MasterProfile extends Model
     ];
 
     /**
-     * The attributes that should be cast.
+     * Касты атрибутов.
      */
     protected $casts = [
-        'certificates' => 'array',
-        'education' => 'array',
-        'show_contacts' => 'boolean',
-        'home_service' => 'boolean',
-        'salon_service' => 'boolean',
-        'is_verified' => 'boolean',
-        'is_premium' => 'boolean',
-        'premium_until' => 'datetime',
-        'rating' => 'decimal:2',
+        'certificates'     => 'array',
+        'education'        => 'array',
+        'show_contacts'    => 'boolean',
+        'home_service'     => 'boolean',
+        'salon_service'    => 'boolean',
+        'is_verified'      => 'boolean',
+        'is_premium'       => 'boolean',
+        'premium_until'    => 'datetime',
+        'rating'           => 'decimal:2',
     ];
 
-    /**
-     * Boot the model.
-     */
+    /* --------------------------------------------------------------------- */
+    /*  Boot                                                                  */
+    /* --------------------------------------------------------------------- */
+
     protected static function boot()
     {
         parent::boot();
@@ -76,7 +77,7 @@ class MasterProfile extends Model
             }
         });
 
-        // Обновляем slug при изменении имени
+        // Обновляем slug при изменении имени (если slug не меняли вручную)
         static::updating(function ($model) {
             if ($model->isDirty('display_name') && !$model->isDirty('slug')) {
                 $model->slug = Str::slug($model->display_name . '-' . Str::random(6));
@@ -84,81 +85,65 @@ class MasterProfile extends Model
         });
     }
 
-    /**
-     * Пользователь
-     */
+    /* --------------------------------------------------------------------- */
+    /*  Отношения                                                            */
+    /* --------------------------------------------------------------------- */
+
+    /** Пользователь */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Услуги мастера
-     */
+    /** Услуги мастера */
     public function services(): HasMany
     {
         return $this->hasMany(Service::class);
     }
 
-    /**
-     * Активные услуги
-     */
+    /** Активные услуги */
     public function activeServices(): HasMany
     {
         return $this->services()->where('status', 'active');
     }
 
-    /**
-     * Районы обслуживания
-     */
+    /** Районы обслуживания */
     public function workZones(): HasMany
     {
         return $this->hasMany(WorkZone::class);
     }
 
-    /**
-     * Расписание
-     */
+    /** Расписание */
     public function schedules(): HasMany
     {
         return $this->hasMany(Schedule::class);
     }
 
-    /**
-     * Исключения в расписании
-     */
+    /** Исключения в расписании */
     public function scheduleExceptions(): HasMany
     {
         return $this->hasMany(ScheduleException::class);
     }
 
-    /**
-     * Бронирования
-     */
+    /** Бронирования */
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
     }
 
-    /**
-     * Отзывы
-     */
+    /** Отзывы */
     public function reviews(): HasMany
     {
         return $this->hasMany(Review::class);
     }
 
-    /**
-     * Подписки
-     */
+    /** Подписки */
     public function subscriptions(): HasMany
     {
         return $this->hasMany(MasterSubscription::class);
     }
 
-    /**
-     * Активная подписка
-     */
+    /** Активная подписка */
     public function activeSubscription(): HasOne
     {
         return $this->hasOne(MasterSubscription::class)
@@ -167,33 +152,51 @@ class MasterProfile extends Model
             ->latest();
     }
 
+    /* --------------------------------------------------------------------- */
+    /*  📸  Фото (добавлено)                                                 */
+    /* --------------------------------------------------------------------- */
+
     /**
-     * Проверка премиум статуса
+     * Галерея всех фото мастера.
      */
+    public function photos(): HasMany
+    {
+        // Если FK переименуете, передайте его вторым аргументом
+        return $this->hasMany(MasterPhoto::class, 'master_profile_id');
+    }
+
+    /**
+     * Главное фото (is_main = true).
+     */
+    public function mainPhoto(): HasOne
+    {
+        return $this->hasOne(MasterPhoto::class, 'master_profile_id')
+                    ->where('is_main', true);
+    }
+
+    /* --------------------------------------------------------------------- */
+    /*  Логика                                                                */
+    /* --------------------------------------------------------------------- */
+
+    /** Проверка премиум-статуса */
     public function isPremium(): bool
     {
         return $this->is_premium && $this->premium_until && $this->premium_until->isFuture();
     }
 
-    /**
-     * Проверка активности профиля
-     */
+    /** Проверка активности профиля */
     public function isActive(): bool
     {
         return $this->status === 'active';
     }
 
-    /**
-     * Увеличение счётчика просмотров
-     */
+    /** Увеличение счётчика просмотров */
     public function incrementViews(): void
     {
         $this->increment('views_count');
     }
 
-    /**
-     * Обновление рейтинга
-     */
+    /** Обновление рейтинга */
     public function updateRating(): void
     {
         $avgRating = $this->reviews()
@@ -201,22 +204,22 @@ class MasterProfile extends Model
             ->avg('rating_overall');
 
         $this->update([
-            'rating' => round($avgRating, 2),
-            'reviews_count' => $this->reviews()->where('status', 'approved')->count(),
+            'rating'         => round($avgRating, 2),
+            'reviews_count'  => $this->reviews()->where('status', 'approved')->count(),
         ]);
     }
 
-    /**
-     * Получить URL профиля
-     */
+    /* --------------------------------------------------------------------- */
+    /*  Accessors & Mutators                                                 */
+    /* --------------------------------------------------------------------- */
+
+    /** URL профиля */
     public function getUrlAttribute(): string
     {
         return route('masters.show', $this->slug);
     }
 
-    /**
-     * Получить полный адрес салона
-     */
+    /** Полный адрес салона */
     public function getFullSalonAddressAttribute(): string
     {
         $parts = array_filter([
@@ -229,42 +232,36 @@ class MasterProfile extends Model
         return implode(', ', $parts);
     }
 
-    /**
-     * Scope для активных мастеров
-     */
+    /* --------------------------------------------------------------------- */
+    /*  Scopes                                                               */
+    /* --------------------------------------------------------------------- */
+
+    /** Scope: активные мастера */
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
     }
 
-    /**
-     * Scope для премиум мастеров
-     */
+    /** Scope: премиум мастера */
     public function scopePremium($query)
     {
         return $query->where('is_premium', true)
-            ->where('premium_until', '>=', now());
+                     ->where('premium_until', '>=', now());
     }
 
-    /**
-     * Scope для верифицированных мастеров
-     */
+    /** Scope: верифицированные мастера */
     public function scopeVerified($query)
     {
         return $query->where('is_verified', true);
     }
 
-    /**
-     * Scope для поиска по городу
-     */
+    /** Scope: поиск по городу */
     public function scopeInCity($query, $city)
     {
         return $query->where('city', $city);
     }
 
-    /**
-     * Scope для поиска по району
-     */
+    /** Scope: поиск по району */
     public function scopeInDistrict($query, $district)
     {
         return $query->where('district', $district);

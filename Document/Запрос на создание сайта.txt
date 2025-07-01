@@ -182,7 +182,7 @@ class Service extends Model
             'category' => $this->category->name,
             'price_from' => $this->price_from,
             'district' => $this->locations->pluck('district'),
-            'rating' => $this->reviews()->avg('rating'),
+            'rating' => $this->reviews()->),
         ];
     }
 }
