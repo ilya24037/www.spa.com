@@ -58,6 +58,87 @@ createInertiaApp({
             console.warn('Vue предупреждение:', msg);
         };
         
+        // 🔥 ДИРЕКТИВА CLICK-OUTSIDE - закрытие элементов по клику вне
+        app.directive('click-outside', {
+            mounted(el, binding) {
+                el.clickOutsideEvent = function(event) {
+                    // Проверяем, что клик был вне элемента
+                    if (!(el === event.target || el.contains(event.target))) {
+                        binding.value(event);
+                    }
+                };
+                // Слушаем клики по всему документу
+                document.body.addEventListener('click', el.clickOutsideEvent);
+            },
+            unmounted(el) {
+                // Удаляем слушатель при размонтировании
+                document.body.removeEventListener('click', el.clickOutsideEvent);
+            }
+        });
+        
+        // 🔥 ДОПОЛНИТЕЛЬНЫЕ ПОЛЕЗНЫЕ ДИРЕКТИВЫ
+        
+        // Директива для автофокуса
+        app.directive('focus', {
+            mounted(el) {
+                el.focus();
+            }
+        });
+        
+        // Директива для отслеживания изменения размера элемента
+        app.directive('resize', {
+            mounted(el, binding) {
+                const resizeObserver = new ResizeObserver(entries => {
+                    binding.value(entries[0]);
+                });
+                resizeObserver.observe(el);
+                el._resizeObserver = resizeObserver;
+            },
+            unmounted(el) {
+                if (el._resizeObserver) {
+                    el._resizeObserver.disconnect();
+                    delete el._resizeObserver;
+                }
+            }
+        });
+        
+        // Директива для копирования в буфер обмена
+        app.directive('clipboard', {
+            mounted(el, binding) {
+                el.clickHandler = () => {
+                    const text = binding.value || el.textContent;
+                    navigator.clipboard.writeText(text).then(() => {
+                        if (window.toast) {
+                            window.toast.success('Скопировано в буфер обмена!');
+                        }
+                    }).catch(err => {
+                        console.error('Ошибка копирования:', err);
+                    });
+                };
+                el.addEventListener('click', el.clickHandler);
+            },
+            unmounted(el) {
+                el.removeEventListener('click', el.clickHandler);
+            }
+        });
+        
+        // Директива для ленивой загрузки изображений
+        app.directive('lazy', {
+            mounted(el) {
+                const imageObserver = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const img = entry.target;
+                            img.src = img.dataset.src;
+                            img.classList.remove('lazy');
+                            observer.unobserve(img);
+                        }
+                    });
+                });
+                imageObserver.observe(el);
+            }
+        });
+        
         app.use(plugin);
         app.use(ZiggyVue);
         app.use(pinia);

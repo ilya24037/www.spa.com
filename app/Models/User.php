@@ -61,6 +61,24 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * 🔥 ДОБАВЛЕНО: Профили мастера (множественное число для Dashboard)
+     * Некоторые мастера могут иметь несколько профилей/анкет
+     */
+    public function masterProfiles()
+    {
+        return $this->hasMany(MasterProfile::class);
+    }
+
+    /**
+     * 🔥 ДОБАВЛЕНО: Избранные мастера
+     */
+    public function favorites()
+    {
+        return $this->belongsToMany(MasterProfile::class, 'favorites')
+            ->withTimestamps();
+    }
+
+    /**
      * Бронирования клиента
      */
     public function bookings()
