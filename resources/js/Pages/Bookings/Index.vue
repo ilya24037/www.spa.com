@@ -1,5 +1,4 @@
 ﻿<template>
-    <AppLayout>
         <Head :title="isMaster ? 'Мои заказы' : 'Мои бронирования'" />
 
         <div class="container mx-auto px-4 py-8">
@@ -216,13 +215,11 @@
                 </div>
             </div>
         </Modal>
-    </AppLayout>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
-import AppLayout from '@/Layouts/AppLayout.vue'
 import Modal from '@/Components/UI/Modal.vue'
 import { CalendarIcon, ClockIcon, MapPinIcon, CalendarDaysIcon } from '@heroicons/vue/24/outline'
 import { format } from 'date-fns'
