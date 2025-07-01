@@ -63,6 +63,7 @@ class ProfileController extends Controller
             'profiles' => $profiles,
             'counts' => $counts,
             'userStats' => $userStats,
+            'user'      => $user,
         ]);
     }
 

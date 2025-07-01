@@ -86,21 +86,13 @@ class MassageCategory extends Model
     }
 
     /**
-     * Дочерние категории (основное отношение)
+     * Дочерние категории
      */
     public function children(): HasMany
     {
         return $this->hasMany(MassageCategory::class, 'parent_id')
             ->orderBy('sort_order')
             ->orderBy('name');
-    }
-
-    /**
-     * Подкатегории (alias для совместимости)
-     */
-    public function subcategories(): HasMany
-    {
-        return $this->children();
     }
 
     /**

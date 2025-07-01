@@ -5,7 +5,7 @@
         <div class="min-h-screen bg-gray-50">
             <div class="max-w-7xl mx-auto px-4 py-6">
                 <div class="flex gap-6">
-                    <!-- Боковая панель (как на Авито) -->
+                    <!-- Боковая панель ВСЕГДА ВИДНА (как на Авито) -->
                     <aside class="w-80 flex-shrink-0">
                         <div class="bg-white rounded-lg shadow-sm sticky top-6">
                             <!-- Профиль пользователя -->
@@ -31,31 +31,31 @@
                                     
                                     <!-- Имя и рейтинг -->
                                     <div>
-                                        <h3 class="font-semibold text-lg">{{ user.name }}</h3>
+                                        <h3 class="font-semibold text-lg">{{ user?.name || 'Пользователь' }}</h3>
                                         <Link 
                                             href="/profile/reviews" 
                                             class="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600"
                                         >
-                                            <span class="font-medium">{{ userStats.rating || '—' }}</span>
+                                            <span class="font-medium">{{ userStats?.rating || '—' }}</span>
                                             <div class="flex">
                                                 <svg 
                                                     v-for="i in 5" 
                                                     :key="i"
                                                     class="w-4 h-4"
-                                                    :class="i <= Math.floor(userStats.rating || 0) ? 'text-yellow-400' : 'text-gray-300'"
+                                                    :class="i <= Math.floor(userStats?.rating || 0) ? 'text-yellow-400' : 'text-gray-300'"
                                                     fill="currentColor"
                                                     viewBox="0 0 20 20"
                                                 >
                                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                                 </svg>
                                             </div>
-                                            <span class="text-xs">{{ userStats.reviewsCount || 0 }} отзывов</span>
+                                            <span class="text-xs">{{ userStats?.reviewsCount || 0 }} отзывов</span>
                                         </Link>
                                     </div>
                                 </div>
                             </div>
                             
-                            <!-- Меню навигации -->
+                            <!-- Меню навигации ВСЕГДА ДОСТУПНО -->
                             <nav class="py-2">
                                 <!-- Основные разделы -->
                                 <div class="px-3 py-2">
@@ -66,7 +66,7 @@
                                                 :class="menuItemClass(route().current('profile.dashboard'))"
                                             >
                                                 Мои анкеты
-                                                <span v-if="counts.profiles > 0" class="ml-auto text-xs bg-gray-100 px-2 py-0.5 rounded">
+                                                <span v-if="counts?.profiles > 0" class="ml-auto text-xs bg-gray-100 px-2 py-0.5 rounded">
                                                     {{ counts.profiles }}
                                                 </span>
                                             </Link>
@@ -77,7 +77,7 @@
                                                 :class="menuItemClass(route().current('bookings.index'))"
                                             >
                                                 Бронирования
-                                                <span v-if="counts.bookings > 0" class="ml-auto text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded">
+                                                <span v-if="counts?.bookings > 0" class="ml-auto text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded">
                                                     {{ counts.bookings }}
                                                 </span>
                                             </Link>
@@ -96,7 +96,7 @@
                                                 :class="menuItemClass(route().current('favorites.index'))"
                                             >
                                                 Избранное
-                                                <span v-if="counts.favorites > 0" class="ml-auto text-xs bg-gray-100 px-2 py-0.5 rounded">
+                                                <span v-if="counts?.favorites > 0" class="ml-auto text-xs bg-gray-100 px-2 py-0.5 rounded">
                                                     {{ counts.favorites }}
                                                 </span>
                                             </Link>
@@ -115,7 +115,7 @@
                                                 :class="menuItemClass(route().current('messages.index'))"
                                             >
                                                 Сообщения
-                                                <span v-if="counts.unreadMessages > 0" class="ml-auto text-xs bg-red-500 text-white px-2 py-0.5 rounded">
+                                                <span v-if="counts?.unreadMessages > 0" class="ml-auto text-xs bg-red-500 text-white px-2 py-0.5 rounded">
                                                     {{ counts.unreadMessages }}
                                                 </span>
                                             </Link>
@@ -143,7 +143,7 @@
                                             >
                                                 Кошелёк
                                                 <span class="ml-auto text-sm font-medium">
-                                                    {{ formatPrice(userStats.balance || 0) }}
+                                                    {{ formatPrice(userStats?.balance || 0) }}
                                                 </span>
                                             </Link>
                                         </li>
@@ -228,7 +228,7 @@
                         </div>
                     </aside>
                     
-                    <!-- Основной контент -->
+                    <!-- Основной контент (здесь может быть пустое состояние) -->
                     <main class="flex-1">
                         <div class="bg-white rounded-lg shadow-sm">
                             <!-- Заголовок и действия -->
@@ -277,7 +277,7 @@
                                 </nav>
                             </div>
                             
-                            <!-- Контент вкладок -->
+                            <!-- Контент вкладок (с защитой от пустых данных) -->
                             <div class="p-6">
                                 <!-- Активные анкеты -->
                                 <div v-if="activeTab === 'active'" class="space-y-4">
@@ -290,6 +290,7 @@
                                         @toggle="toggleProfile"
                                     />
                                     
+                                    <!-- Пустое состояние -->
                                     <div v-if="activeProfiles.length === 0" class="text-center py-12">
                                         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -354,14 +355,17 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { Head, Link, router } from '@inertiajs/vue3'
+import { Head, Link, router, usePage } from '@inertiajs/vue3'  // 🔥 Добавлен usePage
 import { route } from 'ziggy-js'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import ProfileCard from '@/Components/Dashboard/ProfileCard.vue'
 import EmptyState from '@/Components/Dashboard/EmptyState.vue'
 
 const props = defineProps({
-    profiles: Array,
+    profiles: {
+        type: Array,
+        default: () => []  // 🔥 Защита от undefined
+    },
     counts: {
         type: Object,
         default: () => ({
@@ -382,12 +386,12 @@ const props = defineProps({
 })
 
 const user = computed(() => usePage().props.auth.user)
-const userInitial = computed(() => user.value.name.charAt(0).toUpperCase())
+const userInitial = computed(() => user.value?.name?.charAt(0)?.toUpperCase() || 'U')  // 🔥 Защита от undefined
 
 // Цвет аватара на основе имени
 const colors = ['#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#00bcd4', '#009688', '#4caf50', '#ff9800', '#ff5722']
 const avatarColor = computed(() => {
-    const charCode = user.value.name.charCodeAt(0)
+    const charCode = user.value?.name?.charCodeAt(0) || 85  // 85 = 'U'
     return colors[charCode % colors.length]
 })
 
@@ -411,7 +415,7 @@ const tabs = computed(() => [
     }
 ])
 
-// Фильтрация профилей
+// Фильтрация профилей (с защитой от undefined)
 const activeProfiles = computed(() => 
     props.profiles?.filter(p => p.status === 'active') || []
 )
