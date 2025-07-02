@@ -6,9 +6,9 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h } from 'vue';
 import { createPinia } from 'pinia';
 
-import { ZiggyVue } from 'ziggy-js';     // npm-пакет ziggy-js
-import { Ziggy } from './ziggy';               // сгенерированный файл с маршрутами
-import { route } from 'ziggy-js';              // npm-пакет ziggy-js
+import { ZiggyVue } from 'ziggy-js';
+import { Ziggy } from './ziggy';
+import { route } from 'ziggy-js';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -38,7 +38,8 @@ createInertiaApp({
             console.error('Компонент:', instance);
             console.error('Информация:', info);
 
-            // Отправка на сервер (опционально)
+            // 🔥 ЗАКОММЕНТИРОВАНО - endpoint не существует
+            /*
             if (window.axios) {
                 window.axios.post('/api/log-error', {
                     error: err.toString(),
@@ -47,6 +48,7 @@ createInertiaApp({
                     info: info
                 }).catch(() => {});
             }
+            */
 
             // Показываем уведомление пользователю
             if (window.toast) {
@@ -59,39 +61,69 @@ createInertiaApp({
             console.warn('Vue предупреждение:', msg);
         };
 
-        // 🔥 ДИРЕКТИВА CLICK-OUTSIDE - закрытие элементов по клику вне
+        // 🔥 ИСПРАВЛЕННАЯ ДИРЕКТИВА CLICK-OUTSIDE
         app.directive('click-outside', {
             mounted(el, binding) {
-                el.clickOutsideEvent = function(event) {
+                // Проверяем, что el существует
+                if (!el) return;
+                
+                el._clickOutsideHandler = function(event) {
+                    // Дополнительная проверка существования элемента
+                    if (!el || !document.body.contains(el)) {
+                        return;
+                    }
+                    
+                    // Проверяем, что клик был вне элемента
                     if (!(el === event.target || el.contains(event.target))) {
-                        binding.value(event);
+                        // Проверяем, что binding.value это функция
+                        if (binding.value && typeof binding.value === 'function') {
+                            binding.value(event);
+                        }
                     }
                 };
-                document.body.addEventListener('click', el.clickOutsideEvent);
+                
+                // Используем setTimeout для избежания конфликтов при монтировании
+                setTimeout(() => {
+                    document.addEventListener('click', el._clickOutsideHandler);
+                }, 0);
             },
             unmounted(el) {
-                document.body.removeEventListener('click', el.clickOutsideEvent);
+                // Проверяем существование перед удалением
+                if (el && el._clickOutsideHandler) {
+                    document.removeEventListener('click', el._clickOutsideHandler);
+                    delete el._clickOutsideHandler;
+                }
             }
         });
 
         // Директива для автофокуса
         app.directive('focus', {
             mounted(el) {
-                el.focus();
+                if (el && typeof el.focus === 'function') {
+                    el.focus();
+                }
             }
         });
 
         // Директива для отслеживания изменения размера элемента
         app.directive('resize', {
             mounted(el, binding) {
-                const resizeObserver = new ResizeObserver(entries => {
-                    binding.value(entries[0]);
-                });
-                resizeObserver.observe(el);
-                el._resizeObserver = resizeObserver;
+                if (!el || !binding.value) return;
+                
+                try {
+                    const resizeObserver = new ResizeObserver(entries => {
+                        if (binding.value && typeof binding.value === 'function') {
+                            binding.value(entries[0]);
+                        }
+                    });
+                    resizeObserver.observe(el);
+                    el._resizeObserver = resizeObserver;
+                } catch (error) {
+                    console.warn('ResizeObserver не поддерживается:', error);
+                }
             },
             unmounted(el) {
-                if (el._resizeObserver) {
+                if (el && el._resizeObserver) {
                     el._resizeObserver.disconnect();
                     delete el._resizeObserver;
                 }
@@ -101,42 +133,68 @@ createInertiaApp({
         // Директива для копирования в буфер обмена
         app.directive('clipboard', {
             mounted(el, binding) {
-                el.clickHandler = () => {
+                if (!el) return;
+                
+                el._clickHandler = () => {
                     const text = binding.value || el.textContent;
-                    navigator.clipboard.writeText(text).then(() => {
-                        if (window.toast) {
-                            window.toast.success('Скопировано в буфер обмена!');
-                        }
-                    }).catch(err => {
-                        console.error('Ошибка копирования:', err);
-                    });
+                    
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(text).then(() => {
+                            if (window.toast) {
+                                window.toast.success('Скопировано в буфер обмена!');
+                            }
+                        }).catch(err => {
+                            console.error('Ошибка копирования:', err);
+                            // Fallback для старых браузеров
+                            fallbackCopyTextToClipboard(text);
+                        });
+                    } else {
+                        // Fallback для старых браузеров
+                        fallbackCopyTextToClipboard(text);
+                    }
                 };
-                el.addEventListener('click', el.clickHandler);
+                
+                el.addEventListener('click', el._clickHandler);
             },
             unmounted(el) {
-                el.removeEventListener('click', el.clickHandler);
+                if (el && el._clickHandler) {
+                    el.removeEventListener('click', el._clickHandler);
+                    delete el._clickHandler;
+                }
             }
         });
 
         // Директива для ленивой загрузки изображений
         app.directive('lazy', {
             mounted(el) {
+                if (!el || !('IntersectionObserver' in window)) return;
+                
                 const imageObserver = new IntersectionObserver((entries, observer) => {
                     entries.forEach(entry => {
                         if (entry.isIntersecting) {
                             const img = entry.target;
-                            img.src = img.dataset.src;
-                            img.classList.remove('lazy');
-                            observer.unobserve(img);
+                            if (img.dataset.src) {
+                                img.src = img.dataset.src;
+                                img.classList.remove('lazy');
+                                observer.unobserve(img);
+                            }
                         }
                     });
                 });
+                
                 imageObserver.observe(el);
+                el._imageObserver = imageObserver;
+            },
+            unmounted(el) {
+                if (el && el._imageObserver) {
+                    el._imageObserver.disconnect();
+                    delete el._imageObserver;
+                }
             }
         });
 
         app.use(plugin);
-        app.use(ZiggyVue, Ziggy);        // <-- обязательно передаём Ziggy
+        app.use(ZiggyVue, Ziggy);
         app.use(pinia);
 
         app.config.globalProperties.route = route;
@@ -147,6 +205,30 @@ createInertiaApp({
         color: '#4B5563',
     },
 });
+
+// Функция для копирования в старых браузерах
+function fallbackCopyTextToClipboard(text) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.position = "fixed";
+    
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+        const successful = document.execCommand('copy');
+        if (successful && window.toast) {
+            window.toast.success('Скопировано в буфер обмена!');
+        }
+    } catch (err) {
+        console.error('Fallback: Ошибка копирования', err);
+    }
+    
+    document.body.removeChild(textArea);
+}
 
 // Глобальный обработчик ошибок JavaScript
 window.addEventListener('error', (event) => {

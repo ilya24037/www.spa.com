@@ -21,23 +21,23 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         
-        // Загружаем профили мастера с подсчетами
+        // Загружаем профили мастера БЕЗ photos пока
         $profiles = $user->masterProfiles()
-            ->with(['services:id,master_profile_id,name,price', 'photos'])
-            ->withCount(['bookings', 'reviews']) // 🔥 Убрал views, т.к. используем поле views_count
+            ->with(['services:id,master_profile_id,name,price'])
+            ->withCount(['bookings', 'reviews'])
             ->get()
             ->map(function ($profile) {
                 return [
                     'id' => $profile->id,
                     'slug' => $profile->slug ?? Str::slug($profile->display_name ?? $profile->name ?? 'profile'),
                     'name' => $profile->display_name ?? $profile->name ?? 'Без названия',
-                    'status' => $profile->status ?? 'active', // active, draft, archived
+                    'status' => $profile->status ?? 'active',
                     'is_active' => $profile->is_active ?? true,
                     'price_from' => $profile->price_from ?? 0,
-                    'views_count' => $profile->views_count ?? 0, // 🔥 Используем поле напрямую
-                    'photos' => $profile->photos ?? [],
+                    'views_count' => $profile->views_count ?? 0,
+                    'photos' => [], // 🔥 Пустой массив вместо загрузки
                     'services_list' => $profile->services ? $profile->services->pluck('name')->join(', ') : '',
-                    'full_address' => $profile->full_address ?? ($profile->city ?? 'Город не указан') . ', ' . ($profile->address ?? 'адрес не указан'),
+                    'full_address' => $profile->city ?? 'Город не указан',
                     'rejection_reason' => $profile->rejection_reason,
                     'bookings_count' => $profile->bookings_count ?? 0,
                     'reviews_count' => $profile->reviews_count ?? 0,
@@ -49,12 +49,12 @@ class ProfileController extends Controller
             'profiles' => $user->masterProfiles()->count(),
             'bookings' => $user->bookings()->where('status', 'pending')->count(),
             'favorites' => $user->favorites()->count(),
-            'unreadMessages' => 0, // TODO: Реализовать подсчет непрочитанных сообщений
+            'unreadMessages' => 0,
         ];
         
-        // Статистика пользователя
+        // Статистика пользователя  
         $userStats = [
-            'rating' => $user->reviews()->avg('rating_overall') ?: 0,
+            'rating' => 0, // 🔥 Временно 0, пока нет поля rating_overall
             'reviewsCount' => $user->reviews()->count(),
             'balance' => $user->balance ?? 0,
         ];
@@ -63,7 +63,6 @@ class ProfileController extends Controller
             'profiles' => $profiles,
             'counts' => $counts,
             'userStats' => $userStats,
-            'user'      => $user,
         ]);
     }
 

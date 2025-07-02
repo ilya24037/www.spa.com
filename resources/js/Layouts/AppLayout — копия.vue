@@ -6,7 +6,7 @@
     <div class="max-w-[1400px] mx-auto min-h-screen flex flex-col w-full">
       
       <!-- НОВОЕ: Единая обертка с отступами для ВСЕГО контента -->
-      <div class="site-padding flex-1 flex flex-col">
+      <div class="site-padding flex-1">
         
         <!-- Шапка с компенсацией отступов -->
         <header class="sticky top-0 z-50 negative-margin">
@@ -24,10 +24,10 @@
         <main class="flex-1">
           <slot />
         </main>
-        
-        <!-- ВАЖНО: Footer внутри site-padding для выравнивания -->
-        <Footer />
       </div>
+      
+      <!-- НОВОЕ: Подвал сайта -->
+      <Footer />
     </div>
          
     <!-- Глобальные уведомления (вне контейнера) -->

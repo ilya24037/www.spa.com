@@ -1,317 +1,164 @@
 <template>
-  <!-- Mobile: drawer via Teleport -->
-  <Teleport to="body" v-if="isMobile">
-    <Transition name="drawer">
-      <div v-if="modelValue" class="fixed inset-0 z-50 flex">
-        <!-- Overlay с анимацией -->
-        <div 
-          class="flex-1 bg-black/50 backdrop-blur-sm" 
-          @click="handleClose"
-          :class="{ 'pointer-events-none': isAnimating }"
-        />
-
-        <!-- Sliding panel -->
-        <aside
-          ref="drawerRef"
-          role="navigation"
-          :aria-label="ariaLabel"
-          :aria-hidden="!modelValue"
-          class="relative w-72 bg-white h-full shadow-2xl overflow-hidden flex-shrink-0"
-          :style="{ transform: `translateX(${dragOffset}px)` }"
-          @touchstart="onTouchStart"
-          @touchmove="onTouchMove"
-          @touchend="onTouchEnd"
-        >
-          <!-- Индикатор свайпа -->
-          <div 
-            v-if="showSwipeHint" 
-            class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-16 bg-gray-400/50 rounded-r-full"
-          />
-          
-          <!-- Заголовок (опционально) -->
-          <div v-if="$slots.header" class="sticky top-0 bg-white border-b border-gray-200 z-10">
-            <div class="p-4 flex items-center justify-between">
-              <slot name="header" />
-              <button
-                @click="handleClose"
-                class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                :aria-label="closeAriaLabel"
-              >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-          </div>
-          
-          <!-- Контент с кастомным скроллом -->
-          <div 
-            ref="contentRef"
-            class="h-full overflow-y-auto overscroll-contain"
-            :class="[
-              contentClass,
-              { 'pb-20': hasBottomNav }
-            ]"
-            @scroll="onContentScroll"
-          >
-            <div class="p-6">
-              <slot />
-            </div>
-          </div>
-          
-          <!-- Футер (опционально) -->
-          <div v-if="$slots.footer" class="sticky bottom-0 bg-white border-t border-gray-200">
-            <div class="p-4">
-              <slot name="footer" />
-            </div>
-          </div>
-        </aside>
-      </div>
-    </Transition>
-  </Teleport>
-
-  <!-- Desktop / Tablet ≥1024px -->
-  <aside 
-    v-else 
+  <!-- Десктоп версия -->
+  <div 
+    v-if="alwaysVisibleDesktop"
     :class="[
-      'shrink-0 hidden lg:block transition-all duration-300',
-      desktopWidth,
-      { 'lg:hidden': forceHideDesktop }
+      DESKTOP_CONTAINER_CLASSES,
+      DESKTOP_WIDTH
     ]"
   >
-    <div
-      ref="stickyRef"
-      class="bg-white rounded-lg shadow-sm sticky overflow-hidden transition-all duration-300"
-      :style="{ 
-        top: `${effectiveTop}px`,
-        maxHeight: `calc(100vh - ${effectiveTop + 20}px)`
-      }"
+    <div 
       :class="[
-        desktopClass,
-        { 'ring-2 ring-primary-500': isHighlighted }
+        BASE_CLASSES,
+        `sticky top-[${STICKY_TOP}px]`,
+        contentClass
       ]"
     >
-      <!-- Desktop заголовок -->
-      <div v-if="$slots.header && showDesktopHeader" class="border-b border-gray-200">
-        <div class="p-4">
-          <slot name="header" />
-        </div>
+      <!-- Заголовок десктоп -->
+      <div v-if="showDesktopHeader && ($slots.header || title)" :class="HEADER_CLASSES">
+        <slot name="header">
+          <h2 v-if="title" :class="TITLE_CLASSES">{{ title }}</h2>
+        </slot>
       </div>
       
-      <!-- Desktop контент -->
+      <!-- Контент -->
+      <slot />
+      
+      <!-- Футер десктоп -->
+      <div v-if="$slots.footer" :class="FOOTER_CLASSES">
+        <slot name="footer" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Обычная версия (скрываемая) -->
+  <div 
+    v-else
+    :class="[
+      DESKTOP_CONTAINER_CLASSES,
+      DESKTOP_WIDTH
+    ]"
+  >
+    <div 
+      :class="[
+        BASE_CLASSES,
+        `sticky top-[${STICKY_TOP}px]`,
+        contentClass
+      ]"
+    >
+      <!-- Заголовок десктоп -->
+      <div v-if="showDesktopHeader && ($slots.header || title)" :class="HEADER_CLASSES">
+        <slot name="header">
+          <h2 v-if="title" :class="TITLE_CLASSES">{{ title }}</h2>
+        </slot>
+      </div>
+      
+      <!-- Контент -->
+      <slot />
+      
+      <!-- Футер десктоп -->
+      <div v-if="$slots.footer" :class="FOOTER_CLASSES">
+        <slot name="footer" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Мобильная версия -->
+  <Teleport to="body">
+    <div 
+      v-if="modelValue"
+      :class="MOBILE_OVERLAY_CLASSES"
+      @click="$emit('update:modelValue', false)"
+    >
+      <!-- Затемненный фон -->
+      <div :class="MOBILE_BACKDROP_CLASSES" />
+      
+      <!-- Панель -->
       <div 
-        class="overflow-y-auto overscroll-contain"
-        :class="contentClass"
+        :class="[MOBILE_PANEL_CLASSES, MOBILE_WIDTH]"
+        @click.stop
       >
-        <div class="p-4">
+        <!-- Заголовок мобильный -->
+        <div v-if="$slots.header || title" :class="MOBILE_HEADER_CLASSES">
+          <div :class="MOBILE_HEADER_CONTENT_CLASSES">
+            <slot name="header">
+              <h2 v-if="title" :class="TITLE_CLASSES">{{ title }}</h2>
+            </slot>
+            <button 
+              @click="$emit('update:modelValue', false)"
+              :class="MOBILE_CLOSE_BUTTON_CLASSES"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Контент мобильный -->
+        <div :class="contentClass">
           <slot />
         </div>
-      </div>
-      
-      <!-- Desktop футер -->
-      <div v-if="$slots.footer && showDesktopFooter" class="border-t border-gray-200 mt-auto">
-        <div class="p-4">
+        
+        <!-- Футер мобильный -->
+        <div v-if="$slots.footer" :class="MOBILE_FOOTER_CLASSES">
           <slot name="footer" />
         </div>
       </div>
     </div>
-  </aside>
+  </Teleport>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch, inject, nextTick } from 'vue'
-import { useSwipeGesture } from '@/Composables/useSwipeGesture'
-import { useMediaQuery } from '@/Composables/useMediaQuery'
-import { useLockScroll } from '@/Composables/useLockScroll'
+// 🎯 ВСЕ СТИЛИ В КОНСТАНТАХ - КАК В CONTENTCARD
+// Размеры и позиционирование
+const DESKTOP_WIDTH = 'w-64'                    // 256px - ширина боковой панели
+const MOBILE_WIDTH = 'w-80'                     // 320px - ширина мобильной панели
+const STICKY_TOP = 120                          // 120px - отступ сверху при прилипании
 
-// Props
+// Базовые стили компонента
+const BASE_CLASSES = 'bg-white rounded-lg shadow-sm'
+const DESKTOP_CONTAINER_CLASSES = 'hidden lg:block flex-shrink-0'
+
+// Стили заголовка и футера
+const HEADER_CLASSES = 'px-6 py-4 border-b'
+const FOOTER_CLASSES = 'border-t p-6'
+const TITLE_CLASSES = 'font-semibold text-lg'
+
+// Мобильные стили
+const MOBILE_OVERLAY_CLASSES = 'lg:hidden fixed inset-0 z-50 flex'
+const MOBILE_BACKDROP_CLASSES = 'fixed inset-0 bg-black bg-opacity-50'
+const MOBILE_PANEL_CLASSES = 'relative bg-white h-full shadow-xl overflow-y-auto'
+const MOBILE_HEADER_CLASSES = 'px-6 py-4 border-b lg:hidden'
+const MOBILE_HEADER_CONTENT_CLASSES = 'flex items-center justify-between'
+const MOBILE_FOOTER_CLASSES = 'border-t p-6'
+const MOBILE_CLOSE_BUTTON_CLASSES = 'p-2 hover:bg-gray-100 rounded-lg'
+
+// Упрощенные пропсы
 const props = defineProps({
-  /** v-model для контроля видимости на мобильных */
   modelValue: {
     type: Boolean,
-    default: false,
+    default: false
   },
-  /** Индивидуальный отступ от верха */
-  stickyTop: {
-    type: Number,
-    default: undefined,
-  },
-  /** Ширина на десктопе */
-  desktopWidth: {
-    type: String,
-    default: 'w-64',
-  },
-  /** Дополнительные классы для контента */
+  
+  title: String,
+  
   contentClass: {
     type: String,
-    default: '',
+    default: ''
   },
-  /** Дополнительные классы для десктопа */
-  desktopClass: {
-    type: String,
-    default: '',
-  },
-  /** Показывать подсказку свайпа */
-  showSwipeHint: {
-    type: Boolean,
-    default: true,
-  },
-  /** Есть ли нижняя навигация (для отступа) */
-  hasBottomNav: {
-    type: Boolean,
-    default: false,
-  },
-  /** Принудительно скрыть на десктопе */
-  forceHideDesktop: {
-    type: Boolean,
-    default: false,
-  },
-  /** Показывать заголовок на десктопе */
+  
   showDesktopHeader: {
     type: Boolean,
-    default: false,
+    default: false
   },
-  /** Показывать футер на десктопе */
-  showDesktopFooter: {
-    type: Boolean,
-    default: false,
-  },
-  /** Подсветить сайдбар */
-  isHighlighted: {
-    type: Boolean,
-    default: false,
-  },
-  /** Aria-label для сайдбара */
-  ariaLabel: {
-    type: String,
-    default: 'Боковая панель',
-  },
-  /** Aria-label для кнопки закрытия */
-  closeAriaLabel: {
-    type: String,
-    default: 'Закрыть панель',
-  },
-})
-
-// Emits
-const emit = defineEmits(['update:modelValue', 'close', 'open', 'swipe', 'scroll'])
-
-// Refs
-const drawerRef = ref(null)
-const contentRef = ref(null)
-const stickyRef = ref(null)
-
-// Composables
-const isMobile = useMediaQuery('(max-width: 1023px)')
-const { lockScroll, unlockScroll } = useLockScroll()
-
-// Swipe gesture
-const { dragOffset, isAnimating, onTouchStart, onTouchMove, onTouchEnd } = useSwipeGesture({
-  threshold: 50,
-  onSwipeLeft: () => {
-    handleClose()
-    emit('swipe', 'left')
-  },
-})
-
-// Sticky offset
-const injectedTop = inject('stickyTop', 80)
-const effectiveTop = computed(() => props.stickyTop ?? injectedTop)
-
-// Методы
-function handleClose() {
-  emit('update:modelValue', false)
-  emit('close')
-}
-
-function handleOpen() {
-  emit('update:modelValue', true)
-  emit('open')
-}
-
-// Scroll tracking
-let lastScrollTop = 0
-function onContentScroll(e) {
-  const scrollTop = e.target.scrollTop
-  const scrollDirection = scrollTop > lastScrollTop ? 'down' : 'up'
-  lastScrollTop = scrollTop
   
-  emit('scroll', {
-    scrollTop,
-    scrollDirection,
-    isAtTop: scrollTop === 0,
-    isAtBottom: scrollTop + e.target.clientHeight >= e.target.scrollHeight - 1
-  })
-}
-
-// Lock body scroll when mobile drawer is open
-watch(
-  () => props.modelValue && isMobile.value,
-  async (shouldLock) => {
-    await nextTick()
-    if (shouldLock) {
-      lockScroll()
-    } else {
-      unlockScroll()
-    }
-  }
-)
-
-// Cleanup
-onBeforeUnmount(() => {
-  unlockScroll()
-})
-
-// Expose methods
-defineExpose({
-  open: handleOpen,
-  close: handleClose,
-  scrollToTop: () => {
-    if (contentRef.value) {
-      contentRef.value.scrollTop = 0
-    }
+  alwaysVisibleDesktop: {
+    type: Boolean,
+    default: false
   }
 })
+
+// События
+defineEmits(['update:modelValue'])
 </script>
-
-<style scoped>
-/* Анимация drawer */
-.drawer-enter-active,
-.drawer-leave-active {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.drawer-enter-from .bg-black\/50,
-.drawer-leave-to .bg-black\/50 {
-  opacity: 0;
-}
-
-.drawer-enter-from aside,
-.drawer-leave-to aside {
-  transform: translateX(-100%);
-}
-
-/* Кастомный скроллбар */
-.overflow-y-auto::-webkit-scrollbar {
-  width: 6px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-track {
-  background: #f3f4f6;
-}
-
-.overflow-y-auto::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 3px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
-}
-
-/* Предотвращение прокрутки body на iOS */
-.overscroll-contain {
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-}
-</style>

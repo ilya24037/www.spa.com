@@ -1,16 +1,12 @@
 ﻿<!-- resources/js/Pages/Home.vue -->
 <template>
-
-    
     <Head :title="`Массаж в ${currentCity} — найти мастера`" />
 
     <!-- Обертка с правильными отступами -->
-
-    <div class=" py-6 lg:py-8">
+    <div class="py-6 lg:py-8">
       
       <!-- Хлебные крошки - отдельная белая плитка -->
-      
-        <Breadcrumbs
+      <Breadcrumbs
         :items="[
           { title: 'Главная', href: '/' },
           { title: 'Массажисты', href: '/masters' },
@@ -18,7 +14,6 @@
         ]"
         class="mb-4"
       />
-   
 
       <!-- Заголовок -->
       <div class="mb-6">
@@ -30,20 +25,14 @@
         </p>
       </div>
 
-      <!-- Быстрые теги -->
-      <QuickTagsRow class="mb-6" />
-
       <!-- Основной контент с гэпом между блоками -->
       <div class="flex gap-6">
         
         <!-- Универсальная боковая панель через SidebarWrapper -->
         <SidebarWrapper 
           v-model="showFilters"
-          :sticky-top="120"
-          desktop-width="w-64"
           content-class="p-0"
           :show-desktop-header="true"
-          aria-label="Панель фильтров"
         >
           <!-- Заголовок для десктопа -->
           <template #header>
@@ -82,20 +71,17 @@
         <!-- Контент справа -->
         <section class="flex-1 space-y-6">
           
-          <!-- Карта - отдельная белая плитка -->
-          <div class="bg-white rounded-lg shadow-sm p-4">
+          <!-- Карта - фиксированные отступы ContentCard -->
+          <ContentCard>
             <div class="h-[400px] rounded-lg overflow-hidden">
               <SimpleMap :cards="filteredMasters" />
             </div>
-          </div>
+          </ContentCard>
 
-          <!-- Блок с карточками - обернуть в белую плитку -->
-          <div class="bg-white rounded-lg shadow-sm p-6">
-            <!-- Заголовок и контролы -->
-            <div class="flex items-center justify-between mb-6">
-              <h2 class="text-lg font-semibold">Показать списком</h2>
-              
-              <!-- Сортировка и вид -->
+          <!-- Блок с карточками - фиксированные отступы ContentCard -->
+          <ContentCard title="Показать списком">
+            <!-- Контролы в заголовке -->
+            <template #headerActions>
               <div class="flex items-center gap-4">
                 <!-- Переключатель вида -->
                 <div class="hidden sm:flex items-center bg-gray-100 rounded-lg p-1">
@@ -138,14 +124,14 @@
                   <option value="distance">По расстоянию</option>
                 </select>
               </div>
-            </div>
+            </template>
             
             <!-- Карточки -->
             <Cards 
               :cards="sortedMasters" 
               :view-mode="viewMode"
             />
-          </div>
+          </ContentCard>
         </section>
       </div>
 
@@ -177,6 +163,7 @@ import { Head } from '@inertiajs/vue3'
 // Импорты компонентов
 import Breadcrumbs from '@/Components/Common/Breadcrumbs.vue'
 import SidebarWrapper from '@/Components/Layout/SidebarWrapper.vue'
+import ContentCard from '@/Components/Layout/ContentCard.vue'
 import Filters from '@/Components/Filters/Filters.vue'
 import Cards from '@/Components/Cards/Cards.vue'
 import SimpleMap from '@/Components/Map/SimpleMap.vue'
