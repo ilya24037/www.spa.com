@@ -31,7 +31,7 @@
 
                 <!-- Кнопка разместить объявление -->
                 <Link 
-                  href="/masters/create"
+                  href="/additem"
                   class="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition font-medium whitespace-nowrap"
                 >
                   Разместить объявление

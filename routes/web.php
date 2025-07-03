@@ -7,6 +7,7 @@ use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\CompareController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\AddItemController; // 🔥 ДОБАВЛЕНО
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -123,6 +124,18 @@ Route::middleware('auth')->group(function () {
         Route::post('/{booking}/cancel',   [BookingController::class, 'cancel'])->name('cancel');
         Route::post('/{booking}/confirm',  [BookingController::class, 'confirm'])->name('confirm');
         Route::post('/{booking}/complete', [BookingController::class, 'complete'])->name('complete');
+    });
+
+    /*
+    | Размещение объявлений (как у Avito)
+    */
+    Route::prefix('additem')->name('additem.')->group(function () {
+        Route::get('/',              [AddItemController::class, 'index'])->name('index');
+        Route::get('/massage',       [AddItemController::class, 'massage'])->name('massage');
+        Route::post('/massage',      [AddItemController::class, 'storeMassage'])->name('massage.store');
+        Route::get('/erotic',        [AddItemController::class, 'erotic'])->name('erotic');
+        Route::get('/strip',         [AddItemController::class, 'strip'])->name('strip');
+        Route::get('/escort',        [AddItemController::class, 'escort'])->name('escort');
     });
     
     // 🔥 ДОБАВЛЕНО: дополнительные маршруты для полного функционала Dashboard

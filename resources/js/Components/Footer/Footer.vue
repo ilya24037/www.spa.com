@@ -16,7 +16,7 @@
                 
                 <!-- Быстрые ссылки на работу -->
                 <div class="flex flex-wrap gap-3">
-                    <a href="/masters/create" class="inline-flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition">
+                    <a href="/additem" class="inline-flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                         </svg>
@@ -100,7 +100,7 @@
                     <div>
                         <h3 class="font-semibold mb-4 text-gray-900">Мастерам</h3>
                         <ul class="space-y-2 text-sm">
-                            <li><a href="/masters/create" class="text-gray-600 hover:text-blue-600 transition">Разместить анкету</a></li>
+                            <li><a href="/additem" class="text-gray-600 hover:text-blue-600 transition">Разместить анкету</a></li>
                             <li><a href="/pricing" class="text-gray-600 hover:text-blue-600 transition">Тарифы и цены</a></li>
                             <li><a href="/promotion" class="text-gray-600 hover:text-blue-600 transition">Продвижение анкеты</a></li>
                             <li><a href="/education" class="text-gray-600 hover:text-blue-600 transition">Обучение</a></li>

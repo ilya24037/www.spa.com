@@ -67,7 +67,8 @@ Route::middleware('auth')->group(function () {
     | Личный кабинет   (как у Avito:  /profile  →  список объявлений)
     |----------------------------------------------------------------------
     */
-    Route::get('/profile', fn () => Inertia::render('Dashboard'))
+    // 🔥 ИЗМЕНЕНО: используем метод контроллера вместо анонимной функции
+    Route::get('/profile', [ProfileController::class, 'index'])
         ->name('profile.dashboard');
 
     /*  alias /dashboard  → /profile (необязательный)  */
@@ -81,6 +82,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/edit',  [ProfileController::class, 'edit'])->name('edit');
         Route::patch('/',    [ProfileController::class, 'update'])->name('update');
         Route::delete('/',   [ProfileController::class, 'destroy'])->name('destroy');
+        
+        // 🔥 ДОБАВЛЕНО: дополнительные маршруты для Dashboard
+        Route::get('/reviews', fn() => Inertia::render('Profile/Reviews'))->name('reviews');
+        Route::get('/security', fn() => Inertia::render('Profile/Security'))->name('security');
     });
 
     /*
@@ -92,6 +97,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/{master}/edit',        [MasterController::class, 'edit'])->whereNumber('master')->name('edit');
         Route::put('/{master}',             [MasterController::class, 'update'])->whereNumber('master')->name('update');
         Route::delete('/{master}',          [MasterController::class, 'destroy'])->whereNumber('master')->name('destroy');
+        
+        // 🔥 ДОБАВЛЕНО: маршруты для управления статусом профилей
+        Route::patch('/{master}/toggle',    [ProfileController::class, 'toggleProfile'])->whereNumber('master')->name('toggle');
+        Route::patch('/{master}/publish',   [ProfileController::class, 'publishProfile'])->whereNumber('master')->name('publish');
+        Route::patch('/{master}/restore',   [ProfileController::class, 'restoreProfile'])->whereNumber('master')->name('restore');
     });
 
     /*
@@ -114,6 +124,14 @@ Route::middleware('auth')->group(function () {
         Route::post('/{booking}/confirm',  [BookingController::class, 'confirm'])->name('confirm');
         Route::post('/{booking}/complete', [BookingController::class, 'complete'])->name('complete');
     });
+    
+    // 🔥 ДОБАВЛЕНО: дополнительные маршруты для полного функционала Dashboard
+    Route::get('/messages', fn() => Inertia::render('Messages/Index'))->name('messages.index');
+    Route::get('/notifications', fn() => Inertia::render('Notifications/Index'))->name('notifications.index');
+    Route::get('/wallet', fn() => Inertia::render('Wallet/Index'))->name('wallet.index');
+    Route::get('/services', fn() => Inertia::render('Services/Index'))->name('services.index');
+    Route::get('/subscription', fn() => Inertia::render('Subscription/Index'))->name('subscription.index');
+    Route::get('/settings', fn() => Inertia::render('Settings/Index'))->name('settings.index');
 });
 
 /*

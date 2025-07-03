@@ -236,7 +236,7 @@
                                 <div class="flex items-center justify-between">
                                     <h1 class="text-2xl font-bold">Мои анкеты</h1>
                                     <Link 
-                                        href="/masters/create"
+                                        href="/additem"
                                         class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
                                     >
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -299,7 +299,7 @@
                                         <p class="mt-1 text-sm text-gray-500">Создайте свою первую анкету мастера</p>
                                         <div class="mt-6">
                                             <Link 
-                                                href="/masters/create"
+                                                href="/additem"
                                                 class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
                                             >
                                                 Создать анкету
