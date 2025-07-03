@@ -138,7 +138,7 @@ class AddItemController extends Controller
                     'massage_category_id' => $service['category_id'],
                     'name' => $service['name'],
                     'price' => $service['price'],
-                    'duration' => $service['duration'],
+                    'duration_minutes' => $service['duration'],
                     'description' => $service['description'] ?? null,
                     'adult_content' => false,
                 ]);

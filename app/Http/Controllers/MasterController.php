@@ -78,6 +78,11 @@ class MasterController extends Controller
         ])
         ->findOrFail($id);
 
+        // 🔥 ДОБАВЛЕНО: Генерируем meta-теги если их нет
+        if (empty($master->meta_title) || empty($master->meta_description)) {
+            $master->generateMetaTags()->save();
+        }
+
         // Увеличиваем счетчик просмотров
         $master->increment('views_count');
 
@@ -127,6 +132,23 @@ class MasterController extends Controller
                 'schedules' => $master->schedules,
                 'reviews' => $master->reviews->take(5),
                 'created_at' => $master->created_at,
+            ],
+            // 🔥 ДОБАВЛЕНО: Передаём meta-теги для SEO
+            'meta' => [
+                'title' => $master->meta_title,
+                'description' => $master->meta_description,
+                'keywords' => implode(', ', [
+                    $master->display_name,
+                    'массаж',
+                    $master->city,
+                    $master->district,
+                    'массажист'
+                ]),
+                'og:title' => $master->meta_title,
+                'og:description' => $master->meta_description,
+                'og:image' => $master->avatar_url ?? asset('images/default-master.jpg'),
+                'og:url' => $master->full_url,
+                'og:type' => 'profile',
             ],
             'similarMasters' => $this->getSimilarMasters($master),
         ]);
@@ -196,6 +218,9 @@ class MasterController extends Controller
                 'status' => 'active',
                 'is_active' => true,
             ]);
+
+            // 🔥 ДОБАВЛЕНО: Генерируем meta-теги после создания
+            $profile->generateMetaTags()->save();
 
             // Добавляем услуги
             foreach ($validated['services'] as $service) {
@@ -272,6 +297,9 @@ class MasterController extends Controller
         ]);
 
         $profile->update($validated);
+
+        // 🔥 ДОБАВЛЕНО: Регенерируем meta-теги при обновлении профиля
+        $profile->generateMetaTags()->save();
 
         return redirect()
             ->route('masters.show', [$profile->slug, $profile->id])
