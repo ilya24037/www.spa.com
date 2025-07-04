@@ -1,0 +1,113 @@
+<template>
+  <AppLayout>
+    <Head :title="masterProfile.name" />
+
+    <div class="max-w-5xl mx-auto px-4 py-6 space-y-6">
+
+      <!-- Шапка мастера -->
+      <section class="flex flex-col md:flex-row gap-6 items-start">
+        <img :src="masterProfile.avatar" alt="Фото мастера"
+             class="w-full md:w-60 h-60 object-cover rounded-2xl shadow" />
+
+        <div class="flex-1 space-y-2">
+          <h1 class="text-2xl font-bold">{{ masterProfile.name }}</h1>
+          <div class="flex items-center gap-2">
+            <StarRating :rating="masterProfile.rating" />
+            <span class="text-sm text-gray-600">({{ masterProfile.reviewsCount }} отзывов)</span>
+          </div>
+
+          <p class="text-gray-700">{{ masterProfile.bio }}</p>
+
+          <div class="flex flex-wrap gap-2">
+            <span class="px-2 py-1 text-sm bg-green-100 text-green-800 rounded" v-if="masterProfile.verified">
+              ✅ Проверен
+            </span>
+            <span class="px-2 py-1 text-sm bg-blue-100 text-blue-800 rounded">
+              Опыт: {{ masterProfile.experienceYears }} лет
+            </span>
+          </div>
+
+          <div class="mt-4 flex gap-4">
+            <button @click="openBooking"
+                    class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+              Записаться
+            </button>
+            <button @click="openChat"
+                    class="border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50">
+              Написать
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Услуги -->
+      <section>
+        <h2 class="text-xl font-semibold mb-4">Услуги</h2>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div v-for="service in services" :key="service.id" class="border rounded-lg p-4 shadow-sm">
+            <div class="flex justify-between items-center">
+              <h3 class="font-semibold">{{ service.name }}</h3>
+              <span class="text-green-600 font-bold">{{ formatPrice(service.price) }} ₽</span>
+            </div>
+            <p class="text-sm text-gray-600 mt-1">{{ service.description }}</p>
+            <p class="text-xs text-gray-400 mt-2">Длительность: {{ service.duration }} мин</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Расписание -->
+      <section>
+        <h2 class="text-xl font-semibold mb-4">Ближайшее свободное время</h2>
+        <BookingCalendar :master-id="masterProfile.id" />
+      </section>
+
+      <!-- Отзывы -->
+      <section>
+        <h2 class="text-xl font-semibold mb-4">Отзывы клиентов</h2>
+        <ReviewsList :master-id="masterProfile.id" />
+      </section>
+
+      <!-- Контакты -->
+      <section>
+        <h2 class="text-xl font-semibold mb-4">Контакты</h2>
+        <div class="text-gray-700">
+          <p><strong>Город:</strong> {{ masterProfile.city }}</p>
+          <p><strong>Районы выезда:</strong> {{ masterProfile.workZones.join(', ') }}</p>
+          <p><strong>Телефон:</strong> {{ masterProfile.phoneMasked }}</p>
+        </div>
+      </section>
+    </div>
+
+    <ImageGalleryModal :images="masterProfile.gallery" />
+  </AppLayout>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import { Head } from '@inertiajs/vue3'
+import AppLayout from '@/Layouts/AppLayout.vue'
+import BookingCalendar from '@/Components/Booking/BookingCalendar.vue'
+import StarRating from '@/Components/Common/StarRating.vue'
+import ReviewsList from '@/Components/Reviews/ReviewsList.vue'
+import ImageGalleryModal from '@/Components/Common/ImageGalleryModal.vue'
+
+const props = defineProps({
+  masterProfile: Object,
+  services: Array
+})
+
+const openBooking = () => {
+  // TODO: открыть модалку записи
+}
+
+const openChat = () => {
+  // TODO: открыть чат с мастером
+}
+
+const formatPrice = (price) => {
+  return new Intl.NumberFormat('ru-RU').format(price)
+}
+</script>
+
+<style scoped>
+</style>
