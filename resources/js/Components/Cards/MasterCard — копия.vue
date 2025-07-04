@@ -77,7 +77,7 @@
 
       <!-- Имя и специализация -->
       <h3 class="font-semibold text-gray-900 truncate mb-1">
-        {{ master.display_name || master.name || 'Мастер' }}
+        {{ master.display_name || 'Мастер' }}
       </h3>
       
       <!-- Услуги -->
@@ -168,37 +168,17 @@ const toggleFavorite = () => {
   })
 }
 
-// 🔥 ИСПРАВЛЕНО: Формируем правильный URL с slug и id
 const goToProfile = () => {
-  // Получаем slug (если нет - используем имя или 'master')
-  const slug = props.master.slug || 
-               props.master.display_name?.toLowerCase().replace(/\s+/g, '-') || 
-               props.master.name?.toLowerCase().replace(/\s+/g, '-') || 
-               'master'
-  const id = props.master.id
-  
-  // Формируем URL в формате /masters/slug-id
-  router.visit(`/masters/${slug}-${id}`)
+  router.visit(`/masters/${props.master.id}`)
 }
 
-// 🔥 ИСПРАВЛЕНО: Аналогично для бронирования
 const openBooking = () => {
-  const slug = props.master.slug || 
-               props.master.display_name?.toLowerCase().replace(/\s+/g, '-') || 
-               props.master.name?.toLowerCase().replace(/\s+/g, '-') || 
-               'master'
-  const id = props.master.id
-  
-  // Переходим на страницу мастера с якорем для бронирования
-  router.visit(`/masters/${slug}-${id}#booking`)
+  router.visit(`/masters/${props.master.id}/book`)
 }
 
 const showPhone = () => {
   if (props.master.phone) {
     window.location.href = `tel:${props.master.phone}`
-  } else {
-    // Если телефон скрыт, можно показать уведомление
-    alert('Телефон доступен после бронирования')
   }
 }
 

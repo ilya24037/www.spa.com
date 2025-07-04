@@ -1,54 +1,54 @@
+<!-- resources/js/Components/MetaTags.vue -->
 <template>
-  <!-- Компонент не рендерит ничего визуального -->
+  <Head>
+    <!-- ====== базовые теги ====== -->
+    <title>{{ pageTitle }}</title>
+    <meta name="description" :content="pageDescription" />
+    <meta v-if="props.meta.keywords" name="keywords" :content="props.meta.keywords" />
+
+    <!-- ====== Open Graph ====== -->
+    <meta property="og:title"       :content="props.meta['og:title']       || pageTitle" />
+    <meta property="og:description" :content="props.meta['og:description'] || pageDescription" />
+    <meta v-if="props.meta['og:image']" property="og:image" :content="props.meta['og:image']" />
+    <meta v-if="props.meta['og:url']"   property="og:url"   :content="props.meta['og:url']" />
+    <meta property="og:type"      :content="props.meta['og:type'] || 'website'" />
+    <meta property="og:site_name" :content="baseTitle" />
+
+    <!-- ====== Twitter Card ====== -->
+    <meta name="twitter:card"        content="summary_large_image" />
+    <meta name="twitter:title"       :content="props.meta['og:title']       || pageTitle" />
+    <meta name="twitter:description" :content="props.meta['og:description'] || pageDescription" />
+    <meta v-if="props.meta['og:image']" name="twitter:image" :content="props.meta['og:image']" />
+
+    <!-- ====== canonical ====== -->
+    <link v-if="props.meta.canonical" rel="canonical" :href="props.meta.canonical" />
+  </Head>
 </template>
 
 <script setup>
 import { Head } from '@inertiajs/vue3'
 import { computed } from 'vue'
 
+/** Принимаем объект meta со страницы */
 const props = defineProps({
   meta: {
     type: Object,
-    default: () => ({})
-  }
+    default: () => ({}),
+  },
 })
 
-// Базовый title сайта
+/** Фиксированное название сайта */
 const baseTitle = 'СПА Маркетплейс'
 
-// Вычисляемый title с fallback
-const pageTitle = computed(() => {
-  return props.meta.title ? `${props.meta.title} | ${baseTitle}` : baseTitle
-})
+/** Заголовок страницы с fallback-ом на baseTitle */
+const pageTitle = computed(() =>
+  props.meta.title ? `${props.meta.title} | ${baseTitle}` : baseTitle,
+)
 
-// Описание с fallback
-const pageDescription = computed(() => {
-  return props.meta.description || 'Найдите лучших массажистов в вашем городе. Отзывы, рейтинги, онлайн-запись.'
-})
+/** Описание с дефолтным текстом */
+const pageDescription = computed(
+  () =>
+    props.meta.description ||
+    'Найдите лучших массажистов в вашем городе. Отзывы, рейтинги, онлайн-запись.',
+)
 </script>
-
-<template>
-  <Head>
-    <!-- Основные meta теги -->
-    <title>{{ pageTitle }}</title>
-    <meta name="description" :content="pageDescription">
-    <meta v-if="meta.keywords" name="keywords" :content="meta.keywords">
-    
-    <!-- Open Graph теги для соцсетей -->
-    <meta property="og:title" :content="meta['og:title'] || pageTitle">
-    <meta property="og:description" :content="meta['og:description'] || pageDescription">
-    <meta v-if="meta['og:image']" property="og:image" :content="meta['og:image']">
-    <meta v-if="meta['og:url']" property="og:url" :content="meta['og:url']">
-    <meta property="og:type" :content="meta['og:type'] || 'website'">
-    <meta property="og:site_name" :content="baseTitle">
-    
-    <!-- Twitter Card теги -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" :content="meta['og:title'] || pageTitle">
-    <meta name="twitter:description" :content="meta['og:description'] || pageDescription">
-    <meta v-if="meta['og:image']" name="twitter:image" :content="meta['og:image']">
-    
-    <!-- Дополнительные теги -->
-    <link v-if="meta.canonical" rel="canonical" :href="meta.canonical">
-  </Head>
-</template>

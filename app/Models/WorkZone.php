@@ -17,7 +17,7 @@ class WorkZone extends Model
         'is_active', 'priority'
     ];
 
-    protected $casts = {
+    protected $casts = [
         'work_from' => 'datetime:H:i',
         'work_to' => 'datetime:H:i',
         'work_days' => 'array',
