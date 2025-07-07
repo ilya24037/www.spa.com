@@ -364,9 +364,12 @@ class MasterProfile extends Model
 
     /** URL профиля */
     public function getUrlAttribute(): string
-    {
-        return route('masters.show', $this->slug);
-    }
+{
+    return route('masters.show', [
+        'slug' => $this->slug,
+        'master' => $this->id
+    ]);
+}
 
     /** Полный адрес салона */
     public function getFullSalonAddressAttribute(): string

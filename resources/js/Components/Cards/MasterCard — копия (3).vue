@@ -9,7 +9,9 @@
       <span 
         v-if="master.is_premium"
         class="bg-purple-600 text-white px-2 py-0.5 rounded text-xs font-medium"
-      >Premium</span>
+      >
+        Premium
+      </span>
       <span 
         v-if="master.is_verified" 
         class="bg-green-500 text-white px-2 py-0.5 rounded text-xs font-medium flex items-center gap-0.5"
@@ -42,6 +44,7 @@
         loading="lazy"
         @error="handleImageError"
       >
+      
       <!-- Онлайн статус -->
       <div 
         v-if="master.is_online || master.is_available_now"
@@ -62,6 +65,7 @@
           </div>
           <div class="text-xs text-gray-500">/час</div>
         </div>
+        
         <div class="flex items-center gap-1 text-sm">
           <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
@@ -70,14 +74,17 @@
           <span class="text-gray-400">({{ master.reviews_count || 0 }})</span>
         </div>
       </div>
+
       <!-- Имя и специализация -->
       <h3 class="font-semibold text-gray-900 truncate mb-1">
         {{ master.display_name || master.name || 'Мастер' }}
       </h3>
+      
       <!-- Услуги -->
       <p class="text-sm text-gray-600 line-clamp-2 mb-3">
         {{ getServicesText() }}
       </p>
+
       <!-- Локация -->
       <div class="flex items-center gap-1 text-xs text-gray-500 mb-3">
         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -89,6 +96,7 @@
         <span>{{ master.district || 'Центр' }}</span>
         <span v-if="master.metro_station">• м. {{ master.metro_station }}</span>
       </div>
+
       <!-- Кнопки действий -->
       <div class="flex gap-2">
         <button
@@ -101,6 +109,7 @@
           </svg>
           <span class="text-sm">Позвонить</span>
         </button>
+        
         <button
           @click.stop="openBooking"
           class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-3 rounded-lg transition-colors text-sm"
@@ -115,8 +124,6 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { router } from '@inertiajs/vue3'
-import { route } from 'ziggy-js' // Импортируем Ziggy функцию
-
 import { useImages } from '@/Composables/useImages'
 
 const props = defineProps({
@@ -126,17 +133,24 @@ const props = defineProps({
   }
 })
 
+// Используем composable для изображений
 const { getImageUrl, handleImageError: handleImageErrorComposable } = useImages()
+
+// Локальное состояние
 const isFavorite = ref(props.master.is_favorite || false)
 
+// Вычисляемые свойства
 const masterPhoto = computed(() => {
+  // Проверяем разные варианты полей с изображением
   const photoPath = props.master.avatar || 
                    props.master.photo || 
                    props.master.avatar_url ||
                    props.master.image
+  
   return getImageUrl(photoPath, '/images/no-avatar.jpg')
 })
 
+// Методы
 const formatPrice = (price) => {
   return new Intl.NumberFormat('ru-RU').format(price)
 }
@@ -147,6 +161,7 @@ const getServicesText = () => {
       .map(s => typeof s === 'string' ? s : s.name)
       .filter(Boolean)
       .slice(0, 3)
+    
     const text = serviceNames.join(', ')
     return props.master.services.length > 3 ? `${text}...` : text
   }
@@ -155,63 +170,77 @@ const getServicesText = () => {
 
 const toggleFavorite = () => {
   isFavorite.value = !isFavorite.value
+  
   router.post('/api/favorites/toggle', { 
     master_id: props.master.id 
   }, {
     preserveState: true,
     preserveScroll: true,
-    onSuccess: () => {},
+    onSuccess: () => {
+      // Можно добавить уведомление об успешном добавлении/удалении
+    },
     onError: () => {
+      // Откатываем изменение при ошибке
       isFavorite.value = !isFavorite.value
     }
   })
 }
 
 const goToProfile = () => {
+  // Безопасное получение slug
   const slug = props.master.slug || generateSlug(props.master.display_name || props.master.name)
   const id = props.master.id
-  // Используем Ziggy!
-  router.visit(route('masters.show', { slug, master: id }))
+  
+  // Формируем URL в формате /masters/slug-id
+  router.visit(`/masters/${slug}-${id}`)
 }
 
 const openBooking = () => {
   const slug = props.master.slug || generateSlug(props.master.display_name || props.master.name)
   const id = props.master.id
-  // Используем Ziggy!
-  router.visit(route('masters.show', { slug, master: id }) + '#booking')
+  
+  // Переходим на страницу мастера с якорем для бронирования
+  router.visit(`/masters/${slug}-${id}#booking`)
 }
 
 const showPhone = () => {
   if (props.master.phone) {
     window.location.href = `tel:${props.master.phone.replace(/\D/g, '')}`
   } else {
+    // Можно показать модальное окно вместо alert
     alert('Телефон будет доступен после бронирования')
   }
 }
 
+// Вспомогательная функция для генерации slug
 const generateSlug = (text) => {
   if (!text) return 'master'
+  
   return text
     .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
+    .replace(/[^a-z0-9\s-]/g, '') // Удаляем спецсимволы
+    .replace(/\s+/g, '-')         // Заменяем пробелы на дефисы
+    .replace(/-+/g, '-')          // Убираем множественные дефисы
     .trim()
     || 'master'
 }
 
+// Обработчик ошибки загрузки изображения
 const handleImageError = (event) => {
   handleImageErrorComposable(event, '/images/no-avatar.jpg')
 }
 </script>
 
 <style scoped>
+/* Ограничение текста на 2 строки */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* Анимация пульсации для онлайн статуса */
 @keyframes pulse {
   0%, 100% {
     opacity: 1;
@@ -220,6 +249,7 @@ const handleImageError = (event) => {
     opacity: 0.5;
   }
 }
+
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
