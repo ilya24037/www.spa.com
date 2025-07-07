@@ -39,7 +39,7 @@
     <div class="relative aspect-[4/5] overflow-hidden bg-gray-100">
       <img 
         :src="masterPhoto"
-        :alt="master.display_name || master.name || 'Мастер массажа'"
+        :alt="master.display_name || 'Мастер массажа'"
         class="w-full h-full object-cover"
         loading="lazy"
         @error="handleImageError"
@@ -47,7 +47,7 @@
       
       <!-- Онлайн статус -->
       <div 
-        v-if="master.is_online || master.is_available_now"
+        v-if="master.is_online"
         class="absolute bottom-2 left-2 px-2 py-1 bg-green-500 text-white text-xs font-medium rounded-full flex items-center gap-1"
       >
         <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
@@ -124,7 +124,6 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { router } from '@inertiajs/vue3'
-import { useImages } from '@/Composables/useImages'
 
 const props = defineProps({
   master: {
@@ -133,21 +132,16 @@ const props = defineProps({
   }
 })
 
-// Используем composable для изображений
-const { getImageUrl, handleImageError: handleImageErrorComposable } = useImages()
-
 // Локальное состояние
-const isFavorite = ref(props.master.is_favorite || false)
+const isFavorite = ref(false)
+const imageError = ref(false)
 
 // Вычисляемые свойства
 const masterPhoto = computed(() => {
-  // Проверяем разные варианты полей с изображением
-  const photoPath = props.master.avatar || 
-                   props.master.photo || 
-                   props.master.avatar_url ||
-                   props.master.image
-  
-  return getImageUrl(photoPath, '/images/no-avatar.jpg')
+  if (imageError.value) {
+    return '/images/default-avatar.jpg'
+  }
+  return props.master.avatar || props.master.photo || '/images/default-avatar.jpg'
 })
 
 // Методы
@@ -157,46 +151,42 @@ const formatPrice = (price) => {
 
 const getServicesText = () => {
   if (props.master.services?.length > 0) {
-    const serviceNames = props.master.services
-      .map(s => typeof s === 'string' ? s : s.name)
-      .filter(Boolean)
-      .slice(0, 3)
-    
-    const text = serviceNames.join(', ')
-    return props.master.services.length > 3 ? `${text}...` : text
+    const serviceNames = props.master.services.map(s => s.name || s).slice(0, 3)
+    return serviceNames.join(', ') + (props.master.services.length > 3 ? '...' : '')
   }
   return 'Классический массаж'
 }
 
 const toggleFavorite = () => {
   isFavorite.value = !isFavorite.value
-  
+  // TODO: Сохранить в избранное через API
   router.post('/api/favorites/toggle', { 
     master_id: props.master.id 
   }, {
     preserveState: true,
-    preserveScroll: true,
-    onSuccess: () => {
-      // Можно добавить уведомление об успешном добавлении/удалении
-    },
-    onError: () => {
-      // Откатываем изменение при ошибке
-      isFavorite.value = !isFavorite.value
-    }
+    preserveScroll: true
   })
 }
 
+// 🔥 ИСПРАВЛЕНО: Формируем правильный URL с slug и id
 const goToProfile = () => {
-  // Безопасное получение slug
-  const slug = props.master.slug || generateSlug(props.master.display_name || props.master.name)
+  // Получаем slug (если нет - используем имя или 'master')
+  const slug = props.master.slug || 
+               props.master.display_name?.toLowerCase().replace(/\s+/g, '-') || 
+               props.master.name?.toLowerCase().replace(/\s+/g, '-') || 
+               'master'
   const id = props.master.id
   
   // Формируем URL в формате /masters/slug-id
   router.visit(`/masters/${slug}-${id}`)
 }
 
+// 🔥 ИСПРАВЛЕНО: Аналогично для бронирования
 const openBooking = () => {
-  const slug = props.master.slug || generateSlug(props.master.display_name || props.master.name)
+  const slug = props.master.slug || 
+               props.master.display_name?.toLowerCase().replace(/\s+/g, '-') || 
+               props.master.name?.toLowerCase().replace(/\s+/g, '-') || 
+               'master'
   const id = props.master.id
   
   // Переходим на страницу мастера с якорем для бронирования
@@ -205,29 +195,15 @@ const openBooking = () => {
 
 const showPhone = () => {
   if (props.master.phone) {
-    window.location.href = `tel:${props.master.phone.replace(/\D/g, '')}`
+    window.location.href = `tel:${props.master.phone}`
   } else {
-    // Можно показать модальное окно вместо alert
-    alert('Телефон будет доступен после бронирования')
+    // Если телефон скрыт, можно показать уведомление
+    alert('Телефон доступен после бронирования')
   }
 }
 
-// Вспомогательная функция для генерации slug
-const generateSlug = (text) => {
-  if (!text) return 'master'
-  
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '') // Удаляем спецсимволы
-    .replace(/\s+/g, '-')         // Заменяем пробелы на дефисы
-    .replace(/-+/g, '-')          // Убираем множественные дефисы
-    .trim()
-    || 'master'
-}
-
-// Обработчик ошибки загрузки изображения
-const handleImageError = (event) => {
-  handleImageErrorComposable(event, '/images/no-avatar.jpg')
+const handleImageError = () => {
+  imageError.value = true
 }
 </script>
 
@@ -238,19 +214,5 @@ const handleImageError = (event) => {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}
-
-/* Анимация пульсации для онлайн статуса */
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 </style>

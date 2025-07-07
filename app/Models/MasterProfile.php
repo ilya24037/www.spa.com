@@ -70,6 +70,11 @@ class MasterProfile extends Model
         'rating'           => 'decimal:2',
     ];
 
+    /**
+     * Атрибуты, которые должны быть добавлены к модели
+     */
+    protected $appends = ['url', 'full_salon_address', 'full_url', 'share_url', 'avatar_url', 'all_photos'];
+
     /* --------------------------------------------------------------------- */
     /*  Отношения                                                            */
     /* --------------------------------------------------------------------- */
@@ -392,6 +397,41 @@ class MasterProfile extends Model
     public function getShareUrlAttribute(): string
     {
         return str_replace(['https://', 'http://'], '', $this->full_url);
+    }
+
+    /**
+     * Получить URL аватара
+     */
+    public function getAvatarUrlAttribute(): string
+    {
+        return \App\Helpers\ImageHelper::getImageUrl($this->avatar, '/images/no-avatar.jpg');
+    }
+
+    /**
+     * Получить все фотографии (включая аватар)
+     */
+    public function getAllPhotosAttribute(): array
+    {
+        $photos = [];
+        
+        // Добавляем аватар как первое фото
+        if ($this->avatar) {
+            $photos[] = $this->avatar_url;
+        }
+        
+        // Добавляем фотографии из галереи
+        if ($this->photos) {
+            foreach ($this->photos as $photo) {
+                $photos[] = \App\Helpers\ImageHelper::getImageUrl($photo->path);
+            }
+        }
+        
+        // Если нет фотографий, возвращаем заглушку
+        if (empty($photos)) {
+            $photos[] = '/images/no-photo.jpg';
+        }
+        
+        return $photos;
     }
 
     /* --------------------------------------------------------------------- */

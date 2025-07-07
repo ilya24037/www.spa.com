@@ -151,16 +151,16 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         // Если пользователь - мастер с аватаром
         if ($this->isMaster() && $this->masterProfile && $this->masterProfile->avatar) {
-            return \App\Helpers\ImageHelper::getImageUrl($this->masterProfile->avatar, '/images/no-avatar.jpg');
+            return Storage::url($this->masterProfile->avatar);
         }
         
         // Если есть аватар у пользователя
         if ($this->avatar) {
-            return \App\Helpers\ImageHelper::getImageUrl($this->avatar, '/images/no-avatar.jpg');
+            return Storage::url($this->avatar);
         }
 
-        // Возвращаем дефолтный аватар через API или заглушку
-        return \App\Helpers\ImageHelper::getUserAvatar(null, $this->name);
+        // Возвращаем дефолтный аватар
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=7F9CF5&background=EBF4FF';
     }
 
     /**

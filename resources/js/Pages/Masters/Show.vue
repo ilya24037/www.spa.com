@@ -72,6 +72,7 @@
                                             :src="photo" 
                                             :alt="`Фото ${index + 1}`"
                                             class="w-full h-full object-cover"
+                                            @error="handleImageError"
                                         >
                                         <div 
                                             v-if="index === 7 && allPhotos.length > 8"
@@ -292,10 +293,11 @@
                                         <img 
                                             v-for="(cert, index) in master.certificates"
                                             :key="index"
-                                            :src="cert.image"
+                                            :src="getImageUrl(cert.image)"
                                             :alt="cert.name"
                                             class="rounded-lg cursor-pointer hover:opacity-90"
                                             @click="openCertificate(cert)"
+                                            @error="handleImageError"
                                         >
                                     </div>
                                 </div>
@@ -381,6 +383,7 @@ import BookingModal from '@/Components/Booking/BookingModal.vue'
 import ImageGalleryModal from '@/Components/Common/ImageGalleryModal.vue'
 import { useMasterStore } from '@/stores/masterStore'
 import { formatPhone } from '@/utils/helpers'
+import { useImages } from '@/Composables/useImages'
 
 const props = defineProps({
     master: Object,
@@ -390,6 +393,9 @@ const props = defineProps({
 
 const masterStore = useMasterStore()
 const page = usePage()
+
+// Используем composable для изображений
+const { getImageUrl, handleImageError, validateImageArray } = useImages()
 
 // Состояния
 const showPhone = ref(false)
@@ -402,14 +408,15 @@ const showGalleryModal = ref(false)
 const galleryImages = ref([])
 const galleryInitialIndex = ref(0)
 
-// Вычисляемые свойства
+// Обновленное вычисляемое свойство allPhotos с использованием composable
 const allPhotos = computed(() => {
-    const photos = []
-    if (props.master.avatar) photos.push(props.master.avatar)
-    if (props.master.photos?.length) photos.push(...props.master.photos)
-    if (props.master.workspace_photos?.length) photos.push(...props.master.workspace_photos)
-    if (props.master.portfolio_photos?.length) photos.push(...props.master.portfolio_photos)
-    return photos.length ? photos : ['/images/no-photo.jpg']
+    // Проверяем разные варианты данных от бэкенда
+    const photos = props.master.all_photos || 
+                  props.master.photos || 
+                  (props.master.avatar ? [props.master.avatar] : [])
+    
+    // Используем composable для валидации и обработки массива изображений
+    return validateImageArray(photos)
 })
 
 const currentPhoto = computed(() => allPhotos.value[currentPhotoIndex.value])
@@ -479,13 +486,9 @@ const openWhatsApp = () => {
 }
 
 const openCertificate = (cert) => {
-    galleryImages.value = [cert.image]
+    galleryImages.value = [getImageUrl(cert.image)]
     galleryInitialIndex.value = 0
     showGalleryModal.value = true
-}
-
-const handleImageError = (event) => {
-    event.target.src = '/images/no-photo.jpg'
 }
 
 const formatPrice = (price) => {

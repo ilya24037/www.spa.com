@@ -64,95 +64,107 @@ class MasterController extends Controller
     }
 
     /**
-     * Показать карточку мастера
-     */
-    public function show($slug, $id)
-    {
-        $master = MasterProfile::with([
-            'user',
-            'services.category',
-            'photos',
-            'reviews.client',
-            'workZones',
-            'schedules'
-        ])
-        ->findOrFail($id);
+ * Показать карточку мастера
+ */
+public function show($slug, $master)
+{
+    // $master - это ID из маршрута
+    $masterProfile = MasterProfile::with([
+        'user',
+        'services.category',
+        'photos',
+        'reviews.client',
+        'workZones',
+        'schedules'
+    ])
+    ->findOrFail($master);
 
-        // 🔥 ДОБАВЛЕНО: Генерируем meta-теги если их нет
-        if (empty($master->meta_title) || empty($master->meta_description)) {
-            $master->generateMetaTags()->save();
-        }
-
-        // Увеличиваем счетчик просмотров
-        $master->increment('views_count');
-
-        // Проверяем, в избранном ли мастер
-        $isFavorite = false;
-        if (auth()->check()) {
-            $isFavorite = auth()->user()->favorites()->where('master_profile_id', $id)->exists();
-        }
-
-        return Inertia::render('Masters/Show', [
-            'master' => [
-                'id' => $master->id,
-                'name' => $master->display_name,
-                'slug' => $master->slug,
-                'description' => $master->description,
-                'age' => $master->age,
-                'experience_years' => $master->experience_years,
-                'rating' => $master->rating,
-                'reviews_count' => $master->reviews_count,
-                'views_count' => $master->views_count,
-                'price_from' => $master->price_from,
-                'price_to' => $master->price_to,
-                'photos' => $master->photos,
-                'avatar' => $master->avatar_url,
-                'is_available_now' => $master->isAvailableNow(),
-                'is_favorite' => $isFavorite,
-                'is_verified' => $master->is_verified,
-                'is_premium' => $master->isPremium(),
-                'phone' => $master->show_phone ? $master->phone : null,
-                'whatsapp' => $master->whatsapp,
-                'telegram' => $master->telegram,
-                'city' => $master->city,
-                'district' => $master->district,
-                'address' => $master->address,
-                'salon_name' => $master->salon_name,
-                'services' => $master->services->map(function ($service) {
-                    return [
-                        'id' => $service->id,
-                        'name' => $service->name,
-                        'category' => $service->category->name,
-                        'price' => $service->price,
-                        'duration' => $service->duration,
-                        'description' => $service->description,
-                    ];
-                }),
-                'work_zones' => $master->workZones,
-                'schedules' => $master->schedules,
-                'reviews' => $master->reviews->take(5),
-                'created_at' => $master->created_at,
-            ],
-            // 🔥 ДОБАВЛЕНО: Передаём meta-теги для SEO
-            'meta' => [
-                'title' => $master->meta_title,
-                'description' => $master->meta_description,
-                'keywords' => implode(', ', [
-                    $master->display_name,
-                    'массаж',
-                    $master->city,
-                    $master->district,
-                    'массажист'
-                ]),
-                'og:title' => $master->meta_title,
-                'og:description' => $master->meta_description,
-                'og:image' => $master->avatar_url ?? asset('images/default-master.jpg'),
-                'og:url' => $master->full_url,
-                'og:type' => 'profile',
-            ],
-            'similarMasters' => $this->getSimilarMasters($master),
-        ]);
+    // Проверяем, что slug соответствует текущему
+    if ($slug !== $masterProfile->slug) {
+        // Если slug изменился, делаем редирект на правильный URL
+        return redirect()->route('masters.show', [
+            'slug' => $masterProfile->slug,
+            'master' => $masterProfile->id
+        ], 301);
     }
+
+    // 🔥 ДОБАВЛЕНО: Генерируем meta-теги если их нет
+    if (empty($masterProfile->meta_title) || empty($masterProfile->meta_description)) {
+        $masterProfile->generateMetaTags()->save();
+    }
+
+    // Увеличиваем счетчик просмотров
+    $masterProfile->increment('views_count');
+
+    // Проверяем, в избранном ли мастер
+    $isFavorite = false;
+    if (auth()->check()) {
+        $isFavorite = auth()->user()->favorites()->where('master_profile_id', $masterProfile->id)->exists();
+    }
+
+    return Inertia::render('Masters/Show', [
+        'master' => [
+            'id' => $masterProfile->id,
+            'name' => $masterProfile->display_name,
+            'slug' => $masterProfile->slug,
+            'description' => $masterProfile->description,
+            'age' => $masterProfile->age,
+            'experience_years' => $masterProfile->experience_years,
+            'rating' => $masterProfile->rating,
+            'reviews_count' => $masterProfile->reviews_count,
+            'views_count' => $masterProfile->views_count,
+            'price_from' => $masterProfile->price_from,
+            'price_to' => $masterProfile->price_to,
+            'photos' => $masterProfile->photos,
+            'avatar' => $masterProfile->avatar_url,
+            'all_photos' => $masterProfile->all_photos, // Добавляем все фото
+            'is_available_now' => $masterProfile->isAvailableNow(),
+            'is_favorite' => $isFavorite,
+            'is_verified' => $masterProfile->is_verified,
+            'is_premium' => $masterProfile->isPremium(),
+            'phone' => $masterProfile->show_phone ? $masterProfile->phone : null,
+            'whatsapp' => $masterProfile->whatsapp,
+            'telegram' => $masterProfile->telegram,
+            'city' => $masterProfile->city,
+            'district' => $masterProfile->district,
+            'metro_station' => $masterProfile->metro_station, // Добавляем метро
+            'address' => $masterProfile->address,
+            'salon_name' => $masterProfile->salon_name,
+            'services' => $masterProfile->services->map(function ($service) {
+                return [
+                    'id' => $service->id,
+                    'name' => $service->name,
+                    'category' => $service->category->name ?? 'Массаж',
+                    'price' => $service->price,
+                    'duration' => $service->duration,
+                    'description' => $service->description,
+                ];
+            }),
+            'work_zones' => $masterProfile->workZones,
+            'schedules' => $masterProfile->schedules,
+            'reviews' => $masterProfile->reviews->take(5),
+            'created_at' => $masterProfile->created_at,
+        ],
+        // 🔥 ДОБАВЛЕНО: Передаём meta-теги для SEO
+        'meta' => [
+            'title' => $masterProfile->meta_title,
+            'description' => $masterProfile->meta_description,
+            'keywords' => implode(', ', [
+                $masterProfile->display_name,
+                'массаж',
+                $masterProfile->city,
+                $masterProfile->district,
+                'массажист'
+            ]),
+            'og:title' => $masterProfile->meta_title,
+            'og:description' => $masterProfile->meta_description,
+            'og:image' => $masterProfile->avatar_url ?? asset('images/default-master.jpg'),
+            'og:url' => $masterProfile->full_url,
+            'og:type' => 'profile',
+        ],
+        'similarMasters' => $this->getSimilarMasters($masterProfile),
+    ]);
+}
 
     /**
      * Показать форму создания анкеты

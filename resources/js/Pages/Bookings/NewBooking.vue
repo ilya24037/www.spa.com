@@ -1,4 +1,5 @@
 <template>
+     <div>
         <Head title="Оформление бронирования" />
 
         <div class="container mx-auto px-4 py-8 max-w-4xl">
@@ -314,7 +315,7 @@
                 </div>
             </div>
         </div>
-    </AppLayout>
+        </div>
 </template>
 
 <script setup>
