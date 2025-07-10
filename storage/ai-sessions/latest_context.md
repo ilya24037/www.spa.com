@@ -1,5 +1,5 @@
 # 🤖 AI Context: SPA Platform - Платформа услуг массажа
-Дата генерации: 10.07.2025 10:56:08
+Дата генерации: 10.07.2025 11:01:09
 Версия Laravel: 12.19.3
 PHP: 8.2.12
 
@@ -13,6 +13,8 @@ PHP: 8.2.12
 
 ## 🔥 НАД ЧЕМ РАБОТАЛИ ПОСЛЕДНИЙ РАЗ
 **Последние изменённые файлы:**
+- 🧩 Компонент resources/js\Components\Masters\BookingWidget\PriceCalculator.vue (изменён в 10:57)
+- 🧩 Компонент resources/js\Components\Masters\BookingWidget\index.vue (изменён в 10:56)
 - 📄 Страница resources/js\Pages\Masters\Show.vue (изменён в 10:50)
 - ⚡ JavaScript resources/js\stores\favorites.js (изменён в 10:48)
 - 🧩 Компонент resources/js\Components\Masters\SimilarMastersSection.vue (изменён в 10:44)
@@ -21,8 +23,6 @@ PHP: 8.2.12
 - 🧩 Компонент resources/js\Components\Masters\BookingWidget\WorkSchedule.vue (изменён в 10:32)
 - 🧩 Компонент resources/js\Components\Masters\BookingWidget\BookingActions.vue (изменён в 10:31)
 - 🧩 Компонент resources/js\Components\Masters\MasterGallery\useGallery.js (изменён в 10:25)
-- 🧩 Компонент resources/js\Components\Masters\MasterGallery\ThumbnailList.vue (изменён в 10:25)
-- 🧩 Компонент resources/js\Components\Masters\MasterGallery\GalleryImage.vue (изменён в 10:23)
 
 🎯 **Скорее всего работали над:** Vue компонентами и UI
 
@@ -112,4 +112,4 @@ _... и ещё 10_
 4. ✅ Фокусируйся на MVP функциональности
 5. ✅ Давай конкретные команды для терминала
 
-*Этот контекст автоматически сгенерирован 10.07.2025 в 10:56*
+*Этот контекст автоматически сгенерирован 10.07.2025 в 11:01*
