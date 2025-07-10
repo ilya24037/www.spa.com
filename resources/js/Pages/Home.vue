@@ -12,7 +12,7 @@
           { title: 'Массажисты', href: '/masters' },
           { title: currentCity }
         ]"
-        class="mb-4"
+        class="mb-6"
       />
 
       <!-- Заголовок -->

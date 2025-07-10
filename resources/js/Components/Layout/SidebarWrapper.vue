@@ -78,7 +78,7 @@
       <!-- Панель -->
       <div 
         :class="[
-          mobileMode === 'bottom-sheet' ? MOBILE_BOTTOM_SHEET_CLASSES : MOBILE_PANEL_CLASSES,
+          mobileMode === 'bottom-sheet' ? MOBILE_BOTTOM_SHEET_CLASSES : mobilePanelClasses,
           mobileWidthClass
         ]"
         @click.stop
@@ -202,10 +202,12 @@ defineEmits(['update:modelValue'])
 
 // Вычисляемые свойства
 const desktopPositionClasses = computed(() => {
+  // ВАЖНО: НЕ добавляем order классы по умолчанию!
+  // Это позволит существующим использованиям работать как раньше
   if (props.position === 'right') {
-    return 'order-2' // При использовании с flex, сдвигаем вправо
+    return '' // Не добавляем order, позиционирование через родительский контейнер
   }
-  return 'order-1'
+  return '' // По умолчанию тоже без order
 })
 
 const stickyClass = computed(() => {
@@ -220,5 +222,13 @@ const mobileWidthClass = computed(() => {
     return 'w-full'
   }
   return props.widthClass || MOBILE_WIDTH
+})
+
+// Вычисляемое свойство для мобильной панели с учетом позиции
+const mobilePanelClasses = computed(() => {
+  if (props.position === 'right') {
+    return MOBILE_PANEL_CLASSES + ' right-0'
+  }
+  return MOBILE_PANEL_CLASSES + ' left-0'
 })
 </script>
