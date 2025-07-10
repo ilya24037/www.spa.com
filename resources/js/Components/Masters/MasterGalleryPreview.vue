@@ -102,7 +102,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import ImageGalleryModal from './ImageGalleryModal.vue'
+import ImageGalleryModal from '@/Components/Common/ImageGalleryModal.vue'
 
 // Пропсы
 const props = defineProps({
