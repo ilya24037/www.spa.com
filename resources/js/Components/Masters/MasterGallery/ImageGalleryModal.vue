@@ -141,7 +141,6 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
-import { router } from '@inertiajs/vue3'
 
 // Пропсы
 const props = defineProps({

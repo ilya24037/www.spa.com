@@ -1,199 +1,144 @@
-<!-- resources/js/Components/Masters/ServicesSection.vue -->
 <template>
-  <ContentCard>
-    <template #header>
-      <div class="flex items-center justify-between">
-        <h2 class="text-lg font-semibold">Услуги и цены</h2>
-        <span class="text-sm text-gray-500">
-          {{ services.length }} {{ servicesText }}
-        </span>
-      </div>
-    </template>
-    
-    <!-- Фильтр по категориям -->
-    <div v-if="categories.length > 1" class="mb-6">
-      <div class="flex flex-wrap gap-2">
-        <button
-          @click="selectedCategory = null"
-          class="px-4 py-2 rounded-lg text-sm font-medium transition-all"
-          :class="selectedCategory === null 
-            ? 'bg-indigo-600 text-white' 
-            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
-        >
-          Все услуги
-        </button>
-        <button
-          v-for="category in categories"
-          :key="category"
-          @click="selectedCategory = category"
-          class="px-4 py-2 rounded-lg text-sm font-medium transition-all"
-          :class="selectedCategory === category 
-            ? 'bg-indigo-600 text-white' 
-            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
-        >
-          {{ category }}
-        </button>
-      </div>
-    </div>
-    
-    <!-- Список услуг -->
-    <div class="space-y-3">
-      <TransitionGroup
-        enter-active-class="transition-all duration-300"
-        enter-from-class="opacity-0 transform translate-y-2"
-        leave-active-class="transition-all duration-200"
-        leave-to-class="opacity-0 transform scale-95"
-      >
-        <div 
-          v-for="service in filteredServices"
-          :key="service.id"
-          class="service-item group"
-          @click="selectService(service)"
-        >
-          <!-- Основная информация -->
-          <div class="flex items-start justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all cursor-pointer">
-            <div class="flex-1 pr-4">
-              <!-- Название и категория -->
-              <div class="flex items-start gap-3 mb-2">
-                <h3 class="font-medium text-gray-900 group-hover:text-indigo-600 transition-colors">
-                  {{ service.name }}
-                </h3>
-                <!-- Популярная услуга -->
-                <span 
-                  v-if="service.bookings_count > 10"
-                  class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800"
-                >
-                  Популярно
-                </span>
-              </div>
-              
-              <!-- Категория и длительность -->
-              <div class="flex items-center gap-4 text-sm text-gray-600 mb-2">
-                <span class="flex items-center gap-1">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                  </svg>
-                  {{ service.category }}
-                </span>
-                <span class="flex items-center gap-1">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  {{ service.duration }} мин
-                </span>
-              </div>
-              
-              <!-- Описание -->
-              <p v-if="service.description" class="text-sm text-gray-500 line-clamp-2">
-                {{ service.description }}
-              </p>
-              
-              <!-- Дополнительные опции -->
-              <div v-if="service.features?.length" class="mt-3 flex flex-wrap gap-2">
-                <span 
-                  v-for="feature in service.features"
-                  :key="feature"
-                  class="inline-flex items-center px-2 py-1 rounded-md bg-indigo-50 text-indigo-700 text-xs font-medium"
-                >
-                  {{ feature }}
-                </span>
-              </div>
+    <AppLayout :title="`${master.user.name} - Мастер массажа`">
+        <div class="min-h-screen bg-gray-50">
+            <!-- Хлебные крошки -->
+            <div class="container mx-auto px-4 py-4">
+                <nav class="flex text-sm text-gray-600">
+                    <Link href="/" class="hover:text-purple-600">Главная</Link>
+                    <span class="mx-2">/</span>
+                    <Link href="/masters" class="hover:text-purple-600">Мастера</Link>
+                    <span class="mx-2">/</span>
+                    <span class="text-gray-900">{{ master.user.name }}</span>
+                </nav>
             </div>
-            
-            <!-- Цена и действие -->
-            <div class="text-right flex-shrink-0">
-              <div class="mb-2">
-                <!-- Старая цена со скидкой -->
-                <div v-if="service.old_price" class="text-sm text-gray-500 line-through">
-                  {{ formatPrice(service.old_price) }} ₽
+
+            <!-- Основной контент -->
+            <div class="container mx-auto px-4 pb-12">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Левая колонка - Галерея и основная информация -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Галерея фотографий -->
+                        <MasterGalleryPreview
+                            :images="masterImages"
+                            :master-name="master.user.name"
+                            :is-premium="master.is_premium"
+                            :rating="master.rating"
+                            :reviews-count="master.reviews_count"
+                        />
+
+                        <!-- Основная информация -->
+                        <div class="bg-white rounded-xl shadow-sm p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div>
+                                    <h1 class="text-2xl font-bold text-gray-900">{{ master.user.name }}</h1>
+                                    <p class="text-gray-600 mt-1">{{ master.specialization || 'Мастер массажа' }}</p>
+                                </div>
+                                
+                                <!-- Рейтинг -->
+                                <div class="flex items-center gap-2">
+                                    <div class="flex items-center">
+                                        <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                        </svg>
+                                        <span class="ml-1 font-semibold">{{ master.rating || '5.0' }}</span>
+                                    </div>
+                                    <span class="text-gray-500">({{ master.reviews_count || 0 }} отзывов)</span>
+                                </div>
+                            </div>
+
+                            <!-- Описание -->
+                            <div class="prose prose-gray max-w-none">
+                                <h3 class="text-lg font-semibold mb-2">О мастере</h3>
+                                <p class="text-gray-700">{{ master.bio || 'Профессиональный мастер массажа с большим опытом работы.' }}</p>
+                            </div>
+
+                            <!-- Опыт и образование -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-600">Опыт работы</p>
+                                        <p class="font-semibold">{{ master.experience_years || 5 }} лет</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-600">Сертификаты</p>
+                                        <p class="font-semibold">{{ master.certificates_count || 12 }} шт</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Услуги мастера -->
+                        <ServicesSection :services="master.services || []" />
+
+                        <!-- Отзывы -->
+                        <ReviewsSection :master-id="master.id" :reviews="master.reviews || []" />
+                    </div>
+
+                    <!-- Правая колонка - Виджет бронирования -->
+                    <div class="lg:sticky lg:top-20 h-fit space-y-4">
+                        <!-- Виджет бронирования -->
+                        <BookingWidget :master="master" />
+
+                        <!-- Похожие мастера -->
+                        <SimilarMastersSection :current-master-id="master.id" :category-id="master.services?.[0]?.category_id" />
+                    </div>
                 </div>
-                <!-- Текущая цена -->
-                <div class="text-xl font-bold text-indigo-600">
-                  {{ formatPrice(service.price) }} ₽
-                </div>
-                <!-- Скидка -->
-                <div v-if="service.discount_percent" class="text-xs text-green-600 font-medium">
-                  -{{ service.discount_percent }}%
-                </div>
-              </div>
-              
-              <button 
-                @click.stop="$emit('book-service', service)"
-                class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
-              >
-                Записаться
-              </button>
             </div>
-          </div>
         </div>
-      </TransitionGroup>
-    </div>
-    
-    <!-- Пустое состояние -->
-    <div v-if="filteredServices.length === 0" class="text-center py-8">
-      <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      <p class="text-gray-500">Услуги в этой категории не найдены</p>
-    </div>
-  </ContentCard>
+    </AppLayout>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import ContentCard from '@/Components/Layout/ContentCard.vue'
+import { computed } from 'vue'
+import { Link } from '@inertiajs/vue3'
+import AppLayout from '@/Layouts/AppLayout.vue'
+import MasterGalleryPreview from '@/Components/Masters/MasterGalleryPreview.vue'
+import BookingWidget from '@/Components/Masters/BookingWidget.vue'
+import ServicesSection from '@/Components/Masters/ServicesSection.vue'
+import ReviewsSection from '@/Components/Masters/ReviewsSection.vue'
+import SimilarMastersSection from '@/Components/Masters/SimilarMastersSection.vue'
 
+// Пропсы
 const props = defineProps({
-  services: {
-    type: Array,
-    default: () => []
-  }
+    master: {
+        type: Object,
+        required: true
+    }
 })
-
-const emit = defineEmits(['book-service', 'select-service'])
-
-// Состояние
-const selectedCategory = ref(null)
 
 // Вычисляемые свойства
-const categories = computed(() => {
-  const cats = [...new Set(props.services.map(s => s.category))]
-  return cats.filter(Boolean)
+const masterImages = computed(() => {
+    // Если есть галерея фотографий
+    if (props.master.gallery && props.master.gallery.length > 0) {
+        return props.master.gallery.map(img => img.url || img)
+    }
+    
+    // Если есть только аватар
+    if (props.master.avatar_url) {
+        return [props.master.avatar_url]
+    }
+    
+    // Заглушки для демо
+    return [
+        '/images/masters/demo-1.jpg',
+        '/images/masters/demo-2.jpg',
+        '/images/masters/demo-3.jpg',
+        '/images/masters/demo-4.jpg',
+        '/images/masters/demo-5.jpg',
+        '/images/masters/demo-6.jpg'
+    ]
 })
-
-const filteredServices = computed(() => {
-  if (!selectedCategory.value) {
-    return props.services
-  }
-  return props.services.filter(s => s.category === selectedCategory.value)
-})
-
-const servicesText = computed(() => {
-  const count = props.services.length
-  const lastDigit = count % 10
-  const lastTwoDigits = count % 100
-  
-  if (lastTwoDigits >= 11 && lastTwoDigits <= 14) return 'услуг'
-  if (lastDigit === 1) return 'услуга'
-  if (lastDigit >= 2 && lastDigit <= 4) return 'услуги'
-  return 'услуг'
-})
-
-// Методы
-const selectService = (service) => {
-  emit('select-service', service)
-}
-
-const formatPrice = (price) => {
-  return new Intl.NumberFormat('ru-RU').format(price || 0)
-}
 </script>
-
-<style scoped>
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-</style>
