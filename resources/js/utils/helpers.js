@@ -13,6 +13,28 @@ export function pluralize(number, words) {
 }
 
 /**
+ * Альтернативная версия pluralize для совместимости
+ * @param {number} count - число
+ * @param {string} one - форма для 1
+ * @param {string} few - форма для 2-4
+ * @param {string} many - форма для 5+
+ * @returns {string}
+ */
+export function pluralizeAlt(count, one, few, many) {
+    return pluralize(count, [one, few, many])
+}
+
+/**
+ * Форматирование рейтинга
+ * @param {number|string} rating - рейтинг
+ * @returns {string}
+ */
+export function formatRating(rating) {
+    const num = parseFloat(rating) || 0
+    return num.toFixed(1)
+}
+
+/**
  * Форматирование телефона
  * @param {string} phone - телефон
  * @returns {string}
@@ -86,6 +108,26 @@ export function formatDate(date, format = 'short') {
 export function formatPrice(price, currency = '₽') {
     if (!price) return '0'
     return new Intl.NumberFormat('ru-RU').format(price) + ' ' + currency
+}
+
+/**
+ * Форматирование продолжительности в минутах
+ * @param {number} minutes - минуты
+ * @returns {string}
+ */
+export function formatDuration(minutes) {
+    if (!minutes) return ''
+    
+    const hours = Math.floor(minutes / 60)
+    const mins = minutes % 60
+    
+    if (hours > 0 && mins > 0) {
+        return `${hours} ${pluralize(hours, ['час', 'часа', 'часов'])} ${mins} ${pluralize(mins, ['минута', 'минуты', 'минут'])}`
+    } else if (hours > 0) {
+        return `${hours} ${pluralize(hours, ['час', 'часа', 'часов'])}`
+    } else {
+        return `${mins} ${pluralize(mins, ['минута', 'минуты', 'минут'])}`
+    }
 }
 
 /**
@@ -217,4 +259,77 @@ export function formatDistance(distance) {
     } else {
         return `${Math.round(distance)} км`
     }
+}
+
+/**
+ * Получение времени работы из расписания
+ * @param {Array} schedules - массив расписаний
+ * @returns {string}
+ */
+export function getWorkingHours(schedules) {
+    if (!schedules || !schedules.length) return 'Не указано'
+    
+    const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
+    const grouped = {}
+    
+    // Группируем по одинаковому времени
+    schedules.forEach(schedule => {
+        const key = `${schedule.start_time}-${schedule.end_time}`
+        if (!grouped[key]) {
+            grouped[key] = []
+        }
+        grouped[key].push(schedule.day_of_week)
+    })
+    
+    // Форматируем вывод
+    const parts = []
+    for (const [time, dayIndices] of Object.entries(grouped)) {
+        const [start, end] = time.split('-')
+        const dayNames = dayIndices.map(i => days[i])
+        
+        if (dayIndices.length === 7) {
+            parts.push(`Ежедневно: ${start} - ${end}`)
+        } else if (dayIndices.length === 5 && !dayIndices.includes(5) && !dayIndices.includes(6)) {
+            parts.push(`Пн-Пт: ${start} - ${end}`)
+        } else {
+            parts.push(`${dayNames.join(', ')}: ${start} - ${end}`)
+        }
+    }
+    
+    return parts.join('; ')
+}
+
+/**
+ * Форматирование времени (HH:mm)
+ * @param {string} time - время
+ * @returns {string}
+ */
+export function formatTime(time) {
+    if (!time) return ''
+    const [hours, minutes] = time.split(':')
+    return `${hours}:${minutes || '00'}`
+}
+
+/**
+ * Проверка, прошло ли время
+ * @param {string} date - дата
+ * @param {string} time - время
+ * @returns {boolean}
+ */
+export function isPastDateTime(date, time) {
+    const dateTime = new Date(`${date} ${time}`)
+    return dateTime < new Date()
+}
+
+/**
+ * Получение названия дня недели
+ * @param {number} dayIndex - индекс дня (0-6)
+ * @returns {string}
+ */
+export function getDayName(dayIndex, format = 'short') {
+    const days = {
+        short: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
+        long: ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
+    }
+    return days[format][dayIndex] || ''
 }
