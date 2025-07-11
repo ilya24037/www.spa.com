@@ -1,63 +1,4 @@
-<?php
-
-namespace App\Http\Controllers;
-
-use App\Models\MasterProfile;
-use App\Models\MassageCategory;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use Inertia\Inertia;
-
-/**
- * Контроллер анкет мастеров
- * ────────────────────────
- * 1. API‑каталог           (apiIndex)
- * 2. Публичная карточка    (show)
- * 3. CRUD анкеты           (create / store / edit / update / destroy)
- */
-class MasterController extends Controller
-{
-    /*───────────────────────────────────────
-     | API‑каталог мастеров
-     |──────────────────────────────────────*/
-
-    public function apiIndex(Request $request)
-    {
-        $query = MasterProfile::query()
-            ->with(['user', 'services', 'photos'])
-            ->where('is_active', true)
-            ->where('status', 'active');
-
-        /* Фильтрация */
-        if ($request->filled('category_id')) {
-            $query->whereHas('services', fn ($q) =>
-                $q->where('massage_category_id', $request->category_id));
-        }
-        if ($request->filled('price_min')) {
-            $query->where('price_from', '>=', $request->price_min);
-        }
-        if ($request->filled('price_max')) {
-            $query->where('price_from', '<=', $request->price_max);
-        }
-        if ($request->filled('city')) {
-            $query->where('city', $request->city);
-        }
-
-        /* Сортировка */
-        match ($request->get('sort', 'rating')) {
-            'price_asc'   => $query->orderBy('price_from'),
-            'price_desc'  => $query->orderByDesc('price_from'),
-            'reviews'     => $query->orderByDesc('reviews_count'),
-            'rating'      => $query->orderByDesc('rating'),
-            default       => $query->orderByDesc('created_at'),
-        };
-
-        return $query->paginate(12);
-    }
-
-    /*───────────────────────────────────────
+/*───────────────────────────────────────
      | Публичная карточка мастера
      |──────────────────────────────────────*/
 
@@ -68,7 +9,7 @@ class MasterController extends Controller
             'user',
             'services.category',
             'photos',
-            'reviews.client',
+            'reviews.user', // Изменено с reviews.client на reviews.user
             'workZones',
             'schedules',
         ])->findOrFail($master);
@@ -90,21 +31,41 @@ class MasterController extends Controller
         $profile->increment('views_count');
 
         /* 5. Галерея изображений */
-        $gallery = $profile->photos->map(static function ($photo) {
-            return [
-                'url'   => Storage::url($photo->path),
-                'thumb' => Storage::url($photo->getThumbPath()), // метод можно добавить в модель Photo
-                'alt'   => $photo->alt ?? 'Фото мастера',
+        $gallery = [];
+        
+        // Добавляем главное фото из аватара
+        if ($profile->avatar) {
+            $gallery[] = [
+                'id'    => 0,
+                'url'   => $profile->avatar_url,
+                'thumb' => $profile->avatar_url,
+                'alt'   => 'Фото ' . $profile->display_name,
+                'is_main' => true
             ];
-        });
+        }
+        
+        // Добавляем фото из галереи
+        if ($profile->photos->isNotEmpty()) {
+            foreach ($profile->photos as $photo) {
+                $gallery[] = [
+                    'id'    => $photo->id,
+                    'url'   => \App\Helpers\ImageHelper::getImageUrl($photo->path),
+                    'thumb' => \App\Helpers\ImageHelper::getImageUrl($photo->path),
+                    'alt'   => $photo->alt ?? 'Фото мастера',
+                    'is_main' => $photo->is_main ?? false
+                ];
+            }
+        }
 
-        if ($gallery->isEmpty()) {
-            // fallback – четыре плейсхолдера
+        // Если нет фото, добавляем заглушки
+        if (empty($gallery)) {
             $gallery = collect(range(1, 4))->map(fn ($i) => [
+                'id'    => $i,
                 'url'   => asset("images/placeholders/master-$i.jpg"),
                 'thumb' => asset("images/placeholders/master-$i-thumb.jpg"),
                 'alt'   => "Фото $i",
-            ]);
+                'is_main' => $i === 1
+            ])->toArray();
         }
 
         /* 6. Проверяем «Избранное» */
@@ -112,43 +73,66 @@ class MasterController extends Controller
             ? auth()->user()->favorites()->where('master_profile_id', $profile->id)->exists()
             : false;
 
-        /* 7. Подготовка данных для Vue */
+        /* 7. Получаем минимальную и максимальную цену из услуг */
+        $priceFrom = $profile->services->min('price') ?? 2000;
+        $priceTo = $profile->services->max('price') ?? 5000;
+
+        /* 8. Подготовка данных для Vue */
         $masterDTO = [
             'id'               => $profile->id,
             'name'             => $profile->display_name,
             'slug'             => $profile->slug,
-            'description'      => $profile->description,
-            'age'              => $profile->age,
+            'description'      => $profile->bio, // Используем bio вместо description
+            'bio'              => $profile->bio,
             'experience_years' => $profile->experience_years,
-            'rating'           => $profile->rating,
+            'rating'           => (float) $profile->rating, // Приводим к float
             'reviews_count'    => $profile->reviews_count,
             'views_count'      => $profile->views_count,
-            'price_from'       => $profile->price_from,
-            'price_to'         => $profile->price_to,
+            'price_from'       => $priceFrom, // Вычисленное значение
+            'price_to'         => $priceTo,   // Вычисленное значение
             'avatar'           => $profile->avatar_url,
             'is_available_now' => $profile->isAvailableNow(),
             'is_favorite'      => $isFavorite,
             'is_verified'      => $profile->is_verified,
             'is_premium'       => $profile->isPremium(),
-            'phone'            => $profile->show_phone ? $profile->phone : null,
+            'phone'            => $profile->show_contacts ? $profile->phone : null, // show_contacts вместо show_phone
             'whatsapp'         => $profile->whatsapp,
             'telegram'         => $profile->telegram,
+            'show_contacts'    => $profile->show_contacts,
             'city'             => $profile->city,
             'district'         => $profile->district,
             'metro_station'    => $profile->metro_station,
-            'address'          => $profile->address,
-            'salon_name'       => $profile->salon_name,
+            'home_service'     => $profile->home_service,
+            'salon_service'    => $profile->salon_service,
+            'salon_address'    => $profile->salon_address, // salon_address вместо address
             'services'         => $profile->services->map(fn ($service) => [
-                'id'        => $service->id,
-                'name'      => $service->name,
-                'category'  => $service->category->name ?? 'Массаж',
-                'price'     => $service->price,
-                'duration'  => $service->duration,
-                'description'=> $service->description,
+                'id'          => $service->id,
+                'name'        => $service->name,
+                'category'    => $service->category->name ?? 'Массаж',
+                'price'       => $service->price,
+                'duration'    => $service->duration,
+                'description' => $service->description,
             ]),
-            'work_zones'       => $profile->workZones,
-            'schedules'        => $profile->schedules,
-            'reviews'          => $profile->reviews->take(5),
+            'work_zones'       => $profile->workZones->map(fn ($zone) => [
+                'id'          => $zone->id,
+                'district'    => $zone->district,
+                'city'        => $zone->city ?? $profile->city,
+                'is_active'   => $zone->is_active ?? true,
+            ]),
+            'schedules'        => $profile->schedules->map(fn ($schedule) => [
+                'id'              => $schedule->id,
+                'day_of_week'     => $schedule->day_of_week,
+                'start_time'      => $schedule->start_time,
+                'end_time'        => $schedule->end_time,
+                'is_working_day'  => $schedule->is_working_day ?? true,
+            ]),
+            'reviews'          => $profile->reviews->take(5)->map(fn ($review) => [
+                'id'              => $review->id,
+                'rating'          => $review->rating_overall ?? $review->rating,
+                'comment'         => $review->comment,
+                'client_name'     => $review->user->name ?? 'Анонимный клиент',
+                'created_at'      => $review->created_at,
+            ]),
             'gallery'          => $gallery,
             'created_at'       => $profile->created_at,
         ];
@@ -175,39 +159,8 @@ class MasterController extends Controller
             'gallery'        => $gallery,
             'meta'           => $meta,
             'similarMasters' => $this->getSimilarMasters($profile),
+            'reviews'        => $profile->reviews->take(10)->toArray(), // Добавляем reviews в props
+            'availableSlots' => [], // Заглушка для слотов
+            'canReview'      => auth()->check(), // Может ли пользователь оставить отзыв
         ]);
     }
-
-    /*───────────────────────────────────────
-     | CRUD анкеты мастера (коротко без изменений)
-     |──────────────────────────────────────*/
-
-    // create(), store(), edit(), update(), destroy() оставлены без изменений —
-    // логика та же, что была, только убраны повторяющиеся комментарии для краткости.
-
-    /*───────────────────────────────────────
-     | API‑шоу мастера (json)
-     |──────────────────────────────────────*/
-
-    public function apiShow(int $id)
-    {
-        return MasterProfile::with(['services', 'photos', 'workZones'])->findOrFail($id);
-    }
-
-    /*───────────────────────────────────────
-     | Похожие мастера
-     |──────────────────────────────────────*/
-
-    private function getSimilarMasters(MasterProfile $master)
-    {
-        return MasterProfile::where('id', '!=', $master->id)
-            ->where('city', $master->city)
-            ->where('is_active', true)
-            ->whereHas('services', fn ($q) =>
-                $q->whereIn('massage_category_id', $master->services->pluck('massage_category_id')))
-            ->with(['user', 'services', 'photos'])
-            ->orderByDesc('rating')
-            ->limit(4)
-            ->get();
-    }
-}

@@ -115,8 +115,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { router } from '@inertiajs/vue3'
-import { route } from 'ziggy-js' // Импортируем Ziggy функцию
-
+import { route } from 'ziggy-js'
 import { useImages } from '@/Composables/useImages'
 
 const props = defineProps({
@@ -167,17 +166,55 @@ const toggleFavorite = () => {
   })
 }
 
+// Функция транслитерации для slug
+const transliterate = (text) => {
+  const rus = 'щ   ш  ч  ц  ю  я  ё  ж  ъ  ы  э  а б в г д е з и й к л м н о п р с т у ф х ь'.split(' ')
+  const lat = 'shch sh ch cz yu ya yo zh   y  e  a b v g d e z i j k l m n o p r s t u f x  '.split(' ')
+  
+  let result = text.toLowerCase()
+  
+  // Заменяем русские буквы на латинские
+  for (let i = 0; i < rus.length; i++) {
+    const reg = new RegExp(rus[i], 'g')
+    result = result.replace(reg, lat[i])
+  }
+  
+  // Удаляем все не латинские буквы, цифры и дефисы
+  result = result
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .trim()
+  
+  return result || 'master'
+}
+
+const generateSlug = (text) => {
+  if (!text) return 'master'
+  
+  // Если slug уже есть и он корректный (латиница), используем его
+  if (props.master.slug && /^[a-z0-9-]+$/.test(props.master.slug)) {
+    return props.master.slug
+  }
+  
+  // Иначе генерируем новый slug с транслитерацией
+  return transliterate(text)
+}
+
 const goToProfile = () => {
-  const slug = props.master.slug || generateSlug(props.master.display_name || props.master.name)
+  const slug = generateSlug(props.master.display_name || props.master.name || 'master')
   const id = props.master.id
-  // Используем Ziggy!
+  
+  // Формируем URL в формате /masters/{slug}-{id}
   router.visit(route('masters.show', { slug, master: id }))
 }
 
 const openBooking = () => {
-  const slug = props.master.slug || generateSlug(props.master.display_name || props.master.name)
+  const slug = generateSlug(props.master.display_name || props.master.name || 'master')
   const id = props.master.id
-  // Используем Ziggy!
+  
+  // Переход к форме бронирования на странице мастера
   router.visit(route('masters.show', { slug, master: id }) + '#booking')
 }
 
@@ -187,17 +224,6 @@ const showPhone = () => {
   } else {
     alert('Телефон будет доступен после бронирования')
   }
-}
-
-const generateSlug = (text) => {
-  if (!text) return 'master'
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .trim()
-    || 'master'
 }
 
 const handleImageError = (event) => {

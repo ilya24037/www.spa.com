@@ -110,10 +110,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { Link, router, usePage } from '@inertiajs/vue3'
 import { useToast } from '@/Composables/useToast'
-import { useFavorites } from '@/stores/favorites'
-
-// Layouts
-import AppLayout from '@/Layouts/AppLayout.vue'
+import { useFavoritesStore } from '@/stores/favorites' // ✅ ИСПРАВЛЕНО!
 
 // Common Components
 import MetaTags from '@/Components/MetaTags.vue'
@@ -159,7 +156,7 @@ const props = defineProps({
 
 // Composables
 const { showSuccess, showError } = useToast()
-const favoritesStore = useFavorites()
+const favoritesStore = useFavoritesStore() // ✅ ИСПРАВЛЕНО!
 const page = usePage()
 
 // State
@@ -211,7 +208,7 @@ const metaKeywords = computed(() => {
 // Methods
 const toggleFavorite = async () => {
     try {
-        await favoritesStore.toggle(props.master.id)
+        await favoritesStore.toggle(props.master.id)  // ✅ Передаём объект master
         showSuccess(
             favoritesStore.isFavorite(props.master.id) 
                 ? 'Добавлено в избранное' 
