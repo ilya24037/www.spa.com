@@ -149,6 +149,7 @@ class MasterController extends Controller
             'work_zones'       => $profile->workZones,
             'schedules'        => $profile->schedules,
             'reviews'          => $profile->reviews->take(5),
+            'gallery'          => $gallery,
             'created_at'       => $profile->created_at,
         ];
 
