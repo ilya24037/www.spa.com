@@ -98,84 +98,181 @@ class MasterController extends Controller
             'views_count'      => $profile->views_count,
             'price_from'       => $priceFrom,
             'price_to'         => $priceTo,
-            'avatar'           => $profile->avatar_url,
-            'is_available_now' => $profile->isAvailableNow(),
-            'is_favorite'      => $isFavorite,
-            'is_verified'      => $profile->is_verified,
-            'is_premium'       => $profile->isPremium(),
-            'phone'            => $profile->show_contacts ? $profile->phone : null,
-            'whatsapp'         => $profile->whatsapp,
-            'telegram'         => $profile->telegram,
-            'show_contacts'    => $profile->show_contacts,
             'city'             => $profile->city,
             'district'         => $profile->district,
-            'metro_station'    => $profile->metro_station,
-            'home_service'     => $profile->home_service,
-            'salon_service'    => $profile->salon_service,
-            'salon_address'    => $profile->salon_address,
+            'address'          => $profile->address,
+            'phone'            => $profile->phone,
+            'phone_visible'    => $profile->show_phone,
+            'whatsapp'         => $profile->whatsapp,
+            'telegram'         => $profile->telegram,
+            'working_hours'    => $profile->working_hours,
+            'is_online'        => $profile->is_online,
+            'last_seen'        => $profile->last_seen,
+            'gallery'          => $gallery,
             'services'         => $profile->services->map(fn($s) => [
                 'id'          => $s->id,
                 'name'        => $s->name,
-                'category'    => $s->category->name ?? 'Массаж',
                 'price'       => $s->price,
                 'duration'    => $s->duration,
-                'description' => $s->description,
-            ]),
-            'work_zones'       => $profile->workZones->map(fn($z) => [
-                'id'        => $z->id,
-                'district'  => $z->district,
-                'city'      => $z->city ?? $profile->city,
-                'is_active' => $z->is_active ?? true,
-            ]),
-            'schedules'        => $profile->schedules->map(fn($sch) => [
-                'id'             => $sch->id,
-                'day_of_week'    => $sch->day_of_week,
-                'start_time'     => $sch->start_time,
-                'end_time'       => $sch->end_time,
-                'is_working_day' => $sch->is_working_day ?? true,
-            ]),
-            'reviews'          => $profile->reviews->take(5)->map(fn($r) => [
+                'category'    => $s->category->name ?? null,
+            ])->toArray(),
+            'reviews'          => $profile->reviews->map(fn($r) => [
                 'id'          => $r->id,
-                'rating'      => $r->rating_overall ?? $r->rating,
+                'rating'      => $r->rating,
                 'comment'     => $r->comment,
-                'client_name' => $r->user->name ?? 'Анонимный клиент',
-                'created_at'  => $r->created_at,
-            ]),
-            'gallery'          => $gallery,
-            'created_at'       => $profile->created_at,
+                'date'        => $r->created_at->format('d.m.Y'),
+                'author_name' => $r->user->name ?? 'Анонимный',
+            ])->toArray(),
+            'schedule'         => $profile->schedules->groupBy('day_of_week')->map(fn($slots, $day) => [
+                'day'   => $day,
+                'slots' => $slots->map(fn($slot) => [
+                    'start' => $slot->start_time,
+                    'end'   => $slot->end_time,
+                ])->toArray(),
+            ])->values()->toArray(),
+            'similar_masters'  => $this->getSimilarMasters($profile),
+            'is_favorite'      => $isFavorite,
         ];
 
-        // SEO-мета
-        $meta = [
-            'title'       => $profile->meta_title,
-            'description' => $profile->meta_description,
-            'keywords'    => implode(', ', [
-                $profile->display_name,
-                'массаж',
-                $profile->city,
-                $profile->district,
-                'массажист',
-            ]),
-            'og:title'       => $profile->meta_title,
-            'og:description' => $profile->meta_description,
-            'og:image'       => $profile->avatar_url ?? asset('images/default-master.jpg'),
-            'og:url'         => $profile->url,
-            'og:type'        => 'profile',
-        ];
+        // 9. Аналитика
+        \Log::info('Master profile viewed', [
+            'master_id' => $profile->id,
+            'visitor_ip' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'referrer' => request()->header('referer'),
+        ]);
 
+        // 10. Возвращаем страницу
         return Inertia::render('Masters/Show', [
-            'master'         => $masterDTO,
-            'gallery'        => $gallery,
-            'meta'           => $meta,
-            'similarMasters' => $this->getSimilarMasters($profile),
-            'reviews'        => $profile->reviews->take(10)->toArray(),
-            'availableSlots' => [],
-            'canReview'      => auth()->check(),
+            'master' => $masterDTO,
+            'breadcrumbs' => [
+                ['name' => 'Главная', 'url' => '/'],
+                ['name' => 'Мастера', 'url' => '/masters'],
+                ['name' => $profile->display_name, 'url' => null],
+            ],
+            'meta' => [
+                'title' => $profile->meta_title ?: $profile->display_name . ' - массаж в ' . $profile->city,
+                'description' => $profile->meta_description ?: $profile->bio,
+                'keywords' => $profile->meta_keywords ?: 'массаж, ' . $profile->city . ', ' . $profile->display_name,
+                'og_image' => $gallery[0]['url'] ?? null,
+            ],
         ]);
     }
 
     /**
-     * Возвращает «похожих» мастеров (по тому же городу, кроме текущего).
+     * Показать форму редактирования анкеты
+     */
+    public function edit($id)
+    {
+        // Проверяем что пользователь может редактировать эту анкету
+        $master = auth()->user()->masterProfiles()->with(['services', 'photos'])->findOrFail($id);
+
+        return Inertia::render('Masters/Edit', [
+            'master' => [
+                'id' => $master->id,
+                'display_name' => $master->display_name,
+                'bio' => $master->bio,
+                'age' => $master->age,
+                'experience_years' => $master->experience_years,
+                'city' => $master->city,
+                'district' => $master->district,
+                'address' => $master->address,
+                'salon_name' => $master->salon_name,
+                'phone' => $master->phone,
+                'whatsapp' => $master->whatsapp,
+                'telegram' => $master->telegram,
+                'price_from' => $master->price_from,
+                'price_to' => $master->price_to,
+                'show_phone' => $master->show_phone,
+                'is_active' => $master->is_active,
+                'rating' => $master->rating,
+                'reviews_count' => $master->reviews_count,
+                'slug' => $master->slug,
+                'photos' => $master->photos->map(fn($photo) => [
+                    'id' => $photo->id,
+                    'path' => $photo->path,
+                    'alt' => $photo->alt,
+                    'is_main' => $photo->is_main
+                ]),
+                'services' => $master->services->map(fn($service) => [
+                    'id' => $service->id,
+                    'name' => $service->name,
+                    'price' => $service->price,
+                    'duration' => $service->duration,
+                    'category_id' => $service->category_id
+                ])
+            ],
+            'cities' => ['Москва', 'Санкт-Петербург', 'Казань', 'Новосибирск', 'Екатеринбург', 'Нижний Новгород'],
+            'categories' => \App\Models\MassageCategory::all(['id', 'name'])
+        ]);
+    }
+
+    /**
+     * Обновить анкету мастера
+     */
+    public function update(Request $request, $id)
+    {
+        // Проверяем что пользователь может редактировать эту анкету
+        $profile = auth()->user()->masterProfiles()->findOrFail($id);
+
+        $validated = $request->validate([
+            'display_name' => 'required|string|max:255',
+            'description' => 'required|string|min:50',
+            'age' => 'nullable|integer|min:18|max:65',
+            'experience_years' => 'nullable|integer|min:0|max:50',
+            'city' => 'required|string',
+            'district' => 'nullable|string',
+            'address' => 'nullable|string',
+            'salon_name' => 'nullable|string|max:255',
+            'phone' => 'required|string',
+            'whatsapp' => 'nullable|string',
+            'telegram' => 'nullable|string',
+            'price_from' => 'required|integer|min:500',
+            'price_to' => 'nullable|integer|gt:price_from',
+            'show_phone' => 'boolean',
+        ]);
+
+        // Обновляем профиль
+        $profile->update([
+            'display_name' => $validated['display_name'],
+            'bio' => $validated['description'],
+            'age' => $validated['age'],
+            'experience_years' => $validated['experience_years'],
+            'city' => $validated['city'],
+            'district' => $validated['district'],
+            'address' => $validated['address'],
+            'salon_name' => $validated['salon_name'],
+            'phone' => $validated['phone'],
+            'whatsapp' => $validated['whatsapp'],
+            'telegram' => $validated['telegram'],
+            'price_from' => $validated['price_from'],
+            'price_to' => $validated['price_to'],
+            'show_phone' => $validated['show_phone'] ?? false,
+        ]);
+
+        // Обработка фотографий
+        if ($request->hasFile('photos')) {
+            foreach ($request->file('photos') as $index => $photo) {
+                $path = $photo->store('master-photos', 'public');
+                
+                $profile->photos()->create([
+                    'path' => $path,
+                    'is_main' => $request->input("photos.{$index}.is_main", false),
+                    'alt' => "Фото мастера {$profile->display_name}"
+                ]);
+            }
+        }
+
+        // Регенерируем meta-теги при обновлении профиля
+        $profile->generateMetaTags()->save();
+
+        return redirect()
+            ->route('masters.show', [$profile->slug, $profile->id])
+            ->with('success', 'Анкета обновлена!');
+    }
+
+    /**
+     * Получить похожих мастеров
      */
     protected function getSimilarMasters(MasterProfile $profile): array
     {
