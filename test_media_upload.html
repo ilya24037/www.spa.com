@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Тест загрузки медиа</title>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 50px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        .button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+        .button:hover { background: #0056b3; }
+        .result { margin-top: 20px; padding: 15px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .media-preview { max-width: 200px; max-height: 200px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Тест загрузки медиа</h1>
+    
+    <h2>Загрузка фотографий</h2>
+    <form id="photoForm" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="master_id_photo">ID мастера:</label>
+            <input type="number" id="master_id_photo" value="3" required>
+        </div>
+
+        <div class="form-group">
+            <label for="photos">Выберите фотографии:</label>
+            <input type="file" id="photos" name="photos[]" multiple accept="image/*" required>
+        </div>
+
+        <button type="submit" class="button">Загрузить фотографии</button>
+    </form>
+
+    <div id="photoResult"></div>
+
+    <hr>
+
+    <h2>Загрузка видео</h2>
+    <form id="videoForm" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="master_id_video">ID мастера:</label>
+            <input type="number" id="master_id_video" value="3" required>
+        </div>
+
+        <div class="form-group">
+            <label for="video">Выберите видео:</label>
+            <input type="file" id="video" name="video" accept="video/*" required>
+        </div>
+
+        <button type="submit" class="button">Загрузить видео</button>
+    </form>
+
+    <div id="videoResult"></div>
+
+    <script>
+        // Загрузка фотографий
+        document.getElementById('photoForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const resultDiv = document.getElementById('photoResult');
+            resultDiv.innerHTML = 'Загрузка...';
+            
+            const formData = new FormData();
+            const masterId = document.getElementById('master_id_photo').value;
+            const files = document.getElementById('photos').files;
+            
+            for (let i = 0; i < files.length; i++) {
+                formData.append('photos[]', files[i]);
+            }
+            
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/masters/${masterId}/media/photos`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': await getCSRFToken()
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    let photosHtml = '';
+                    data.photos.forEach(photo => {
+                        photosHtml += `
+                            <div>
+                                <img src="${photo.thumb_url}" class="media-preview" alt="Фото">
+                                <p>Размер: ${photo.file_size}</p>
+                            </div>
+                        `;
+                    });
+                    
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ Успешно!</h3>
+                            <p>${data.message}</p>
+                            <div>${photosHtml}</div>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ Ошибка</h3>
+                            <p>${data.error}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ Ошибка</h3>
+                        <p>Не удалось выполнить запрос: ${error.message}</p>
+                    </div>
+                `;
+            }
+        });
+
+        // Загрузка видео
+        document.getElementById('videoForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const resultDiv = document.getElementById('videoResult');
+            resultDiv.innerHTML = 'Загрузка...';
+            
+            const formData = new FormData();
+            const masterId = document.getElementById('master_id_video').value;
+            const file = document.getElementById('video').files[0];
+            
+            formData.append('video', file);
+            
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/masters/${masterId}/media/video`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': await getCSRFToken()
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ Успешно!</h3>
+                            <p>${data.message}</p>
+                            <p>Размер: ${data.video.file_size}</p>
+                            <p>Длительность: ${data.video.duration}</p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ Ошибка</h3>
+                            <p>${data.error}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ Ошибка</h3>
+                        <p>Не удалось выполнить запрос: ${error.message}</p>
+                    </div>
+                `;
+            }
+        });
+
+        async function getCSRFToken() {
+            const response = await fetch('/csrf-token');
+            const data = await response.json();
+            return data.token;
+        }
+    </script>
+</body>
+</html> 

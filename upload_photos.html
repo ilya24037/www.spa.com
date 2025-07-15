@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Загрузка фотографий мастеру</title>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 50px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        .button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+        .button:hover { background: #0056b3; }
+        .result { margin-top: 20px; padding: 15px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .photo-preview { max-width: 200px; max-height: 200px; margin: 10px 0; }
+        .instructions { background: #e9ecef; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Загрузка фотографий мастеру</h1>
+    
+    <div class="instructions">
+        <h3>📁 Где разместить фотографии:</h3>
+        <p><strong>Вариант 1:</strong> Поместите фотографии в папку <code>public/images/masters/</code></p>
+        <p><strong>Вариант 2:</strong> Поместите фотографии в папку <code>storage/app/public/masters/</code></p>
+        <p><strong>Поддерживаемые форматы:</strong> JPG, PNG, GIF (до 2MB)</p>
+    </div>
+
+    <form id="uploadForm">
+        <div class="form-group">
+            <label for="master_id">ID мастера:</label>
+            <input type="number" id="master_id" value="3" required>
+            <small>ID мастера Елены Сидоровой: 3</small>
+        </div>
+
+        <div class="form-group">
+            <label for="file_path">Путь к файлу:</label>
+            <input type="text" id="file_path" placeholder="images/masters/photo1.jpg" required>
+            <small>Пример: images/masters/elena1.jpg или storage/masters/elena2.jpg</small>
+        </div>
+
+        <div class="form-group">
+            <label for="is_main">Сделать главной фотографией:</label>
+            <select id="is_main">
+                <option value="false">Нет</option>
+                <option value="true">Да</option>
+            </select>
+        </div>
+
+        <button type="submit" class="button">Добавить фотографию</button>
+    </form>
+
+    <div id="result"></div>
+
+    <hr>
+
+    <h2>Загрузка файлов</h2>
+    <form id="fileUploadForm" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="master_id_upload">ID мастера:</label>
+            <input type="number" id="master_id_upload" value="3" required>
+        </div>
+
+        <div class="form-group">
+            <label for="photos">Выберите фотографии:</label>
+            <input type="file" id="photos" name="photos[]" multiple accept="image/*" required>
+        </div>
+
+        <button type="submit" class="button">Загрузить фотографии</button>
+    </form>
+
+    <div id="uploadResult"></div>
+
+    <script>
+        // Добавление локальной фотографии
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Загрузка...';
+            
+            const formData = {
+                master_id: document.getElementById('master_id').value,
+                file_path: document.getElementById('file_path').value,
+                is_main: document.getElementById('is_main').value === 'true'
+            };
+            
+            try {
+                const response = await fetch('http://127.0.0.1:8000/master/photos/local', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': await getCSRFToken()
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ Успешно!</h3>
+                            <p>${data.message}</p>
+                            <img src="${data.photo.url}" class="photo-preview" alt="Загруженное фото">
+                            <p><a href="http://127.0.0.1:8000/masters/elena-sidorova-3" target="_blank">Посмотреть на странице мастера</a></p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ Ошибка</h3>
+                            <p>${data.error}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ Ошибка</h3>
+                        <p>Не удалось выполнить запрос: ${error.message}</p>
+                    </div>
+                `;
+            }
+        });
+
+        // Загрузка файлов
+        document.getElementById('fileUploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const resultDiv = document.getElementById('uploadResult');
+            resultDiv.innerHTML = 'Загрузка...';
+            
+            const formData = new FormData();
+            const masterId = document.getElementById('master_id_upload').value;
+            const photos = document.getElementById('photos').files;
+            
+            for (let i = 0; i < photos.length; i++) {
+                formData.append('photos[]', photos[i]);
+            }
+            
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/masters/${masterId}/photos`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': await getCSRFToken()
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    let photosHtml = '';
+                    data.photos.forEach(photo => {
+                        photosHtml += `<img src="${photo.url}" class="photo-preview" alt="Загруженное фото">`;
+                    });
+                    
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ Успешно!</h3>
+                            <p>${data.message}</p>
+                            <div>${photosHtml}</div>
+                            <p><a href="http://127.0.0.1:8000/masters/elena-sidorova-3" target="_blank">Посмотреть на странице мастера</a></p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ Ошибка</h3>
+                            <p>${data.error}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ Ошибка</h3>
+                        <p>Не удалось выполнить запрос: ${error.message}</p>
+                    </div>
+                `;
+            }
+        });
+
+        // Получение CSRF токена
+        async function getCSRFToken() {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/');
+                const text = await response.text();
+                const match = text.match(/name="csrf-token" content="([^"]+)"/);
+                return match ? match[1] : '';
+            } catch {
+                return '';
+            }
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,458 @@
+Запрос для AI помощника: Создание платформы объявлений услуг массажа и СПА
+Общее описание проекта
+Необходимо создать полноценную платформу для размещения платных объявлений услуг массажа, СПА и косметологических процедур, аналогичную www.Avito.ru Проект должен быть разработан с использованием современного стека технологий и следовать лучшим практикам разработки.
+Технический стек (обязательно использовать)
+•	Backend: Laravel 12 (PHP 8.3+)
+•	Frontend: Vue.js 3 + Inertia.js
+•	State Management: Pinia
+•	Стилизация: Tailwind CSS
+•	Сборщик: Vite
+•	База данных: MySQL/PostgreSQL
+•	Кеширование: Redis
+•	Поиск: Laravel Scout + Algolia/Meilisearch
+•	Платежи: Stripe/YooKassa
+•	Хранилище файлов: S3/MinIO
+Пошаговая инструкция разработки
+Шаг 1: Архитектура и структура проекта
+Создай детальную архитектуру проекта со следующими модулями:
+1.	Модуль авторизации и регистрации
+o	Регистрация через email/телефон
+o	Двухфакторная аутентификация
+o	Социальная авторизация (VK, Google)
+o	Восстановление пароля
+o	Верификация аккаунта
+2.	Модуль профилей пользователей
+o	Личный кабинет исполнителя
+o	Личный кабинет клиента
+o	Портфолио и сертификаты
+o	Рейтинговая система
+o	История заказов
+3.	Модуль объявлений
+o	Создание/редактирование объявлений
+o	Категории и подкатегории услуг
+o	Гибкая система тарифов
+o	Галерея изображений
+o	Расписание работы
+o	Геолокация (районы города)
+4.	Модуль поиска и фильтрации
+o	Полнотекстовый поиск
+o	Фильтры по категориям
+o	Фильтры по цене
+o	Фильтры по району
+o	Фильтры по рейтингу
+o	Сортировка результатов
+5.	Модуль оплаты и монетизации
+o	Платное размещение объявлений
+o	Пакеты продвижения
+o	VIP-статусы
+o	Подписки для мастеров
+o	История транзакций
+6.	Модуль коммуникации
+o	Внутренний чат
+o	Уведомления (email, SMS, push)
+o	Система жалоб и модерации
+o	Отзывы и комментарии
+Шаг 2: Детальная структура базы данных
+Создай следующие таблицы с миграциями Laravel:
+// Основные таблицы
+- users (id, name, email, phone, password, role, verified_at, etc.)
+- profiles (user_id, bio, avatar, experience, education, certificates, etc.)
+- categories (id, name, slug, parent_id, icon, order)
+- services (id, user_id, category_id, title, description, price_from, price_to, duration, etc.)
+- service_images (id, service_id, path, is_main, order)
+- locations (id, city, district, address, lat, lng)
+- service_locations (service_id, location_id)
+- schedules (id, service_id, day_of_week, open_time, close_time)
+- bookings (id, service_id, client_id, date, time, status, notes)
+- reviews (id, service_id, user_id, rating, comment, created_at)
+- favorites (user_id, service_id)
+- transactions (id, user_id, type, amount, status, payment_method)
+- subscriptions (id, user_id, plan_id, starts_at, ends_at)
+- notifications (id, user_id, type, data, read_at)
+- chats (id, created_at)
+- chat_participants (chat_id, user_id)
+- messages (id, chat_id, user_id, message, read_at)
+Шаг 3: Функциональные требования
+3.1 Для мастеров/исполнителей:
+•	Создание детального профиля с портфолио
+•	Размещение неограниченного количества услуг
+•	Управление расписанием и бронированиями
+•	Настройка районов обслуживания
+•	Загрузка сертификатов и дипломов
+•	Статистика просмотров и конверсии
+•	Управление отзывами
+•	Настройка автоответов
+3.2 Для клиентов:
+•	Удобный поиск услуг
+•	Сравнение мастеров
+•	Онлайн-бронирование
+•	Избранные мастера
+•	История посещений
+•	Система лояльности
+3.3 Для администраторов:
+•	Модерация объявлений
+•	Управление категориями
+•	Финансовая аналитика
+•	Управление пользователями
+•	SEO-настройки
+•	Массовые рассылки
+Шаг 4: UI/UX компоненты на Vue.js 3
+Создай следующие компоненты с использованием Composition API:
+// Основные компоненты
+- HeaderComponent.vue (навигация, поиск, профиль)
+- FooterComponent.vue
+- ServiceCard.vue (карточка услуги в списке)
+- ServiceDetail.vue (детальная страница услуги)
+- FilterSidebar.vue (фильтры поиска)
+- BookingModal.vue (модальное окно бронирования)
+- ReviewsSection.vue (секция отзывов)
+- ChatWidget.vue (виджет чата)
+- ProfileEdit.vue (редактирование профиля)
+- ServiceForm.vue (форма создания/редактирования услуги)
+- ImageUploader.vue (загрузка изображений с preview)
+- ScheduleManager.vue (управление расписанием)
+- PricingTable.vue (таблица тарифов)
+- NotificationCenter.vue (центр уведомлений)
+Шаг 5: API endpoints (Laravel)
+Реализуй RESTful API со следующими маршрутами:
+// Аутентификация
+POST   /api/register
+POST   /api/login
+POST   /api/logout
+POST   /api/password/reset
+
+// Профили
+GET    /api/profiles/{id}
+PUT    /api/profiles/{id}
+POST   /api/profiles/{id}/verify
+
+// Услуги
+GET    /api/services (с пагинацией и фильтрами)
+POST   /api/services
+GET    /api/services/{id}
+PUT    /api/services/{id}
+DELETE /api/services/{id}
+POST   /api/services/{id}/publish
+POST   /api/services/{id}/promote
+
+// Бронирования
+GET    /api/bookings
+POST   /api/bookings
+PUT    /api/bookings/{id}/status
+DELETE /api/bookings/{id}
+
+// Отзывы
+GET    /api/services/{id}/reviews
+POST   /api/services/{id}/reviews
+PUT    /api/reviews/{id}
+DELETE /api/reviews/{id}
+
+// Избранное
+GET    /api/favorites
+POST   /api/favorites/{service_id}
+DELETE /api/favorites/{service_id}
+
+// Чат
+GET    /api/chats
+POST   /api/chats
+GET    /api/chats/{id}/messages
+POST   /api/chats/{id}/messages
+
+// Платежи
+POST   /api/payments/create
+POST   /api/payments/callback
+GET    /api/payments/history
+
+// Поиск
+GET    /api/search/services
+GET    /api/search/suggestions
+Шаг 6: Ключевые функции реализации
+6.1 Система поиска с Algolia/Meilisearch:
+// Настрой индексацию для модели Service
+class Service extends Model
+{
+    use Searchable;
+    
+    public function toSearchableArray()
+    {
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'description' => $this->description,
+            'category' => $this->category->name,
+            'price_from' => $this->price_from,
+            'district' => $this->locations->pluck('district'),
+            'rating' => $this->reviews()->),
+        ];
+    }
+}
+6.2 Realtime чат на Laravel Echo + Pusher:
+// Настрой WebSocket соединение для чата
+Echo.private(`chat.${chatId}`)
+    .listen('MessageSent', (e) => {
+        messages.value.push(e.message);
+    });
+6.3 Система уведомлений:
+// Создай уведомления для ключевых событий
+class BookingConfirmed extends Notification
+{
+    use Queueable;
+    
+    public function via($notifiable)
+    {
+        return ['mail', 'database', 'broadcast'];
+    }
+}
+Шаг 7: SEO и производительность
+1.	SEO оптимизация:
+o	Динамические meta-теги через Inertia
+o	Структурированные данные (Schema.org)
+o	Sitemap генератор
+o	Человекопонятные URL
+o	AMP версии страниц
+2.	Оптимизация производительности:
+o	Lazy loading компонентов
+o	Кеширование на уровне Redis
+o	Оптимизация изображений (WebP)
+o	CDN для статики
+o	Database индексы
+Шаг 8: Безопасность
+1.	Защита данных:
+o	HTTPS везде
+o	Шифрование персональных данных
+o	Rate limiting для API
+o	CSRF защита
+o	XSS предотвращение
+2.	Модерация контента:
+o	Автоматическая проверка на запрещенный контент
+o	Ручная модерация новых объявлений
+o	Система жалоб от пользователей
+o	Блокировка нарушителей
+Шаг 9: Монетизация
+1.	Способы заработка:
+o	Платное размещение (300₽/месяц за объявление)
+o	VIP-размещение (1000₽/месяц - топ выдачи)
+o	Продвижение в категории (500₽/неделя)
+o	Подписки для мастеров (от 1500₽/месяц)
+o	Комиссия с бронирований (5-10%)
+2.	Платежные системы:
+o	Интеграция с ЮKassa
+o	Поддержка банковских карт
+o	Электронные кошельки
+o	Автоплатежи для подписок
+Шаг 10: Дополнительные фичи
+1.	Мобильное приложение (PWA)
+o	Push-уведомления
+o	Офлайн-режим
+o	Установка на домашний экран
+2.	Аналитика для мастеров
+o	Статистика просмотров
+o	Конверсия в бронирования
+o	Демография клиентов
+o	ROI от продвижения
+3.	Программа лояльности
+o	Накопительные баллы
+o	Скидки постоянным клиентам
+o	Реферальная программа
+Примеры кода для начала
+Установка проекта:
+# Создание нового Laravel проекта
+composer create-project laravel/laravel spa-marketplace
+cd spa-marketplace
+
+# Установка Inertia.js
+composer require inertiajs/inertia-laravel
+php artisan inertia:middleware
+
+# Установка Vue.js 3 и зависимостей
+npm install @inertiajs/vue3 vue@3 @vitejs/plugin-vue
+npm install pinia @vueuse/core
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+
+# Установка дополнительных пакетов
+composer require laravel/scout
+composer require laravel/cashier
+composer require pusher/pusher-php-server
+composer require intervention/image
+Базовая структура Vue компонента:
+<template>
+  <div class="service-card bg-white rounded-lg shadow-md p-4 hover:shadow-xl transition-shadow">
+    <div class="relative">
+      <img :src="service.mainImage" :alt="service.title" class="w-full h-48 object-cover rounded-md">
+      <span class="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded text-sm">
+        {{ service.category }}
+      </span>
+    </div>
+    
+    <h3 class="mt-4 text-lg font-semibold">{{ service.title }}</h3>
+    <p class="text-gray-600 text-sm mt-2">{{ service.shortDescription }}</p>
+    
+    <div class="mt-4 flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+        </svg>
+        <span class="text-sm font-medium">{{ service.rating }}</span>
+        <span class="text-sm text-gray-500">({{ service.reviewsCount }})</span>
+      </div>
+      
+      <div class="text-right">
+        <p class="text-sm text-gray-500">от</p>
+        <p class="text-lg font-bold text-green-600">{{ formatPrice(service.priceFrom) }} ₽</p>
+      </div>
+    </div>
+    
+    <div class="mt-4 flex items-center text-sm text-gray-500">
+      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+      </svg>
+      {{ service.district }}
+    </div>
+    
+    <div class="mt-4 flex space-x-2">
+      <button @click="openBooking" class="flex-1 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition-colors">
+        Записаться
+      </button>
+      <button @click="toggleFavorite" class="p-2 border border-gray-300 rounded hover:bg-gray-50">
+        <svg :class="['w-5 h-5', isFavorite ? 'text-red-500 fill-current' : 'text-gray-400']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed } from 'vue'
+import { useServiceStore } from '@/stores/services'
+import { formatPrice } from '@/utils/helpers'
+
+const props = defineProps({
+  service: {
+    type: Object,
+    required: true
+  }
+})
+
+const serviceStore = useServiceStore()
+const isFavorite = computed(() => serviceStore.isFavorite(props.service.id))
+
+const openBooking = () => {
+  // Логика открытия модального окна бронирования
+}
+
+const toggleFavorite = () => {
+  serviceStore.toggleFavorite(props.service.id)
+}
+</script>
+Пример Pinia store:
+// stores/services.js
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+import axios from 'axios'
+
+export const useServiceStore = defineStore('services', () => {
+  const services = ref([])
+  const favorites = ref([])
+  const loading = ref(false)
+  const filters = ref({
+    category: null,
+    priceFrom: null,
+    priceTo: null,
+    district: null,
+    rating: null
+  })
+
+  const filteredServices = computed(() => {
+    return services.value.filter(service => {
+      if (filters.value.category && service.category_id !== filters.value.category) return false
+      if (filters.value.priceFrom && service.price_from < filters.value.priceFrom) return false
+      if (filters.value.priceTo && service.price_to > filters.value.priceTo) return false
+      if (filters.value.district && !service.districts.includes(filters.value.district)) return false
+      if (filters.value.rating && service.rating < filters.value.rating) return false
+      return true
+    })
+  })
+
+  const fetchServices = async (params = {}) => {
+    loading.value = true
+    try {
+      const response = await axios.get('/api/services', { params })
+      services.value = response.data.data
+    } catch (error) {
+      console.error('Error fetching services:', error)
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const toggleFavorite = async (serviceId) => {
+    try {
+      if (isFavorite(serviceId)) {
+        await axios.delete(`/api/favorites/${serviceId}`)
+        favorites.value = favorites.value.filter(id => id !== serviceId)
+      } else {
+        await axios.post(`/api/favorites/${serviceId}`)
+        favorites.value.push(serviceId)
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error)
+    }
+  }
+
+  const isFavorite = (serviceId) => {
+    return favorites.value.includes(serviceId)
+  }
+
+  return {
+    services,
+    favorites,
+    loading,
+    filters,
+    filteredServices,
+    fetchServices,
+    toggleFavorite,
+    isFavorite
+  }
+})
+Инструкция для пошагового запуска
+1.	Начни с базовой установки Laravel и всех зависимостей
+2.	Создай структуру базы данных через миграции
+3.	Настрой аутентификацию и авторизацию
+4.	Реализуй CRUD для основных сущностей (услуги, профили)
+5.	Добавь систему поиска и фильтрации
+6.	Внедри платежную систему
+7.	Создай систему уведомлений и чат
+8.	Оптимизируй производительность
+9.	Добавь аналитику и отчеты
+10.	Проведи тестирование и деплой
+Каждый шаг должен включать:
+•	Детальное описание реализации
+•	Примеры кода
+•	Тесты для проверки функциональности
+•	Документацию для будущих разработчиков
+Важные моменты для новичков
+1.	Используй Laravel Sail для локальной разработки - это упростит настройку окружения
+2.	Следуй принципам SOLID и DRY при написании кода
+3.	Пиши тесты для критичного функционала (PHPUnit, Jest)
+4.	Используй Git с понятными коммитами на каждом этапе
+5.	Документируй API через Swagger/OpenAPI
+6.	Настрой CI/CD через GitHub Actions
+7.	Используй Laravel Telescope для отладки в development
+8.	Внедри мониторинг ошибок через Sentry
+9.	Оптимизируй запросы к БД через Eager Loading
+10.	Следи за безопасностью - регулярно обновляй зависимости
+Этот проект должен стать полноценной коммерческой платформой с возможностью масштабирования и поддержки тысяч пользователей одновременно.
+
+Используй дефолтные значения в props.
+
+Всегда делай v-if для рисков.
+
+Можно сделать ErrorBoundary-компонент (продвинуто).
+
+Не бойся прятать отдельные компоненты, если данных нет — лучше, чем падение всей страницы.
+
+"промышленная" защита фронта, как на Ozon, Авито и Wildberries.
+

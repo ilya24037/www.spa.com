@@ -48,6 +48,41 @@ class MasterProfile extends Model
         'share_url', 'avatar_url', 'all_photos',
     ];
 
+    /**
+     * Получить имя папки для файлов мастера
+     */
+    public function getFolderNameAttribute(): string
+    {
+        // Берем первое слово из имени
+        $firstName = explode(' ', trim($this->display_name))[0];
+        
+        // Транслитерируем в латиницу
+        $transliteration = [
+            'А' => 'A', 'Б' => 'B', 'В' => 'V', 'Г' => 'G', 'Д' => 'D', 'Е' => 'E', 'Ё' => 'E',
+            'Ж' => 'Zh', 'З' => 'Z', 'И' => 'I', 'Й' => 'Y', 'К' => 'K', 'Л' => 'L', 'М' => 'M',
+            'Н' => 'N', 'О' => 'O', 'П' => 'P', 'Р' => 'R', 'С' => 'S', 'Т' => 'T', 'У' => 'U',
+            'Ф' => 'F', 'Х' => 'H', 'Ц' => 'C', 'Ч' => 'Ch', 'Ш' => 'Sh', 'Щ' => 'Sch', 'Ъ' => '',
+            'Ы' => 'Y', 'Ь' => '', 'Э' => 'E', 'Ю' => 'Yu', 'Я' => 'Ya',
+            'а' => 'a', 'б' => 'b', 'в' => 'v', 'г' => 'g', 'д' => 'd', 'е' => 'e', 'ё' => 'e',
+            'ж' => 'zh', 'з' => 'z', 'и' => 'i', 'й' => 'y', 'к' => 'k', 'л' => 'l', 'м' => 'm',
+            'н' => 'n', 'о' => 'o', 'п' => 'p', 'р' => 'r', 'с' => 's', 'т' => 't', 'у' => 'u',
+            'ф' => 'f', 'х' => 'h', 'ц' => 'c', 'ч' => 'ch', 'ш' => 'sh', 'щ' => 'sch', 'ъ' => '',
+            'ы' => 'y', 'ь' => '', 'э' => 'e', 'ю' => 'yu', 'я' => 'ya'
+        ];
+        
+        $transliterated = strtr($firstName, $transliteration);
+        
+        // Убираем все кроме букв и цифр, приводим к нижнему регистру
+        $safeName = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $transliterated));
+        
+        // Если имя пустое, используем "master"
+        if (empty($safeName)) {
+            $safeName = 'master';
+        }
+        
+        return $safeName . '-' . $this->id;
+    }
+
     /* --------------------------------------------------------------------- */
     /*  Отношения                                                            */
     /* --------------------------------------------------------------------- */
@@ -110,9 +145,20 @@ class MasterProfile extends Model
         return $this->hasMany(MasterPhoto::class, 'master_profile_id');
     }
 
+    public function videos(): HasMany
+    {
+        return $this->hasMany(MasterVideo::class, 'master_profile_id');
+    }
+
     public function mainPhoto(): HasOne
     {
         return $this->hasOne(MasterPhoto::class, 'master_profile_id')
+                    ->where('is_main', true);
+    }
+
+    public function mainVideo(): HasOne
+    {
+        return $this->hasOne(MasterVideo::class, 'master_profile_id')
                     ->where('is_main', true);
     }
 
@@ -293,24 +339,38 @@ class MasterProfile extends Model
 
     public function getAllPhotosAttribute(): array
     {
-        $out = [];
+        return $this->photos()
+            ->orderBy('order')
+            ->get()
+            ->map(function ($photo) {
+                return [
+                    'id' => $photo->id,
+                    'url' => $photo->url,
+                    'thumb_url' => $photo->thumb_url,
+                    'medium_url' => $photo->medium_url,
+                    'is_main' => $photo->is_main,
+                    'file_size' => $photo->formatted_size,
+                ];
+            })
+            ->toArray();
+    }
 
-        if ($this->avatar) {
-            $out[] = $this->avatar_url;
-        }
-
-        foreach ($this->photos as $photo) {
-            $out[] = ImageHelper::getImageUrl(
-                $photo->path,
-                asset('images/no-photo.jpg')
-            );
-        }
-
-        if (empty($out)) {
-            $out[] = asset('images/no-photo.jpg');
-        }
-
-        return $out;
+    public function getAllVideosAttribute(): array
+    {
+        return $this->videos()
+            ->orderBy('order')
+            ->get()
+            ->map(function ($video) {
+                return [
+                    'id' => $video->id,
+                    'url' => $video->url,
+                    'thumb_url' => $video->thumb_url,
+                    'duration' => $video->formatted_duration,
+                    'is_main' => $video->is_main,
+                    'file_size' => $video->formatted_size,
+                ];
+            })
+            ->toArray();
     }
 
     /* --------------------------------------------------------------------- */

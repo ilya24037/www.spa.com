@@ -1,122 +1,171 @@
 <!-- resources/js/Components/Masters/MasterGallery/index.vue -->
 <template>
   <div class="master-gallery">
-    <div class="relative">
-      <!-- Основное изображение -->
-      <GalleryImage 
-        :src="currentPhoto"
-        :alt="master.name"
-        :is-premium="master.is_premium"
-        :is-verified="master.is_verified"
-        @click="openFullscreen"
-        @error="handleImageError"
-      />
+    <!-- Главное фото -->
+    <div class="main-photo-container">
+      <img 
+        :src="currentPhoto?.url || '/images/no-photo.jpg'"
+        :alt="`${masterName} - фото ${currentIndex + 1}`"
+        class="main-photo"
+        @click="openLightbox"
+      >
       
-      <!-- Кнопки навигации (для множества фото) -->
-      <div v-if="photos.length > 1" class="absolute inset-0 flex items-center justify-between px-4 pointer-events-none">
-        <button
-          v-show="currentIndex > 0"
-          @click="previousPhoto"
-          class="pointer-events-auto bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
-          aria-label="Предыдущее фото"
-        >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        
-        <button
-          v-show="currentIndex < photos.length - 1"
-          @click="nextPhoto"
-          class="pointer-events-auto bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
-          aria-label="Следующее фото"
-        >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      </div>
+      <!-- Навигация по фото -->
+      <button 
+        v-if="hasPrevious"
+        @click="previousPhoto"
+        class="nav-btn nav-btn-left"
+      >
+        <ChevronLeftIcon class="w-6 h-6" />
+      </button>
       
-      <!-- Индикатор текущего фото -->
-      <div v-if="photos.length > 1" class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
-        {{ currentIndex + 1 }} / {{ photos.length }}
+      <button 
+        v-if="hasNext"
+        @click="nextPhoto"
+        class="nav-btn nav-btn-right"
+      >
+        <ChevronRightIcon class="w-6 h-6" />
+      </button>
+      
+      <!-- Счетчик фото -->
+      <div class="photo-counter">
+        {{ currentIndex + 1 }} из {{ photos.length }}
       </div>
     </div>
-    
+
     <!-- Миниатюры -->
-    <ThumbnailList
-      v-if="photos.length > 1"
+    <div class="thumbnails-container">
+      <div class="thumbnails">
+        <button
+          v-for="(photo, index) in photos"
+          :key="photo.id"
+          @click="selectPhoto(index)"
+          :class="[
+            'thumbnail-btn',
+            { 'active': currentIndex === index }
+          ]"
+        >
+          <img 
+            :src="photo.thumb_url || photo.url"
+            :alt="`${masterName} - фото ${index + 1}`"
+            class="thumbnail-img"
+          >
+        </button>
+      </div>
+    </div>
+
+    <!-- Полноэкранный просмотр -->
+    <GalleryLightbox 
+      v-if="showLightbox"
       :photos="photos"
       :current-index="currentIndex"
-      @select="currentIndex = $event"
+      :master-name="masterName"
+      @close="closeLightbox"
+      @next="nextPhoto"
+      @previous="previousPhoto"
     />
-    
-    <!-- Модальное окно для полноэкранного просмотра -->
-    <Teleport to="body">
-      <ImageGalleryModal
-        v-if="showFullscreen"
-        v-model="showFullscreen"
-        :images="photos"
-        :initial-index="currentIndex"
-        @close="showFullscreen = false"
-      />
-    </Teleport>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
-import GalleryImage from './GalleryImage.vue'
-import ThumbnailList from './ThumbnailList.vue'
-import ImageGalleryModal from '@/Components/Common/ImageGalleryModal.vue'
-import { useGallery } from './useGallery'
+import { ref, computed } from 'vue'
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/24/outline'
+import GalleryLightbox from './GalleryLightbox.vue'
 
 const props = defineProps({
-  master: {
-    type: Object,
+  photos: {
+    type: Array,
+    default: () => []
+  },
+  masterName: {
+    type: String,
     required: true
   }
 })
 
-// Composable для логики галереи
-const { 
-  photos, 
-  currentIndex, 
-  currentPhoto,
-  nextPhoto,
-  previousPhoto,
-  setPhoto
-} = useGallery(props.master)
+const currentIndex = ref(0)
+const showLightbox = ref(false)
 
-// Локальное состояние
-const showFullscreen = ref(false)
+const currentPhoto = computed(() => 
+  props.photos[currentIndex.value] || null
+)
 
-// Методы
-const openFullscreen = () => {
-  showFullscreen.value = true
+const hasPrevious = computed(() => currentIndex.value > 0)
+const hasNext = computed(() => currentIndex.value < props.photos.length - 1)
+
+const selectPhoto = (index) => {
+  currentIndex.value = index
 }
 
-const handleImageError = (event) => {
-  event.target.src = '/images/placeholder-master.jpg'
+const nextPhoto = () => {
+  if (hasNext.value) {
+    currentIndex.value++
+  }
 }
 
-// Предзагрузка соседних изображений для плавности
-watch(currentIndex, (newIndex) => {
-  // Предзагружаем следующее и предыдущее изображение
-  if (photos.value[newIndex + 1]) {
-    const img = new Image()
-    img.src = photos.value[newIndex + 1]
+const previousPhoto = () => {
+  if (hasPrevious.value) {
+    currentIndex.value--
   }
-  if (photos.value[newIndex - 1]) {
-    const img = new Image()
-    img.src = photos.value[newIndex - 1]
+}
+
+const openLightbox = () => {
+  if (props.photos.length > 0) {
+    showLightbox.value = true
   }
-})
+}
+
+const closeLightbox = () => {
+  showLightbox.value = false
+}
 </script>
 
 <style scoped>
-/* Плавные переходы для галереи */
 .master-gallery {
-  @apply bg-gray-50 rounded-lg overflow-hidden;
+  @apply bg-white rounded-lg overflow-hidden shadow-sm;
+}
+
+.main-photo-container {
+  @apply relative aspect-[4/3] bg-gray-100;
+}
+
+.main-photo {
+  @apply w-full h-full object-cover cursor-pointer;
+}
+
+.nav-btn {
+  @apply absolute top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-70 transition-all;
+}
+
+.nav-btn-left {
+  @apply left-4;
+}
+
+.nav-btn-right {
+  @apply right-4;
+}
+
+.photo-counter {
+  @apply absolute bottom-4 right-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm;
+}
+
+.thumbnails-container {
+  @apply p-4 bg-gray-50;
+}
+
+.thumbnails {
+  @apply flex gap-2 overflow-x-auto;
+}
+
+.thumbnail-btn {
+  @apply flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 border-transparent hover:border-blue-500 transition-colors;
+}
+
+.thumbnail-btn.active {
+  @apply border-blue-500;
+}
+
+.thumbnail-img {
+  @apply w-full h-full object-cover;
 }
 </style>

@@ -60,6 +60,51 @@ return [
             'report' => false,
         ],
 
+        'masters_photos' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/masters/photos'),
+            'url' => env('APP_URL').'/storage/masters/photos',
+            'visibility' => 'public',
+        ],
+
+        'masters_videos' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/masters/videos'),
+            'url' => env('APP_URL').'/storage/masters/videos',
+            'visibility' => 'public',
+        ],
+
+        'masters_thumbnails' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/masters/thumbnails'),
+            'url' => env('APP_URL').'/storage/masters/thumbnails',
+            'visibility' => 'public',
+        ],
+
+        // Для масштабирования (когда перейдете на облако)
+        'masters_cloud' => [
+            'driver' => 's3',
+            'key' => env('AWS_ACCESS_KEY_ID'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'region' => env('AWS_DEFAULT_REGION'),
+            'bucket' => env('AWS_BUCKET'),
+            'url' => env('AWS_URL'),
+            'visibility' => 'public',
+        ],
+
+        'masters_public' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/masters'),
+            'url' => env('APP_URL').'/storage/masters',
+            'visibility' => 'public',
+        ],
+
+        'masters_private' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/masters'),
+            'visibility' => 'private',
+        ],
+
     ],
 
     /*

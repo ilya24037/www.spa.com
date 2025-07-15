@@ -3,9 +3,59 @@
 namespace App\Helpers;
 
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Facades\Image;
 
 class ImageHelper
 {
+    /**
+     * Создать миниатюру
+     */
+    public static function createThumbnail($file, $fileName, $width = 300, $height = 300)
+    {
+        try {
+            $image = Image::make($file);
+            
+            // Изменяем размер с сохранением пропорций
+            $image->resize($width, $height, function ($constraint) {
+                $constraint->aspectRatio();
+                $constraint->upsize();
+            });
+            
+            // Оптимизируем качество
+            $image->encode('jpg', 85);
+            
+            // Сохраняем миниатюру
+            $thumbFileName = 'thumb_' . $width . 'x' . $height . '_' . $fileName;
+            $thumbPath = $thumbFileName;
+            
+            Storage::disk('masters_thumbnails')->put($thumbPath, $image);
+            
+            return $thumbPath;
+        } catch (\Exception $e) {
+            // Если не удалось создать миниатюру, возвращаем null
+            return null;
+        }
+    }
+
+    /**
+     * Оптимизировать изображение
+     */
+    public static function optimizeImage($path)
+    {
+        $image = Image::make($path);
+        
+        // Максимальные размеры
+        $image->resize(1200, 1200, function ($constraint) {
+            $constraint->aspectRatio();
+            $constraint->upsize();
+        });
+        
+        // Сохраняем с оптимизацией
+        $image->save($path, 85);
+        
+        return $path;
+    }
+
     /**
      * Получить URL изображения с проверкой существования
      */
