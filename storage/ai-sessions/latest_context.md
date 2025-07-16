@@ -1,5 +1,5 @@
 # 🤖 AI Context: SPA Platform - Платформа услуг массажа
-Дата генерации: 16.07.2025 12:20:22
+Дата генерации: 16.07.2025 14:19:48
 Версия Laravel: 12.20.0
 PHP: 8.4.10
 
@@ -13,24 +13,24 @@ PHP: 8.4.10
 
 ## 🔥 НАД ЧЕМ РАБОТАЛИ ПОСЛЕДНИЙ РАЗ
 **Последние изменённые файлы:**
-- 🧩 Компонент resources/js\Components\Form\AdForm.vue (изменён в 11:35)
-- 📄 Страница resources/js\Pages\AddItem\Index.vue (изменён в 11:28)
-- ⚡ JavaScript resources/js\Composables\useAdForm.js (изменён в 11:09)
-- 🧩 Компонент resources/js\Components\Form\Sections\ScheduleSection.vue (изменён в 11:01)
-- 🧩 Компонент resources/js\Components\Form\Sections\GeoSection.vue (изменён в 11:01)
-- 🧩 Компонент resources/js\Components\Form\Sections\VideosSection.vue (изменён в 11:01)
-- 🧩 Компонент resources/js\Components\Form\Sections\PhotosSection.vue (изменён в 11:00)
-- 🎮 Контроллер app\Http\Controllers\AddItemController.php (изменён в 11:00)
-- 🧩 Компонент resources/js\Components\Form\Sections\MassageSection.vue (изменён в 10:59)
-- 📄 Страница resources/js\Pages\AddService.vue (изменён в 10:34)
+- 📄 Страница resources/js\Pages\Dashboard.vue (изменён в 14:18)
+- 🎮 Контроллер app\Http\Controllers\ProfileController.php (изменён в 14:09)
+- ⚡ JavaScript resources/js\utils\adApi.js (изменён в 13:51)
+- 🎮 Контроллер app\Http\Controllers\AdController.php (изменён в 13:50)
+- 🧩 Компонент resources/js\Components\Form\AdForm.vue (изменён в 13:49)
+- 📄 Страница resources/js\Pages\EditAd.vue (изменён в 13:48)
+- 🧩 Компонент resources/js\Components\Profile\ItemCard.vue (изменён в 13:46)
+- 🧩 Компонент resources/js\Components\Form\Sections\PriceSection.vue (изменён в 13:21)
+- 🧩 Компонент resources/js\Components\Form\Sections\ClientsSection.vue (изменён в 13:21)
+- 🧩 Компонент resources/js\Components\Form\Sections\ScheduleSection.vue (изменён в 13:21)
 
 🎯 **Скорее всего работали над:** Vue компонентами и UI
 
-**⚠️ Незакоммиченные изменения:** 5 файлов
+**⚠️ Незакоммиченные изменения:** 23 файлов
 
 ## 📊 АВТОМАТИЧЕСКИЙ АНАЛИЗ ПРОГРЕССА
-### 🎯 Общий прогресс: 84%
-[████████░░] (31/37 компонентов)
+### 🎯 Общий прогресс: 86%
+[█████████░] (32/37 компонентов)
 
 ### ✅ Модели данных [████████░░] 80%
 ✅ **Готово:** User, MasterProfile, MassageCategory, Service, Booking
@@ -44,7 +44,7 @@ PHP: 8.4.10
 
 ### ✅ Миграции БД [██████████] 100%
 ✅ **Готово:** 2024_12_19_000000_create_master_media_tables.php, 2025_07_15_092654_update_master_photos_table_structure.php, 2025_07_15_093422_create_master_videos_table.php, 2025_07_15_150546_create_ads_table.php, 2025_07_15_151623_update_ads_table_nullable_fields.php
-   _и ещё 1 файлов_
+   _и ещё 2 файлов_
 
 ### ✅ Vue страницы [██████████] 100%
 ✅ **Готово:** Home, Masters/Index, Masters/Show, Profile/Edit, Bookings/Create
@@ -64,7 +64,7 @@ PHP: 8.4.10
 - PHP файлов: 20
 - Vue компонентов: 9
 - JavaScript: 17
-- Всего строк кода: 8,021
+- Всего строк кода: 7,773
 
 
 ## ⚠️ НАЙДЕННЫЕ ПРОБЛЕМЫ И ЗАМЕТКИ
@@ -74,7 +74,7 @@ PHP: 8.4.10
 
 ### ⚠️ Debug (13)
 - Debug (`C:\www.spa.com\resources\js/Pages/AddService.vue:255`)
-- Debug (`C:\www.spa.com\resources\js/Composables/useAdForm.js:96`)
+- Debug (`C:\www.spa.com\resources\js/Composables/useAdForm.js:101`)
 - Debug (`C:\www.spa.com\resources\js/stores/bookingStore.js:85`)
 - Debug (`C:\www.spa.com\resources\js/stores/bookingStore.js:97`)
 - Debug (`C:\www.spa.com\resources\js/stores/bookingStore.js:115`)
@@ -114,4 +114,4 @@ _... и ещё 8_
 4. ✅ Фокусируйся на MVP функциональности
 5. ✅ Давай конкретные команды для терминала
 
-*Этот контекст автоматически сгенерирован 16.07.2025 в 12:20*
+*Этот контекст автоматически сгенерирован 16.07.2025 в 14:19*

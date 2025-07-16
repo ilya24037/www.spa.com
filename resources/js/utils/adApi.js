@@ -54,6 +54,30 @@ export const saveDraft = async (formData) => {
 }
 
 /**
+ * Загрузить черновик объявления по ID
+ */
+export const loadDraftById = async (draftId) => {
+  try {
+    const response = await fetch(`/ads/${draftId}/data`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      }
+    })
+    
+    if (response.ok) {
+      return await response.json()
+    } else {
+      throw new Error('Ошибка при загрузке черновика')
+    }
+  } catch (error) {
+    console.error('Ошибка при загрузке черновика:', error)
+    throw error
+  }
+}
+
+/**
  * Получить объявление по ID
  */
 export const getAd = async (adId) => {

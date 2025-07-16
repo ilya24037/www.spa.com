@@ -183,12 +183,14 @@ export default {
       ]
     }
   },
-  created() {
+  mounted() {
     // Инициализируем поля формы если они не существуют
-    if (!this.form.show_types) this.form.show_types = []
-    if (!this.form.costumes) this.form.costumes = []
-    if (!this.form.durations) this.form.durations = []
-    if (!this.form.additional_services) this.form.additional_services = []
+    this.$nextTick(() => {
+      if (!this.form.show_types) this.form.show_types = []
+      if (!this.form.costumes) this.form.costumes = []
+      if (!this.form.durations) this.form.durations = []
+      if (!this.form.additional_services) this.form.additional_services = []
+    })
   }
 }
 </script>

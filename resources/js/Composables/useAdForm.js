@@ -5,7 +5,7 @@
 
 import { ref, reactive, computed } from 'vue'
 import { validateAdForm } from '@/utils/formValidators'
-import { createAd, updateAd, saveDraft, prepareFormData } from '@/utils/adApi'
+import { createAd, updateAd, saveDraft, prepareFormData, loadDraftById } from '@/utils/adApi'
 import { useAutosave } from '@/Composables/useAutosave'
 
 export function useAdForm(initialData = {}, options = {}) {
@@ -19,29 +19,22 @@ export function useAdForm(initialData = {}, options = {}) {
 
   // Состояние формы
   const form = reactive({
-    // Основные детали
+    // Новые поля согласно Avito
     title: initialData.title || '',
     specialty: initialData.specialty || '',
     clients: initialData.clients || [],
     service_location: initialData.service_location || [],
     work_format: initialData.work_format || '',
-    service_provider: initialData.service_provider || [],
     experience: initialData.experience || '',
     
-    // Описание
-    description: initialData.description || '',
-    
-    // Цены
+    // Цены (обновленные)
     price: initialData.price || '',
-    price_unit: initialData.price_unit || 'service',
-    is_starting_price: initialData.is_starting_price || [],
+    price_unit: initialData.price_unit || 'session',
+    is_starting_price: initialData.is_starting_price || false,
     
-    // Акции
-    discount: initialData.discount || '',
+    // Акции (обновленные)
+    new_client_discount: initialData.new_client_discount || '',
     gift: initialData.gift || '',
-    promo_code: initialData.promo_code || '',
-    has_special_offers: initialData.has_special_offers || [],
-    special_offers_description: initialData.special_offers_description || '',
     
     // Медиа
     photos: initialData.photos || [],
@@ -58,7 +51,25 @@ export function useAdForm(initialData = {}, options = {}) {
     travel_fee: initialData.travel_fee || '',
     travel_time: initialData.travel_time || '',
     
-    // Прайс-лист
+    // Описание
+    description: initialData.description || '',
+    
+    // Контакты
+    phone: initialData.phone || '',
+    contact_method: initialData.contact_method || 'messages',
+    
+    // Расписание
+    schedule: initialData.schedule || {},
+    
+    // Категория
+    category: initialData.category || '',
+    
+    // Прочие поля (для совместимости)
+    service_provider: initialData.service_provider || [],
+    discount: initialData.discount || '',
+    promo_code: initialData.promo_code || '',
+    has_special_offers: initialData.has_special_offers || [],
+    special_offers_description: initialData.special_offers_description || '',
     main_service_name: initialData.main_service_name || '',
     main_service_price: initialData.main_service_price || '',
     main_service_price_unit: initialData.main_service_price_unit || 'service',
@@ -67,8 +78,6 @@ export function useAdForm(initialData = {}, options = {}) {
     show_prices_public: initialData.show_prices_public || [],
     negotiable_prices: initialData.negotiable_prices || [],
     currency: initialData.currency || 'RUB',
-    
-    // Образование
     education_level: initialData.education_level || '',
     university: initialData.university || '',
     specialization: initialData.specialization || '',
@@ -77,11 +86,7 @@ export function useAdForm(initialData = {}, options = {}) {
     has_certificates: initialData.has_certificates || [],
     certificate_photos: initialData.certificate_photos || [],
     experience_years: initialData.experience_years || '',
-    work_history: initialData.work_history || '',
-    
-    // Контакты
-    phone: initialData.phone || '',
-    contact_method: initialData.contact_method || 'messages'
+    work_history: initialData.work_history || ''
   })
 
   // Состояние валидации
@@ -148,12 +153,14 @@ export function useAdForm(initialData = {}, options = {}) {
 
     // Валидация
     if (!validateForm()) {
-      return false
+      console.warn('Форма содержит ошибки:', errors.value)
+      return Promise.reject(new Error('Validation failed'))
     }
 
+    isSubmitting.value = true
+
     try {
-      isSubmitting.value = true
-      
+      // Подготавливаем данные для отправки
       const formData = prepareFormData(form)
       
       let result
@@ -163,53 +170,62 @@ export function useAdForm(initialData = {}, options = {}) {
         result = await createAd(formData)
       }
 
-      // Остановить автосохранение после успешной отправки
-      autosave.stopAutosave()
-      autosave.reset()
+      // Очищаем ошибки при успешной отправке
+      clearErrors()
 
+      // Вызываем коллбек успеха
       if (onSuccess) {
         onSuccess(result)
       }
 
-      return true
+      return result
     } catch (error) {
-      if (error && typeof error === 'object') {
-        errors.value = error
+      console.error('Ошибка при отправке формы:', error)
+      
+      // Обрабатываем ошибки валидации с сервера
+      if (error.response?.data?.errors) {
+        errors.value = error.response.data.errors
       }
 
+      // Вызываем коллбек ошибки
       if (onError) {
         onError(error)
       }
 
-      return false
+      throw error
     } finally {
       isSubmitting.value = false
     }
   }
 
   /**
-   * Сохранить и выйти (черновик)
+   * Загрузить черновик
    */
-  const saveAndExit = async () => {
+  const loadDraft = async (draftId) => {
     try {
-      isSubmitting.value = true
+      const draft = await loadDraftById(draftId)
       
-      // Принудительно сохраняем черновик
-      const formData = prepareFormData(form)
-      await saveDraft(formData)
+      // Обновляем форму данными из черновика
+      Object.assign(form, draft)
       
-      // Остановить автосохранение
-      autosave.stopAutosave()
-      autosave.reset()
-      
-      // Перейти на страницу дашборда
-      window.location.href = '/dashboard'
+      return draft
     } catch (error) {
-      console.warn('Ошибка сохранения черновика:', error)
-      // Даже при ошибке переходим на дашборд
-      window.location.href = '/dashboard'
-    } finally {
-      isSubmitting.value = false
+      console.error('Ошибка при загрузке черновика:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Сохранить черновик
+   */
+  const saveDraftForm = async () => {
+    try {
+      const formData = prepareFormData(form)
+      const result = await saveDraft(formData)
+      return result
+    } catch (error) {
+      console.error('Ошибка при сохранении черновика:', error)
+      throw error
     }
   }
 
@@ -220,77 +236,51 @@ export function useAdForm(initialData = {}, options = {}) {
     Object.keys(form).forEach(key => {
       if (Array.isArray(form[key])) {
         form[key] = []
+      } else if (typeof form[key] === 'object' && form[key] !== null) {
+        form[key] = {}
+      } else if (typeof form[key] === 'boolean') {
+        form[key] = false
       } else {
         form[key] = ''
       }
     })
-    
-    form.price_unit = 'service'
-    form.contact_method = 'messages'
-    
     clearErrors()
-    autosave.reset()
   }
 
   /**
-   * Заполнить форму данными
+   * Установить данные формы
    */
-  const fillForm = (data) => {
-    Object.keys(form).forEach(key => {
-      if (data[key] !== undefined) {
-        form[key] = data[key]
-      }
-    })
-    
-    autosave.reset()
+  const setFormData = (data) => {
+    Object.assign(form, data)
   }
 
   /**
    * Получить данные формы
    */
   const getFormData = () => {
-    return prepareFormData(form)
+    return { ...form }
   }
 
-  /**
-   * Проверить, есть ли несохраненные изменения
-   */
-  const hasUnsavedChanges = computed(() => {
-    return autosave.hasUnsavedChanges.value
-  })
-
   return {
-    // Данные формы
+    // Состояние
     form,
     errors,
-    isValid,
     isSubmitting,
+    isValid,
     
-    // Автосохранение
-    isSaving: autosave.isSaving,
-    lastSaved: autosave.lastSaved,
-    hasUnsavedChanges,
-    
-    // Методы валидации
+    // Методы
     validateForm,
     validateField,
     clearErrors,
     clearFieldError,
-    
-    // Методы отправки
-    submitForm,
-    saveAndExit,
-    saveDraft: autosave.forceSave, // Алиас для принудительного сохранения
-    
-    // Методы управления
+    handleSubmit: submitForm,
+    loadDraft,
+    saveDraft: saveDraftForm,
     resetForm,
-    fillForm,
+    setFormData,
     getFormData,
-    loadDraft: fillForm, // Алиас для fillForm
     
     // Автосохранение
-    startAutosave: autosave.startAutosave,
-    stopAutosave: autosave.stopAutosave,
-    forceSave: autosave.forceSave
+    autosave
   }
 } 

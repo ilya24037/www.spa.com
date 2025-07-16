@@ -24,6 +24,7 @@ class AdController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            'category' => 'required|string',
             'title' => 'required|string|max:255',
             'specialty' => 'required|string',
             'clients' => 'array',
@@ -49,6 +50,7 @@ class AdController extends Controller
 
         $ad = Ad::create([
             'user_id' => Auth::id(),
+            'category' => $request->category,
             'title' => $request->title,
             'specialty' => $request->specialty,
             'clients' => json_encode($request->clients ?? []),
@@ -59,7 +61,7 @@ class AdController extends Controller
             'description' => $request->description,
             'price' => $request->price,
             'price_unit' => $request->price_unit,
-            'is_starting_price' => in_array('1', $request->is_starting_price ?? []),
+            'is_starting_price' => $request->is_starting_price ? true : false,
             'discount' => $request->discount,
             'gift' => $request->gift,
             'address' => $request->address,
@@ -82,6 +84,7 @@ class AdController extends Controller
 
         $ad = Ad::create([
             'user_id' => Auth::id(),
+            'category' => $request->category ?: null,
             'title' => $request->title ?: 'Черновик объявления',
             'specialty' => $request->specialty ?: null,
             'clients' => !empty($request->clients) ? json_encode($request->clients) : json_encode([]),
@@ -90,10 +93,10 @@ class AdController extends Controller
             'service_provider' => !empty($request->service_provider) ? json_encode($request->service_provider) : json_encode([]),
             'experience' => $request->experience ?: null,
             'description' => $request->description ?: null,
-            'price' => $request->price ?: null,
+            'price' => $request->price ? (float)$request->price : null,
             'price_unit' => $request->price_unit ?: 'service',
-            'is_starting_price' => in_array('1', $request->is_starting_price ?? []),
-            'discount' => $request->discount ?: null,
+            'is_starting_price' => $request->is_starting_price ? true : false,
+            'discount' => $request->discount ? (int)$request->discount : null,
             'gift' => $request->gift ?: null,
             'address' => $request->address ?: null,
             'travel_area' => $request->travel_area ?: null,
@@ -102,8 +105,8 @@ class AdController extends Controller
             'status' => 'draft'
         ]);
 
-        // Если запрос ожидает JSON (автосохранение), возвращаем JSON
-        if ($request->expectsJson()) {
+        // Если запрос ожидает JSON (проверяем несколько способов)
+        if ($request->expectsJson() || $request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => true,
                 'message' => 'Черновик сохранен!',
@@ -125,9 +128,50 @@ class AdController extends Controller
             abort(403, 'Нет доступа к редактированию этого объявления');
         }
 
+        // Загружаем все данные объявления включая JSON поля
+        $adData = $ad->toArray();
+        
+        // Преобразуем JSON поля в массивы, если они строки
+        $jsonFields = ['clients', 'service_location', 'service_provider', 'is_starting_price', 
+                      'show_photos_in_gallery', 'allow_download_photos', 'watermark_photos', 
+                      'custom_travel_areas', 'working_days', 'working_hours'];
+        
+        foreach ($jsonFields as $field) {
+            if (isset($adData[$field]) && is_string($adData[$field])) {
+                $adData[$field] = json_decode($adData[$field], true) ?? [];
+            }
+        }
+
         return Inertia::render('EditAd', [
-            'ad' => $ad
+            'ad' => $adData
         ]);
+    }
+
+    /**
+     * Получить данные объявления для API
+     */
+    public function getData(Ad $ad)
+    {
+        // Проверяем права доступа
+        if (auth()->id() !== $ad->user_id) {
+            return response()->json(['error' => 'Нет доступа'], 403);
+        }
+
+        // Загружаем все данные объявления включая JSON поля
+        $adData = $ad->toArray();
+        
+        // Преобразуем JSON поля в массивы, если они строки
+        $jsonFields = ['clients', 'service_location', 'service_provider', 'is_starting_price', 
+                      'show_photos_in_gallery', 'allow_download_photos', 'watermark_photos', 
+                      'custom_travel_areas', 'working_days', 'working_hours'];
+        
+        foreach ($jsonFields as $field) {
+            if (isset($adData[$field]) && is_string($adData[$field])) {
+                $adData[$field] = json_decode($adData[$field], true) ?? [];
+            }
+        }
+
+        return response()->json($adData);
     }
 
     /**

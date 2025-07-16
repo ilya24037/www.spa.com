@@ -1,90 +1,74 @@
 <template>
-  <PageSection title="Акции">
-    <p class="section-description">
-      Клиенты увидят информацию о скидках и подарках в объявлении.
-    </p>
-    
-    <div class="promo-fields">
-      <PriceInput
-        id="discount"
-        name="discount"
-        label="Скидка новым клиентам"
-        placeholder="0"
-        v-model="form.discount"
-        :error="errors.discount"
-        :show-unit="false"
-        postfix="%"
-        hint="Укажите процент скидки для привлечения новых клиентов"
-      />
-
-      <FormInput
-        id="gift"
-        name="gift"
-        label="Подарок"
-        placeholder="Что и на каких условиях дарите"
-        v-model="form.gift"
-        :error="errors.gift"
-        hint="Можно не заполнять, если у вас нет такой акции"
-      />
-
-      <FormInput
-        id="promo_code"
-        name="promo_code"
-        label="Промокод"
-        placeholder="Введите промокод"
-        v-model="form.promo_code"
-        :error="errors.promo_code"
-        hint="Специальный код для скидки (опционально)"
-      />
-
-      <FormCheckbox
-        name="has_special_offers"
-        v-model="form.has_special_offers"
-        :options="[{ value: '1', label: 'У меня есть специальные предложения' }]"
-      />
-
-      <div v-if="form.has_special_offers.includes('1')" class="special-offers">
-        <FormTextarea
-          id="special_offers_description"
-          name="special_offers_description"
-          label="Описание специальных предложений"
-          placeholder="Опишите ваши специальные предложения..."
-          v-model="form.special_offers_description"
-          :error="errors.special_offers_description"
-          hint="Например: «При заказе от 3 сеансов - скидка 15%», «День рождения - скидка 20%»"
-        />
-      </div>
+    <div class="form-section">
+        <h3 class="form-section-title">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
+            </svg>
+            Акции
+        </h3>
+        
+        <p class="text-sm text-gray-600 mb-4">
+            Клиенты увидят информацию о скидках и подарках в объявлении
+        </p>
+        
+        <div class="form-row">
+            <div class="w-full">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Скидка новым клиентам
+                </label>
+                <div class="flex items-center space-x-2">
+                    <input 
+                        v-model="form.new_client_discount"
+                        type="number"
+                        min="0"
+                        max="100"
+                        class="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="0"
+                    >
+                    <span class="text-sm text-gray-700">%</span>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">
+                    Можно не заполнять, если скидки нет
+                </p>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="w-full">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Подарок
+                </label>
+                <input 
+                    v-model="form.gift"
+                    type="text"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Что вы можете подарить? Например: дарим чай"
+                    maxlength="100"
+                >
+                <div class="flex justify-between items-center mt-1">
+                    <p class="text-xs text-gray-500">
+                        Можно не заполнять, если подарка нет
+                    </p>
+                    <span class="text-xs text-gray-400">
+                        {{ (form.gift || '').length }}/100
+                    </span>
+                </div>
+            </div>
+        </div>
     </div>
-  </PageSection>
 </template>
 
-<script>
-import PageSection from '@/Components/Layout/PageSection.vue'
-import PriceInput from '@/Components/Form/Controls/PriceInput.vue'
-import FormInput from '@/Components/Form/FormInput.vue'
-import FormCheckbox from '@/Components/Form/FormCheckbox.vue'
-import FormTextarea from '@/Components/Form/FormTextarea.vue'
-
-export default {
-  name: 'PromoSection',
-  components: {
-    PageSection,
-    PriceInput,
-    FormInput,
-    FormCheckbox,
-    FormTextarea
-  },
-  props: {
+<script setup>
+const props = defineProps({
     form: {
-      type: Object,
-      required: true
+        type: Object,
+        required: true
     },
     errors: {
-      type: Object,
-      default: () => ({})
+        type: Object,
+        default: () => ({})
     }
-  }
-}
+})
 </script>
 
 <style scoped>

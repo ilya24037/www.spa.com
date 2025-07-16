@@ -5,37 +5,57 @@
             <!-- Скрытое поле с категорией -->
             <input type="hidden" name="category" :value="category">
             
-            <!-- Специфичные секции для категорий -->
-            <EroticSection 
-                v-if="category === 'erotic'"
+            <!-- Секции согласно порядку Avito -->
+            
+            <!-- 1. Название объявления -->
+            <TitleSection 
                 :form="form" 
                 :errors="errors" 
             />
             
-            <StripSection 
-                v-if="category === 'strip'"
+            <!-- 2. Специальность или сфера -->
+            <SpecialtySection 
                 :form="form" 
                 :errors="errors" 
             />
             
-            <EscortSection 
-                v-if="category === 'escort'"
+            <!-- 3. Ваши клиенты -->
+            <ClientsSection 
                 :form="form" 
                 :errors="errors" 
             />
             
-            <MassageSection 
-                v-if="category === 'massage'"
+            <!-- 4. Местоположение (где оказываете услуги) -->
+            <LocationSection 
                 :form="form" 
                 :errors="errors" 
             />
             
-            <!-- Общие секции для всех категорий -->
-            <ContactsSection 
+            <!-- 5. Формат работы -->
+            <WorkFormatSection 
                 :form="form" 
                 :errors="errors" 
             />
             
+            <!-- 6. Опыт работы -->
+            <ExperienceSection 
+                :form="form" 
+                :errors="errors" 
+            />
+            
+            <!-- 7. Стоимость основной услуги -->
+            <PriceSection 
+                :form="form" 
+                :errors="errors" 
+            />
+            
+            <!-- 8. Акции -->
+            <PromoSection 
+                :form="form" 
+                :errors="errors" 
+            />
+            
+            <!-- 9. Фотографии и видео -->
             <PhotosSection 
                 :form="form" 
                 :errors="errors" 
@@ -46,26 +66,25 @@
                 :errors="errors" 
             />
             
-            <DescriptionSection 
-                :form="form" 
-                :errors="errors" 
-            />
-            
-            <DetailsSection 
-                :form="form" 
-                :errors="errors" 
-            />
-            
+            <!-- 10. География (куда выезжаете) -->
             <GeoSection 
                 :form="form" 
                 :errors="errors" 
             />
             
-            <PriceSection 
+            <!-- 11. Контакты -->
+            <ContactsSection 
                 :form="form" 
                 :errors="errors" 
             />
             
+            <!-- Описание (дополнительная информация) -->
+            <DescriptionSection 
+                :form="form" 
+                :errors="errors" 
+            />
+            
+            <!-- Расписание работы -->
             <ScheduleSection 
                 :form="form" 
                 :errors="errors" 
@@ -99,18 +118,22 @@ import { ref, computed, onMounted } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import { useAdForm } from '@/Composables/useAdForm'
 
-// Секции формы
-import EroticSection from '@/Components/Form/Sections/EroticSection.vue'
-import StripSection from '@/Components/Form/Sections/StripSection.vue'
-import EscortSection from '@/Components/Form/Sections/EscortSection.vue'
-import MassageSection from '@/Components/Form/Sections/MassageSection.vue'
-import ContactsSection from '@/Components/Form/Sections/ContactsSection.vue'
+// Новые секции согласно Avito
+import TitleSection from '@/Components/Form/Sections/TitleSection.vue'
+import SpecialtySection from '@/Components/Form/Sections/SpecialtySection.vue'
+import ClientsSection from '@/Components/Form/Sections/ClientsSection.vue'
+import LocationSection from '@/Components/Form/Sections/LocationSection.vue'
+import WorkFormatSection from '@/Components/Form/Sections/WorkFormatSection.vue'
+import ExperienceSection from '@/Components/Form/Sections/ExperienceSection.vue'
+import PriceSection from '@/Components/Form/Sections/PriceSection.vue'
+import PromoSection from '@/Components/Form/Sections/PromoSection.vue'
+
+// Существующие секции
 import PhotosSection from '@/Components/Form/Sections/PhotosSection.vue'
 import VideosSection from '@/Components/Form/Sections/VideosSection.vue'
-import DescriptionSection from '@/Components/Form/Sections/DescriptionSection.vue'
-import DetailsSection from '@/Components/Form/Sections/DetailsSection.vue'
 import GeoSection from '@/Components/Form/Sections/GeoSection.vue'
-import PriceSection from '@/Components/Form/Sections/PriceSection.vue'
+import ContactsSection from '@/Components/Form/Sections/ContactsSection.vue'
+import DescriptionSection from '@/Components/Form/Sections/DescriptionSection.vue'
 import ScheduleSection from '@/Components/Form/Sections/ScheduleSection.vue'
 
 // Props
@@ -150,6 +173,13 @@ const saving = ref(false)
 // Устанавливаем категорию в форму
 form.category = props.category
 
+// Если это режим редактирования, загружаем данные
+onMounted(async () => {
+    if (props.adId) {
+        await loadDraft(props.adId)
+    }
+})
+
 // Обработчики
 const handleSubmit = async () => {
     try {
@@ -166,16 +196,42 @@ const saveDraft = async () => {
         saving.value = true
         
         // Отправляем данные на сервер для сохранения черновика
-        const response = await fetch('/additem/draft', {
+        // Фильтруем только поддерживаемые поля
+        const draftData = {
+            category: props.category,
+            title: form.title,
+            specialty: form.specialty,
+            clients: form.clients,
+            service_location: form.service_location,
+            work_format: form.work_format,
+            service_provider: form.service_provider,
+            experience: form.experience,
+            description: form.description,
+            price: form.price,
+            price_unit: form.price_unit,
+            is_starting_price: form.is_starting_price,
+            discount: form.discount,
+            gift: form.gift,
+            address: form.address,
+            travel_area: form.travel_area,
+            phone: form.phone,
+            contact_method: form.contact_method
+        }
+        
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+        if (!csrfToken) {
+            throw new Error('CSRF токен не найден')
+        }
+        
+        const response = await fetch('/ads/draft', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
             },
-            body: JSON.stringify({
-                ...form,
-                category: props.category
-            })
+            body: JSON.stringify(draftData)
         })
         
         if (response.ok) {
@@ -183,7 +239,9 @@ const saveDraft = async () => {
             console.log('Черновик сохранен:', result)
             // Можно показать уведомление об успешном сохранении
         } else {
-            throw new Error('Ошибка при сохранении черновика')
+            const errorText = await response.text()
+            console.error('Ошибка сервера:', response.status, errorText)
+            throw new Error(`Ошибка при сохранении черновика: ${response.status}`)
         }
     } catch (error) {
         console.error('Ошибка при сохранении черновика:', error)

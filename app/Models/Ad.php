@@ -12,6 +12,7 @@ class Ad extends Model
 
     protected $fillable = [
         'user_id',
+        'category',
         'title',
         'specialty',
         'clients',

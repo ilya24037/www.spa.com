@@ -206,6 +206,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { router } from '@inertiajs/vue3'
 import ConfirmModal from '../UI/ConfirmModal.vue'
 
 const props = defineProps({
@@ -287,7 +288,8 @@ const promoteItem = () => {
 }
 
 const editItem = () => {
-  window.location.href = `/ads/${props.item.id}/edit`
+  // Используем Inertia для навигации
+  router.visit(`/ads/${props.item.id}/edit`)
   showDropdown.value = false
 }
 

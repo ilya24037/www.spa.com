@@ -330,6 +330,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/ads', [AdController::class, 'store'])->name('ads.store');
     Route::post('/ads/draft', [AdController::class, 'storeDraft'])->name('ads.draft');
     Route::get('/ads/{ad}/edit', [AdController::class, 'edit'])->name('ads.edit');
+    Route::get('/ads/{ad}/data', [AdController::class, 'getData'])->name('ads.data');
     Route::put('/ads/{ad}', [AdController::class, 'update'])->name('ads.update');
     Route::delete('/ads/{ad}', [AdController::class, 'destroy'])->name('ads.destroy');
     Route::patch('/ads/{ad}/status', [AdController::class, 'toggleStatus'])->name('ads.toggle-status');

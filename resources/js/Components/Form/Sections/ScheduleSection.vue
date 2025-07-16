@@ -131,7 +131,7 @@
 </template>
 
 <script setup>
-import { watch } from 'vue'
+import { watch, watchEffect } from 'vue'
 
 // Props
 const props = defineProps({
@@ -157,24 +157,36 @@ const weekDays = [
 ]
 
 // Инициализация расписания если не существует
-if (!props.form.schedule) {
-    props.form.schedule = {}
+const initializeSchedule = () => {
+    if (!props.form.schedule) {
+        props.form.schedule = {}
+    }
     weekDays.forEach(day => {
-        props.form.schedule[day.id] = {
-            active: false,
-            from: '09:00',
-            to: '18:00',
-            around_clock: false
+        if (!props.form.schedule[day.id]) {
+            props.form.schedule[day.id] = {
+                active: false,
+                from: '09:00',
+                to: '18:00',
+                around_clock: false
+            }
         }
     })
 }
 
+// Вызываем инициализацию сразу
+initializeSchedule()
+
+// Отслеживаем изменения через watchEffect
+watchEffect(() => {
+    initializeSchedule()
+})
+
 // Отслеживание изменений круглосуточного режима
 weekDays.forEach(day => {
     watch(
-        () => props.form.schedule[day.id].around_clock,
+        () => props.form.schedule[day.id]?.around_clock,
         (newValue) => {
-            if (newValue) {
+            if (newValue && props.form.schedule[day.id]) {
                 props.form.schedule[day.id].from = '00:00'
                 props.form.schedule[day.id].to = '23:59'
             }

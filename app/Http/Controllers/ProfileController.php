@@ -22,10 +22,22 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         
-        // Загружаем объявления пользователя
+        // Загружаем все объявления пользователя
         $ads = Ad::where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->get();
+            
+        return $this->renderItems($ads);
+    }
+    
+
+    
+    /**
+     * Общий метод для рендеринга объявлений
+     */
+    private function renderItems($ads)
+    {
+        $user = auth()->user();
         
         // Преобразуем объявления в формат для карточек
         $profiles = $ads->map(function ($ad) {
@@ -59,12 +71,14 @@ class ProfileController extends Controller
             ];
         });
         
-        // Подсчеты для бокового меню
+        // Подсчеты для бокового меню (всех объявлений пользователя)
+        $allAds = Ad::where('user_id', $user->id)->get();
         $counts = [
-            'profiles' => $ads->where('status', 'active')->count(),
-            'draft' => $ads->where('status', 'draft')->count(),
-            'archived' => $ads->where('status', 'archived')->count(),
-            'inactive' => $ads->where('status', 'inactive')->count(),
+            'active' => $allAds->where('status', 'active')->count(),
+            'draft' => $allAds->where('status', 'draft')->count(),
+            'archived' => $allAds->where('status', 'archived')->count(),
+            'inactive' => $allAds->where('status', 'inactive')->count(),
+            'old' => $allAds->where('status', 'old')->count(),
             'bookings' => $user->bookings()->where('status', 'pending')->count(),
             'favorites' => $user->favorites()->count(),
             'unreadMessages' => 0,

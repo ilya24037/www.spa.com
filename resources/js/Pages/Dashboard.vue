@@ -38,8 +38,8 @@
                                 :class="menuItemClass(isCurrentRoute('profile.dashboard'))"
                             >
                                 Мои объявления
-                                <span class="bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full text-xs font-medium">
-                                    {{ counts.profiles || 0 }}
+                                <span v-if="totalAds > 0" class="bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full text-xs font-medium">
+                                    {{ totalAds }}
                                 </span>
                             </Link>
                         </li>
@@ -106,13 +106,26 @@
                 <!-- Основной контент с правильными отступами -->
                 <div class="space-y-6">
                     <!-- Вкладки -->
-                    <Tabs 
-                        v-model="activeTab"
-                        :tabs="tabs"
-                        marker="personal-items-tabs"
-                    />
-
-
+                    <div class="border-b border-gray-200">
+                        <nav class="-mb-px flex space-x-8">
+                            <button 
+                                v-for="tab in tabs" 
+                                :key="tab.key"
+                                @click="activeTab = tab.key"
+                                :class="[
+                                    'py-2 px-1 border-b-2 font-medium text-sm',
+                                    activeTab === tab.key
+                                        ? 'border-blue-500 text-blue-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                ]"
+                            >
+                                {{ tab.title }}
+                                <span v-if="tab.count > 0" class="ml-2 bg-gray-100 text-gray-900 py-0.5 px-2.5 rounded-full text-xs font-medium">
+                                    {{ tab.count }}
+                                </span>
+                            </button>
+                        </nav>
+                    </div>
 
                     <!-- Список объявлений -->
                     <div class="items-list">
@@ -133,7 +146,15 @@
                         <h3 class="mt-2 text-sm font-medium text-gray-900">Нет объявлений</h3>
                         <p class="mt-1 text-sm text-gray-500">Создайте свое первое объявление</p>
                         <div class="mt-6">
-                            <p class="text-sm text-gray-500">Используйте кнопку "Разместить объявление" в шапке сайта</p>
+                            <Link 
+                                href="/additem"
+                                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                            >
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                </svg>
+                                Разместить объявление
+                            </Link>
                         </div>
                     </div>
                 </div>
@@ -158,7 +179,6 @@ import { ref, computed } from 'vue'
 import { Head, Link, usePage } from '@inertiajs/vue3'
 import SidebarWrapper from '../Components/Layout/SidebarWrapper.vue'
 import PromoCard from '../Components/Profile/PromoCard.vue'
-import Tabs from '../Components/Profile/Tabs.vue'
 import ItemCard from '../Components/Profile/ItemCard.vue'
 import Toast from '../Components/UI/Toast.vue'
 
@@ -180,7 +200,6 @@ const props = defineProps({
 
 // Состояние
 const showSidebar = ref(false)
-const activeTab = ref('active')
 const toasts = ref([])
 
 // Пользователь
@@ -196,8 +215,21 @@ const avatarColor = computed(() => {
     return colors[charCode % colors.length]
 })
 
-// Вкладки в стиле Avito
+// Общее количество объявлений
+const totalAds = computed(() => {
+    return (props.counts.active || 0) + (props.counts.draft || 0) + (props.counts.inactive || 0) + (props.counts.old || 0) + (props.counts.archived || 0)
+})
+
+// Активная вкладка
+const activeTab = ref('paused')
+
+// Вкладки
 const tabs = computed(() => [
+    {
+        key: 'paused',
+        title: 'Ждут действий',
+        count: props.profiles.filter(p => p.status === 'paused').length
+    },
     {
         key: 'active',
         title: 'Активные',
@@ -212,26 +244,21 @@ const tabs = computed(() => [
         key: 'archived',
         title: 'Архив',
         count: props.profiles.filter(p => p.status === 'archived').length
-    },
-    {
-        key: 'inactive',
-        title: 'Неактивные',
-        count: props.profiles.filter(p => p.status === 'inactive').length
     }
 ])
 
-// Отфильтрованные профили
+// Фильтрация объявлений по активной вкладке
 const filteredProfiles = computed(() => {
     return props.profiles.filter(profile => {
         switch (activeTab.value) {
+            case 'paused':
+                return profile.status === 'paused'
             case 'active':
                 return profile.status === 'active'
             case 'draft':
                 return profile.status === 'draft'
             case 'archived':
                 return profile.status === 'archived'
-            case 'inactive':
-                return profile.status === 'inactive'
             default:
                 return true
         }
