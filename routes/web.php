@@ -216,6 +216,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('additem')->name('additem.')->group(function () {
         Route::get('/',              [AddItemController::class, 'index'])->name('index');
         Route::post('/store',        [AddItemController::class, 'store'])->name('store');
+        Route::post('/draft',        [AddItemController::class, 'storeDraft'])->name('draft');
         Route::get('/massage',       [AddItemController::class, 'massage'])->name('massage');
         Route::post('/massage',      [AddItemController::class, 'storeMassage'])->name('massage.store');
         Route::get('/erotic',        [AddItemController::class, 'erotic'])->name('erotic');

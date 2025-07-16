@@ -17,6 +17,14 @@ class AddItemController extends Controller
     {
         $categories = [
             [
+                'id' => 'massage',
+                'name' => 'Массаж',
+                'icon' => '💆‍♀️',
+                'description' => 'Классический, лечебный, расслабляющий массаж',
+                'adult' => false,
+                'popular' => true
+            ],
+            [
                 'id' => 'erotic',
                 'name' => 'Эротический массаж',
                 'icon' => '🔥',
@@ -57,7 +65,7 @@ class AddItemController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'category' => 'required|string|in:erotic,strip,escort',
+            'category' => 'required|string|in:massage,erotic,strip,escort',
             'display_name' => 'required|string|max:255',
             'age' => 'nullable|integer|min:18|max:65',
             'experience_years' => 'nullable|integer|min:0|max:50',
@@ -76,6 +84,43 @@ class AddItemController extends Controller
         // Пока просто возвращаем успешный ответ
         
         return redirect()->route('dashboard')->with('success', 'Объявление успешно создано!');
+    }
+
+    /**
+     * 💾 Сохранение черновика объявления
+     */
+    public function storeDraft(Request $request)
+    {
+        $validated = $request->validate([
+            'category' => 'required|string|in:massage,erotic,strip,escort',
+            'title' => 'nullable|string|max:255',
+            'display_name' => 'nullable|string|max:255',
+            'age' => 'nullable|integer|min:18|max:65',
+            'experience_years' => 'nullable|integer|min:0|max:50',
+            'city' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'price_from' => 'nullable|integer|min:500',
+            'price_to' => 'nullable|integer',
+            'phone' => 'nullable|string|max:20',
+            'whatsapp' => 'nullable|string|max:20',
+            'telegram' => 'nullable|string|max:50',
+            'address' => 'nullable|string|max:500',
+            'show_phone' => 'nullable|boolean',
+        ]);
+
+        // Добавляем заголовок по умолчанию если не указан
+        if (empty($validated['title'])) {
+            $validated['title'] = 'Черновик объявления';
+        }
+
+        // Здесь будет логика сохранения черновика в базу данных
+        // Пока просто возвращаем успешный ответ
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Черновик сохранен',
+            'draft_id' => time() // Временный ID
+        ]);
     }
 
     /**

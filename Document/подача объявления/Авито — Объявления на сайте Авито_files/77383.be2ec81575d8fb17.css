@@ -1,0 +1,343 @@
+.notification-notification__width-SsrDY {
+    width: 295px;
+}
+
+.notification-notification__widthWithButton-fl3rY {
+    width: 200px;
+}
+
+.Done-module-mask_light-N0ZUr {
+  --module-icon-mask-url: url(/static/item-publish/assets/../assets/7c17bfa891b872c7.svg);
+}
+
+.Done-module-mask_normal-JTcMy {
+  --module-icon-mask-url: url(/static/item-publish/assets/../assets/ee3c7fda22f4856c.svg);
+}
+
+.Done-module-mask_bold-AUCjU {
+  --module-icon-mask-url: url(/static/item-publish/assets/../assets/8815ccfd9a49a87f.svg);
+}
+
+.Done-module-aspectRatio_light-2Fr27 {
+  --aspect-ratio: 0.875;
+}
+
+.Done-module-aspectRatio_normal-puama {
+  --aspect-ratio: 0.8;
+}
+
+.Done-module-aspectRatio_bold-og35O {
+  --aspect-ratio: 0.8;
+}
+
+.styles-module-root-pMU8L {
+  --kitty-textarea-backgroundColor: var(--theme-component-textarea-preset-default-backgroundColor-default);
+  --kitty-textarea-backgroundColor-disabled: var(--theme-component-textarea-preset-default-backgroundColor-disabled);
+  --kitty-textarea-backgroundColor-disabledHover: var(
+    --theme-component-textarea-preset-default-backgroundColor-disabledHover
+  );
+  --kitty-textarea-backgroundColor-focus: var(--theme-component-textarea-preset-default-backgroundColor-focus);
+  --kitty-textarea-backgroundColor-hover: var(--theme-component-textarea-preset-default-backgroundColor-hover);
+  --kitty-textarea-border-color: var(--theme-component-textarea-preset-default-border-color);
+  --kitty-textarea-border-colorInvalid: var(--theme-component-textarea-preset-default-border-colorInvalid);
+  --kitty-textarea-boxShadow-focus: var(--theme-component-textarea-preset-default-boxShadow-focus);
+  --kitty-textarea-boxShadow-focusInvalid: var(--theme-component-textarea-preset-default-boxShadow-focusInvalid);
+  --kitty-textarea-color: var(--theme-component-textarea-preset-default-color-default);
+  --kitty-textarea-color-disabled: var(--theme-component-textarea-preset-default-color-disabled);
+  --kitty-textarea-color-placeholderColor: var(--theme-component-textarea-preset-default-placeholderColor-default);
+  --kitty-textarea-color-placeholderColor-disabled: var(
+    --theme-component-textarea-preset-default-placeholderColor-disabled
+  );
+  --kitty-textarea-crossButton-color-active: var(--theme-component-textarea-preset-default-crossButton-color-active);
+  --kitty-textarea-crossButton-color-hover: var(--theme-component-textarea-preset-default-crossButton-color-hover);
+
+  position: relative;
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+
+  padding: var(--module-textarea-padding);
+
+  outline: none;
+
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--kitty-textarea-border-color);
+  border-radius: var(--module-textarea-borderRadius);
+
+  background-color: var(--kitty-textarea-backgroundColor);
+  color: var(--kitty-textarea-color);
+
+  font-size: var(--module-textarea-fontSize);
+  line-height: var(--module-textarea-lineHeight);
+}
+
+.styles-module-root_resizable-km4ll {
+  padding-right: var(--theme-component-textarea-resizeControl-padding);
+}
+
+.styles-module-root_size_xs-qWFwB {
+  --module-textarea-resizeControl-textareaPadding: var(
+    --theme-component-textarea-resizeControl-size-xs-controlPaddingRight
+  );
+  --module-textarea-padding: var(--theme-component-textarea-size-xs-padding);
+
+  --module-crossButton-size: var(--theme-size-xs-crossButtonSize);
+  --module-crossButton-iconSize: var(--theme-size-xs-crossButtonIconSize);
+  --module-crossButton-top: var(--theme-component-textarea-clearButton-size-xs-position-top);
+  --module-crossButton-right: var(--theme-component-textarea-clearButton-size-xs-position-right);
+
+  --module-textarea-borderRadius: var(--theme-size-xs-borderRadius);
+  --module-textarea-fontSize: var(--theme-size-xs-fontSize);
+  --module-textarea-lineHeight: var(--theme-component-textarea-size-xs-lineHeight);
+}
+
+.styles-module-root_size_s-sohgm {
+  --module-textarea-resizeControl-textareaPadding: var(
+    --theme-component-textarea-resizeControl-size-l-controlPaddingRight
+  );
+  --module-textarea-padding: var(--theme-component-textarea-size-s-padding);
+
+  --module-crossButton-size: var(--theme-size-s-crossButtonSize);
+  --module-crossButton-iconSize: var(--theme-size-s-crossButtonIconSize);
+  --module-crossButton-top: var(--theme-component-textarea-clearButton-size-s-position-top);
+  --module-crossButton-right: var(--theme-component-textarea-clearButton-size-s-position-right);
+
+  --module-textarea-borderRadius: var(--theme-size-s-borderRadius);
+  --module-textarea-fontSize: var(--theme-size-s-fontSize);
+  --module-textarea-lineHeight: var(--theme-component-textarea-size-s-lineHeight);
+}
+
+.styles-module-root_size_m-DNf2r {
+  --module-textarea-resizeControl-textareaPadding: var(
+    --theme-component-textarea-resizeControl-size-l-controlPaddingRight
+  );
+  --module-textarea-padding: var(--theme-component-textarea-size-m-padding);
+
+  --module-crossButton-size: var(--theme-size-m-crossButtonSize);
+  --module-crossButton-iconSize: var(--theme-size-m-crossButtonIconSize);
+  --module-crossButton-top: var(--theme-component-textarea-clearButton-size-m-position-top);
+  --module-crossButton-right: var(--theme-component-textarea-clearButton-size-m-position-right);
+
+  --module-textarea-borderRadius: var(--theme-size-m-borderRadius);
+  --module-textarea-fontSize: var(--theme-size-m-fontSize);
+  --module-textarea-lineHeight: var(--theme-component-textarea-size-m-lineHeight);
+}
+
+.styles-module-root_size_l-L5Vft {
+  --module-textarea-resizeControl-textareaPadding: var(
+    --theme-component-textarea-resizeControl-size-l-controlPaddingRight
+  );
+  --module-textarea-padding: var(--theme-component-textarea-size-l-padding);
+
+  --module-crossButton-size: var(--theme-size-l-crossButtonSize);
+  --module-crossButton-iconSize: var(--theme-size-l-crossButtonIconSize);
+  --module-crossButton-top: var(--theme-component-textarea-clearButton-size-l-position-top);
+  --module-crossButton-right: var(--theme-component-textarea-clearButton-size-l-position-right);
+
+  --module-textarea-borderRadius: var(--theme-size-l-borderRadius);
+  --module-textarea-fontSize: var(--theme-size-l-fontSize);
+  --module-textarea-lineHeight: var(--theme-component-textarea-size-l-lineHeight);
+}
+
+.styles-module-root_size_xl-vfzGl {
+  --module-textarea-resizeControl-textareaPadding: var(
+    --theme-component-textarea-resizeControl-size-xl-controlPaddingRight
+  );
+  --module-textarea-padding: var(--theme-component-textarea-size-xl-padding);
+
+  --module-crossButton-size: var(--theme-size-xl-crossButtonSize);
+  --module-crossButton-iconSize: var(--theme-size-xl-crossButtonIconSize);
+  --module-crossButton-top: var(--theme-component-textarea-clearButton-size-xl-position-top);
+  --module-crossButton-right: var(--theme-component-textarea-clearButton-size-xl-position-right);
+
+  --module-textarea-borderRadius: var(--theme-size-xl-borderRadius);
+  --module-textarea-fontSize: var(--theme-size-xl-fontSize);
+  --module-textarea-lineHeight: var(--theme-component-textarea-size-xl-lineHeight);
+}
+
+.styles-module-root_preset_overlay-zdpm9 {
+  --kitty-textarea-backgroundColor: var(--theme-component-textarea-preset-overlay-backgroundColor-default);
+  --kitty-textarea-backgroundColor-disabled: var(--theme-component-textarea-preset-overlay-backgroundColor-disabled);
+  --kitty-textarea-backgroundColor-disabledHover: var(
+    --theme-component-textarea-preset-overlay-backgroundColor-disabledHover
+  );
+  --kitty-textarea-backgroundColor-focus: var(--theme-component-textarea-preset-overlay-backgroundColor-focus);
+  --kitty-textarea-backgroundColor-hover: var(--theme-component-textarea-preset-overlay-backgroundColor-hover);
+  --kitty-textarea-border-color: var(--theme-component-textarea-preset-overlay-border-color);
+  --kitty-textarea-border-colorInvalid: var(--theme-component-textarea-preset-overlay-border-colorInvalid);
+  --kitty-textarea-boxShadow-focus: var(--theme-component-textarea-preset-overlay-boxShadow-focus);
+  --kitty-textarea-boxShadow-focusInvalid: var(--theme-component-textarea-preset-overlay-boxShadow-focusInvalid);
+  --kitty-textarea-color: var(--theme-component-textarea-preset-overlay-color-default);
+  --kitty-textarea-color-disabled: var(--theme-component-textarea-preset-overlay-color-disabled);
+  --kitty-textarea-color-placeholderColor: var(--theme-component-textarea-preset-overlay-placeholderColor-default);
+  --kitty-textarea-color-placeholderColor-disabled: var(
+    --theme-component-textarea-preset-overlay-placeholderColor-disabled
+  );
+  --kitty-textarea-crossButton-color-active: var(--theme-component-textarea-preset-overlay-crossButton-color-active);
+  --kitty-textarea-crossButton-color-hover: var(--theme-component-textarea-preset-overlay-crossButton-color-hover);
+}
+
+.styles-module-root_preset_inverse-KCQae {
+  --kitty-textarea-backgroundColor: var(--theme-component-textarea-preset-inverse-backgroundColor-default);
+  --kitty-textarea-backgroundColor-disabled: var(--theme-component-textarea-preset-inverse-backgroundColor-disabled);
+  --kitty-textarea-backgroundColor-disabledHover: var(
+    --theme-component-textarea-preset-inverse-backgroundColor-disabledHover
+  );
+  --kitty-textarea-backgroundColor-focus: var(--theme-component-textarea-preset-inverse-backgroundColor-focus);
+  --kitty-textarea-backgroundColor-hover: var(--theme-component-textarea-preset-inverse-backgroundColor-hover);
+  --kitty-textarea-border-color: var(--theme-component-textarea-preset-inverse-border-color);
+  --kitty-textarea-border-colorInvalid: var(--theme-component-textarea-preset-inverse-border-colorInvalid);
+  --kitty-textarea-boxShadow-focus: var(--theme-component-textarea-preset-inverse-boxShadow-focus);
+  --kitty-textarea-boxShadow-focusInvalid: var(--theme-component-textarea-preset-inverse-boxShadow-focusInvalid);
+  --kitty-textarea-color: var(--theme-component-textarea-preset-inverse-color-default);
+  --kitty-textarea-color-disabled: var(--theme-component-textarea-preset-inverse-color-disabled);
+  --kitty-textarea-color-placeholderColor: var(--theme-component-textarea-preset-inverse-placeholderColor-default);
+  --kitty-textarea-color-placeholderColor-disabled: var(
+    --theme-component-textarea-preset-inverse-placeholderColor-disabled
+  );
+  --kitty-textarea-crossButton-color-active: var(--theme-component-textarea-preset-inverse-crossButton-color-active);
+  --kitty-textarea-crossButton-color-hover: var(--theme-component-textarea-preset-inverse-crossButton-color-hover);
+}
+
+.styles-module-root_invalid-uPceR {
+  border-color: var(--kitty-textarea-border-colorInvalid);
+}
+
+.styles-module-root-pMU8L:hover {
+  background-color: var(--kitty-textarea-backgroundColor-hover);
+  border-color: var(--kitty-textarea-border-color);
+}
+
+.styles-module-root_invalid-uPceR:hover {
+  border-color: var(--kitty-textarea-border-colorInvalid);
+}
+
+.styles-module-root-pMU8L[data-state~='focus'] {
+  box-shadow: var(--kitty-textarea-boxShadow-focus);
+  background-color: var(--kitty-textarea-backgroundColor-focus);
+  border-color: var(--kitty-textarea-backgroundColor-focus);
+}
+
+.styles-module-root_invalid-uPceR[data-state~='focus'] {
+  box-shadow: var(--kitty-textarea-boxShadow-focusInvalid);
+}
+
+.styles-module-textarea-ynjS1 {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 100%;
+
+  padding: 0;
+  resize: none;
+  outline: none;
+  border: none;
+  font-family: inherit;
+  font-size: var(--module-textarea-fontSize);
+  line-height: var(--module-textarea-lineHeight);
+  background-color: transparent;
+  color: inherit;
+
+  overflow-y: hidden;
+  min-height: var(--module-textarea-lineHeight);
+}
+
+.styles-module-textarea_resizable-rhheW {
+  resize: vertical;
+  padding-right: var(--module-textarea-resizeControl-textareaPadding);
+}
+
+.styles-module-root-pMU8L[data-state~='focus'] .styles-module-textarea-ynjS1 {
+  background-color: transparent;
+}
+
+.styles-module-textarea-ynjS1::-moz-placeholder {
+  color: var(--kitty-textarea-color-placeholderColor);
+}
+
+.styles-module-textarea-ynjS1::placeholder {
+  color: var(--kitty-textarea-color-placeholderColor);
+}
+
+.styles-module-root_disabled-vplMt {
+  background-color: var(--kitty-textarea-backgroundColor-disabled);
+  border-color: var(--kitty-textarea-backgroundColor-disabled);
+  color: var(--kitty-textarea-color-disabled);
+}
+
+.styles-module-root_disabled-vplMt .styles-module-textarea-ynjS1 {
+  color: inherit;
+}
+
+.styles-module-textarea_disabled-GICZk {
+  pointer-events: none;
+}
+
+.styles-module-textarea_disabled-GICZk::-moz-placeholder {
+  color: var(--kitty-textarea-color-placeholderColor-disabled);
+}
+
+.styles-module-textarea_disabled-GICZk::placeholder {
+  color: var(--kitty-textarea-color-placeholderColor-disabled);
+}
+
+.styles-module-root_disabled-vplMt:hover {
+  background-color: var(--kitty-textarea-backgroundColor-disabledHover);
+  border-color: var(--kitty-textarea-backgroundColor-disabled);
+}
+
+.styles-module-clearButton-hgtjJ {
+  --module-crossButton-hoverColor: var(--kitty-textarea-crossButton-color-hover);
+  --module-crossButton-activeColor: var(--kitty-textarea-crossButton-color-active);
+
+  position: absolute;
+  top: var(--module-crossButton-top);
+  right: var(--module-crossButton-right);
+}
+
+@media (hover: none) {
+  .styles-module-root-pMU8L:hover {
+    border-color: var(--kitty-textarea-border-color);
+    background-color: var(--kitty-textarea-backgroundColor);
+  }
+
+  .styles-module-root-pMU8L[data-state~='focus'] {
+    box-shadow: unset;
+  }
+
+  .styles-module-root_invalid-uPceR[data-state~='focus'] {
+    box-shadow: unset;
+    border-color: var(--kitty-textarea-border-colorInvalid);
+  }
+}
+
+.description-button-descriptionButtonIcon_disabled-rBzJF {
+    opacity: .6;
+}
+
+.AvitoIcon-module-mask_light-VAAsn {
+  --module-icon-mask-url: url(/static/item-publish/assets/../assets/077a6c7346b7b75c.svg);
+}
+
+.AvitoIcon-module-mask_normal-aSfKS {
+  --module-icon-mask-url: url(/static/item-publish/assets/../assets/67a03a54952c357b.svg);
+}
+
+.AvitoIcon-module-mask_bold-Tu3fp {
+  --module-icon-mask-url: url(/static/item-publish/assets/../assets/67a03a54952c357b.svg);
+}
+
+.AvitoIcon-module-aspectRatio_light-MGVbT {
+  --aspect-ratio: 1;
+}
+
+.AvitoIcon-module-aspectRatio_normal-QfJhz {
+  --aspect-ratio: 1;
+}
+
+.AvitoIcon-module-aspectRatio_bold-FRbxG {
+  --aspect-ratio: 1;
+}
+

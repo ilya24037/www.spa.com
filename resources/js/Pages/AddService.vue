@@ -202,11 +202,8 @@ export default {
       isSaving,
       lastSaved,
       hasUnsavedChanges,
-      handleSubmit,
-      handleSaveAndExit,
-      handleMediaError,
-      handleAddressSelected,
-      goBack
+      submitForm,
+      saveAndExit
     } = useAdForm()
 
     // Состояние выбранной категории
@@ -252,12 +249,12 @@ export default {
       hasUnsavedChanges,
       selectedCategory,
       pageTitle,
-      handleSubmit,
-      handleSaveAndExit,
-      handleMediaError,
-      handleAddressSelected,
+      handleSubmit: submitForm,
+      handleSaveAndExit: saveAndExit,
+      handleMediaError: (error) => console.warn('Ошибка медиа:', error),
+      handleAddressSelected: (address) => console.log('Выбран адрес:', address),
       handleCategoryChange,
-      goBack
+      goBack: () => window.history.back()
     }
   }
 }

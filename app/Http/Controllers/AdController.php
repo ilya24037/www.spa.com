@@ -77,18 +77,12 @@ class AdController extends Controller
      */
     public function storeDraft(Request $request)
     {
-        // Для черновика валидируем только обязательные поля
-        $validator = Validator::make($request->all(), [
-            'title' => 'required|string|max:255',
-        ]);
-
-        if ($validator->fails()) {
-            return back()->withErrors($validator->errors());
-        }
+        // Для черновика не валидируем ничего - принимаем любые данные
+        // Черновик может быть полностью пустым
 
         $ad = Ad::create([
             'user_id' => Auth::id(),
-            'title' => $request->title,
+            'title' => $request->title ?: 'Черновик объявления',
             'specialty' => $request->specialty ?: null,
             'clients' => !empty($request->clients) ? json_encode($request->clients) : json_encode([]),
             'service_location' => !empty($request->service_location) ? json_encode($request->service_location) : json_encode([]),
@@ -108,6 +102,16 @@ class AdController extends Controller
             'status' => 'draft'
         ]);
 
+        // Если запрос ожидает JSON (автосохранение), возвращаем JSON
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Черновик сохранен!',
+                'ad_id' => $ad->id
+            ]);
+        }
+
+        // Для Inertia.js возвращаем редирект на профиль
         return redirect()->route('dashboard')->with('success', 'Черновик сохранен!');
     }
 

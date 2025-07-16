@@ -1,0 +1,177 @@
+.styles-hidden-BZqns {
+    visibility: hidden;
+}
+
+.styles-skeleton-gpP4c {
+    position: absolute;
+}
+
+.styles-label-tucEx {
+    padding-left: 10px;
+}
+
+.styles-wrap-QPRA1 {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.styles-module-root-tT9OD {
+  --module-skeleton-border-radius: var(--theme-borderRadius-m);
+
+  border-radius: var(--module-skeleton-border-radius);
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  /* Animation */
+  animation-name: styles-module-pulsate-qDXY5;
+  animation-duration: 1.2s;
+  animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
+  animation-iteration-count: infinite;
+}
+
+/* ------------------ root borderRadius modifier ------------------ */
+
+.styles-module-root_borderRadius_2-PQAXW {
+  --module-skeleton-border-radius: 2px;
+}
+
+.styles-module-root_borderRadius_4-aI5g7 {
+  --module-skeleton-border-radius: 4px;
+}
+
+.styles-module-root_borderRadius_6-rcfeQ {
+  --module-skeleton-border-radius: 6px;
+}
+
+.styles-module-root_borderRadius_12-cIB5_ {
+  --module-skeleton-border-radius: 12px;
+}
+
+.styles-module-root_borderRadius_16-LPHp8 {
+  --module-skeleton-border-radius: 16px;
+}
+
+.styles-module-root_borderRadius_20-kigi5 {
+  --module-skeleton-border-radius: 20px;
+}
+
+.styles-module-root_borderRadius_24-X3nDo {
+  --module-skeleton-border-radius: 24px;
+}
+
+.styles-module-root_borderRadius_28-C2s5T {
+  --module-skeleton-border-radius: 28px;
+}
+
+.styles-module-root_preset_default-X5xKc {
+  background-color: var(--theme-palette-warmGray8);
+}
+
+.styles-module-root_preset_inverted-mtQFF {
+  background-color: var(--theme-palette-warmGray84);
+}
+
+@keyframes styles-module-pulsate-qDXY5 {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* ---------- text ---------- */
+
+.styles-module-text-o6OFm {
+  display: inline-block;
+  width: 100%;
+  line-height: var(--capital-height);
+  --module-skeleton-border-radius: var(--theme-borderRadius-s);
+}
+
+.styles-module-text-o6OFm::before {
+  /* It's important to use NBSP because sometimes the browser cut it off */
+  content: '\00a0';
+  display: inline-block;
+}
+
+/* ---------- circle ---------- */
+
+.styles-module-circle-zSkFv {
+  --module-skeleton-border-radius: 50%;
+}
+
+.styles-module-circle-zSkFv::before {
+  content: '';
+  display: block;
+  padding-bottom: 100%;
+}
+
+/* ---------- control ---------- */
+.styles-module-control-FqDnX {
+  height: var(--module-skeleton-border-height);
+}
+
+.styles-module-control_size_s-pELKX {
+  --module-skeleton-border-height: var(--theme-size-s-height);
+  --module-skeleton-border-radius: var(--theme-size-s-borderRadius);
+}
+
+.styles-module-control_size_m-beoua {
+  --module-skeleton-border-height: var(--theme-size-m-height);
+  --module-skeleton-border-radius: var(--theme-size-m-borderRadius);
+}
+
+.styles-module-control_size_l-wlHOZ {
+  --module-skeleton-border-height: var(--theme-size-l-height);
+  --module-skeleton-border-radius: var(--theme-size-l-borderRadius);
+}
+
+/* ------------------ control shape modifier ------------------ */
+
+.styles-module-control_shape_round-qMQEx {
+  --module-skeleton-border-radius: var(--module-skeleton-border-height);
+}
+
+.styles-module-control_shape_square-l21NC,
+.styles-module-control_shape_circle-WprSa {
+  max-width: var(--module-skeleton-border-height);
+  min-width: var(--module-skeleton-border-height);
+}
+
+.styles-module-control_shape_circle-WprSa {
+  --module-skeleton-border-radius: 50%;
+}
+
+.index-border-jWytu {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #a3a3a3;
+    border-radius: 50%;
+    box-sizing: border-box;
+}
+
+.index-border-jWytu.index-dashed-H2Ch3 {
+    border-style: dashed;
+}
+
+.index-white-color-border-spuv6 {
+    border-color: #ebeae8;
+}
+
+.index-color-wrapper-Ujg5N {
+    position: relative;
+    margin-right: var(--theme-component-dropdown-item-size-m-iconBeforeWrapperMarginRight);
+    top: var(--theme-component-dropdown-item-size-m-iconBeforeWrapperTop);
+}
+
+.index-label-wrapper-aN4Up {
+    flex-grow: 1;
+    font-size: var(--theme-component-dropdown-item-size-m-fontSize);
+    line-height: var(--theme-component-dropdown-item-size-m-lineHeight);
+}
+

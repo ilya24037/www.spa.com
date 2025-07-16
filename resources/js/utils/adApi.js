@@ -171,13 +171,29 @@ export const deleteAdPhoto = async (adId, photoId) => {
 }
 
 /**
- * Автосохранение черновика
+ * Автосохранение черновика (без редиректа)
  */
 export const autosaveDraft = async (formData) => {
   try {
-    // Отправляем данные без показа ошибок пользователю
-    await saveDraft(formData)
-    return true
+    // Подготавливаем данные для черновика
+    const preparedData = prepareFormData(formData)
+    
+    // Используем обычный fetch для автосохранения
+    const response = await fetch('/ads/draft', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(preparedData)
+    })
+    
+    if (response.ok) {
+      return true
+    } else {
+      throw new Error('Ошибка сохранения')
+    }
   } catch (error) {
     console.warn('Автосохранение не удалось:', error)
     return false
@@ -188,7 +204,7 @@ export const autosaveDraft = async (formData) => {
  * Подготовить данные формы для отправки
  */
 export const prepareFormData = (form) => {
-  return {
+  const data = {
     title: form.title || '',
     specialty: form.specialty || '',
     clients: Array.isArray(form.clients) ? form.clients : [],
@@ -207,4 +223,8 @@ export const prepareFormData = (form) => {
     phone: form.phone || '',
     contact_method: form.contact_method || 'messages'
   }
+  
+  // Для черновика оставляем все поля, даже пустые
+  // Это позволит сохранить черновик даже с полностью пустой формой
+  return data
 } 

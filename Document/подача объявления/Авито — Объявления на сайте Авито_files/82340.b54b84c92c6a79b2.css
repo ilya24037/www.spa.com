@@ -1,0 +1,163 @@
+.error-root-GxmJn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.error-text-n634D {
+    padding-bottom: 1em;
+}
+
+.tree-root-NEaT_,
+.tree-treeContainer-HFDo1 {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+}
+
+.tree-tree-UPuWY {
+    display: block;
+    width: 100%;
+    height: 100%;
+    margin-left: 2px;
+    overflow-y: auto;
+}
+
+.tree-treeWithShadow-WvWe8::after {
+    z-index: 5;
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: calc(100% + 25px);
+    height: 90px;
+    pointer-events: none;
+    background-image: url(/static/item-publish/assets/../assets/8cefb4bb0eebee9b.png);
+    background-repeat: no-repeat;
+    background-position: bottom center;
+    background-size: contain;
+}
+
+.tree-filter-aQQRJ {
+    padding-bottom: 12px;
+}
+
+.tree-disclaimer-GZqYa {
+    margin-bottom: 10px;
+}
+
+.tree-root-NEaT_.tree-activationPage-FFbE7 {
+    padding-bottom: 26px;
+}
+
+.filter-root-vQRui {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+}
+
+.filter-buttons-P2R_8 {
+    flex: 0 0 auto;
+}
+
+.filter-arrow-Wldsb {
+    width: 30px;
+    height: 30px;
+    background-image: url(/static/item-publish/assets/../assets/28c777b6dd1fbbc8.svg);
+    background-repeat: no-repeat;
+    background-size: 14px 14px;
+    background-position: center center;
+}
+
+.filter-arrowUp-EkPnG {
+    transform: rotate(180deg);
+}
+
+.filter-buttons-P2R_8 > .filter-arrow-Wldsb {
+    border-bottom-right-radius: unset;
+    border-top-right-radius: unset;
+}
+
+.filter-buttons-P2R_8 > .filter-arrow-Wldsb:first-child {
+    border-right: unset;
+}
+
+.filter-counter-rfIZh {
+    flex: 0 0 auto;
+    padding: 0 14px;
+}
+
+.filter-input-ZoXQi {
+    flex: 1 1 auto;
+}
+
+.filter-input-ZoXQi.filter-activation-N9Vk9 input::-moz-placeholder {
+    /*
+        хак для того, чтобы на странице активации
+        не переопределялись стили placeholder-а в input-е
+        (там заданы глобальные стили для ::placeholder)
+     */
+    /* stylelint-disable */
+    color: #999 !important;
+    /* stylelint-enable */
+}
+
+.filter-input-ZoXQi.filter-activation-N9Vk9 input::placeholder {
+    /*
+        хак для того, чтобы на странице активации
+        не переопределялись стили placeholder-а в input-е
+        (там заданы глобальные стили для ::placeholder)
+     */
+    /* stylelint-disable */
+    color: #999 !important;
+    /* stylelint-enable */
+}
+
+.row-row-A61Sd {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: baseline;
+}
+
+.row-rowHidden-AFZRA {
+    position: absolute;
+    left: -30000px;
+    visibility: hidden;
+    opacity: 0;
+}
+
+.title-root-CXSKP {
+    max-width: 232px;
+    margin-left: 2px;
+    word-wrap: break-word;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+}
+
+.title-root-CXSKP.title-disabled-dzZzE {
+    cursor: auto;
+}
+
+.title-highlight-u15qx {
+    background-color: #def3ff;
+}
+
+.footer-root-AWoqi {
+    padding-top: 16px;
+}
+
+.footer-reset-APtax {
+    padding: 0 24px;
+}
+

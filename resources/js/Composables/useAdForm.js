@@ -5,7 +5,7 @@
 
 import { ref, reactive, computed } from 'vue'
 import { validateAdForm } from '@/utils/formValidators'
-import { createAd, updateAd, prepareFormData } from '@/utils/adApi'
+import { createAd, updateAd, saveDraft, prepareFormData } from '@/utils/adApi'
 import { useAutosave } from '@/Composables/useAutosave'
 
 export function useAdForm(initialData = {}, options = {}) {
@@ -191,10 +191,26 @@ export function useAdForm(initialData = {}, options = {}) {
    * Сохранить и выйти (черновик)
    */
   const saveAndExit = async () => {
-    await autosave.forceSave()
-    
-    // Перейти на страницу профиля
-    window.location.href = '/profile'
+    try {
+      isSubmitting.value = true
+      
+      // Принудительно сохраняем черновик
+      const formData = prepareFormData(form)
+      await saveDraft(formData)
+      
+      // Остановить автосохранение
+      autosave.stopAutosave()
+      autosave.reset()
+      
+      // Перейти на страницу дашборда
+      window.location.href = '/dashboard'
+    } catch (error) {
+      console.warn('Ошибка сохранения черновика:', error)
+      // Даже при ошибке переходим на дашборд
+      window.location.href = '/dashboard'
+    } finally {
+      isSubmitting.value = false
+    }
   }
 
   /**
@@ -264,11 +280,13 @@ export function useAdForm(initialData = {}, options = {}) {
     // Методы отправки
     submitForm,
     saveAndExit,
+    saveDraft: autosave.forceSave, // Алиас для принудительного сохранения
     
     // Методы управления
     resetForm,
     fillForm,
     getFormData,
+    loadDraft: fillForm, // Алиас для fillForm
     
     // Автосохранение
     startAutosave: autosave.startAutosave,

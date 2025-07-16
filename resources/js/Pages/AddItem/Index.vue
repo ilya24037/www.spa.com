@@ -77,110 +77,146 @@
                                     </svg>
                                 </li>
                                 <li>
-                                    <span class="text-gray-900 font-medium">Разместить объявление</span>
+                                    <span class="text-gray-900 font-medium">
+                                        {{ selectedCategory ? getCategoryName(selectedCategory) : 'Разместить объявление' }}
+                                    </span>
                                 </li>
                             </ol>
                         </nav>
                     </template>
 
-                    <!-- Заголовок -->
-                    <div class="text-center mb-8">
-                        <h1 class="text-3xl font-bold text-gray-900 mb-4">
-                            Разместить объявление
-                        </h1>
-                        <p class="text-lg text-gray-600">
-                            Выберите категорию услуг для создания объявления. Ваше объявление увидят тысячи клиентов.
-                        </p>
-                    </div>
+                    <!-- Выбор категории (показывается если категория не выбрана) -->
+                    <div v-if="!selectedCategory">
+                        <!-- Заголовок -->
+                        <div class="text-center mb-8">
+                            <h1 class="text-3xl font-bold text-gray-900 mb-4">
+                                Разместить объявление
+                            </h1>
+                            <p class="text-lg text-gray-600">
+                                Выберите категорию услуг для создания объявления. Ваше объявление увидят тысячи клиентов.
+                            </p>
+                        </div>
 
-                    <!-- Сетка категорий -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                        <div
-                            v-for="category in categories"
-                            :key="category.id"
-                            class="relative group"
-                        >
-                            <!-- Карточка категории -->
-                            <Link 
-                                :href="`/addservice?category=${category.id}`"
-                                class="block bg-gray-50 rounded-xl p-6 hover:bg-gray-100 transition-all duration-300 transform hover:-translate-y-1 border-2 border-transparent hover:border-blue-200"
+                        <!-- Сетка категорий -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                            <div
+                                v-for="category in props.categories"
+                                :key="category.id"
+                                class="relative group"
                             >
-                                <!-- Популярный лейбл -->
-                                <div v-if="category.popular" class="absolute top-4 right-4 z-10">
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        ⭐ Популярное
-                                    </span>
-                                </div>
-
-                                <!-- 18+ лейбл -->
-                                <div v-if="category.adult" class="absolute top-4 left-4 z-10">
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                        🔞 18+
-                                    </span>
-                                </div>
-
-                                <!-- Контент карточки -->
-                                <div class="text-center">
-                                    <!-- Иконка -->
-                                    <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-white rounded-full shadow-sm">
-                                        <span class="text-3xl">{{ category.icon }}</span>
-                                    </div>
-
-                                    <!-- Название -->
-                                    <h3 class="text-xl font-bold text-gray-900 mb-2">
-                                        {{ category.name }}
-                                    </h3>
-
-                                    <!-- Описание -->
-                                    <p class="text-gray-600 text-sm mb-4">
-                                        {{ category.description }}
-                                    </p>
-
-                                    <!-- Кнопка -->
-                                    <div class="flex justify-center">
-                                        <span class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg text-sm group-hover:bg-blue-700 transition-colors">
-                                            Выбрать
-                                            <svg class="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                            </svg>
+                                <!-- Карточка категории -->
+                                <button 
+                                    @click="selectCategory(category.id)"
+                                    type="button"
+                                    class="w-full block bg-gray-50 rounded-xl p-6 hover:bg-gray-100 transition-all duration-300 transform hover:-translate-y-1 border-2 border-transparent hover:border-blue-200"
+                                >
+                                    <!-- Популярный лейбл -->
+                                    <div v-if="category.popular" class="absolute top-4 right-4 z-10">
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            ⭐ Популярное
                                         </span>
                                     </div>
+
+                                    <!-- 18+ лейбл -->
+                                    <div v-if="category.adult" class="absolute top-4 left-4 z-10">
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                            🔞 18+
+                                        </span>
+                                    </div>
+
+                                    <!-- Контент карточки -->
+                                    <div class="text-center">
+                                        <!-- Иконка -->
+                                        <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-white rounded-full shadow-sm">
+                                            <span class="text-3xl">{{ category.icon }}</span>
+                                        </div>
+
+                                        <!-- Название -->
+                                        <h3 class="text-xl font-bold text-gray-900 mb-2">
+                                            {{ category.name }}
+                                        </h3>
+
+                                        <!-- Описание -->
+                                        <p class="text-gray-600 text-sm mb-4">
+                                            {{ category.description }}
+                                        </p>
+
+                                        <!-- Кнопка -->
+                                        <div class="flex justify-center">
+                                            <span class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg text-sm group-hover:bg-blue-700 transition-colors">
+                                                Выбрать
+                                                <svg class="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                                </svg>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Почему стоит разместить объявление у нас -->
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-8">
+                            <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">
+                                Почему стоит разместить объявление у нас?
+                            </h2>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div class="text-center">
+                                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <span class="text-2xl">👁️</span>
+                                    </div>
+                                    <h3 class="font-semibold text-gray-900 mb-2">Высокая видимость</h3>
+                                    <p class="text-sm text-gray-600">Ваше объявление увидят тысячи потенциальных клиентов</p>
                                 </div>
-                            </Link>
+                                
+                                <div class="text-center">
+                                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <span class="text-2xl">💰</span>
+                                    </div>
+                                    <h3 class="font-semibold text-gray-900 mb-2">Доступные цены</h3>
+                                    <p class="text-sm text-gray-600">Размещение объявлений по выгодным тарифам</p>
+                                </div>
+                                
+                                <div class="text-center">
+                                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <span class="text-2xl">⚡</span>
+                                    </div>
+                                    <h3 class="font-semibold text-gray-900 mb-2">Быстрая модерация</h3>
+                                    <p class="text-sm text-gray-600">Объявления проверяются и публикуются в течение часа</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Почему стоит разместить объявление у нас -->
-                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-8">
-                        <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">
-                            Почему стоит разместить объявление у нас?
-                        </h2>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div class="text-center">
-                                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                    <span class="text-2xl">👁️</span>
-                                </div>
-                                <h3 class="font-semibold text-gray-900 mb-2">Высокая видимость</h3>
-                                <p class="text-sm text-gray-600">Ваше объявление увидят тысячи потенциальных клиентов</p>
-                            </div>
-                            
-                            <div class="text-center">
-                                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                    <span class="text-2xl">💰</span>
-                                </div>
-                                <h3 class="font-semibold text-gray-900 mb-2">Доступные цены</h3>
-                                <p class="text-sm text-gray-600">Размещение объявлений по выгодным тарифам</p>
-                            </div>
-                            
-                            <div class="text-center">
-                                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                    <span class="text-2xl">⚡</span>
-                                </div>
-                                <h3 class="font-semibold text-gray-900 mb-2">Быстрая модерация</h3>
-                                <p class="text-sm text-gray-600">Объявления проверяются и публикуются в течение часа</p>
+                    <!-- Форма создания объявления (показывается когда категория выбрана) -->
+                    <div v-else>
+                        <!-- Заголовок с кнопкой "Назад" -->
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center space-x-4">
+                                <button 
+                                    @click="goBackToCategories"
+                                    type="button"
+                                    class="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+                                >
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                    </svg>
+                                    Назад к категориям
+                                </button>
+                                <div class="h-6 w-px bg-gray-300"></div>
+                                <h1 class="text-2xl font-bold text-gray-900">
+                                    {{ getCategoryName(selectedCategory) }}
+                                </h1>
                             </div>
                         </div>
+
+                        <!-- Форма объявления -->
+                        <AdForm 
+                            :category="selectedCategory"
+                            :categories="props.categories"
+                            @success="handleFormSuccess"
+                        />
                     </div>
                 </ContentCard>
             </main>
@@ -194,9 +230,10 @@ import { Head, Link, usePage } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import SidebarWrapper from '@/Components/Layout/SidebarWrapper.vue'
 import ContentCard from '@/Components/Layout/ContentCard.vue'
+import AdForm from '@/Components/Form/AdForm.vue'
 
 // Получаем данные от контроллера
-defineProps({
+const props = defineProps({
   categories: {
     type: Array,
     required: true
@@ -214,6 +251,9 @@ defineProps({
     default: () => ({})
   }
 })
+
+// Внутреннее состояние для выбранной категории
+const selectedCategory = ref(null)
 
 // Состояние для мобильного меню
 const showMobileSidebar = ref(false)
@@ -243,6 +283,26 @@ const menuItemClass = (isActive) => [
         ? 'bg-blue-50 text-blue-600 font-medium' 
         : 'text-gray-700 hover:bg-gray-50'
 ]
+
+// Методы для работы с категориями
+const selectCategory = (categoryId) => {
+    selectedCategory.value = categoryId
+}
+
+const goBackToCategories = () => {
+    selectedCategory.value = null
+}
+
+const getCategoryName = (categoryId) => {
+    const category = props.categories.find(cat => cat.id === categoryId)
+    return category ? category.name : 'Неизвестная категория'
+}
+
+const handleFormSuccess = (data) => {
+    // Перенаправляем на страницу объявления или показываем успешное сообщение
+    console.log('Объявление создано:', data)
+    // Можно добавить toast уведомление или перенаправление
+}
 </script>
 
 <script>

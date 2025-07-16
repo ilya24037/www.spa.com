@@ -1,0 +1,192 @@
+.remover-remover-QZBOz {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+}
+
+.remover-remover-QZBOz:hover {
+    cursor: pointer;
+}
+
+.box-box-gaNz3 {
+    position: relative;
+    border: 1px solid #ebeae8;
+    padding: 20px 24px 32px;
+    border-radius: 6px;
+    margin-left: -6px;
+    margin-right: -6px;
+}
+
+.box-box-gaNz3:first-child {
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+}
+
+.box-box-gaNz3:last-child {
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
+
+.box-box-gaNz3:not(:first-child) {
+    margin-top: 6px;
+}
+
+.fields-row-VMoUW {
+    display: flex;
+    align-items: center;
+    line-height: 36px;
+    padding-left: 24px;
+    margin-bottom: 10px;
+    position: relative;
+    padding-right: 55px;
+}
+
+.fields-service-OmeR3 {
+    flex: 1;
+    padding-right: 20px;
+}
+
+.fields-initialCost-Cqy48 {
+    width: 50px;
+    margin-right: 8px;
+}
+
+.fields-cost-FUL51 {
+    width: 111px;
+}
+
+.fields-priceType-G690H {
+    margin-left: 8px;
+    width: 160px;
+}
+
+.fields-duration-Ny3Dv {
+    margin-left: 8px;
+    width: 150px;
+}
+
+.fields-removeButton-GTefI {
+    display: flex;
+    align-items: center;
+    right: 0;
+    position: absolute;
+}
+
+.price-tooltip-text-KfYwY {
+    margin-left: -4px;
+}
+
+.price-tooltip-actions-uV4ha {
+    margin-left: -4px;
+    padding-bottom: 2px;
+}
+
+.price-tooltip-actions-uV4ha .price-tooltip-button-KhuXK {
+    margin-right: 6px;
+    display: inline-block;
+}
+
+.DeleteFilled-module-mask-FdbkB {
+  --module-icon-mask-url: url(/static/item-publish/assets/../assets/fe0fe17b031d4dc4.svg);
+}
+
+.priceListSummary-shadowWrapper-gOExf {
+    position: relative;
+}
+
+.priceListSummary-bottomShadowElement-h7Ilc {
+    height: 15px;
+    width: 715px;
+    margin-left: 42px;
+}
+
+.priceListSummary-shadow-peU4a {
+    box-shadow: 0 -2px 24px 0 rgba(0, 0, 0, .13);
+}
+
+.priceListSummary-summary-R6KUz {
+    width: 800px;
+    top: 1px;
+    background: white;
+    position: absolute;
+    padding: 16px 20px;
+}
+
+.priceListSummary-count-mHEzf {
+    display: flex;
+    align-items: center;
+}
+
+.priceListSummary-clearButton-CGHdx {
+    margin-left: 12px;
+    cursor: pointer;
+}
+
+.priceListSummary-text-YyWhS {
+    margin: 8px 0 16px;
+}
+
+.styles-root-PxMDA {
+    width: 850px;
+}
+
+.styles-services-NDvky {
+    display: flex;
+    flex-direction: column;
+    max-height: 526px;
+    overflow: hidden;
+    overflow-y: scroll;
+    margin-top: 16px;
+}
+
+.styles-services-NDvky::-webkit-scrollbar {
+    width: 0;
+}
+
+.styles-group-gAfFJ {
+    cursor: pointer;
+    display: flex;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+            user-select: none;
+    align-items: center;
+    padding: 6px 0;
+    margin-bottom: 10px;
+}
+
+.styles-title-C33wO {
+    margin-left: 4px;
+}
+
+.styles-addButton-Z4X9A {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    padding-left: 25px;
+    cursor: pointer;
+    margin-bottom: 30px;
+}
+
+.styles-addText-kMx6B {
+    margin-left: 8px;
+}
+
+.styles-fakeInput-kO8lT {
+    width: 0;
+    height: 0;
+    position: absolute;
+    visibility: hidden;
+}
+
+.ArrowExpandLess-module-mask-UZyrx {
+  --module-icon-mask-url: url(/static/item-publish/assets/../assets/d4f64547cedde830.svg);
+}
+
+.ArrowExpandMore-module-mask-zcNas {
+  --module-icon-mask-url: url(/static/item-publish/assets/../assets/c5c21142677b25cf.svg);
+}
+
+.AddRound-module-mask-ggQAo {
+  --module-icon-mask-url: url(/static/item-publish/assets/../assets/2ca2a1740e1747ae.svg);
+}
+
