@@ -1,5 +1,5 @@
 # 🤖 AI Context: SPA Platform - Платформа услуг массажа
-Дата генерации: 14.07.2025 17:34:41
+Дата генерации: 16.07.2025 05:10:36
 Версия Laravel: 12.20.0
 PHP: 8.4.10
 
@@ -13,24 +13,24 @@ PHP: 8.4.10
 
 ## 🔥 НАД ЧЕМ РАБОТАЛИ ПОСЛЕДНИЙ РАЗ
 **Последние изменённые файлы:**
-- 📄 Страница resources/js\Pages\Masters\Show.vue (изменён в 17:28)
-- 🧩 Компонент resources/js\Components\Masters\MasterGallery\OzonStyleGallery.vue (изменён в 17:27)
-- 🎮 Контроллер app\Http\Controllers\MasterController.php (изменён в 14:48)
-- 📋 Модель app\Models\MasterProfile.php (изменён в 14:40)
-- 🧩 Компонент resources/js\Components\Masters\MasterHeader.zip (изменён в 14:20)
-- 🧩 Компонент resources/js\Components\Masters.zip (изменён в 13:35)
-- 🎮 Контроллер app\Http\Controllers\MasterController3.php (изменён в 12:33)
-- 🧩 Компонент resources/js\Components\Cards\MasterCard.vue (изменён в 12:09)
-- 🧩 Компонент resources/js\Components\Masters\MasterDetails\index.vue (изменён в 11:47)
-- ⚡ JavaScript resources/js\utils\helpers.js (изменён в 11:40)
+- 📄 Страница resources/js\Pages\Dashboard.vue (изменён в 05:02)
+- 🧩 Компонент resources/js\Components\UI\Toast.vue (изменён в 05:01)
+- 🧩 Компонент resources/js\Components\Profile\ItemCard.vue (изменён в 05:00)
+- 🧩 Компонент resources/js\Components\UI\ConfirmModal.vue (изменён в 04:59)
+- ⚡ JavaScript resources/js\Composables\useAdForm.js (изменён в 04:48)
+- 🎮 Контроллер app\Http\Controllers\ProfileController.php (изменён в 04:45)
+- 🎮 Контроллер app\Http\Controllers\AdController.php (изменён в 04:44)
+- 🧩 Компонент resources/js\Components\Layout\PageHeader.vue (изменён в 04:40)
+- 📄 Страница resources/js\Pages\AddService.vue (изменён в 04:40)
+- 🧩 Компонент resources/js\Components\Form\FormRadio.vue (изменён в 04:39)
 
 🎯 **Скорее всего работали над:** Vue компонентами и UI
 
-**⚠️ Незакоммиченные изменения:** 7 файлов
+**⚠️ Незакоммиченные изменения:** 66 файлов
 
 ## 📊 АВТОМАТИЧЕСКИЙ АНАЛИЗ ПРОГРЕССА
-### 🎯 Общий прогресс: 119%
-[██████████] (44/37 компонентов)
+### 🎯 Общий прогресс: 84%
+[████████░░] (31/37 компонентов)
 
 ### ✅ Модели данных [████████░░] 80%
 ✅ **Готово:** User, MasterProfile, MassageCategory, Service, Booking
@@ -43,8 +43,8 @@ PHP: 8.4.10
 ❌ **Отсутствует:** ReviewController
 
 ### ✅ Миграции БД [██████████] 100%
-✅ **Готово:** 0001_01_01_000001_create_cache_table.php, 0001_01_01_000002_create_jobs_table.php, 2024_01_01_000000_create_users_table.php, 2025_06_08_190102_create_personal_access_tokens_table.php, 2025_06_11_211948_create_master_profiles_table.php
-   _и ещё 14 файлов_
+✅ **Готово:** 2024_12_19_000000_create_master_media_tables.php, 2025_07_15_092654_update_master_photos_table_structure.php, 2025_07_15_093422_create_master_videos_table.php, 2025_07_15_150546_create_ads_table.php, 2025_07_15_151623_update_ads_table_nullable_fields.php
+   _и ещё 1 файлов_
 
 ### ✅ Vue страницы [██████████] 100%
 ✅ **Готово:** Home, Masters/Index, Masters/Show, Profile/Edit, Bookings/Create
@@ -61,10 +61,10 @@ PHP: 8.4.10
 
 ## 📁 СТРУКТУРА ПРОЕКТА
 **Статистика файлов:**
-- PHP файлов: 14
-- Vue компонентов: 6
-- JavaScript: 11
-- Всего строк кода: 5,870
+- PHP файлов: 20
+- Vue компонентов: 9
+- JavaScript: 17
+- Всего строк кода: 7,972
 
 
 ## ⚠️ НАЙДЕННЫЕ ПРОБЛЕМЫ И ЗАМЕТКИ
@@ -72,13 +72,13 @@ PHP: 8.4.10
 - Отправить SMS/Email клиенту (`D:\www.spa.com\app/Models/Booking.php:164`)
 - Отправить уведомление (`D:\www.spa.com\app/Models/Booking.php:185`)
 
-### ⚠️ Debug (15)
-- Debug (`D:\www.spa.com\resources\js/Pages/Welcome.vue:22`)
-- Debug (`D:\www.spa.com\resources\js/Pages/Welcome.vue:23`)
-- Debug (`D:\www.spa.com\resources\js/Pages/Welcome.vue:24`)
-- Debug (`D:\www.spa.com\resources\js/Pages/Welcome.vue:25`)
+### ⚠️ Debug (14)
+- Debug (`D:\www.spa.com\resources\js/Pages/AddService.vue:189`)
+- Debug (`D:\www.spa.com\resources\js/Pages/AddService.vue:204`)
+- Debug (`D:\www.spa.com\resources\js/Composables/useAdForm.js:96`)
 - Debug (`D:\www.spa.com\resources\js/stores/bookingStore.js:85`)
-_... и ещё 10_
+- Debug (`D:\www.spa.com\resources\js/stores/bookingStore.js:97`)
+_... и ещё 9_
 
 
 ## 🚀 РЕКОМЕНДУЕМЫЕ СЛЕДУЮЩИЕ ШАГИ
@@ -114,4 +114,4 @@ _... и ещё 10_
 4. ✅ Фокусируйся на MVP функциональности
 5. ✅ Давай конкретные команды для терминала
 
-*Этот контекст автоматически сгенерирован 14.07.2025 в 17:34*
+*Этот контекст автоматически сгенерирован 16.07.2025 в 05:10*

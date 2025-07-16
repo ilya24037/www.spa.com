@@ -105,6 +105,12 @@ return [
             'visibility' => 'private',
         ],
 
+        'masters_private' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/masters'),
+            'visibility' => 'private',
+        ],
+
     ],
 
     /*

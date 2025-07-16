@@ -102,18 +102,18 @@
           
           <!-- Для неавторизованных -->
           <template v-else>
-            <Link 
-              href="/login"
+            <button 
+              @click="$emit('show-login-modal')"
               class="block w-full bg-blue-600 text-white text-center py-3 rounded-lg font-medium"
             >
               Войти
-            </Link>
-            <Link 
-              href="/register"
+            </button>
+            <button 
+              @click="$emit('show-register-modal')"
               class="block w-full border border-blue-600 text-blue-600 text-center py-3 rounded-lg font-medium"
             >
               Регистрация
-            </Link>
+            </button>
           </template>
 
           <!-- Общая навигация -->
@@ -150,7 +150,7 @@ defineProps({
 })
 
 // Emits
-defineEmits(['toggle-catalog', 'open-city-modal'])
+defineEmits(['toggle-catalog', 'open-city-modal', 'show-login-modal', 'show-register-modal'])
 
 // Состояние
 const showMenu = ref(false)

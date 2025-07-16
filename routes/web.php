@@ -8,6 +8,7 @@ use App\Http\Controllers\CompareController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\AddItemController; // 🔥 ДОБАВЛЕНО
+use App\Http\Controllers\AdController;
 use App\Http\Controllers\TestController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -19,6 +20,11 @@ use Inertia\Inertia;
 */
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// Тестовая страница для проверки навигации
+Route::get('/test', function() {
+    return Inertia::render('Test');
+})->name('test');
 
 // Тестовый маршрут для добавления фотографий
 Route::get('/test/add-photos', [TestController::class, 'addPhotos'])->name('test.add-photos');
@@ -51,7 +57,7 @@ Route::post('/masters/{master}/upload/photos/test', function(\Illuminate\Http\Re
         return response()->json([
             'success' => true,
             'message' => 'Загружено ' . count($photos) . ' фотографий',
-            'photos' => $photos->map(function ($photo) {
+            'photos' => collect($photos)->map(function ($photo) {
                 return [
                     'id' => $photo->id,
                     'filename' => $photo->filename,
@@ -127,6 +133,11 @@ Route::middleware('auth')->group(function () {
 
     /*  alias /dashboard  → /profile (необязательный)  */
     Route::redirect('/dashboard', '/profile');
+    
+    /*  Алиас для маршрута dashboard  */
+    Route::get('/dashboard', function() {
+        return redirect('/profile');
+    })->name('dashboard');
 
     /*
     | Профиль пользователя (редактирование / пароль / удаление)
@@ -156,6 +167,11 @@ Route::middleware('auth')->group(function () {
         Route::patch('/{master}/toggle',    [ProfileController::class, 'toggleProfile'])->whereNumber('master')->name('toggle');
         Route::patch('/{master}/publish',   [ProfileController::class, 'publishProfile'])->whereNumber('master')->name('publish');
         Route::patch('/{master}/restore',   [ProfileController::class, 'restoreProfile'])->whereNumber('master')->name('restore');
+        
+        // 🔥 ДОБАВЛЕНО: маршруты для загрузки медиа
+        Route::post('/{master}/upload/avatar', [App\Http\Controllers\MediaUploadController::class, 'uploadAvatar'])->name('upload.avatar');
+        Route::post('/{master}/upload/photos', [App\Http\Controllers\MediaUploadController::class, 'uploadPhotos'])->name('upload.photos');
+        Route::post('/{master}/upload/video', [App\Http\Controllers\MediaUploadController::class, 'uploadVideo'])->name('upload.video');
     });
 
     /*
@@ -177,6 +193,16 @@ Route::middleware('auth')->group(function () {
         Route::post('/{booking}/cancel',   [BookingController::class, 'cancel'])->name('cancel');
         Route::post('/{booking}/confirm',  [BookingController::class, 'confirm'])->name('confirm');
         Route::post('/{booking}/complete', [BookingController::class, 'complete'])->name('complete');
+    });
+
+    /*
+    | Управление медиафайлами
+    */
+    Route::prefix('media')->name('media.')->group(function () {
+        Route::delete('/photos/{photo}', [App\Http\Controllers\MediaUploadController::class, 'deletePhoto'])->name('photos.delete');
+        Route::delete('/videos/{video}', [App\Http\Controllers\MediaUploadController::class, 'deleteVideo'])->name('videos.delete');
+        Route::post('/photos/{photo}/set-main', [App\Http\Controllers\MediaUploadController::class, 'setMainPhoto'])->name('photos.set-main');
+        Route::post('/photos/reorder', [App\Http\Controllers\MediaUploadController::class, 'reorderPhotos'])->name('photos.reorder');
     });
 
     /*
@@ -217,6 +243,55 @@ Route::prefix('masters/{master}/media')->group(function () {
         ->name('master.media.blur-settings');
 });
 
+// Публичные маршруты для медиафайлов
+Route::get('/masters/{master}/avatar', function($master) {
+    $masterProfile = \App\Models\MasterProfile::findOrFail($master);
+    $disk = \Illuminate\Support\Facades\Storage::disk('masters_public');
+    $path = "{$masterProfile->folder_name}/avatar.jpg";
+    
+    if (!$disk->exists($path)) {
+        return response()->file(public_path('images/default-avatar.jpg'));
+    }
+    
+    return response()->file($disk->path($path));
+})->name('master.avatar');
+
+Route::get('/masters/{master}/avatar/thumb', function($master) {
+    $masterProfile = \App\Models\MasterProfile::findOrFail($master);
+    $disk = \Illuminate\Support\Facades\Storage::disk('masters_public');
+    $path = "{$masterProfile->folder_name}/avatar_thumb.jpg";
+    
+    if (!$disk->exists($path)) {
+        return response()->file(public_path('images/default-avatar.jpg'));
+    }
+    
+    return response()->file($disk->path($path));
+})->name('master.avatar.thumb');
+
+Route::get('/masters/{master}/photos/{filename}', function($master, $filename) {
+    $masterProfile = \App\Models\MasterProfile::findOrFail($master);
+    $disk = \Illuminate\Support\Facades\Storage::disk('masters_private');
+    $path = "{$masterProfile->folder_name}/photos/{$filename}";
+    
+    if (!$disk->exists($path)) {
+        abort(404);
+    }
+    
+    return response()->file($disk->path($path));
+})->name('master.photo');
+
+Route::get('/masters/{master}/video/{filename}', function($master, $filename) {
+    $masterProfile = \App\Models\MasterProfile::findOrFail($master);
+    $disk = \Illuminate\Support\Facades\Storage::disk('masters_private');
+    $path = "{$masterProfile->folder_name}/video/{$filename}";
+    
+    if (!$disk->exists($path)) {
+        abort(404);
+    }
+    
+    return response()->file($disk->path($path));
+})->name('master.video');
+
 // Маршруты для медиа файлов мастеров
 Route::get('/masters/{master}/photo/{filename}', [App\Http\Controllers\MasterMediaController::class, 'photo'])->name('master.photo');
 Route::get('/masters/{master}/video/{filename}', [App\Http\Controllers\MasterMediaController::class, 'video'])->name('master.video');
@@ -235,4 +310,13 @@ Route::middleware('auth')->group(function () {
     
     Route::post('/masters/{master}/photos/reorder', [App\Http\Controllers\MediaUploadController::class, 'reorderPhotos'])->name('master.reorder.photos');
     Route::post('/photos/{photo}/set-main', [App\Http\Controllers\MediaUploadController::class, 'setMainPhoto'])->name('master.set.main.photo');
+    
+    // Маршруты для объявлений
+    Route::get('/ads/create', [AdController::class, 'create'])->name('ads.create');
+    Route::post('/ads', [AdController::class, 'store'])->name('ads.store');
+    Route::post('/ads/draft', [AdController::class, 'storeDraft'])->name('ads.draft');
+    Route::get('/ads/{ad}/edit', [AdController::class, 'edit'])->name('ads.edit');
+    Route::put('/ads/{ad}', [AdController::class, 'update'])->name('ads.update');
+    Route::delete('/ads/{ad}', [AdController::class, 'destroy'])->name('ads.destroy');
+    Route::patch('/ads/{ad}/status', [AdController::class, 'toggleStatus'])->name('ads.toggle-status');
 });

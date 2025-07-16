@@ -175,6 +175,84 @@ class MasterController extends Controller
     }
 
     /**
+     * Страница редактирования профиля мастера
+     */
+    public function edit(MasterProfile $master)
+    {
+        // Проверяем права доступа
+        if (auth()->id() !== $master->user_id) {
+            abort(403, 'Нет доступа к редактированию этого профиля');
+        }
+
+        // Загружаем профиль с медиафайлами
+        $master->load(['photos' => function($query) {
+            $query->orderBy('sort_order')->orderBy('created_at');
+        }, 'video']);
+
+        return Inertia::render('Masters/Edit', [
+            'master' => [
+                'id' => $master->id,
+                'name' => $master->display_name,
+                'specialization' => $master->specialization,
+                'description' => $master->bio,
+                'experience_years' => $master->experience_years,
+                'hourly_rate' => $master->hourly_rate,
+                'city' => $master->city,
+                'photos' => $master->photos->map(function($photo) {
+                    return [
+                        'id' => $photo->id,
+                        'filename' => $photo->filename,
+                        'original_url' => $photo->original_url,
+                        'medium_url' => $photo->medium_url,
+                        'thumb_url' => $photo->thumb_url,
+                        'is_main' => $photo->is_main,
+                        'sort_order' => $photo->sort_order,
+                    ];
+                }),
+                'video' => $master->video ? [
+                    'id' => $master->video->id,
+                    'filename' => $master->video->filename,
+                    'video_url' => $master->video->video_url,
+                    'poster_url' => $master->video->poster_url,
+                    'duration' => $master->video->formatted_duration,
+                    'file_size' => $master->video->file_size,
+                ] : null,
+            ]
+        ]);
+    }
+
+    /**
+     * Обновление профиля мастера
+     */
+    public function update(Request $request, MasterProfile $master)
+    {
+        // Проверяем права доступа
+        if (auth()->id() !== $master->user_id) {
+            abort(403, 'Нет доступа к редактированию этого профиля');
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'specialization' => 'nullable|string|max:255',
+            'description' => 'nullable|string|max:2000',
+            'experience_years' => 'nullable|integer|min:0|max:50',
+            'hourly_rate' => 'nullable|integer|min:0',
+            'city' => 'nullable|string|max:255',
+        ]);
+
+        $master->update([
+            'display_name' => $validated['name'],
+            'specialization' => $validated['specialization'],
+            'bio' => $validated['description'],
+            'experience_years' => $validated['experience_years'],
+            'hourly_rate' => $validated['hourly_rate'],
+            'city' => $validated['city'],
+        ]);
+
+        return redirect()->back()->with('success', 'Профиль обновлен успешно!');
+    }
+
+    /**
      * Возвращает «похожих» мастеров (по тому же городу, кроме текущего).
      */
     protected function getSimilarMasters(MasterProfile $profile): array

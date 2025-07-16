@@ -40,18 +40,18 @@
 
               <!-- Для неавторизованных -->
               <template v-else>
-                <Link 
-                  href="/login"
+                <button 
+                  @click="showLoginModal = true"
                   class="text-gray-700 px-4 py-2.5 rounded-lg hover:bg-gray-100 transition font-medium"
                 >
                   Войти
-                </Link>
-                <Link 
-                  href="/register"
+                </button>
+                <button 
+                  @click="showRegisterModal = true"
                   class="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition font-medium"
                 >
                   Регистрация
-                </Link>
+                </button>
               </template>
             </div>
           </div>
@@ -78,6 +78,8 @@
       :is-authenticated="isAuthenticated"
       @toggle-catalog="showCatalog = !showCatalog"
       @open-city-modal="showCityModal = true"
+      @show-login-modal="showLoginModal = true"
+      @show-register-modal="showRegisterModal = true"
     />
 
     <!-- Общие компоненты -->
@@ -108,6 +110,17 @@
       @close="showCityModal = false"
       @select="handleCitySelect"
     />
+
+    <!-- Модальные окна авторизации -->
+    <AuthModal 
+      :show="showLoginModal"
+      @close="showLoginModal = false"
+    />
+    
+    <RegisterModal 
+      :show="showRegisterModal"
+      @close="showRegisterModal = false"
+    />
   </nav>
 </template>
 
@@ -126,6 +139,8 @@ import CatalogDropdown from './CatalogDropdown.vue'
 import CityModal from './CityModal.vue'
 import MobileMenu from './MobileMenu.vue'
 import UserMenu from './UserMenu.vue'
+import AuthModal from '@/Components/Auth/AuthModal.vue'
+import RegisterModal from '@/Components/Auth/RegisterModal.vue'
 
 // Данные страницы
 const page = usePage()
@@ -136,6 +151,8 @@ const isAuthenticated = computed(() => !!page.props.auth?.user)
 // Состояние
 const showCatalog = ref(false)
 const showCityModal = ref(false)
+const showLoginModal = ref(false)
+const showRegisterModal = ref(false)
 const currentCity = ref('Москва')
 
 // Методы

@@ -1,6 +1,9 @@
 <template>
-  <!-- Серый фон на всю страницу -->
-  <div class="min-h-screen bg-gray-100 flex flex-col">
+  <!-- Динамический фон в зависимости от типа страницы -->
+  <div :class="[
+    'min-h-screen flex flex-col',
+    isAuthPage ? 'bg-gray-50' : 'bg-gray-100'
+  ]">
     
     <!-- Контейнер с фиксированной шириной для всего сайта -->
     <div class="max-w-[1400px] mx-auto min-h-screen flex flex-col w-full">
@@ -8,8 +11,8 @@
       <!-- НОВОЕ: Единая обертка с отступами для ВСЕГО контента -->
       <div class="site-padding flex-1 flex flex-col">
         
-        <!-- Шапка с компенсацией отступов -->
-        <header class="sticky top-0 z-50 negative-margin">
+        <!-- Шапка с компенсацией отступов (скрыта для авторизации) -->
+        <header v-if="!isAuthPage" class="sticky top-0 z-50 negative-margin">
           <div class="site-padding">
             <ErrorBoundary 
               error-title="Навигация временно недоступна"
@@ -25,8 +28,8 @@
           <slot />
         </main>
         
-        <!-- ВАЖНО: Footer внутри site-padding для выравнивания -->
-        <Footer />
+        <!-- Footer (скрыт для авторизации) -->
+        <Footer v-if="!isAuthPage" />
       </div>
     </div>
          
@@ -36,7 +39,7 @@
 </template>
 
 <script setup>
-import { provide } from 'vue'
+import { provide, computed } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 import Navbar from '@/Components/Header/Navbar.vue'
 import Footer from '@/Components/Footer/Footer.vue'
@@ -44,6 +47,11 @@ import ErrorBoundary from '@/Components/Common/ErrorBoundary.vue'
 import ToastNotifications from '@/Components/Common/ToastNotifications.vue'
 
 const page = usePage()
+
+// Определяем, является ли это страницей авторизации
+const isAuthPage = computed(() => {
+  return window.isAuthPage || false
+})
 
 // Глобальные данные
 provide('auth', page.props.auth)
@@ -54,22 +62,3 @@ provide('canRegister', page.props.canRegister)
 provide('stickyTop', 112) // высота двухуровневой шапки
 </script>
 
-<style scoped>
-/* Единые отступы для всего сайта */
-.site-padding {
-  @apply px-4 lg:px-6;
-}
-
-/* Компенсация отступов для элементов на всю ширину */
-.negative-margin {
-  margin-left: -1rem;
-  margin-right: -1rem;
-}
-
-@media (min-width: 1024px) {
-  .negative-margin {
-    margin-left: -1.5rem;
-    margin-right: -1.5rem;
-  }
-}
-</style>

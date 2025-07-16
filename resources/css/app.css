@@ -20,6 +20,16 @@
   .shadow-xl {
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.08);
   }
+  
+  /* Отступы для всего сайта */
+  .site-padding {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+  
+  /* Компенсация отступов для шапки */
+  .negative-margin {
+    @apply -mx-4 sm:-mx-6 lg:-mx-8;
+  }
 }
 
 /* Адаптивность */

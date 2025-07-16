@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\Ad;
 
 class ProfileController extends Controller
 {
@@ -21,32 +22,49 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         
-        // Загружаем профили мастера БЕЗ photos пока
-        $profiles = $user->masterProfiles()
-            ->with(['services:id,master_profile_id,name,price'])
-            ->withCount(['bookings', 'reviews'])
-            ->get()
-            ->map(function ($profile) {
-                return [
-                    'id' => $profile->id,
-                    'slug' => $profile->slug ?? Str::slug($profile->display_name ?? $profile->name ?? 'profile'),
-                    'name' => $profile->display_name ?? $profile->name ?? 'Без названия',
-                    'status' => $profile->status ?? 'active',
-                    'is_active' => $profile->is_active ?? true,
-                    'price_from' => $profile->price_from ?? 0,
-                    'views_count' => $profile->views_count ?? 0,
-                    'photos' => [], // 🔥 Пустой массив вместо загрузки
-                    'services_list' => $profile->services ? $profile->services->pluck('name')->join(', ') : '',
-                    'full_address' => $profile->city ?? 'Город не указан',
-                    'rejection_reason' => $profile->rejection_reason,
-                    'bookings_count' => $profile->bookings_count ?? 0,
-                    'reviews_count' => $profile->reviews_count ?? 0,
-                ];
-            });
+        // Загружаем объявления пользователя
+        $ads = Ad::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        // Преобразуем объявления в формат для карточек
+        $profiles = $ads->map(function ($ad) {
+            return [
+                'id' => $ad->id,
+                'slug' => Str::slug($ad->title),
+                'name' => $ad->title,
+                'status' => $ad->status,
+                'is_active' => $ad->status === 'active',
+                'price_from' => $ad->price ?? 0,
+                'views_count' => 0, // Пока не реализовано
+                'photos_count' => 0, // Пока не реализовано
+                'avatar' => null, // Пока не реализовано
+                'city' => 'Москва', // Из адреса или по умолчанию
+                'address' => $ad->address ?? '',
+                'district' => $ad->travel_area ?? '',
+                'home_visit' => is_array($ad->service_location) ? in_array('client_home', $ad->service_location) : false,
+                'availability' => $ad->status === 'active' ? 'Доступен' : 'Недоступен',
+                'messages_count' => 0, // Пока не реализовано
+                'services_list' => $ad->specialty ?? '',
+                'full_address' => $ad->address ?? 'Адрес не указан',
+                'rejection_reason' => null,
+                'bookings_count' => 0,
+                'reviews_count' => 0,
+                'description' => $ad->description,
+                'formatted_price' => $ad->formatted_price,
+                'phone' => $ad->phone,
+                'contact_method' => $ad->contact_method,
+                'created_at' => $ad->created_at->format('d.m.Y'),
+                'updated_at' => $ad->updated_at->format('d.m.Y'),
+            ];
+        });
         
         // Подсчеты для бокового меню
         $counts = [
-            'profiles' => $user->masterProfiles()->count(),
+            'profiles' => $ads->where('status', 'active')->count(),
+            'draft' => $ads->where('status', 'draft')->count(),
+            'archived' => $ads->where('status', 'archived')->count(),
+            'inactive' => $ads->where('status', 'inactive')->count(),
             'bookings' => $user->bookings()->where('status', 'pending')->count(),
             'favorites' => $user->favorites()->count(),
             'unreadMessages' => 0,

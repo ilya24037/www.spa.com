@@ -68,7 +68,7 @@ class MediaUploadController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Загружено ' . count($photos) . ' фотографий',
-                'photos' => $photos->map(function ($photo) {
+                'photos' => array_map(function ($photo) {
                     return [
                         'id' => $photo->id,
                         'filename' => $photo->filename,
@@ -78,7 +78,7 @@ class MediaUploadController extends Controller
                         'is_main' => $photo->is_main,
                         'sort_order' => $photo->sort_order,
                     ];
-                }),
+                }, $photos),
             ]);
         } catch (\Exception $e) {
             return response()->json([
