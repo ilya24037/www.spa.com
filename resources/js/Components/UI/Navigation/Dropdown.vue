@@ -14,6 +14,10 @@ const props = defineProps({
         type: String,
         default: 'py-1 bg-white',
     },
+    open: {
+        type: Boolean,
+        default: false
+    }
 });
 
 const closeOnEscape = (e) => {

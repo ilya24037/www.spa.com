@@ -194,6 +194,11 @@ const props = defineProps({
     type: String,
     default: 'overlay', // 'overlay' | 'bottom-sheet'
     validator: (value) => ['overlay', 'bottom-sheet'].includes(value)
+  },
+
+  show: {
+    type: Boolean,
+    default: false
   }
 })
 

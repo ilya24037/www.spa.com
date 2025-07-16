@@ -215,12 +215,20 @@ Route::middleware('auth')->group(function () {
     */
     Route::prefix('additem')->name('additem.')->group(function () {
         Route::get('/',              [AddItemController::class, 'index'])->name('index');
+        Route::post('/store',        [AddItemController::class, 'store'])->name('store');
         Route::get('/massage',       [AddItemController::class, 'massage'])->name('massage');
         Route::post('/massage',      [AddItemController::class, 'storeMassage'])->name('massage.store');
         Route::get('/erotic',        [AddItemController::class, 'erotic'])->name('erotic');
+        Route::post('/erotic',       [AddItemController::class, 'storeErotic'])->name('erotic.store');
         Route::get('/strip',         [AddItemController::class, 'strip'])->name('strip');
         Route::get('/escort',        [AddItemController::class, 'escort'])->name('escort');
     });
+
+    /*
+    | Модульная страница создания объявления (как на Avito)
+    */
+    Route::get('/addservice', [AddItemController::class, 'addService'])->name('addservice');
+    Route::post('/addservice', [AddItemController::class, 'storeService'])->name('addservice.store');
     
     // 🔥 ДОБАВЛЕНО: дополнительные маршруты для полного функционала Dashboard
     Route::get('/messages', fn() => Inertia::render('Messages/Index'))->name('messages.index');

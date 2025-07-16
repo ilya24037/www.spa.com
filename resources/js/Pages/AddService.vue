@@ -1,4 +1,6 @@
 <template>
+  <Head :title="pageTitle" />
+  
   <div class="add-service-page">
     <!-- Навигация -->
     <div class="page-navigation">
@@ -8,84 +10,138 @@
 
     <!-- Заголовок -->
     <PageHeader 
-      title="Новое объявление"
+      :title="pageTitle"
       subtitle="Создайте привлекательное объявление для привлечения клиентов"
     />
 
     <!-- Основная форма -->
     <div class="form-container">
       <form @submit.prevent="handleSubmit" novalidate>
-        <!-- Секции формы -->
-        <DetailsSection 
-          :form="form" 
-          :errors="errors" 
+        <!-- Скрытое поле с категорией -->
+        <input v-if="selectedCategory" type="hidden" name="category" :value="selectedCategory">
+        
+        <!-- Селектор категории -->
+        <CategorySelector 
+          :selected-category="selectedCategory"
+          @category-changed="handleCategoryChange"
         />
         
-        <DescriptionSection 
-          :form="form" 
-          :errors="errors" 
-        />
+        <!-- Секции формы показываются только если выбрана категория -->
+        <template v-if="selectedCategory">
+          <!-- Специфичные секции для категорий -->
+          <EroticSection 
+            v-if="selectedCategory === 'erotic'"
+            :form="form" 
+            :errors="errors" 
+          />
+          
+          <StripSection 
+            v-if="selectedCategory === 'strip'"
+            :form="form" 
+            :errors="errors" 
+          />
+          
+          <EscortSection 
+            v-if="selectedCategory === 'escort'"
+            :form="form" 
+            :errors="errors" 
+          />
+          
+          <!-- Общие секции для всех категорий -->
+          <DetailsSection 
+            :form="form" 
+            :errors="errors" 
+          />
+          
+          <DescriptionSection 
+            :form="form" 
+            :errors="errors" 
+          />
+          
+          <PriceSection 
+            :form="form" 
+            :errors="errors" 
+          />
+          
+          <PromoSection 
+            :form="form" 
+            :errors="errors" 
+          />
+          
+          <MediaSection 
+            :form="form" 
+            :errors="errors" 
+            @error="handleMediaError"
+          />
+          
+          <GeographySection 
+            :form="form" 
+            :errors="errors" 
+            @address-selected="handleAddressSelected"
+          />
+          
+          <PriceListSection 
+            :form="form" 
+            :errors="errors" 
+          />
+          
+          <EducationSection 
+            :form="form" 
+            :errors="errors" 
+          />
+          
+          <ContactsSection 
+            :form="form" 
+            :errors="errors" 
+          />
+          
+          <!-- Действия формы -->
+          <FormActions 
+            :is-submitting="isSubmitting"
+            :is-saving="isSaving"
+            :has-unsaved-changes="hasUnsavedChanges"
+            :last-saved="lastSaved"
+            submit-text="Опубликовать объявление"
+            @submit="handleSubmit"
+            @save-and-exit="handleSaveAndExit"
+          />
+        </template>
         
-        <PriceSection 
-          :form="form" 
-          :errors="errors" 
-        />
-        
-        <PromoSection 
-          :form="form" 
-          :errors="errors" 
-        />
-        
-        <MediaSection 
-          :form="form" 
-          :errors="errors" 
-          @error="handleMediaError"
-        />
-        
-        <GeographySection 
-          :form="form" 
-          :errors="errors" 
-          @address-selected="handleAddressSelected"
-        />
-        
-        <PriceListSection 
-          :form="form" 
-          :errors="errors" 
-        />
-        
-        <EducationSection 
-          :form="form" 
-          :errors="errors" 
-        />
-        
-        <ContactsSection 
-          :form="form" 
-          :errors="errors" 
-        />
-        
-        <!-- Действия формы -->
-        <FormActions 
-          :is-submitting="isSubmitting"
-          :is-saving="isSaving"
-          :has-unsaved-changes="hasUnsavedChanges"
-          :last-saved="lastSaved"
-          submit-text="Опубликовать объявление"
-          @submit="handleSubmit"
-          @save-and-exit="handleSaveAndExit"
-        />
+        <!-- Заглушка если категория не выбрана -->
+        <div v-else class="no-category-selected">
+          <div class="text-center py-12">
+            <div class="text-6xl mb-4">📝</div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">
+              Выберите категорию услуг
+            </h3>
+            <p class="text-gray-600">
+              Для продолжения выберите категорию услуг в меню выше
+            </p>
+          </div>
+        </div>
       </form>
     </div>
   </div>
 </template>
 
 <script>
+import { Head } from '@inertiajs/vue3'
 import { useAdForm } from '@/Composables/useAdForm'
+import { computed, watch, ref } from 'vue'
 import BackButton from '@/Components/Layout/BackButton.vue'
 import Breadcrumbs from '@/Components/Layout/Breadcrumbs.vue'
 import PageHeader from '@/Components/Layout/PageHeader.vue'
 import FormActions from '@/Components/Form/Sections/FormActions.vue'
 
-// Секции формы
+// Селектор категории
+import CategorySelector from '@/Components/Form/Sections/CategorySelector.vue'
+
+// Специфичные секции
+import EroticSection from '@/Components/Form/Sections/EroticSection.vue'
+import StripSection from '@/Components/Form/Sections/StripSection.vue'
+import EscortSection from '@/Components/Form/Sections/EscortSection.vue'
+
+// Общие секции формы
 import DetailsSection from '@/Components/Form/Sections/DetailsSection.vue'
 import DescriptionSection from '@/Components/Form/Sections/DescriptionSection.vue'
 import PriceSection from '@/Components/Form/Sections/PriceSection.vue'
@@ -98,11 +154,34 @@ import ContactsSection from '@/Components/Form/Sections/ContactsSection.vue'
 
 export default {
   name: 'AddService',
+  props: {
+    category: {
+      type: String,
+      default: null
+    },
+    categoryName: {
+      type: String,
+      default: 'Новое объявление'
+    },
+    breadcrumbs: {
+      type: Array,
+      default: () => [
+        { label: 'Главная', url: '/' },
+        { label: 'Разместить объявление', url: '/additem' },
+        { label: 'Новое объявление', url: null }
+      ]
+    }
+  },
   components: {
+    Head,
     BackButton,
     Breadcrumbs,
     PageHeader,
     FormActions,
+    CategorySelector,
+    EroticSection,
+    StripSection,
+    EscortSection,
     DetailsSection,
     DescriptionSection,
     PriceSection,
@@ -113,17 +192,7 @@ export default {
     EducationSection,
     ContactsSection
   },
-  data() {
-    return {
-      breadcrumbs: [
-        { label: 'Главная', url: '/' },
-        { label: 'Предложение услуг', url: '/services' },
-        { label: 'Красота', url: '/services/beauty' },
-        { label: 'СПА-услуги, массаж', url: '/services/beauty/spa-massage' }
-      ]
-    }
-  },
-  setup() {
+  setup(props) {
     // Используем composable для управления формой
     const {
       form,
@@ -133,20 +202,44 @@ export default {
       isSaving,
       lastSaved,
       hasUnsavedChanges,
-      validateForm,
-      submitForm,
-      saveAndExit,
-      startAutosave,
-      stopAutosave
-    } = useAdForm({}, {
-      autosaveEnabled: true,
-      onSuccess: (result) => {
-        // Перенаправление на страницу успеха
-        window.location.href = `/ads/${result.id}/success`
-      },
-      onError: (error) => {
-        console.error('Ошибка отправки формы:', error)
-      }
+      handleSubmit,
+      handleSaveAndExit,
+      handleMediaError,
+      handleAddressSelected,
+      goBack
+    } = useAdForm()
+
+    // Состояние выбранной категории
+    const selectedCategory = ref(props.category)
+    
+    // Названия категорий
+    const categoryNames = {
+      'erotic': 'Эротический массаж',
+      'strip': 'Стриптиз',
+      'escort': 'Сопровождение'
+    }
+    
+    // Заголовок страницы
+    const pageTitle = computed(() => {
+      return selectedCategory.value ? categoryNames[selectedCategory.value] : 'Новое объявление'
+    })
+
+    // Обработчик смены категории
+    const handleCategoryChange = (categoryId) => {
+      selectedCategory.value = categoryId
+      
+      // Обновляем URL без перезагрузки
+      const url = new URL(window.location)
+      url.searchParams.set('category', categoryId)
+      window.history.replaceState({}, '', url)
+      
+      // Обновляем поле формы
+      form.value.category = categoryId
+    }
+
+    // Следим за изменениями в URL
+    watch(() => props.category, (newCategory) => {
+      selectedCategory.value = newCategory
     })
 
     return {
@@ -157,51 +250,14 @@ export default {
       isSaving,
       lastSaved,
       hasUnsavedChanges,
-      validateForm,
-      submitForm,
-      saveAndExit,
-      startAutosave,
-      stopAutosave
-    }
-  },
-  mounted() {
-    // Запускаем автосохранение при загрузке страницы
-    this.startAutosave()
-  },
-  beforeUnmount() {
-    // Останавливаем автосохранение при уходе со страницы
-    this.stopAutosave()
-  },
-  methods: {
-    goBack() {
-      if (this.hasUnsavedChanges) {
-        if (confirm('У вас есть несохраненные изменения. Уйти без сохранения?')) {
-          window.history.back()
-        }
-      } else {
-        window.history.back()
-      }
-    },
-    
-    async handleSubmit() {
-      if (await this.submitForm()) {
-        // Форма успешно отправлена
-        console.log('Объявление создано!')
-      }
-    },
-    
-    async handleSaveAndExit() {
-      await this.saveAndExit()
-    },
-    
-    handleMediaError(error) {
-      // Обработка ошибок медиа
-      console.warn('Ошибка медиа:', error)
-    },
-    
-    handleAddressSelected(address) {
-      // Обработка выбора адреса
-      console.log('Выбран адрес:', address)
+      selectedCategory,
+      pageTitle,
+      handleSubmit,
+      handleSaveAndExit,
+      handleMediaError,
+      handleAddressSelected,
+      handleCategoryChange,
+      goBack
     }
   }
 }
@@ -209,41 +265,25 @@ export default {
 
 <style scoped>
 .add-service-page {
-  max-width: 636px;
-  margin: 0 auto;
-  padding: 32px 20px;
+  @apply max-w-4xl mx-auto px-4 py-6;
 }
 
 .page-navigation {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 32px;
+  @apply mb-6;
 }
 
 .form-container {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  padding: 32px;
+  @apply space-y-6;
+}
+
+.no-category-selected {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200 p-8;
 }
 
 /* Адаптивность */
 @media (max-width: 768px) {
   .add-service-page {
-    padding: 24px 16px;
-  }
-  
-  .page-navigation {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-    margin-bottom: 24px;
-  }
-  
-  .form-container {
-    padding: 24px;
+    @apply px-2 py-4;
   }
 }
 </style> 

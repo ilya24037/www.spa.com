@@ -51,7 +51,7 @@
                 <div class="lg:col-span-1">
                     <div class="bg-white rounded-lg p-4 text-center shadow-sm">
                         <!-- QR код -->
-                        <img src="/images/qr-code.png" alt="QR код" class="w-24 h-24 mx-auto mb-3">
+                        <img src="/images/qr-code.svg" alt="QR код" class="w-24 h-24 mx-auto mb-3">
                         <p class="text-sm text-gray-600 mb-4">
                             Наведите камеру и скачайте приложение
                         </p>
