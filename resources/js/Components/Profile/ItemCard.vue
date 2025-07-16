@@ -56,6 +56,11 @@
           </a>
         </h4>
 
+        <!-- Описание -->
+        <div v-if="item.description" class="item-description">
+          <p class="description-text">{{ item.description }}</p>
+        </div>
+
         <!-- Цена -->
         <div class="item-price-section">
           <p class="item-price">
@@ -98,22 +103,24 @@
       <div class="item-info-section">
         <!-- Счетчики -->
         <div class="item-counters">
+          <!-- Просмотры (глаз) -->
           <div class="counter-item">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M8 2a6 6 0 1 0 0 12A6 6 0 0 0 8 2z" stroke="currentColor" stroke-width="1.5"/>
-              <path d="M8 6v4M8 10h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M8 3C4.5 3 1.73 5.11 1 8c.73 2.89 3.5 5 7 5s6.27-2.11 7-5c-.73-2.89-3.5-5-7-5zm0 8.5c-1.93 0-3.5-1.57-3.5-3.5S6.07 4.5 8 4.5s3.5 1.57 3.5 3.5S9.93 11.5 8 11.5zm0-5.5c-.83 0-1.5.67-1.5 1.5S7.17 9.5 8 9.5s1.5-.67 1.5-1.5S8.83 6 8 6z" fill="currentColor"/>
             </svg>
             <span class="counter-value">{{ item.views_count || 0 }}</span>
           </div>
+          <!-- Подписчики (человек) -->
           <div class="counter-item">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M8 2L2 8l6 6 6-6-6-6z" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M8 8c1.66 0 3-1.34 3-3S9.66 2 8 2 5 3.34 5 5s1.34 3 3 3zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="currentColor"/>
             </svg>
             <span class="counter-value">{{ item.subscribers_count || 0 }}</span>
           </div>
+          <!-- Избранное (сердце) -->
           <div class="counter-item">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M8 14s6-4.5 6-8.5C14 3.5 12 2 10 2c-1 0-2 .5-2 1.5C8 2.5 7 2 6 2 4 2 2 3.5 2 5.5 2 9.5 8 14 8 14z" fill="currentColor"/>
             </svg>
             <span class="counter-value">{{ item.favorites_count || 0 }}</span>
           </div>
@@ -128,8 +135,12 @@
 
         <!-- Чаты -->
         <div class="item-chats">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M2 8a6 6 0 016-6h4a2 2 0 012 2v4a2 2 0 01-2 2H8l-4 4V8z" stroke="currentColor" stroke-width="1.5"/>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" class="chat-icon">
+            <!-- Простая иконка чата как в Avito -->
+            <path d="M2 3h12c.6 0 1 .4 1 1v6c0 .6-.4 1-1 1h-3l-3 2v-2H2c-.6 0-1-.4-1-1V4c0-.6.4-1 1-1z" 
+                  stroke="currentColor" 
+                  stroke-width="1" 
+                  fill="none"/>
           </svg>
           <span class="chat-text">{{ item.new_messages_count > 0 ? `${item.new_messages_count} новых чатов` : 'Нет новых чатов' }}</span>
         </div>
@@ -195,7 +206,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import ConfirmModal from '@/Components/UI/ConfirmModal.vue'
+import ConfirmModal from '../UI/ConfirmModal.vue'
 
 const props = defineProps({
   item: {
@@ -369,8 +380,8 @@ const cancelDelete = () => {
   @apply block;
 }
 
-.item-image-wrapper {
-  @apply relative w-40 h-30 rounded-lg overflow-hidden bg-gray-100;
+  .item-image-wrapper {
+    @apply relative w-40 h-32 rounded-lg overflow-hidden bg-gray-100;
   width: 160px;
   height: 120px;
   border-radius: 10px;
@@ -403,6 +414,18 @@ const cancelDelete = () => {
 
 .item-title-link {
   @apply text-gray-900 hover:text-blue-600 transition-colors;
+}
+
+.item-description {
+  @apply mb-3;
+}
+
+.description-text {
+  @apply text-sm text-gray-600 leading-relaxed;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .item-price-section {
@@ -497,6 +520,11 @@ const cancelDelete = () => {
 
 .item-chats {
   @apply flex items-center gap-2 text-sm text-gray-600;
+}
+
+.chat-icon {
+  @apply text-gray-600;
+  flex-shrink: 0;
 }
 
 .chat-text {

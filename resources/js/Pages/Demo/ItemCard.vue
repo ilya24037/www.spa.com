@@ -1,37 +1,38 @@
 <template>
   <div class="min-h-screen bg-gray-100 py-8">
     <div class="max-w-6xl mx-auto px-4">
-      <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-4">
-          Демонстрация компонента ItemCard
-        </h1>
-        <p class="text-gray-600 mb-6">
-          Компонент карточки услуги в стиле Avito для раздела "Мои объявления"
-        </p>
-        
-        <div class="flex gap-4 mb-6">
-          <a 
-            href="/dashboard" 
-            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Перейти к Dashboard
-          </a>
-          <button 
-            @click="addRandomItem"
-            class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-          >
-            Добавить случайную карточку
-          </button>
-          <button 
-            @click="clearItems"
-            class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
-          >
-            Очистить все
-          </button>
+      <div class="space-y-6">
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <h1 class="text-3xl font-bold text-gray-900 mb-4">
+            Демонстрация компонента ItemCard
+          </h1>
+          <p class="text-gray-600 mb-6">
+            Компонент карточки услуги в стиле Avito для раздела "Мои объявления"
+          </p>
+          
+          <div class="flex gap-4">
+            <a 
+              href="/dashboard" 
+              class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Перейти к Dashboard
+            </a>
+            <button 
+              @click="addRandomItem"
+              class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+            >
+              Добавить случайную карточку
+            </button>
+            <button 
+              @click="clearItems"
+              class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Очистить все
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div class="space-y-4">
+        <div class="space-y-4">
         <ItemCard 
           v-for="item in items" 
           :key="item.id"
@@ -58,6 +59,7 @@
       </div>
     </div>
   </div>
+</div>
 </template>
 
 <script setup>
@@ -71,6 +73,7 @@ const sampleItems = [
   {
     id: 1,
     name: "Расслабляющий массаж всего тела",
+    description: "Профессиональный расслабляющий массаж с использованием натуральных масел. Поможет снять стресс и напряжение после тяжелого дня.",
     price_from: 2500,
     avatar: "/images/masters/demo-1.jpg",
     photos_count: 4,
@@ -88,6 +91,7 @@ const sampleItems = [
   {
     id: 2,
     name: "Антицеллюлитный массаж",
+    description: "Эффективный антицеллюлитный массаж для коррекции фигуры. Используются специальные техники и косметические средства.",
     price_from: 3000,
     avatar: "/images/masters/demo-2.jpg",
     photos_count: 6,
@@ -105,6 +109,7 @@ const sampleItems = [
   {
     id: 3,
     name: "Лечебный массаж спины",
+    description: "Лечебный массаж для устранения болей в спине и улучшения осанки. Проводится квалифицированным специалистом.",
     price_from: 1800,
     avatar: "/images/masters/demo-3.jpg",
     photos_count: 2,
@@ -122,6 +127,7 @@ const sampleItems = [
   {
     id: 4,
     name: "Спортивный массаж для спортсменов",
+    description: "Профессиональный спортивный массаж для восстановления после тренировок и соревнований. Подходит для всех видов спорта.",
     price_from: 4000,
     avatar: "/images/masters/demo-4.jpg",
     photos_count: 8,

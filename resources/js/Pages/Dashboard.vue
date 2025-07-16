@@ -1,8 +1,9 @@
 <template>
     <Head title="Личный кабинет" />
     
-    <div class="min-h-screen bg-gray-50">
-        <div class="flex">
+    <!-- Обертка с правильными отступами как на главной -->
+    <div class="py-6 lg:py-8">
+        <div class="flex gap-6">
             <!-- Боковая панель -->
             <SidebarWrapper :show="showSidebar" @close="showSidebar = false">
                 <!-- Профиль пользователя -->
@@ -79,14 +80,8 @@
             <!-- Основной контент -->
             <main class="flex-1">
                 <!-- Заголовок страницы -->
-                <div class="mb-6 flex items-center justify-between">
+                <div class="mb-6">
                     <h1 class="text-2xl font-bold text-gray-900">Мои объявления</h1>
-                    <Link 
-                        href="/ads/create"
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-                    >
-                        Создать объявление
-                    </Link>
                 </div>
 
                 <!-- Промо-карточки -->
@@ -108,36 +103,27 @@
                     </div>
                 </div>
 
-                <!-- Вкладки -->
-                <Tabs 
-                    v-model="activeTab"
-                    :tabs="tabs"
-                    marker="personal-items-tabs"
-                />
+                <!-- Основной контент с правильными отступами -->
+                <div class="space-y-6">
+                    <!-- Вкладки -->
+                    <Tabs 
+                        v-model="activeTab"
+                        :tabs="tabs"
+                        marker="personal-items-tabs"
+                    />
 
-                <!-- Кнопка создания объявления -->
-                <div class="mb-6">
-                    <Link 
-                        href="/ads/create"
-                        class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
-                    >
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                        Создать объявление
-                    </Link>
-                </div>
 
-                <!-- Список объявлений -->
-                <div class="items-list">
-                    <div v-if="filteredProfiles.length > 0" class="space-y-3">
-                        <ItemCard 
-                            v-for="profile in filteredProfiles" 
-                            :key="profile.id"
-                            :item="profile"
-                            @item-deleted="handleItemDeleted"
-                        />
-                    </div>
+
+                    <!-- Список объявлений -->
+                    <div class="items-list">
+                        <div v-if="filteredProfiles.length > 0" class="space-y-4">
+                            <ItemCard 
+                                v-for="profile in filteredProfiles" 
+                                :key="profile.id"
+                                :item="profile"
+                                @item-deleted="handleItemDeleted"
+                            />
+                        </div>
                     
                     <!-- Пустое состояние -->
                     <div v-else class="text-center py-12">
@@ -147,38 +133,34 @@
                         <h3 class="mt-2 text-sm font-medium text-gray-900">Нет объявлений</h3>
                         <p class="mt-1 text-sm text-gray-500">Создайте свое первое объявление</p>
                         <div class="mt-6">
-                            <Link 
-                                href="/ads/create"
-                                class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-                            >
-                                Создать объявление
-                            </Link>
+                            <p class="text-sm text-gray-500">Используйте кнопку "Разместить объявление" в шапке сайта</p>
                         </div>
                     </div>
                 </div>
+            </div>
             </main>
         </div>
-
-        <!-- Уведомления -->
-        <Toast
-            v-for="toast in toasts"
-            :key="toast.id"
-            :message="toast.message"
-            :type="toast.type"
-            :duration="toast.duration"
-            @close="removeToast(toast.id)"
-        />
     </div>
+
+    <!-- Уведомления -->
+    <Toast
+        v-for="toast in toasts"
+        :key="toast.id"
+        :message="toast.message"
+        :type="toast.type"
+        :duration="toast.duration"
+        @close="removeToast(toast.id)"
+    />
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import { Head, Link, usePage } from '@inertiajs/vue3'
-import SidebarWrapper from '@/Components/Layout/SidebarWrapper.vue'
-import PromoCard from '@/Components/Profile/PromoCard.vue'
-import Tabs from '@/Components/Profile/Tabs.vue'
-import ItemCard from '@/Components/Profile/ItemCard.vue'
-import Toast from '@/Components/UI/Toast.vue'
+import SidebarWrapper from '../Components/Layout/SidebarWrapper.vue'
+import PromoCard from '../Components/Profile/PromoCard.vue'
+import Tabs from '../Components/Profile/Tabs.vue'
+import ItemCard from '../Components/Profile/ItemCard.vue'
+import Toast from '../Components/UI/Toast.vue'
 
 // Props
 const props = defineProps({

@@ -1,44 +1,36 @@
 <template>
-
-    <Head title="Тест навигации" />
-    
-    <div class="py-8">
-      <div class="max-w-4xl mx-auto">
-        <h1 class="text-3xl font-bold text-gray-900 mb-6">
+  <div class="min-h-screen bg-gray-100 py-8">
+    <div class="max-w-4xl mx-auto px-4">
+      <div class="bg-white rounded-lg shadow-sm p-6">
+        <h1 class="text-2xl font-bold text-gray-900 mb-4">
           Тестовая страница
         </h1>
+        <p class="text-gray-600 mb-6">
+          Эта страница используется для тестирования базовой функциональности приложения.
+        </p>
         
-        <div class="bg-white rounded-lg shadow-sm p-6">
-          <p class="text-gray-600 mb-4">
-            Эта страница используется для тестирования навигации.
-          </p>
+        <div class="space-y-4">
+          <div>
+            <h2 class="text-lg font-semibold mb-2">Навигация:</h2>
+            <div class="flex gap-4">
+              <a href="/" class="text-blue-600 hover:text-blue-800">Главная</a>
+              <a href="/dashboard" class="text-blue-600 hover:text-blue-800">Dashboard</a>
+              <a href="/demo/item-card" class="text-blue-600 hover:text-blue-800">Демо ItemCard</a>
+            </div>
+          </div>
           
-          <div class="space-y-4">
-            <div class="p-4 bg-blue-50 rounded-lg">
-              <h3 class="font-semibold text-blue-900">Проверьте:</h3>
-              <ul class="mt-2 text-blue-800 space-y-1">
-                <li>• Навигация отображается только один раз</li>
-                <li>• Нет дублирования шапки</li>
-                <li>• Правильные отступы</li>
-              </ul>
-            </div>
-            
-            <div class="p-4 bg-green-50 rounded-lg">
-              <h3 class="font-semibold text-green-900">Ссылки для тестирования:</h3>
-              <div class="mt-2 space-x-4">
-                <a href="/login" class="text-green-700 hover:text-green-900 underline">Страница логина</a>
-                <a href="/register" class="text-green-700 hover:text-green-900 underline">Страница регистрации</a>
-                <a href="/" class="text-green-700 hover:text-green-900 underline">Главная страница</a>
-              </div>
-            </div>
+          <div>
+            <h2 class="text-lg font-semibold mb-2">Статус:</h2>
+            <div class="text-green-600">✓ Vue.js работает</div>
+            <div class="text-green-600">✓ Inertia.js работает</div>
+            <div class="text-green-600">✓ Tailwind CSS работает</div>
           </div>
         </div>
       </div>
     </div>
-
+  </div>
 </template>
 
 <script setup>
 import { Head } from '@inertiajs/vue3'
-
 </script> 
