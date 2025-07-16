@@ -1,152 +1,180 @@
+<!--
+  Компонент карточки услуги в стиле Avito для раздела "Мои объявления"
+  
+  Ожидаемая структура данных item:
+  {
+    id: 1,
+    name: "Клапан вентиляции топливного бака Chevrolet Captiv",
+    price_from: 1500,
+    avatar: "/images/masters/demo-1.jpg",
+    main_image: "/images/masters/demo-1.jpg",
+    photos_count: 4,
+    company_name: "METACO",
+    address: "Пермский край, Пермь, ул. Адмирала Ушакова, 21",
+    district: "р-н Кировский",
+    home_service: true,
+    status: "active",
+    views_count: 7,
+    subscribers_count: 0,
+    favorites_count: 0,
+    new_messages_count: 0,
+    expires_at: "2024-02-15T12:00:00Z"
+  }
+-->
 <template>
-  <div class="avito-item-card">
-    <div class="item-row">
-      <!-- Изображение -->
-      <div class="item-image-container">
-        <div class="item-image-wrapper">
-          <img 
-            :src="item.avatar || '/images/default-avatar.svg'" 
-            :alt="item.name"
-            class="item-image"
-            @error="$event.target.src = '/images/default-avatar.svg'"
-          >
-          <!-- Индикатор количества фото -->
-          <div v-if="item.photos_count > 1" class="photo-count-badge">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M2 4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4z" fill="currentColor"/>
-              <path d="M6 8l1.5 1.5L11 6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            {{ item.photos_count }}
+  <div class="avito-item-snippet">
+    <div class="item-snippet-content">
+      <!-- Изображение слева (160x120px) -->
+      <div class="item-image-section">
+        <a :href="`/ads/${item.id}`" class="item-image-link">
+          <div class="item-image-wrapper">
+            <img 
+              :src="getImageUrl(item.avatar || item.main_image)"
+              :alt="item.name"
+              class="item-image"
+              @error="handleImageError"
+            >
+            <!-- Индикаторы слайдера (белые точки) -->
+            <div v-if="item.photos_count > 1" class="slider-indicators">
+              <div 
+                v-for="n in Math.min(item.photos_count, 4)" 
+                :key="n"
+                class="slider-dot"
+                :class="{ 'active': n === 1 }"
+              ></div>
+            </div>
           </div>
-        </div>
+        </a>
       </div>
 
-      <!-- Основной контент -->
-      <div class="item-content">
+      <!-- Основной контент (центральная часть) -->
+      <div class="item-content-section">
         <!-- Заголовок -->
-        <div class="item-header">
-          <h3 class="item-title">
-            <a :href="`/ads/${item.id}`" class="item-link">
-              {{ item.name }}
-            </a>
-          </h3>
-          
-          <!-- Цена -->
-          <div class="item-price">
+        <h4 class="item-title">
+          <a :href="`/ads/${item.id}`" class="item-title-link">
+            {{ item.name }}
+          </a>
+        </h4>
+
+        <!-- Цена -->
+        <div class="item-price-section">
+          <p class="item-price">
             <span v-if="item.price_from" class="price-value">
-              {{ formatPrice(item.price_from) }} ₽
+              {{ formatPrice(item.price_from) }}
             </span>
-            <span v-else class="price-negotiable">Цена договорная</span>
-          </div>
+            <span v-else class="price-negotiable">Договорная</span>
+            <span class="price-currency">₽</span>
+          </p>
         </div>
 
-        <!-- Дополнительная информация -->
-        <div class="item-details">
-          <div class="item-info">
-            <span class="item-category">{{ item.services_list || 'Массаж' }}</span>
-            <span class="item-location">{{ item.address || item.city }}</span>
-          </div>
-          
-          <!-- Статистика -->
-          <div class="item-stats">
-            <div class="stat-item">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M8 2a6 6 0 1 0 0 12A6 6 0 0 0 8 2z" stroke="currentColor" stroke-width="1.5"/>
-                <path d="M8 6v4M8 10h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-              </svg>
-              <span class="stat-value">{{ item.views_count || 0 }}</span>
-            </div>
-            
-            <div class="stat-item">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M8 2L2 8l6 6 6-6-6-6z" stroke="currentColor" stroke-width="1.5"/>
-              </svg>
-              <span class="stat-value">{{ item.messages_count || 0 }}</span>
-            </div>
-            
-            <div class="stat-item">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M8 2L2 8l6 6 6-6-6-6z" stroke="currentColor" stroke-width="1.5"/>
-              </svg>
-              <span class="stat-value">{{ item.bookings_count || 0 }}</span>
-            </div>
-          </div>
+        <!-- Доступность -->
+        <div class="item-stock">
+          <p class="stock-text">Доступен для записи</p>
         </div>
 
-        <!-- Статус и дата -->
-        <div class="item-footer">
-          <div class="item-status">
-            <span :class="['status-text', getStatusClass(item.status)]">
-              {{ getStatusText(item.status) }}
-            </span>
-            <span class="item-date">{{ formatDate(item.updated_at) }}</span>
+        <!-- Доставка/Выезд -->
+        <div v-if="item.home_service" class="item-delivery">
+          <div class="delivery-icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
           </div>
-          
-          <!-- Дополнительные бейджи -->
-          <div class="item-badges">
-            <span v-if="item.status === 'active'" class="badge badge-active">
-              Нет новых чатов
-            </span>
-            <span v-if="item.status === 'draft'" class="badge badge-draft">
-              Выберите объявления
-            </span>
-          </div>
+          <p class="delivery-text">Выезд к клиенту</p>
+        </div>
+
+        <!-- Название компании/мастера -->
+        <div class="item-company">
+          <p class="company-name">{{ item.company_name || 'Массажный салон' }}</p>
+        </div>
+
+        <!-- Адрес -->
+        <div class="item-location">
+          <p class="location-address">{{ item.address || item.city }}</p>
+          <p class="location-district">{{ item.district || 'Центральный район' }}</p>
         </div>
       </div>
 
-      <!-- Действия -->
-      <div class="item-actions">
-        <div class="actions-dropdown" ref="dropdown">
-          <button 
-            type="button" 
-            class="actions-button"
-            @click="toggleDropdown"
-          >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M10 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM10 11a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM10 16a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" fill="currentColor"/>
+      <!-- Информация и действия (правая колонка) -->
+      <div class="item-info-section">
+        <!-- Счетчики -->
+        <div class="item-counters">
+          <div class="counter-item">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M8 2a6 6 0 1 0 0 12A6 6 0 0 0 8 2z" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M8 6v4M8 10h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
+            <span class="counter-value">{{ item.views_count || 0 }}</span>
+          </div>
+          <div class="counter-item">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M8 2L2 8l6 6 6-6-6-6z" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+            <span class="counter-value">{{ item.subscribers_count || 0 }}</span>
+          </div>
+          <div class="counter-item">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+            <span class="counter-value">{{ item.favorites_count || 0 }}</span>
+          </div>
+        </div>
+
+        <!-- Время до окончания -->
+        <div class="item-lifetime">
+          <span class="lifetime-text" :class="{ 'lifetime-warning': getDaysLeft() < 7 }">
+            Осталось {{ getDaysLeft() }} дней
+          </span>
+        </div>
+
+        <!-- Чаты -->
+        <div class="item-chats">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M2 8a6 6 0 016-6h4a2 2 0 012 2v4a2 2 0 01-2 2H8l-4 4V8z" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+          <span class="chat-text">{{ item.new_messages_count > 0 ? `${item.new_messages_count} новых чатов` : 'Нет новых чатов' }}</span>
+        </div>
+
+        <!-- Кнопки действий -->
+        <div class="item-actions">
+          <button class="action-button primary-button">
+            Поднять просмотры
           </button>
           
-          <div v-if="showDropdown" class="dropdown-menu">
-            <a href="#" class="dropdown-item" @click.prevent="editItem">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M11.5 3.5L12.5 4.5L5 12H4V11L11.5 3.5Z" stroke="currentColor" stroke-width="1.5"/>
-              </svg>
-              Редактировать
-            </a>
+          <div class="action-row">
+            <button class="action-button secondary-button">
+              Рассылка
+            </button>
             
-            <a href="#" class="dropdown-item" @click.prevent="duplicateItem">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M4 4H12V12H4V4Z" stroke="currentColor" stroke-width="1.5"/>
-                <path d="M2 2H10V10H2V2Z" stroke="currentColor" stroke-width="1.5"/>
-              </svg>
-              Дублировать
-            </a>
-            
-            <a v-if="item.status === 'active'" href="#" class="dropdown-item" @click.prevent="archiveItem">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M2 4H14V12H2V4Z" stroke="currentColor" stroke-width="1.5"/>
-                <path d="M6 8H10" stroke="currentColor" stroke-width="1.5"/>
-              </svg>
-              В архив
-            </a>
-            
-            <a v-if="item.status === 'archived'" href="#" class="dropdown-item" @click.prevent="activateItem">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M8 2L2 8L8 14L14 8L8 2Z" stroke="currentColor" stroke-width="1.5"/>
-              </svg>
-              Активировать
-            </a>
-            
-            <div class="dropdown-divider"></div>
-            
-            <a href="#" class="dropdown-item text-red-600" @click.prevent="showDeleteConfirm">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M6 2H10V4H6V2Z" stroke="currentColor" stroke-width="1.5"/>
-                <path d="M3 4H13L12 14H4L3 4Z" stroke="currentColor" stroke-width="1.5"/>
-              </svg>
-              Удалить
-            </a>
+            <div class="dropdown-container" ref="dropdown">
+              <button 
+                type="button" 
+                class="dropdown-button"
+                @click="toggleDropdown"
+              >
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M10 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM10 11a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM10 16a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" fill="currentColor"/>
+                </svg>
+              </button>
+              
+              <div v-if="showDropdown" class="dropdown-menu">
+                <a href="#" class="dropdown-item" @click.prevent="promoteItem">
+                  Поднять просмотры
+                </a>
+                <a href="#" class="dropdown-item" @click.prevent="editItem">
+                  Редактировать
+                </a>
+                <a href="#" class="dropdown-item" @click.prevent="reserveItem">
+                  Забронировать
+                </a>
+                <a href="#" class="dropdown-item" @click.prevent="togglePublication">
+                  {{ item.status === 'active' ? 'Снять с публикации' : 'Опубликовать' }}
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="#" class="dropdown-item danger-item" @click.prevent="showDeleteConfirm">
+                  Удалить
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -205,45 +233,61 @@ const formatPrice = (price) => {
   return new Intl.NumberFormat('ru-RU').format(price)
 }
 
-const formatDate = (date) => {
-  if (!date) return ''
-  return new Date(date).toLocaleDateString('ru-RU', {
-    day: 'numeric',
-    month: 'short'
-  })
+const getImageUrl = (path) => {
+  if (!path) return '/images/no-photo.jpg'
+  
+  // Если это уже полный URL
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path
+  }
+  
+  // Если путь начинается с /storage/
+  if (path.startsWith('/storage/')) {
+    return path
+  }
+  
+  // Если путь начинается с /
+  if (path.startsWith('/')) {
+    return path
+  }
+  
+  // Иначе добавляем /storage/
+  return `/storage/${path}`
 }
 
-const getStatusClass = (status) => {
-  const classes = {
-    'active': 'status-active',
-    'draft': 'status-draft', 
-    'archived': 'status-archived',
-    'paused': 'status-paused'
-  }
-  return classes[status] || 'status-default'
+const handleImageError = (event) => {
+  event.target.src = '/images/no-photo.jpg'
+  event.target.onerror = null // Предотвращаем бесконечный цикл
 }
 
-const getStatusText = (status) => {
-  const texts = {
-    'active': 'Активно',
-    'draft': 'Черновик',
-    'archived': 'В архиве', 
-    'paused': 'Приостановлено'
-  }
-  return texts[status] || status
+const getDaysLeft = () => {
+  if (!props.item.expires_at) return 30
+  const now = new Date()
+  const expires = new Date(props.item.expires_at)
+  const diffTime = expires - now
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  return Math.max(0, diffDays)
 }
 
 // Действия
+const promoteItem = () => {
+  console.log('Promote item:', props.item.id)
+  showDropdown.value = false
+}
+
 const editItem = () => {
   window.location.href = `/ads/${props.item.id}/edit`
+  showDropdown.value = false
 }
 
-const duplicateItem = () => {
-  // Логика дублирования
-  console.log('Duplicate item:', props.item.id)
+const reserveItem = () => {
+  console.log('Reserve item:', props.item.id)
+  showDropdown.value = false
 }
 
-const archiveItem = async () => {
+const togglePublication = async () => {
+  const newStatus = props.item.status === 'active' ? 'paused' : 'active'
+  
   try {
     const response = await fetch(`/ads/${props.item.id}/status`, {
       method: 'PATCH',
@@ -251,57 +295,30 @@ const archiveItem = async () => {
         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ status: 'archived' })
+      body: JSON.stringify({ status: newStatus })
     })
 
     const result = await response.json()
     
     if (result.success) {
-      // Обновляем статус элемента
-      props.item.status = 'archived'
-      console.log('Archive item:', props.item.id)
+      props.item.status = newStatus
+      console.log('Toggle publication:', props.item.id, newStatus)
     } else {
-      alert('Ошибка архивирования: ' + (result.error || 'Неизвестная ошибка'))
+      alert('Ошибка изменения статуса: ' + (result.error || 'Неизвестная ошибка'))
     }
   } catch (error) {
-    console.error('Ошибка при архивировании:', error)
-    alert('Ошибка при архивировании объявления')
+    console.error('Ошибка при изменении статуса:', error)
+    alert('Ошибка при изменении статуса объявления')
   }
+  
+  showDropdown.value = false
 }
 
-const activateItem = async () => {
-  try {
-    const response = await fetch(`/ads/${props.item.id}/status`, {
-      method: 'PATCH',
-      headers: {
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ status: 'active' })
-    })
-
-    const result = await response.json()
-    
-    if (result.success) {
-      // Обновляем статус элемента
-      props.item.status = 'active'
-      console.log('Activate item:', props.item.id)
-    } else {
-      alert('Ошибка активации: ' + (result.error || 'Неизвестная ошибка'))
-    }
-  } catch (error) {
-    console.error('Ошибка при активации:', error)
-    alert('Ошибка при активации объявления')
-  }
-}
-
-// Показать модальное окно подтверждения удаления
 const showDeleteConfirm = () => {
   showDropdown.value = false
   showDeleteModal.value = true
 }
 
-// Подтвердить удаление
 const confirmDelete = async () => {
   showDeleteModal.value = false
   
@@ -317,7 +334,6 @@ const confirmDelete = async () => {
     const result = await response.json()
     
     if (result.success) {
-      // Удаляем элемент из списка
       emit('item-deleted', props.item.id)
       console.log('Delete item:', props.item.id)
     } else {
@@ -329,154 +345,190 @@ const confirmDelete = async () => {
   }
 }
 
-// Отменить удаление
 const cancelDelete = () => {
   showDeleteModal.value = false
 }
 </script>
 
 <style scoped>
-.avito-item-card {
-  @apply bg-white border border-gray-200 rounded-lg mb-4 hover:shadow-md transition-shadow;
+/* Главный контейнер - точная копия Avito */
+.avito-item-snippet {
+  @apply bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow duration-200;
 }
 
-.item-row {
+.item-snippet-content {
   @apply flex p-4 gap-4;
 }
 
-/* Изображение */
-.item-image-container {
+/* Блок изображения (160x120px) */
+.item-image-section {
   @apply flex-shrink-0;
 }
 
+.item-image-link {
+  @apply block;
+}
+
 .item-image-wrapper {
-  @apply relative w-20 h-20 rounded-lg overflow-hidden bg-gray-100;
+  @apply relative w-40 h-30 rounded-lg overflow-hidden bg-gray-100;
+  width: 160px;
+  height: 120px;
+  border-radius: 10px;
 }
 
 .item-image {
   @apply w-full h-full object-cover;
 }
 
-.photo-count-badge {
-  @apply absolute bottom-1 right-1 bg-black bg-opacity-70 text-white text-xs px-1.5 py-0.5 rounded flex items-center gap-1;
+.slider-indicators {
+  @apply absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-1;
 }
 
-/* Основной контент */
-.item-content {
+.slider-dot {
+  @apply w-1.5 h-1.5 rounded-full bg-white bg-opacity-80 transition-all duration-200;
+}
+
+.slider-dot.active {
+  @apply w-4 bg-white;
+}
+
+/* Блок контента (центральная часть) */
+.item-content-section {
   @apply flex-1 min-w-0;
 }
 
-.item-header {
-  @apply mb-2;
-}
-
 .item-title {
-  @apply text-lg font-medium text-gray-900 mb-1;
+  @apply text-xl font-medium text-gray-900 mb-2 leading-tight;
 }
 
-.item-link {
+.item-title-link {
   @apply text-gray-900 hover:text-blue-600 transition-colors;
 }
 
-.item-price {
+.item-price-section {
   @apply mb-2;
 }
 
+.item-price {
+  @apply text-2xl font-bold text-gray-900;
+}
+
 .price-value {
-  @apply text-xl font-bold text-gray-900;
+  @apply mr-1;
+}
+
+.price-currency {
+  @apply text-gray-900;
 }
 
 .price-negotiable {
-  @apply text-lg text-gray-600;
+  @apply text-gray-600;
 }
 
-.item-details {
-  @apply mb-3;
+.item-stock {
+  @apply mb-2;
 }
 
-.item-info {
-  @apply flex flex-col gap-1 mb-2;
+.stock-text {
+  @apply text-sm text-gray-600;
 }
 
-.item-category {
+.item-delivery {
+  @apply flex items-center gap-2 mb-2;
+}
+
+.delivery-icon {
+  @apply text-gray-400;
+}
+
+.delivery-text {
+  @apply text-sm text-gray-600;
+}
+
+.item-company {
+  @apply mb-1;
+}
+
+.company-name {
   @apply text-sm text-gray-600;
 }
 
 .item-location {
-  @apply text-sm text-gray-500;
+  @apply text-sm;
+  color: rgb(117, 117, 117);
 }
 
-.item-stats {
+.location-address {
+  @apply mb-1;
+}
+
+.location-district {
+  /* Пустой класс для consistency */
+}
+
+/* Блок информации и действий (правая колонка) */
+.item-info-section {
+  @apply flex-shrink-0 flex flex-col gap-3 w-48;
+}
+
+.item-counters {
   @apply flex gap-4;
 }
 
-.stat-item {
-  @apply flex items-center gap-1 text-sm text-gray-500;
+.counter-item {
+  @apply flex items-center gap-1 text-sm text-gray-600;
 }
 
-.stat-value {
+.counter-value {
+  @apply text-gray-900;
+}
+
+.item-lifetime {
+  @apply text-sm;
+}
+
+.lifetime-text {
   @apply text-gray-600;
 }
 
-.item-footer {
-  @apply flex items-center justify-between;
+.lifetime-warning {
+  @apply text-red-600 font-medium;
 }
 
-.item-status {
-  @apply flex items-center gap-2;
+.item-chats {
+  @apply flex items-center gap-2 text-sm text-gray-600;
 }
 
-.status-text {
-  @apply text-sm font-medium;
+.chat-text {
+  /* Базовый стиль */
 }
 
-.status-active {
-  @apply text-green-600;
+.item-actions {
+  @apply flex flex-col gap-2;
 }
 
-.status-draft {
-  @apply text-yellow-600;
+.action-button {
+  @apply px-4 py-2 text-sm font-medium rounded-lg transition-colors;
 }
 
-.status-archived {
-  @apply text-gray-500;
+.primary-button {
+  @apply bg-blue-600 text-white hover:bg-blue-700 w-full;
 }
 
-.status-paused {
-  @apply text-orange-600;
+.secondary-button {
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200 flex-1;
 }
 
-.item-date {
-  @apply text-sm text-gray-500;
-}
-
-.item-badges {
+.action-row {
   @apply flex gap-2;
 }
 
-.badge {
-  @apply px-2 py-1 text-xs rounded;
-}
-
-.badge-active {
-  @apply bg-green-100 text-green-700;
-}
-
-.badge-draft {
-  @apply bg-yellow-100 text-yellow-700;
-}
-
-/* Действия */
-.item-actions {
-  @apply flex-shrink-0;
-}
-
-.actions-dropdown {
+.dropdown-container {
   @apply relative;
 }
 
-.actions-button {
-  @apply p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors;
+.dropdown-button {
+  @apply p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors;
 }
 
 .dropdown-menu {
@@ -484,7 +536,7 @@ const cancelDelete = () => {
 }
 
 .dropdown-item {
-  @apply flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors;
+  @apply block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors;
 }
 
 .dropdown-item:first-child {
@@ -495,22 +547,40 @@ const cancelDelete = () => {
   @apply rounded-b-lg;
 }
 
+.danger-item {
+  @apply text-red-600 hover:bg-red-50;
+}
+
 .dropdown-divider {
   @apply border-t border-gray-200 my-1;
 }
 
 /* Responsive */
-@media (max-width: 640px) {
-  .item-row {
+@media (max-width: 768px) {
+  .item-snippet-content {
     @apply flex-col gap-3;
   }
   
   .item-image-wrapper {
     @apply w-full h-48;
+    width: 100%;
+    height: 192px;
   }
   
-  .item-stats {
-    @apply flex-wrap;
+  .item-info-section {
+    @apply w-full;
+  }
+  
+  .item-counters {
+    @apply justify-center;
+  }
+  
+  .action-row {
+    @apply flex-col gap-2;
+  }
+  
+  .secondary-button {
+    @apply w-full;
   }
 }
 </style> 

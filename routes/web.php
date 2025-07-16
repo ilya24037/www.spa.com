@@ -28,6 +28,11 @@ Route::get('/test', function() {
 
 // Тестовый маршрут для добавления фотографий
 Route::get('/test/add-photos', [TestController::class, 'addPhotos'])->name('test.add-photos');
+
+// Демонстрация компонента ItemCard
+Route::get('/demo/item-card', function() {
+    return Inertia::render('Demo/ItemCard');
+})->name('demo.item-card');
 Route::get('/test/add-local-photos', [TestController::class, 'addLocalPhotos'])->name('test.add-local-photos');
 
 // Управление фотографиями мастеров

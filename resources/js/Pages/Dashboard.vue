@@ -130,7 +130,7 @@
 
                 <!-- Список объявлений -->
                 <div class="items-list">
-                    <div v-if="filteredProfiles.length > 0" class="space-y-4">
+                    <div v-if="filteredProfiles.length > 0" class="space-y-3">
                         <ItemCard 
                             v-for="profile in filteredProfiles" 
                             :key="profile.id"
