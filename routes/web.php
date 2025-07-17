@@ -149,13 +149,14 @@ Route::middleware('auth')->group(function () {
     | Урлы:  /profile/edit, /profile   [PATCH|DELETE]
     */
     Route::prefix('profile')->name('profile.')->group(function () {
-        Route::get('/edit',  [ProfileController::class, 'edit'])->name('edit');
-        Route::patch('/',    [ProfileController::class, 'update'])->name('update');
-        Route::delete('/',   [ProfileController::class, 'destroy'])->name('destroy');
-        
-        // 🔥 ДОБАВЛЕНО: дополнительные маршруты для Dashboard
-        Route::get('/reviews', fn() => Inertia::render('Profile/Reviews'))->name('reviews');
-        Route::get('/security', fn() => Inertia::render('Profile/Security'))->name('security');
+        Route::get('/', [ProfileController::class, 'index'])->name('dashboard');
+        Route::prefix('items')->name('items.')->group(function () {
+            Route::get('/active/all', [ProfileController::class, 'activeItems'])->name('active');
+            Route::get('/draft/all', [ProfileController::class, 'draftItems'])->name('draft');
+            Route::get('/inactive/all', [ProfileController::class, 'inactiveItems'])->name('inactive');
+            Route::get('/old/all', [ProfileController::class, 'oldItems'])->name('old');
+            Route::get('/archive/all', [ProfileController::class, 'archiveItems'])->name('archive');
+        });
     });
 
     /*

@@ -18,20 +18,25 @@ class ProfileController extends Controller
     /**
      * Отображение Dashboard (личного кабинета)
      */
-    public function index(Request $request): Response
-    {
-        $user = $request->user();
-        
-        // Загружаем все объявления пользователя
-        $ads = Ad::where('user_id', $user->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
-            
-        return $this->renderItems($ads);
+    public function index(Request $request) {
+        return redirect()->route('profile.items.active');
     }
-    
+    public function activeItems(Request $request) {
+        return $this->renderItemsByStatus($request, 'active', 'Активные');
+    }
+    public function draftItems(Request $request) {
+        return $this->renderItemsByStatus($request, 'draft', 'Черновики');
+    }
+    public function inactiveItems(Request $request) {
+        return $this->renderItemsByStatus($request, 'inactive', 'Неактивные');
+    }
+    public function oldItems(Request $request) {
+        return $this->renderItemsByStatus($request, 'old', 'Старые');
+    }
+    public function archiveItems(Request $request) {
+        return $this->renderItemsByStatus($request, 'archived', 'Архив');
+    }
 
-    
     /**
      * Общий метод для рендеринга объявлений
      */
@@ -95,6 +100,61 @@ class ProfileController extends Controller
             'profiles' => $profiles,
             'counts' => $counts,
             'userStats' => $userStats,
+        ]);
+    }
+
+    private function renderItemsByStatus($request, $status, $title) {
+        $user = $request->user();
+        $ads = \App\Models\Ad::where('user_id', $user->id)->where('status', $status)->orderBy('created_at', 'desc')->get();
+        // Преобразование и подсчёты (оставить как было)
+        $profiles = $ads->map(function ($ad) {
+            return [
+                'id' => $ad->id,
+                'slug' => Str::slug($ad->title),
+                'name' => $ad->title,
+                'status' => $ad->status,
+                'is_active' => $ad->status === 'active',
+                'price_from' => $ad->price ?? 0,
+                'views_count' => 0, // Пока не реализовано
+                'photos_count' => 0, // Пока не реализовано
+                'avatar' => null, // Пока не реализовано
+                'city' => 'Москва', // Из адреса или по умолчанию
+                'address' => $ad->address ?? '',
+                'district' => $ad->travel_area ?? '',
+                'home_visit' => is_array($ad->service_location) ? in_array('client_home', $ad->service_location) : false,
+                'availability' => $ad->status === 'active' ? 'Доступен' : 'Недоступен',
+                'messages_count' => 0, // Пока не реализовано
+                'services_list' => $ad->specialty ?? '',
+                'full_address' => $ad->address ?? 'Адрес не указан',
+                'rejection_reason' => null,
+                'bookings_count' => 0,
+                'reviews_count' => 0,
+                'description' => $ad->description,
+                'formatted_price' => $ad->formatted_price,
+                'phone' => $ad->phone,
+                'contact_method' => $ad->contact_method,
+                'created_at' => $ad->created_at->format('d.m.Y'),
+                'updated_at' => $ad->updated_at->format('d.m.Y'),
+            ];
+        });
+        $counts = [
+            'active' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'active')->count(),
+            'draft' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'draft')->count(),
+            'inactive' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'inactive')->count(),
+            'old' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'old')->count(),
+            'archived' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'archived')->count(),
+        ];
+        $userStats = [
+            'rating' => 0,
+            'reviewsCount' => 0,
+            'balance' => 0,
+        ];
+        return Inertia::render('Dashboard', [
+            'profiles' => $profiles,
+            'counts' => $counts,
+            'userStats' => $userStats,
+            'activeTab' => $status,
+            'title' => $title,
         ]);
     }
 

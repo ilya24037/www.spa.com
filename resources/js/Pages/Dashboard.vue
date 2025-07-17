@@ -34,35 +34,42 @@
                     <ul class="space-y-1">
                         <li>
                             <Link 
-                                href="/profile"
-                                :class="menuItemClass(isCurrentRoute('profile.dashboard'))"
+                                href="/profile/items/active/all"
+                                :class="menuItemClass(activeTab === 'active')"
                             >
-                                Мои объявления
-                                <span v-if="totalAds > 0" class="bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full text-xs font-medium">
-                                    {{ totalAds }}
-                                </span>
+                                Активные <span v-if="counts.active">{{ counts.active }}</span>
                             </Link>
                         </li>
                         <li>
                             <Link 
-                                href="/bookings"
-                                :class="menuItemClass(isCurrentRoute('bookings.index'))"
+                                href="/profile/items/draft/all"
+                                :class="menuItemClass(activeTab === 'draft')"
                             >
-                                Бронирования
-                                <span v-if="counts.bookings > 0" class="bg-red-100 text-red-600 px-2 py-0.5 rounded-full text-xs font-medium">
-                                    {{ counts.bookings }}
-                                </span>
+                                Черновики <span v-if="counts.draft">{{ counts.draft }}</span>
                             </Link>
                         </li>
                         <li>
                             <Link 
-                                href="/favorites"
-                                :class="menuItemClass(isCurrentRoute('favorites.index'))"
+                                href="/profile/items/inactive/all"
+                                :class="menuItemClass(activeTab === 'inactive')"
                             >
-                                Избранное
-                                <span v-if="counts.favorites > 0" class="bg-pink-100 text-pink-600 px-2 py-0.5 rounded-full text-xs font-medium">
-                                    {{ counts.favorites }}
-                                </span>
+                                Неактивные <span v-if="counts.inactive">{{ counts.inactive }}</span>
+                            </Link>
+                        </li>
+                        <li>
+                            <Link 
+                                href="/profile/items/old/all"
+                                :class="menuItemClass(activeTab === 'old')"
+                            >
+                                Старые <span v-if="counts.old">{{ counts.old }}</span>
+                            </Link>
+                        </li>
+                        <li>
+                            <Link 
+                                href="/profile/items/archived/all"
+                                :class="menuItemClass(activeTab === 'archived')"
+                            >
+                                Архив <span v-if="counts.archived">{{ counts.archived }}</span>
                             </Link>
                         </li>
                         <li>
@@ -195,6 +202,14 @@ const props = defineProps({
     userStats: {
         type: Object,
         default: () => ({})
+    },
+    activeTab: {
+        type: String,
+        default: 'paused'
+    },
+    title: {
+        type: String,
+        default: 'Мои объявления'
     }
 })
 
