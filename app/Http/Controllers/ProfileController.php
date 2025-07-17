@@ -18,8 +18,13 @@ class ProfileController extends Controller
     /**
      * Отображение Dashboard (личного кабинета)
      */
-    public function index(Request $request) {
-        return redirect()->route('profile.items.active');
+    /**
+     * Редирект на "Мои объявления" (как на Avito)
+     */
+    public function index(Request $request)
+    {
+        // На Avito при входе в личный кабинет открывается "Ждут действий"
+        return redirect()->route('profile.items.inactive');
     }
     public function activeItems(Request $request) {
         return $this->renderItemsByStatus($request, 'active', 'Активные');
@@ -28,7 +33,7 @@ class ProfileController extends Controller
         return $this->renderItemsByStatus($request, 'draft', 'Черновики');
     }
     public function inactiveItems(Request $request) {
-        return $this->renderItemsByStatus($request, 'inactive', 'Неактивные');
+        return $this->renderItemsByStatus($request, 'paused', 'Ждут действий');
     }
     public function oldItems(Request $request) {
         return $this->renderItemsByStatus($request, 'old', 'Старые');
@@ -140,7 +145,7 @@ class ProfileController extends Controller
         $counts = [
             'active' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'active')->count(),
             'draft' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'draft')->count(),
-            'inactive' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'inactive')->count(),
+            'inactive' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'paused')->count(),
             'old' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'old')->count(),
             'archived' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'archived')->count(),
         ];
@@ -245,4 +250,6 @@ class ProfileController extends Controller
         
         return back()->with('success', 'Анкета восстановлена');
     }
+
+
 }

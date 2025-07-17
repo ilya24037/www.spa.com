@@ -150,6 +150,10 @@ Route::middleware('auth')->group(function () {
     */
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::get('/', [ProfileController::class, 'index'])->name('dashboard');
+        Route::get('/edit', [ProfileController::class, 'edit'])->name('edit');
+        Route::patch('/', [ProfileController::class, 'update'])->name('update');
+        Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
+        
         Route::prefix('items')->name('items.')->group(function () {
             Route::get('/active/all', [ProfileController::class, 'activeItems'])->name('active');
             Route::get('/draft/all', [ProfileController::class, 'draftItems'])->name('draft');

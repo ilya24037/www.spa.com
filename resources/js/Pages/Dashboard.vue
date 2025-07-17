@@ -1,13 +1,13 @@
 <template>
-    <Head title="Личный кабинет" />
+    <AppLayout>
+        <Head title="Мои объявления" />
     
-    <!-- Обертка с правильными отступами как на главной -->
-    <div class="py-6 lg:py-8">
-        <div class="flex gap-6">
+        <!-- Основной контент с боковой панелью как на главной -->
+        <div class="flex gap-6 py-6 lg:py-8">
             <!-- Боковая панель -->
-            <SidebarWrapper :show="showSidebar" @close="showSidebar = false">
+            <aside class="w-64 flex-shrink-0">
                 <!-- Профиль пользователя -->
-                <div class="p-6 border-b border-gray-200">
+                <div class="bg-white rounded-lg shadow-sm p-4 mb-4">
                     <div class="flex items-center space-x-3">
                         <div 
                             class="w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-lg"
@@ -16,121 +16,264 @@
                             {{ userInitial }}
                         </div>
                         <div>
-                            <h2 class="text-lg font-semibold text-gray-900">{{ userName }}</h2>
-                            <div class="flex items-center space-x-1">
-                                <div class="flex">
-                                    <svg v-for="i in 5" :key="i" class="w-4 h-4" :class="i <= (userStats.rating || 0) ? 'text-yellow-400' : 'text-gray-300'" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                    </svg>
-                                </div>
-                                <span class="text-sm text-gray-500">{{ userStats.reviewsCount || 0 }} отзывов</span>
+                            <h2 class="font-semibold text-gray-900">{{ userName }}</h2>
+                            <div class="flex items-center mt-1">
+                                <svg class="w-4 h-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
+                                <span class="text-sm text-gray-600">{{ userRating }} • {{ userReviewsCount }} отзывов</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Навигация -->
-                <nav class="flex-1 px-4 py-4 space-y-1">
+                <nav class="bg-white rounded-lg shadow-sm">
                     <ul class="space-y-1">
                         <li>
-                            <Link 
-                                href="/profile/items/active/all"
-                                :class="menuItemClass(activeTab === 'active')"
-                            >
-                                Активные <span v-if="counts.active">{{ counts.active }}</span>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link 
-                                href="/profile/items/draft/all"
-                                :class="menuItemClass(activeTab === 'draft')"
-                            >
-                                Черновики <span v-if="counts.draft">{{ counts.draft }}</span>
-                            </Link>
+                            <div class="text-xs font-medium text-gray-700 uppercase tracking-wide px-3 py-2">
+                                Мои объявления
+                            </div>
                         </li>
                         <li>
                             <Link 
                                 href="/profile/items/inactive/all"
-                                :class="menuItemClass(activeTab === 'inactive')"
+                                :class="menuItemClass(isCurrentRoute('profile.items.inactive'))"
                             >
-                                Неактивные <span v-if="counts.inactive">{{ counts.inactive }}</span>
+                                Мои объявления
+                                <span v-if="totalAds > 0" class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs font-medium ml-auto">
+                                    {{ totalAds }}
+                                </span>
                             </Link>
                         </li>
                         <li>
                             <Link 
-                                href="/profile/items/old/all"
-                                :class="menuItemClass(activeTab === 'old')"
+                                href="/orders"
+                                :class="menuItemClass(isCurrentRoute('orders.index'))"
                             >
-                                Старые <span v-if="counts.old">{{ counts.old }}</span>
+                                Заказы
                             </Link>
                         </li>
                         <li>
                             <Link 
-                                href="/profile/items/archived/all"
-                                :class="menuItemClass(activeTab === 'archived')"
+                                href="/reviews"
+                                :class="menuItemClass(isCurrentRoute('reviews.index'))"
                             >
-                                Архив <span v-if="counts.archived">{{ counts.archived }}</span>
+                                Мои отзывы
                             </Link>
                         </li>
                         <li>
                             <Link 
-                                href="/profile/edit"
-                                :class="menuItemClass(isCurrentRoute('profile.edit'))"
+                                href="/favorites"
+                                :class="menuItemClass(isCurrentRoute('favorites.index'))"
                             >
-                                Настройки профиля
+                                Избранное
+                            </Link>
+                        </li>
+                        <li>
+                            <Link 
+                                href="/portal-prizov"
+                                :class="menuItemClass(false)"
+                            >
+                                Портал призов
+                                <span class="bg-red-500 text-white px-1.5 py-0.5 rounded text-xs font-medium ml-auto">Новое</span>
+                            </Link>
+                        </li>
+                        <li>
+                            <Link 
+                                href="/garage"
+                                :class="menuItemClass(false)"
+                            >
+                                Гараж
+                                <span class="bg-red-500 text-white px-1.5 py-0.5 rounded text-xs font-medium ml-auto">Новое</span>
+                            </Link>
+                        </li>
+                        <li>
+                            <Link 
+                                href="/messages"
+                                :class="menuItemClass(isCurrentRoute('messages.index'))"
+                            >
+                                Сообщения
+                                <span v-if="counts.unreadMessages > 0" class="bg-red-100 text-red-600 px-2 py-0.5 rounded-full text-xs font-medium ml-auto">
+                                    {{ counts.unreadMessages }}
+                                </span>
+                            </Link>
+                        </li>
+                        <li>
+                            <Link 
+                                href="/notifications"
+                                :class="menuItemClass(isCurrentRoute('notifications.index'))"
+                            >
+                                Уведомления
+                            </Link>
+                        </li>
+                        <li class="pt-2 mt-2 border-t">
+                            <Link 
+                                href="/wallet"
+                                :class="menuItemClass(isCurrentRoute('wallet.index'))"
+                            >
+                                Кошелёк
+                            </Link>
+                        </li>
+                        <li>
+                            <Link 
+                                href="/services"
+                                :class="menuItemClass(isCurrentRoute('services.index'))"
+                            >
+                                Платные услуги
+                            </Link>
+                        </li>
+                        <li>
+                            <Link 
+                                href="/pro"
+                                :class="menuItemClass(isCurrentRoute('pro.index'))"
+                            >
+                                Для профессионалов
+                            </Link>
+                        </li>
+                        <li>
+                            <Link 
+                                href="/special-offers"
+                                :class="menuItemClass(false)"
+                            >
+                                Спецпредложения
+                                <span class="bg-red-500 text-white px-1.5 py-0.5 rounded text-xs font-medium ml-auto">Новое</span>
+                            </Link>
+                        </li>
+                        <li>
+                            <Link 
+                                href="/subscriptions"
+                                :class="menuItemClass(isCurrentRoute('subscriptions.index'))"
+                            >
+                                Рассылки
+                            </Link>
+                        </li>
+                        <li>
+                            <Link 
+                                href="/service-level"
+                                :class="menuItemClass(isCurrentRoute('service-level.index'))"
+                            >
+                                Уровень сервиса
+                            </Link>
+                        </li>
+                        <li>
+                            <Link 
+                                href="/avito-mall"
+                                :class="menuItemClass(isCurrentRoute('avito-mall.index'))"
+                            >
+                                Авито Молл
+                            </Link>
+                        </li>
+                        <li class="pt-2 mt-2 border-t">
+                            <Link 
+                                href="/addresses"
+                                :class="menuItemClass(isCurrentRoute('addresses.index'))"
+                            >
+                                Адреса
+                            </Link>
+                        </li>
+                        <li>
+                            <Link 
+                                href="/profile/manage"
+                                :class="menuItemClass(isCurrentRoute('profile.manage'))"
+                            >
+                                Управление профилем
+                            </Link>
+                        </li>
+                        <li>
+                            <Link 
+                                href="/profile/security"
+                                :class="menuItemClass(isCurrentRoute('profile.security'))"
+                            >
+                                Защита профиля
+                            </Link>
+                        </li>
+                        <li>
+                            <Link 
+                                href="/settings"
+                                :class="menuItemClass(isCurrentRoute('settings.index'))"
+                            >
+                                Настройки
                             </Link>
                         </li>
                     </ul>
                 </nav>
-            </SidebarWrapper>
+            </aside>
             
-            <!-- Основной контент -->
+            <!-- Основной контент как на главной -->
             <main class="flex-1">
-                <!-- Заголовок страницы -->
-                <div class="mb-6">
-                    <h1 class="text-2xl font-bold text-gray-900">Мои объявления</h1>
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <!-- Заголовок страницы -->
+                    <div class="mb-6">
+                        <h1 class="text-2xl font-bold text-gray-900">{{ title || 'Мои объявления' }}</h1>
                 </div>
 
-                <!-- Промо-карточки -->
-                <div class="mb-6">
-                    <div class="promo-carousel">
-                        <ul class="promo-list">
-                            <li class="promo-item">
-                                <PromoCard 
-                                    :card="{
-                                        title: 'Скидки и акции',
-                                        description: 'настройте для покупателей',
-                                        icon: '/images/promo-icon.svg',
-                                        link: '/promotions',
-                                        badge: 'Новое'
-                                    }"
-                                />
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+
 
                 <!-- Основной контент с правильными отступами -->
                 <div class="space-y-6">
-                    <!-- Вкладки -->
+                    <!-- Вкладки как на Avito -->
                     <div class="border-b border-gray-200">
                         <nav class="-mb-px flex space-x-8">
-                            <button 
-                                v-for="tab in tabs" 
-                                :key="tab.key"
-                                @click="activeTab = tab.key"
+                            <Link 
+                                href="/profile/items/inactive/all"
                                 :class="[
                                     'py-2 px-1 border-b-2 font-medium text-sm',
-                                    activeTab === tab.key
+                                    activeTab === 'inactive'
                                         ? 'border-blue-500 text-blue-600'
                                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                 ]"
                             >
-                                {{ tab.title }}
-                                <span v-if="tab.count > 0" class="ml-2 bg-gray-100 text-gray-900 py-0.5 px-2.5 rounded-full text-xs font-medium">
-                                    {{ tab.count }}
+                                Ждут действий
+                                <span v-if="counts.inactive > 0" class="ml-2 bg-gray-100 text-gray-900 py-0.5 px-2.5 rounded-full text-xs font-medium">
+                                    {{ counts.inactive }}
                                 </span>
-                            </button>
+                            </Link>
+                            
+                            <Link 
+                                href="/profile/items/active/all"
+                                :class="[
+                                    'py-2 px-1 border-b-2 font-medium text-sm',
+                                    activeTab === 'active'
+                                        ? 'border-blue-500 text-blue-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                ]"
+                            >
+                                Активные
+                                <span v-if="counts.active > 0" class="ml-2 bg-gray-100 text-gray-900 py-0.5 px-2.5 rounded-full text-xs font-medium">
+                                    {{ counts.active }}
+                                </span>
+                            </Link>
+                            
+                            <Link 
+                                href="/profile/items/draft/all"
+                                :class="[
+                                    'py-2 px-1 border-b-2 font-medium text-sm',
+                                    activeTab === 'draft'
+                                        ? 'border-blue-500 text-blue-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                ]"
+                            >
+                                Черновики
+                                <span v-if="counts.draft > 0" class="ml-2 bg-gray-100 text-gray-900 py-0.5 px-2.5 rounded-full text-xs font-medium">
+                                    {{ counts.draft }}
+                                </span>
+                            </Link>
+                            
+                            <Link 
+                                href="/profile/items/archive/all"
+                                :class="[
+                                    'py-2 px-1 border-b-2 font-medium text-sm',
+                                    activeTab === 'archived'
+                                        ? 'border-blue-500 text-blue-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                ]"
+                            >
+                                Архив
+                                <span v-if="counts.archived > 0" class="ml-2 bg-gray-100 text-gray-900 py-0.5 px-2.5 rounded-full text-xs font-medium">
+                                    {{ counts.archived }}
+                                </span>
+                            </Link>
                         </nav>
                     </div>
 
@@ -168,24 +311,24 @@
             </div>
             </main>
         </div>
-    </div>
 
-    <!-- Уведомления -->
-    <Toast
-        v-for="toast in toasts"
-        :key="toast.id"
-        :message="toast.message"
-        :type="toast.type"
-        :duration="toast.duration"
-        @close="removeToast(toast.id)"
-    />
+        <!-- Уведомления -->
+        <Toast
+            v-for="toast in toasts"
+            :key="toast.id"
+            :message="toast.message"
+            :type="toast.type"
+            :duration="toast.duration"
+            @close="removeToast(toast.id)"
+        />
+    </AppLayout>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import { Head, Link, usePage } from '@inertiajs/vue3'
+import AppLayout from '../Layouts/AppLayout.vue'
 import SidebarWrapper from '../Components/Layout/SidebarWrapper.vue'
-import PromoCard from '../Components/Profile/PromoCard.vue'
 import ItemCard from '../Components/Profile/ItemCard.vue'
 import Toast from '../Components/UI/Toast.vue'
 
@@ -235,49 +378,12 @@ const totalAds = computed(() => {
     return (props.counts.active || 0) + (props.counts.draft || 0) + (props.counts.inactive || 0) + (props.counts.old || 0) + (props.counts.archived || 0)
 })
 
-// Активная вкладка
-const activeTab = ref('paused')
+// Активная вкладка (из props)
+const activeTab = computed(() => props.activeTab || 'active')
 
-// Вкладки
-const tabs = computed(() => [
-    {
-        key: 'paused',
-        title: 'Ждут действий',
-        count: props.profiles.filter(p => p.status === 'paused').length
-    },
-    {
-        key: 'active',
-        title: 'Активные',
-        count: props.profiles.filter(p => p.status === 'active').length
-    },
-    {
-        key: 'draft',
-        title: 'Черновики',
-        count: props.profiles.filter(p => p.status === 'draft').length
-    },
-    {
-        key: 'archived',
-        title: 'Архив',
-        count: props.profiles.filter(p => p.status === 'archived').length
-    }
-])
-
-// Фильтрация объявлений по активной вкладке
+// Показываем объявления пришедшие с сервера (уже отфильтрованные)
 const filteredProfiles = computed(() => {
-    return props.profiles.filter(profile => {
-        switch (activeTab.value) {
-            case 'paused':
-                return profile.status === 'paused'
-            case 'active':
-                return profile.status === 'active'
-            case 'draft':
-                return profile.status === 'draft'
-            case 'archived':
-                return profile.status === 'archived'
-            default:
-                return true
-        }
-    })
+    return props.profiles || []
 })
 
 // Проверка текущего роута
@@ -321,19 +427,33 @@ const removeToast = (id) => {
 </script>
 
 <style scoped>
-.promo-carousel {
-  @apply overflow-hidden;
+/* Стили навигации как на Avito */
+nav ul li {
+    @apply relative;
 }
 
-.promo-list {
-  @apply flex gap-4;
+nav ul li a {
+    @apply block px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors duration-150;
 }
 
-.promo-item {
-  @apply flex-shrink-0;
+nav ul li a.router-link-active {
+    @apply bg-gray-100 text-gray-900 font-medium;
+}
+
+nav ul li a span.bg-red-500 {
+    @apply text-xs px-1.5 py-0.5;
 }
 
 .items-list {
-  @apply space-y-4;
+    @apply space-y-4;
+}
+
+/* Убираем лишние отступы */
+aside nav {
+    @apply p-0;
+}
+
+aside nav ul {
+    @apply py-2;
 }
 </style>
