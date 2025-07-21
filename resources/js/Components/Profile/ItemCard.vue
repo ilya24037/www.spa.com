@@ -367,6 +367,7 @@ const cancelDelete = () => {
 /* Главный контейнер - точная копия Avito */
 .avito-item-snippet {
   @apply bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow duration-200;
+  overflow: visible;
 }
 
 .item-snippet-content {
@@ -494,6 +495,7 @@ const cancelDelete = () => {
 /* Блок информации и действий (правая колонка) */
 .item-info-section {
   @apply flex-shrink-0 flex flex-col gap-3 w-48;
+  overflow: visible;
 }
 
 .item-counters {
@@ -555,6 +557,7 @@ const cancelDelete = () => {
 
 .dropdown-container {
   @apply relative;
+  overflow: visible;
 }
 
 .dropdown-button {
@@ -562,7 +565,7 @@ const cancelDelete = () => {
 }
 
 .dropdown-menu {
-  @apply absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10;
+  @apply absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50;
 }
 
 .dropdown-item {

@@ -90,12 +90,12 @@
                 :errors="errors" 
             />
             
-            <!-- Кнопки управления -->
-            <div class="flex justify-end items-center mt-8 pt-6 border-t space-x-4">
+            <!-- Кнопки управления в стиле Avito -->
+            <div class="flex justify-end items-center mt-8 pt-6 border-t border-gray-200 space-x-4">
                 <button 
                     type="button" 
                     @click="saveDraft"
-                    class="px-6 py-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                    class="px-6 py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
                     :disabled="saving"
                 >
                     {{ saving ? 'Сохранение...' : 'Сохранить черновик' }}
@@ -103,10 +103,10 @@
                 
                 <button 
                     type="submit" 
-                    class="px-8 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                    class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 font-medium"
                     :disabled="saving"
                 >
-                    {{ saving ? 'Публикация...' : 'Опубликовать' }}
+                    {{ saving ? 'Сохранение...' : 'Сохранить изменения' }}
                 </button>
             </div>
         </form>
@@ -149,6 +149,10 @@ const props = defineProps({
     adId: {
         type: [String, Number],
         default: null
+    },
+    initialData: {
+        type: Object,
+        default: () => ({})
     }
 })
 
@@ -176,7 +180,17 @@ form.category = props.category
 // Если это режим редактирования, загружаем данные
 onMounted(async () => {
     if (props.adId) {
-        await loadDraft(props.adId)
+        if (props.initialData && Object.keys(props.initialData).length > 0) {
+            // Загружаем данные из props
+            Object.keys(props.initialData).forEach(key => {
+                if (props.initialData[key] !== null && props.initialData[key] !== undefined) {
+                    form[key] = props.initialData[key]
+                }
+            })
+        } else {
+            // Загружаем данные через API
+            await loadDraft(props.adId)
+        }
     }
 })
 
@@ -263,39 +277,75 @@ onMounted(() => {
     max-width: 100%;
 }
 
-/* Стили для секций формы */
+/* Стили для секций формы в стиле Avito */
 .ad-form :deep(.form-section) {
     margin-bottom: 2rem;
-    padding: 1.5rem;
-    background: #f9fafb;
-    border-radius: 0.75rem;
-    border: 1px solid #e5e7eb;
+    padding: 0;
+    background: transparent;
+    border: none;
 }
 
 .ad-form :deep(.form-section-title) {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: #1f2937;
-    margin-bottom: 1rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 1.5rem;
     display: flex;
     align-items: center;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 .ad-form :deep(.form-section-title svg) {
-    margin-right: 0.5rem;
-    width: 1.25rem;
-    height: 1.25rem;
+    margin-right: 0.75rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    color: #6b7280;
 }
 
 .ad-form :deep(.form-row) {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 1rem;
-    margin-bottom: 1rem;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
 }
 
 .ad-form :deep(.form-row.two-columns) {
     grid-template-columns: 1fr 1fr;
+}
+
+/* Стили для полей ввода */
+.ad-form :deep(input[type="text"]),
+.ad-form :deep(input[type="email"]),
+.ad-form :deep(input[type="tel"]),
+.ad-form :deep(input[type="number"]),
+.ad-form :deep(textarea),
+.ad-form :deep(select) {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.ad-form :deep(input[type="text"]:focus),
+.ad-form :deep(input[type="email"]:focus),
+.ad-form :deep(input[type="tel"]:focus),
+.ad-form :deep(input[type="number"]:focus),
+.ad-form :deep(textarea:focus),
+.ad-form :deep(select:focus) {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.ad-form :deep(label) {
+    display: block;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
 }
 
 .ad-form :deep(.form-row.three-columns) {

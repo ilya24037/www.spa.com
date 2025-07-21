@@ -1,335 +1,262 @@
 <template>
-    <AppLayout>
-        <Head title="Мои объявления" />
+    <Head title="Мои объявления" />
     
-        <!-- Основной контент с боковой панелью как на главной -->
-        <div class="flex gap-6 py-6 lg:py-8">
-            <!-- Боковая панель -->
-            <aside class="w-64 flex-shrink-0">
+    <!-- Обертка с правильными отступами как в Home.vue -->
+    <div class="py-6 lg:py-8">
+        
+        <!-- Основной контент с гэпом между блоками -->
+        <div class="flex gap-6">
+            
+            <!-- Боковая панель через SidebarWrapper -->
+            <SidebarWrapper 
+                v-model="showSidebar"
+                content-class="p-0"
+                :show-desktop-header="false"
+                :always-visible-desktop="true"
+            >
                 <!-- Профиль пользователя -->
-                <div class="bg-white rounded-lg shadow-sm p-4 mb-4">
+                <div class="p-6 border-b">
                     <div class="flex items-center space-x-3">
                         <div 
-                            class="w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-lg"
+                            class="w-12 h-12 rounded-full flex items-center justify-center text-white font-medium text-lg"
                             :style="{ backgroundColor: avatarColor }"
                         >
                             {{ userInitial }}
                         </div>
                         <div>
-                            <h2 class="font-semibold text-gray-900">{{ userName }}</h2>
-                            <div class="flex items-center mt-1">
-                                <svg class="w-4 h-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                                <span class="text-sm text-gray-600">{{ userRating }} • {{ userReviewsCount }} отзывов</span>
-                            </div>
+                            <div class="font-medium text-gray-900">{{ userName }}</div>
+                            <div class="text-sm text-gray-500">★ {{ userStats.rating || 4.2 }} • {{ userStats.reviews_count || 5 }} отзывов</div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Навигация -->
-                <nav class="bg-white rounded-lg shadow-sm">
-                    <ul class="space-y-1">
-                        <li>
-                            <div class="text-xs font-medium text-gray-700 uppercase tracking-wide px-3 py-2">
-                                Мои объявления
-                            </div>
-                        </li>
-                        <li>
-                            <Link 
-                                href="/profile/items/inactive/all"
-                                :class="menuItemClass(isCurrentRoute('profile.items.inactive'))"
-                            >
-                                Мои объявления
-                                <span v-if="totalAds > 0" class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs font-medium ml-auto">
-                                    {{ totalAds }}
-                                </span>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link 
-                                href="/orders"
-                                :class="menuItemClass(isCurrentRoute('orders.index'))"
-                            >
-                                Заказы
-                            </Link>
-                        </li>
-                        <li>
-                            <Link 
-                                href="/reviews"
-                                :class="menuItemClass(isCurrentRoute('reviews.index'))"
-                            >
-                                Мои отзывы
-                            </Link>
-                        </li>
-                        <li>
-                            <Link 
-                                href="/favorites"
-                                :class="menuItemClass(isCurrentRoute('favorites.index'))"
-                            >
-                                Избранное
-                            </Link>
-                        </li>
-                        <li>
-                            <Link 
-                                href="/portal-prizov"
-                                :class="menuItemClass(false)"
-                            >
-                                Портал призов
-                                <span class="bg-red-500 text-white px-1.5 py-0.5 rounded text-xs font-medium ml-auto">Новое</span>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link 
-                                href="/garage"
-                                :class="menuItemClass(false)"
-                            >
-                                Гараж
-                                <span class="bg-red-500 text-white px-1.5 py-0.5 rounded text-xs font-medium ml-auto">Новое</span>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link 
-                                href="/messages"
-                                :class="menuItemClass(isCurrentRoute('messages.index'))"
-                            >
-                                Сообщения
-                                <span v-if="counts.unreadMessages > 0" class="bg-red-100 text-red-600 px-2 py-0.5 rounded-full text-xs font-medium ml-auto">
-                                    {{ counts.unreadMessages }}
-                                </span>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link 
-                                href="/notifications"
-                                :class="menuItemClass(isCurrentRoute('notifications.index'))"
-                            >
-                                Уведомления
-                            </Link>
-                        </li>
-                        <li class="pt-2 mt-2 border-t">
-                            <Link 
-                                href="/wallet"
-                                :class="menuItemClass(isCurrentRoute('wallet.index'))"
-                            >
-                                Кошелёк
-                            </Link>
-                        </li>
-                        <li>
-                            <Link 
-                                href="/services"
-                                :class="menuItemClass(isCurrentRoute('services.index'))"
-                            >
-                                Платные услуги
-                            </Link>
-                        </li>
-                        <li>
-                            <Link 
-                                href="/pro"
-                                :class="menuItemClass(isCurrentRoute('pro.index'))"
-                            >
-                                Для профессионалов
-                            </Link>
-                        </li>
-                        <li>
-                            <Link 
-                                href="/special-offers"
-                                :class="menuItemClass(false)"
-                            >
-                                Спецпредложения
-                                <span class="bg-red-500 text-white px-1.5 py-0.5 rounded text-xs font-medium ml-auto">Новое</span>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link 
-                                href="/subscriptions"
-                                :class="menuItemClass(isCurrentRoute('subscriptions.index'))"
-                            >
-                                Рассылки
-                            </Link>
-                        </li>
-                        <li>
-                            <Link 
-                                href="/service-level"
-                                :class="menuItemClass(isCurrentRoute('service-level.index'))"
-                            >
-                                Уровень сервиса
-                            </Link>
-                        </li>
-                        <li>
-                            <Link 
-                                href="/avito-mall"
-                                :class="menuItemClass(isCurrentRoute('avito-mall.index'))"
-                            >
-                                Авито Молл
-                            </Link>
-                        </li>
-                        <li class="pt-2 mt-2 border-t">
-                            <Link 
-                                href="/addresses"
-                                :class="menuItemClass(isCurrentRoute('addresses.index'))"
-                            >
-                                Адреса
-                            </Link>
-                        </li>
-                        <li>
-                            <Link 
-                                href="/profile/manage"
-                                :class="menuItemClass(isCurrentRoute('profile.manage'))"
-                            >
-                                Управление профилем
-                            </Link>
-                        </li>
-                        <li>
-                            <Link 
-                                href="/profile/security"
-                                :class="menuItemClass(isCurrentRoute('profile.security'))"
-                            >
-                                Защита профиля
-                            </Link>
-                        </li>
-                        <li>
-                            <Link 
-                                href="/settings"
-                                :class="menuItemClass(isCurrentRoute('settings.index'))"
-                            >
-                                Настройки
-                            </Link>
-                        </li>
-                    </ul>
-                </nav>
-            </aside>
-            
-            <!-- Основной контент как на главной -->
-            <main class="flex-1">
-                <div class="bg-white rounded-lg shadow-sm p-6">
-                    <!-- Заголовок страницы -->
-                    <div class="mb-6">
-                        <h1 class="text-2xl font-bold text-gray-900">{{ title || 'Мои объявления' }}</h1>
-                </div>
-
-
-
-                <!-- Основной контент с правильными отступами -->
-                <div class="space-y-6">
-                    <!-- Вкладки как на Avito -->
-                    <div class="border-b border-gray-200">
-                        <nav class="-mb-px flex space-x-8">
+                
+                <!-- Меню как на Авито -->
+                <nav class="flex-1">
+                    <div class="py-2">
+                        <!-- Мои объявления (основная секция) -->
+                        <div class="px-4">
                             <Link 
                                 href="/profile/items/inactive/all"
                                 :class="[
-                                    'py-2 px-1 border-b-2 font-medium text-sm',
-                                    activeTab === 'inactive'
-                                        ? 'border-blue-500 text-blue-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    'flex items-center justify-between px-3 py-2 text-sm rounded-md transition-colors',
+                                    isAdsRoute ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700 hover:bg-gray-50'
                                 ]"
                             >
-                                Ждут действий
-                                <span v-if="counts.inactive > 0" class="ml-2 bg-gray-100 text-gray-900 py-0.5 px-2.5 rounded-full text-xs font-medium">
-                                    {{ counts.inactive }}
+                                <span>Мои объявления</span>
+                                <span v-if="totalAds > 0" class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{{ totalAds }}</span>
+                            </Link>
+                        </div>
+                        
+                        <!-- Остальные пункты меню -->
+                        <div class="px-4 mt-2 space-y-1">
+                            <Link 
+                                href="/bookings"
+                                class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                            >
+                                Заказы
+                            </Link>
+                            
+                            <Link 
+                                href="/profile/reviews"
+                                class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                            >
+                                Мои отзывы
+                            </Link>
+                            
+                            <Link 
+                                href="/favorites"
+                                class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                            >
+                                Избранное
+                            </Link>
+                            
+                            <Link 
+                                href="/messages"
+                                class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                            >
+                                Сообщения
+                            </Link>
+                            
+                            <Link 
+                                href="/notifications"
+                                class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                            >
+                                Уведомления
+                            </Link>
+                            
+                            <Link 
+                                href="/wallet"
+                                class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                            >
+                                Кошелёк
+                            </Link>
+                            
+                            <Link 
+                                href="/profile/addresses"
+                                class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                            >
+                                Адреса
+                            </Link>
+                            
+                            <Link 
+                                href="/profile/edit"
+                                class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                            >
+                                Управление профилем
+                            </Link>
+                            
+                            <Link 
+                                href="/profile/security"
+                                class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                            >
+                                Защита профиля
+                            </Link>
+                            
+                            <Link 
+                                href="/settings"
+                                class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                            >
+                                Настройки
+                            </Link>
+                            
+                            <Link 
+                                href="/services"
+                                class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                            >
+                                Платные услуги
+                            </Link>
+                        </div>
+                    </div>
+                </nav>
+            </SidebarWrapper>
+            
+            <!-- Контент справа -->
+            <section class="flex-1 space-y-6">
+                
+                <!-- Заголовок без фона -->
+                <div class="mb-6">
+                    <h1 class="text-2xl font-bold text-gray-900 mb-4">Мои объявления</h1>
+                </div>
+                
+                <!-- Основной контент - белая карточка как на главной -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div class="p-6">
+                        <!-- Навигация вкладок как на Авито -->
+                        <div class="flex items-center space-x-8">
+                            <Link 
+                                href="/profile/items/inactive/all"
+                                :class="[
+                                    'pb-2 text-base font-medium border-b-2 transition-colors',
+                                    activeTab === 'paused' 
+                                        ? 'text-gray-900 border-gray-900' 
+                                        : 'text-gray-500 border-transparent hover:text-gray-700'
+                                ]"
+                            >
+                                <span class="flex items-center gap-2">
+                                    Ждут действий
+                                    <sup v-if="counts.paused" class="text-sm font-normal">{{ counts.paused }}</sup>
                                 </span>
                             </Link>
                             
                             <Link 
                                 href="/profile/items/active/all"
                                 :class="[
-                                    'py-2 px-1 border-b-2 font-medium text-sm',
-                                    activeTab === 'active'
-                                        ? 'border-blue-500 text-blue-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    'pb-2 text-base font-medium border-b-2 transition-colors',
+                                    activeTab === 'active' 
+                                        ? 'text-gray-900 border-gray-900' 
+                                        : 'text-gray-500 border-transparent hover:text-gray-700'
                                 ]"
                             >
-                                Активные
-                                <span v-if="counts.active > 0" class="ml-2 bg-gray-100 text-gray-900 py-0.5 px-2.5 rounded-full text-xs font-medium">
-                                    {{ counts.active }}
+                                <span class="flex items-center gap-2">
+                                    Активные
+                                    <sup v-if="counts.active" class="text-sm font-normal">{{ counts.active }}</sup>
                                 </span>
                             </Link>
                             
                             <Link 
                                 href="/profile/items/draft/all"
                                 :class="[
-                                    'py-2 px-1 border-b-2 font-medium text-sm',
-                                    activeTab === 'draft'
-                                        ? 'border-blue-500 text-blue-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    'pb-2 text-base font-medium border-b-2 transition-colors',
+                                    activeTab === 'draft' 
+                                        ? 'text-gray-900 border-gray-900' 
+                                        : 'text-gray-500 border-transparent hover:text-gray-700'
                                 ]"
                             >
-                                Черновики
-                                <span v-if="counts.draft > 0" class="ml-2 bg-gray-100 text-gray-900 py-0.5 px-2.5 rounded-full text-xs font-medium">
-                                    {{ counts.draft }}
+                                <span class="flex items-center gap-2">
+                                    Черновики
+                                    <sup v-if="counts.draft" class="text-sm font-normal">{{ counts.draft }}</sup>
                                 </span>
                             </Link>
                             
                             <Link 
                                 href="/profile/items/archive/all"
                                 :class="[
-                                    'py-2 px-1 border-b-2 font-medium text-sm',
-                                    activeTab === 'archived'
-                                        ? 'border-blue-500 text-blue-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    'pb-2 text-base font-medium border-b-2 transition-colors',
+                                    activeTab === 'archive' 
+                                        ? 'text-gray-900 border-gray-900' 
+                                        : 'text-gray-500 border-transparent hover:text-gray-700'
                                 ]"
                             >
-                                Архив
-                                <span v-if="counts.archived > 0" class="ml-2 bg-gray-100 text-gray-900 py-0.5 px-2.5 rounded-full text-xs font-medium">
-                                    {{ counts.archived }}
+                                <span class="flex items-center gap-2">
+                                    Архив
+                                    <sup v-if="counts.archive" class="text-sm font-normal">{{ counts.archive }}</sup>
                                 </span>
                             </Link>
-                        </nav>
+                        </div>
                     </div>
-
-                    <!-- Список объявлений -->
-                    <div class="items-list">
-                        <div v-if="filteredProfiles.length > 0" class="space-y-4">
-                            <ItemCard 
-                                v-for="profile in filteredProfiles" 
-                                :key="profile.id"
-                                :item="profile"
-                                @item-deleted="handleItemDeleted"
-                            />
-                        </div>
                     
-                    <!-- Пустое состояние -->
-                    <div v-else class="text-center py-12">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <h3 class="mt-2 text-sm font-medium text-gray-900">Нет объявлений</h3>
-                        <p class="mt-1 text-sm text-gray-500">Создайте свое первое объявление</p>
-                        <div class="mt-6">
-                            <Link 
-                                href="/additem"
-                                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-                            >
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    <!-- Контент вкладки -->
+                    <div v-if="profiles && profiles.length > 0" class="space-y-6">
+                        <ItemCard 
+                            v-for="profile in profiles" 
+                            :key="profile.id"
+                            :item="profile"
+                            :show-status="true"
+                            @update="handleItemUpdate"
+                            @delete="handleItemDelete"
+                        />
+                    </div>
+                    
+                    <!-- Пустое состояние как на Авито -->
+                    <div v-else class="text-center py-16">
+                        <div class="max-w-md mx-auto">
+                            <div class="w-20 h-20 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+                                <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
-                                Разместить объявление
-                            </Link>
+                            </div>
+                            <h3 class="text-xl font-medium text-gray-900 mb-3">{{ getEmptyStateTitle(activeTab) }}</h3>
+                            <p class="text-gray-600 mb-8 leading-relaxed">{{ getEmptyStateDescription(activeTab) }}</p>
+                            <div v-if="activeTab === 'draft' || activeTab === 'paused'" class="space-y-3">
+                                <Link 
+                                    href="/additem/massage"
+                                    class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
+                                >
+                                    Разместить объявление
+                                </Link>
+                            </div>
                         </div>
-                                            </div>
                     </div>
                 </div>
-            </div>
-            </main>
+            </section>
         </div>
-
-        <!-- Уведомления -->
-        <Toast
-            v-for="toast in toasts"
-            :key="toast.id"
-            :message="toast.message"
-            :type="toast.type"
-            :duration="toast.duration"
-            @close="removeToast(toast.id)"
-        />
-    </AppLayout>
+    </div>
+    
+    <!-- Глобальные уведомления -->
+    <Toast
+        v-for="toast in toasts"
+        :key="toast.id"
+        :message="toast.message"
+        :type="toast.type"
+        :duration="toast.duration"
+        @close="removeToast(toast.id)"
+    />
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import { Head, Link, usePage } from '@inertiajs/vue3'
-import AppLayout from '../Layouts/AppLayout.vue'
-import SidebarWrapper from '../Components/Layout/SidebarWrapper.vue'
+import SidebarWrapper from '@/Components/Layout/SidebarWrapper.vue'
 import ItemCard from '../Components/Profile/ItemCard.vue'
 import Toast from '../Components/UI/Toast.vue'
 
@@ -364,62 +291,77 @@ const toasts = ref([])
 // Пользователь
 const page = usePage()
 const user = computed(() => page.props.auth?.user || {})
+
+// Вычисляемые свойства для пользователя
 const userName = computed(() => user.value.name || 'Пользователь')
 const userInitial = computed(() => userName.value.charAt(0).toUpperCase())
-
-// Цвет аватара
-const colors = ['#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#00bcd4', '#009688', '#4caf50', '#ff9800', '#ff5722']
 const avatarColor = computed(() => {
-    const charCode = userName.value.charCodeAt(0) || 85
-    return colors[charCode % colors.length]
+    const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899']
+    const index = userName.value.charCodeAt(0) % colors.length
+    return colors[index]
+})
+
+// Проверка текущего роута для объявлений
+const isAdsRoute = computed(() => {
+    const currentRoute = page.url
+    return currentRoute.includes('/profile/items/')
 })
 
 // Общее количество объявлений
 const totalAds = computed(() => {
-    return (props.counts.active || 0) + (props.counts.draft || 0) + (props.counts.inactive || 0) + (props.counts.old || 0) + (props.counts.archived || 0)
+    const counts = props.counts || {}
+    return (counts.active || 0) + (counts.draft || 0) + (counts.paused || 0) + (counts.old || 0) + (counts.archive || 0)
 })
 
-// Активная вкладка (из props)
-const activeTab = computed(() => props.activeTab || 'active')
-
-// Показываем объявления пришедшие с сервера (уже отфильтрованные)
-const filteredProfiles = computed(() => {
-    return props.profiles || []
-})
-
-// Проверка текущего роута
-const isCurrentRoute = (routeName) => {
-    return page.url === `/${routeName.replace('.', '/')}`
+// Функции для заголовков и описаний
+const getTabTitle = (tab) => {
+    const titles = {
+        active: 'Активные объявления',
+        draft: 'Черновики',
+        paused: 'Ждут действий',
+        old: 'Старые объявления',
+        archive: 'Архив'
+    }
+    return titles[tab] || 'Мои объявления'
 }
 
-// Класс для пунктов меню
-const menuItemClass = (isActive) => [
-    'flex items-center justify-between px-3 py-2 text-sm rounded-lg transition',
-    isActive 
-        ? 'bg-blue-50 text-blue-600 font-medium' 
-        : 'text-gray-700 hover:bg-gray-50'
-]
-
-// Обработчик события удаления объявления
-const handleItemDeleted = (deletedId) => {
-  // Удаляем элемент из списка профилей
-  const index = props.profiles.findIndex(p => p.id === deletedId)
-  if (index > -1) {
-    props.profiles.splice(index, 1)
-  }
-  
-  // Показываем уведомление об успешном удалении
-  addToast('Объявление успешно удалено', 'success', 3000)
+const getEmptyStateTitle = (tab) => {
+    const titles = {
+        active: 'Нет активных объявлений',
+        draft: 'Нет черновиков',
+        paused: 'Нет объявлений, ожидающих действий',
+        old: 'Нет старых объявлений',
+        archive: 'Архив пуст'
+    }
+    return titles[tab] || 'Нет объявлений'
 }
 
-// Emit событие для обновления счетчиков
-const emit = defineEmits(['counts-updated'])
+const getEmptyStateDescription = (tab) => {
+    const descriptions = {
+        active: 'У вас пока нет активных объявлений. Разместите новое объявление, чтобы начать получать заказы.',
+        draft: 'У вас нет сохраненных черновиков. Создайте новое объявление или сохраните текущее как черновик.',
+        paused: 'Здесь появятся объявления, которые требуют вашего внимания - например, истекающие или отклоненные.',
+        old: 'Здесь будут показаны ваши старые неактивные объявления.',
+        archive: 'Архивированные объявления не отображаются в поиске, но сохраняют всю информацию.'
+    }
+    return descriptions[tab] || 'Пока здесь пусто.'
+}
 
-// Управление уведомлениями
-const addToast = (message, type = 'info', duration = 5000) => {
+// Обработчики событий
+const handleItemUpdate = (itemId, data) => {
+    console.log('Обновление объявления:', itemId, data)
+    // Здесь логика обновления
+}
+
+const handleItemDelete = (itemId) => {
+    console.log('Удаление объявления:', itemId)
+    // Здесь логика удаления
+}
+
+// Управление Toast уведомлениями
+const addToast = (message, type = 'success', duration = 5000) => {
     const id = Date.now()
     toasts.value.push({ id, message, type, duration })
-    setTimeout(() => removeToast(id), duration)
 }
 
 const removeToast = (id) => {
@@ -428,33 +370,18 @@ const removeToast = (id) => {
 </script>
 
 <style scoped>
-/* Стили навигации как на Avito */
-nav ul li {
-    @apply relative;
+/* Авито-подобные стили для навигации */
+.router-link-exact-active {
+    @apply text-gray-900 border-gray-900;
 }
 
-nav ul li a {
-    @apply block px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors duration-150;
+/* Плавные переходы для ховеров */
+a {
+    @apply transition-colors duration-150;
 }
 
-nav ul li a.router-link-active {
-    @apply bg-gray-100 text-gray-900 font-medium;
-}
-
-nav ul li a span.bg-red-500 {
-    @apply text-xs px-1.5 py-0.5;
-}
-
-.items-list {
-    @apply space-y-4;
-}
-
-/* Убираем лишние отступы */
-aside nav {
-    @apply p-0;
-}
-
-aside nav ul {
-    @apply py-2;
+/* Стилизация счетчиков */
+sup {
+    @apply text-xs text-gray-500 font-normal;
 }
 </style>

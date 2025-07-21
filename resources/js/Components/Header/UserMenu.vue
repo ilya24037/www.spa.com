@@ -8,7 +8,7 @@
     <!-- Кнопка-ссылка -->
     <Link
       ref="buttonRef"
-      href="/dashboard"
+      href="/profile"
       class="flex items-center gap-2 p-1 rounded-lg transition-colors hover:bg-gray-100 group"
     >
       <div class="relative">
@@ -47,7 +47,7 @@
         <!-- Шапка профиля -->
         <div class="p-4 border-b border-gray-100">
           <Link 
-            href="/dashboard"
+            href="/profile"
             class="flex items-center gap-3 hover:bg-gray-50 -m-2 p-2 rounded-lg transition-colors"
           >
             <div
@@ -96,7 +96,7 @@
         <!-- Настройки -->
         <div class="py-2">
           <Link 
-            href="/profile" 
+            href="/profile/edit" 
             class="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors block"
           >
             <span class="text-gray-400">⚙️</span>

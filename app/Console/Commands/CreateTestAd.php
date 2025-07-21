@@ -27,8 +27,8 @@ class CreateTestAd extends Command
      */
     public function handle()
     {
-        // Найдем первого пользователя или создадим тестового
-        $user = User::first();
+        // Найдем пользователя test@example.com или создадим его
+        $user = User::where('email', 'test@example.com')->first();
         if (!$user) {
             $user = User::create([
                 'name' => 'Тестовый пользователь',
@@ -37,6 +37,9 @@ class CreateTestAd extends Command
                 'email_verified_at' => now(),
             ]);
         }
+
+        // Удалим старые объявления этого пользователя, чтобы не было дубликатов
+        Ad::where('user_id', $user->id)->delete();
 
         // Создаем активное объявление
         $activeAd = Ad::create([
@@ -85,7 +88,7 @@ class CreateTestAd extends Command
             'status' => 'archived'
         ]);
 
-        // Создаем неактивное объявление
+        // Создаем неактивное объявление (статус 'paused' - ждет действий)
         $inactiveAd = Ad::create([
             'user_id' => $user->id,
             'title' => 'Неактивное объявление',
@@ -100,14 +103,14 @@ class CreateTestAd extends Command
             'address' => 'Москва, ул. Новый Арбат, 15',
             'phone' => '+7 (999) 555-55-55',
             'contact_method' => 'messages',
-            'status' => 'inactive'
+            'status' => 'paused'
         ]);
 
-        $this->info('Созданы тестовые объявления:');
+        $this->info('Созданы тестовые объявления для test@example.com:');
         $this->line("- Активное: {$activeAd->title} (ID: {$activeAd->id})");
         $this->line("- Черновик: {$draftAd->title} (ID: {$draftAd->id})");
         $this->line("- Архивное: {$archivedAd->title} (ID: {$archivedAd->id})");
-        $this->line("- Неактивное: {$inactiveAd->title} (ID: {$inactiveAd->id})");
+        $this->line("- Ждет действий: {$inactiveAd->title} (ID: {$inactiveAd->id})");
         $this->line("Пользователь: {$user->name} (ID: {$user->id})");
     }
 }

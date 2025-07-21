@@ -13,36 +13,36 @@
                     Формат работы *
                 </label>
                 <div class="space-y-3">
-                    <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                    <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                         <input 
                             v-model="form.work_format"
                             type="radio"
                             value="private"
-                            class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                            class="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500 focus:ring-2"
                         >
                         <div class="ml-3">
                             <div class="text-sm font-medium text-gray-900">Частный мастер</div>
                             <div class="text-xs text-gray-500">Работаете в одиночку</div>
                         </div>
                     </label>
-                    <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                    <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                         <input 
                             v-model="form.work_format"
                             type="radio"
                             value="salon"
-                            class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                            class="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500 focus:ring-2"
                         >
                         <div class="ml-3">
                             <div class="text-sm font-medium text-gray-900">Салон</div>
                             <div class="text-xs text-gray-500">У вас есть отдельное помещение и штат мастеров</div>
                         </div>
                     </label>
-                    <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                    <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                         <input 
                             v-model="form.work_format"
                             type="radio"
                             value="network"
-                            class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                            class="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500 focus:ring-2"
                         >
                         <div class="ml-3">
                             <div class="text-sm font-medium text-gray-900">Сеть салонов</div>
@@ -50,7 +50,15 @@
                         </div>
                     </label>
                 </div>
-                <div v-if="errors.work_format" class="mt-1 text-sm text-red-600">
+                
+                <p class="text-xs text-gray-500 mt-2">
+                    Выберите формат вашей работы
+                </p>
+                
+                <div v-if="errors.work_format" class="mt-2 text-sm text-red-600 flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                    </svg>
                     {{ errors.work_format }}
                 </div>
             </div>

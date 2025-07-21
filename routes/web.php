@@ -129,7 +129,7 @@ Route::middleware('auth')->group(function () {
 
     /*
     |----------------------------------------------------------------------
-    | Личный кабинет   (как у Avito:  /profile  →  список объявлений)
+    | Личный кабинет   (как у Avito:  /profile  →  главная страница ЛК)
     |----------------------------------------------------------------------
     */
     // 🔥 ИЗМЕНЕНО: используем метод контроллера вместо анонимной функции
@@ -149,7 +149,6 @@ Route::middleware('auth')->group(function () {
     | Урлы:  /profile/edit, /profile   [PATCH|DELETE]
     */
     Route::prefix('profile')->name('profile.')->group(function () {
-        Route::get('/', [ProfileController::class, 'index'])->name('dashboard');
         Route::get('/edit', [ProfileController::class, 'edit'])->name('edit');
         Route::patch('/', [ProfileController::class, 'update'])->name('update');
         Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');

@@ -13,26 +13,34 @@
                     Кто ваши клиенты? *
                 </label>
                 <div class="space-y-3">
-                    <label class="flex items-center">
+                    <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
                         <input 
                             v-model="form.clients"
                             type="checkbox"
                             value="women"
-                            class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                            class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
                         >
-                        <span class="ml-2 text-sm text-gray-700">Женщины</span>
+                        <span class="ml-3 text-sm text-gray-700 font-medium">Женщины</span>
                     </label>
-                    <label class="flex items-center">
+                    <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
                         <input 
                             v-model="form.clients"
                             type="checkbox"
                             value="men"
-                            class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                            class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
                         >
-                        <span class="ml-2 text-sm text-gray-700">Мужчины</span>
+                        <span class="ml-3 text-sm text-gray-700 font-medium">Мужчины</span>
                     </label>
                 </div>
-                <div v-if="errors.clients" class="mt-1 text-sm text-red-600">
+                
+                <p class="text-xs text-gray-500 mt-2">
+                    Выберите пол клиентов, которым вы оказываете услуги
+                </p>
+                
+                <div v-if="errors.clients" class="mt-2 text-sm text-red-600 flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                    </svg>
                     {{ errors.clients }}
                 </div>
             </div>

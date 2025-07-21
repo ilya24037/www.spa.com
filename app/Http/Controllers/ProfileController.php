@@ -16,15 +16,12 @@ use App\Models\Ad;
 class ProfileController extends Controller
 {
     /**
-     * Отображение Dashboard (личного кабинета)
-     */
-    /**
-     * Редирект на "Мои объявления" (как на Avito)
+     * Отображение личного кабинета - сразу показываем активные объявления (как у Avito)
      */
     public function index(Request $request)
     {
-        // На Avito при входе в личный кабинет открывается "Ждут действий"
-        return redirect()->route('profile.items.inactive');
+        // Используем ту же логику, что и для активных объявлений
+        return $this->renderItemsByStatus($request, 'active', 'Мои объявления');
     }
     public function activeItems(Request $request) {
         return $this->renderItemsByStatus($request, 'active', 'Активные');
@@ -36,7 +33,7 @@ class ProfileController extends Controller
         return $this->renderItemsByStatus($request, 'paused', 'Ждут действий');
     }
     public function oldItems(Request $request) {
-        return $this->renderItemsByStatus($request, 'old', 'Старые');
+        return $this->renderItemsByStatus($request, 'archived', 'Старые');
     }
     public function archiveItems(Request $request) {
         return $this->renderItemsByStatus($request, 'archived', 'Архив');
@@ -58,13 +55,13 @@ class ProfileController extends Controller
                 'status' => $ad->status,
                 'is_active' => $ad->status === 'active',
                 'price_from' => $ad->price ?? 0,
-                'views_count' => 0, // Пока не реализовано
-                'photos_count' => 0, // Пока не реализовано
-                'avatar' => null, // Пока не реализовано
+                'views_count' => rand(10, 100), // Тестовые данные
+                'photos_count' => rand(1, 8), // Тестовые данные
+                'avatar' => '/images/masters/demo-' . (($ad->id % 4) + 1) . '.jpg', // Тестовые изображения
                 'city' => 'Москва', // Из адреса или по умолчанию
                 'address' => $ad->address ?? '',
                 'district' => $ad->travel_area ?? '',
-                'home_visit' => is_array($ad->service_location) ? in_array('client_home', $ad->service_location) : false,
+                'home_service' => is_array($ad->service_location) ? in_array('client_home', $ad->service_location) : false,
                 'availability' => $ad->status === 'active' ? 'Доступен' : 'Недоступен',
                 'messages_count' => 0, // Пока не реализовано
                 'services_list' => $ad->specialty ?? '',
@@ -78,6 +75,12 @@ class ProfileController extends Controller
                 'contact_method' => $ad->contact_method,
                 'created_at' => $ad->created_at->format('d.m.Y'),
                 'updated_at' => $ad->updated_at->format('d.m.Y'),
+                // Дополнительные поля для ItemCard
+                'company_name' => 'Массажный салон',
+                'expires_at' => now()->addDays(30)->toISOString(), // 30 дней от сегодня
+                'new_messages_count' => 0,
+                'subscribers_count' => rand(0, 10),
+                'favorites_count' => rand(0, 25),
             ];
         });
         
@@ -87,8 +90,8 @@ class ProfileController extends Controller
             'active' => $allAds->where('status', 'active')->count(),
             'draft' => $allAds->where('status', 'draft')->count(),
             'archived' => $allAds->where('status', 'archived')->count(),
-            'inactive' => $allAds->where('status', 'inactive')->count(),
-            'old' => $allAds->where('status', 'old')->count(),
+            'paused' => $allAds->where('status', 'paused')->count(),
+            'old' => $allAds->where('status', 'archived')->count(), // старые = архивные
             'bookings' => $user->bookings()->where('status', 'pending')->count(),
             'favorites' => $user->favorites()->count(),
             'unreadMessages' => 0,
@@ -120,13 +123,13 @@ class ProfileController extends Controller
                 'status' => $ad->status,
                 'is_active' => $ad->status === 'active',
                 'price_from' => $ad->price ?? 0,
-                'views_count' => 0, // Пока не реализовано
-                'photos_count' => 0, // Пока не реализовано
-                'avatar' => null, // Пока не реализовано
+                'views_count' => rand(10, 100), // Тестовые данные
+                'photos_count' => rand(1, 8), // Тестовые данные
+                'avatar' => '/images/masters/demo-' . (($ad->id % 4) + 1) . '.jpg', // Тестовые изображения
                 'city' => 'Москва', // Из адреса или по умолчанию
                 'address' => $ad->address ?? '',
                 'district' => $ad->travel_area ?? '',
-                'home_visit' => is_array($ad->service_location) ? in_array('client_home', $ad->service_location) : false,
+                'home_service' => is_array($ad->service_location) ? in_array('client_home', $ad->service_location) : false,
                 'availability' => $ad->status === 'active' ? 'Доступен' : 'Недоступен',
                 'messages_count' => 0, // Пока не реализовано
                 'services_list' => $ad->specialty ?? '',
@@ -140,13 +143,19 @@ class ProfileController extends Controller
                 'contact_method' => $ad->contact_method,
                 'created_at' => $ad->created_at->format('d.m.Y'),
                 'updated_at' => $ad->updated_at->format('d.m.Y'),
+                // Дополнительные поля для ItemCard
+                'company_name' => 'Массажный салон',
+                'expires_at' => now()->addDays(30)->toISOString(), // 30 дней от сегодня
+                'new_messages_count' => 0,
+                'subscribers_count' => rand(0, 10),
+                'favorites_count' => rand(0, 25),
             ];
         });
         $counts = [
             'active' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'active')->count(),
             'draft' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'draft')->count(),
-            'inactive' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'paused')->count(),
-            'old' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'old')->count(),
+            'paused' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'paused')->count(),
+            'old' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'archived')->count(), // старые = архивные
             'archived' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'archived')->count(),
         ];
         $userStats = [
