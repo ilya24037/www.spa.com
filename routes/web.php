@@ -10,6 +10,7 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\AddItemController; // 🔥 ДОБАВЛЕНО
 use App\Http\Controllers\AdController;
 use App\Http\Controllers\TestController;
+use App\Http\Controllers\MyAdsController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -143,6 +144,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function() {
         return redirect('/profile');
     })->name('dashboard');
+    
+    /*
+    | Мои объявления (как на Avito)
+    */
+    Route::prefix('my-ads')->name('my-ads.')->group(function () {
+        Route::get('/', [MyAdsController::class, 'index'])->name('index');
+        Route::post('/{ad}/pay', [MyAdsController::class, 'pay'])->name('pay');
+        Route::post('/{ad}/deactivate', [MyAdsController::class, 'deactivate'])->name('deactivate');
+        Route::delete('/{ad}', [MyAdsController::class, 'destroy'])->name('destroy');
+        Route::post('/{ad}/publish', [MyAdsController::class, 'publish'])->name('publish');
+        Route::post('/{ad}/restore', [MyAdsController::class, 'restore'])->name('restore');
+    });
 
     /*
     | Профиль пользователя (редактирование / пароль / удаление)

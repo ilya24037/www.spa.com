@@ -128,7 +128,10 @@
 
         <!-- Время до окончания -->
         <div class="item-lifetime">
-          <span class="lifetime-text" :class="{ 'lifetime-warning': getDaysLeft() < 7 }">
+          <span v-if="item.status === 'waiting_payment'" class="lifetime-text text-orange-600">
+            Не оплачено
+          </span>
+          <span v-else class="lifetime-text" :class="{ 'lifetime-warning': getDaysLeft() < 7 }">
             Осталось {{ getDaysLeft() }} дней
           </span>
         </div>
@@ -147,12 +150,29 @@
 
         <!-- Кнопки действий -->
         <div class="item-actions">
-          <button class="action-button primary-button">
+          <!-- Для объявлений ждущих оплаты показываем кнопку "Оплатить размещение" -->
+          <button v-if="item.status === 'waiting_payment'" 
+                  @click="payItem"
+                  class="action-button primary-button">
+            Оплатить размещение
+          </button>
+          
+          <!-- Для активных объявлений показываем "Поднять просмотры" -->
+          <button v-else-if="item.status === 'active'" 
+                  class="action-button primary-button">
             Поднять просмотры
           </button>
           
+          <!-- Для черновиков показываем "Опубликовать" -->
+          <button v-else-if="item.status === 'draft'" 
+                  @click="publishItem"
+                  class="action-button primary-button">
+            Опубликовать
+          </button>
+          
           <div class="action-row">
-            <button class="action-button secondary-button">
+            <button v-if="item.status !== 'waiting_payment'" 
+                    class="action-button secondary-button">
               Рассылка
             </button>
             
@@ -168,22 +188,73 @@
               </button>
               
               <div v-if="showDropdown" class="dropdown-menu">
-                <a href="#" class="dropdown-item" @click.prevent="promoteItem">
-                  Поднять просмотры
-                </a>
-                <a href="#" class="dropdown-item" @click.prevent="editItem">
-                  Редактировать
-                </a>
-                <a href="#" class="dropdown-item" @click.prevent="reserveItem">
-                  Забронировать
-                </a>
-                <a href="#" class="dropdown-item" @click.prevent="togglePublication">
-                  {{ item.status === 'active' ? 'Снять с публикации' : 'Опубликовать' }}
-                </a>
-                <div class="dropdown-divider"></div>
-                <a href="#" class="dropdown-item danger-item" @click.prevent="showDeleteConfirm">
-                  Удалить
-                </a>
+                <!-- Меню для объявлений, ждущих действий -->
+                <template v-if="item.status === 'waiting_payment'">
+                  <a href="#" class="dropdown-item" @click.prevent="payItem">
+                    Оплатить размещение
+                  </a>
+                  <a href="#" class="dropdown-item" @click.prevent="deactivateItem">
+                    Уже не актуально
+                  </a>
+                  <a href="#" class="dropdown-item" @click.prevent="editItem">
+                    Редактировать
+                  </a>
+                  <a href="#" class="dropdown-item danger-item" @click.prevent="showDeleteConfirm">
+                    Удалить
+                  </a>
+                </template>
+                
+                <!-- Меню для активных объявлений -->
+                <template v-else-if="item.status === 'active'">
+                  <a href="#" class="dropdown-item" @click.prevent="promoteItem">
+                    Поднять просмотры
+                  </a>
+                  <a href="#" class="dropdown-item" @click.prevent="editItem">
+                    Редактировать
+                  </a>
+                  <a href="#" class="dropdown-item" @click.prevent="deactivateItem">
+                    Снять с публикации
+                  </a>
+                  <a href="#" class="dropdown-item danger-item" @click.prevent="showDeleteConfirm">
+                    Удалить
+                  </a>
+                </template>
+                
+                <!-- Меню для черновиков -->
+                <template v-else-if="item.status === 'draft'">
+                  <a href="#" class="dropdown-item" @click.prevent="publishItem">
+                    Опубликовать
+                  </a>
+                  <a href="#" class="dropdown-item" @click.prevent="editItem">
+                    Редактировать
+                  </a>
+                  <a href="#" class="dropdown-item danger-item" @click.prevent="showDeleteConfirm">
+                    Удалить
+                  </a>
+                </template>
+                
+                <!-- Меню для архивных объявлений -->
+                <template v-else-if="item.status === 'archived'">
+                  <a href="#" class="dropdown-item" @click.prevent="restoreItem">
+                    Восстановить
+                  </a>
+                  <a href="#" class="dropdown-item" @click.prevent="editItem">
+                    Редактировать
+                  </a>
+                  <a href="#" class="dropdown-item danger-item" @click.prevent="showDeleteConfirm">
+                    Удалить
+                  </a>
+                </template>
+                
+                <!-- Меню по умолчанию -->
+                <template v-else>
+                  <a href="#" class="dropdown-item" @click.prevent="editItem">
+                    Редактировать
+                  </a>
+                  <a href="#" class="dropdown-item danger-item" @click.prevent="showDeleteConfirm">
+                    Удалить
+                  </a>
+                </template>
               </div>
             </div>
           </div>
@@ -287,6 +358,79 @@ const promoteItem = () => {
   showDropdown.value = false
 }
 
+const payItem = async () => {
+  showDropdown.value = false
+  try {
+    // Используем Inertia для POST запроса
+    router.post(`/my-ads/${props.item.id}/pay`, {}, {
+      preserveScroll: true,
+      onSuccess: () => {
+        // Обновление произойдет автоматически через Inertia
+      },
+      onError: (errors) => {
+        console.error('Ошибка оплаты:', errors)
+        alert('Ошибка при оплате объявления')
+      }
+    })
+  } catch (error) {
+    console.error('Ошибка при оплате:', error)
+  }
+}
+
+const deactivateItem = async () => {
+  showDropdown.value = false
+  try {
+    router.post(`/my-ads/${props.item.id}/deactivate`, {}, {
+      preserveScroll: true,
+      onSuccess: () => {
+        // Обновление произойдет автоматически через Inertia
+      },
+      onError: (errors) => {
+        console.error('Ошибка деактивации:', errors)
+        alert('Ошибка при деактивации объявления')
+      }
+    })
+  } catch (error) {
+    console.error('Ошибка при деактивации:', error)
+  }
+}
+
+const publishItem = async () => {
+  showDropdown.value = false
+  try {
+    router.post(`/my-ads/${props.item.id}/publish`, {}, {
+      preserveScroll: true,
+      onSuccess: () => {
+        // Обновление произойдет автоматически через Inertia
+      },
+      onError: (errors) => {
+        console.error('Ошибка публикации:', errors)
+        alert('Ошибка при публикации объявления')
+      }
+    })
+  } catch (error) {
+    console.error('Ошибка при публикации:', error)
+  }
+}
+
+const restoreItem = async () => {
+  showDropdown.value = false
+  try {
+    router.post(`/my-ads/${props.item.id}/restore`, {}, {
+      preserveScroll: true,
+      onSuccess: () => {
+        // Обновление произойдет автоматически через Inertia
+      },
+      onError: (errors) => {
+        console.error('Ошибка восстановления:', errors)
+        alert('Ошибка при восстановлении объявления')
+      }
+    })
+  } catch (error) {
+    console.error('Ошибка при восстановлении:', error)
+  }
+}
+
 const editItem = () => {
   // Используем Inertia для навигации
   router.visit(`/ads/${props.item.id}/edit`)
@@ -336,25 +480,18 @@ const confirmDelete = async () => {
   showDeleteModal.value = false
   
   try {
-    const response = await fetch(`/ads/${props.item.id}`, {
-      method: 'DELETE',
-      headers: {
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-        'Content-Type': 'application/json'
+    router.delete(`/my-ads/${props.item.id}`, {
+      preserveScroll: true,
+      onSuccess: () => {
+        // Обновление произойдет автоматически через Inertia
+      },
+      onError: (errors) => {
+        console.error('Ошибка удаления:', errors)
+        alert('Ошибка при удалении объявления')
       }
     })
-
-    const result = await response.json()
-    
-    if (result.success) {
-      emit('item-deleted', props.item.id)
-      console.log('Delete item:', props.item.id)
-    } else {
-      alert('Ошибка удаления: ' + (result.error || 'Неизвестная ошибка'))
-    }
   } catch (error) {
     console.error('Ошибка при удалении:', error)
-    alert('Ошибка при удалении объявления')
   }
 }
 

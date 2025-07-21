@@ -10,6 +10,15 @@ class Ad extends Model
 {
     use HasFactory;
 
+    // Константы статусов
+    const STATUS_WAITING_PAYMENT = 'waiting_payment';
+    const STATUS_ACTIVE = 'active';
+    const STATUS_DRAFT = 'draft';
+    const STATUS_ARCHIVED = 'archived';
+    const STATUS_EXPIRED = 'expired';
+    const STATUS_REJECTED = 'rejected';
+    const STATUS_BLOCKED = 'blocked';
+
     protected $fillable = [
         'user_id',
         'category',
@@ -30,7 +39,13 @@ class Ad extends Model
         'travel_area',
         'phone',
         'contact_method',
-        'status'
+        'status',
+        'is_paid',
+        'paid_at',
+        'expires_at',
+        'views_count',
+        'contacts_shown',
+        'favorites_count'
     ];
 
     protected $casts = [
@@ -38,8 +53,14 @@ class Ad extends Model
         'service_location' => 'array',
         'service_provider' => 'array',
         'is_starting_price' => 'boolean',
+        'is_paid' => 'boolean',
         'price' => 'decimal:2',
-        'discount' => 'integer'
+        'discount' => 'integer',
+        'paid_at' => 'datetime',
+        'expires_at' => 'datetime',
+        'views_count' => 'integer',
+        'contacts_shown' => 'integer',
+        'favorites_count' => 'integer'
     ];
 
     /**
@@ -56,13 +77,14 @@ class Ad extends Model
     public function getReadableStatusAttribute()
     {
         return [
-            'draft' => 'Черновик',
+            'waiting_payment' => 'Ждет оплаты',
             'active' => 'Активное',
-            'paused' => 'Приостановлено',
+            'draft' => 'Черновик',
             'archived' => 'В архиве',
-            'inactive' => 'Неактивное',
-            'old' => 'Старое'
-        ][$this->attributes['status']] ?? $this->attributes['status'];
+            'expired' => 'Истекло',
+            'rejected' => 'Отклонено',
+            'blocked' => 'Заблокировано'
+        ][$this->status] ?? $this->status;
     }
 
     /**
@@ -87,5 +109,103 @@ class Ad extends Model
         $unit = $units[$this->price_unit] ?? $this->price_unit;
         
         return $prefix . number_format($this->price, 0, ',', ' ') . ' ₽ ' . $unit;
+    }
+
+    /**
+     * Проверка: ждет ли объявление действий
+     */
+    public function isWaitingAction(): bool
+    {
+        return $this->status === self::STATUS_WAITING_PAYMENT && !$this->is_paid;
+    }
+
+    /**
+     * Проверка: активно ли объявление
+     */
+    public function isActive(): bool
+    {
+        return $this->status === self::STATUS_ACTIVE && 
+               $this->is_paid && 
+               (!$this->expires_at || $this->expires_at->isFuture());
+    }
+
+    /**
+     * Проверка: истекло ли объявление
+     */
+    public function isExpired(): bool
+    {
+        return $this->status === self::STATUS_EXPIRED || 
+               ($this->expires_at && $this->expires_at->isPast());
+    }
+
+    /**
+     * Получить количество дней до истечения
+     */
+    public function getDaysUntilExpirationAttribute(): ?int
+    {
+        if (!$this->expires_at) {
+            return null;
+        }
+
+        return now()->diffInDays($this->expires_at, false);
+    }
+
+    /**
+     * Получить сообщение о статусе
+     */
+    public function getStatusMessageAttribute(): string
+    {
+        if ($this->isWaitingAction()) {
+            return 'Не оплачено';
+        }
+
+        if ($this->isExpired()) {
+            return 'Истекло ' . $this->expires_at->format('d.m.Y');
+        }
+
+        if ($this->days_until_expiration !== null && $this->days_until_expiration <= 3) {
+            return 'Осталось ' . $this->days_until_expiration . ' ' . 
+                   trans_choice('день|дня|дней', $this->days_until_expiration);
+        }
+
+        return '';
+    }
+
+    /**
+     * Scope для объявлений, ждущих действий
+     */
+    public function scopeWaitingAction($query)
+    {
+        return $query->where('status', self::STATUS_WAITING_PAYMENT)
+                     ->where('is_paid', false);
+    }
+
+    /**
+     * Scope для активных объявлений
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', self::STATUS_ACTIVE)
+                     ->where('is_paid', true)
+                     ->where(function ($q) {
+                         $q->whereNull('expires_at')
+                           ->orWhere('expires_at', '>', now());
+                     });
+    }
+
+    /**
+     * Scope для черновиков
+     */
+    public function scopeDrafts($query)
+    {
+        return $query->where('status', self::STATUS_DRAFT);
+    }
+
+    /**
+     * Scope для архивных объявлений
+     */
+    public function scopeArchived($query)
+    {
+        return $query->where('status', self::STATUS_ARCHIVED);
     }
 } 
