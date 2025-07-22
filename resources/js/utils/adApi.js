@@ -252,3 +252,36 @@ export const prepareFormData = (form) => {
   // Это позволит сохранить черновик даже с полностью пустой формой
   return data
 } 
+
+/**
+ * Опубликовать объявление (с валидацией)
+ */
+export async function publishAd(formData) {
+  try {
+    const response = await fetch('/ads/publish', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': getCsrfToken(),
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify(formData)
+    })
+
+    if (!response.ok) {
+      const error = await response.json()
+      throw {
+        response: {
+          data: error,
+          status: response.status
+        }
+      }
+    }
+
+    return await response.json()
+  } catch (error) {
+    console.error('Ошибка при публикации объявления:', error)
+    throw error
+  }
+} 

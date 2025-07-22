@@ -147,14 +147,14 @@
                                 href="/profile/items/inactive/all"
                                 :class="[
                                     'pb-2 text-base font-medium border-b-2 transition-colors',
-                                    activeTab === 'paused' 
+                                    activeTab === 'inactive' 
                                         ? 'text-gray-900 border-gray-900' 
                                         : 'text-gray-500 border-transparent hover:text-gray-700'
                                 ]"
                             >
                                 <span class="flex items-center gap-2">
                                     Ждут действий
-                                    <sup v-if="counts.paused" class="text-sm font-normal">{{ counts.paused }}</sup>
+                                    <sup v-if="counts.waiting_payment" class="text-sm font-normal">{{ counts.waiting_payment }}</sup>
                                 </span>
                             </Link>
                             
@@ -227,7 +227,7 @@
                             </div>
                             <h3 class="text-xl font-medium text-gray-900 mb-3">{{ getEmptyStateTitle(activeTab) }}</h3>
                             <p class="text-gray-600 mb-8 leading-relaxed">{{ getEmptyStateDescription(activeTab) }}</p>
-                            <div v-if="activeTab === 'draft' || activeTab === 'paused'" class="space-y-3">
+                            <div v-if="activeTab === 'draft' || activeTab === 'inactive'" class="space-y-3">
                                 <Link 
                                     href="/additem/massage"
                                     class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
@@ -276,7 +276,7 @@ const props = defineProps({
     },
     activeTab: {
         type: String,
-        default: 'paused'
+        default: 'inactive'
     },
     title: {
         type: String,
@@ -310,15 +310,15 @@ const isAdsRoute = computed(() => {
 // Общее количество объявлений
 const totalAds = computed(() => {
     const counts = props.counts || {}
-    return (counts.active || 0) + (counts.draft || 0) + (counts.paused || 0) + (counts.old || 0) + (counts.archive || 0)
+    return (counts.active || 0) + (counts.draft || 0) + (counts.waiting_payment || 0) + (counts.old || 0) + (counts.archive || 0)
 })
 
 // Функции для заголовков и описаний
-const getTabTitle = (tab) => {
+const getPageTitle = (tab) => {
     const titles = {
-        active: 'Активные объявления',
+        active: 'Активные',
         draft: 'Черновики',
-        paused: 'Ждут действий',
+        inactive: 'Ждут действий',
         old: 'Старые объявления',
         archive: 'Архив'
     }
@@ -329,7 +329,7 @@ const getEmptyStateTitle = (tab) => {
     const titles = {
         active: 'Нет активных объявлений',
         draft: 'Нет черновиков',
-        paused: 'Нет объявлений, ожидающих действий',
+        inactive: 'Нет объявлений, ожидающих действий',
         old: 'Нет старых объявлений',
         archive: 'Архив пуст'
     }
@@ -340,7 +340,7 @@ const getEmptyStateDescription = (tab) => {
     const descriptions = {
         active: 'У вас пока нет активных объявлений. Разместите новое объявление, чтобы начать получать заказы.',
         draft: 'У вас нет сохраненных черновиков. Создайте новое объявление или сохраните текущее как черновик.',
-        paused: 'Здесь появятся объявления, которые требуют вашего внимания - например, истекающие или отклоненные.',
+        inactive: 'Здесь появятся объявления, которые требуют вашего внимания - например, истекающие или отклоненные.',
         old: 'Здесь будут показаны ваши старые неактивные объявления.',
         archive: 'Архивированные объявления не отображаются в поиске, но сохраняют всю информацию.'
     }

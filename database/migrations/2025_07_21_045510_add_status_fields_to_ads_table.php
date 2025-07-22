@@ -12,16 +12,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Сначала обновляем существующие статусы на допустимые значения
-        DB::table('ads')->where('status', 'inactive')->update(['status' => 'draft']);
-        DB::table('ads')->where('status', 'old')->update(['status' => 'archived']);
-        DB::table('ads')->where('status', 'paused')->update(['status' => 'draft']);
-        
-        // Меняем все объявления на waiting_payment временно, чтобы продемонстрировать функционал
-        DB::table('ads')->where('status', 'active')->update(['status' => 'waiting_payment']);
-        
+        // Добавляем новые поля
         Schema::table('ads', function (Blueprint $table) {
-            // Добавляем новые поля для управления объявлениями, если их еще нет
             if (!Schema::hasColumn('ads', 'is_paid')) {
                 $table->boolean('is_paid')->default(false)->after('status');
             }
@@ -42,8 +34,12 @@ return new class extends Migration
             }
         });
         
-        // Теперь меняем enum статуса
+        // Обновляем enum статуса через ALTER TABLE
         DB::statement("ALTER TABLE `ads` MODIFY COLUMN `status` ENUM('waiting_payment', 'active', 'draft', 'archived', 'expired', 'rejected', 'blocked') NOT NULL DEFAULT 'draft'");
+        
+        // Теперь можем обновить данные
+        // Несколько активных объявлений переводим в waiting_payment для демонстрации
+        DB::table('ads')->where('status', 'active')->limit(2)->update(['status' => 'waiting_payment']);
     }
 
     /**
@@ -51,31 +47,19 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Возвращаем старые статусы
+        // Возвращаем статусы
         DB::table('ads')->where('status', 'waiting_payment')->update(['status' => 'active']);
-        
-        Schema::table('ads', function (Blueprint $table) {
-            if (Schema::hasColumn('ads', 'is_paid')) {
-                $table->dropColumn('is_paid');
-            }
-            if (Schema::hasColumn('ads', 'paid_at')) {
-                $table->dropColumn('paid_at');
-            }
-            if (Schema::hasColumn('ads', 'expires_at')) {
-                $table->dropColumn('expires_at');
-            }
-            if (Schema::hasColumn('ads', 'views_count')) {
-                $table->dropColumn('views_count');
-            }
-            if (Schema::hasColumn('ads', 'contacts_shown')) {
-                $table->dropColumn('contacts_shown');
-            }
-            if (Schema::hasColumn('ads', 'favorites_count')) {
-                $table->dropColumn('favorites_count');
-            }
-        });
         
         // Возвращаем старый enum
         DB::statement("ALTER TABLE `ads` MODIFY COLUMN `status` ENUM('draft', 'active', 'paused', 'archived', 'inactive', 'old') NOT NULL DEFAULT 'draft'");
+        
+        Schema::table('ads', function (Blueprint $table) {
+            $columnsToDelete = ['is_paid', 'paid_at', 'expires_at', 'views_count', 'contacts_shown', 'favorites_count'];
+            foreach ($columnsToDelete as $column) {
+                if (Schema::hasColumn('ads', $column)) {
+                    $table->dropColumn($column);
+                }
+            }
+        });
     }
 };

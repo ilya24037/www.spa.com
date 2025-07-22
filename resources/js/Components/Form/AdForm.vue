@@ -1,112 +1,134 @@
 <template>
-    <div class="ad-form">
-        <!-- Основная форма -->
+    <div class="universal-ad-form">
+        <!-- Универсальная форма для всех категорий -->
         <form @submit.prevent="handleSubmit" novalidate>
-            <!-- Скрытое поле с категорией -->
-            <input type="hidden" name="category" :value="category">
             
-            <!-- Секции согласно порядку Avito -->
-            
-            <!-- 1. Название объявления -->
-            <TitleSection 
-                :form="form" 
-                :errors="errors" 
-            />
-            
-            <!-- 2. Специальность или сфера -->
-            <SpecialtySection 
-                :form="form" 
-                :errors="errors" 
-            />
-            
-            <!-- 3. Ваши клиенты -->
-            <ClientsSection 
-                :form="form" 
-                :errors="errors" 
-            />
-            
-            <!-- 4. Местоположение (где оказываете услуги) -->
-            <LocationSection 
-                :form="form" 
-                :errors="errors" 
-            />
-            
-            <!-- 5. Формат работы -->
-            <WorkFormatSection 
-                :form="form" 
-                :errors="errors" 
-            />
-            
+            <!-- 1. Подробности (title + specialty) -->
+            <div class="form-group-section">
+                <TitleSection :form="form" :errors="errors" />
+                <SpecialtySection :form="form" :errors="errors" />
+            </div>
+
+            <!-- 2. Ваши клиенты -->
+            <div class="form-group-section">
+                <h2 class="form-group-title">Ваши клиенты</h2>
+                <ClientsSection :form="form" :errors="errors" />
+            </div>
+
+            <!-- 3. Где вы оказываете услуги -->
+            <div class="form-group-section">
+                <h2 class="form-group-title">Где вы оказываете услуги</h2>
+                <LocationSection :form="form" :errors="errors" />
+            </div>
+
+            <!-- 4. Формат работы -->
+            <div class="form-group-section">
+                <h2 class="form-group-title">Формат работы</h2>
+                <WorkFormatSection :form="form" :errors="errors" />
+            </div>
+
+            <!-- 5. Кто оказывает услуги -->
+            <div class="form-group-section">
+                <h2 class="form-group-title">Кто оказывает услуги</h2>
+                <div class="checkbox-group">
+                    <div class="checkbox-item" @click="toggleServiceProvider('women')">
+                        <div 
+                            class="custom-checkbox"
+                            :class="{ 'checked': form.service_provider.includes('women') }"
+                        >
+                            <svg class="check-icon" width="100%" height="100%" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1 4.35714L3.4 6.5L9 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                            </svg>
+                        </div>
+                        <span class="checkbox-label">Женщина</span>
+                    </div>
+                    
+                    <div class="checkbox-item" @click="toggleServiceProvider('men')">
+                        <div 
+                            class="custom-checkbox"
+                            :class="{ 'checked': form.service_provider.includes('men') }"
+                        >
+                            <svg class="check-icon" width="100%" height="100%" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1 4.35714L3.4 6.5L9 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                            </svg>
+                        </div>
+                        <span class="checkbox-label">Мужчина</span>
+                    </div>
+                </div>
+            </div>
+
             <!-- 6. Опыт работы -->
-            <ExperienceSection 
-                :form="form" 
-                :errors="errors" 
-            />
-            
-            <!-- 7. Стоимость основной услуги -->
-            <PriceSection 
-                :form="form" 
-                :errors="errors" 
-            />
-            
-            <!-- 8. Акции -->
-            <PromoSection 
-                :form="form" 
-                :errors="errors" 
-            />
-            
-            <!-- 9. Фотографии и видео -->
-            <PhotosSection 
-                :form="form" 
-                :errors="errors" 
-            />
-            
-            <VideosSection 
-                :form="form" 
-                :errors="errors" 
-            />
-            
-            <!-- 10. География (куда выезжаете) -->
-            <GeoSection 
-                :form="form" 
-                :errors="errors" 
-            />
-            
-            <!-- 11. Контакты -->
-            <ContactsSection 
-                :form="form" 
-                :errors="errors" 
-            />
-            
-            <!-- Описание (дополнительная информация) -->
-            <DescriptionSection 
-                :form="form" 
-                :errors="errors" 
-            />
-            
-            <!-- Расписание работы -->
-            <ScheduleSection 
-                :form="form" 
-                :errors="errors" 
-            />
-            
-            <!-- Кнопки управления в стиле Avito -->
-            <div class="flex justify-end items-center mt-8 pt-6 border-t border-gray-200 space-x-4">
+            <div class="form-group-section">
+                <h2 class="form-group-title">Опыт работы</h2>
+                <ExperienceSection :form="form" :errors="errors" />
+            </div>
+
+            <!-- 7. Описание -->
+            <div class="form-group-section">
+                <h2 class="form-group-title">Описание</h2>
+                <DescriptionSection :form="form" :errors="errors" />
+            </div>
+
+            <!-- 8. Стоимость основной услуги -->
+            <div class="form-group-section">
+                <h2 class="form-group-title">Стоимость основной услуги</h2>
+                <div class="field-hint" style="margin-bottom: 20px; color: #8c8c8c; font-size: 16px;">
+                    Заказчик увидит эту цену рядом с названием объявления.
+                </div>
+                <PriceSection :form="form" :errors="errors" />
+            </div>
+
+            <!-- 9. Акции -->
+            <div class="form-group-section">
+                <h2 class="form-group-title">Акции</h2>
+                <div class="field-hint" style="margin-bottom: 20px; color: #8c8c8c; font-size: 16px;">
+                    Клиенты увидят информацию о скидках и подарках в объявлении.
+                </div>
+                <PromoSection :form="form" :errors="errors" />
+            </div>
+
+            <!-- 10. Фотографии и видео -->
+            <div class="form-group-section">
+                <h2 class="form-group-title">Фотографии и видео</h2>
+                <PhotosSection :form="form" :errors="errors" />
+                <div style="margin-top: 24px;">
+                    <VideosSection :form="form" :errors="errors" />
+                </div>
+            </div>
+
+            <!-- 11. География с бейджем "Новое" -->
+            <div class="form-group-section geography-section">
+                <h2 class="form-group-title">
+                    География
+                    <span class="form-group-badge">Новое</span>
+                </h2>
+                <GeoSection :form="form" :errors="errors" />
+            </div>
+
+            <!-- 12. Контакты -->
+            <div class="form-group-section">
+                <h2 class="form-group-title">Контакты</h2>
+                <ContactsSection :form="form" :errors="errors" />
+            </div>
+
+            <!-- Кнопки действий -->
+            <div class="form-actions">
+                <!-- Левая кнопка - Сохранить черновик -->
                 <button 
                     type="button" 
-                    @click="saveDraft"
-                    class="px-6 py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                    @click="handleSaveDraft"
                     :disabled="saving"
                 >
                     {{ saving ? 'Сохранение...' : 'Сохранить черновик' }}
                 </button>
                 
+                <!-- Правая кнопка - Разместить объявление -->
                 <button 
-                    type="submit" 
-                    class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 font-medium"
+                    type="button" 
+                    @click="handlePublish"
                     :disabled="saving"
                 >
-                    {{ saving ? 'Сохранение...' : 'Сохранить изменения' }}
+                    {{ saving ? 'Публикация...' : 'Разместить объявление' }}
                 </button>
             </div>
         </form>
@@ -114,27 +136,25 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useForm } from '@inertiajs/vue3'
+import { ref, reactive, computed, onMounted, nextTick } from 'vue'
+import { router } from '@inertiajs/vue3'
 import { useAdForm } from '@/Composables/useAdForm'
+import { publishAd } from '@/utils/adApi'
 
-// Новые секции согласно Avito
-import TitleSection from '@/Components/Form/Sections/TitleSection.vue'
-import SpecialtySection from '@/Components/Form/Sections/SpecialtySection.vue'
-import ClientsSection from '@/Components/Form/Sections/ClientsSection.vue'
-import LocationSection from '@/Components/Form/Sections/LocationSection.vue'
-import WorkFormatSection from '@/Components/Form/Sections/WorkFormatSection.vue'
-import ExperienceSection from '@/Components/Form/Sections/ExperienceSection.vue'
-import PriceSection from '@/Components/Form/Sections/PriceSection.vue'
-import PromoSection from '@/Components/Form/Sections/PromoSection.vue'
-
-// Существующие секции
-import PhotosSection from '@/Components/Form/Sections/PhotosSection.vue'
-import VideosSection from '@/Components/Form/Sections/VideosSection.vue'
-import GeoSection from '@/Components/Form/Sections/GeoSection.vue'
-import ContactsSection from '@/Components/Form/Sections/ContactsSection.vue'
-import DescriptionSection from '@/Components/Form/Sections/DescriptionSection.vue'
-import ScheduleSection from '@/Components/Form/Sections/ScheduleSection.vue'
+// Импорты секций формы
+import TitleSection from './Sections/TitleSection.vue'
+import SpecialtySection from './Sections/SpecialtySection.vue'
+import ClientsSection from './Sections/ClientsSection.vue'
+import LocationSection from './Sections/LocationSection.vue'
+import WorkFormatSection from './Sections/WorkFormatSection.vue'
+import ExperienceSection from './Sections/ExperienceSection.vue'
+import PriceSection from './Sections/PriceSection.vue'
+import DescriptionSection from './Sections/DescriptionSection.vue'
+import PromoSection from './Sections/PromoSection.vue'
+import PhotosSection from './Sections/PhotosSection.vue'
+import VideosSection from './Sections/VideosSection.vue'
+import GeoSection from './Sections/GeoSection.vue'
+import ContactsSection from './Sections/ContactsSection.vue'
 
 // Props
 const props = defineProps({
@@ -162,7 +182,7 @@ const emit = defineEmits(['success'])
 // Используем композабл для работы с формой
 const { 
     form, 
-    errors, 
+    errors: formErrors, 
     handleSubmit: submitForm,
     loadDraft
 } = useAdForm({}, { 
@@ -173,6 +193,82 @@ const {
 
 // Собственное состояние для сохранения
 const saving = ref(false)
+const validationErrors = ref({})
+
+// Определяем обязательные поля
+const requiredFields = {
+    title: 'Название объявления',
+    specialty: 'Специальность или сфера',
+    clients: 'Ваши клиенты',
+    service_location: 'Где вы оказываете услуги', 
+    work_format: 'Формат работы',
+    price: 'Стоимость услуги',
+    phone: 'Телефон для связи'
+}
+
+// Функция валидации формы
+const validateForm = () => {
+    validationErrors.value = {}
+    let isValid = true
+    let firstErrorField = null
+
+    // Проверяем каждое обязательное поле
+    for (const [field, label] of Object.entries(requiredFields)) {
+        if (field === 'clients' || field === 'service_location') {
+            // Для массивов проверяем, что выбран хотя бы один элемент
+            if (!form[field] || form[field].length === 0) {
+                validationErrors.value[field] = `Поле "${label}" обязательно для заполнения`
+                if (!firstErrorField) firstErrorField = field
+                isValid = false
+            }
+        } else {
+            // Для обычных полей проверяем на пустоту
+            if (!form[field] || form[field].toString().trim() === '') {
+                validationErrors.value[field] = `Поле "${label}" обязательно для заполнения`
+                if (!firstErrorField) firstErrorField = field
+                isValid = false
+            }
+        }
+    }
+
+    // Если есть ошибки, прокручиваем к первой
+    if (!isValid && firstErrorField) {
+        scrollToField(firstErrorField)
+    }
+
+    return isValid
+}
+
+// Функция прокрутки к полю с ошибкой
+const scrollToField = async (fieldName) => {
+    await nextTick()
+    
+    // Ищем элемент по имени поля или id
+    const element = document.querySelector(
+        `[name="${fieldName}"], #${fieldName}, [data-field="${fieldName}"]`
+    )
+    
+    if (element) {
+        // Прокручиваем с отступом от верха
+        const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
+        const offsetPosition = elementPosition - 100
+        
+        window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+        })
+        
+        // Фокусируемся на элементе если возможно
+        if (element.focus) {
+            setTimeout(() => element.focus(), 500)
+        }
+    }
+}
+
+// Объединяем ошибки из формы и валидации
+const errors = computed(() => {
+    return { ...formErrors.value, ...validationErrors.value }
+})
 
 // Устанавливаем категорию в форму
 form.category = props.category
@@ -251,7 +347,7 @@ const saveDraft = async () => {
         if (response.ok) {
             const result = await response.json()
             console.log('Черновик сохранен:', result)
-            // Можно показать уведомление об успешном сохранении
+            return result
         } else {
             const errorText = await response.text()
             console.error('Ошибка сервера:', response.status, errorText)
@@ -259,103 +355,192 @@ const saveDraft = async () => {
         }
     } catch (error) {
         console.error('Ошибка при сохранении черновика:', error)
+        // Не выбрасываем ошибку дальше, чтобы не блокировать перенаправление
+        return null
     } finally {
         saving.value = false
     }
 }
 
-// Загружаем черновик при монтировании
+// Обработчик кнопки "Сохранить черновик"
+const handleSaveDraft = async () => {
+    console.log('Начинаем сохранение черновика...')
+    saving.value = true
+    
+    // Используем Inertia router для отправки
+    router.post('/ads/draft', {
+        category: props.category,
+        title: form.title,
+        specialty: form.specialty,
+        clients: form.clients,
+        service_location: form.service_location,
+        work_format: form.work_format,
+        service_provider: form.service_provider,
+        experience: form.experience,
+        description: form.description,
+        price: form.price,
+        price_unit: form.price_unit,
+        is_starting_price: form.is_starting_price,
+        discount: form.discount,
+        gift: form.gift,
+        address: form.address,
+        travel_area: form.travel_area,
+        phone: form.phone,
+        contact_method: form.contact_method
+    }, {
+        preserveScroll: true,
+        onFinish: () => {
+            saving.value = false
+            console.log('Запрос завершен')
+        }
+    })
+}
+
+// Обработчик кнопки "Разместить объявление"
+const handlePublish = async () => {
+    // Сначала валидируем форму
+    if (!validateForm()) {
+        return // Если есть ошибки, не продолжаем
+    }
+    
+    try {
+        saving.value = true
+        
+        // Сохраняем объявление
+        const result = await publishAd(form)
+        
+        if (result && result.id) {
+            // Перенаправляем на страницу оплаты
+            router.visit(`/payment/ad/${result.id}/select-plan`)
+        }
+    } catch (error) {
+        console.error('Ошибка при публикации объявления:', error)
+        // Можно показать уведомление об ошибке
+    } finally {
+        saving.value = false
+    }
+}
+
+// Функция переключения поставщиков услуг
+const toggleServiceProvider = (provider) => {
+    if (!form.service_provider) {
+        form.service_provider = []
+    }
+    
+    if (!form.service_provider.includes(provider)) {
+        form.service_provider.push(provider)
+    } else {
+        const index = form.service_provider.indexOf(provider)
+        form.service_provider.splice(index, 1)
+    }
+}
+
+// Инициализация массивов
 onMounted(() => {
-    if (props.adId) {
-        loadDraft(props.adId)
+    if (!form.service_provider) {
+        form.service_provider = []
     }
 })
 </script>
 
 <style scoped>
-.ad-form {
-    max-width: 100%;
+/* Кнопки действий */
+.form-actions {
+    margin-top: 32px;
+    display: flex;
+    gap: 16px;
+    padding: 24px 0;
+    border-top: 1px solid #f0f0f0;
 }
 
-/* Стили для секций формы в стиле Avito */
-.ad-form :deep(.form-section) {
-    margin-bottom: 2rem;
-    padding: 0;
-    background: transparent;
+.form-actions button {
+    flex: 1;
+    padding: 16px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
     border: none;
 }
 
-.ad-form :deep(.form-section-title) {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #111827;
-    margin-bottom: 1.5rem;
+.form-actions button:first-child {
+    background: #f5f5f5;
+    color: #1a1a1a;
+}
+
+.form-actions button:first-child:hover {
+    background: #e6e6e6;
+}
+
+.form-actions button:last-child {
+    background: #1890ff;
+    color: white;
+}
+
+.form-actions button:last-child:hover {
+    background: #1677ff;
+}
+
+.form-actions button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Радио кнопки как на Avito */
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.radio-item {
     display: flex;
     align-items: center;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid #e5e7eb;
+    gap: 12px;
+    cursor: pointer;
 }
 
-.ad-form :deep(.form-section-title svg) {
-    margin-right: 0.75rem;
-    width: 1.5rem;
-    height: 1.5rem;
-    color: #6b7280;
+.custom-radio {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #d9d9d9;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    background: #fff;
+    flex-shrink: 0;
 }
 
-.ad-form :deep(.form-row) {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
+.custom-radio.checked {
+    border-color: #1890ff;
 }
 
-.ad-form :deep(.form-row.two-columns) {
-    grid-template-columns: 1fr 1fr;
+.custom-radio.checked::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #1890ff;
 }
 
-/* Стили для полей ввода */
-.ad-form :deep(input[type="text"]),
-.ad-form :deep(input[type="email"]),
-.ad-form :deep(input[type="tel"]),
-.ad-form :deep(input[type="number"]),
-.ad-form :deep(textarea),
-.ad-form :deep(select) {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid #d1d5db;
-    border-radius: 0.5rem;
-    font-size: 1rem;
-    transition: all 0.2s;
+.radio-content {
+    flex: 1;
 }
 
-.ad-form :deep(input[type="text"]:focus),
-.ad-form :deep(input[type="email"]:focus),
-.ad-form :deep(input[type="tel"]:focus),
-.ad-form :deep(input[type="number"]:focus),
-.ad-form :deep(textarea:focus),
-.ad-form :deep(select:focus) {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+.radio-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: #1a1a1a;
+    line-height: 1.4;
 }
 
-.ad-form :deep(label) {
-    display: block;
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 0.5rem;
-    font-size: 0.875rem;
-}
-
-.ad-form :deep(.form-row.three-columns) {
-    grid-template-columns: 1fr 1fr 1fr;
-}
-
-@media (max-width: 768px) {
-    .ad-form :deep(.form-row.two-columns),
-    .ad-form :deep(.form-row.three-columns) {
-        grid-template-columns: 1fr;
-    }
+.radio-description {
+    font-size: 14px;
+    color: #8c8c8c;
+    line-height: 1.4;
+    margin-top: 2px;
 }
 </style> 

@@ -102,7 +102,7 @@
       <!-- Информация и действия (правая колонка) -->
       <div class="item-info-section">
         <!-- Счетчики -->
-        <div class="item-counters">
+        <div v-if="item.status !== 'waiting_payment'" class="item-counters">
           <!-- Просмотры (глаз) -->
           <div class="counter-item">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -128,7 +128,7 @@
 
         <!-- Время до окончания -->
         <div class="item-lifetime">
-          <span v-if="item.status === 'waiting_payment'" class="lifetime-text text-orange-600">
+          <span v-if="item.status === 'waiting_payment'" class="lifetime-text text-gray-900">
             Не оплачено
           </span>
           <span v-else class="lifetime-text" :class="{ 'lifetime-warning': getDaysLeft() < 7 }">
@@ -150,62 +150,77 @@
 
         <!-- Кнопки действий -->
         <div class="item-actions">
-          <!-- Для объявлений ждущих оплаты показываем кнопку "Оплатить размещение" -->
-          <button v-if="item.status === 'waiting_payment'" 
-                  @click="payItem"
-                  class="action-button primary-button">
-            Оплатить размещение
-          </button>
-          
-          <!-- Для активных объявлений показываем "Поднять просмотры" -->
-          <button v-else-if="item.status === 'active'" 
-                  class="action-button primary-button">
-            Поднять просмотры
-          </button>
-          
-          <!-- Для черновиков показываем "Опубликовать" -->
-          <button v-else-if="item.status === 'draft'" 
-                  @click="publishItem"
-                  class="action-button primary-button">
-            Опубликовать
-          </button>
-          
-          <div class="action-row">
-            <button v-if="item.status !== 'waiting_payment'" 
-                    class="action-button secondary-button">
-              Рассылка
+          <!-- Для объявлений ждущих оплаты показываем две кнопки в ряд -->
+          <div v-if="item.status === 'waiting_payment'" class="waiting-payment-actions">
+            <button @click="payItem" class="action-button secondary-button-flex">
+              <span class="button-wrapper">
+                <span class="button-text">Оплатить размещение</span>
+              </span>
             </button>
             
             <div class="dropdown-container" ref="dropdown">
               <button 
                 type="button" 
-                class="dropdown-button"
+                class="dropdown-button-inline"
                 @click="toggleDropdown"
+                aria-haspopup="true"
+                :aria-expanded="showDropdown"
               >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M10 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM10 11a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM10 16a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" fill="currentColor"/>
-                </svg>
+                <span class="dropdown-button-wrapper">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" class="dropdown-icon">
+                    <circle cx="4" cy="10" r="1.5" fill="currentColor"/>
+                    <circle cx="10" cy="10" r="1.5" fill="currentColor"/>
+                    <circle cx="16" cy="10" r="1.5" fill="currentColor"/>
+                  </svg>
+                </span>
               </button>
               
               <div v-if="showDropdown" class="dropdown-menu">
-                <!-- Меню для объявлений, ждущих действий -->
-                <template v-if="item.status === 'waiting_payment'">
-                  <a href="#" class="dropdown-item" @click.prevent="payItem">
-                    Оплатить размещение
-                  </a>
-                  <a href="#" class="dropdown-item" @click.prevent="deactivateItem">
-                    Уже не актуально
-                  </a>
-                  <a href="#" class="dropdown-item" @click.prevent="editItem">
-                    Редактировать
-                  </a>
-                  <a href="#" class="dropdown-item danger-item" @click.prevent="showDeleteConfirm">
-                    Удалить
-                  </a>
-                </template>
+                <a href="#" class="dropdown-item" @click.prevent="payItem">
+                  Оплатить размещение
+                </a>
+                <a href="#" class="dropdown-item" @click.prevent="deactivateItem">
+                  Уже не актуально
+                </a>
+                <a href="#" class="dropdown-item" @click.prevent="editItem">
+                  Редактировать
+                </a>
+                <a href="#" class="dropdown-item danger-item" @click.prevent="showDeleteConfirm">
+                  Удалить
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Для активных объявлений -->
+          <template v-else-if="item.status === 'active'">
+            <button class="action-button primary-button">
+              Поднять просмотры
+            </button>
+            
+            <div class="action-row">
+              <button class="action-button secondary-button">
+                Рассылка
+              </button>
+              
+              <div class="dropdown-container" ref="dropdown">
+                <button 
+                  type="button" 
+                  class="dropdown-button-avito"
+                  @click="toggleDropdown"
+                  aria-haspopup="true"
+                  :aria-expanded="showDropdown"
+                >
+                  <span class="dropdown-button-wrapper">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="dropdown-icon">
+                      <circle cx="2.5" cy="7" r="1" fill="currentColor"/>
+                      <circle cx="7" cy="7" r="1" fill="currentColor"/>
+                      <circle cx="11.5" cy="7" r="1" fill="currentColor"/>
+                    </svg>
+                  </span>
+                </button>
                 
-                <!-- Меню для активных объявлений -->
-                <template v-else-if="item.status === 'active'">
+                <div v-if="showDropdown" class="dropdown-menu">
                   <a href="#" class="dropdown-item" @click.prevent="promoteItem">
                     Поднять просмотры
                   </a>
@@ -218,10 +233,36 @@
                   <a href="#" class="dropdown-item danger-item" @click.prevent="showDeleteConfirm">
                     Удалить
                   </a>
-                </template>
+                </div>
+              </div>
+            </div>
+          </template>
+          
+          <!-- Для черновиков -->
+          <template v-else-if="item.status === 'draft'">
+            <button @click="publishItem" class="action-button primary-button">
+              Опубликовать
+            </button>
+            
+            <div class="action-row">
+              <div class="dropdown-container" ref="dropdown" style="margin-left: auto;">
+                <button 
+                  type="button" 
+                  class="dropdown-button-avito"
+                  @click="toggleDropdown"
+                  aria-haspopup="true"
+                  :aria-expanded="showDropdown"
+                >
+                  <span class="dropdown-button-wrapper">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="dropdown-icon">
+                      <circle cx="2.5" cy="7" r="1" fill="currentColor"/>
+                      <circle cx="7" cy="7" r="1" fill="currentColor"/>
+                      <circle cx="11.5" cy="7" r="1" fill="currentColor"/>
+                    </svg>
+                  </span>
+                </button>
                 
-                <!-- Меню для черновиков -->
-                <template v-else-if="item.status === 'draft'">
+                <div v-if="showDropdown" class="dropdown-menu">
                   <a href="#" class="dropdown-item" @click.prevent="publishItem">
                     Опубликовать
                   </a>
@@ -231,10 +272,32 @@
                   <a href="#" class="dropdown-item danger-item" @click.prevent="showDeleteConfirm">
                     Удалить
                   </a>
-                </template>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <!-- Для архивных объявлений -->
+          <template v-else-if="item.status === 'archived'">
+            <div class="action-row">
+              <div class="dropdown-container" ref="dropdown" style="margin-left: auto;">
+                <button 
+                  type="button" 
+                  class="dropdown-button-avito"
+                  @click="toggleDropdown"
+                  aria-haspopup="true"
+                  :aria-expanded="showDropdown"
+                >
+                  <span class="dropdown-button-wrapper">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="dropdown-icon">
+                      <circle cx="2.5" cy="7" r="1" fill="currentColor"/>
+                      <circle cx="7" cy="7" r="1" fill="currentColor"/>
+                      <circle cx="11.5" cy="7" r="1" fill="currentColor"/>
+                    </svg>
+                  </span>
+                </button>
                 
-                <!-- Меню для архивных объявлений -->
-                <template v-else-if="item.status === 'archived'">
+                <div v-if="showDropdown" class="dropdown-menu">
                   <a href="#" class="dropdown-item" @click.prevent="restoreItem">
                     Восстановить
                   </a>
@@ -244,20 +307,10 @@
                   <a href="#" class="dropdown-item danger-item" @click.prevent="showDeleteConfirm">
                     Удалить
                   </a>
-                </template>
-                
-                <!-- Меню по умолчанию -->
-                <template v-else>
-                  <a href="#" class="dropdown-item" @click.prevent="editItem">
-                    Редактировать
-                  </a>
-                  <a href="#" class="dropdown-item danger-item" @click.prevent="showDeleteConfirm">
-                    Удалить
-                  </a>
-                </template>
+                </div>
               </div>
             </div>
-          </div>
+          </template>
         </div>
       </div>
     </div>
@@ -360,21 +413,8 @@ const promoteItem = () => {
 
 const payItem = async () => {
   showDropdown.value = false
-  try {
-    // Используем Inertia для POST запроса
-    router.post(`/my-ads/${props.item.id}/pay`, {}, {
-      preserveScroll: true,
-      onSuccess: () => {
-        // Обновление произойдет автоматически через Inertia
-      },
-      onError: (errors) => {
-        console.error('Ошибка оплаты:', errors)
-        alert('Ошибка при оплате объявления')
-      }
-    })
-  } catch (error) {
-    console.error('Ошибка при оплате:', error)
-  }
+  // Перенаправляем на страницу выбора тарифа как в Авито
+  window.location.href = `/payment/ad/${props.item.id}/select-plan`
 }
 
 const deactivateItem = async () => {
@@ -508,12 +548,14 @@ const cancelDelete = () => {
 }
 
 .item-snippet-content {
-  @apply flex p-4 gap-4;
+  @apply flex p-4;
+  gap: 12px; /* уменьшаем отступ для экономии места */
 }
 
 /* Блок изображения (160x120px) */
 .item-image-section {
   @apply flex-shrink-0;
+  width: 160px; /* фиксированная ширина */
 }
 
 .item-image-link {
@@ -546,6 +588,7 @@ const cancelDelete = () => {
 /* Блок контента (центральная часть) */
 .item-content-section {
   @apply flex-1 min-w-0;
+  flex: 1; /* занимает максимум доступного места */
 }
 
 .item-title {
@@ -631,8 +674,10 @@ const cancelDelete = () => {
 
 /* Блок информации и действий (правая колонка) */
 .item-info-section {
-  @apply flex-shrink-0 flex flex-col gap-3 w-48;
-  overflow: visible;
+  @apply flex-shrink-0 flex flex-col gap-3;
+  width: 220px; /* увеличено для помещения полного текста */
+  max-width: 220px;
+  overflow: visible; /* разрешаем переполнение для dropdown меню */
 }
 
 .item-counters {
@@ -652,7 +697,7 @@ const cancelDelete = () => {
 }
 
 .lifetime-text {
-  @apply text-gray-600;
+  @apply text-gray-900;
 }
 
 .lifetime-warning {
@@ -660,20 +705,22 @@ const cancelDelete = () => {
 }
 
 .item-chats {
-  @apply flex items-center gap-2 text-sm text-gray-600;
+  @apply flex items-center gap-2 text-sm text-gray-900;
 }
 
 .chat-icon {
-  @apply text-gray-600;
+  @apply text-gray-900;
   flex-shrink: 0;
 }
 
 .chat-text {
-  /* Базовый стиль */
+  @apply text-gray-900;
 }
 
 .item-actions {
   @apply flex flex-col gap-2;
+  width: 100%;
+  max-width: 100%;
 }
 
 .action-button {
@@ -682,27 +729,95 @@ const cancelDelete = () => {
 
 .primary-button {
   @apply bg-blue-600 text-white hover:bg-blue-700 w-full;
+  max-width: 100%;
+}
+
+.primary-button-flex {
+  @apply bg-blue-600 text-white hover:bg-blue-700;
+  flex: 1;
+  width: auto;
+  min-width: 0; /* Позволяет элементу сжиматься */
+}
+
+.button-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 6px 12px; /* как в реальном Авито */
+}
+
+.button-text {
+  white-space: nowrap;
+  font-size: 14px; /* как в реальном Авито */
+  line-height: 1.2;
 }
 
 .secondary-button {
-  @apply bg-gray-100 text-gray-700 hover:bg-gray-200 flex-1;
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200 rounded;
+  height: 32px;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 400;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .action-row {
   @apply flex gap-2;
+  width: 100%;
+  max-width: 100%;
 }
 
 .dropdown-container {
   @apply relative;
   overflow: visible;
+  z-index: 1; /* гарантируем что контейнер создает новый stacking context */
 }
 
 .dropdown-button {
   @apply p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors;
 }
 
+.dropdown-button-avito {
+  @apply p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.dropdown-button-inline {
+  @apply bg-gray-100 text-gray-900 hover:bg-gray-200 border border-gray-200 rounded transition-colors;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px; /* как в реальном Авито */
+  height: 32px; /* как в реальном Авито */
+  flex-shrink: 0;
+}
+
+.dropdown-button-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.dropdown-icon {
+  width: 20px;
+  height: 20px;
+}
+
 .dropdown-menu {
-  @apply absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50;
+  @apply absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-lg;
+  z-index: 9999; /* максимальный z-index для отображения поверх всех элементов */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); /* усиленная тень */
 }
 
 .dropdown-item {
@@ -723,6 +838,28 @@ const cancelDelete = () => {
 
 .dropdown-divider {
   @apply border-t border-gray-200 my-1;
+}
+
+.waiting-payment-actions {
+  @apply flex flex-row;
+  gap: 4px; /* отступ как в реальном Авито */
+  width: 100%;
+  min-width: 200px; /* обеспечиваем минимальное место для кнопок */
+}
+
+.secondary-button-flex {
+  @apply bg-gray-100 text-gray-900 hover:bg-gray-200 border border-gray-200 rounded;
+  height: 32px; /* как в реальном Авито */
+  padding: 0;
+  font-size: 14px; /* увеличиваем шрифт */
+  font-weight: 400;
+  flex: 1;
+  min-width: 150px; /* минимальная ширина для полного текста */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 /* Responsive */

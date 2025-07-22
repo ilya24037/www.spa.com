@@ -1,60 +1,45 @@
 <template>
-    <div class="form-section">
-        <h3 class="form-section-title">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-            </svg>
-            Специальность или сфера
-        </h3>
-        
-        <div class="form-row">
-            <div class="w-full">
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                    Специальность *
-                </label>
-                <div class="relative">
-                    <select 
-                        v-model="form.specialty"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none pr-12"
-                        :class="{ 'border-red-500 focus:ring-red-500 focus:border-red-500': errors.specialty }"
-                        required
-                    >
-                        <option value="">Выберите специальность</option>
-                        <option value="massage">Массаж</option>
-                        <option value="therapeutic">Лечебный массаж</option>
-                        <option value="relaxing">Расслабляющий массаж</option>
-                        <option value="sports">Спортивный массаж</option>
-                        <option value="anti-cellulite">Антицеллюлитный массаж</option>
-                        <option value="lymphatic">Лимфодренажный массаж</option>
-                        <option value="honey">Медовый массаж</option>
-                        <option value="stone">Стоун-массаж</option>
-                        <option value="thai">Тайский массаж</option>
-                        <option value="erotic">Эротический массаж</option>
-                    </select>
-                    <!-- Кастомная стрелка -->
-                    <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                        </svg>
-                    </div>
-                </div>
-                
-                <p class="text-xs text-gray-500 mt-2">
-                    Выберите основную специальность, по которой вы оказываете услуги
-                </p>
-                
-                <div v-if="errors.specialty" class="mt-2 text-sm text-red-600 flex items-center">
-                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+    <div class="form-field">
+        <label class="field-label">Специальность или сфера</label>
+        <div class="custom-select-wrapper" :class="{ 'active': isOpen }">
+            <div 
+                class="custom-select-trigger"
+                @click="toggleDropdown"
+                :class="{ 'has-value': form.specialty }"
+            >
+                <span v-if="form.specialty" class="selected-text">{{ getSpecialtyLabel(form.specialty) }}</span>
+                <span v-else class="placeholder-text">Выберите специальность</span>
+                <div class="select-arrow">
+                    <svg class="w-5 h-5 transition-transform" :class="{ 'rotate-180': isOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
-                    {{ errors.specialty }}
                 </div>
             </div>
+            
+            <div v-if="isOpen" class="custom-select-dropdown">
+                <div class="dropdown-option" 
+                     v-for="option in specialtyOptions" 
+                     :key="option.value"
+                     @click="selectOption(option.value)"
+                     :class="{ 'selected': form.specialty === option.value }">
+                    {{ option.label }}
+                </div>
+            </div>
+        </div>
+        
+        <p class="field-hint">
+            Выберите основную специальность по которой вы оказываете услуги
+        </p>
+        
+        <div v-if="errors.specialty" class="error-message">
+            {{ errors.specialty }}
         </div>
     </div>
 </template>
 
 <script setup>
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+
 const props = defineProps({
     form: {
         type: Object,
@@ -65,4 +50,148 @@ const props = defineProps({
         default: () => ({})
     }
 })
-</script> 
+
+const isOpen = ref(false)
+
+// Варианты специальностей как на скрине
+const specialtyOptions = [
+    { value: 'massage', label: 'Массаж' },
+    { value: 'therapeutic', label: 'Лечебный массаж' },
+    { value: 'relaxing', label: 'Расслабляющий массаж' },
+    { value: 'sports', label: 'Спортивный массаж' },
+    { value: 'anti-cellulite', label: 'Антицеллюлитный массаж' },
+    { value: 'lymphatic', label: 'Лимфодренажный массаж' },
+    { value: 'honey', label: 'Медовый массаж' },
+    { value: 'stone', label: 'Стоун-массаж' },
+    { value: 'thai', label: 'Тайский массаж' },
+    { value: 'erotic', label: 'Эротический массаж' }
+]
+
+const toggleDropdown = () => {
+    isOpen.value = !isOpen.value
+}
+
+const selectOption = (value) => {
+    props.form.specialty = value
+    isOpen.value = false
+}
+
+const getSpecialtyLabel = (value) => {
+    const option = specialtyOptions.find(opt => opt.value === value)
+    return option ? option.label : ''
+}
+
+// Закрытие при клике вне компонента
+const handleClickOutside = (event) => {
+    if (!event.target.closest('.custom-select-wrapper')) {
+        isOpen.value = false
+    }
+}
+
+onMounted(() => {
+    document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside)
+})
+</script>
+
+<style scoped>
+.custom-select-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.custom-select-trigger {
+    width: 100%;
+    padding: 12px 40px 12px 16px;
+    border: 2px solid #e5e5e5;
+    border-radius: 8px;
+    background: #f5f5f5;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 48px;
+    transition: all 0.2s ease;
+}
+
+.custom-select-trigger:hover {
+    border-color: #d0d0d0;
+}
+
+.custom-select-wrapper.active .custom-select-trigger {
+    border-color: #2196f3;
+    background: #fff;
+    border-radius: 8px 8px 0 0;
+}
+
+.selected-text {
+    font-size: 16px;
+    color: #1a1a1a;
+    font-weight: 400;
+}
+
+.placeholder-text {
+    font-size: 16px;
+    color: #8c8c8c;
+}
+
+.select-arrow {
+    color: #8c8c8c;
+    transition: transform 0.2s ease;
+}
+
+.custom-select-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 2px solid #2196f3;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.dropdown-option {
+    padding: 16px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #1a1a1a;
+    transition: background-color 0.2s ease;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.dropdown-option:last-child {
+    border-bottom: none;
+}
+
+.dropdown-option:hover {
+    background-color: #f8f9fa;
+}
+
+.dropdown-option.selected {
+    background-color: #e3f2fd;
+    color: #2196f3;
+    font-weight: 500;
+}
+
+.field-hint {
+    margin-top: 8px;
+    font-size: 14px;
+    color: #8c8c8c;
+    line-height: 1.4;
+}
+
+.error-message {
+    margin-top: 8px;
+    color: #ff4d4f;
+    font-size: 14px;
+    line-height: 1.4;
+}
+</style> 

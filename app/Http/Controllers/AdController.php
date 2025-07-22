@@ -105,17 +105,82 @@ class AdController extends Controller
             'status' => 'draft'
         ]);
 
-        // Если запрос ожидает JSON (проверяем несколько способов)
-        if ($request->expectsJson() || $request->ajax() || $request->wantsJson()) {
+        // Всегда возвращаем редирект для Inertia
+        return redirect('/profile/items/draft/all')->with('success', 'Черновик сохранен!');
+    }
+
+    /**
+     * Опубликовать объявление (с валидацией обязательных полей)
+     */
+    public function publish(Request $request)
+    {
+        // Валидация обязательных полей для публикации
+        $validator = Validator::make($request->all(), [
+            'category' => 'required|string',
+            'title' => 'required|string|max:255',
+            'specialty' => 'required|string',
+            'clients' => 'required|array|min:1',
+            'service_location' => 'required|array|min:1',
+            'work_format' => 'required|string',
+            'experience' => 'required|string',
+            'price' => 'required|numeric|min:0',
+            'phone' => 'required|string',
+        ], [
+            'title.required' => 'Название объявления обязательно для заполнения',
+            'specialty.required' => 'Специальность или сфера обязательна для заполнения',
+            'clients.required' => 'Выберите хотя бы одну категорию клиентов',
+            'clients.min' => 'Выберите хотя бы одну категорию клиентов',
+            'service_location.required' => 'Укажите где вы оказываете услуги',
+            'service_location.min' => 'Укажите хотя бы одно место оказания услуг',
+            'work_format.required' => 'Укажите формат работы',
+            'experience.required' => 'Укажите опыт работы',
+            'price.required' => 'Укажите стоимость услуги',
+            'phone.required' => 'Укажите телефон для связи',
+        ]);
+
+        if ($validator->fails()) {
             return response()->json([
-                'success' => true,
-                'message' => 'Черновик сохранен!',
-                'ad_id' => $ad->id
-            ]);
+                'success' => false,
+                'errors' => $validator->errors(),
+                'message' => 'Заполните все обязательные поля'
+            ], 422);
         }
 
-        // Для Inertia.js возвращаем редирект на профиль
-        return redirect()->route('dashboard')->with('success', 'Черновик сохранен!');
+        // Создаем или обновляем объявление
+        $ad = Ad::updateOrCreate(
+            [
+                'user_id' => auth()->id(),
+                'id' => $request->id ?? null
+            ],
+            [
+                'category' => $request->category,
+                'title' => $request->title,
+                'description' => $request->description ?: '',
+                'specialty' => $request->specialty,
+                'clients' => is_array($request->clients) ? json_encode($request->clients) : '[]',
+                'service_location' => is_array($request->service_location) ? json_encode($request->service_location) : '[]',
+                'work_format' => $request->work_format,
+                'service_provider' => is_array($request->service_provider) ? json_encode($request->service_provider) : '[]',
+                'experience' => $request->experience,
+                'price' => $request->price,
+                'price_unit' => $request->price_unit ?: 'session',
+                'is_starting_price' => is_array($request->is_starting_price) ? json_encode($request->is_starting_price) : '[]',
+                'discount' => $request->discount ?: null,
+                'gift' => $request->gift ?: null,
+                'address' => $request->address ?: null,
+                'travel_area' => $request->travel_area ?: null,
+                'phone' => $request->phone,
+                'contact_method' => $request->contact_method ?: 'messages',
+                'status' => 'waiting_payment' // Статус для ожидания оплаты
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Объявление готово к публикации',
+            'id' => $ad->id,
+            'redirect' => route('payment.select-plan', ['ad' => $ad->id])
+        ]);
     }
 
     /**

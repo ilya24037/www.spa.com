@@ -1,67 +1,69 @@
 <template>
-    <div class="form-section">
-        <h3 class="form-section-title">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-            </svg>
-            Формат работы
-        </h3>
-        
-        <div class="form-row">
-            <div class="w-full">
-                <label class="block text-sm font-medium text-gray-700 mb-3">
-                    Формат работы *
-                </label>
-                <div class="space-y-3">
-                    <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                        <input 
-                            v-model="form.work_format"
-                            type="radio"
-                            value="private"
-                            class="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500 focus:ring-2"
-                        >
-                        <div class="ml-3">
-                            <div class="text-sm font-medium text-gray-900">Частный мастер</div>
-                            <div class="text-xs text-gray-500">Работаете в одиночку</div>
-                        </div>
-                    </label>
-                    <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                        <input 
-                            v-model="form.work_format"
-                            type="radio"
-                            value="salon"
-                            class="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500 focus:ring-2"
-                        >
-                        <div class="ml-3">
-                            <div class="text-sm font-medium text-gray-900">Салон</div>
-                            <div class="text-xs text-gray-500">У вас есть отдельное помещение и штат мастеров</div>
-                        </div>
-                    </label>
-                    <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                        <input 
-                            v-model="form.work_format"
-                            type="radio"
-                            value="network"
-                            class="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500 focus:ring-2"
-                        >
-                        <div class="ml-3">
-                            <div class="text-sm font-medium text-gray-900">Сеть салонов</div>
-                            <div class="text-xs text-gray-500">У вас несколько салонов в разных местах</div>
-                        </div>
-                    </label>
+    <div class="form-field">
+        <div class="radio-group">
+            <div class="radio-item" @click="selectFormat('private')">
+                <div 
+                    class="custom-radio"
+                    :class="{ 'checked': form.work_format === 'private' }"
+                    :style="{ 
+                        width: '20px', 
+                        height: '20px', 
+                        border: '2px solid #d9d9d9', 
+                        borderRadius: '50%',
+                        marginRight: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: '#fff'
+                    }"
+                >
                 </div>
-                
-                <p class="text-xs text-gray-500 mt-2">
-                    Выберите формат вашей работы
-                </p>
-                
-                <div v-if="errors.work_format" class="mt-2 text-sm text-red-600 flex items-center">
-                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                    </svg>
-                    {{ errors.work_format }}
+                <input 
+                    v-model="form.work_format"
+                    type="radio"
+                    value="private"
+                    style="display: none;"
+                >
+                <div class="radio-content">
+                    <div class="radio-title">Частный мастер</div>
+                    <div class="radio-description">Работаете в одиночку</div>
                 </div>
             </div>
+            
+            <div class="radio-item" @click="selectFormat('salon')">
+                <div 
+                    class="custom-radio"
+                    :class="{ 'checked': form.work_format === 'salon' }"
+                    :style="{ 
+                        width: '20px', 
+                        height: '20px', 
+                        border: '2px solid #d9d9d9', 
+                        borderRadius: '50%',
+                        marginRight: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: '#fff'
+                    }"
+                >
+                </div>
+                <input 
+                    v-model="form.work_format"
+                    type="radio"
+                    value="salon"
+                    style="display: none;"
+                >
+                <div class="radio-content">
+                    <div class="radio-title">Салон</div>
+                    <div class="radio-description">У вас есть отдельное помещение и штат мастеров</div>
+                </div>
+            </div>
+            
+
+        </div>
+        
+        <div v-if="errors.work_format" class="error-message">
+            {{ errors.work_format }}
         </div>
     </div>
 </template>
@@ -77,4 +79,77 @@ const props = defineProps({
         default: () => ({})
     }
 })
-</script> 
+
+// Функция выбора формата
+const selectFormat = (format) => {
+    props.form.work_format = format
+}
+</script>
+
+<style scoped>
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.radio-item {
+    display: flex;
+    align-items: flex-start;
+    cursor: pointer;
+    padding: 12px 0;
+}
+
+.custom-radio {
+    width: 20px !important;
+    height: 20px !important;
+    border: 2px solid #d9d9d9 !important;
+    border-radius: 50% !important;
+    margin-right: 12px !important;
+    margin-top: 2px !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease !important;
+    background: #fff !important;
+}
+
+.custom-radio.checked {
+    border-color: #1890ff !important;
+}
+
+.custom-radio.checked::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #1890ff;
+}
+
+.radio-content {
+    flex: 1;
+}
+
+.radio-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin: 0 0 4px 0;
+    line-height: 1.4;
+}
+
+.radio-description {
+    font-size: 14px;
+    color: #8c8c8c;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.error-message {
+    margin-top: 8px;
+    color: #ff4d4f;
+    font-size: 14px;
+    line-height: 1.4;
+}
+</style> 

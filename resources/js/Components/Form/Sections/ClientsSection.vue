@@ -1,49 +1,49 @@
 <template>
-    <div class="form-section">
-        <h3 class="form-section-title">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-            </svg>
-            Ваши клиенты
-        </h3>
-        
-        <div class="form-row">
-            <div class="w-full">
-                <label class="block text-sm font-medium text-gray-700 mb-3">
-                    Кто ваши клиенты? *
-                </label>
-                <div class="space-y-3">
-                    <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
-                        <input 
-                            v-model="form.clients"
-                            type="checkbox"
-                            value="women"
-                            class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                        >
-                        <span class="ml-3 text-sm text-gray-700 font-medium">Женщины</span>
-                    </label>
-                    <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
-                        <input 
-                            v-model="form.clients"
-                            type="checkbox"
-                            value="men"
-                            class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                        >
-                        <span class="ml-3 text-sm text-gray-700 font-medium">Мужчины</span>
-                    </label>
-                </div>
-                
-                <p class="text-xs text-gray-500 mt-2">
-                    Выберите пол клиентов, которым вы оказываете услуги
-                </p>
-                
-                <div v-if="errors.clients" class="mt-2 text-sm text-red-600 flex items-center">
-                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+    <div class="form-field">
+        <div class="checkbox-group">
+            <div class="checkbox-item" @click="toggleClient('women')">
+                <div 
+                    class="custom-checkbox"
+                    :class="{ 'checked': form.clients.includes('women') }"
+                >
+                    <svg class="check-icon" width="100%" height="100%" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1 4.35714L3.4 6.5L9 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
                     </svg>
-                    {{ errors.clients }}
                 </div>
+                <input 
+                    v-model="form.clients"
+                    type="checkbox"
+                    value="women"
+                    style="display: none;"
+                >
+                <span class="checkbox-label">Женщины</span>
             </div>
+            
+            <div class="checkbox-item" @click="toggleClient('men')">
+                <div 
+                    class="custom-checkbox"
+                    :class="{ 'checked': form.clients.includes('men') }"
+                >
+                    <svg class="check-icon" width="100%" height="100%" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1 4.35714L3.4 6.5L9 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                    </svg>
+                </div>
+                <input 
+                    v-model="form.clients"
+                    type="checkbox"
+                    value="men"
+                    style="display: none;"
+                >
+                <span class="checkbox-label">Мужчины</span>
+            </div>
+        </div>
+        
+        <p class="field-hint">
+            Выберите пол клиентов, которым вы оказываете услуги
+        </p>
+        
+        <div v-if="errors.clients" class="error-message">
+            {{ errors.clients }}
         </div>
     </div>
 </template>
@@ -66,6 +66,16 @@ const props = defineProps({
 const initializeClients = () => {
     if (!props.form.clients) {
         props.form.clients = []
+    }
+}
+
+// Функция переключения клиента
+const toggleClient = (client) => {
+    if (!props.form.clients.includes(client)) {
+        props.form.clients.push(client)
+    } else {
+        const index = props.form.clients.indexOf(client)
+        props.form.clients.splice(index, 1)
     }
 }
 

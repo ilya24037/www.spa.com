@@ -2,521 +2,73 @@
 <template>
     <Head title="Создать анкету эротического массажа" />
     
-    <!-- Обертка с правильными отступами как в Dashboard -->
-    <div class="py-6 lg:py-8">
-        
-        <!-- Основной контент с гэпом между блоками -->
-        <div class="flex gap-6">
+    <!-- Центрированный контент как на Avito -->
+    <div class="avito-bg">
+        <div class="avito-container">
             
-            <!-- Боковая панель через SidebarWrapper -->
-            <SidebarWrapper 
-                v-model="showMobileSidebar"
-                content-class="p-0"
-                :show-desktop-header="false"
-                :always-visible-desktop="true"
-            >
-                <!-- Профиль пользователя -->
-                <div class="p-6 border-b">
-                    <div class="flex items-center gap-4">
-                        <div 
-                            class="w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold"
-                            :style="{ backgroundColor: avatarColor }"
+            <!-- Хлебные крошки -->
+            <nav class="flex mb-6 pt-6" aria-label="Breadcrumb">
+                <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                    <li v-for="(breadcrumb, index) in breadcrumbs" :key="index" class="inline-flex items-center">
+                        <Link 
+                            v-if="breadcrumb.url" 
+                            :href="breadcrumb.url"
+                            class="text-gray-500 hover:text-gray-700 transition-colors"
                         >
-                            {{ userInitial }}
-                        </div>
-                        <div>
-                            <h2 class="text-lg font-semibold text-gray-900">{{ userName }}</h2>
-                            <div class="flex items-center space-x-1">
-                                <div class="flex">
-                                    <svg v-for="i in 5" :key="i" class="w-4 h-4" :class="i <= (userStats.rating || 0) ? 'text-yellow-400' : 'text-gray-300'" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                    </svg>
-                                </div>
-                                <span class="text-sm text-gray-500">{{ userStats.reviewsCount || 0 }} отзывов</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Навигация -->
-                <nav class="py-2">
-                    <div class="px-3 py-2">
-                        <ul class="space-y-1">
-                            <li>
-                                <Link 
-                                    href="/profile"
-                                    :class="menuItemClass(isCurrentRoute('profile'))"
-                                >
-                                    Мои анкеты
-                                    <span v-if="counts?.profiles > 0" class="ml-auto text-xs bg-gray-100 px-2 py-0.5 rounded">
-                                        {{ counts.profiles }}
-                                    </span>
-                                </Link>
-                            </li>
-                            <li>
-                                <Link 
-                                    href="/bookings"
-                                    :class="menuItemClass(isCurrentRoute('bookings'))"
-                                >
-                                    Бронирования
-                                    <span v-if="counts?.bookings > 0" class="ml-auto text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded">
-                                        {{ counts.bookings }}
-                                    </span>
-                                </Link>
-                            </li>
-                            <li>
-                                <Link 
-                                    href="/favorites"
-                                    :class="menuItemClass(isCurrentRoute('favorites'))"
-                                >
-                                    Избранное
-                                    <span v-if="counts?.favorites > 0" class="ml-auto text-xs bg-gray-100 px-2 py-0.5 rounded">
-                                        {{ counts.favorites }}
-                                    </span>
-                                </Link>
-                            </li>
-                            <li>
-                                <Link 
-                                    href="/additem"
-                                    :class="menuItemClass(isCurrentRoute('additem'))"
-                                >
-                                    Создать объявление
-                                </Link>
-                            </li>
-                            <li>
-                                <Link 
-                                    href="/profile/edit"
-                                    :class="menuItemClass(isCurrentRoute('profile/edit'))"
-                                >
-                                    Настройки профиля
-                                </Link>
-                            </li>
-                        </ul>
-                    </div>
-                </nav>
-            </SidebarWrapper>
-            
-            <!-- Основной контент -->
-            <main class="flex-1">
-                <ContentCard>
-                    <template #header>
-                        <!-- Хлебные крошки -->
-                        <nav class="flex mb-4" aria-label="Breadcrumb">
-                            <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                                <li v-for="(breadcrumb, index) in breadcrumbs" :key="index" class="inline-flex items-center">
-                                    <Link 
-                                        v-if="breadcrumb.url" 
-                                        :href="breadcrumb.url"
-                                        class="text-gray-500 hover:text-gray-700 transition-colors"
-                                    >
-                                        {{ breadcrumb.name }}
-                                    </Link>
-                                    <span v-else class="text-gray-900 font-medium">{{ breadcrumb.name }}</span>
-                                    
-                                    <svg 
-                                        v-if="index < breadcrumbs.length - 1"
-                                        class="w-4 h-4 text-gray-400 mx-2" 
-                                        fill="currentColor" 
-                                        viewBox="0 0 20 20"
-                                    >
-                                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                                    </svg>
-                                </li>
-                            </ol>
-                        </nav>
-                    </template>
-
-                    <!-- Предупреждение 18+ -->
-                    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-                        <div class="flex items-center">
-                            <span class="text-2xl mr-3">🔞</span>
-                            <div>
-                                <h3 class="text-red-800 font-semibold">Контент 18+</h3>
-                                <p class="text-red-700 text-sm">Данная категория предназначена только для совершеннолетних пользователей</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Заголовок -->
-                    <div class="text-center mb-8">
-                        <h1 class="text-3xl font-bold text-gray-900 mb-2">
-                            🔥 Создать анкету эротического массажа
-                        </h1>
-                        <p class="text-gray-600">
-                            Заполните информацию о себе и интимных услугах
-                        </p>
-                    </div>
-
-                    <!-- Форма -->
-                    <form @submit.prevent="submit" class="space-y-6">
+                            {{ breadcrumb.name }}
+                        </Link>
+                        <span v-else class="text-gray-900 font-medium">{{ breadcrumb.name }}</span>
                         
-                        <!-- Личная информация -->
-                        <div class="bg-gray-50 rounded-lg p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                                👤 Личная информация
-                            </h3>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <!-- Имя -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        Имя для показа *
-                                    </label>
-                                    <input 
-                                        v-model="form.display_name"
-                                        type="text"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="Анна"
-                                        required
-                                    >
-                                </div>
-                                
-                                <!-- Возраст -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        Возраст *
-                                    </label>
-                                    <input 
-                                        v-model="form.age"
-                                        type="number"
-                                        min="18"
-                                        max="65"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="25"
-                                        required
-                                    >
-                                </div>
-                                
-                                <!-- Опыт работы -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        Опыт работы (лет)
-                                    </label>
-                                    <input 
-                                        v-model="form.experience_years"
-                                        type="number"
-                                        min="0"
-                                        max="50"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="3"
-                                    >
-                                </div>
-                                
-                                <!-- Салон -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        Название салона
-                                    </label>
-                                    <input 
-                                        v-model="form.salon_name"
-                                        type="text"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="Эротический салон"
-                                    >
-                                </div>
-                            </div>
-                        </div>
+                        <svg 
+                            v-if="index < breadcrumbs.length - 1"
+                            class="w-4 h-4 text-gray-400 mx-2" 
+                            fill="currentColor" 
+                            viewBox="0 0 20 20"
+                        >
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                    </li>
+                </ol>
+            </nav>
 
-                        <!-- Описание -->
-                        <div class="bg-gray-50 rounded-lg p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                                📝 Описание
-                            </h3>
-                            
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    Расскажите о себе и своих услугах *
-                                </label>
-                                <textarea 
-                                    v-model="form.description"
-                                    rows="5"
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder="Профессиональный эротический массаж. Индивидуальный подход к каждому клиенту. Работаю в уютной обстановке с соблюдением полной конфиденциальности..."
-                                    required
-                                ></textarea>
-                                <p class="text-xs text-gray-500 mt-1">Минимум 50 символов</p>
-                            </div>
-                        </div>
+            <!-- Заголовок -->
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center space-x-4">
+                    <Link 
+                        href="/additem"
+                        class="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+                    >
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                        Назад к категориям
+                    </Link>
+                    <div class="h-6 w-px bg-gray-300"></div>
+                    <h1 class="text-2xl font-bold text-gray-900">
+                        Эротический массаж
+                    </h1>
+                </div>
+            </div>
 
-                        <!-- Местоположение -->
-                        <div class="bg-gray-50 rounded-lg p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                                📍 Местоположение
-                            </h3>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <!-- Город -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        Город *
-                                    </label>
-                                    <select 
-                                        v-model="form.city"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        required
-                                    >
-                                        <option value="">Выберите город</option>
-                                        <option v-for="city in cities" :key="city" :value="city">
-                                            {{ city }}
-                                        </option>
-                                    </select>
-                                </div>
-                                
-                                <!-- Район -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        Район
-                                    </label>
-                                    <input 
-                                        v-model="form.district"
-                                        type="text"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="Центральный"
-                                    >
-                                </div>
-                                
-                                <!-- Адрес -->
-                                <div class="md:col-span-2">
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        Адрес (не обязательно)
-                                    </label>
-                                    <input 
-                                        v-model="form.address"
-                                        type="text"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="Улица, дом (будет скрыт до бронирования)"
-                                    >
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Контакты -->
-                        <div class="bg-gray-50 rounded-lg p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                                📞 Контакты
-                            </h3>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <!-- Телефон -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        Телефон *
-                                    </label>
-                                    <input 
-                                        v-model="form.phone"
-                                        type="tel"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="+7 (999) 123-45-67"
-                                        required
-                                    >
-                                </div>
-                                
-                                <!-- WhatsApp -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        WhatsApp
-                                    </label>
-                                    <input 
-                                        v-model="form.whatsapp"
-                                        type="tel"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="+7 (999) 123-45-67"
-                                    >
-                                </div>
-                                
-                                <!-- Telegram -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        Telegram
-                                    </label>
-                                    <input 
-                                        v-model="form.telegram"
-                                        type="text"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="@username"
-                                    >
-                                </div>
-                                
-                                <!-- Показывать телефон -->
-                                <div class="flex items-center">
-                                    <input 
-                                        v-model="form.show_phone"
-                                        type="checkbox"
-                                        class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                                    >
-                                    <label class="ml-2 text-sm text-gray-700">
-                                        Показывать телефон в объявлении
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Цены -->
-                        <div class="bg-gray-50 rounded-lg p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                                💰 Цены
-                            </h3>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <!-- Цена от -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        Цена от (₽) *
-                                    </label>
-                                    <input 
-                                        v-model="form.price_from"
-                                        type="number"
-                                        min="1000"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="3000"
-                                        required
-                                    >
-                                </div>
-                                
-                                <!-- Цена до -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        Цена до (₽)
-                                    </label>
-                                    <input 
-                                        v-model="form.price_to"
-                                        type="number"
-                                        min="1000"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="8000"
-                                    >
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Услуги -->
-                        <div class="bg-gray-50 rounded-lg p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                                🔥 Услуги
-                            </h3>
-                            
-                            <div class="space-y-4">
-                                <div 
-                                    v-for="(service, index) in form.services" 
-                                    :key="index"
-                                    class="border border-gray-200 rounded-lg p-4 bg-white"
-                                >
-                                    <div class="flex justify-between items-center mb-4">
-                                        <h4 class="font-medium text-gray-900">Услуга {{ index + 1 }}</h4>
-                                        <button 
-                                            v-if="form.services.length > 1"
-                                            @click="removeService(index)"
-                                            type="button"
-                                            class="text-red-600 hover:text-red-800"
-                                        >
-                                            Удалить
-                                        </button>
-                                    </div>
-                                    
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <!-- Категория -->
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                                Категория *
-                                            </label>
-                                            <select 
-                                                v-model="service.category_id"
-                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                                required
-                                            >
-                                                <option value="">Выберите категорию</option>
-                                                <option v-for="category in categories" :key="category.id" :value="category.id">
-                                                    {{ category.name }}
-                                                </option>
-                                            </select>
-                                        </div>
-                                        
-                                        <!-- Название -->
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                                Название услуги *
-                                            </label>
-                                            <input 
-                                                v-model="service.name"
-                                                type="text"
-                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                                placeholder="Тантрический массаж"
-                                                required
-                                            >
-                                        </div>
-                                        
-                                        <!-- Цена -->
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                                Цена (₽) *
-                                            </label>
-                                            <input 
-                                                v-model="service.price"
-                                                type="number"
-                                                min="1000"
-                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                                placeholder="5000"
-                                                required
-                                            >
-                                        </div>
-                                        
-                                        <!-- Длительность -->
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                                Длительность (мин) *
-                                            </label>
-                                            <input 
-                                                v-model="service.duration"
-                                                type="number"
-                                                min="30"
-                                                max="480"
-                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                                placeholder="90"
-                                                required
-                                            >
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Кнопка добавить услугу -->
-                                <button 
-                                    @click="addService"
-                                    type="button"
-                                    class="w-full py-2 px-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                                >
-                                    + Добавить услугу
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Кнопки -->
-                        <div class="flex justify-end gap-4 pt-6">
-                            <Link 
-                                href="/additem"
-                                class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                            >
-                                Назад
-                            </Link>
-                            <button 
-                                type="submit"
-                                :disabled="form.processing"
-                                class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
-                            >
-                                {{ form.processing ? 'Создание...' : 'Создать анкету' }}
-                            </button>
-                        </div>
-                    </form>
-                </ContentCard>
-            </main>
+            <!-- Форма объявления -->
+            <AdForm 
+                category="erotic"
+                :categories="categories"
+                @success="handleFormSuccess"
+            />
         </div>
     </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
-import { Head, Link, usePage, useForm } from '@inertiajs/vue3'
-import SidebarWrapper from '@/Components/Layout/SidebarWrapper.vue'
-import ContentCard from '@/Components/Layout/ContentCard.vue'
+import { Head, Link, usePage } from '@inertiajs/vue3'
+import AppLayout from '@/Layouts/AppLayout.vue'
+import AdForm from '@/Components/Form/AdForm.vue'
+
+defineOptions({
+    layout: AppLayout
+})
 
 // Получаем данные от контроллера
 const props = defineProps({
@@ -542,79 +94,7 @@ const props = defineProps({
     }
 })
 
-// Состояние для мобильного меню
-const showMobileSidebar = ref(false)
-
-// Пользователь
-const page = usePage()
-const user = computed(() => page.props.auth?.user || {})
-const userName = computed(() => user.value.name || 'Пользователь')
-const userInitial = computed(() => userName.value.charAt(0).toUpperCase())
-
-// Цвет аватара
-const colors = ['#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#00bcd4', '#009688', '#4caf50', '#ff9800', '#ff5722']
-const avatarColor = computed(() => {
-    const charCode = userName.value.charCodeAt(0) || 85
-    return colors[charCode % colors.length]
-})
-
-// Проверка текущего роута
-const isCurrentRoute = (routeName) => {
-    return page.url.includes(routeName)
-}
-
-// Класс для пунктов меню
-const menuItemClass = (isActive) => [
-    'flex items-center justify-between px-3 py-2 text-sm rounded-lg transition',
-    isActive 
-        ? 'bg-blue-50 text-blue-600 font-medium' 
-        : 'text-gray-700 hover:bg-gray-50'
-]
-
-// Форма
-const form = useForm({
-    display_name: '',
-    description: '',
-    age: '',
-    experience_years: '',
-    city: '',
-    district: '',
-    address: '',
-    salon_name: '',
-    phone: '',
-    whatsapp: '',
-    telegram: '',
-    price_from: '',
-    price_to: '',
-    show_phone: false,
-    services: [
-        {
-            category_id: '',
-            name: '',
-            price: '',
-            duration: ''
-        }
-    ]
-})
-
-// Методы для услуг
-const addService = () => {
-    form.services.push({
-        category_id: '',
-        name: '',
-        price: '',
-        duration: ''
-    })
-}
-
-const removeService = (index) => {
-    if (form.services.length > 1) {
-        form.services.splice(index, 1)
-    }
-}
-
-// Отправка формы
-const submit = () => {
-    form.post('/additem/erotic')
+const handleFormSuccess = () => {
+    // Перенаправление после успешного создания объявления
 }
 </script> 

@@ -1,55 +1,40 @@
 <template>
-    <div class="form-section">
-        <h3 class="form-section-title">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
-            </svg>
-            Опыт работы
-        </h3>
-        
-        <div class="form-row">
-            <div class="w-full">
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                    Опыт работы *
-                </label>
-                <div class="relative">
-                    <select 
-                        v-model="form.experience"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none pr-12"
-                        :class="{ 'border-red-500 focus:ring-red-500 focus:border-red-500': errors.experience }"
-                        required
-                    >
-                        <option value="">Выберите опыт работы</option>
-                        <option value="no_experience">Нет опыта</option>
-                        <option value="less_than_1">Менее 1 года</option>
-                        <option value="1_3">1-3 года</option>
-                        <option value="3_6">3-6 лет</option>
-                        <option value="more_than_6">Более 6 лет</option>
-                    </select>
-                    <!-- Кастомная стрелка -->
-                    <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                        </svg>
-                    </div>
-                </div>
-                
-                <p class="text-xs text-gray-500 mt-2">
-                    Укажите ваш опыт работы в данной сфере
-                </p>
-                
-                <div v-if="errors.experience" class="mt-2 text-sm text-red-600 flex items-center">
-                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+    <div class="form-field">
+        <div class="custom-select-wrapper" :class="{ 'active': isOpen }">
+            <div 
+                class="custom-select-trigger"
+                @click="toggleDropdown"
+                :class="{ 'has-value': form.experience }"
+            >
+                <span v-if="form.experience" class="selected-text">{{ getExperienceLabel(form.experience) }}</span>
+                <span v-else class="placeholder-text">Выберите опыт работы</span>
+                <div class="select-arrow">
+                    <svg class="w-5 h-5 transition-transform" :class="{ 'rotate-180': isOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
-                    {{ errors.experience }}
                 </div>
             </div>
+            
+            <div v-if="isOpen" class="custom-select-dropdown">
+                <div class="dropdown-option" 
+                     v-for="option in experienceOptions" 
+                     :key="option.value"
+                     @click="selectOption(option.value)"
+                     :class="{ 'selected': form.experience === option.value }">
+                    {{ option.label }}
+                </div>
+            </div>
+        </div>
+        
+        <div v-if="errors.experience" class="error-message">
+            {{ errors.experience }}
         </div>
     </div>
 </template>
 
 <script setup>
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+
 const props = defineProps({
     form: {
         type: Object,
@@ -60,4 +45,136 @@ const props = defineProps({
         default: () => ({})
     }
 })
-</script> 
+
+const isOpen = ref(false)
+
+// Варианты опыта как на скрине
+const experienceOptions = [
+    { value: 'less_than_year', label: 'Меньше года' },
+    { value: '1_3_years', label: '1-3 года' },
+    { value: '4_7_years', label: '4-7 лет' },
+    { value: '8_10_years', label: '8-10 лет' },
+    { value: 'more_than_10', label: 'Больше 10 лет' }
+]
+
+const toggleDropdown = () => {
+    isOpen.value = !isOpen.value
+}
+
+const selectOption = (value) => {
+    props.form.experience = value
+    isOpen.value = false
+}
+
+const getExperienceLabel = (value) => {
+    const option = experienceOptions.find(opt => opt.value === value)
+    return option ? option.label : ''
+}
+
+// Закрытие при клике вне компонента
+const handleClickOutside = (event) => {
+    if (!event.target.closest('.custom-select-wrapper')) {
+        isOpen.value = false
+    }
+}
+
+onMounted(() => {
+    document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside)
+})
+</script>
+
+<style scoped>
+.custom-select-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.custom-select-trigger {
+    width: 100%;
+    padding: 12px 40px 12px 16px;
+    border: 2px solid #e5e5e5;
+    border-radius: 8px;
+    background: #f5f5f5;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 48px;
+    transition: all 0.2s ease;
+}
+
+.custom-select-trigger:hover {
+    border-color: #d0d0d0;
+}
+
+.custom-select-wrapper.active .custom-select-trigger {
+    border-color: #2196f3;
+    background: #fff;
+    border-radius: 8px 8px 0 0;
+}
+
+.selected-text {
+    font-size: 16px;
+    color: #1a1a1a;
+    font-weight: 400;
+}
+
+.placeholder-text {
+    font-size: 16px;
+    color: #8c8c8c;
+}
+
+.select-arrow {
+    color: #8c8c8c;
+    transition: transform 0.2s ease;
+}
+
+.custom-select-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 2px solid #2196f3;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.dropdown-option {
+    padding: 16px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #1a1a1a;
+    transition: background-color 0.2s ease;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.dropdown-option:last-child {
+    border-bottom: none;
+}
+
+.dropdown-option:hover {
+    background-color: #f8f9fa;
+}
+
+.dropdown-option.selected {
+    background-color: #e3f2fd;
+    color: #2196f3;
+    font-weight: 500;
+}
+
+.error-message {
+    margin-top: 8px;
+    color: #ff4d4f;
+    font-size: 14px;
+    line-height: 1.4;
+}
+</style> 

@@ -88,29 +88,36 @@ class CreateTestAd extends Command
             'status' => 'archived'
         ]);
 
-        // Создаем неактивное объявление (статус 'paused' - ждет действий)
-        $inactiveAd = Ad::create([
+        // Создаем неактивное объявление (статус 'waiting_payment' - ждет оплаты)
+        $waitingPaymentAd = Ad::create([
             'user_id' => $user->id,
-            'title' => 'Неактивное объявление',
+            'title' => 'Массаж на дому',
             'specialty' => 'massage',
-            'clients' => ['women'],
-            'service_location' => ['master_home'],
+            'clients' => ['women', 'men'],
+            'service_location' => ['client_home'],
             'work_format' => 'private_master',
-            'experience' => '1_3_years',
-            'description' => 'Неактивное объявление.',
-            'price' => 2000,
+            'service_provider' => ['individual'],
+            'experience' => '3_5_years',
+            'description' => 'Качественный массаж с выездом на дом. Расслабляющий и восстанавливающий массаж.',
+            'price' => 5000,
             'price_unit' => 'service',
-            'address' => 'Москва, ул. Новый Арбат, 15',
-            'phone' => '+7 (999) 555-55-55',
-            'contact_method' => 'messages',
-            'status' => 'paused'
+            'is_starting_price' => true,
+            'address' => 'Пермский край, Пермь, ул. Ленина, 10',
+            'travel_area' => 'р-н Ленинский',
+            'phone' => '+7 (999) 123-45-67',
+            'contact_method' => 'phone',
+            'status' => 'waiting_payment',
+            'is_paid' => false,
+            'views_count' => 81,
+            'contacts_shown' => 7,
+            'favorites_count' => 0
         ]);
 
         $this->info('Созданы тестовые объявления для test@example.com:');
         $this->line("- Активное: {$activeAd->title} (ID: {$activeAd->id})");
         $this->line("- Черновик: {$draftAd->title} (ID: {$draftAd->id})");
         $this->line("- Архивное: {$archivedAd->title} (ID: {$archivedAd->id})");
-        $this->line("- Ждет действий: {$inactiveAd->title} (ID: {$inactiveAd->id})");
+        $this->line("- Ждет оплаты: {$waitingPaymentAd->title} (ID: {$waitingPaymentAd->id})");
         $this->line("Пользователь: {$user->name} (ID: {$user->id})");
     }
 }

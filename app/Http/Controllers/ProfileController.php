@@ -30,7 +30,7 @@ class ProfileController extends Controller
         return $this->renderItemsByStatus($request, 'draft', 'Черновики');
     }
     public function inactiveItems(Request $request) {
-        return $this->renderItemsByStatus($request, 'paused', 'Ждут действий');
+        return $this->renderItemsByStatus($request, 'waiting_payment', 'Ждут действий');
     }
     public function oldItems(Request $request) {
         return $this->renderItemsByStatus($request, 'archived', 'Старые');
@@ -90,7 +90,7 @@ class ProfileController extends Controller
             'active' => $allAds->where('status', 'active')->count(),
             'draft' => $allAds->where('status', 'draft')->count(),
             'archived' => $allAds->where('status', 'archived')->count(),
-            'paused' => $allAds->where('status', 'paused')->count(),
+            'waiting_payment' => $allAds->where('status', 'waiting_payment')->count(),
             'old' => $allAds->where('status', 'archived')->count(), // старые = архивные
             'bookings' => $user->bookings()->where('status', 'pending')->count(),
             'favorites' => $user->favorites()->count(),
@@ -108,6 +108,7 @@ class ProfileController extends Controller
             'profiles' => $profiles,
             'counts' => $counts,
             'userStats' => $userStats,
+            'activeTab' => 'inactive', // Для главной страницы показываем как inactive
         ]);
     }
 
@@ -154,7 +155,7 @@ class ProfileController extends Controller
         $counts = [
             'active' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'active')->count(),
             'draft' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'draft')->count(),
-            'paused' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'paused')->count(),
+            'waiting_payment' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'waiting_payment')->count(),
             'old' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'archived')->count(), // старые = архивные
             'archived' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'archived')->count(),
         ];
@@ -167,8 +168,8 @@ class ProfileController extends Controller
             'profiles' => $profiles,
             'counts' => $counts,
             'userStats' => $userStats,
-            'activeTab' => $status,
-            'title' => $title,
+            'activeTab' => $status === 'waiting_payment' ? 'inactive' : $status,
+            'title' => $title
         ]);
     }
 

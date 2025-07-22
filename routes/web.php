@@ -11,6 +11,7 @@ use App\Http\Controllers\AddItemController; // 🔥 ДОБАВЛЕНО
 use App\Http\Controllers\AdController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\MyAdsController;
+use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -157,6 +158,21 @@ Route::middleware('auth')->group(function () {
         Route::post('/{ad}/restore', [MyAdsController::class, 'restore'])->name('restore');
     });
 
+                    /*
+                | Система оплаты объявлений
+                */
+                Route::prefix('payment')->name('payment.')->group(function () {
+                    Route::get('/ad/{ad}/select-plan', [PaymentController::class, 'selectPlan'])->name('select-plan');
+                    Route::post('/ad/{ad}/checkout', [PaymentController::class, 'checkout'])->name('checkout');
+                    Route::post('/{payment}/process', [PaymentController::class, 'process'])->name('process');
+                    Route::get('/{payment}/success', [PaymentController::class, 'success'])->name('success');
+                    Route::get('/history', [PaymentController::class, 'history'])->name('history');
+                    
+                    // СБП платежи
+                    Route::get('/{payment}/sbp-qr', [PaymentController::class, 'sbpQr'])->name('sbp-qr');
+                    Route::get('/{payment}/check-status', [PaymentController::class, 'checkStatus'])->name('check-status');
+                });
+
     /*
     | Профиль пользователя (редактирование / пароль / удаление)
     | Урлы:  /profile/edit, /profile   [PATCH|DELETE]
@@ -299,29 +315,7 @@ Route::get('/masters/{master}/avatar/thumb', function($master) {
     return response()->file($disk->path($path));
 })->name('master.avatar.thumb');
 
-Route::get('/masters/{master}/photos/{filename}', function($master, $filename) {
-    $masterProfile = \App\Models\MasterProfile::findOrFail($master);
-    $disk = \Illuminate\Support\Facades\Storage::disk('masters_private');
-    $path = "{$masterProfile->folder_name}/photos/{$filename}";
-    
-    if (!$disk->exists($path)) {
-        abort(404);
-    }
-    
-    return response()->file($disk->path($path));
-})->name('master.photo');
-
-Route::get('/masters/{master}/video/{filename}', function($master, $filename) {
-    $masterProfile = \App\Models\MasterProfile::findOrFail($master);
-    $disk = \Illuminate\Support\Facades\Storage::disk('masters_private');
-    $path = "{$masterProfile->folder_name}/video/{$filename}";
-    
-    if (!$disk->exists($path)) {
-        abort(404);
-    }
-    
-    return response()->file($disk->path($path));
-})->name('master.video');
+// Удалены дублирующиеся маршруты - используются контроллеры ниже
 
 // Маршруты для медиа файлов мастеров
 Route::get('/masters/{master}/photo/{filename}', [App\Http\Controllers\MasterMediaController::class, 'photo'])->name('master.photo');
@@ -346,6 +340,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/ads/create', [AdController::class, 'create'])->name('ads.create');
     Route::post('/ads', [AdController::class, 'store'])->name('ads.store');
     Route::post('/ads/draft', [AdController::class, 'storeDraft'])->name('ads.draft');
+    Route::post('/ads/publish', [AdController::class, 'publish'])->name('ads.publish');
     Route::get('/ads/{ad}/edit', [AdController::class, 'edit'])->name('ads.edit');
     Route::get('/ads/{ad}/data', [AdController::class, 'getData'])->name('ads.data');
     Route::put('/ads/{ad}', [AdController::class, 'update'])->name('ads.update');
