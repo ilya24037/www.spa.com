@@ -48,6 +48,21 @@ class ProfileController extends Controller
         
         // Преобразуем объявления в формат для карточек
         $profiles = $ads->map(function ($ad) {
+            // Получаем первое фото из массива photos
+            $mainImage = null;
+            $photosCount = 0;
+            
+            if ($ad->photos && is_array($ad->photos) && count($ad->photos) > 0) {
+                $mainImage = $ad->photos[0]['preview'] ?? $ad->photos[0]['url'] ?? null;
+                $photosCount = count($ad->photos);
+            }
+            
+            // Если нет фото в объявлении, используем тестовое
+            if (!$mainImage) {
+                $mainImage = '/images/masters/demo-' . (($ad->id % 4) + 1) . '.jpg';
+                $photosCount = rand(1, 4);
+            }
+            
             return [
                 'id' => $ad->id,
                 'slug' => Str::slug($ad->title),
@@ -55,9 +70,10 @@ class ProfileController extends Controller
                 'status' => $ad->status,
                 'is_active' => $ad->status === 'active',
                 'price_from' => $ad->price ?? 0,
-                'views_count' => rand(10, 100), // Тестовые данные
-                'photos_count' => rand(1, 8), // Тестовые данные
-                'avatar' => '/images/masters/demo-' . (($ad->id % 4) + 1) . '.jpg', // Тестовые изображения
+                'views_count' => $ad->views_count ?? rand(10, 100),
+                'photos_count' => $photosCount,
+                'avatar' => $mainImage,
+                'main_image' => $mainImage,
                 'city' => 'Москва', // Из адреса или по умолчанию
                 'address' => $ad->address ?? '',
                 'district' => $ad->travel_area ?? '',

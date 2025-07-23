@@ -89,11 +89,8 @@
 
             <!-- 10. Фотографии и видео -->
             <div class="form-group-section">
-                <h2 class="form-group-title">Фотографии и видео</h2>
                 <PhotosSection :form="form" :errors="errors" />
-                <div style="margin-top: 24px;">
-                    <VideosSection :form="form" :errors="errors" />
-                </div>
+                <VideosSection :form="form" :errors="errors" />
             </div>
 
             <!-- 11. География с бейджем "Новое" -->

@@ -64,6 +64,11 @@ class AdController extends Controller
             'is_starting_price' => $request->is_starting_price ? true : false,
             'discount' => $request->discount,
             'gift' => $request->gift,
+            'photos' => $request->photos ?? [],
+            'video' => $request->video,
+            'show_photos_in_gallery' => $request->show_photos_in_gallery ?? [],
+            'allow_download_photos' => $request->allow_download_photos ?? [],
+            'watermark_photos' => $request->watermark_photos ?? [],
             'address' => $request->address,
             'travel_area' => $request->travel_area,
             'phone' => $request->phone,
@@ -98,6 +103,11 @@ class AdController extends Controller
             'is_starting_price' => $request->is_starting_price ? true : false,
             'discount' => $request->discount ? (int)$request->discount : null,
             'gift' => $request->gift ?: null,
+            'photos' => $request->photos ?? [],
+            'video' => $request->video,
+            'show_photos_in_gallery' => !empty($request->show_photos_in_gallery) ? json_encode($request->show_photos_in_gallery) : json_encode([]),
+            'allow_download_photos' => !empty($request->allow_download_photos) ? json_encode($request->allow_download_photos) : json_encode([]),
+            'watermark_photos' => !empty($request->watermark_photos) ? json_encode($request->watermark_photos) : json_encode([]),
             'address' => $request->address ?: null,
             'travel_area' => $request->travel_area ?: null,
             'phone' => $request->phone ?: null,
@@ -198,7 +208,7 @@ class AdController extends Controller
         
         // Преобразуем JSON поля в массивы, если они строки
         $jsonFields = ['clients', 'service_location', 'service_provider', 'is_starting_price', 
-                      'show_photos_in_gallery', 'allow_download_photos', 'watermark_photos', 
+                      'photos', 'video', 'show_photos_in_gallery', 'allow_download_photos', 'watermark_photos', 
                       'custom_travel_areas', 'working_days', 'working_hours'];
         
         foreach ($jsonFields as $field) {
@@ -227,7 +237,7 @@ class AdController extends Controller
         
         // Преобразуем JSON поля в массивы, если они строки
         $jsonFields = ['clients', 'service_location', 'service_provider', 'is_starting_price', 
-                      'show_photos_in_gallery', 'allow_download_photos', 'watermark_photos', 
+                      'photos', 'video', 'show_photos_in_gallery', 'allow_download_photos', 'watermark_photos', 
                       'custom_travel_areas', 'working_days', 'working_hours'];
         
         foreach ($jsonFields as $field) {
@@ -331,5 +341,31 @@ class AdController extends Controller
                 'error' => 'Ошибка при изменении статуса: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Показать объявление для просмотра/редактирования
+     */
+    public function show(Ad $ad)
+    {
+        // Проверяем, что пользователь может просматривать это объявление
+        $user = Auth::user();
+        if (!$user || $ad->user_id !== $user->id) {
+            abort(403, 'Нет доступа к объявлению');
+        }
+
+        // Загружаем связанные данные
+        $ad->load(['user']);
+
+        // Если это черновик, показываем форму редактирования
+        if ($ad->status === 'draft') {
+            return $this->edit($ad);
+        }
+
+        // Для опубликованных объявлений показываем страницу просмотра
+        return Inertia::render('Ads/Show', [
+            'ad' => $ad,
+            'isOwner' => true
+        ]);
     }
 } 
