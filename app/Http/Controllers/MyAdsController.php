@@ -93,8 +93,17 @@ class MyAdsController extends Controller
     {
         $this->authorize('delete', $ad);
         
+        // Запоминаем статус для правильного перенаправления
+        $wasDraft = $ad->status === Ad::STATUS_DRAFT;
+        
         $ad->delete();
         
+        // Если удаляли со страницы черновика - перенаправляем в личный кабинет
+        if (request()->header('referer') && str_contains(request()->header('referer'), '/draft/')) {
+            return redirect('/profile/items/draft/all')->with('success', 'Черновик удален');
+        }
+        
+        // Иначе возвращаемся назад
         return back()->with('success', 'Объявление удалено');
     }
     

@@ -244,25 +244,10 @@ Route::middleware('auth')->group(function () {
     });
 
     /*
-    | Размещение объявлений (как у Avito)
+    | Размещение объявлений (как у Avito - /additem)
     */
-    Route::prefix('additem')->name('additem.')->group(function () {
-        Route::get('/',              [AddItemController::class, 'index'])->name('index');
-        Route::post('/store',        [AddItemController::class, 'store'])->name('store');
-        Route::post('/draft',        [AddItemController::class, 'storeDraft'])->name('draft');
-        Route::get('/massage',       [AddItemController::class, 'massage'])->name('massage');
-        Route::post('/massage',      [AddItemController::class, 'storeMassage'])->name('massage.store');
-        Route::get('/erotic',        [AddItemController::class, 'erotic'])->name('erotic');
-        Route::post('/erotic',       [AddItemController::class, 'storeErotic'])->name('erotic.store');
-        Route::get('/strip',         [AddItemController::class, 'strip'])->name('strip');
-        Route::get('/escort',        [AddItemController::class, 'escort'])->name('escort');
-    });
-
-    /*
-    | Модульная страница создания объявления (как на Avito)
-    */
-    Route::get('/addservice', [AddItemController::class, 'addService'])->name('addservice');
-    Route::post('/addservice', [AddItemController::class, 'storeService'])->name('addservice.store');
+    Route::get('/additem', [AdController::class, 'addItem'])->name('additem');
+    Route::post('/additem', [AdController::class, 'store'])->name('additem.store');
     
     // 🔥 ДОБАВЛЕНО: дополнительные маршруты для полного функционала Dashboard
     Route::get('/messages', fn() => Inertia::render('Messages/Index'))->name('messages.index');
@@ -337,12 +322,16 @@ Route::middleware('auth')->group(function () {
     Route::post('/photos/{photo}/set-main', [App\Http\Controllers\MediaUploadController::class, 'setMainPhoto'])->name('master.set.main.photo');
     
     // Маршруты для объявлений
-    Route::get('/ads/create', [AdController::class, 'create'])->name('ads.create');
+            // Удалено: ads/create - теперь используем /additem
     Route::post('/ads', [AdController::class, 'store'])->name('ads.store');
     Route::post('/ads/draft', [AdController::class, 'storeDraft'])->name('ads.draft');
     Route::post('/ads/publish', [AdController::class, 'publish'])->name('ads.publish');
     Route::get('/ads/{ad}', [AdController::class, 'show'])->name('ads.show');
     Route::get('/ads/{ad}/edit', [AdController::class, 'edit'])->name('ads.edit');
+    
+    // Маршруты для черновиков
+            Route::get('/draft/{ad}', [AdController::class, 'showDraft'])->name('ads.draft.show');
+        // Удаление черновиков теперь через my-ads.destroy как и других объявлений
     Route::get('/ads/{ad}/data', [AdController::class, 'getData'])->name('ads.data');
     Route::put('/ads/{ad}', [AdController::class, 'update'])->name('ads.update');
     Route::delete('/ads/{ad}', [AdController::class, 'destroy'])->name('ads.destroy');

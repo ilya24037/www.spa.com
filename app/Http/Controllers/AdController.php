@@ -11,15 +11,17 @@ use Illuminate\Support\Facades\Validator;
 class AdController extends Controller
 {
     /**
-     * Показать форму создания объявления
+     * Страница создания объявления в стиле Avito (/additem)
      */
-    public function create()
+    public function addItem()
     {
-        return Inertia::render('AddService');
+        return Inertia::render('AddItem');
     }
 
+
+
     /**
-     * Сохранить объявление
+     * Сохранить объявление (как у Avito - один метод для черновика и публикации)
      */
     public function store(Request $request)
     {
@@ -66,9 +68,9 @@ class AdController extends Controller
             'gift' => $request->gift,
             'photos' => $request->photos ?? [],
             'video' => $request->video,
-            'show_photos_in_gallery' => $request->show_photos_in_gallery ?? [],
-            'allow_download_photos' => $request->allow_download_photos ?? [],
-            'watermark_photos' => $request->watermark_photos ?? [],
+            'show_photos_in_gallery' => $request->boolean('show_photos_in_gallery', true),
+            'allow_download_photos' => $request->boolean('allow_download_photos', false),
+            'watermark_photos' => $request->boolean('watermark_photos', true),
             'address' => $request->address,
             'travel_area' => $request->travel_area,
             'phone' => $request->phone,
@@ -105,9 +107,9 @@ class AdController extends Controller
             'gift' => $request->gift ?: null,
             'photos' => $request->photos ?? [],
             'video' => $request->video,
-            'show_photos_in_gallery' => !empty($request->show_photos_in_gallery) ? json_encode($request->show_photos_in_gallery) : json_encode([]),
-            'allow_download_photos' => !empty($request->allow_download_photos) ? json_encode($request->allow_download_photos) : json_encode([]),
-            'watermark_photos' => !empty($request->watermark_photos) ? json_encode($request->watermark_photos) : json_encode([]),
+            'show_photos_in_gallery' => $request->boolean('show_photos_in_gallery', true),
+            'allow_download_photos' => $request->boolean('allow_download_photos', false),
+            'watermark_photos' => $request->boolean('watermark_photos', true),
             'address' => $request->address ?: null,
             'travel_area' => $request->travel_area ?: null,
             'phone' => $request->phone ?: null,
@@ -276,14 +278,30 @@ class AdController extends Controller
             'address' => 'required|string|max:500',
             'travel_area' => 'required|string',
             'phone' => 'required|string',
-            'contact_method' => 'required|string|in:any,calls,messages'
+            'contact_method' => 'required|string|in:any,calls,messages',
+            'photos' => 'nullable|array',
+            'video' => 'nullable|string',
+            'show_photos_in_gallery' => 'boolean',
+            'allow_download_photos' => 'boolean',
+            'watermark_photos' => 'boolean'
         ]);
 
         if ($validator->fails()) {
             return back()->withErrors($validator->errors());
         }
 
-        $ad->update($validator->validated());
+        $validated = $validator->validated();
+        
+        // Обрабатываем специальные поля
+        $validated['clients'] = json_encode($validated['clients'] ?? []);
+        $validated['service_location'] = json_encode($validated['service_location']);
+        $validated['service_provider'] = json_encode($validated['service_provider'] ?? []);
+        $validated['photos'] = $validated['photos'] ?? [];
+        $validated['show_photos_in_gallery'] = $request->boolean('show_photos_in_gallery', true);
+        $validated['allow_download_photos'] = $request->boolean('allow_download_photos', false);
+        $validated['watermark_photos'] = $request->boolean('watermark_photos', true);
+        
+        $ad->update($validated);
 
         return redirect()->route('profile.dashboard')->with('success', 'Объявление обновлено!');
     }
@@ -357,9 +375,9 @@ class AdController extends Controller
         // Загружаем связанные данные
         $ad->load(['user']);
 
-        // Если это черновик, показываем форму редактирования
+        // Если это черновик, перенаправляем на специальную страницу черновика
         if ($ad->status === 'draft') {
-            return $this->edit($ad);
+            return redirect()->route('ads.draft.show', $ad);
         }
 
         // Для опубликованных объявлений показываем страницу просмотра
@@ -367,5 +385,70 @@ class AdController extends Controller
             'ad' => $ad,
             'isOwner' => true
         ]);
+    }
+
+    /**
+     * Показать черновик объявления (как на Авито)
+     */
+    public function showDraft(Ad $ad)
+    {
+        // Проверяем права доступа
+        $user = Auth::user();
+        if (!$user || $ad->user_id !== $user->id) {
+            abort(403, 'Нет доступа к черновику');
+        }
+
+        // Проверяем что это действительно черновик
+        if ($ad->status !== 'draft') {
+            return redirect()->route('ads.show', $ad);
+        }
+
+        // Загружаем связанные данные
+        $ad->load(['user']);
+
+        // Получаем данные с правильным преобразованием JSON полей
+        $adData = $ad->toArray();
+        
+        // Убеждаемся что JSON поля декодированы в массивы
+        $jsonFields = ['clients', 'service_location', 'service_provider', 'photos', 'video'];
+        
+        foreach ($jsonFields as $field) {
+            if (isset($adData[$field]) && is_string($adData[$field])) {
+                $decoded = json_decode($adData[$field], true);
+                $adData[$field] = is_array($decoded) ? $decoded : [];
+            } elseif (!isset($adData[$field])) {
+                $adData[$field] = [];
+            }
+        }
+
+        // Показываем страницу черновика
+        return Inertia::render('Draft/Show', [
+            'ad' => $adData,
+            'isOwner' => true
+        ]);
+    }
+
+    /**
+     * Удалить черновик объявления
+     */
+    public function deleteDraft(Ad $ad)
+    {
+        // Проверяем права доступа
+        $user = Auth::user();
+        if (!$user || $ad->user_id !== $user->id) {
+            abort(403, 'Нет доступа к черновику');
+        }
+
+        // Проверяем что это действительно черновик
+        if ($ad->status !== 'draft') {
+            return redirect()->route('ads.show', $ad)->with('error', 'Можно удалять только черновики');
+        }
+
+        // Удаляем черновик
+        $ad->delete();
+
+        // Перенаправляем на страницу "Мои объявления"
+        return redirect()->route('my-ads.index')
+            ->with('success', 'Черновик успешно удален');
     }
 } 

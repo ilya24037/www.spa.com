@@ -227,14 +227,6 @@
                             </div>
                             <h3 class="text-xl font-medium text-gray-900 mb-3">{{ getEmptyStateTitle(activeTab) }}</h3>
                             <p class="text-gray-600 mb-8 leading-relaxed">{{ getEmptyStateDescription(activeTab) }}</p>
-                            <div v-if="activeTab === 'draft' || activeTab === 'inactive'" class="space-y-3">
-                                <Link 
-                                    href="/additem/massage"
-                                    class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
-                                >
-                                    Разместить объявление
-                                </Link>
-                            </div>
                         </div>
                     </div>
                 </div>

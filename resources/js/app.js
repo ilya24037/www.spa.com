@@ -10,6 +10,9 @@ import { ZiggyVue } from 'ziggy-js';
 import { Ziggy } from './ziggy';
 import { route } from 'ziggy-js';
 
+// Делаем route доступным глобально
+window.route = route;
+
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({

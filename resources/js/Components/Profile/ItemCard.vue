@@ -22,11 +22,11 @@
   }
 -->
 <template>
-  <div class="avito-item-snippet">
+  <div class="avito-item-snippet cursor-pointer hover:shadow-lg transition-shadow" @click="handleCardClick">
     <div class="item-snippet-content">
       <!-- Изображение слева (160x120px) -->
       <div class="item-image-section">
-        <a :href="`/ads/${item.id}`" class="item-image-link">
+        <a :href="itemUrl" class="item-image-link">
           <div class="item-image-wrapper">
             <img 
               :src="getImageUrl(item.avatar || item.main_image)"
@@ -51,7 +51,7 @@
       <div class="item-content-section">
         <!-- Заголовок -->
         <h4 class="item-title">
-          <a :href="`/ads/${item.id}`" class="item-title-link">
+          <a :href="itemUrl" class="item-title-link">
             {{ item.name }}
           </a>
         </h4>
@@ -185,7 +185,7 @@
                 <a href="#" class="dropdown-item" @click.prevent="editItem">
                   Редактировать
                 </a>
-                <a href="#" class="dropdown-item danger-item" @click.prevent="showDeleteConfirm">
+                <a href="#" class="dropdown-item danger-item" @click.stop.prevent="showDeleteConfirm">
                   Удалить
                 </a>
               </div>
@@ -230,7 +230,7 @@
                   <a href="#" class="dropdown-item" @click.prevent="deactivateItem">
                     Снять с публикации
                   </a>
-                  <a href="#" class="dropdown-item danger-item" @click.prevent="showDeleteConfirm">
+                  <a href="#" class="dropdown-item danger-item" @click.stop.prevent="showDeleteConfirm">
                     Удалить
                   </a>
                 </div>
@@ -269,7 +269,7 @@
                   <a href="#" class="dropdown-item" @click.prevent="editItem">
                     Редактировать
                   </a>
-                  <a href="#" class="dropdown-item danger-item" @click.prevent="showDeleteConfirm">
+                  <a href="#" class="dropdown-item danger-item" @click.stop.prevent="showDeleteConfirm">
                     Удалить
                   </a>
                 </div>
@@ -304,7 +304,7 @@
                   <a href="#" class="dropdown-item" @click.prevent="editItem">
                     Редактировать
                   </a>
-                  <a href="#" class="dropdown-item danger-item" @click.prevent="showDeleteConfirm">
+                  <a href="#" class="dropdown-item danger-item" @click.stop.prevent="showDeleteConfirm">
                     Удалить
                   </a>
                 </div>
@@ -329,9 +329,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { router } from '@inertiajs/vue3'
 import ConfirmModal from '../UI/ConfirmModal.vue'
+
+// Импортируем route из window.route (Ziggy)
+const { route } = window
 
 const props = defineProps({
   item: {
@@ -346,8 +349,30 @@ const showDropdown = ref(false)
 const showDeleteModal = ref(false)
 const dropdown = ref(null)
 
+// Computed property для правильного URL в зависимости от статуса
+const itemUrl = computed(() => {
+  if (props.item.status === 'draft') {
+    return `/draft/${props.item.id}`
+  }
+  return `/ads/${props.item.id}`
+})
+
 const toggleDropdown = () => {
   showDropdown.value = !showDropdown.value
+}
+
+// Обработчик клика по карточке (как на Авито)
+const handleCardClick = (event) => {
+  // Игнорируем клик если это по кнопкам действий
+  if (event.target.closest('.dropdown-container') || 
+      event.target.closest('.action-button') ||
+      event.target.closest('button')) {
+    return
+  }
+  
+  // Используем router.visit для навигации
+  console.log('Card clicked, navigating to:', itemUrl.value)
+  router.visit(itemUrl.value)
 }
 
 const closeDropdown = (event) => {
@@ -520,7 +545,10 @@ const confirmDelete = async () => {
   showDeleteModal.value = false
   
   try {
-    router.delete(`/my-ads/${props.item.id}`, {
+    // Используем один роут для удаления всех объявлений (как у Avito)
+    const deleteUrl = `/my-ads/${props.item.id}`
+    
+    router.delete(deleteUrl, {
       preserveScroll: true,
       onSuccess: () => {
         // Обновление произойдет автоматически через Inertia

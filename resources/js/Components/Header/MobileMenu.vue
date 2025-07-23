@@ -93,7 +93,7 @@
           <template v-if="isAuthenticated">
             <!-- Разместить объявление -->
             <Link 
-              href="/additem"
+                                href="/additem"
               class="block w-full bg-blue-600 text-white text-center py-3 rounded-lg font-medium"
             >
               Разместить объявление
