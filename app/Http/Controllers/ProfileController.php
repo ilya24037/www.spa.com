@@ -52,13 +52,23 @@ class ProfileController extends Controller
             $mainImage = null;
             $photosCount = 0;
             
-            if ($ad->photos && is_array($ad->photos) && count($ad->photos) > 0) {
-                $mainImage = $ad->photos[0]['preview'] ?? $ad->photos[0]['url'] ?? null;
-                $photosCount = count($ad->photos);
+            // Проверяем, что photos не null и не пустая строка
+            if ($ad->photos && $ad->photos !== 'null' && $ad->photos !== '') {
+                // Если photos - это JSON строка, декодируем её
+                if (is_string($ad->photos)) {
+                    $photosArray = json_decode($ad->photos, true);
+                    if (is_array($photosArray) && count($photosArray) > 0) {
+                        $mainImage = $photosArray[0]['preview'] ?? $photosArray[0]['url'] ?? null;
+                        $photosCount = count($photosArray);
+                    }
+                } elseif (is_array($ad->photos) && count($ad->photos) > 0) {
+                    $mainImage = $ad->photos[0]['preview'] ?? $ad->photos[0]['url'] ?? null;
+                    $photosCount = count($ad->photos);
+                }
             }
             
             // Если нет фото в объявлении, используем тестовое
-            if (!$mainImage) {
+            if (!$mainImage || $mainImage === 'undefined') {
                 $mainImage = '/images/masters/demo-' . (($ad->id % 4) + 1) . '.jpg';
                 $photosCount = rand(1, 4);
             }
@@ -130,9 +140,41 @@ class ProfileController extends Controller
 
     private function renderItemsByStatus($request, $status, $title) {
         $user = $request->user();
-        $ads = \App\Models\Ad::where('user_id', $user->id)->where('status', $status)->orderBy('created_at', 'desc')->get();
-        // Преобразование и подсчёты (оставить как было)
+        
+        // Оптимизируем запрос - добавляем лимит и выбираем только нужные поля
+        $ads = \App\Models\Ad::where('user_id', $user->id)
+            ->where('status', $status)
+            ->select(['id', 'title', 'status', 'price', 'address', 'travel_area', 'specialty', 'description', 'phone', 'contact_method', 'photos', 'service_location', 'created_at', 'updated_at'])
+            ->orderBy('created_at', 'desc')
+            ->limit(100) // Ограничиваем количество записей
+            ->get();
+        // Преобразование и подсчёты с правильной обработкой фотографий
         $profiles = $ads->map(function ($ad) {
+            // Получаем первое фото из массива photos (используем ту же логику что и в renderItems)
+            $mainImage = null;
+            $photosCount = 0;
+            
+            // Проверяем, что photos не null и не пустая строка
+            if ($ad->photos && $ad->photos !== 'null' && $ad->photos !== '') {
+                // Если photos - это JSON строка, декодируем её
+                if (is_string($ad->photos)) {
+                    $photosArray = json_decode($ad->photos, true);
+                    if (is_array($photosArray) && count($photosArray) > 0) {
+                        $mainImage = $photosArray[0]['preview'] ?? $photosArray[0]['url'] ?? null;
+                        $photosCount = count($photosArray);
+                    }
+                } elseif (is_array($ad->photos) && count($ad->photos) > 0) {
+                    $mainImage = $ad->photos[0]['preview'] ?? $ad->photos[0]['url'] ?? null;
+                    $photosCount = count($ad->photos);
+                }
+            }
+            
+            // Если нет фото в объявлении, используем тестовое
+            if (!$mainImage || $mainImage === 'undefined') {
+                $mainImage = '/images/masters/demo-' . (($ad->id % 4) + 1) . '.jpg';
+                $photosCount = rand(1, 4);
+            }
+            
             return [
                 'id' => $ad->id,
                 'slug' => Str::slug($ad->title),
@@ -140,9 +182,10 @@ class ProfileController extends Controller
                 'status' => $ad->status,
                 'is_active' => $ad->status === 'active',
                 'price_from' => $ad->price ?? 0,
-                'views_count' => rand(10, 100), // Тестовые данные
-                'photos_count' => rand(1, 8), // Тестовые данные
-                'avatar' => '/images/masters/demo-' . (($ad->id % 4) + 1) . '.jpg', // Тестовые изображения
+                'views_count' => $ad->views_count ?? rand(10, 100),
+                'photos_count' => $photosCount,
+                'avatar' => $mainImage,
+                'main_image' => $mainImage,
                 'city' => 'Москва', // Из адреса или по умолчанию
                 'address' => $ad->address ?? '',
                 'district' => $ad->travel_area ?? '',
@@ -168,12 +211,19 @@ class ProfileController extends Controller
                 'favorites_count' => rand(0, 25),
             ];
         });
+        // Оптимизируем подсчеты - используем один запрос с группировкой
+        $countsQuery = \App\Models\Ad::where('user_id', $user->id)
+            ->selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
+            ->pluck('count', 'status')
+            ->toArray();
+            
         $counts = [
-            'active' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'active')->count(),
-            'draft' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'draft')->count(),
-            'waiting_payment' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'waiting_payment')->count(),
-            'old' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'archived')->count(), // старые = архивные
-            'archived' => \App\Models\Ad::where('user_id', $user->id)->where('status', 'archived')->count(),
+            'active' => $countsQuery['active'] ?? 0,
+            'draft' => $countsQuery['draft'] ?? 0,
+            'waiting_payment' => $countsQuery['waiting_payment'] ?? 0,
+            'old' => $countsQuery['archived'] ?? 0, // старые = архивные
+            'archived' => $countsQuery['archived'] ?? 0,
         ];
         $userStats = [
             'rating' => 0,

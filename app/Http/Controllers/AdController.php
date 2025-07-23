@@ -66,7 +66,7 @@ class AdController extends Controller
             'is_starting_price' => $request->is_starting_price ? true : false,
             'discount' => $request->discount,
             'gift' => $request->gift,
-            'photos' => $request->photos ?? [],
+            'photos' => is_array($request->photos) ? json_encode($request->photos) : json_encode([]),
             'video' => $request->video,
             'show_photos_in_gallery' => $request->boolean('show_photos_in_gallery', true),
             'allow_download_photos' => $request->boolean('allow_download_photos', false),
@@ -105,7 +105,7 @@ class AdController extends Controller
             'is_starting_price' => $request->is_starting_price ? true : false,
             'discount' => $request->discount ? (int)$request->discount : null,
             'gift' => $request->gift ?: null,
-            'photos' => $request->photos ?? [],
+            'photos' => is_array($request->photos) ? json_encode($request->photos) : json_encode([]),
             'video' => $request->video,
             'show_photos_in_gallery' => $request->boolean('show_photos_in_gallery', true),
             'allow_download_photos' => $request->boolean('allow_download_photos', false),
@@ -183,6 +183,11 @@ class AdController extends Controller
                 'travel_area' => $request->travel_area ?: null,
                 'phone' => $request->phone,
                 'contact_method' => $request->contact_method ?: 'messages',
+                'photos' => is_array($request->photos) ? json_encode($request->photos) : json_encode([]),
+                'video' => $request->video ?: null,
+                'show_photos_in_gallery' => $request->boolean('show_photos_in_gallery', true),
+                'allow_download_photos' => $request->boolean('allow_download_photos', false),
+                'watermark_photos' => $request->boolean('watermark_photos', true),
                 'status' => 'waiting_payment' // Статус для ожидания оплаты
             ]
         );
@@ -296,7 +301,7 @@ class AdController extends Controller
         $validated['clients'] = json_encode($validated['clients'] ?? []);
         $validated['service_location'] = json_encode($validated['service_location']);
         $validated['service_provider'] = json_encode($validated['service_provider'] ?? []);
-        $validated['photos'] = $validated['photos'] ?? [];
+        $validated['photos'] = is_array($validated['photos']) ? json_encode($validated['photos']) : json_encode([]);
         $validated['show_photos_in_gallery'] = $request->boolean('show_photos_in_gallery', true);
         $validated['allow_download_photos'] = $request->boolean('allow_download_photos', false);
         $validated['watermark_photos'] = $request->boolean('watermark_photos', true);

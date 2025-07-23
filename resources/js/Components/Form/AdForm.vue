@@ -383,7 +383,12 @@ const handleSaveDraft = async () => {
         address: form.address,
         travel_area: form.travel_area,
         phone: form.phone,
-        contact_method: form.contact_method
+        contact_method: form.contact_method,
+        photos: form.photos,
+        video: form.video,
+        show_photos_in_gallery: form.show_photos_in_gallery,
+        allow_download_photos: form.allow_download_photos,
+        watermark_photos: form.watermark_photos
     }, {
         preserveScroll: true,
         onFinish: () => {

@@ -194,28 +194,26 @@
 
           <!-- Для активных объявлений -->
           <template v-else-if="item.status === 'active'">
-            <button class="action-button primary-button">
-              Поднять просмотры
-            </button>
-            
-            <div class="action-row">
-              <button class="action-button secondary-button">
-                Рассылка
+            <div class="waiting-payment-actions">
+              <button class="action-button secondary-button-flex">
+                <span class="button-wrapper">
+                  <span class="button-text">Поднять просмотры</span>
+                </span>
               </button>
               
               <div class="dropdown-container" ref="dropdown">
                 <button 
                   type="button" 
-                  class="dropdown-button-avito"
+                  class="dropdown-button-inline"
                   @click="toggleDropdown"
                   aria-haspopup="true"
                   :aria-expanded="showDropdown"
                 >
                   <span class="dropdown-button-wrapper">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="dropdown-icon">
-                      <circle cx="2.5" cy="7" r="1" fill="currentColor"/>
-                      <circle cx="7" cy="7" r="1" fill="currentColor"/>
-                      <circle cx="11.5" cy="7" r="1" fill="currentColor"/>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" class="dropdown-icon">
+                      <circle cx="4" cy="10" r="1.5" fill="currentColor"/>
+                      <circle cx="10" cy="10" r="1.5" fill="currentColor"/>
+                      <circle cx="16" cy="10" r="1.5" fill="currentColor"/>
                     </svg>
                   </span>
                 </button>
@@ -240,32 +238,31 @@
           
           <!-- Для черновиков -->
           <template v-else-if="item.status === 'draft'">
-            <button @click="publishItem" class="action-button primary-button">
-              Опубликовать
-            </button>
-            
-            <div class="action-row">
-              <div class="dropdown-container" ref="dropdown" style="margin-left: auto;">
+            <div class="waiting-payment-actions">
+              <button @click="editItem" class="action-button secondary-button-flex">
+                <span class="button-wrapper">
+                  <span class="button-text">Редактировать</span>
+                </span>
+              </button>
+              
+              <div class="dropdown-container" ref="dropdown">
                 <button 
                   type="button" 
-                  class="dropdown-button-avito"
+                  class="dropdown-button-inline"
                   @click="toggleDropdown"
                   aria-haspopup="true"
                   :aria-expanded="showDropdown"
                 >
                   <span class="dropdown-button-wrapper">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="dropdown-icon">
-                      <circle cx="2.5" cy="7" r="1" fill="currentColor"/>
-                      <circle cx="7" cy="7" r="1" fill="currentColor"/>
-                      <circle cx="11.5" cy="7" r="1" fill="currentColor"/>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" class="dropdown-icon">
+                      <circle cx="4" cy="10" r="1.5" fill="currentColor"/>
+                      <circle cx="10" cy="10" r="1.5" fill="currentColor"/>
+                      <circle cx="16" cy="10" r="1.5" fill="currentColor"/>
                     </svg>
                   </span>
                 </button>
                 
                 <div v-if="showDropdown" class="dropdown-menu">
-                  <a href="#" class="dropdown-item" @click.prevent="publishItem">
-                    Опубликовать
-                  </a>
                   <a href="#" class="dropdown-item" @click.prevent="editItem">
                     Редактировать
                   </a>
@@ -279,28 +276,31 @@
 
           <!-- Для архивных объявлений -->
           <template v-else-if="item.status === 'archived'">
-            <div class="action-row">
-              <div class="dropdown-container" ref="dropdown" style="margin-left: auto;">
+            <div class="waiting-payment-actions">
+              <button @click="restoreItem" class="action-button secondary-button-flex">
+                <span class="button-wrapper">
+                  <span class="button-text">Восстановить</span>
+                </span>
+              </button>
+              
+              <div class="dropdown-container" ref="dropdown">
                 <button 
                   type="button" 
-                  class="dropdown-button-avito"
+                  class="dropdown-button-inline"
                   @click="toggleDropdown"
                   aria-haspopup="true"
                   :aria-expanded="showDropdown"
                 >
                   <span class="dropdown-button-wrapper">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="dropdown-icon">
-                      <circle cx="2.5" cy="7" r="1" fill="currentColor"/>
-                      <circle cx="7" cy="7" r="1" fill="currentColor"/>
-                      <circle cx="11.5" cy="7" r="1" fill="currentColor"/>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" class="dropdown-icon">
+                      <circle cx="4" cy="10" r="1.5" fill="currentColor"/>
+                      <circle cx="10" cy="10" r="1.5" fill="currentColor"/>
+                      <circle cx="16" cy="10" r="1.5" fill="currentColor"/>
                     </svg>
                   </span>
                 </button>
                 
                 <div v-if="showDropdown" class="dropdown-menu">
-                  <a href="#" class="dropdown-item" @click.prevent="restoreItem">
-                    Восстановить
-                  </a>
                   <a href="#" class="dropdown-item" @click.prevent="editItem">
                     Редактировать
                   </a>
@@ -395,7 +395,12 @@ const formatPrice = (price) => {
 }
 
 const getImageUrl = (path) => {
-  if (!path) return '/images/no-photo.jpg'
+  if (!path || path === 'undefined') return '/images/masters/demo-1.jpg'
+  
+  // Если это base64 изображение
+  if (path.startsWith('data:image/')) {
+    return path
+  }
   
   // Если это уже полный URL
   if (path.startsWith('http://') || path.startsWith('https://')) {
@@ -417,7 +422,7 @@ const getImageUrl = (path) => {
 }
 
 const handleImageError = (event) => {
-  event.target.src = '/images/no-photo.jpg'
+  event.target.src = '/images/masters/demo-1.jpg'
   event.target.onerror = null // Предотвращаем бесконечный цикл
 }
 
@@ -817,6 +822,10 @@ const cancelDelete = () => {
   width: 28px;
   height: 28px;
   flex-shrink: 0;
+}
+
+.gray-button {
+  @apply bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200;
 }
 
 .dropdown-button-inline {

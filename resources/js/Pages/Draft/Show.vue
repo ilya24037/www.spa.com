@@ -363,19 +363,36 @@ const galleryPhotos = computed(() => {
   // Добавляем фотографии из объявления
   if (props.ad.photos && props.ad.photos.length) {
     props.ad.photos.forEach((photo, index) => {
-      photos.push({
-        url: photo.url || `/storage/${photo.path}`,
-        thumb: photo.thumb || photo.url || `/storage/${photo.path}`,
-        alt: photo.alt || `Фото ${index + 1}`
-      })
+      // Обрабатываем разные форматы фотографий
+      let photoUrl = null
+      let photoThumb = null
+      
+      if (typeof photo === 'string') {
+        // Если фото - строка (URL)
+        photoUrl = photo
+        photoThumb = photo
+      } else if (photo && typeof photo === 'object') {
+        // Если фото - объект
+        photoUrl = photo.preview || photo.url || photo.src || photo.path
+        photoThumb = photo.thumb || photo.preview || photo.url || photo.src || photo.path
+      }
+      
+      // Проверяем что URL не undefined
+      if (photoUrl && photoUrl !== 'undefined') {
+        photos.push({
+          url: photoUrl,
+          thumb: photoThumb || photoUrl,
+          alt: photo.alt || `Фото ${index + 1}`
+        })
+      }
     })
   }
   
   // Если нет фотографий, добавляем placeholder
   if (photos.length === 0) {
     photos.push({
-      url: '/images/no-photo.jpg',
-      thumb: '/images/no-photo.jpg',
+      url: '/images/masters/demo-1.jpg',
+      thumb: '/images/masters/demo-1.jpg',
       alt: 'Фото недоступно'
     })
   }
