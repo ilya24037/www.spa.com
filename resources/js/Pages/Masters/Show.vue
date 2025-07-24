@@ -1,8 +1,8 @@
 ﻿<template>
-  <div class="master-page">
-    <!-- Контент с максимальной шириной как на главной -->
+  <div>
+    <!-- Контейнер как на главной -->
     <div class="py-6 lg:py-8">
-      <!-- Основной контент -->
+      <!-- Основной контент с правильными отступами -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         <!-- Левая колонка: Фото и основная информация -->
@@ -212,20 +212,5 @@ const openBooking = () => {
 </script>
 
 <style scoped>
-/* Полная ширина страницы */
-.master-page {
-  margin-left: calc(-50vw + 50%);
-  margin-right: calc(-50vw + 50%);
-  width: 100vw;
-  padding-left: 2rem;
-  padding-right: 2rem;
-  box-sizing: border-box;
-}
-
-@media (max-width: 768px) {
-  .master-page {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-}
+/* Убираем стили полной ширины - используем стандартную структуру как на главной */
 </style>

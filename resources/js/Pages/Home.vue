@@ -74,7 +74,15 @@
           <!-- Карта - фиксированные отступы ContentCard -->
           <ContentCard>
             <div class="h-[400px] rounded-lg overflow-hidden">
-              <SimpleMap :cards="filteredMasters" />
+              <UniversalMap 
+                mode="preview"
+                :markers="filteredMasters"
+                :title="`${filteredMasters.length} мастеров`"
+                :subtitle="currentCity"
+                :action-button="{ text: 'Показать списком', action: 'toggle-list' }"
+                @action-click="viewMode = 'list'"
+                @marker-click="handleMasterClick"
+              />
             </div>
           </ContentCard>
 
@@ -166,7 +174,7 @@ import SidebarWrapper from '@/Components/Layout/SidebarWrapper.vue'
 import ContentCard from '@/Components/Layout/ContentCard.vue'
 import Filters from '@/Components/Filters/Filters.vue'
 import Cards from '@/Components/Cards/Cards.vue'
-import SimpleMap from '@/Components/Map/SimpleMap.vue'
+import UniversalMap from '@/Components/Map/UniversalMap.vue'
 
 // Props из Inertia
 const props = defineProps({
@@ -198,6 +206,12 @@ const filters = ref({
   online_booking: false,
   verified: false
 })
+
+// Обработчик клика по мастеру
+const handleMasterClick = (master) => {
+  // Переход на страницу мастера
+  window.location.href = `/masters/${master.id}`
+}
 
 // Фильтрация мастеров
 const filteredMasters = computed(() => {

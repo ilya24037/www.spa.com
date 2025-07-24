@@ -9,11 +9,9 @@
       <div class="main-service">
         <h4 class="field-title">Основная услуга</h4>
         <div class="service-row">
-          <FormInput
-            id="main_service_name"
-            name="main_service_name"
-            placeholder="Название услуги"
+          <BaseInput
             v-model="form.main_service_name"
+            placeholder="Название услуги"
             :error="errors.main_service_name"
           />
           <PriceInput
@@ -140,20 +138,20 @@
 
 <script>
 import PageSection from '@/Components/Layout/PageSection.vue'
-import FormInput from '@/Components/Form/FormInput.vue'
+import BaseInput from '@/Components/UI/BaseInput.vue'
 import FormTextarea from '@/Components/Form/FormTextarea.vue'
-import FormCheckbox from '@/Components/Form/FormCheckbox.vue'
-import FormSelect from '@/Components/Form/FormSelect.vue'
+import BaseCheckbox from '@/Components/UI/BaseCheckbox.vue'
+import BaseSelect from '@/Components/UI/BaseSelect.vue'
 import PriceInput from '@/Components/Form/Controls/PriceInput.vue'
 
 export default {
   name: 'PriceListSection',
   components: {
     PageSection,
-    FormInput,
+    BaseInput,
     FormTextarea,
-    FormCheckbox,
-    FormSelect,
+    BaseCheckbox,
+    BaseSelect,
     PriceInput
   },
   props: {

@@ -20,38 +20,43 @@
         <h4 class="field-title">Куда выезжаете</h4>
         <p class="field-hint">Укажите все зоны выезда, чтобы клиенты понимали, доберётесь ли вы до них.</p>
         
-        <FormRadio
-          label="Районы выезда"
-          name="travel_area"
-          v-model="form.travel_area"
-          :options="travelAreaOptions"
-          :error="errors.travel_area"
-        />
+                 <div class="space-y-2">
+           <BaseRadio
+             v-for="option in travelAreaOptions"
+             :key="option.value"
+             v-model="form.travel_area"
+             :value="option.value"
+             :label="option.label"
+           />
+         </div>
+         <div v-if="errors.travel_area" class="mt-1 text-sm text-red-600">{{ errors.travel_area }}</div>
 
-        <!-- Дополнительные районы -->
-        <div v-if="form.travel_area === 'custom'" class="custom-areas">
-          <FormCheckbox
-            label="Выберите районы"
-            name="custom_travel_areas"
-            v-model="form.custom_travel_areas"
-            :options="customTravelAreasOptions"
-            :error="errors.custom_travel_areas"
-          />
-        </div>
+         <!-- Дополнительные районы -->
+         <div v-if="form.travel_area === 'custom'" class="custom-areas">
+           <label class="block text-sm font-medium text-gray-700 mb-3">Выберите районы</label>
+           <div class="space-y-2">
+             <BaseCheckbox
+               v-for="option in customTravelAreasOptions"
+               :key="option.value"
+               v-model="form.custom_travel_areas"
+               :value="option.value"
+               :label="option.label"
+             />
+           </div>
+           <div v-if="errors.custom_travel_areas" class="mt-1 text-sm text-red-600">{{ errors.custom_travel_areas }}</div>
+         </div>
       </div>
 
       <!-- Радиус выезда -->
-      <div v-if="form.travel_area !== 'no_travel'" class="travel-radius">
-        <FormSelect
-          id="travel_radius"
-          name="travel_radius"
-          label="Радиус выезда"
-          placeholder="Выберите радиус"
-          v-model="form.travel_radius"
-          :options="travelRadiusOptions"
-          :error="errors.travel_radius"
-        />
-      </div>
+             <div v-if="form.travel_area !== 'no_travel'" class="travel-radius">
+         <BaseSelect
+           v-model="form.travel_radius"
+           label="Радиус выезда"
+           placeholder="Выберите радиус"
+           :options="travelRadiusOptions"
+           :error="errors.travel_radius"
+         />
+       </div>
 
       <!-- Доплата за выезд -->
       <div v-if="form.travel_area !== 'no_travel'" class="travel-fee">
@@ -68,33 +73,25 @@
       </div>
 
       <!-- Время в пути -->
-      <div v-if="form.travel_area !== 'no_travel'" class="travel-time">
-        <FormSelect
-          id="travel_time"
-          name="travel_time"
-          label="Время в пути"
-          placeholder="Выберите время"
-          v-model="form.travel_time"
-          :options="travelTimeOptions"
-          :error="errors.travel_time"
-        />
-      </div>
+             <div v-if="form.travel_area !== 'no_travel'" class="travel-time">
+         <BaseSelect
+           v-model="form.travel_time"
+           label="Время в пути"
+           placeholder="Выберите время"
+           :options="travelTimeOptions"
+           :error="errors.travel_time"
+         />
+       </div>
 
       <!-- Карта -->
       <div class="map-container">
         <h4 class="field-title">Карта</h4>
-        <div class="map-placeholder">
-          <div class="map-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-              <circle cx="12" cy="10" r="3"/>
-            </svg>
-          </div>
-          <p>Здесь будет карта с вашим адресом и зоной выезда</p>
-          <button type="button" class="btn btn-secondary" @click="showMap = true">
-            Открыть карту
-          </button>
-        </div>
+        <UniversalMap 
+          mode="picker"
+          :height="200"
+          placeholder-text="Кликните для выбора места на карте"
+          @map-click="handleMapClick"
+        />
       </div>
     </div>
   </PageSection>
@@ -103,20 +100,22 @@
 <script>
 import PageSection from '@/Components/Layout/PageSection.vue'
 import GeoSuggest from '@/Components/Form/Geo/GeoSuggest.vue'
-import FormRadio from '@/Components/Form/FormRadio.vue'
-import FormCheckbox from '@/Components/Form/FormCheckbox.vue'
-import FormSelect from '@/Components/Form/FormSelect.vue'
+import BaseRadio from '@/Components/UI/BaseRadio.vue'
+import BaseCheckbox from '@/Components/UI/BaseCheckbox.vue'
+import BaseSelect from '@/Components/UI/BaseSelect.vue'
 import PriceInput from '@/Components/Form/Controls/PriceInput.vue'
+import UniversalMap from '@/Components/Map/UniversalMap.vue'
 
 export default {
   name: 'GeographySection',
   components: {
     PageSection,
     GeoSuggest,
-    FormRadio,
-    FormCheckbox,
-    FormSelect,
-    PriceInput
+    BaseRadio,
+    BaseCheckbox,
+    BaseSelect,
+    PriceInput,
+    UniversalMap
   },
   props: {
     form: {
@@ -170,6 +169,11 @@ export default {
   methods: {
     handleAddressSelect(address) {
       this.$emit('address-selected', address)
+    },
+    handleMapClick(data) {
+      console.log('Выбрано место на карте:', data)
+      // Здесь можно установить координаты в форму
+      this.$emit('map-location-selected', data)
     }
   }
 }

@@ -28,23 +28,25 @@
       <div class="media-settings">
         <h4 class="settings-title">Настройки отображения</h4>
         
-        <FormCheckbox
-          name="show_photos_in_gallery"
-          v-model="form.show_photos_in_gallery"
-          :options="[{ value: '1', label: 'Показывать фото в галерее на странице объявления' }]"
-        />
+        <div class="space-y-3">
+          <BaseCheckbox
+            v-model="form.show_photos_in_gallery"
+            value="1"
+            label="Показывать фото в галерее на странице объявления"
+          />
 
-        <FormCheckbox
-          name="allow_download_photos"
-          v-model="form.allow_download_photos"
-          :options="[{ value: '1', label: 'Разрешить клиентам скачивать фотографии' }]"
-        />
+          <BaseCheckbox
+            v-model="form.allow_download_photos"
+            value="1"
+            label="Разрешить клиентам скачивать фотографии"
+          />
 
-        <FormCheckbox
-          name="watermark_photos"
-          v-model="form.watermark_photos"
-          :options="[{ value: '1', label: 'Добавить водяной знак на фотографии' }]"
-        />
+          <BaseCheckbox
+            v-model="form.watermark_photos"
+            value="1"
+            label="Добавить водяной знак на фотографии"
+          />
+        </div>
       </div>
 
       <!-- Советы по медиа -->
@@ -66,7 +68,7 @@
 import PageSection from '@/Components/Layout/PageSection.vue'
 import PhotoUploader from '@/Components/Form/Upload/PhotoUploader.vue'
 import VideoUploader from '@/Components/Form/Upload/VideoUploader.vue'
-import FormCheckbox from '@/Components/Form/FormCheckbox.vue'
+import BaseCheckbox from '@/Components/UI/BaseCheckbox.vue'
 
 export default {
   name: 'MediaSection',
@@ -74,7 +76,7 @@ export default {
     PageSection,
     PhotoUploader,
     VideoUploader,
-    FormCheckbox
+    BaseCheckbox
   },
   props: {
     form: {

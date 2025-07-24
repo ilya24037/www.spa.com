@@ -9,41 +9,33 @@
       <div class="main-education">
         <h4 class="field-title">Основное образование</h4>
         
-        <FormSelect
-          id="education_level"
-          name="education_level"
+        <BaseSelect
+          v-model="form.education_level"
           label="Уровень образования"
           placeholder="Выберите уровень"
-          v-model="form.education_level"
           :options="educationLevelOptions"
           :error="errors.education_level"
         />
 
-        <FormInput
-          id="university"
-          name="university"
+        <BaseInput
+          v-model="form.university"
           label="Учебное заведение"
           placeholder="Название университета, колледжа или школы"
-          v-model="form.university"
           :error="errors.university"
         />
 
-        <FormInput
-          id="specialization"
-          name="specialization"
+        <BaseInput
+          v-model="form.specialization"
           label="Специальность"
           placeholder="Ваша специальность или направление"
-          v-model="form.specialization"
           :error="errors.specialization"
         />
 
-        <FormInput
-          id="graduation_year"
-          name="graduation_year"
-          label="Год окончания"
-          type="number"
-          placeholder="2020"
+        <BaseInput
           v-model="form.graduation_year"
+          type="number"
+          label="Год окончания"
+          placeholder="2020"
           :error="errors.graduation_year"
         />
       </div>
@@ -200,20 +192,20 @@
 
 <script>
 import PageSection from '@/Components/Layout/PageSection.vue'
-import FormInput from '@/Components/Form/FormInput.vue'
+import BaseInput from '@/Components/UI/BaseInput.vue'
 import FormTextarea from '@/Components/Form/FormTextarea.vue'
-import FormCheckbox from '@/Components/Form/FormCheckbox.vue'
-import FormSelect from '@/Components/Form/FormSelect.vue'
+import BaseCheckbox from '@/Components/UI/BaseCheckbox.vue'
+import BaseSelect from '@/Components/UI/BaseSelect.vue'
 import PhotoUploader from '@/Components/Form/Upload/PhotoUploader.vue'
 
 export default {
   name: 'EducationSection',
   components: {
     PageSection,
-    FormInput,
+    BaseInput,
     FormTextarea,
-    FormCheckbox,
-    FormSelect,
+    BaseCheckbox,
+    BaseSelect,
     PhotoUploader
   },
   props: {
