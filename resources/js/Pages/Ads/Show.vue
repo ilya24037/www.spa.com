@@ -34,26 +34,14 @@
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Левая колонка - основная информация -->
         <div class="lg:col-span-2 space-y-6">
-          <!-- Фотографии -->
+          <!-- Фотографии через универсальную галерею -->
           <div v-if="ad.photos && ad.photos.length > 0" class="bg-white rounded-lg p-6">
-            <h2 class="text-xl font-semibold mb-4">Фотографии</h2>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <div 
-                v-for="(photo, index) in ad.photos" 
-                :key="index"
-                class="relative aspect-square bg-gray-100 rounded-lg overflow-hidden"
-              >
-                <img 
-                  :src="photo.preview || photo.url" 
-                  :alt="`Фото ${index + 1}`"
-                  class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
-                  @click="openLightbox(index)"
-                />
-                <div v-if="index === 0" class="absolute bottom-2 left-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
-                  Основное фото
-                </div>
-              </div>
-            </div>
+            <PhotoGallery 
+              :photos="ad.photos"
+              mode="grid"
+              title="Фотографии"
+              :enable-lightbox="true"
+            />
           </div>
 
           <!-- Описание -->
@@ -149,6 +137,7 @@
 
 <script setup>
 import { Head, Link } from '@inertiajs/vue3'
+import PhotoGallery from '@/Components/Gallery/PhotoGallery.vue'
 
 const props = defineProps({
   ad: {
@@ -229,9 +218,4 @@ const getServiceLocationText = (locations) => {
   
   return locations.map(loc => locationTexts[loc] || loc).join(', ')
 }
-
-const openLightbox = (index) => {
-  // TODO: Implement lightbox functionality
-  console.log('Open lightbox at index:', index)
-}
-</script> 
+</script>

@@ -31,129 +31,15 @@
             </button>
           </div>
 
-          <!-- Галерея фото в стиле Ozon -->
-          <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-            <!-- Десктопная версия -->
-            <div class="hidden md:flex gap-4 p-4">
-              <!-- Миниатюры слева -->
-              <div class="flex flex-col gap-2 w-20">
-                <div 
-                  v-for="(photo, index) in galleryPhotos" 
-                  :key="index"
-                  @click="selectPhoto(index)"
-                  :class="[
-                    'relative w-16 h-16 rounded-lg overflow-hidden cursor-pointer border-2 transition-all',
-                    currentPhotoIndex === index ? 'border-blue-500' : 'border-gray-200 hover:border-gray-300'
-                  ]"
-                >
-                  <img 
-                    :src="photo.thumb || photo.url"
-                    :alt="`Фото ${index + 1}`"
-                    class="w-full h-full object-cover"
-                  >
-                  <!-- Индикатор активного фото -->
-                  <div 
-                    v-if="currentPhotoIndex === index"
-                    class="absolute inset-0 bg-blue-500 bg-opacity-10"
-                  ></div>
-                </div>
-              </div>
-              
-              <!-- Основное изображение -->
-              <div class="flex-1">
-                <div class="relative aspect-[4/3] bg-gray-100 rounded-lg overflow-hidden">
-                  <img 
-                    :src="currentPhoto.url"
-                    :alt="currentPhoto.alt || 'Фото объявления'"
-                    class="w-full h-full object-cover cursor-pointer"
-                    @click="openLightbox"
-                  >
-                  
-
-                  
-                  <!-- Кнопка увеличения -->
-                  <button 
-                    @click="openLightbox"
-                    class="absolute bottom-4 right-4 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-all"
-                  >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
-                    </svg>
-                  </button>
-                  
-                  <!-- Счетчик фото -->
-                  <div class="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
-                    {{ currentPhotoIndex + 1 }} / {{ galleryPhotos.length }}
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Мобильная версия -->
-            <div class="md:hidden">
-              <!-- Основное изображение -->
-              <div class="relative aspect-[4/3] bg-gray-100">
-                <img 
-                  :src="currentPhoto.url"
-                  :alt="currentPhoto.alt || 'Фото объявления'"
-                  class="w-full h-full object-cover cursor-pointer"
-                  @click="openLightbox"
-                >
-                
-
-                
-                <!-- Навигация стрелками -->
-                <button 
-                  v-if="currentPhotoIndex > 0"
-                  @click="previousPhoto"
-                  class="absolute left-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full"
-                >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                  </svg>
-                </button>
-                
-                <button 
-                  v-if="currentPhotoIndex < galleryPhotos.length - 1"
-                  @click="nextPhoto"
-                  class="absolute right-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full"
-                >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                  </svg>
-                </button>
-                
-                <!-- Счетчик фото -->
-                <div class="absolute bottom-4 right-4 bg-black bg-opacity-50 text-white px-2 py-1 rounded-full text-sm">
-                  {{ currentPhotoIndex + 1 }} / {{ galleryPhotos.length }}
-                </div>
-              </div>
-              
-              <!-- Миниатюры горизонтально -->
-              <div class="flex gap-2 p-4 overflow-x-auto">
-                <div 
-                  v-for="(photo, index) in galleryPhotos" 
-                  :key="index"
-                  @click="selectPhoto(index)"
-                  :class="[
-                    'relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden cursor-pointer border-2 transition-all',
-                    currentPhotoIndex === index ? 'border-blue-500' : 'border-gray-200'
-                  ]"
-                >
-                  <img 
-                    :src="photo.thumb || photo.url"
-                    :alt="`Фото ${index + 1}`"
-                    class="w-full h-full object-cover"
-                  >
-                  <!-- Индикатор активного фото -->
-                  <div 
-                    v-if="currentPhotoIndex === index"
-                    class="absolute inset-0 bg-blue-500 bg-opacity-10"
-                  ></div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <!-- Универсальная галерея фото -->
+          <PhotoGallery 
+            :photos="ad.photos || []"
+            mode="full"
+            :show-badges="false"
+            :show-thumbnails="true"
+            :show-counter="true"
+            :enable-lightbox="true"
+          />
           
           <!-- Основная информация -->
           <div class="bg-white rounded-lg p-6 shadow-sm mt-6">
@@ -193,47 +79,77 @@
           </div>
           
           <!-- Отзывы -->
-          <div class="bg-white rounded-lg p-6 shadow-sm mt-6">
+          <div v-if="ad.reviews && ad.reviews.length" class="bg-white rounded-lg p-6 shadow-sm mt-6">
             <h2 class="text-xl font-bold text-gray-900 mb-4">Отзывы</h2>
             
-            <div class="text-center text-gray-500 py-8">
-              Пока нет отзывов
+            <div class="space-y-4">
+              <div 
+                v-for="review in ad.reviews" 
+                :key="review.id"
+                class="border-b border-gray-200 pb-4 last:border-b-0"
+              >
+                <div class="flex items-center gap-3 mb-2">
+                  <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                    {{ review.client_name?.charAt(0) || 'А' }}
+                  </div>
+                  <div>
+                    <div class="font-medium">{{ review.client_name || 'Анонимный клиент' }}</div>
+                    <div class="flex items-center gap-1">
+                      <svg v-for="n in 5" :key="n" 
+                        :class="n <= review.rating ? 'text-yellow-400' : 'text-gray-300'"
+                        class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"
+                      >
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                <p class="text-gray-700">{{ review.comment }}</p>
+              </div>
             </div>
           </div>
         </div>
-        
-        <!-- Правая колонка: Контакты -->
-        <div class="lg:col-span-1">
-          <div class="bg-white rounded-lg p-6 shadow-sm sticky top-4">
-            <!-- Цена -->
-            <div class="text-center mb-6">
-              <div class="text-3xl font-bold text-gray-900">
-                {{ ad.price ? formatPrice(ad.price) + ' ₽' : 'Цена не указана' }}
-              </div>
-              <div class="text-gray-500">за сеанс</div>
-            </div>
 
-            <!-- Кнопки -->
+        <!-- Правая колонка: Информация о черновике -->
+        <div class="space-y-6">
+          <!-- Статус черновика -->
+          <div class="bg-white rounded-lg p-6 shadow-sm sticky top-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Статус черновика</h2>
+            
+            <!-- Информация -->
             <div class="space-y-3 mb-6">
-              <button 
-                @click="showPhone"
-                class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+              <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <div class="flex">
+                  <svg class="w-5 h-5 text-yellow-400 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                  </svg>
+                  <div>
+                    <p class="text-sm font-medium text-yellow-800">Черновик не опубликован</p>
+                    <p class="text-sm text-yellow-700 mt-1">Для публикации завершите заполнение всех обязательных полей</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Действия -->
+            <div class="space-y-3">
+              <Link 
+                :href="route('ads.edit', ad.id)"
+                class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition font-medium text-center block"
               >
-                <PhoneIcon class="w-5 h-5" />
-                Показать телефон
-              </button>
+                Продолжить редактирование
+              </Link>
               
               <button 
-                @click="openBooking"
-                class="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                @click="showDeleteModal = true"
+                class="w-full border border-red-300 text-red-600 py-3 px-4 rounded-lg hover:bg-red-50 transition font-medium"
               >
-                <CalendarIcon class="w-5 h-5" />
-                Записаться
+                Удалить черновик
               </button>
             </div>
-
+            
             <!-- График работы / Информация -->
-            <div>
+            <div class="mt-6 pt-6 border-t border-gray-200">
               <h3 class="font-semibold text-gray-900 mb-3">Контактная информация</h3>
               <div class="space-y-2">
                 <div v-if="ad.phone" class="flex justify-between text-sm">
@@ -256,59 +172,6 @@
             </div>
           </div>
         </div>
-  
-      </div>
-    </div>
-    
-    <!-- Lightbox для полноэкранного просмотра -->
-    <div 
-      v-if="showLightbox" 
-      class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50"
-      @click="closeLightbox"
-    >
-      <div class="relative max-w-4xl max-h-full p-4">
-        <img 
-          :src="currentPhoto.url"
-          :alt="currentPhoto.alt"
-          class="max-w-full max-h-full object-contain"
-          @click.stop
-        >
-        
-        <!-- Кнопка закрытия -->
-        <button 
-          @click="closeLightbox"
-          class="absolute top-4 right-4 text-white bg-black bg-opacity-50 p-2 rounded-full hover:bg-opacity-70"
-        >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-        
-        <!-- Навигация -->
-        <button 
-          v-if="currentPhotoIndex > 0"
-          @click.stop="previousPhoto"
-          class="absolute left-4 top-1/2 -translate-y-1/2 text-white bg-black bg-opacity-50 p-2 rounded-full hover:bg-opacity-70"
-        >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-          </svg>
-        </button>
-        
-        <button 
-          v-if="currentPhotoIndex < galleryPhotos.length - 1"
-          @click.stop="nextPhoto"
-          class="absolute right-4 top-1/2 -translate-y-1/2 text-white bg-black bg-opacity-50 p-2 rounded-full hover:bg-opacity-70"
-        >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-          </svg>
-        </button>
-        
-        <!-- Счетчик -->
-        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white bg-black bg-opacity-50 px-3 py-1 rounded-full">
-          {{ currentPhotoIndex + 1 }} / {{ galleryPhotos.length }}
-        </div>
       </div>
     </div>
 
@@ -326,10 +189,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
-import { PhoneIcon, CalendarIcon, MapPinIcon } from '@heroicons/vue/24/outline'
+import { MapPinIcon } from '@heroicons/vue/24/outline'
 import ConfirmModal from '@/Components/UI/ConfirmModal.vue'
+import PhotoGallery from '@/Components/Gallery/PhotoGallery.vue'
 
 // Импортируем route из window.route (Ziggy)
 const route = window.route || ((name, params) => {
@@ -351,112 +215,10 @@ const props = defineProps({
   ad: Object
 })
 
-// Состояние галереи (точно как у мастера)
-const currentPhotoIndex = ref(0)
-const showLightbox = ref(false)
+// Состояние
 const showDeleteModal = ref(false)
 
-// Генерируем фотографии для галереи (адаптированная версия)
-const galleryPhotos = computed(() => {
-  const photos = []
-  
-  // Добавляем фотографии из объявления
-  if (props.ad.photos && props.ad.photos.length) {
-    props.ad.photos.forEach((photo, index) => {
-      // Обрабатываем разные форматы фотографий
-      let photoUrl = null
-      let photoThumb = null
-      
-      if (typeof photo === 'string') {
-        // Если фото - строка (URL)
-        photoUrl = photo
-        photoThumb = photo
-      } else if (photo && typeof photo === 'object') {
-        // Если фото - объект
-        photoUrl = photo.preview || photo.url || photo.src || photo.path
-        photoThumb = photo.thumb || photo.preview || photo.url || photo.src || photo.path
-      }
-      
-      // Проверяем что URL не undefined
-      if (photoUrl && photoUrl !== 'undefined') {
-        photos.push({
-          url: photoUrl,
-          thumb: photoThumb || photoUrl,
-          alt: photo.alt || `Фото ${index + 1}`
-        })
-      }
-    })
-  }
-  
-  // Если нет фотографий, добавляем placeholder
-  if (photos.length === 0) {
-    photos.push({
-      url: '/images/masters/demo-1.jpg',
-      thumb: '/images/masters/demo-1.jpg',
-      alt: 'Фото недоступно'
-    })
-  }
-  
-  return photos
-})
-
-// Текущее фото (точно как у мастера)
-const currentPhoto = computed(() => 
-  galleryPhotos.value[currentPhotoIndex.value] || galleryPhotos.value[0]
-)
-
-// Методы навигации (точно как у мастера)
-const selectPhoto = (index) => {
-  currentPhotoIndex.value = index
-}
-
-const nextPhoto = () => {
-  if (currentPhotoIndex.value < galleryPhotos.value.length - 1) {
-    currentPhotoIndex.value++
-  }
-}
-
-const previousPhoto = () => {
-  if (currentPhotoIndex.value > 0) {
-    currentPhotoIndex.value--
-  }
-}
-
-const openLightbox = () => {
-  showLightbox.value = true
-}
-
-const closeLightbox = () => {
-  showLightbox.value = false
-}
-
-// Обработка клавиатуры (точно как у мастера)
-const handleKeydown = (event) => {
-  if (!showLightbox.value) return
-  
-  switch (event.key) {
-    case 'Escape':
-      closeLightbox()
-      break
-    case 'ArrowLeft':
-      previousPhoto()
-      break
-    case 'ArrowRight':
-      nextPhoto()
-      break
-  }
-}
-
-// Подключение обработчиков клавиатуры (точно как у мастера)
-onMounted(() => {
-  document.addEventListener('keydown', handleKeydown)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('keydown', handleKeydown)
-})
-
-// Остальные методы (адаптированные под черновик)
+// Остальные методы
 const formatPrice = (price) => {
   if (!price) return '0'
   return new Intl.NumberFormat('ru-RU').format(price)
@@ -471,18 +233,6 @@ const formatDate = (date) => {
   })
 }
 
-const showPhone = () => {
-  if (props.ad.phone) {
-    window.location.href = `tel:${props.ad.phone.replace(/\D/g, '')}`
-  } else {
-    alert('Телефон будет доступен после публикации')
-  }
-}
-
-const openBooking = () => {
-  alert('Форма бронирования появится после публикации')
-}
-
 // Удаление черновика
 const deleteDraft = () => {
   console.log('Deleting draft with ID:', props.ad.id)
@@ -491,29 +241,29 @@ const deleteDraft = () => {
   console.log('Deleting with my-ads route')
   
   // Используем общий роут удаления my-ads.destroy
-      router.delete(`/my-ads/${props.ad.id}`, {
-      preserveScroll: false,
-      preserveState: false,
-      onBefore: () => {
-        console.log('Before delete request')
-        showDeleteModal.value = false // Закрываем модалку сразу
-        return true
-      },
-      onSuccess: (page) => {
-        console.log('Delete successful, redirecting...')
-        // Контроллер сам перенаправит куда нужно
-      },
-      onError: (errors) => {
-        console.error('Delete failed:', errors)
-        alert('Ошибка удаления: ' + JSON.stringify(errors))
-      }
-    })
+  router.delete(`/my-ads/${props.ad.id}`, {
+    preserveScroll: false,
+    preserveState: false,
+    onBefore: () => {
+      console.log('Before delete request')
+      showDeleteModal.value = false // Закрываем модалку сразу
+      return true
+    },
+    onSuccess: (page) => {
+      console.log('Delete successful, redirecting...')
+      // Контроллер сам перенаправит куда нужно
+    },
+    onError: (errors) => {
+      console.error('Delete failed:', errors)
+      alert('Ошибка удаления: ' + JSON.stringify(errors))
+    }
+  })
 }
 </script>
 
 <style scoped>
 /* Полная ширина страницы как у мастера */
-.full-width-page {
+.master-page {
   margin-left: calc(-50vw + 50%);
   margin-right: calc(-50vw + 50%);
   width: 100vw;
@@ -523,7 +273,7 @@ const deleteDraft = () => {
 }
 
 @media (max-width: 768px) {
-  .full-width-page {
+  .master-page {
     padding-left: 1rem;
     padding-right: 1rem;
   }
@@ -535,4 +285,4 @@ const deleteDraft = () => {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 300ms;
 }
-</style> 
+</style>

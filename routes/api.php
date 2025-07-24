@@ -3,12 +3,37 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Models\MasterProfile;
+use App\Http\Controllers\BookingController;
 
 Route::middleware('api')->group(function () {
     // Тестовый маршрут
     Route::get('/test', function () {
         return response()->json(['status' => 'ok', 'time' => now()]);
     });
+
+    // =================== СИСТЕМА БРОНИРОВАНИЯ ===================
+    
+    // Публичные роуты (доступны без авторизации)
+    Route::prefix('bookings')->group(function () {
+        // Получить доступные слоты для мастера и услуги
+        Route::get('/available-slots', [BookingController::class, 'availableSlots']);
+    });
+
+    // Защищенные роуты (требуют авторизации)
+    Route::middleware('auth:sanctum')->prefix('bookings')->group(function () {
+        // CRUD операции с бронированиями
+        Route::post('/', [BookingController::class, 'store']);           // Создать бронирование
+        Route::get('/', [BookingController::class, 'index']);            // Список бронирований
+        Route::get('/{booking}', [BookingController::class, 'show']);    // Просмотр бронирования
+        
+        // Действия с бронированиями
+        Route::post('/{booking}/cancel', [BookingController::class, 'cancel']);     // Отменить
+        Route::post('/{booking}/confirm', [BookingController::class, 'confirm']);   // Подтвердить (мастер)
+        Route::post('/{booking}/complete', [BookingController::class, 'complete']); // Завершить (мастер)
+    });
+
+    // =================== МАСТЕРА (существующие) ===================
+    
     // Получить информацию о фотографиях мастера
     Route::get('/masters/{master}/photos', function ($masterId) {
         try {

@@ -1,320 +1,383 @@
 import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
 import axios from 'axios'
 
-export const useBookingStore = defineStore('booking', {
-  // 📦 СОСТОЯНИЕ - здесь храним данные
-  state: () => ({
-    // Текущее бронирование
-    currentBooking: {
+export const useBookingStore = defineStore('booking', () => {
+  
+  // =================== СОСТОЯНИЕ ===================
+  
+  const bookings = ref([])
+  const currentBooking = ref({
+    masterId: null,
+    serviceId: null,
+    date: null,
+    time: null,
+    locationType: 'home', // 'home' или 'salon'
+    clientName: '',
+    clientPhone: '',
+    clientEmail: '',
+    address: '',
+    comment: '',
+    paymentMethod: 'cash'
+  })
+  
+  const availableSlots = ref({})
+  const isLoading = ref(false)
+  const error = ref(null)
+  const lastBooking = ref(null)
+  
+  // =================== ВЫЧИСЛЯЕМЫЕ ===================
+  
+  const isFormValid = computed(() => {
+    return currentBooking.value.masterId &&
+           currentBooking.value.serviceId &&
+           currentBooking.value.date &&
+           currentBooking.value.time &&
+           currentBooking.value.clientName &&
+           currentBooking.value.clientPhone
+  })
+  
+  const totalBookings = computed(() => bookings.value.length)
+  
+  const pendingBookings = computed(() => 
+    bookings.value.filter(b => b.status === 'pending')
+  )
+  
+  const confirmedBookings = computed(() => 
+    bookings.value.filter(b => b.status === 'confirmed')
+  )
+  
+  // =================== ДЕЙСТВИЯ ===================
+  
+  // 📋 Получить список бронирований
+  async function fetchBookings() {
+    console.log('📤 Загружаем список бронирований...')
+    
+    isLoading.value = true
+    error.value = null
+    
+    try {
+      const response = await axios.get('/api/bookings', {
+        headers: {
+          'Authorization': `Bearer ${getAuthToken()}`,
+          'Accept': 'application/json'
+        }
+      })
+      
+      bookings.value = response.data.data || response.data
+      console.log('✅ Загружено бронирований:', bookings.value.length)
+      
+      return bookings.value
+    } catch (error) {
+      console.error('❌ Ошибка загрузки бронирований:', error)
+      
+      if (error.response?.status === 401) {
+        this.error = 'Необходимо войти в систему'
+      } else {
+        this.error = 'Не удалось загрузить бронирования'
+      }
+      
+      throw error
+    } finally {
+      isLoading.value = false
+    }
+  }
+  
+  // 📅 Получить доступные слоты
+  async function fetchAvailableSlots(masterId, serviceId, date = null) {
+    console.log('📤 Получаем доступные слоты для мастера:', masterId, 'услуга:', serviceId)
+    
+    isLoading.value = true
+    error.value = null
+    
+    try {
+      const params = {
+        master_profile_id: masterId,
+        service_id: serviceId
+      }
+      
+      if (date) {
+        params.date = date
+      }
+      
+      const response = await axios.get('/api/bookings/available-slots', {
+        params,
+        headers: {
+          'Accept': 'application/json'
+        }
+      })
+      
+      if (date) {
+        // Слоты для конкретной даты
+        availableSlots.value[date] = response.data.slots || []
+      } else {
+        // Слоты на несколько дней
+        availableSlots.value = response.data.slots || {}
+      }
+      
+      console.log('✅ Получены доступные слоты:', Object.keys(availableSlots.value).length, 'дней')
+      
+      return availableSlots.value
+    } catch (error) {
+      console.error('❌ Ошибка получения слотов:', error)
+      this.error = 'Не удалось получить доступные слоты'
+      throw error
+    } finally {
+      isLoading.value = false
+    }
+  }
+  
+  // 📝 Создать новое бронирование (ОБНОВЛЕННЫЙ МЕТОД)
+  async function createBooking(bookingData) {
+    console.log('📤 Отправляем бронирование:', bookingData)
+    
+    isLoading.value = true
+    error.value = null
+    
+    try {
+      // Подготавливаем данные в правильном формате
+      const dataToSend = {
+        master_profile_id: bookingData.masterId,
+        service_id: bookingData.serviceId,
+        booking_date: bookingData.date,
+        booking_time: bookingData.time,
+        service_location: bookingData.locationType,
+        client_name: bookingData.clientName,
+        client_phone: bookingData.clientPhone,
+        client_email: bookingData.clientEmail,
+        address: bookingData.address,
+        address_details: bookingData.addressDetails,
+        client_comment: bookingData.comment,
+        payment_method: bookingData.paymentMethod
+      }
+      
+      // Отправляем на новый API endpoint
+      const response = await axios.post('/api/bookings', dataToSend, {
+        headers: {
+          'Authorization': `Bearer ${getAuthToken()}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      })
+      
+      // Сохраняем результат
+      lastBooking.value = response.data.booking
+      
+      // Добавляем в локальный список
+      bookings.value.unshift(response.data.booking)
+      
+      // Очищаем форму
+      resetCurrentBooking()
+      
+      console.log('✅ Бронирование создано:', response.data.booking_number)
+      
+      return response.data.booking
+    } catch (error) {
+      console.error('❌ Ошибка создания бронирования:', error)
+      
+      // Обработка ошибок валидации
+      if (error.response?.status === 422) {
+        const validationErrors = error.response.data.errors || {}
+        this.error = Object.values(validationErrors).flat().join(', ') || error.response.data.message
+        throw validationErrors
+      }
+      
+      // Обработка других ошибок
+      if (error.response?.status === 401) {
+        this.error = 'Необходимо войти в систему'
+      } else {
+        this.error = error.response?.data?.message || 'Не удалось создать бронирование'
+      }
+      
+      throw error
+    } finally {
+      isLoading.value = false
+    }
+  }
+  
+  // ❌ Отменить бронирование
+  async function cancelBooking(bookingId, reason = null) {
+    console.log('📤 Отменяем бронирование:', bookingId)
+    
+    isLoading.value = true
+    error.value = null
+    
+    try {
+      const response = await axios.post(`/api/bookings/${bookingId}/cancel`, 
+        { reason },
+        {
+          headers: {
+            'Authorization': `Bearer ${getAuthToken()}`,
+            'Accept': 'application/json'
+          }
+        }
+      )
+      
+      // Обновляем статус в локальном списке
+      const booking = bookings.value.find(b => b.id === bookingId)
+      if (booking) {
+        booking.status = 'cancelled'
+        booking.cancelled_at = new Date().toISOString()
+      }
+      
+      console.log('✅ Бронирование отменено')
+      
+      return response.data
+    } catch (error) {
+      console.error('❌ Ошибка отмены бронирования:', error)
+      this.error = error.response?.data?.message || 'Не удалось отменить бронирование'
+      throw error
+    } finally {
+      isLoading.value = false
+    }
+  }
+  
+  // ✅ Подтвердить бронирование (для мастеров)
+  async function confirmBooking(bookingId) {
+    console.log('📤 Подтверждаем бронирование:', bookingId)
+    
+    isLoading.value = true
+    error.value = null
+    
+    try {
+      const response = await axios.post(`/api/bookings/${bookingId}/confirm`, {}, {
+        headers: {
+          'Authorization': `Bearer ${getAuthToken()}`,
+          'Accept': 'application/json'
+        }
+      })
+      
+      // Обновляем статус в локальном списке
+      const booking = bookings.value.find(b => b.id === bookingId)
+      if (booking) {
+        booking.status = 'confirmed'
+        booking.confirmed_at = new Date().toISOString()
+      }
+      
+      console.log('✅ Бронирование подтверждено')
+      
+      return response.data
+    } catch (error) {
+      console.error('❌ Ошибка подтверждения бронирования:', error)
+      this.error = error.response?.data?.message || 'Не удалось подтвердить бронирование'
+      throw error
+    } finally {
+      isLoading.value = false
+    }
+  }
+  
+  // 🏁 Завершить услугу (для мастеров)
+  async function completeBooking(bookingId) {
+    console.log('📤 Завершаем услугу:', bookingId)
+    
+    isLoading.value = true
+    error.value = null
+    
+    try {
+      const response = await axios.post(`/api/bookings/${bookingId}/complete`, {}, {
+        headers: {
+          'Authorization': `Bearer ${getAuthToken()}`,
+          'Accept': 'application/json'
+        }
+      })
+      
+      // Обновляем статус в локальном списке
+      const booking = bookings.value.find(b => b.id === bookingId)
+      if (booking) {
+        booking.status = 'completed'
+        booking.payment_status = 'paid'
+        booking.paid_at = new Date().toISOString()
+      }
+      
+      console.log('✅ Услуга завершена')
+      
+      return response.data
+    } catch (error) {
+      console.error('❌ Ошибка завершения услуги:', error)
+      this.error = error.response?.data?.message || 'Не удалось завершить услугу'
+      throw error
+    } finally {
+      isLoading.value = false
+    }
+  }
+  
+  // =================== ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ ===================
+  
+  // 🔄 Сбросить текущее бронирование
+  function resetCurrentBooking() {
+    currentBooking.value = {
       masterId: null,
       serviceId: null,
       date: null,
       time: null,
+      locationType: 'home',
       clientName: '',
       clientPhone: '',
       clientEmail: '',
       address: '',
       comment: '',
-      locationType: 'salon',
       paymentMethod: 'cash'
-    },
-    
-    // Доступные даты и время
-    availableDates: [],
-    timeSlots: [],
-    
-    // Состояние загрузки
-    isLoading: false,
-    error: null,
-    
-    // История бронирований пользователя
-    userBookings: [],
-    
-    // Детали последнего успешного бронирования
-    lastBooking: null
-  }),
-
-  // 🔍 ГЕТТЕРЫ - вычисляемые свойства
-  getters: {
-    // Проверка, заполнены ли все обязательные поля
-    isBookingValid: (state) => {
-      return !!(
-        state.currentBooking.masterId &&
-        state.currentBooking.serviceId &&
-        state.currentBooking.date &&
-        state.currentBooking.time &&
-        state.currentBooking.clientName &&
-        state.currentBooking.clientPhone
-      )
-    },
-    
-    // Получить выбранную дату в читаемом формате
-    formattedDate: (state) => {
-      if (!state.currentBooking.date) return ''
-      
-      const date = new Date(state.currentBooking.date)
-      return date.toLocaleDateString('ru-RU', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      })
-    },
-    
-    // Подсчёт общей стоимости
-    totalPrice: (state) => {
-      let price = 0
-      
-      // Здесь будет логика подсчёта цены
-      // price = state.currentService?.price || 0
-      // if (state.currentBooking.locationType === 'home') price += 500
-      
-      return price
-    },
-    
-    // Проверка, есть ли свободные слоты на выбранную дату
-    hasAvailableSlots: (state) => {
-      return state.timeSlots.length > 0
     }
-  },
-
-  // 🎯 ДЕЙСТВИЯ - функции для изменения данных
-  actions: {
-    // 📅 Загрузить доступные даты мастера
-    async loadAvailableDates(masterId) {
-      console.log('🔄 Загружаем доступные даты для мастера:', masterId)
-      
-      this.isLoading = true
-      this.error = null
-      
-      try {
-        // Запрос к серверу
-        const response = await axios.get(`/api/masters/${masterId}/available-dates`)
-        
-        // Сохраняем даты
-        this.availableDates = response.data.dates
-        
-        console.log('✅ Загружено дат:', this.availableDates.length)
-        
-        return this.availableDates
-      } catch (error) {
-        console.error('❌ Ошибка загрузки дат:', error)
-        this.error = 'Не удалось загрузить доступные даты'
-        
-        // Временные тестовые данные (уберите когда будет API)
-        this.availableDates = this.generateTestDates()
-        
-        throw error
-      } finally {
-        this.isLoading = false
-      }
-    },
-    
-    // ⏰ Загрузить доступные слоты времени на дату
-    async loadTimeSlots(masterId, date) {
-      console.log('🔄 Загружаем слоты времени на дату:', date)
-      
-      this.isLoading = true
-      this.error = null
-      
-      try {
-        // Запрос к серверу
-        const response = await axios.get(`/api/masters/${masterId}/time-slots`, {
-          params: { date }
-        })
-        
-        // Сохраняем слоты
-        this.timeSlots = response.data.slots
-        
-        console.log('✅ Загружено слотов:', this.timeSlots.length)
-        
-        return this.timeSlots
-      } catch (error) {
-        console.error('❌ Ошибка загрузки слотов:', error)
-        this.error = 'Не удалось загрузить доступное время'
-        
-        // Временные тестовые данные (уберите когда будет API)
-        this.timeSlots = this.generateTestTimeSlots()
-        
-        throw error
-      } finally {
-        this.isLoading = false
-      }
-    },
-    
-    // 📝 Создать новое бронирование
-    async createBooking(bookingData) {
-      console.log('📤 Отправляем бронирование:', bookingData)
-      
-      this.isLoading = true
-      this.error = null
-      
-      try {
-        // Подготавливаем данные
-        const dataToSend = {
-          master_id: bookingData.masterId,
-          service_id: bookingData.serviceId,
-          date: bookingData.date,
-          time: bookingData.time,
-          location_type: bookingData.locationType,
-          client_name: bookingData.clientName,
-          client_phone: bookingData.clientPhone,
-          client_email: bookingData.clientEmail,
-          address: bookingData.address,
-          comment: bookingData.comment,
-          payment_method: bookingData.paymentMethod
-        }
-        
-        // Отправляем на сервер
-        const response = await axios.post('/api/bookings', dataToSend)
-        
-        // Сохраняем результат
-        this.lastBooking = response.data.booking
-        
-        // Очищаем форму
-        this.resetCurrentBooking()
-        
-        console.log('✅ Бронирование создано:', this.lastBooking.id)
-        
-        return this.lastBooking
-      } catch (error) {
-        console.error('❌ Ошибка создания бронирования:', error)
-        
-        // Обработка ошибок валидации
-        if (error.response?.status === 422) {
-          this.error = 'Проверьте правильность заполнения формы'
-          throw error.response.data.errors
-        }
-        
-        this.error = 'Не удалось создать бронирование. Попробуйте позже.'
-        throw error
-      } finally {
-        this.isLoading = false
-      }
-    },
-    
-    // 📋 Загрузить историю бронирований пользователя
-    async loadUserBookings() {
-      console.log('🔄 Загружаем историю бронирований')
-      
-      try {
-        const response = await axios.get('/api/user/bookings')
-        this.userBookings = response.data.bookings
-        
-        console.log('✅ Загружено бронирований:', this.userBookings.length)
-        
-        return this.userBookings
-      } catch (error) {
-        console.error('❌ Ошибка загрузки истории:', error)
-        this.userBookings = []
-        throw error
-      }
-    },
-    
-    // ❌ Отменить бронирование
-    async cancelBooking(bookingId) {
-      console.log('🗑️ Отменяем бронирование:', bookingId)
-      
-      try {
-        await axios.post(`/api/bookings/${bookingId}/cancel`)
-        
-        // Удаляем из списка
-        this.userBookings = this.userBookings.filter(b => b.id !== bookingId)
-        
-        console.log('✅ Бронирование отменено')
-        
-        return true
-      } catch (error) {
-        console.error('❌ Ошибка отмены:', error)
-        throw error
-      }
-    },
-    
-    // 🔧 ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
-    
-    // Установить данные текущего бронирования
-    setBookingData(data) {
-      this.currentBooking = { ...this.currentBooking, ...data }
-    },
-    
-    // Установить мастера и услугу
-    setMasterAndService(masterId, serviceId) {
-      this.currentBooking.masterId = masterId
-      this.currentBooking.serviceId = serviceId
-    },
-    
-    // Установить дату
-    setDate(date) {
-      this.currentBooking.date = date
-      this.currentBooking.time = null // Сбрасываем время при смене даты
-    },
-    
-    // Установить время
-    setTime(time) {
-      this.currentBooking.time = time
-    },
-    
-    // Очистить текущее бронирование
-    resetCurrentBooking() {
-      this.currentBooking = {
-        masterId: null,
-        serviceId: null,
-        date: null,
-        time: null,
-        clientName: '',
-        clientPhone: '',
-        clientEmail: '',
-        address: '',
-        comment: '',
-        locationType: 'salon',
-        paymentMethod: 'cash'
-      }
-      this.availableDates = []
-      this.timeSlots = []
-    },
-    
-    // 🧪 ТЕСТОВЫЕ ДАННЫЕ (удалите когда будет готов backend)
-    
-    // Генерация тестовых дат
-    generateTestDates() {
-      const dates = []
-      const today = new Date()
-      
-      // Генерируем даты на месяц вперёд
-      for (let i = 1; i <= 30; i++) {
-        const date = new Date(today)
-        date.setDate(today.getDate() + i)
-        
-        // 70% вероятность что день доступен
-        if (Math.random() > 0.3) {
-          dates.push(date.toISOString().split('T')[0])
-        }
-      }
-      
-      return dates
-    },
-    
-    // Генерация тестовых слотов времени
-    generateTestTimeSlots() {
-      const slots = []
-      
-      // Генерируем слоты с 9:00 до 20:00
-      for (let hour = 9; hour < 20; hour++) {
-        // Слоты каждые 30 минут
-        slots.push({
-          time: `${hour}:00`,
-          available: Math.random() > 0.3 // 70% доступны
-        })
-        
-        if (hour < 19) {
-          slots.push({
-            time: `${hour}:30`,
-            available: Math.random() > 0.3
-          })
-        }
-      }
-      
-      return slots
+  }
+  
+  // 📝 Обновить данные формы
+  function updateBookingData(data) {
+    Object.assign(currentBooking.value, data)
+  }
+  
+  // 🔑 Получить токен авторизации
+  function getAuthToken() {
+    // Для Laravel Sanctum токен может быть в cookie или localStorage
+    // В данном случае используем CSRF токен
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+    return token || ''
+  }
+  
+  // 🧹 Очистить ошибки
+  function clearError() {
+    error.value = null
+  }
+  
+  // 📊 Получить статистику
+  function getBookingStats() {
+    return {
+      total: totalBookings.value,
+      pending: pendingBookings.value.length,
+      confirmed: confirmedBookings.value.length,
+      completed: bookings.value.filter(b => b.status === 'completed').length,
+      cancelled: bookings.value.filter(b => b.status === 'cancelled').length
     }
+  }
+  
+  // =================== ВОЗВРАЩАЕМ ИНТЕРФЕЙС ===================
+  
+  return {
+    // Состояние
+    bookings,
+    currentBooking,
+    availableSlots,
+    isLoading,
+    error,
+    lastBooking,
+    
+    // Вычисляемые
+    isFormValid,
+    totalBookings,
+    pendingBookings,
+    confirmedBookings,
+    
+    // Действия
+    fetchBookings,
+    fetchAvailableSlots,
+    createBooking,
+    cancelBooking,
+    confirmBooking,
+    completeBooking,
+    
+    // Вспомогательные
+    resetCurrentBooking,
+    updateBookingData,
+    clearError,
+    getBookingStats
   }
 })
