@@ -17,22 +17,22 @@
     </button>
     
     <div v-if="showDropdown" class="dropdown-menu">
-      <a v-if="$attrs.onPay" href="#" class="dropdown-item" @click.prevent="$emit('pay')">
+      <a v-if="showPay" href="#" class="dropdown-item" @click.prevent="$emit('pay')">
         Оплатить размещение
       </a>
-      <a v-if="$attrs.onPromote" href="#" class="dropdown-item" @click.prevent="$emit('promote')">
+      <a v-if="showPromote" href="#" class="dropdown-item" @click.prevent="$emit('promote')">
         Поднять просмотры
       </a>
-      <a v-if="$attrs.onEdit" href="#" class="dropdown-item" @click.prevent="$emit('edit')">
+      <a v-if="showEdit" href="#" class="dropdown-item" @click.prevent="$emit('edit')">
         Редактировать
       </a>
-      <a v-if="$attrs.onRestore" href="#" class="dropdown-item" @click.prevent="$emit('restore')">
+      <a v-if="showRestore" href="#" class="dropdown-item" @click.prevent="$emit('restore')">
         Восстановить
       </a>
-      <a v-if="$attrs.onDeactivate" href="#" class="dropdown-item" @click.prevent="$emit('deactivate')">
-        {{ $attrs.onRestore ? 'Архивировать' : 'Снять с публикации' }}
-      </a>
-      <a v-if="$attrs.onDelete" href="#" class="dropdown-item danger-item" @click.stop.prevent="$emit('delete')">
+             <a v-if="showDeactivate" href="#" class="dropdown-item" @click.prevent="$emit('deactivate')">
+         {{ showRestore ? 'Архивировать' : 'Уже не актуально' }}
+       </a>
+      <a v-if="showDelete" href="#" class="dropdown-item danger-item" @click.stop.prevent="$emit('delete')">
         Удалить
       </a>
     </div>
@@ -42,6 +42,30 @@
 <script setup>
 const props = defineProps({
   showDropdown: {
+    type: Boolean,
+    default: false
+  },
+  showPay: {
+    type: Boolean,
+    default: false
+  },
+  showPromote: {
+    type: Boolean,
+    default: false
+  },
+  showEdit: {
+    type: Boolean,
+    default: false
+  },
+  showRestore: {
+    type: Boolean,
+    default: false
+  },
+  showDeactivate: {
+    type: Boolean,
+    default: false
+  },
+  showDelete: {
     type: Boolean,
     default: false
   }
@@ -64,7 +88,7 @@ const emit = defineEmits([
 }
 
 .dropdown-button-inline {
-  @apply p-2 text-gray-400 hover:text-gray-600 transition-colors;
+  @apply p-2 bg-gray-100 text-gray-800 hover:bg-gray-200 rounded-lg transition-colors;
 }
 
 .dropdown-button-wrapper {

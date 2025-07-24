@@ -1,83 +1,35 @@
 <template>
   <div class="item-actions">
-    <!-- Для объявлений ждущих оплаты -->
-    <div v-if="item.status === 'waiting_payment'" class="waiting-payment-actions">
-      <button @click="$emit('pay', item)" class="action-button secondary-button-flex">
-        <span class="button-wrapper">
-          <span class="button-text">Оплатить размещение</span>
-        </span>
-      </button>
+    <!-- Единообразный дизайн для всех статусов -->
+    <div class="actions-container">
+             <!-- Основная кнопка слева (как на Авито) -->
+       <button @click="handleMainAction" class="main-action-button">
+         {{ mainActionText }}
+       </button>
       
-      <ItemActionsDropdown 
-        :showDropdown="showDropdown"
-        @toggle="toggleDropdown"
-        @pay="$emit('pay', item)"
-        @deactivate="$emit('deactivate', item)"
-        @edit="$emit('edit', item)"
-        @delete="$emit('delete', item)"
-      />
-    </div>
-
-    <!-- Для активных объявлений -->
-    <template v-else-if="item.status === 'active'">
-      <div class="waiting-payment-actions">
-        <button @click="$emit('promote', item)" class="action-button secondary-button-flex">
-          <span class="button-wrapper">
-            <span class="button-text">Поднять просмотры</span>
-          </span>
-        </button>
-        
-        <ItemActionsDropdown 
+      <!-- Троеточие справа (всегда) -->
+                           <ItemActionsDropdown 
           :showDropdown="showDropdown"
+          :showPay="item.status === 'waiting_payment'"
+          :showPromote="item.status === 'active'"
+          :showEdit="true"
+          :showRestore="item.status === 'archived'"
+          :showDeactivate="['waiting_payment', 'active'].includes(item.status)"
+          :showDelete="true"
           @toggle="toggleDropdown"
+          @pay="$emit('pay', item)"
           @promote="$emit('promote', item)"
           @edit="$emit('edit', item)"
+          @restore="$emit('restore', item)"
           @deactivate="$emit('deactivate', item)"
           @delete="$emit('delete', item)"
         />
-      </div>
-    </template>
-    
-    <!-- Для черновиков -->
-    <template v-else-if="item.status === 'draft'">
-      <div class="waiting-payment-actions">
-        <button @click="$emit('edit', item)" class="action-button secondary-button-flex">
-          <span class="button-wrapper">
-            <span class="button-text">Редактировать</span>
-          </span>
-        </button>
-        
-        <ItemActionsDropdown 
-          :showDropdown="showDropdown"
-          @toggle="toggleDropdown"
-          @edit="$emit('edit', item)"
-          @delete="$emit('delete', item)"
-        />
-      </div>
-    </template>
-
-    <!-- Для архивных объявлений -->
-    <template v-else-if="item.status === 'archived'">
-      <div class="waiting-payment-actions">
-        <button @click="$emit('restore', item)" class="action-button secondary-button-flex">
-          <span class="button-wrapper">
-            <span class="button-text">Восстановить</span>
-          </span>
-        </button>
-        
-        <ItemActionsDropdown 
-          :showDropdown="showDropdown"
-          @toggle="toggleDropdown"
-          @restore="$emit('restore', item)"
-          @delete="$emit('delete', item)"
-        />
-      </div>
-    </template>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import ItemActionsDropdown from './ItemActionsDropdown.vue'
 
 const props = defineProps({
@@ -97,6 +49,16 @@ const emit = defineEmits([
 ])
 
 const showDropdown = ref(false)
+
+// Везде одинаковая кнопка "Редактировать" как в черновиках
+const mainActionText = computed(() => {
+  return 'Редактировать'
+})
+
+// Всегда редактирование как основное действие
+const handleMainAction = () => {
+  emit('edit', props.item)
+}
 
 const toggleDropdown = () => {
   showDropdown.value = !showDropdown.value
@@ -123,23 +85,16 @@ onUnmounted(() => {
   @apply mt-4;
 }
 
-.waiting-payment-actions {
-  @apply flex gap-2;
+.actions-container {
+  @apply flex items-center gap-2;
 }
 
-.action-button {
-  @apply flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors;
+.main-action-button {
+  @apply px-4 py-2 bg-gray-100 text-gray-800 hover:bg-gray-200 rounded-lg transition-colors text-sm font-medium;
 }
 
-.secondary-button-flex {
-  @apply bg-gray-100 text-gray-800 hover:bg-gray-200;
-}
-
-.button-wrapper {
-  @apply flex items-center justify-center;
-}
-
-.button-text {
-  @apply text-sm font-medium;
+/* Компактный дизайн как на Авито */
+.actions-container {
+  @apply justify-start;
 }
 </style>

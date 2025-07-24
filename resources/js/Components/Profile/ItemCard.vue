@@ -94,26 +94,22 @@ const promoteItem = () => {
 }
 
 const editItem = () => {
-  if (props.item.status === 'draft') {
-    router.visit(`/draft/${props.item.id}/edit`)
-  } else {
-    router.visit(`/ads/${props.item.id}/edit`)
-  }
+  // Для всех объявлений (включая черновики) используем один роут
+  router.visit(`/ads/${props.item.id}/edit`)
 }
 
 const deactivateItem = async () => {
   try {
-    const response = await fetch(`/api/ads/${props.item.id}/deactivate`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    // Используем правильный роут через router
+    router.post(`/my-ads/${props.item.id}/deactivate`, {}, {
+      preserveState: true,
+      onSuccess: () => {
+        emit('item-updated', { ...props.item, status: 'archived' })
+      },
+      onError: (errors) => {
+        console.error('Ошибка при деактивации:', errors)
       }
     })
-
-    if (response.ok) {
-      emit('item-updated', { ...props.item, status: 'archived' })
-    }
   } catch (error) {
     console.error('Ошибка при деактивации:', error)
   }
@@ -121,17 +117,16 @@ const deactivateItem = async () => {
 
 const restoreItem = async () => {
   try {
-    const response = await fetch(`/api/ads/${props.item.id}/restore`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    // Используем правильный роут через router
+    router.post(`/my-ads/${props.item.id}/restore`, {}, {
+      preserveState: true,
+      onSuccess: () => {
+        emit('item-updated', { ...props.item, status: 'active' })
+      },
+      onError: (errors) => {
+        console.error('Ошибка при восстановлении:', errors)
       }
     })
-
-    if (response.ok) {
-      emit('item-updated', { ...props.item, status: 'active' })
-    }
   } catch (error) {
     console.error('Ошибка при восстановлении:', error)
   }
@@ -143,20 +138,21 @@ const showDeleteConfirm = () => {
 
 const deleteItem = async () => {
   try {
-    const response = await fetch(`/api/ads/${props.item.id}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    // Используем правильный роут через router для удаления
+    router.delete(`/my-ads/${props.item.id}`, {
+      preserveScroll: false,
+      preserveState: false,
+      onSuccess: () => {
+        emit('item-deleted', props.item.id)
+        showDeleteModal.value = false
+      },
+      onError: (errors) => {
+        console.error('Ошибка при удалении:', errors)
+        showDeleteModal.value = false
       }
     })
-
-    if (response.ok) {
-      emit('item-deleted', props.item.id)
-    }
   } catch (error) {
     console.error('Ошибка при удалении:', error)
-  } finally {
     showDeleteModal.value = false
   }
 }
