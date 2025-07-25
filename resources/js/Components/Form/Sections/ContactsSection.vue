@@ -177,8 +177,8 @@ const toggleContactMethod = (method) => {
 }
 
 .custom-checkbox.checked {
-    background: #1890ff;
-    border-color: #1890ff;
+    background: #007bff;
+    border-color: #007bff;
 }
 
 .check-icon {

@@ -1,4 +1,4 @@
-<!-- Базовый чекбокс в стиле Авито -->
+<!-- Базовый чекбокс для Boolean значений (как на Авито) -->
 <template>
   <div class="checkbox-container" @click="toggle">
     <div 
@@ -38,9 +38,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-
-// Props
+// Props (ТОЛЬКО Boolean)
 const props = defineProps({
   modelValue: {
     type: Boolean,
@@ -103,8 +101,8 @@ const toggle = (event) => {
 }
 
 .custom-checkbox.checked {
-  background: #000;
-  border-color: #000;
+  background: #007bff;
+  border-color: #007bff;
 }
 
 .custom-checkbox.disabled {

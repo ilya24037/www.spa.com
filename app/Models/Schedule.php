@@ -18,10 +18,6 @@ class Schedule extends Model
     ];
 
     protected $casts = [
-        'start_time' => 'datetime:H:i',
-        'end_time' => 'datetime:H:i',
-        'break_start' => 'datetime:H:i',
-        'break_end' => 'datetime:H:i',
         'is_working_day' => 'boolean',
         'is_flexible' => 'boolean'
     ];

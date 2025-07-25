@@ -34,15 +34,10 @@
          <!-- Дополнительные районы -->
          <div v-if="form.travel_area === 'custom'" class="custom-areas">
            <label class="block text-sm font-medium text-gray-700 mb-3">Выберите районы</label>
-           <div class="space-y-2">
-             <BaseCheckbox
-               v-for="option in customTravelAreasOptions"
-               :key="option.value"
-               v-model="form.custom_travel_areas"
-               :value="option.value"
-               :label="option.label"
-             />
-           </div>
+           <CheckboxGroup
+             v-model="form.custom_travel_areas"
+             :options="customTravelAreasOptions"
+           />
            <div v-if="errors.custom_travel_areas" class="mt-1 text-sm text-red-600">{{ errors.custom_travel_areas }}</div>
          </div>
       </div>
@@ -101,7 +96,7 @@
 import PageSection from '@/Components/Layout/PageSection.vue'
 import GeoSuggest from '@/Components/Form/Geo/GeoSuggest.vue'
 import BaseRadio from '@/Components/UI/BaseRadio.vue'
-import BaseCheckbox from '@/Components/UI/BaseCheckbox.vue'
+import CheckboxGroup from '@/Components/UI/CheckboxGroup.vue'
 import BaseSelect from '@/Components/UI/BaseSelect.vue'
 import PriceInput from '@/Components/Form/Controls/PriceInput.vue'
 import UniversalMap from '@/Components/Map/UniversalMap.vue'
@@ -112,7 +107,7 @@ export default {
     PageSection,
     GeoSuggest,
     BaseRadio,
-    BaseCheckbox,
+    CheckboxGroup,
     BaseSelect,
     PriceInput,
     UniversalMap

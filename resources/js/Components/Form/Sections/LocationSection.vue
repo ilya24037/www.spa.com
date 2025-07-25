@@ -52,15 +52,9 @@
                     value="office"
                     style="display: none;"
                 >
-                <span class="checkbox-label">В салоне</span>
+                <span class="checkbox-label">В офисе</span>
             </div>
-            
-
         </div>
-        
-        <p class="field-hint">
-            Выберите места, где вы оказываете услуги
-        </p>
         
         <div v-if="errors.service_location" class="error-message">
             {{ errors.service_location }}
@@ -69,6 +63,8 @@
 </template>
 
 <script setup>
+import { watchEffect } from 'vue'
+
 const props = defineProps({
     form: {
         type: Object,
@@ -80,7 +76,14 @@ const props = defineProps({
     }
 })
 
-// Функция переключения локации
+// Инициализируем массив если его нет
+const initializeServiceLocation = () => {
+    if (!Array.isArray(props.form.service_location)) {
+        props.form.service_location = []
+    }
+}
+
+// Функция переключения места оказания услуги
 const toggleLocation = (location) => {
     if (!props.form.service_location.includes(location)) {
         props.form.service_location.push(location)
@@ -90,8 +93,79 @@ const toggleLocation = (location) => {
     }
 }
 
-// Инициализируем массив если его нет
-if (!props.form.service_location) {
-    props.form.service_location = []
+// Вызываем инициализацию сразу
+initializeServiceLocation()
+
+// Отслеживаем изменения через watchEffect
+watchEffect(() => {
+    initializeServiceLocation()
+})
+</script>
+
+<style scoped>
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
-</script> 
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    gap: 12px;
+    padding: 8px 0;
+    user-select: none;
+}
+
+.custom-checkbox {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #d9d9d9;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    background: #fff;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.custom-checkbox:hover {
+    border-color: #8c8c8c;
+}
+
+.custom-checkbox.checked {
+    background: #007bff;
+    border-color: #007bff;
+}
+
+.check-icon {
+    width: 12px;
+    height: 10px;
+    color: #fff;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.custom-checkbox.checked .check-icon {
+    opacity: 1;
+}
+
+.checkbox-label {
+    font-size: 16px;
+    color: #1a1a1a;
+    font-weight: 400;
+    line-height: 1.4;
+    cursor: pointer;
+    user-select: none;
+}
+
+.error-message {
+    margin-top: 8px;
+    color: #ff4d4f;
+    font-size: 14px;
+    line-height: 1.4;
+}
+</style> 

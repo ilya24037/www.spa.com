@@ -3,7 +3,11 @@
   <div class="input-container">
     <label v-if="label" class="input-label">{{ label }}</label>
     
-    <div class="input-wrapper" :class="{ 'has-error': error }">
+          <div class="input-wrapper" :class="{ 
+        'has-error': error,
+        'has-prefix': prefix,
+        'has-suffix': suffix
+      }">
       <input
         ref="inputRef"
         v-model="inputValue"
@@ -19,7 +23,9 @@
         :class="{
           'disabled': disabled,
           'readonly': readonly,
-          'has-clear': clearable && inputValue
+          'has-clear': clearable && inputValue,
+          'has-prefix': prefix,
+          'has-suffix': suffix
         }"
         @input="handleInput"
         @focus="handleFocus"
@@ -28,23 +34,23 @@
       />
       
       <!-- Кнопка очистки -->
-      <button
-        v-if="clearable && inputValue && !disabled && !readonly"
-        type="button"
-        class="clear-button"
-        @click="clearInput"
-        tabindex="-1"
-      >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path
-            d="M12 4L4 12M4 4L12 12"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </button>
+             <button
+         v-if="clearable && inputValue && !disabled && !readonly"
+         type="button"
+         class="clear-button"
+         @click="clearInput"
+         tabindex="-1"
+       >
+         <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
+           <path
+             d="M12 4L4 12M4 4L12 12"
+             stroke="currentColor"
+             stroke-width="2"
+             stroke-linecap="round"
+             stroke-linejoin="round"
+           />
+         </svg>
+       </button>
       
       <!-- Префикс -->
       <div v-if="prefix" class="input-prefix">{{ prefix }}</div>
@@ -161,9 +167,30 @@ const inputValue = computed({
 const handleInput = (event) => {
   let value = event.target.value
   
-  // Для числовых инпутов
+  // Для числовых инпутов - безопасная обработка
   if (props.type === 'number') {
-    value = value === '' ? '' : Number(value)
+    // Если пустое значение, оставляем пустым
+    if (value === '') {
+      value = ''
+    } else {
+      // Проверяем что значение является числом
+      const numValue = Number(value)
+      if (!isNaN(numValue)) {
+        // Проверяем ограничения min/max
+        if (props.min !== null && numValue < props.min) {
+          value = props.min
+        } else if (props.max !== null && numValue > props.max) {
+          value = props.max
+          // Устанавливаем исправленное значение обратно в поле
+          event.target.value = value
+        } else {
+          value = numValue
+        }
+      } else {
+        // Если не число, не изменяем значение
+        return
+      }
+    }
   }
   
   emit('update:modelValue', value)
@@ -208,8 +235,8 @@ defineExpose({
 .input-label {
   display: block;
   font-size: 16px;
-  font-weight: 400;
-  color: #1a1a1a;
+  font-weight: 500;
+  color: #000000;
   margin-bottom: 8px;
 }
 
@@ -260,6 +287,21 @@ defineExpose({
   padding-right: 40px;
 }
 
+/* Отступы для префикса */
+.base-input.has-prefix {
+  padding-left: 48px;
+}
+
+/* Отступы для суффикса */
+.base-input.has-suffix {
+  padding-right: 48px;
+}
+
+/* Отступы для суффикса + кнопка очистки */
+.base-input.has-suffix.has-clear {
+  padding-right: 80px;
+}
+
 .input-wrapper.has-error .base-input {
   border-color: #ff4d4f;
 }
@@ -276,16 +318,25 @@ defineExpose({
   background: none;
   border: none;
   cursor: pointer;
-  padding: 4px;
+  padding: 6px;
   color: #8c8c8c;
   transition: color 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+}
+
+/* Кнопка очистки когда есть суффикс */
+.input-wrapper.has-suffix .clear-button {
+  right: 48px;
 }
 
 .clear-button:hover {
   color: #1a1a1a;
+  background: #f0f0f0;
 }
 
 .input-prefix {
@@ -323,7 +374,7 @@ defineExpose({
 .input-hint {
   margin-top: 4px;
   font-size: 14px;
-  color: #8c8c8c;
+  color: #666666;
   line-height: 1.4;
 }
 

@@ -28,7 +28,7 @@ export function useAdForm(initialData = {}, options = {}) {
     experience: initialData.experience || '',
     
     // Цены (обновленные)
-    price: initialData.price || '',
+    price: String(initialData.price || ''),
     price_unit: initialData.price_unit || 'session',
     is_starting_price: initialData.is_starting_price || false,
     

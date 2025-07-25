@@ -40,11 +40,17 @@
           v-for="(photo, index) in photos" 
           :key="photo.id"
           class="photo-item"
-          :class="{ 'main-photo': index === 0 }"
+          :class="{ 
+            'main-photo': index === 0,
+            'drag-over': dragOverIndex === index,
+            'being-dragged': draggedIndex === index
+          }"
           draggable="true"
           @dragstart="handlePhotoStart($event, index)"
-          @dragover.prevent
+          @dragover.prevent="handleDragOverPhoto($event, index)"
           @drop.prevent="handlePhotoMove($event, index)"
+          @dragend="handleDragEnd"
+          @dragleave="handleDragLeavePhoto($event, index)"
         >
           <div class="photo-preview">
             <img 
@@ -59,7 +65,7 @@
               <button 
                 type="button"
                 class="control-btn rotate-btn"
-                @click="rotatePhoto(index)"
+                @click.stop="rotatePhoto(index)"
                 title="Повернуть"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -71,7 +77,7 @@
               <button 
                 type="button"
                 class="control-btn delete-btn"
-                @click="removePhoto(index)"
+                @click.stop="removePhoto(index)"
                 title="Удалить"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -189,6 +195,7 @@ const emit = defineEmits(['update:modelValue', 'upload', 'error'])
 const fileInput = ref(null)
 const isDragOver = ref(false)
 const error = ref('')
+const dragOverIndex = ref(null)
 let draggedIndex = null
 
 // Computed
@@ -216,8 +223,18 @@ const handleDrop = (event) => {
   event.preventDefault()
   isDragOver.value = false
   
+  // Если это перестановка фото - игнорируем
+  if (draggedIndex !== null) {
+    console.log('🔄 Игнорируем drop - это перестановка фото')
+    return
+  }
+  
+  // Иначе обрабатываем как загрузку новых файлов
   const files = Array.from(event.dataTransfer.files)
-  processFiles(files)
+  if (files.length > 0) {
+    console.log('📁 Загружаем новые файлы:', files.length)
+    processFiles(files)
+  }
 }
 
 const handleDragOver = (event) => {
@@ -273,44 +290,112 @@ const processFiles = (files) => {
 }
 
 const removePhoto = (index) => {
+  console.log('Удаляем фото с индексом:', index)
+  if (index < 0 || index >= photos.value.length) {
+    console.error('Неверный индекс фото:', index)
+    return
+  }
+  
   const newPhotos = [...photos.value]
   newPhotos.splice(index, 1)
   photos.value = newPhotos
+  
+  console.log('Фото удалено, осталось:', newPhotos.length)
 }
 
 const rotatePhoto = (index) => {
-  const newPhotos = [...photos.value]
-  newPhotos[index].rotation = (newPhotos[index].rotation || 0) + 90
-  if (newPhotos[index].rotation >= 360) {
-    newPhotos[index].rotation = 0
+  console.log('Поворачиваем фото с индексом:', index)
+  if (index < 0 || index >= photos.value.length) {
+    console.error('Неверный индекс фото:', index)
+    return
   }
+  
+  const newPhotos = [...photos.value]
+  const currentRotation = newPhotos[index].rotation || 0
+  newPhotos[index].rotation = (currentRotation + 90) % 360
   photos.value = newPhotos
+  
+  console.log('Фото повернуто на:', newPhotos[index].rotation, 'градусов')
 }
 
 // Drag and drop для перестановки фото
 const handlePhotoStart = (event, index) => {
+  console.log('🚀 НАЧАЛО ПЕРЕТАСКИВАНИЯ: фото с индексом', index)
   draggedIndex = index
   event.dataTransfer.effectAllowed = 'move'
+  event.dataTransfer.setData('text/plain', index.toString())
+  
+  // Добавляем прозрачность
+  setTimeout(() => {
+    if (event.target) {
+      event.target.style.opacity = '0.5'
+    }
+  }, 0)
 }
 
 const handlePhotoMove = (event, targetIndex) => {
-  if (draggedIndex === null || draggedIndex === targetIndex) return
+  event.preventDefault()
+  event.stopPropagation()
   
-  const newPhotos = [...photos.value]
-  const draggedPhoto = newPhotos[draggedIndex]
+  console.log('🔄 ПЕРЕСТАНОВКА: Перемещаем фото', draggedIndex, '→', targetIndex)
   
-  // Удаляем элемент с исходной позиции
-  newPhotos.splice(draggedIndex, 1)
-  
-  // Вставляем на новую позицию
-  if (draggedIndex < targetIndex) {
-    newPhotos.splice(targetIndex - 1, 0, draggedPhoto)
-  } else {
-    newPhotos.splice(targetIndex, 0, draggedPhoto)
+  if (draggedIndex === null || draggedIndex === targetIndex) {
+    console.log('❌ Отменяем: одинаковые индексы или null')
+    return
   }
   
+  if (draggedIndex < 0 || draggedIndex >= photos.value.length || 
+      targetIndex < 0 || targetIndex >= photos.value.length) {
+    console.log('❌ Отменяем: некорректные индексы')
+    return
+  }
+  
+  const newPhotos = [...photos.value]
+  console.log('📋 Исходный порядок:', newPhotos.map((p, i) => `${i}: ${p.name.substring(0, 10)}...`))
+  
+  // Простая логика: меняем местами
+  const temp = newPhotos[draggedIndex]
+  newPhotos[draggedIndex] = newPhotos[targetIndex]
+  newPhotos[targetIndex] = temp
+  
+  console.log('✅ Новый порядок:', newPhotos.map((p, i) => `${i}: ${p.name.substring(0, 10)}... ${i === 0 ? '(ГЛАВНОЕ)' : ''}`))
+  
   photos.value = newPhotos
+  
+  // Сбрасываем состояние
   draggedIndex = null
+  dragOverIndex.value = null
+}
+
+// Новые обработчики для лучшего UX
+const handleDragOverPhoto = (event, index) => {
+  event.preventDefault()
+  event.stopPropagation()
+  
+  if (draggedIndex !== null && draggedIndex !== index) {
+    dragOverIndex.value = index
+    console.log('🎯 Наведение на фото', index)
+  }
+}
+
+const handleDragLeavePhoto = (event, index) => {
+  // Сбрасываем только если покидаем именно этот элемент
+  if (dragOverIndex.value === index) {
+    dragOverIndex.value = null
+  }
+}
+
+const handleDragEnd = (event) => {
+  console.log('🏁 ЗАВЕРШЕНИЕ ПЕРЕТАСКИВАНИЯ')
+  
+  // Возвращаем нормальную прозрачность
+  if (event.target) {
+    event.target.style.opacity = '1'
+  }
+  
+  // Сбрасываем состояние
+  draggedIndex = null
+  dragOverIndex.value = null
 }
 
 // Метод для получения файлов
@@ -394,6 +479,22 @@ defineExpose({
   border-radius: inherit;
 }
 
+/* Визуальные состояния для drag & drop */
+.photo-item.being-dragged {
+  @apply opacity-30 scale-90;
+  transition: all 0.2s ease;
+}
+
+.photo-item.drag-over {
+  @apply ring-4 ring-blue-500 bg-blue-50 scale-105;
+  transition: all 0.2s ease;
+}
+
+.photo-item.drag-over::before {
+  content: 'Поменять местами';
+  @apply absolute inset-0 bg-blue-500 bg-opacity-20 flex items-center justify-center text-blue-700 font-medium text-sm z-20;
+}
+
 .photo-preview {
   @apply relative w-full h-full;
 }
@@ -406,14 +507,22 @@ defineExpose({
 .photo-controls {
   @apply absolute top-2 right-2 flex gap-1 opacity-0;
   transition: opacity 0.2s ease;
+  z-index: 10;
 }
 
 .photo-item:hover .photo-controls {
   @apply opacity-100;
 }
 
+/* Для основного фото всегда показываем кнопки */
+.photo-item.main-photo .photo-controls {
+  @apply opacity-100;
+}
+
 .control-btn {
   @apply w-8 h-8 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full flex items-center justify-center shadow transition-all;
+  cursor: pointer;
+  z-index: 11;
 }
 
 .control-btn svg {

@@ -55,16 +55,16 @@
           >
             <div class="service-content">
               <div class="service-row">
-                <FormInput
-                  :id="`service_name_${index}`"
-                  :name="`service_name_${index}`"
-                  placeholder="Название услуги"
+                <BaseInput
                   v-model="service.name"
+                  label="Название услуги"
+                  placeholder="Название дополнительной услуги"
                   :error="getServiceError(index, 'name')"
                 />
                 <PriceInput
                   :id="`service_price_${index}`"
                   :name="`service_price_${index}`"
+                  label="Цена"
                   placeholder="0"
                   v-model="service.price"
                   :unit-value="service.price_unit"
@@ -73,12 +73,12 @@
                 />
               </div>
               
-              <FormTextarea
-                :id="`service_description_${index}`"
-                :name="`service_description_${index}`"
-                placeholder="Краткое описание услуги (опционально)"
+              <BaseTextarea
                 v-model="service.description"
+                label="Описание услуги"
+                placeholder="Краткое описание дополнительной услуги"
                 :error="getServiceError(index, 'description')"
+                :rows="2"
               />
             </div>
             
@@ -99,35 +99,24 @@
 
       <!-- Настройки прайс-листа -->
       <div class="price-list-settings">
-        <h4 class="field-title">Настройки отображения</h4>
+        <h4 class="field-title">Настройки прайс-листа</h4>
         
-        <FormCheckbox
-          name="show_price_list"
-          v-model="form.show_price_list"
-          :options="[{ value: '1', label: 'Показывать прайс-лист в объявлении' }]"
-        />
-
-        <FormCheckbox
-          name="show_prices_public"
-          v-model="form.show_prices_public"
-          :options="[{ value: '1', label: 'Показывать цены всем посетителям' }]"
-        />
-
-        <FormCheckbox
-          name="negotiable_prices"
-          v-model="form.negotiable_prices"
-          :options="[{ value: '1', label: 'Цены договорные' }]"
+        <CheckboxGroup
+          v-model="form.price_list_settings"
+          :options="[
+            { value: 'show_price_list', label: 'Показывать подробный прайс-лист в объявлении' },
+            { value: 'price_negotiable', label: 'Цена договорная' },
+            { value: 'payment_on_arrival', label: 'Оплата по прибытию' }
+          ]"
         />
       </div>
 
       <!-- Валюта -->
       <div class="currency-settings">
-        <FormSelect
-          id="currency"
-          name="currency"
-          label="Валюта"
-          placeholder="Выберите валюту"
+        <h4 class="field-title">Валюта</h4>
+        <BaseSelect
           v-model="form.currency"
+          placeholder="Выберите валюту"
           :options="currencyOptions"
           :error="errors.currency"
         />
@@ -139,8 +128,8 @@
 <script>
 import PageSection from '@/Components/Layout/PageSection.vue'
 import BaseInput from '@/Components/UI/BaseInput.vue'
-import FormTextarea from '@/Components/Form/FormTextarea.vue'
-import BaseCheckbox from '@/Components/UI/BaseCheckbox.vue'
+import BaseTextarea from '@/Components/UI/BaseTextarea.vue'
+import CheckboxGroup from '@/Components/UI/CheckboxGroup.vue'
 import BaseSelect from '@/Components/UI/BaseSelect.vue'
 import PriceInput from '@/Components/Form/Controls/PriceInput.vue'
 
@@ -149,8 +138,8 @@ export default {
   components: {
     PageSection,
     BaseInput,
-    FormTextarea,
-    BaseCheckbox,
+    BaseTextarea,
+    CheckboxGroup,
     BaseSelect,
     PriceInput
   },

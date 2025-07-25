@@ -81,7 +81,7 @@
             <!-- 9. Акции -->
             <div class="form-group-section">
                 <h2 class="form-group-title">Акции</h2>
-                <div class="field-hint" style="margin-bottom: 20px; color: #8c8c8c; font-size: 16px;">
+                <div class="field-hint" style="margin-bottom: 20px; color: #000000; font-size: 16px;">
                     Клиенты увидят информацию о скидках и подарках в объявлении.
                 </div>
                 <PromoSection :form="form" :errors="errors" />
@@ -152,6 +152,7 @@ import PhotosSection from './Sections/PhotosSection.vue'
 import VideosSection from './Sections/VideosSection.vue'
 import GeoSection from './Sections/GeoSection.vue'
 import ContactsSection from './Sections/ContactsSection.vue'
+
 
 // Props
 const props = defineProps({
@@ -425,7 +426,7 @@ const handlePublish = async () => {
 
 // Функция переключения поставщиков услуг
 const toggleServiceProvider = (provider) => {
-    if (!form.service_provider) {
+    if (!Array.isArray(form.service_provider)) {
         form.service_provider = []
     }
     
@@ -439,9 +440,22 @@ const toggleServiceProvider = (provider) => {
 
 // Инициализация массивов
 onMounted(() => {
-    if (!form.service_provider) {
+    // Инициализируем все массивы, которые могут быть undefined
+    if (!Array.isArray(form.clients)) {
+        form.clients = []
+    }
+    if (!Array.isArray(form.service_location)) {
+        form.service_location = []
+    }
+    if (!Array.isArray(form.service_provider)) {
         form.service_provider = []
     }
+    
+    console.log('Form initialized:', {
+        clients: form.clients,
+        service_location: form.service_location,
+        service_provider: form.service_provider
+    })
 })
 </script>
 
@@ -473,6 +487,66 @@ onMounted(() => {
 
 .form-actions button:first-child:hover {
     background: #e6e6e6;
+}
+
+/* Чекбоксы */
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    gap: 12px;
+    padding: 8px 0;
+    user-select: none;
+}
+
+.custom-checkbox {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #d9d9d9;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    background: #fff;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.custom-checkbox:hover {
+    border-color: #8c8c8c;
+}
+
+.custom-checkbox.checked {
+    background: #007bff;
+    border-color: #007bff;
+}
+
+.check-icon {
+    width: 12px;
+    height: 10px;
+    color: #fff;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.custom-checkbox.checked .check-icon {
+    opacity: 1;
+}
+
+.checkbox-label {
+    font-size: 16px;
+    color: #1a1a1a;
+    font-weight: 400;
+    line-height: 1.4;
+    cursor: pointer;
+    user-select: none;
 }
 
 .form-actions button:last-child {

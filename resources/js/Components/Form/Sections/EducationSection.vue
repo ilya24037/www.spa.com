@@ -40,10 +40,10 @@
         />
       </div>
 
-      <!-- Дополнительные курсы -->
-      <div class="additional-courses">
+      <!-- Курсы и дополнительное образование -->
+      <div class="courses">
         <div class="courses-header">
-          <h4 class="field-title">Дополнительные курсы и сертификаты</h4>
+          <h4 class="field-title">Курсы и дополнительное образование</h4>
           <button 
             type="button" 
             class="btn btn-primary"
@@ -57,8 +57,8 @@
           </button>
         </div>
 
-        <div v-if="form.courses.length === 0" class="empty-courses">
-          <p>Добавьте курсы повышения квалификации и сертификаты</p>
+        <div v-if="!form.courses || form.courses.length === 0" class="empty-courses">
+          <p>Добавьте курсы повышения квалификации, которые вы проходили</p>
         </div>
 
         <div v-else class="courses-list">
@@ -69,59 +69,47 @@
           >
             <div class="course-content">
               <div class="course-row">
-                <FormInput
-                  :id="`course_name_${index}`"
-                  :name="`course_name_${index}`"
+                <BaseInput
+                  v-model="course.name"
                   label="Название курса"
                   placeholder="Название курса или программы"
-                  v-model="course.name"
                   :error="getCourseError(index, 'name')"
                 />
-                <FormInput
-                  :id="`course_organization_${index}`"
-                  :name="`course_organization_${index}`"
+                <BaseInput
+                  v-model="course.organization"
                   label="Организация"
                   placeholder="Название организации"
-                  v-model="course.organization"
                   :error="getCourseError(index, 'organization')"
                 />
               </div>
               
               <div class="course-row">
-                <FormInput
-                  :id="`course_year_${index}`"
-                  :name="`course_year_${index}`"
+                <BaseInput
+                  v-model="course.year"
                   label="Год"
                   type="number"
                   placeholder="2023"
-                  v-model="course.year"
                   :error="getCourseError(index, 'year')"
                 />
-                <FormInput
-                  :id="`course_duration_${index}`"
-                  :name="`course_duration_${index}`"
+                <BaseInput
+                  v-model="course.duration"
                   label="Длительность"
                   placeholder="3 месяца, 72 часа"
-                  v-model="course.duration"
                   :error="getCourseError(index, 'duration')"
                 />
               </div>
               
-              <FormTextarea
-                :id="`course_description_${index}`"
-                :name="`course_description_${index}`"
+              <BaseTextarea
+                v-model="course.description"
                 label="Описание"
                 placeholder="Что вы изучали, какие навыки получили"
-                v-model="course.description"
                 :error="getCourseError(index, 'description')"
               />
 
-              <FormInput
-                :id="`course_certificate_${index}`"
-                :name="`course_certificate_${index}`"
+              <BaseInput
+                v-model="course.certificate_number"
                 label="Номер сертификата"
                 placeholder="Номер сертификата (если есть)"
-                v-model="course.certificate_number"
                 :error="getCourseError(index, 'certificate_number')"
               />
             </div>
@@ -145,13 +133,12 @@
       <div class="certificates">
         <h4 class="field-title">Сертификаты</h4>
         
-        <FormCheckbox
-          name="has_certificates"
+        <BaseCheckbox
           v-model="form.has_certificates"
-          :options="[{ value: '1', label: 'У меня есть сертификаты' }]"
+          label="У меня есть сертификаты"
         />
 
-        <div v-if="form.has_certificates.includes('1')" class="certificates-upload">
+        <div v-if="form.has_certificates" class="certificates-upload">
           <PhotoUploader
             v-model="form.certificate_photos"
             label="Фотографии сертификатов"
@@ -166,22 +153,18 @@
       <div class="work-experience">
         <h4 class="field-title">Опыт работы</h4>
         
-        <FormSelect
-          id="experience_years"
-          name="experience_years"
+        <BaseSelect
+          v-model="form.experience_years"
           label="Общий стаж работы"
           placeholder="Выберите стаж"
-          v-model="form.experience_years"
           :options="experienceYearsOptions"
           :error="errors.experience_years"
         />
 
-        <FormTextarea
-          id="work_history"
-          name="work_history"
+        <BaseTextarea
+          v-model="form.work_history"
           label="История работы"
           placeholder="Опишите ваш опыт работы в данной сфере"
-          v-model="form.work_history"
           :error="errors.work_history"
           hint="Расскажите о местах работы, должностях, достижениях"
         />
@@ -193,7 +176,7 @@
 <script>
 import PageSection from '@/Components/Layout/PageSection.vue'
 import BaseInput from '@/Components/UI/BaseInput.vue'
-import FormTextarea from '@/Components/Form/FormTextarea.vue'
+import BaseTextarea from '@/Components/UI/BaseTextarea.vue'
 import BaseCheckbox from '@/Components/UI/BaseCheckbox.vue'
 import BaseSelect from '@/Components/UI/BaseSelect.vue'
 import PhotoUploader from '@/Components/Form/Upload/PhotoUploader.vue'
@@ -203,7 +186,7 @@ export default {
   components: {
     PageSection,
     BaseInput,
-    FormTextarea,
+    BaseTextarea,
     BaseCheckbox,
     BaseSelect,
     PhotoUploader
@@ -283,7 +266,7 @@ export default {
 }
 
 .main-education,
-.additional-courses,
+.courses,
 .certificates,
 .work-experience {
   padding: 16px;
