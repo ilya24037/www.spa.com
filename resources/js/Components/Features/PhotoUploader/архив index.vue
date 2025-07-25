@@ -16,12 +16,12 @@
     <div 
       class="upload-zone"
       :class="{ 
-        'drag-over': isDragOver && draggedIndex === null,
+        'drag-over': isDragOver,
         'has-photos': photos.length > 0 
       }"
-      @drop.prevent="handleDrop"
+      @drop="handleDrop"
       @dragover.prevent="handleDragOver"
-      @dragleave.prevent="handleDragLeave"
+      @dragleave="handleDragLeave"
     >
       <!-- Скрытый input -->
       <input
@@ -35,75 +35,71 @@
 
       <!-- Список фотографий -->
       <div class="photos-list" v-if="photos.length > 0">
+        <!-- Основное фото -->
         <div 
           v-for="(photo, index) in photos" 
-          :key="`photo-${photo.id}`"
+          :key="photo.id"
           class="photo-item"
           :class="{ 
             'main-photo': index === 0,
-            'drag-over': dragOverIndex === index && draggedIndex !== null && draggedIndex !== index,
+            'drag-over': dragOverIndex === index,
             'being-dragged': draggedIndex === index
           }"
           draggable="true"
           @dragstart="handlePhotoStart($event, index)"
-          @dragover.prevent="handlePhotoDragOver($event, index)"
-          @drop.prevent="handlePhotoDrop($event, index)"
+          @dragover.prevent="handleDragOverPhoto($event, index)"
+          @drop.prevent="handlePhotoMove($event, index)"
           @dragend="handleDragEnd"
-          @dragleave.prevent="handlePhotoDragLeave($event, index)"
+          @dragleave="handleDragLeavePhoto($event, index)"
         >
           <div class="photo-preview">
             <img 
               :src="photo.preview" 
-              :alt="photo.name"
+              :alt="`Фото ${index + 1}`"
               class="photo-image"
               :style="{ transform: `rotate(${photo.rotation || 0}deg)` }"
             />
             
-            <!-- Контролы фото -->
+            <!-- Кнопки управления -->
             <div class="photo-controls">
               <button 
-                @click.stop="rotatePhoto(index)" 
-                class="control-btn rotate-btn"
                 type="button"
+                class="control-btn rotate-btn"
+                @click.stop="rotatePhoto(index)"
                 title="Повернуть"
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="23,4 23,10 17,10"/>
-                  <path d="M20.49,15a9,9,0,1,1-2.12-9.36L23,10"/>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M1 4v6h6"/>
+                  <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
                 </svg>
               </button>
               
               <button 
-                @click.stop="removePhoto(index)" 
-                class="control-btn delete-btn"
                 type="button"
+                class="control-btn delete-btn"
+                @click.stop="removePhoto(index)"
                 title="Удалить"
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="3,6 5,6 21,6"/>
-                  <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2v2"/>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
                 </svg>
               </button>
             </div>
-            
-            <!-- Метка основного фото -->
-            <div v-if="index === 0" class="main-photo-label">
-              Основное фото
-            </div>
           </div>
+          
+          <!-- Пометка основного фото -->
+          <span v-if="index === 0" class="main-photo-label">основное фото</span>
         </div>
 
-        <!-- Кнопка добавления фото -->
-        <label v-if="photos.length < maxFiles" class="add-photo-btn">
-          <input
-            type="file"
-            multiple
-            accept="image/gif,image/png,image/jpeg,image/pjpeg,image/heic"
-            @change="handleFileSelect"
-            class="hidden-input"
-          />
+        <!-- Кнопка добавления -->
+        <label 
+          v-if="photos.length < maxFiles"
+          class="add-photo-btn"
+          @click="triggerFileInput"
+        >
           <div class="add-photo-content">
-            <svg class="add-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg class="add-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <line x1="12" y1="5" x2="12" y2="19"/>
               <line x1="5" y1="12" x2="19" y2="12"/>
             </svg>
@@ -126,8 +122,8 @@
         </div>
       </div>
 
-      <!-- Drag-and-drop overlay для новых файлов -->
-      <div v-if="isDragOver && draggedIndex === null" class="drag-overlay">
+      <!-- Drag-and-drop overlay -->
+      <div v-if="isDragOver" class="drag-overlay">
         <div class="drag-content">
           <div class="drag-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -144,9 +140,9 @@
     <!-- Подсказки -->
     <div class="upload-hints">
       <p class="hint-text">Добавьте качественные фото ваших работ</p>
-      <p class="hint-text secondary">Перетащите фото для изменения порядка</p>
+      <p class="hint-text secondary">Перетащите фото сюда или нажмите для выбора</p>
       <p class="hint-text secondary">До {{ maxFiles }} фото, формат JPG, PNG</p>
-      <p class="hint-text secondary">Первая фотография будет использоваться как главная</p>
+      <p class="hint-text secondary">Максимум 50 фотографий. Первая фотография будет использоваться как главная</p>
     </div>
 
     <!-- Ошибки -->
@@ -200,7 +196,7 @@ const fileInput = ref(null)
 const isDragOver = ref(false)
 const error = ref('')
 const dragOverIndex = ref(null)
-const draggedIndex = ref(null)
+let draggedIndex = null
 
 // Computed
 const photos = computed({
@@ -225,32 +221,30 @@ const handleFileSelect = (event) => {
 
 const handleDrop = (event) => {
   event.preventDefault()
-  event.stopPropagation()
+  isDragOver.value = false
   
-  // Если это не перетаскивание фото (draggedIndex === null), обрабатываем файлы
-  if (draggedIndex.value === null) {
-    isDragOver.value = false
-    const files = Array.from(event.dataTransfer.files)
-    if (files.length > 0) {
-      processFiles(files)
-    }
+  // Если это перестановка фото - игнорируем
+  if (draggedIndex !== null) {
+    console.log('🔄 Игнорируем drop - это перестановка фото')
+    return
+  }
+  
+  // Иначе обрабатываем как загрузку новых файлов
+  const files = Array.from(event.dataTransfer.files)
+  if (files.length > 0) {
+    console.log('📁 Загружаем новые файлы:', files.length)
+    processFiles(files)
   }
 }
 
 const handleDragOver = (event) => {
   event.preventDefault()
-  // Показываем оверлей только если не перетаскиваем существующее фото
-  if (draggedIndex.value === null) {
-    isDragOver.value = true
-  }
+  isDragOver.value = true
 }
 
 const handleDragLeave = (event) => {
   event.preventDefault()
-  // Убираем оверлей только если покидаем всю зону
-  if (event.currentTarget === event.target) {
-    isDragOver.value = false
-  }
+  isDragOver.value = false
 }
 
 const processFiles = (files) => {
@@ -296,92 +290,112 @@ const processFiles = (files) => {
 }
 
 const removePhoto = (index) => {
+  console.log('Удаляем фото с индексом:', index)
   if (index < 0 || index >= photos.value.length) {
+    console.error('Неверный индекс фото:', index)
     return
   }
   
   const newPhotos = [...photos.value]
   newPhotos.splice(index, 1)
   photos.value = newPhotos
+  
+  console.log('Фото удалено, осталось:', newPhotos.length)
 }
 
 const rotatePhoto = (index) => {
+  console.log('Поворачиваем фото с индексом:', index)
   if (index < 0 || index >= photos.value.length) {
+    console.error('Неверный индекс фото:', index)
     return
   }
   
   const newPhotos = [...photos.value]
   const currentRotation = newPhotos[index].rotation || 0
-  newPhotos[index] = {
-    ...newPhotos[index],
-    rotation: (currentRotation + 90) % 360
-  }
+  newPhotos[index].rotation = (currentRotation + 90) % 360
   photos.value = newPhotos
+  
+  console.log('Фото повернуто на:', newPhotos[index].rotation, 'градусов')
 }
 
 // Drag and drop для перестановки фото
 const handlePhotoStart = (event, index) => {
-  draggedIndex.value = index
+  console.log('🚀 НАЧАЛО ПЕРЕТАСКИВАНИЯ: фото с индексом', index)
+  draggedIndex = index
   event.dataTransfer.effectAllowed = 'move'
   event.dataTransfer.setData('text/plain', index.toString())
   
-  // Добавляем класс для визуального эффекта
-  event.target.classList.add('opacity-50')
+  // Добавляем прозрачность
+  setTimeout(() => {
+    if (event.target) {
+      event.target.style.opacity = '0.5'
+    }
+  }, 0)
 }
 
-const handlePhotoDragOver = (event, index) => {
+const handlePhotoMove = (event, targetIndex) => {
   event.preventDefault()
   event.stopPropagation()
   
-  if (draggedIndex.value !== null && draggedIndex.value !== index) {
-    dragOverIndex.value = index
-  }
-}
-
-const handlePhotoDrop = (event, targetIndex) => {
-  event.preventDefault()
-  event.stopPropagation()
+  console.log('🔄 ПЕРЕСТАНОВКА: Перемещаем фото', draggedIndex, '→', targetIndex)
   
-  const sourceIndex = draggedIndex.value
-  
-  if (sourceIndex === null || sourceIndex === targetIndex) {
+  if (draggedIndex === null || draggedIndex === targetIndex) {
+    console.log('❌ Отменяем: одинаковые индексы или null')
     return
   }
   
-  if (sourceIndex < 0 || sourceIndex >= photos.value.length || 
+  if (draggedIndex < 0 || draggedIndex >= photos.value.length || 
       targetIndex < 0 || targetIndex >= photos.value.length) {
+    console.log('❌ Отменяем: некорректные индексы')
     return
   }
   
-  // Создаем новый массив для перестановки
   const newPhotos = [...photos.value]
-  const [movedPhoto] = newPhotos.splice(sourceIndex, 1)
-  newPhotos.splice(targetIndex, 0, movedPhoto)
+  console.log('📋 Исходный порядок:', newPhotos.map((p, i) => `${i}: ${p.name.substring(0, 10)}...`))
+  
+  // Простая логика: меняем местами
+  const temp = newPhotos[draggedIndex]
+  newPhotos[draggedIndex] = newPhotos[targetIndex]
+  newPhotos[targetIndex] = temp
+  
+  console.log('✅ Новый порядок:', newPhotos.map((p, i) => `${i}: ${p.name.substring(0, 10)}... ${i === 0 ? '(ГЛАВНОЕ)' : ''}`))
   
   photos.value = newPhotos
   
   // Сбрасываем состояние
-  draggedIndex.value = null
+  draggedIndex = null
   dragOverIndex.value = null
 }
 
-const handlePhotoDragLeave = (event, index) => {
-  // Сбрасываем только если действительно покидаем элемент
-  if (!event.currentTarget.contains(event.relatedTarget)) {
-    if (dragOverIndex.value === index) {
-      dragOverIndex.value = null
-    }
+// Новые обработчики для лучшего UX
+const handleDragOverPhoto = (event, index) => {
+  event.preventDefault()
+  event.stopPropagation()
+  
+  if (draggedIndex !== null && draggedIndex !== index) {
+    dragOverIndex.value = index
+    console.log('🎯 Наведение на фото', index)
+  }
+}
+
+const handleDragLeavePhoto = (event, index) => {
+  // Сбрасываем только если покидаем именно этот элемент
+  if (dragOverIndex.value === index) {
+    dragOverIndex.value = null
   }
 }
 
 const handleDragEnd = (event) => {
-  // Убираем визуальные эффекты
-  event.target.classList.remove('opacity-50')
+  console.log('🏁 ЗАВЕРШЕНИЕ ПЕРЕТАСКИВАНИЯ')
+  
+  // Возвращаем нормальную прозрачность
+  if (event.target) {
+    event.target.style.opacity = '1'
+  }
   
   // Сбрасываем состояние
-  draggedIndex.value = null
+  draggedIndex = null
   dragOverIndex.value = null
-  isDragOver.value = false
 }
 
 // Метод для получения файлов
@@ -457,19 +471,28 @@ defineExpose({
 .photo-item {
   @apply relative bg-gray-100 rounded-lg overflow-hidden cursor-move;
   aspect-ratio: 4/3;
+}
+
+.photo-item.main-photo .photo-preview::after {
+  content: '';
+  @apply absolute inset-0 ring-2 ring-blue-500;
+  border-radius: inherit;
+}
+
+/* Визуальные состояния для drag & drop */
+.photo-item.being-dragged {
+  @apply opacity-30 scale-90;
   transition: all 0.2s ease;
 }
 
-.photo-item.main-photo {
-  @apply ring-2 ring-blue-500;
-}
-
-.photo-item.being-dragged {
-  @apply opacity-30 scale-95;
-}
-
 .photo-item.drag-over {
-  @apply ring-4 ring-blue-400 bg-blue-50 scale-105;
+  @apply ring-4 ring-blue-500 bg-blue-50 scale-105;
+  transition: all 0.2s ease;
+}
+
+.photo-item.drag-over::before {
+  content: 'Поменять местами';
+  @apply absolute inset-0 bg-blue-500 bg-opacity-20 flex items-center justify-center text-blue-700 font-medium text-sm z-20;
 }
 
 .photo-preview {
@@ -491,9 +514,15 @@ defineExpose({
   @apply opacity-100;
 }
 
+/* Для основного фото всегда показываем кнопки */
+.photo-item.main-photo .photo-controls {
+  @apply opacity-100;
+}
+
 .control-btn {
   @apply w-8 h-8 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full flex items-center justify-center shadow transition-all;
   cursor: pointer;
+  z-index: 11;
 }
 
 .control-btn svg {
@@ -601,12 +630,6 @@ defineExpose({
   @apply mt-2 text-sm text-gray-600;
 }
 
-/* Индикатор места при перетаскивании */
-.photo-item.drag-over::before {
-  content: '';
-  @apply absolute inset-0 bg-blue-500 bg-opacity-20 z-10;
-}
-
 /* Мобильная адаптация */
 @media (max-width: 768px) {
   .photos-list {
@@ -622,4 +645,4 @@ defineExpose({
     @apply text-xl;
   }
 }
-</style>
+</style> 
