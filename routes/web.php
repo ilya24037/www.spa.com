@@ -137,6 +137,17 @@ Route::prefix('api')->group(function () {
         Route::get('/favorites', [FavoriteController::class, 'apiIndex']);
         Route::post('/favorites/toggle', [FavoriteController::class, 'toggle']);
         Route::get('/bookings/available-slots', [BookingController::class, 'availableSlots']);
+        
+        // Расширенные услуги
+        Route::prefix('extended-services')->name('extended-services.')->group(function () {
+            Route::get('/categories', [App\Http\Controllers\ExtendedServiceController::class, 'getCategories']);
+            Route::get('/categories/{type}', [App\Http\Controllers\ExtendedServiceController::class, 'getCategoriesByType']);
+            Route::post('/services/{service}/attach', [App\Http\Controllers\ExtendedServiceController::class, 'attachToService']);
+            Route::get('/services/{service}', [App\Http\Controllers\ExtendedServiceController::class, 'getServiceExtended']);
+            Route::post('/services/{service}/calculate-cost', [App\Http\Controllers\ExtendedServiceController::class, 'calculateTotalCost']);
+            Route::get('/popular-combinations', [App\Http\Controllers\ExtendedServiceController::class, 'getPopularCombinations']);
+            Route::post('/validate-age', [App\Http\Controllers\ExtendedServiceController::class, 'validateAgeRestrictions']);
+        });
     });
 });
 

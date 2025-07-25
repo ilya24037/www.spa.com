@@ -10,6 +10,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             MassageCategorySeeder::class, // Добавьте эту строку ПЕРЕД MasterSeeder
+            ExtendedServiceCategorySeeder::class, // Расширенные категории услуг
             MasterSeeder::class,
         ]);
     }
