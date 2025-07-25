@@ -1,49 +1,59 @@
 <!--
   Рефакторированный компонент карточки услуги в стиле Avito
   Разбит на переиспользуемые подкомпоненты для лучшей maintainability
+  С изображением в стиле Ozon
 -->
 <template>
-  <div class="avito-item-snippet cursor-pointer hover:shadow-lg transition-shadow" @click="handleCardClick">
-    <div class="item-snippet-content">
-      <!-- Изображение -->
-      <ItemImage 
-        :item="item"
-        :itemUrl="itemUrl"
-      />
+  <Link :href="itemUrl" class="block">
+    <div class="avito-item-snippet cursor-pointer hover:shadow-lg transition-shadow">
+      <div class="item-snippet-content">
+        <!-- Изображение в стиле Ozon -->
+        <div class="item-image-container relative">
+          <ItemImage 
+            :item="item"
+            :itemUrl="itemUrl"
+          />
+        </div>
 
-      <!-- Основной контент -->
-      <ItemContent 
-        :item="item"
-        :itemUrl="itemUrl"
-      />
-
-      <!-- Статистика и действия -->
-      <div class="item-info-section">
-        <ItemStats :item="item" />
-        
-        <ItemActions 
+        <!-- Основной контент -->
+        <ItemContent 
           :item="item"
-          @pay="payItem"
-          @promote="promoteItem"
-          @edit="editItem"
-          @deactivate="deactivateItem"
-          @restore="restoreItem"
-          @delete="showDeleteConfirm"
+          :itemUrl="itemUrl"
         />
+
+        <!-- Статистика и действия -->
+        <div class="item-info-section">
+          <div class="item-info-top">
+            <ItemStats :item="item" />
+          </div>
+          
+          <!-- Действия на уровне низа фото -->
+          <div class="item-actions-bottom">
+            <ItemActions 
+              :item="item"
+              @pay="(e) => { e.preventDefault(); payItem() }"
+              @promote="(e) => { e.preventDefault(); promoteItem() }"
+              @edit="(e) => { e.preventDefault(); editItem() }"
+              @deactivate="(e) => { e.preventDefault(); deactivateItem() }"
+              @delete="(e) => { e.preventDefault(); showDeleteModal = true }"
+              @click.stop
+            />
+          </div>
+        </div>
       </div>
     </div>
+  </Link>
 
-    <!-- Модальное окно подтверждения удаления -->
-    <ConfirmModal
-  :show="showDeleteModal"
-  title="Удалить объявление?"
-  message="Это действие нельзя отменить. Объявление будет удалено навсегда."
-  confirmText="Удалить"
-  cancelText="Отмена"
-  @confirm="deleteItem"
-  @cancel="showDeleteModal = false"
-/>
-  </div>
+  <!-- Модальное окно подтверждения удаления -->
+  <ConfirmModal
+      :show="showDeleteModal"
+      title="Удалить объявление?"
+      message="Это действие нельзя отменить. Объявление будет удалено навсегда."
+      confirmText="Удалить"
+      cancelText="Отмена"
+      @confirm="deleteItem"
+      @cancel="showDeleteModal = false"
+    />
 </template>
 
 <script setup>
@@ -54,6 +64,7 @@ import ItemContent from '../Cards/ItemContent.vue'
 import ItemStats from '../Cards/ItemStats.vue'
 import ItemActions from '../Cards/ItemActions.vue'
 import ConfirmModal from '../UI/ConfirmModal.vue'
+import { Link } from '@inertiajs/vue3'
 
 const props = defineProps({
   item: {
@@ -76,15 +87,6 @@ const itemUrl = computed(() => {
 })
 
 // Методы действий
-const handleCardClick = (event) => {
-  // Не переходим по ссылке при клике на кнопки
-  if (event.target.closest('button') || event.target.closest('.dropdown-container')) {
-    return
-  }
-  
-  window.open(itemUrl.value, '_blank')
-}
-
 const payItem = () => {
   router.visit(`/payment/select-plan?item_id=${props.item.id}`)
 }
@@ -132,10 +134,6 @@ const restoreItem = async () => {
   }
 }
 
-const showDeleteConfirm = () => {
-  showDeleteModal.value = true
-}
-
 const deleteItem = async () => {
   try {
     // Используем правильный роут через router для удаления
@@ -160,15 +158,39 @@ const deleteItem = async () => {
 
 <style scoped>
 .avito-item-snippet {
-  @apply bg-white rounded-lg border border-gray-200 p-4 mb-4;
+  @apply bg-white border border-gray-200 mb-4;
+  border-radius: 16px; /* Как на Ozon */
+  padding: 0; /* Убираем padding как на Ozon */
+  height: fit-content; /* Строго по контенту */
+  overflow: hidden; /* Как на Ozon */
 }
 
 .item-snippet-content {
-  @apply flex gap-4;
+  @apply flex;
+  align-items: flex-start;
+  height: 256px; /* Фото + равномерные отступы 12px */
+  padding: 12px; /* Равномерные отступы 12px со всех сторон */
+  gap: 12px; /* Уменьшаем gap */
+}
+
+.item-image-container {
+  @apply relative;
+  @apply overflow-hidden; /* Как на Ozon - обрезаем */
+  width: 160px; /* Ширина как на Ozon */
+  height: 232px; /* Точно по размеру без лишних отступов */
+  border-radius: 12px; /* Скругление фото */
+  flex-shrink: 0;
 }
 
 .item-info-section {
-  @apply flex flex-col justify-between w-48 flex-shrink-0;
+  @apply flex flex-col justify-between flex-shrink-0;
+  width: 200px; /* Оптимальная ширина правой колонки */
+  height: 232px; /* Высота контента с отступами 12px */
+}
+
+/* Кнопки с большим отступом снизу */
+.item-actions-bottom {
+  margin-bottom: 30px; /* Еще больший отступ снизу */
 }
 
 /* Responsive */

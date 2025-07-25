@@ -4,6 +4,14 @@
   <div>
     <!-- Контейнер как на главной -->
     <div class="py-6 lg:py-8">
+      <!-- Хлебные крошки -->
+      <div class="mb-6">
+        <!-- Хлебные крошки -->
+        <Breadcrumbs
+          :items="breadcrumbItems"
+        />
+      </div>
+
       <!-- Основной контент с правильными отступами -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
@@ -205,6 +213,7 @@ import { Head, Link, router } from '@inertiajs/vue3'
 import { MapPinIcon, PhoneIcon } from '@heroicons/vue/24/outline'
 import ConfirmModal from '@/Components/UI/ConfirmModal.vue'
 import PhotoGallery from '@/Components/Gallery/PhotoGallery.vue'
+import Breadcrumbs from '@/Components/Common/Breadcrumbs.vue'
 
 // Импортируем route из window.route (Ziggy)
 const route = window.route || ((name, params) => {
@@ -286,6 +295,12 @@ const deleteDraft = () => {
     }
   })
 }
+
+const breadcrumbItems = [
+  { title: 'Главная', href: '/' },
+  { title: 'Мои объявления', href: '/profile/items/draft/all' },
+  { title: props.ad.title || 'Черновик' }
+]
 </script>
 
 <style scoped>

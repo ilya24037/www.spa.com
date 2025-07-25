@@ -14,19 +14,31 @@ class Payment extends Model
         'ad_id',
         'ad_plan_id',
         'payment_id',
+        'external_payment_id',
         'amount',
+        'discount_amount',
+        'final_amount',
+        'discount_percent',
+        'promo_code',
         'currency',
         'status',
         'payment_method',
+        'purchase_type',
         'description',
         'metadata',
+        'activation_code',
+        'activation_code_used',
         'paid_at',
         'expires_at'
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
+        'final_amount' => 'decimal:2',
+        'discount_percent' => 'decimal:2',
         'metadata' => 'array',
+        'activation_code_used' => 'boolean',
         'paid_at' => 'datetime',
         'expires_at' => 'datetime'
     ];

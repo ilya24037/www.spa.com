@@ -3,13 +3,13 @@
   <nav class="text-xs text-gray-500 my-2">
     <ol class="flex items-center space-x-2">
       <li v-for="(item, index) in items" :key="index" class="flex items-center">
-        <Link 
+        <a 
           v-if="index < items.length - 1"
           :href="item.href"
           class="hover:text-gray-700 transition-colors"
         >
           {{ item.title }}
-        </Link>
+        </a>
         <span v-else class="text-gray-700 font-medium">
           {{ item.title }}
         </span>
@@ -29,8 +29,6 @@
 </template>
 
 <script setup>
-import { Link } from '@inertiajs/vue3'
-
 defineProps({
   items: {
     type: Array,

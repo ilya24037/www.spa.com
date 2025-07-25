@@ -33,10 +33,17 @@ export default {
       
       this.$emit('click')
       
+      // Простой подход как на Avito
       if (this.to) {
         window.location.href = this.to
       } else {
-        window.history.back()
+        // Простая проверка истории
+        if (window.history.length > 1) {
+          window.history.back()
+        } else {
+          // Fallback на главную
+          window.location.href = '/'
+        }
       }
     }
   }

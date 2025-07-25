@@ -68,9 +68,12 @@ class ProfileController extends Controller
             }
             
             // Если нет фото в объявлении, используем тестовое
-            if (!$mainImage || $mainImage === 'undefined') {
+            if (!$mainImage || $mainImage === 'undefined' || $mainImage === 'null' || empty($mainImage)) {
                 $mainImage = '/images/masters/demo-' . (($ad->id % 4) + 1) . '.jpg';
                 $photosCount = rand(1, 4);
+                
+                // Отладочная информация
+                \Log::info("Объявление {$ad->id}: нет фото, используем {$mainImage}");
             }
             
             return [
@@ -150,29 +153,42 @@ class ProfileController extends Controller
             ->get();
         // Преобразование и подсчёты с правильной обработкой фотографий
         $profiles = $ads->map(function ($ad) {
-            // Получаем первое фото из массива photos (используем ту же логику что и в renderItems)
-            $mainImage = null;
-            $photosCount = 0;
+            // Получаем данные объявления с правильным преобразованием JSON полей
+            $adData = $ad->toArray();
             
-            // Проверяем, что photos не null и не пустая строка
-            if ($ad->photos && $ad->photos !== 'null' && $ad->photos !== '') {
-                // Если photos - это JSON строка, декодируем её
-                if (is_string($ad->photos)) {
-                    $photosArray = json_decode($ad->photos, true);
-                    if (is_array($photosArray) && count($photosArray) > 0) {
-                        $mainImage = $photosArray[0]['preview'] ?? $photosArray[0]['url'] ?? null;
-                        $photosCount = count($photosArray);
-                    }
-                } elseif (is_array($ad->photos) && count($ad->photos) > 0) {
-                    $mainImage = $ad->photos[0]['preview'] ?? $ad->photos[0]['url'] ?? null;
-                    $photosCount = count($ad->photos);
+            // Убеждаемся что JSON поля декодированы в массивы (как в AdController)
+            $jsonFields = ['clients', 'service_location', 'service_provider', 'photos', 'video'];
+            
+            foreach ($jsonFields as $field) {
+                if (isset($adData[$field]) && is_string($adData[$field])) {
+                    $decoded = json_decode($adData[$field], true);
+                    $adData[$field] = is_array($decoded) ? $decoded : [];
+                } elseif (!isset($adData[$field])) {
+                    $adData[$field] = [];
                 }
             }
             
+            // Получаем первое фото из массива photos
+            $mainImage = null;
+            $photosCount = 0;
+            
+            if (isset($adData['photos']) && is_array($adData['photos']) && count($adData['photos']) > 0) {
+                $firstPhoto = $adData['photos'][0];
+                if (is_array($firstPhoto)) {
+                    $mainImage = $firstPhoto['preview'] ?? $firstPhoto['url'] ?? $firstPhoto['src'] ?? null;
+                } elseif (is_string($firstPhoto)) {
+                    $mainImage = $firstPhoto;
+                }
+                $photosCount = count($adData['photos']);
+            }
+            
             // Если нет фото в объявлении, используем тестовое
-            if (!$mainImage || $mainImage === 'undefined') {
+            if (!$mainImage || $mainImage === 'undefined' || $mainImage === 'null') {
                 $mainImage = '/images/masters/demo-' . (($ad->id % 4) + 1) . '.jpg';
                 $photosCount = rand(1, 4);
+                
+                // Отладочная информация
+                \Log::info("Объявление {$ad->id}: нет фото, используем {$mainImage}");
             }
             
             return [
@@ -186,10 +202,11 @@ class ProfileController extends Controller
                 'photos_count' => $photosCount,
                 'avatar' => $mainImage,
                 'main_image' => $mainImage,
+                'photos' => $adData['photos'], // Передаем массив фото
                 'city' => 'Москва', // Из адреса или по умолчанию
                 'address' => $ad->address ?? '',
                 'district' => $ad->travel_area ?? '',
-                'home_service' => is_array($ad->service_location) ? in_array('client_home', $ad->service_location) : false,
+                'home_service' => is_array($adData['service_location']) ? in_array('client_home', $adData['service_location']) : false,
                 'availability' => $ad->status === 'active' ? 'Доступен' : 'Недоступен',
                 'messages_count' => 0, // Пока не реализовано
                 'services_list' => $ad->specialty ?? '',

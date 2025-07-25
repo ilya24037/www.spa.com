@@ -23,6 +23,24 @@ use Inertia\Inertia;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+// CSRF токен для AJAX запросов
+Route::get('/csrf-token', function() {
+    return response()->json(['token' => csrf_token()]);
+});
+
+// DigiSeller/WebMoney платежные маршруты
+Route::middleware('auth')->group(function () {
+    // Пополнение баланса
+    Route::get('/payment/top-up', [PaymentController::class, 'topUpBalance'])->name('payment.top-up');
+    Route::post('/payment/top-up', [PaymentController::class, 'createTopUpPayment'])->name('payment.create-top-up');
+    
+    // Активационные коды
+    Route::post('/payment/activate-code', [PaymentController::class, 'activateCode'])->name('payment.activate-code');
+});
+
+// WebMoney callback (без middleware auth)
+Route::post('/payment/webmoney/callback', [PaymentController::class, 'webmoneyCallback'])->name('payment.webmoney.callback');
+
 // Тестовая страница для проверки навигации
 Route::get('/test', function() {
     return Inertia::render('Test');

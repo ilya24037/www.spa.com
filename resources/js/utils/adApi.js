@@ -6,6 +6,22 @@
 import { router } from '@inertiajs/vue3'
 
 /**
+ * Получение CSRF токена
+ */
+const getCsrfToken = async () => {
+  try {
+    const response = await fetch('/csrf-token')
+    const data = await response.json()
+    return data.token
+  } catch (error) {
+    console.error('Ошибка получения CSRF токена:', error)
+    // Fallback - пытаемся получить из meta тега
+    const metaToken = document.querySelector('meta[name="csrf-token"]')
+    return metaToken ? metaToken.getAttribute('content') : ''
+  }
+}
+
+/**
  * Создать новое объявление
  */
 export const createAd = async (formData) => {
@@ -258,12 +274,13 @@ export const prepareFormData = (form) => {
  */
 export async function publishAd(formData) {
   try {
+    const csrfToken = await getCsrfToken()
     const response = await fetch('/ads/publish', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'X-CSRF-TOKEN': getCsrfToken(),
+        'X-CSRF-TOKEN': csrfToken,
         'X-Requested-With': 'XMLHttpRequest'
       },
       body: JSON.stringify(formData)

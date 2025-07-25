@@ -235,6 +235,48 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Связь с балансом пользователя (DigiSeller стиль)
+     */
+    public function balance()
+    {
+        return $this->hasOne(UserBalance::class);
+    }
+
+    /**
+     * Получить или создать баланс пользователя
+     */
+    public function getBalance()
+    {
+        if (!$this->balance) {
+            $this->balance()->create([
+                'user_id' => $this->id
+            ]);
+            $this->refresh();
+        }
+        
+        return $this->balance;
+    }
+
+    /**
+     * Проверить достаточность средств
+     */
+    public function hasEnoughFunds($amount, $currency = 'RUB')
+    {
+        $balance = $this->getBalance();
+        $field = strtolower($currency) . '_balance';
+        
+        return $balance->$field >= $amount;
+    }
+
+    /**
+     * Получить форматированный баланс
+     */
+    public function getFormattedBalance()
+    {
+        return $this->getBalance()->formatted_balance;
+    }
+
+    /**
      * Boot метод для автоматического создания профиля мастера
      */
     protected static function boot()
@@ -250,6 +292,11 @@ class User extends Authenticatable implements MustVerifyEmail
                     'status' => 'draft',
                 ]);
             }
+            
+            // Создаём баланс для всех пользователей
+            $user->balance()->create([
+                'user_id' => $user->id
+            ]);
         });
     }
 }

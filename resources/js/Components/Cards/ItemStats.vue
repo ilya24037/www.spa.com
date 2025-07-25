@@ -1,7 +1,7 @@
 <template>
   <div class="item-stats-section">
-    <!-- Счетчики -->
-    <div v-if="item.status !== 'waiting_payment'" class="item-counters">
+    <!-- Счетчики - только для активных объявлений -->
+    <div v-if="item.status !== 'waiting_payment' && item.status !== 'draft'" class="item-counters">
       <!-- Просмотры (глаз) -->
       <div class="counter-item">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -27,14 +27,21 @@
       </div>
     </div>
 
-    <!-- Время до окончания -->
-    <div class="item-lifetime">
+    <!-- Время до окончания - для активных объявлений -->
+    <div v-if="item.status !== 'draft'" class="item-lifetime">
       <span v-if="item.status === 'waiting_payment'" class="lifetime-text text-gray-900">
         Не оплачено
       </span>
       <span v-else class="lifetime-text" :class="{ 'lifetime-warning': getDaysLeft() < 7 }">
         Осталось {{ getDaysLeft() }} дней
       </span>
+    </div>
+
+    <!-- Статус удаления для черновиков -->
+    <div v-if="item.status === 'draft'" class="item-lifetime">
+      <div class="draft-info">
+        <div class="draft-status">Удалится навсегда через 30 дней</div>
+      </div>
     </div>
 
     <!-- Чаты -->
@@ -96,22 +103,34 @@ const getDaysLeft = () => {
 }
 
 .lifetime-text {
-  @apply text-gray-600;
+  @apply text-gray-900 font-normal; /* Черный текст как на скрине */
 }
 
 .lifetime-warning {
-  @apply text-orange-600 font-medium;
+  @apply text-red-600;
 }
 
 .item-chats {
-  @apply flex items-center gap-2 text-sm text-gray-600;
+  @apply flex items-center gap-2 text-sm;
+  color: #000000; /* Черный текст как на скрине */
 }
 
 .chat-icon {
-  @apply text-gray-400;
+  @apply text-black; /* Черная иконка */
 }
 
 .chat-text {
-  @apply text-sm;
+  @apply font-normal; /* Обычный шрифт */
+  color: #000000; /* Черный текст */
+}
+
+/* Стили для черновиков */
+.draft-info {
+  @apply flex flex-col gap-1;
+}
+
+.draft-status {
+  @apply text-sm font-normal;
+  color: #000000;
 }
 </style>
