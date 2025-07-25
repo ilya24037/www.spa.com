@@ -196,7 +196,7 @@ class AdController extends Controller
             'success' => true,
             'message' => 'Объявление готово к публикации',
             'id' => $ad->id,
-            'redirect' => route('payment.select-plan', ['ad' => $ad->id])
+            'redirect' => route('select-plan', ['ad' => $ad->id])
         ]);
     }
 
