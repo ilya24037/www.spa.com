@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
@@ -42,6 +43,16 @@ class Service extends Model
         'instant_booking',
         'advance_booking_hours',
         'cancellation_hours',
+        // Новые поля для расширенных услуг
+        'category_type',
+        'is_adult_only',
+        'age_restriction',
+        'additional_cost',
+        'restrictions',
+        'tags',
+        'intensity_level',
+        'requires_experience',
+        'preparation_required',
     ];
 
     /**
@@ -60,6 +71,12 @@ class Service extends Model
         'price_home' => 'decimal:2',
         'price_sale' => 'decimal:2',
         'rating' => 'decimal:2',
+        // Новые поля
+        'is_adult_only' => 'boolean',
+        'additional_cost' => 'decimal:2',
+        'restrictions' => 'array',
+        'tags' => 'array',
+        'requires_experience' => 'boolean',
     ];
 
     /**
@@ -96,6 +113,16 @@ class Service extends Model
     public function masterProfile(): BelongsTo
     {
         return $this->belongsTo(MasterProfile::class);
+    }
+
+    /**
+     * Расширенные категории услуг
+     */
+    public function extendedCategories(): BelongsToMany
+    {
+        return $this->belongsToMany(ExtendedServiceCategory::class, 'service_extended_categories', 'service_id', 'extended_category_id')
+            ->withPivot(['custom_additional_cost', 'custom_restrictions'])
+            ->withTimestamps();
     }
 
     /**
