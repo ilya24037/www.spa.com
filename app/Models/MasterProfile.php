@@ -29,6 +29,8 @@ class MasterProfile extends Model
         'views_count', 'status', 'is_verified',
         'is_premium', 'premium_until',
         'meta_title', 'meta_description',
+        // Физические параметры
+        'age', 'height', 'weight', 'breast_size',
     ];
 
     protected $casts = [

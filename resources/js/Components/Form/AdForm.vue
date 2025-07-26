@@ -78,7 +78,13 @@
                 <PriceSection :form="form" :errors="errors" />
             </div>
 
-            <!-- 9. Акции -->
+            <!-- 9. Физические параметры -->
+            <div class="form-group-section">
+                <h2 class="form-group-title">Физические параметры</h2>
+                <ParametersSection :form="form" :errors="errors" />
+            </div>
+
+            <!-- 10. Акции -->
             <div class="form-group-section">
                 <h2 class="form-group-title">Акции</h2>
                 <div class="field-hint" style="margin-bottom: 20px; color: #000000; font-size: 16px;">
@@ -87,7 +93,7 @@
                 <PromoSection :form="form" :errors="errors" />
             </div>
 
-            <!-- 10. Фотографии и видео -->
+            <!-- 11. Фотографии и видео -->
             <div class="form-group-section">
                 <PhotosSection :form="form" :errors="errors" />
                 <VideosSection :form="form" :errors="errors" />
@@ -147,6 +153,7 @@ import WorkFormatSection from './Sections/WorkFormatSection.vue'
 import ExperienceSection from './Sections/ExperienceSection.vue'
 import PriceSection from './Sections/PriceSection.vue'
 import DescriptionSection from './Sections/DescriptionSection.vue'
+import ParametersSection from './Sections/ParametersSection.vue'
 import PromoSection from './Sections/PromoSection.vue'
 import PhotosSection from './Sections/PhotosSection.vue'
 import VideosSection from './Sections/VideosSection.vue'
@@ -200,6 +207,8 @@ const requiredFields = {
     clients: 'Ваши клиенты',
     service_location: 'Где вы оказываете услуги', 
     work_format: 'Формат работы',
+    experience: 'Опыт работы',
+    description: 'Описание услуги',
     price: 'Стоимость услуги',
     phone: 'Телефон для связи'
 }
@@ -216,6 +225,17 @@ const validateForm = () => {
             // Для массивов проверяем, что выбран хотя бы один элемент
             if (!form[field] || form[field].length === 0) {
                 validationErrors.value[field] = `Поле "${label}" обязательно для заполнения`
+                if (!firstErrorField) firstErrorField = field
+                isValid = false
+            }
+        } else if (field === 'description') {
+            // Для описания проверяем минимальную длину
+            if (!form[field] || form[field].toString().trim() === '') {
+                validationErrors.value[field] = `Поле "${label}" обязательно для заполнения`
+                if (!firstErrorField) firstErrorField = field
+                isValid = false
+            } else if (form[field].toString().trim().length < 50) {
+                validationErrors.value[field] = `${label} должно содержать не менее 50 символов`
                 if (!firstErrorField) firstErrorField = field
                 isValid = false
             }
@@ -409,16 +429,43 @@ const handlePublish = async () => {
     try {
         saving.value = true
         
-        // Сохраняем объявление
-        const result = await publishAd(form)
+        // Подготавливаем данные для отправки
+        const publishData = {
+            ...form,
+            category: props.category, // Добавляем категорию из props
+            // Убеждаемся, что массивы корректно переданы
+            clients: Array.isArray(form.clients) ? form.clients : [],
+            service_location: Array.isArray(form.service_location) ? form.service_location : [],
+            service_provider: Array.isArray(form.service_provider) ? form.service_provider : [],
+            is_starting_price: Array.isArray(form.is_starting_price) ? form.is_starting_price : [],
+            // Переименовываем поле скидки для сервера
+            discount: form.new_client_discount || null
+        }
         
-        if (result && result.id) {
-            // Перенаправляем на страницу оплаты
-            router.visit(`/payment/ad/${result.id}/select-plan`)
+        console.log('Отправляем данные для публикации:', publishData)
+        
+        // Сохраняем объявление
+        const result = await publishAd(publishData)
+        
+        if (result && result.success) {
+            // Используем URL из ответа сервера
+            if (result.redirect) {
+                window.location.href = result.redirect
+            } else if (result.id) {
+                // Fallback на старый формат
+                router.visit(`/ad/${result.id}/select-plan`)
+            }
         }
     } catch (error) {
         console.error('Ошибка при публикации объявления:', error)
-        // Можно показать уведомление об ошибке
+        
+        // Показываем ошибки валидации
+        if (error.response && error.response.data && error.response.data.errors) {
+            const errors = error.response.data.errors
+            for (let field in errors) {
+                console.error(`${field}: ${errors[field].join(', ')}`)
+            }
+        }
     } finally {
         saving.value = false
     }

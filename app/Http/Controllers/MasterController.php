@@ -113,6 +113,11 @@ class MasterController extends Controller
             'home_service'     => $profile->home_service,
             'salon_service'    => $profile->salon_service,
             'salon_address'    => $profile->salon_address,
+            // Физические параметры
+            'age'              => $profile->age,
+            'height'           => $profile->height,
+            'weight'           => $profile->weight,
+            'breast_size'      => $profile->breast_size,
             'services'         => $profile->services->map(fn($s) => [
                 'id'          => $s->id,
                 'name'        => $s->name,
@@ -198,6 +203,11 @@ class MasterController extends Controller
                 'experience_years' => $master->experience_years,
                 'hourly_rate' => $master->hourly_rate,
                 'city' => $master->city,
+                // Физические параметры
+                'age' => $master->age,
+                'height' => $master->height,
+                'weight' => $master->weight,
+                'breast_size' => $master->breast_size,
                 'photos' => $master->photos->map(function($photo) {
                     return [
                         'id' => $photo->id,
@@ -238,6 +248,11 @@ class MasterController extends Controller
             'experience_years' => 'nullable|integer|min:0|max:50',
             'hourly_rate' => 'nullable|integer|min:0',
             'city' => 'nullable|string|max:255',
+            // Физические параметры
+            'age' => 'nullable|integer|min:18|max:65',
+            'height' => 'nullable|integer|min:140|max:200',
+            'weight' => 'nullable|integer|min:40|max:120',
+            'breast_size' => 'nullable|integer|min:1|max:6',
         ]);
 
         $master->update([
@@ -247,6 +262,11 @@ class MasterController extends Controller
             'experience_years' => $validated['experience_years'],
             'hourly_rate' => $validated['hourly_rate'],
             'city' => $validated['city'],
+            // Физические параметры
+            'age' => $validated['age'],
+            'height' => $validated['height'],
+            'weight' => $validated['weight'],
+            'breast_size' => $validated['breast_size'],
         ]);
 
         return redirect()->back()->with('success', 'Профиль обновлен успешно!');

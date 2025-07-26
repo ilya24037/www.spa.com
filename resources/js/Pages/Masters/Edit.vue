@@ -88,6 +88,75 @@
             </div>
           </div>
 
+          <!-- Физические параметры -->
+          <div class="border-t pt-4 mt-4">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Физические параметры</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Возраст
+                </label>
+                <input 
+                  v-model="form.age"
+                  type="number"
+                  min="18"
+                  max="65"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="34"
+                >
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Рост (см)
+                </label>
+                <input 
+                  v-model="form.height"
+                  type="number"
+                  min="140"
+                  max="200"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="161"
+                >
+                <div class="text-xs text-gray-500 mt-1">Ваш рост в сантиметрах</div>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Вес (кг)
+                </label>
+                <input 
+                  v-model="form.weight"
+                  type="number"
+                  min="40"
+                  max="120"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="56"
+                >
+                <div class="text-xs text-gray-500 mt-1">Ваш вес в килограммах</div>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Размер груди
+                </label>
+                <select 
+                  v-model="form.breast_size"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Не указано</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
           <div class="flex justify-end">
             <button 
               type="submit"
@@ -135,7 +204,11 @@ const form = reactive({
   description: props.master.description || '',
   experience_years: props.master.experience_years || 0,
   hourly_rate: props.master.hourly_rate || 0,
-  city: props.master.city || ''
+  city: props.master.city || '',
+  age: props.master.age || '',
+  height: props.master.height || '',
+  weight: props.master.weight || '',
+  breast_size: props.master.breast_size || ''
 })
 
 const updateProfile = async () => {

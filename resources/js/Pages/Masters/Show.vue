@@ -113,6 +113,29 @@
               <p class="text-gray-600">за сеанс</p>
             </div>
             
+            <!-- Физические параметры -->
+            <div v-if="master.age || master.height || master.weight || master.breast_size" class="mb-6 p-4 bg-gray-50 rounded-lg">
+              <h3 class="font-semibold text-gray-900 mb-3">Параметры</h3>
+              <div class="space-y-2">
+                <div v-if="master.age" class="flex justify-between text-sm">
+                  <span class="text-gray-600">Возраст:</span>
+                  <span class="font-medium">{{ master.age }} лет</span>
+                </div>
+                <div v-if="master.height" class="flex justify-between text-sm">
+                  <span class="text-gray-600">Рост:</span>
+                  <span class="font-medium">{{ master.height }} см</span>
+                </div>
+                <div v-if="master.weight" class="flex justify-between text-sm">
+                  <span class="text-gray-600">Вес:</span>
+                  <span class="font-medium">{{ master.weight }} кг</span>
+                </div>
+                <div v-if="master.breast_size" class="flex justify-between text-sm">
+                  <span class="text-gray-600">Размер груди:</span>
+                  <span class="font-medium">{{ master.breast_size }}</span>
+                </div>
+              </div>
+            </div>
+            
             <!-- Кнопки -->
             <div class="space-y-3">
               <button 

@@ -32,6 +32,15 @@ export function useAdForm(initialData = {}, options = {}) {
     price_unit: initialData.price_unit || 'session',
     is_starting_price: initialData.is_starting_price || false,
     
+    // Физические параметры
+    age: initialData.age || '',
+    height: initialData.height || '',
+    weight: initialData.weight || '',
+    breast_size: initialData.breast_size || '',
+    hair_color: initialData.hair_color || '',
+    eye_color: initialData.eye_color || '',
+    nationality: initialData.nationality || '',
+    
     // Акции (обновленные)
     new_client_discount: initialData.new_client_discount || '',
     gift: initialData.gift || '',
