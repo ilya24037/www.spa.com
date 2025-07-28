@@ -1,6 +1,6 @@
 <template>
   <div class="item-image-section">
-    <a :href="itemUrl" class="item-image-link">
+    <div class="item-image-container">
       <div 
         class="item-image-wrapper ozon-style"
         @mouseenter="startImagePreview"
@@ -14,7 +14,7 @@
           @error="handleImageError"
         >
       </div>
-    </a>
+    </div>
     
     <!-- Индикаторы слайдера ПОД фото как на Ozon -->
     <div v-if="processedPhotos.length > 1" class="slider-indicators ozon-indicators">
@@ -157,7 +157,7 @@ const handleImageError = (event) => {
   background: transparent; /* Убираем любой фон */
 }
 
-.item-image-link {
+.item-image-container {
   @apply block w-full;
   height: 213px; /* Высота самого изображения */
 }
@@ -218,7 +218,7 @@ const handleImageError = (event) => {
     height: 214px; /* 187px изображение + 27px для индикаторов */
   }
   
-  .item-image-link {
+  .item-image-container {
     height: 187px; /* Пропорции 3:4 для мобильных */
   }
 }

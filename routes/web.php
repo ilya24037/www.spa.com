@@ -12,6 +12,7 @@ use App\Http\Controllers\AdController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\MyAdsController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -40,6 +41,10 @@ Route::middleware('auth')->group(function () {
 
 // WebMoney callback (без middleware auth)
 Route::post('/payment/webmoney/callback', [PaymentController::class, 'webmoneyCallback'])->name('payment.webmoney.callback');
+
+// Универсальные webhook для всех платежных систем
+Route::post('/webhooks/payments/{gateway}', [WebhookController::class, 'handle'])->name('webhooks.payments');
+Route::post('/webhooks/test', [WebhookController::class, 'test'])->name('webhooks.test');
 
 // Тестовая страница для проверки навигации
 Route::get('/test', function() {
@@ -349,6 +354,7 @@ Route::middleware('auth')->group(function () {
     
     // Маршруты для черновиков
             Route::get('/draft/{ad}', [AdController::class, 'showDraft'])->name('ads.draft.show');
+        Route::delete('/draft/{ad}', [MyAdsController::class, 'destroy'])->name('ads.draft.destroy');
         // Удаление черновиков теперь через my-ads.destroy как и других объявлений
     Route::get('/ads/{ad}/data', [AdController::class, 'getData'])->name('ads.data');
     Route::put('/ads/{ad}', [AdController::class, 'update'])->name('ads.update');

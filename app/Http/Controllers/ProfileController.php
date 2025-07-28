@@ -71,9 +71,6 @@ class ProfileController extends Controller
             if (!$mainImage || $mainImage === 'undefined' || $mainImage === 'null' || empty($mainImage)) {
                 $mainImage = '/images/masters/demo-' . (($ad->id % 4) + 1) . '.jpg';
                 $photosCount = rand(1, 4);
-                
-                // Отладочная информация
-                \Log::info("Объявление {$ad->id}: нет фото, используем {$mainImage}");
             }
             
             return [
@@ -183,12 +180,9 @@ class ProfileController extends Controller
             }
             
             // Если нет фото в объявлении, используем тестовое
-            if (!$mainImage || $mainImage === 'undefined' || $mainImage === 'null') {
+            if (!$mainImage || $mainImage === 'undefined' || $mainImage === 'null' || empty($mainImage)) {
                 $mainImage = '/images/masters/demo-' . (($ad->id % 4) + 1) . '.jpg';
                 $photosCount = rand(1, 4);
-                
-                // Отладочная информация
-                \Log::info("Объявление {$ad->id}: нет фото, используем {$mainImage}");
             }
             
             return [

@@ -1,60 +1,73 @@
 <template>
-    <div class="form-field">
-        <textarea 
-            v-model="form.description"
-            rows="6"
-            class="avito-textarea"
-            :class="{ 'border-red-500 focus:ring-red-500 focus:border-red-500': errors.description }"
-            placeholder="Расскажите о своих услугах подробнее. Опишите ваш опыт, используемые техники, материалы и оборудование..."
-            required
-        ></textarea>
-        
-        <div class="flex justify-between items-center mt-2">
-            <p class="field-hint">
-                Минимум 50 символов. Расскажите о своих услугах, опыте и преимуществах
-            </p>
-            <span class="text-xs text-gray-400">
-                {{ (form.description || '').length }}/1000
-            </span>
-        </div>
-        
-        <div v-if="errors.description" class="error-message">
-            {{ errors.description }}
-        </div>
-    </div>
+  <div class="description-section">
+    <h2 class="form-group-title">О себе:</h2>
+    <textarea 
+      v-model="localDescription" 
+      @input="emitDescription" 
+      rows="8" 
+      placeholder="Напишите подробное описание о себе и о своих услугах. Подробное, интересное, смысловое описание значительно увеличивает эффективность вашей анкеты." 
+      class="description-textarea"
+    ></textarea>
+  </div>
 </template>
 
 <script setup>
+import { ref, watch } from 'vue'
+
 const props = defineProps({
-    form: {
-        type: Object,
-        required: true
-    },
-    errors: {
-        type: Object,
-        default: () => ({})
-    }
+  description: { type: String, default: '' },
+  errors: { type: Object, default: () => ({}) }
 })
+
+const emit = defineEmits(['update:description'])
+
+const localDescription = ref(props.description)
+
+watch(() => props.description, val => { 
+  localDescription.value = val 
+})
+
+const emitDescription = () => {
+  emit('update:description', localDescription.value)
+}
 </script>
 
 <style scoped>
-.avito-textarea {
-    width: 100%;
-    padding: 16px;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    line-height: 1.5;
-    color: #1a1a1a;
-    background: #f5f5f5;
-    transition: all 0.2s ease;
-    font-family: inherit;
-    resize: none;
+.description-section { 
+  background: white; 
+  border-radius: 8px; 
+  padding: 20px; 
 }
 
-.avito-textarea:focus {
-    outline: none;
-    background: #fff;
-    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+.form-group-title { 
+  font-size: 18px; 
+  font-weight: 600; 
+  color: #333; 
+  margin-bottom: 16px; 
+}
+
+.description-textarea { 
+  width: 100%; 
+  min-height: 150px; 
+  padding: 16px; 
+  border: 1px solid #ddd; 
+  border-radius: 8px; 
+  font-size: 15px; 
+  font-family: inherit; 
+  resize: vertical; 
+  line-height: 1.5;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease;
+}
+
+.description-textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.description-textarea::placeholder {
+  color: #999;
+  font-style: italic;
 }
 </style> 

@@ -203,19 +203,19 @@ const generateSlug = (text) => {
 }
 
 const goToProfile = () => {
-  const slug = generateSlug(props.master.display_name || props.master.name || 'master')
+  const slug = props.master.slug || generateSlug(props.master.display_name || props.master.name || 'master')
   const id = props.master.id
   
   // Формируем URL в формате /masters/{slug}-{id}
-  router.visit(route('masters.show', { slug, master: id }))
+  router.visit(route('masters.show', [slug, id]))
 }
 
 const openBooking = () => {
-  const slug = generateSlug(props.master.display_name || props.master.name || 'master')
+  const slug = props.master.slug || generateSlug(props.master.display_name || props.master.name || 'master')
   const id = props.master.id
   
   // Переход к форме бронирования на странице мастера
-  router.visit(route('masters.show', { slug, master: id }) + '#booking')
+  router.visit(route('masters.show', [slug, id]) + '#booking')
 }
 
 const showPhone = () => {

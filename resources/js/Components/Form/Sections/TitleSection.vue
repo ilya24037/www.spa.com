@@ -3,7 +3,8 @@
         <label class="field-label">Название объявления</label>
         <div class="input-wrapper">
             <input
-                v-model="form.title"
+                v-model="localTitle"
+                @input="emitTitle"
                 type="text"
                 name="title"
                 id="title"
@@ -15,9 +16,9 @@
                 required
             >
             <button 
-                v-if="form.title" 
+                v-if="localTitle" 
                 type="button" 
-                @click="form.title = ''" 
+                @click="clearTitle" 
                 class="clear-button"
             >
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -37,16 +38,29 @@
 </template>
 
 <script setup>
+import { ref, watch } from 'vue'
+
 const props = defineProps({
-    form: {
-        type: Object,
-        required: true
-    },
-    errors: {
-        type: Object,
-        default: () => ({})
-    }
+    title: { type: String, default: '' },
+    errors: { type: Object, default: () => ({}) }
 })
+
+const emit = defineEmits(['update:title'])
+
+const localTitle = ref(props.title)
+
+watch(() => props.title, (val) => {
+    localTitle.value = val || ''
+})
+
+const emitTitle = () => {
+    emit('update:title', localTitle.value)
+}
+
+const clearTitle = () => {
+    localTitle.value = ''
+    emitTitle()
+}
 </script>
 
 <style scoped>

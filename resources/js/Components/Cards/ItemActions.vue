@@ -1,5 +1,5 @@
 <template>
-  <div class="item-actions">
+  <div class="item-actions" @click.stop>
     <!-- Единообразный дизайн для всех статусов -->
     <div class="actions-container">
              <!-- Основная кнопка слева (как на Авито) -->
@@ -22,7 +22,7 @@
           @edit="$emit('edit', item)"
           @restore="$emit('restore', item)"
           @deactivate="$emit('deactivate', item)"
-          @delete="$emit('delete', item)"
+          @delete="handleDelete"
         />
     </div>
   </div>
@@ -56,12 +56,36 @@ const mainActionText = computed(() => {
 })
 
 // Всегда редактирование как основное действие
-const handleMainAction = () => {
-  emit('edit', props.item)
+const handleMainAction = (event) => {
+  console.log('Main action (Edit) clicked in ItemActions')
+  console.log('Event target:', event?.target)
+  console.log('Dropdown open:', showDropdown.value)
+  
+  // Безопасно останавливаем всплытие события
+  if (event && typeof event.stopPropagation === 'function') {
+    event.stopPropagation()
+  }
+  if (event && typeof event.preventDefault === 'function') {
+    event.preventDefault()
+  }
+  
+  // Небольшая задержка чтобы модальные окна успели открыться
+  setTimeout(() => {
+    console.log('Emitting edit event after delay')
+    emit('edit', props.item)
+  }, 200)
 }
 
 const toggleDropdown = () => {
   showDropdown.value = !showDropdown.value
+}
+
+const handleDelete = (event) => {
+  console.log('Delete action triggered in ItemActions')
+  // Закрываем dropdown
+  showDropdown.value = false
+  // Эмитим событие delete
+  emit('delete', props.item)
 }
 
 // Закрытие dropdown при клике вне

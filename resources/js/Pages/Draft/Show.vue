@@ -21,6 +21,7 @@
           <div class="mb-4 flex justify-start gap-3">
             <Link 
               :href="route('ads.edit', ad.id)"
+              @click="handleEditClick"
               class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2 text-sm font-medium shadow-lg"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -29,7 +30,7 @@
               Редактировать
             </Link>
             <button 
-              @click.stop.prevent="() => { console.log('Delete button clicked'); showDeleteModal = true }"
+              @click.stop.prevent="handleDeleteClick"
               class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center gap-2 text-sm font-medium shadow-lg"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -197,8 +198,8 @@
     <!-- Модальное окно подтверждения удаления -->
     <ConfirmModal
       :show="showDeleteModal"
-      @cancel="() => { console.log('Modal canceled'); showDeleteModal = false }"
-      @confirm="() => { console.log('Modal confirmed'); deleteDraft() }"
+      @cancel="handleDeleteCancel"
+      @confirm="handleDeleteConfirm"
       title="Удалить черновик?"
       message="Это действие нельзя отменить. Черновик будет удален навсегда."
       confirm-text="Удалить"
@@ -225,8 +226,8 @@ const route = window.route || ((name, params) => {
   if (name === 'ads.edit' && params) {
     return `/ads/${params}/edit`
   }
-  if (name === 'my-ads.index') {
-    return '/my-ads'
+  if (name === 'my-ads.index' || name === 'profile.items.draft') {
+    return '/profile/items/draft/all'
   }
   return '/'
 })
@@ -237,6 +238,42 @@ const props = defineProps({
 
 // Состояние
 const showDeleteModal = ref(false)
+
+// Обработчик клика по кнопке редактирования
+const handleEditClick = (event) => {
+  console.log('Edit button clicked')
+  console.log('Modal open:', showDeleteModal.value)
+  
+  // Если модальное окно открыто, блокируем переход
+  if (showDeleteModal.value) {
+    console.log('Blocking edit - delete modal is open')
+    event.preventDefault()
+    event.stopPropagation()
+    return false
+  }
+  
+  console.log('Allowing edit navigation')
+}
+
+// Обработчик клика по кнопке удаления
+const handleDeleteClick = (event) => {
+  console.log('Delete button clicked, event:', event)
+  event.stopPropagation()
+  event.preventDefault()
+  showDeleteModal.value = true
+}
+
+// Обработчик отмены удаления
+const handleDeleteCancel = () => {
+  console.log('Modal canceled')
+  showDeleteModal.value = false
+}
+
+// Обработчик подтверждения удаления
+const handleDeleteConfirm = () => {
+  console.log('Modal confirmed, calling deleteDraft')
+  deleteDraft()
+}
 
 // Остальные методы
 const formatPrice = (price) => {
@@ -271,27 +308,37 @@ const showPhone = () => {
 
 // Удаление черновика
 const deleteDraft = () => {
-  console.log('Deleting draft with ID:', props.ad.id)
+  console.log('=== STARTING DELETE DRAFT ===')
+  console.log('Draft ID:', props.ad.id)
+  console.log('Current URL:', window.location.href)
   
-  // Используем общий роут для удаления
-  console.log('Deleting with my-ads route')
+  // НЕ закрываем модалку - оставляем открытой до завершения операции
+  console.log('Starting delete request with modal open...')
   
-  // Используем общий роут удаления my-ads.destroy
-  router.delete(`/my-ads/${props.ad.id}`, {
+  // Используем специальный роут для черновиков
+  router.delete(`/draft/${props.ad.id}`, {
     preserveScroll: false,
     preserveState: false,
-    onBefore: () => {
-      console.log('Before delete request')
-      showDeleteModal.value = false // Закрываем модалку сразу
-      return true
+    onStart: () => {
+      console.log('Delete request started')
     },
     onSuccess: (page) => {
-      console.log('Delete successful, redirecting...')
-      // Контроллер сам перенаправит куда нужно
+      console.log('=== DELETE SUCCESSFUL ===')
+      console.log('Redirected to:', page.url)
+      console.log('Page props:', page.props)
+      // Закрываем модалку только при успехе
+      showDeleteModal.value = false
+      // Контроллер перенаправляет в личный кабинет
     },
     onError: (errors) => {
-      console.error('Delete failed:', errors)
-      alert('Ошибка удаления: ' + JSON.stringify(errors))
+      console.log('=== DELETE FAILED ===')
+      console.error('Delete failed with errors:', errors)
+      // Показываем ошибку пользователю
+      alert('Ошибка удаления: ' + (errors.message || JSON.stringify(errors)))
+      // Модалка остается открытой при ошибке
+    },
+    onFinish: () => {
+      console.log('Delete request finished')
     }
   })
 }

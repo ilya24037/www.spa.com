@@ -1,391 +1,380 @@
 <template>
-    <div class="price-section">
-        <!-- Основные поля цены -->
-        <div class="price-controls">
-            <div class="price-input-container">
-                <!-- АВИТО-СТИЛЬ: четкое разделение зон -->
-                <div class="avito-price-wrapper">
-                    <div class="price-prefix" aria-hidden="true">от</div>
-                    
-                    <div class="price-input-area">
-                        <input
-                            ref="priceInput"
-                            v-model="displayValue"
-                            type="text"
-                            inputmode="numeric"
-                            placeholder=" ₽"
-                            class="price-input"
-                            autocomplete="off"
-                            @input="handleInput"
-                            @keydown="handleKeydown"
-                            @click="handleClick"
-                            @focus="handleFocus"
-                        />
-                    </div>
-                    
-                    <button 
-                        v-if="form.price" 
-                        type="button" 
-                        class="price-clear-btn"
-                        @click="clearPrice"
-                        aria-label="Очистить цену"
-                    >
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                            <path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                    </button>
-                    
-                    <div v-if="errors.price" class="price-error">{{ errors.price }}</div>
-                </div>
-            </div>
-            
-            <div class="price-unit-container">
-                <BaseSelect
-                    v-model="form.price_unit"
-                    :options="unitOptions"
-                    placeholder="за час"
-                />
-            </div>
-        </div>
-        
-        <!-- Чекбокс начальной цены -->
-        <div class="starting-price-section">
-            <BaseCheckbox
-                v-model="form.is_starting_price"
-                label="это начальная цена"
-            />
-        </div>
+  <div class="price-section">
+    <!-- Экспресс 30 мин (перенесено в начало) -->
+    <div class="express-section">
+      <label class="express-label">Экспресс 30 мин</label>
+      <input 
+        v-model="expressPrice" 
+        @input="emitAll"
+        type="text" 
+        class="express-input" 
+        placeholder="Экспресс"
+      />
     </div>
+    
+    <!-- Таблица расценок -->
+    <div class="pricing-table">
+      <div class="table-header">
+        <div class="header-cell header-label">Расценки *</div>
+        <div class="header-cell">За час</div>
+        <div class="header-cell">За два</div>
+        <div class="header-cell">За ночь</div>
+      </div>
+      
+      <div class="table-row">
+        <div class="row-label">(апартаменты)</div>
+        <div class="price-cell">
+          <input 
+            v-model="prices.apartment.hour" 
+            @input="emitAll"
+            type="text" 
+            class="price-input" 
+            placeholder="За час"
+          />
+        </div>
+        <div class="price-cell">
+          <input 
+            v-model="prices.apartment.two_hours" 
+            @input="emitAll"
+            type="text" 
+            class="price-input" 
+            placeholder="За два"
+          />
+        </div>
+        <div class="price-cell">
+          <input 
+            v-model="prices.apartment.night" 
+            @input="emitAll"
+            type="text" 
+            class="price-input" 
+            placeholder="За ночь"
+          />
+        </div>
+      </div>
+      
+      <div class="table-row">
+        <div class="row-label">(выезд)</div>
+        <div class="price-cell">
+          <input 
+            v-model="prices.outcall.hour" 
+            @input="emitAll"
+            type="text" 
+            class="price-input" 
+            placeholder="За час"
+          />
+        </div>
+        <div class="price-cell">
+          <input 
+            v-model="prices.outcall.two_hours" 
+            @input="emitAll"
+            type="text" 
+            class="price-input" 
+            placeholder="За два"
+          />
+        </div>
+        <div class="price-cell">
+          <input 
+            v-model="prices.outcall.night" 
+            @input="emitAll"
+            type="text" 
+            class="price-input" 
+            placeholder="За ночь"
+          />
+        </div>
+      </div>
+    </div>
+    
+    <!-- Контактов в час -->
+    <div class="contacts-section">
+      <div class="contacts-label-container">
+        <label class="contacts-label">Контактов в час</label>
+        <div class="tooltip-container">
+          <div class="tooltip-icon">?</div>
+          <div class="tooltip-text">
+            Количество окончаний клиента в час.<br>
+            Например, минет + классика + анал = кончил = 1 контакт<br>
+            минет = кончил и классика = кончил — 2 контакта
+          </div>
+        </div>
+      </div>
+      <select v-model="contactsPerHour" @change="emitAll" class="contacts-select">
+        <option value="">- Выбрать -</option>
+        <option value="1">1</option>
+        <option value="2">до 2-х</option>
+        <option value="3">до 3-х</option>
+        <option value="4">до 4-х</option>
+        <option value="5">до 5-ти</option>
+        <option value="6">безгранично</option>
+      </select>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, computed, nextTick } from 'vue'
-import BaseSelect from '../../UI/BaseSelect.vue'  
-import BaseCheckbox from '../../UI/BaseCheckbox.vue'
+import { ref, reactive, watch } from 'vue'
 
 const props = defineProps({
-    form: {
-        type: Object,
-        required: true
-    },
-    errors: {
-        type: Object,
-        default: () => ({})
-    }
+  price: { type: String, default: '' },
+  priceUnit: { type: String, default: 'hour' },
+  isStartingPrice: { type: Boolean, default: false },
+  pricingData: { type: Object, default: () => ({}) },
+  contactsPerHour: { type: String, default: '' },
+  errors: { type: Object, default: () => ({}) }
 })
 
-// Отображаемое значение с пробелом и ₽
-const displayValue = computed({
-    get() {
-        const price = props.form.price || ''
-        if (!price) return ''
-        // Форматируем как "10000 ₽"
-        return `${price} ₽`
-    },
-    set(value) {
-        // Извлекаем только цифры из строки
-        const cleanValue = value.replace(/[^\d]/g, '')
-        props.form.price = cleanValue
-    }
+const emit = defineEmits(['update:price', 'update:priceUnit', 'update:isStartingPrice', 'update:pricingData', 'update:contactsPerHour'])
+
+// Структура цен как на скриншоте
+const prices = reactive({
+  apartment: {
+    hour: props.pricingData?.apartment?.hour || '',
+    two_hours: props.pricingData?.apartment?.two_hours || '',
+    night: props.pricingData?.apartment?.night || ''
+  },
+  outcall: {
+    hour: props.pricingData?.outcall?.hour || '',
+    two_hours: props.pricingData?.outcall?.two_hours || '',
+    night: props.pricingData?.outcall?.night || ''
+  }
 })
 
-// Обработка ввода
-const handleInput = (event) => {
-    const input = event.target
-    const value = input.value
-    const cursorPos = input.selectionStart
-    
-    // Извлекаем только цифры
-    const cleanValue = value.replace(/[^\d]/g, '')
-    
-    // Обновляем форму
-    props.form.price = cleanValue
-    
-    // Восстанавливаем позицию курсора
-    nextTick(() => {
-        // Если есть цифры, курсор после них перед " ₽"
-        if (cleanValue) {
-            input.setSelectionRange(cleanValue.length, cleanValue.length)
-        } else {
-            // Если пусто - курсор в начало
-            input.setSelectionRange(0, 0)
-        }
-    })
-}
+const expressPrice = ref(props.pricingData?.express || '')
+const contactsPerHour = ref(props.contactsPerHour || '')
 
-// Обработка клика - курсор в правильную позицию
-const handleClick = (event) => {
-    const input = event.target
-    const clickPos = input.selectionStart
-    
-    setTimeout(() => {
-        const price = props.form.price || ''
-        if (price) {
-            // Если кликнули до цифр или после " ₽" - ставим курсор после цифр
-            if (clickPos <= 0 || clickPos > price.length) {
-                input.setSelectionRange(price.length, price.length)
-            }
-        } else {
-            // Если пусто - курсор в начало
-            input.setSelectionRange(0, 0)
-        }
-    }, 0)
-}
+// Совместимость со старой структурой
+const localPrice = ref(props.price)
+const localUnit = ref(props.priceUnit)
+const localIsStartingPrice = ref(props.isStartingPrice)
 
-// Обработка фокуса
-const handleFocus = (event) => {
-    const input = event.target
-    
-    setTimeout(() => {
-        const price = props.form.price || ''
-        if (price) {
-            // При фокусе - курсор после цифр перед " ₽"
-            input.setSelectionRange(price.length, price.length)
-        } else {
-            // Если пусто - курсор в начало
-            input.setSelectionRange(0, 0)
-        }
-    }, 0)
-}
+watch(() => props.pricingData, (newVal) => {
+  if (newVal?.apartment) {
+    prices.apartment = { ...newVal.apartment }
+  }
+  if (newVal?.outcall) {
+    prices.outcall = { ...newVal.outcall }
+  }
+  if (newVal?.express) {
+    expressPrice.value = newVal.express
+  }
+}, { deep: true })
 
-// Обработка клавиш
-const handleKeydown = (event) => {
-    // Разрешаем: Backspace, Delete, Tab, Escape, Enter, цифры
-    const allowed = [
-        'Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
-        'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
-        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
-    ]
-    
-    // Разрешаем Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
-    if (event.ctrlKey && ['a', 'c', 'v', 'x'].includes(event.key.toLowerCase())) {
-        return
-    }
-    
-    // Блокируем все остальные клавиши
-    if (!allowed.includes(event.key)) {
-        event.preventDefault()
-        return
-    }
-}
+watch(() => props.contactsPerHour, (val) => {
+  contactsPerHour.value = val || ''
+})
 
-// Очистка цены
-const clearPrice = () => {
-    props.form.price = ''
-    
-    // Фокус обратно на поле
-    nextTick(() => {
-        const input = document.querySelector('.price-input')
-        if (input) {
-            input.focus()
-            input.setSelectionRange(0, 0)
-        }
-    })
+const emitAll = () => {
+  // Новая структура данных
+  const pricingData = {
+    apartment: { ...prices.apartment },
+    outcall: { ...prices.outcall },
+    express: expressPrice.value
+  }
+  
+  emit('update:pricingData', pricingData)
+  emit('update:contactsPerHour', contactsPerHour.value)
+  
+  // Совместимость со старой структурой - используем первую найденную цену как основную
+  const firstPrice = prices.apartment.hour || prices.outcall.hour || expressPrice.value
+  emit('update:price', firstPrice)
+  emit('update:priceUnit', localUnit.value)
+  emit('update:isStartingPrice', localIsStartingPrice.value)
 }
-
-// Инициализация значений по умолчанию
-if (!props.form.price_unit) {
-    props.form.price_unit = 'hour'
-}
-if (props.form.is_starting_price === undefined || props.form.is_starting_price === null) {
-    props.form.is_starting_price = false
-}
-if (props.form.price === undefined || props.form.price === null) {
-    props.form.price = ''
-}
-
-const unitOptions = [
-    { value: 'hour', label: 'за час' },
-    { value: 'session', label: 'за сеанс' },
-    { value: 'service', label: 'за услугу' },
-    { value: 'day', label: 'за день' },
-    { value: 'visit', label: 'за выезд' }
-]
 </script>
 
 <style scoped>
-/* Основной контейнер секции */
 .price-section {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
 }
 
-/* Контейнер для полей цены */
-.price-controls {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    width: 100%;
+.pricing-table {
+  margin-bottom: 20px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e5e5;
 }
 
-/* Поле ввода цены - 50% как на Авито */
-.price-input-container {
-    width: calc(50% - 6px);
-    flex-shrink: 0;
+.table-header {
+  display: grid;
+  grid-template-columns: 140px 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 8px;
 }
 
-/* АВИТО-СТИЛЬ: Основной контейнер БЕЗ ВИДИМЫХ РАЗДЕЛИТЕЛЕЙ */
-.avito-price-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    border: 2px solid #e5e5e5;
-    border-radius: 8px;
-    background: #fff;
-    transition: all 0.2s ease;
-    min-height: 48px;
-    overflow: hidden;
+.header-cell {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  text-align: center;
 }
 
-.avito-price-wrapper:hover {
-    border-color: #d0d0d0;
+.header-label {
+  text-align: left;
 }
 
-.avito-price-wrapper:focus-within {
-    border-color: #2196f3;
-    box-shadow: none; /* Убираем дополнительную тень */
+.table-row {
+  display: grid;
+  grid-template-columns: 140px 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 8px;
+  align-items: center;
 }
 
-/* Префикс "от" - БЕЗ видимых границ */
-.price-prefix {
-    padding-left: 16px;
-    padding-right: 0;
-    color: #666;
-    font-size: 16px;
-    font-weight: 400;
-    pointer-events: none;
-    user-select: none;
-    flex-shrink: 0;
-    background: transparent;
-    height: 100%;
-    display: flex;
-    align-items: center;
+.row-label {
+  font-size: 14px;
+  color: #666;
+  text-align: left;
 }
 
-
-
-/* Область ввода */
-.price-input-area {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    min-width: 0;
-    padding-right: 40px; /* Место только для кнопки X */
-    position: relative;
+.price-cell {
+  position: relative;
 }
 
-/* Поле ввода цифр */
 .price-input {
-    width: 100%;
-    border: none !important;
-    background: transparent !important;
-    font-size: 16px;
-    color: #1a1a1a;
-    outline: none !important;
-    box-shadow: none !important;
-    padding: 12px 0 12px 4px; /* Минимальный отступ слева */
-    box-sizing: border-box;
-    font-family: inherit;
-    text-align: left;
-}
-
-.price-input::placeholder {
-    color: #666;
-    text-align: left;
-    padding-left: 0;
-    font-weight: 400;
-    /* Placeholder начинается сразу, без дополнительных отступов */
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  background: white;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
 }
 
 .price-input:focus {
-    outline: none !important;
-    border: none !important;
-    box-shadow: none !important;
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
-
-
-/* Кнопка очистки - дальше от ₽ */
-.price-clear-btn {
-    position: absolute;
-    right: 12px; /* Больше отступ от края */
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 6px;
-    color: #999;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 4px;
-    z-index: 10;
+.express-section {
+  margin-bottom: 0;
 }
 
-.price-clear-btn:hover {
-    color: #333;
-    background: #f0f0f0;
+.express-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 8px;
 }
 
-/* Ошибка */
-.price-error {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    margin-top: 4px;
-    font-size: 14px;
-    color: #ff4d4f;
-    line-height: 1.4;
+.express-input {
+  width: 100%;
+  max-width: 300px;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #f8f9fa;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
 }
 
-/* Поле единиц измерения */
-.price-unit-container {
-    width: calc(45% - 6px);
-    flex-shrink: 0;
+.express-input:focus {
+  outline: none;
+  border-color: #007bff;
+  background: white;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
-/* Секция чекбокса */
-.starting-price-section {
-    margin-top: 8px;
+.contacts-section {
+  padding-top: 16px;
+  border-top: 1px solid #e5e5e5;
+  margin-top: 16px;
 }
 
-/* Адаптивность для мобильных устройств */
-@media (max-width: 768px) {
-    .price-controls {
-        flex-direction: column;
-        gap: 16px;
-    }
-    
-    .price-input-container,
-    .price-unit-container {
-        width: 100%;
-    }
-    
-    .price-prefix,
-    .price-suffix {
-        padding: 0 10px;
-        font-size: 15px;
-    }
-    
-    .price-input {
-        padding: 10px;
-        font-size: 16px;
-    }
+.contacts-label-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
-/* Состояние с ошибкой */
-.avito-price-wrapper.error {
-    border-color: #ff4d4f;
+.contacts-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
 }
 
-.avito-price-wrapper.error:focus-within {
-    border-color: #ff4d4f;
-    box-shadow: 0 0 0 1px #ff4d4f;
+.tooltip-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: help;
+}
+
+.tooltip-icon {
+  width: 20px;
+  height: 20px;
+  background-color: #007bff;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.tooltip-text {
+  position: absolute;
+  bottom: 100%; /* Показываем сверху */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: pre-wrap; /* Сохраняем переносы строк */
+  z-index: 10;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  margin-bottom: 8px;
+  min-width: 300px;
+  max-width: 400px;
+}
+
+.tooltip-text::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #333;
+}
+
+.tooltip-container:hover .tooltip-text {
+  opacity: 1;
+  visibility: visible;
+}
+
+.contacts-select {
+  width: 100%;
+  max-width: 300px;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  background: white;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.contacts-select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 </style> 

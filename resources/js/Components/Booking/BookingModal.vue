@@ -274,18 +274,14 @@
 import { ref, computed, watch } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
-import VueDatePicker from '@vuepic/vue-datepicker'
-import { VueTelInput } from 'vue-tel-input'
 import axios from 'axios'
-import { useToast } from 'vue-toastification'
 
 const props = defineProps({
     master: Object,
     service: Object
 })
 
-const emit = defineEmits(['close'])
-const toast = useToast()
+const emit = defineEmits(['close', 'success'])
 
 const form = ref({
     master_profile_id: props.master.id,
@@ -352,11 +348,12 @@ const submitBooking = async () => {
     
     try {
         await router.post('/bookings', form.value)
-        toast.success('Заявка отправлена! Ожидайте подтверждения мастера.')
+        alert('Заявка отправлена! Ожидайте подтверждения мастера.')
+        emit('success', form.value)
         emit('close')
     } catch (error) {
         console.error('Booking error:', error)
-        toast.error('Ошибка при создании записи')
+        alert('Ошибка при создании записи')
     } finally {
         loading.value = false
     }

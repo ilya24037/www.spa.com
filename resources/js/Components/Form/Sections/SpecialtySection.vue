@@ -1,47 +1,35 @@
 <template>
-    <div class="form-field">
-        <BaseSelect
-            v-model="form.specialty"
-            :options="specialtyOptions"
-            label="Специальность или сфера"
-            placeholder="Выберите специальность"
-            :error="errors.specialty"
-        />
+  <div class="specialty-section">
+    <h2 class="form-group-title">Специальность или сфера</h2>
+    <div class="specialty-fields">
+      <select v-model="localSpecialty" @change="emitSpecialty">
+        <option value="">Выберите специальность</option>
+        <option value="massage">Массажист</option>
+        <option value="cosmetologist">Косметолог</option>
+        <option value="stripper">Стриптизёр/Стриптизёрша</option>
+        <option value="escort">Эскорт</option>
+        <!-- Добавь другие опции по необходимости -->
+      </select>
     </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import BaseSelect from '../../UI/BaseSelect.vue'
-
+import { ref, watch } from 'vue'
 const props = defineProps({
-    form: {
-        type: Object,
-        required: true
-    },
-    errors: {
-        type: Object,
-        default: () => ({})
-    }
+  specialty: { type: String, default: '' },
+  errors: { type: Object, default: () => ({}) }
 })
-
-// Варианты специальностей как на скрине
-const specialtyOptions = [
-    { value: 'massage', label: 'Массаж' },
-    { value: 'therapeutic', label: 'Лечебный массаж' },
-    { value: 'relaxing', label: 'Расслабляющий массаж' },
-    { value: 'sports', label: 'Спортивный массаж' },
-    { value: 'anti-cellulite', label: 'Антицеллюлитный массаж' },
-    { value: 'lymphatic', label: 'Лимфодренажный массаж' },
-    { value: 'honey', label: 'Медовый массаж' },
-    { value: 'stone', label: 'Стоун-массаж' },
-    { value: 'thai', label: 'Тайский массаж' },
-    { value: 'erotic', label: 'Эротический массаж' }
-]
+const emit = defineEmits(['update:specialty'])
+const localSpecialty = ref(props.specialty)
+watch(() => props.specialty, val => { localSpecialty.value = val })
+const emitSpecialty = () => {
+  emit('update:specialty', localSpecialty.value)
+}
 </script>
 
 <style scoped>
-.form-field {
-    margin-bottom: 24px;
-}
+.specialty-section { background: white; border-radius: 8px; padding: 20px; }
+.form-group-title { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 16px; }
+.specialty-fields { display: flex; gap: 16px; align-items: center; }
 </style> 

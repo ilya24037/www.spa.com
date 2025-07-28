@@ -2,9 +2,9 @@
   <div class="item-content-section">
     <!-- Заголовок -->
     <h4 class="item-title">
-      <a :href="itemUrl" class="item-title-link">
+      <span class="item-title-text">
         {{ item.title || item.name }}
-      </a>
+      </span>
     </h4>
 
     <!-- Цена -->
@@ -79,8 +79,8 @@ const formatPrice = (price) => {
   @apply mb-2;
 }
 
-.item-title-link {
-  @apply text-lg font-medium text-gray-900 hover:text-blue-600 transition-colors;
+.item-title-text {
+  @apply text-lg font-medium text-gray-900;
   /* Для черновиков - многострочный заголовок */
   line-height: 1.4;
   display: -webkit-box;

@@ -1,171 +1,205 @@
 <template>
-    <div class="form-field">
-        <div class="checkbox-group">
-            <div class="checkbox-item" @click="toggleLocation('home')">
-                <div 
-                    class="custom-checkbox"
-                    :class="{ 'checked': form.service_location.includes('home') }"
-                >
-                    <svg class="check-icon" width="100%" height="100%" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M1 4.35714L3.4 6.5L9 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
-                    </svg>
-                </div>
-                <input 
-                    v-model="form.service_location"
-                    type="checkbox"
-                    value="home"
-                    style="display: none;"
-                >
-                <span class="checkbox-label">У заказчика дома</span>
-            </div>
-            
-            <div class="checkbox-item" @click="toggleLocation('salon')">
-                <div 
-                    class="custom-checkbox"
-                    :class="{ 'checked': form.service_location.includes('salon') }"
-                >
-                    <svg class="check-icon" width="100%" height="100%" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M1 4.35714L3.4 6.5L9 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
-                    </svg>
-                </div>
-                <input 
-                    v-model="form.service_location"
-                    type="checkbox"
-                    value="salon"
-                    style="display: none;"
-                >
-                <span class="checkbox-label">У себя дома</span>
-            </div>
-            
-            <div class="checkbox-item" @click="toggleLocation('office')">
-                <div 
-                    class="custom-checkbox"
-                    :class="{ 'checked': form.service_location.includes('office') }"
-                >
-                    <svg class="check-icon" width="100%" height="100%" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M1 4.35714L3.4 6.5L9 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
-                    </svg>
-                </div>
-                <input 
-                    v-model="form.service_location"
-                    type="checkbox"
-                    value="office"
-                    style="display: none;"
-                >
-                <span class="checkbox-label">В офисе</span>
-            </div>
-        </div>
-        
-        <div v-if="errors.service_location" class="error-message">
-            {{ errors.service_location }}
-        </div>
+  <div class="location-section">
+    <h2 class="form-group-title">Где вы оказываете услуги</h2>
+    
+    <!-- Основные опции расположения -->
+    <div class="main-locations">
+      <CheckboxGroup 
+        v-model="localLocation"
+        :options="mainLocationOptions"
+        @update:modelValue="emitLocation"
+      />
     </div>
+    
+    <!-- Дополнительные опции выезда -->
+    <div class="outcall-locations" v-if="hasOutcallSelected">
+      <h3 class="subcategory-title">Выезд:</h3>
+      <CheckboxGroup 
+        v-model="localOutcallOptions"
+        :options="outcallLocationOptions"
+        @update:modelValue="emitOutcallOptions"
+      />
+    </div>
+    
+    <!-- Секция "Такси" (показывается только если выбран "Выезд") -->
+    <div class="taxi-section" v-if="hasOutcallSelected">
+      <div class="taxi-row">
+        <span class="taxi-title">Такси</span>
+        <div class="taxi-options">
+          <label class="radio-option">
+            <input 
+              type="radio" 
+              name="taxi" 
+              value="separately" 
+              v-model="localTaxiOption"
+              @change="emitTaxiOption"
+            />
+            <span class="radio-label">оплачивается отдельно</span>
+          </label>
+          <label class="radio-option">
+            <input 
+              type="radio" 
+              name="taxi" 
+              value="included" 
+              v-model="localTaxiOption"
+              @change="emitTaxiOption"
+            />
+            <span class="radio-label">включено в стоимость</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { watchEffect } from 'vue'
+import { ref, watch, computed } from 'vue'
+import CheckboxGroup from '@/Components/UI/CheckboxGroup.vue'
 
 const props = defineProps({
-    form: {
-        type: Object,
-        required: true
-    },
-    errors: {
-        type: Object,
-        default: () => ({})
-    }
+  serviceLocation: { type: Array, default: () => [] },
+  outcallLocations: { type: Array, default: () => [] },
+  taxiOption: { type: String, default: '' },
+  errors: { type: Object, default: () => ({}) }
 })
 
-// Инициализируем массив если его нет
-const initializeServiceLocation = () => {
-    if (!Array.isArray(props.form.service_location)) {
-        props.form.service_location = []
-    }
-}
+const emit = defineEmits(['update:serviceLocation', 'update:outcallLocations', 'update:taxiOption'])
 
-// Функция переключения места оказания услуги
-const toggleLocation = (location) => {
-    if (!props.form.service_location.includes(location)) {
-        props.form.service_location.push(location)
-    } else {
-        const index = props.form.service_location.indexOf(location)
-        props.form.service_location.splice(index, 1)
-    }
-}
+const localLocation = ref([...props.serviceLocation])
+const localOutcallOptions = ref([...props.outcallLocations])
+const localTaxiOption = ref(props.taxiOption)
 
-// Вызываем инициализацию сразу
-initializeServiceLocation()
-
-// Отслеживаем изменения через watchEffect
-watchEffect(() => {
-    initializeServiceLocation()
+watch(() => props.serviceLocation, (val) => {
+  localLocation.value = [...val]
 })
+
+watch(() => props.outcallLocations, (val) => {
+  localOutcallOptions.value = [...val]
+})
+
+watch(() => props.taxiOption, (val) => {
+  localTaxiOption.value = val || ''
+})
+
+// Основные опции расположения
+const mainLocationOptions = computed(() => [
+  { value: 'Апартаменты', label: 'Апартаменты' },
+  { value: 'В салоне', label: 'В салоне' },
+  { value: 'Выезд', label: 'Выезд' }
+])
+
+// Дополнительные опции выезда (показываются только если выбран "Выезд")
+const outcallLocationOptions = computed(() => [
+  { value: 'На квартиру', label: 'На квартиру' },
+  { value: 'В гостиницу', label: 'В гостиницу' },
+  { value: 'В загородный дом', label: 'В загородный дом' },
+  { value: 'В сауну', label: 'В сауну' },
+  { value: 'В офис', label: 'В офис' }
+])
+
+// Проверяем, выбран ли "Выезд"
+const hasOutcallSelected = computed(() => {
+  return localLocation.value.includes('Выезд')
+})
+
+const emitLocation = () => {
+  emit('update:serviceLocation', [...localLocation.value])
+  
+  // Если "Выезд" не выбран, очищаем дополнительные опции и такси
+  if (!hasOutcallSelected.value) {
+    localOutcallOptions.value = []
+    emit('update:outcallLocations', [])
+    localTaxiOption.value = ''
+    emit('update:taxiOption', '')
+  }
+}
+
+const emitOutcallOptions = () => {
+  emit('update:outcallLocations', [...localOutcallOptions.value])
+}
+
+const emitTaxiOption = () => {
+  emit('update:taxiOption', localTaxiOption.value)
+}
 </script>
 
 <style scoped>
-.checkbox-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+.location-section {
+  margin-bottom: 24px;
 }
 
-.checkbox-item {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    gap: 12px;
-    padding: 8px 0;
-    user-select: none;
+.form-group-title {
+  font-size: 20px;
+  font-weight: 500;
+  color: #000000;
+  margin: 0 0 20px 0;
+  line-height: 1.3;
 }
 
-.custom-checkbox {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #d9d9d9;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    background: #fff;
-    flex-shrink: 0;
-    cursor: pointer;
+.main-locations {
+  margin-bottom: 20px;
 }
 
-.custom-checkbox:hover {
-    border-color: #8c8c8c;
+.outcall-locations {
+  padding-left: 20px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e5e5;
 }
 
-.custom-checkbox.checked {
-    background: #007bff;
-    border-color: #007bff;
+.subcategory-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  margin: 0 0 12px 0;
+  line-height: 1.3;
 }
 
-.check-icon {
-    width: 12px;
-    height: 10px;
-    color: #fff;
-    opacity: 0;
-    transition: opacity 0.2s ease;
+.taxi-section {
+  padding-left: 20px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e5e5;
 }
 
-.custom-checkbox.checked .check-icon {
-    opacity: 1;
+.taxi-row {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  flex-wrap: wrap;
 }
 
-.checkbox-label {
-    font-size: 16px;
-    color: #1a1a1a;
-    font-weight: 400;
-    line-height: 1.4;
-    cursor: pointer;
-    user-select: none;
+.taxi-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  min-width: 50px;
 }
 
-.error-message {
-    margin-top: 8px;
-    color: #ff4d4f;
-    font-size: 14px;
-    line-height: 1.4;
+.taxi-options {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+}
+
+.radio-option input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.radio-label {
+  user-select: none;
+  cursor: pointer;
 }
 </style> 

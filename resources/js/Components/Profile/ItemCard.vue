@@ -4,45 +4,50 @@
   С изображением в стиле Ozon
 -->
 <template>
-  <Link :href="itemUrl" class="block">
-    <div class="avito-item-snippet cursor-pointer hover:shadow-lg transition-shadow">
-      <div class="item-snippet-content">
-        <!-- Изображение в стиле Ozon -->
-        <div class="item-image-container relative">
-          <ItemImage 
-            :item="item"
-            :itemUrl="itemUrl"
-          />
-        </div>
+  <div class="avito-item-snippet hover:shadow-lg transition-shadow" @click="handleContainerClick">
+    <div class="item-snippet-content">
+      <!-- Изображение в стиле Ozon -->
+      <Link 
+        :href="itemUrl" 
+        class="item-image-container relative cursor-pointer"
+      >
+        <ItemImage 
+          :item="item"
+          :itemUrl="itemUrl"
+        />
+      </Link>
 
-        <!-- Основной контент -->
+      <!-- Основной контент -->
+      <Link 
+        :href="itemUrl" 
+        class="item-content-link cursor-pointer"
+      >
         <ItemContent 
           :item="item"
           :itemUrl="itemUrl"
         />
+      </Link>
 
-        <!-- Статистика и действия -->
-        <div class="item-info-section">
-          <div class="item-info-top">
-            <ItemStats :item="item" />
-          </div>
-          
-          <!-- Действия на уровне низа фото -->
-          <div class="item-actions-bottom">
-            <ItemActions 
-              :item="item"
-              @pay="(e) => { e.preventDefault(); payItem() }"
-              @promote="(e) => { e.preventDefault(); promoteItem() }"
-              @edit="(e) => { e.preventDefault(); editItem() }"
-              @deactivate="(e) => { e.preventDefault(); deactivateItem() }"
-              @delete="(e) => { e.preventDefault(); showDeleteModal = true }"
-              @click.stop
-            />
-          </div>
+      <!-- Статистика и действия (НЕ кликабельные) -->
+      <div class="item-info-section">
+        <div class="item-info-top">
+          <ItemStats :item="item" />
+        </div>
+        
+        <!-- Действия на уровне низа фото -->
+        <div class="item-actions-bottom">
+          <ItemActions 
+            :item="item"
+            @pay="payItem"
+            @promote="promoteItem"
+            @edit="editItem"
+            @deactivate="deactivateItem"
+            @delete="handleDeleteClick"
+          />
         </div>
       </div>
     </div>
-  </Link>
+  </div>
 
   <!-- Модальное окно подтверждения удаления -->
   <ConfirmModal
@@ -96,7 +101,19 @@ const promoteItem = () => {
 }
 
 const editItem = () => {
+  console.log('=== EDIT ITEM CALLED ===')
+  console.log('Item ID:', props.item.id)
+  console.log('Item status:', props.item.status)
+  console.log('Modal open:', showDeleteModal.value)
+  
+  // Если модальное окно открыто, НЕ редактируем
+  if (showDeleteModal.value) {
+    console.log('Blocking edit - delete modal is open')
+    return
+  }
+  
   // Для всех объявлений (включая черновики) используем один роут
+  console.log('Navigating to edit page...')
   router.visit(`/ads/${props.item.id}/edit`)
 }
 
@@ -134,19 +151,67 @@ const restoreItem = async () => {
   }
 }
 
+const handleContainerClick = (event) => {
+  console.log('Container clicked')
+  console.log('Target:', event.target)
+  console.log('Current target:', event.currentTarget)
+}
+
+const handleDeleteClick = (event) => {
+  console.log('=== DELETE CLICKED IN ITEMCARD ===')
+  console.log('Item status:', props.item.status)
+  console.log('Item ID:', props.item.id)
+  console.log('Current URL:', window.location.href)
+  
+  // Безопасно останавливаем всплытие события чтобы не сработал Link
+  if (event && typeof event.stopPropagation === 'function') {
+    event.stopPropagation()
+  }
+  if (event && typeof event.preventDefault === 'function') {
+    event.preventDefault()
+  }
+  
+  console.log('Opening delete modal immediately...')
+  showDeleteModal.value = true
+}
+
 const deleteItem = async () => {
   try {
+    console.log('=== DELETING ITEM ===')
+    console.log('Item ID:', props.item.id)
+    console.log('Item status:', props.item.status)
+    
+    // Выбираем правильный роут в зависимости от типа объявления
+    const deleteUrl = props.item.status === 'draft' 
+      ? `/draft/${props.item.id}` 
+      : `/my-ads/${props.item.id}`
+    
+    console.log('Delete URL:', deleteUrl)
+    
     // Используем правильный роут через router для удаления
-    router.delete(`/my-ads/${props.item.id}`, {
+    router.delete(deleteUrl, {
       preserveScroll: false,
       preserveState: false,
-      onSuccess: () => {
+      onStart: () => {
+        console.log('Delete request started')
+      },
+      onSuccess: (page) => {
+        console.log('=== DELETE SUCCESSFUL ===')
+        console.log('Redirected to:', page.url)
+        console.log('Page props:', page.props)
+        
+        // Эмитим событие для обновления списка
         emit('item-deleted', props.item.id)
         showDeleteModal.value = false
       },
       onError: (errors) => {
-        console.error('Ошибка при удалении:', errors)
+        console.error('=== DELETE FAILED ===')
+        console.error('Delete failed with errors:', errors)
+        alert('Ошибка удаления: ' + (errors.message || JSON.stringify(errors)))
         showDeleteModal.value = false
+      },
+      onFinish: () => {
+        console.log('Delete request finished')
       }
     })
   } catch (error) {
@@ -158,11 +223,11 @@ const deleteItem = async () => {
 
 <style scoped>
 .avito-item-snippet {
-  @apply bg-white border border-gray-200 mb-4;
+  @apply bg-white border border-gray-200 mb-4 relative;
   border-radius: 16px; /* Как на Ozon */
   padding: 0; /* Убираем padding как на Ozon */
   height: fit-content; /* Строго по контенту */
-  overflow: hidden; /* Как на Ozon */
+  overflow: visible; /* Изменяем на visible для dropdown */
 }
 
 .item-snippet-content {
@@ -180,6 +245,12 @@ const deleteItem = async () => {
   height: 232px; /* Точно по размеру без лишних отступов */
   border-radius: 12px; /* Скругление фото */
   flex-shrink: 0;
+  display: block; /* Для корректного отображения Link */
+}
+
+.item-content-link {
+  display: block; /* Для корректного отображения Link */
+  flex: 1; /* Занимает оставшееся место */
 }
 
 .item-info-section {
@@ -191,6 +262,7 @@ const deleteItem = async () => {
 /* Кнопки с большим отступом снизу */
 .item-actions-bottom {
   margin-bottom: 30px; /* Еще больший отступ снизу */
+  position: relative; /* Для корректного позиционирования dropdown */
 }
 
 /* Responsive */

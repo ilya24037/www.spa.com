@@ -1,150 +1,239 @@
 <?php
 
 return [
+
     /*
     |--------------------------------------------------------------------------
-    | Payment Systems Configuration
+    | Основные настройки платежей
     |--------------------------------------------------------------------------
-    |
-    | Конфигурация платёжных систем для SPA Platform
-    | Интеграция с DigiSeller, WebMoney, и другими системами
-    |
     */
 
-    // WebMoney Web Merchant Interface
+    'default_currency' => 'RUB',
+    'min_amount' => 100,
+    'max_amount' => 500000,
+
+    /*
+    |--------------------------------------------------------------------------
+    | YooKassa (ЮKassa) - основной шлюз
+    |--------------------------------------------------------------------------
+    */
+
+    'yookassa' => [
+        'enabled' => env('YOOKASSA_ENABLED', true),
+        'shop_id' => env('YOOKASSA_SHOP_ID'),
+        'secret_key' => env('YOOKASSA_SECRET_KEY'),
+        'test_mode' => env('YOOKASSA_TEST_MODE', true),
+        'webhook_secret' => env('YOOKASSA_WEBHOOK_SECRET'),
+        
+        // Поддерживаемые методы оплаты
+        'payment_methods' => [
+            'bank_card' => true,
+            'yoo_money' => true,
+            'qiwi' => true,
+            'webmoney' => true,
+            'alfabank' => true,
+            'tinkoff_bank' => true,
+            'sberbank' => true,
+            'sbp' => true,
+        ]
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Система быстрых платежей (СБП)
+    |--------------------------------------------------------------------------
+    */
+
+    'sbp' => [
+        'enabled' => env('SBP_ENABLED', true),
+        'merchant_id' => env('SBP_MERCHANT_ID'),
+        'api_key' => env('SBP_API_KEY'),
+        'test_mode' => env('SBP_TEST_MODE', true),
+        
+        // Банки-участники СБП
+        'banks' => [
+            '100000000111' => 'Сбербанк',
+            '044525225' => 'Тинькофф',
+            '044525593' => 'Альфа-банк',
+            '044525974' => 'ВТБ',
+        ]
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | WebMoney
+    |--------------------------------------------------------------------------
+    */
+
     'webmoney' => [
-        'purse' => env('WEBMONEY_PURSE', 'Z123456789012'), // WebMoney кошелёк
-        'secret_key' => env('WEBMONEY_SECRET_KEY', 'your_secret_key'),
+        'enabled' => env('WEBMONEY_ENABLED', false),
+        'purse' => env('WEBMONEY_PURSE'),
+        'secret_key' => env('WEBMONEY_SECRET_KEY'),
         'test_mode' => env('WEBMONEY_TEST_MODE', true),
-        'merchant_url' => 'https://merchant.webmoney.com/lmi/payment_utf.asp',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Робокасса
+    |--------------------------------------------------------------------------
+    */
+
+    'robokassa' => [
+        'enabled' => env('ROBOKASSA_ENABLED', false),
+        'login' => env('ROBOKASSA_LOGIN'),
+        'password1' => env('ROBOKASSA_PASSWORD1'),
+        'password2' => env('ROBOKASSA_PASSWORD2'),
+        'test_mode' => env('ROBOKASSA_TEST_MODE', true),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Paypal (для международных платежей)
+    |--------------------------------------------------------------------------
+    */
+
+    'paypal' => [
+        'enabled' => env('PAYPAL_ENABLED', false),
+        'client_id' => env('PAYPAL_CLIENT_ID'),
+        'client_secret' => env('PAYPAL_CLIENT_SECRET'),
+        'sandbox' => env('PAYPAL_SANDBOX', true),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Настройки комиссий
+    |--------------------------------------------------------------------------
+    */
+
+    'fees' => [
+        // Комиссия платформы (%)
+        'platform_fee_percent' => env('PLATFORM_FEE_PERCENT', 5),
         
-        // Настройки безопасности
-        'verify_signature' => true,
-        'allowed_ips' => [
-            '91.200.29.0/24',   // WebMoney IP диапазоны
-            '195.28.254.0/24',
+        // Комиссии платежных систем
+        'gateway_fees' => [
+            'yookassa' => 2.9,
+            'sbp' => 0.4,
+            'webmoney' => 0.8,
+            'robokassa' => 3.5,
+            'paypal' => 3.4,
+        ],
+        
+        // Кто платит комиссию: 'customer', 'merchant', 'split'
+        'fee_payer' => env('PAYMENT_FEE_PAYER', 'customer'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Лимиты и ограничения
+    |--------------------------------------------------------------------------
+    */
+
+    'limits' => [
+        // Лимиты по суммам (в рублях)
+        'daily_limit' => 100000,
+        'monthly_limit' => 2000000,
+        'single_payment_limit' => 500000,
+        
+        // Лимиты по количеству операций
+        'daily_operations_limit' => 50,
+        'hourly_operations_limit' => 10,
+        
+        // Автоматические ограничения
+        'auto_block_suspicious' => true,
+        'max_failed_attempts' => 3,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Настройки возвратов
+    |--------------------------------------------------------------------------
+    */
+
+    'refunds' => [
+        'enabled' => true,
+        'auto_refund_period' => 24, // часов
+        'partial_refunds' => true,
+        'refund_fee' => 50, // фиксированная комиссия за возврат
+        
+        // Правила возврата
+        'rules' => [
+            'ad_placement' => [
+                'period_hours' => 24,
+                'partial_allowed' => false,
+            ],
+            'service_booking' => [
+                'period_hours' => 2,
+                'partial_allowed' => true,
+            ],
+            'balance_top_up' => [
+                'period_hours' => 1,
+                'partial_allowed' => true,
+            ],
         ]
     ],
 
-    // DigiSeller интеграция
-    'digiseller' => [
-        'seller_id' => env('DIGISELLER_SELLER_ID'),
-        'api_key' => env('DIGISELLER_API_KEY'),
-        'test_mode' => env('DIGISELLER_TEST_MODE', true),
-        'commission' => 1.5, // 1.5% комиссия DigiSeller
-        
-        // URLs
-        'api_url' => 'https://api.digiseller.com/api',
-        'payment_url' => 'https://shop.digiseller.com/xml',
-    ],
+    /*
+    |--------------------------------------------------------------------------
+    | Безопасность
+    |--------------------------------------------------------------------------
+    */
 
-    // Система скидок (как в DigiSeller)
-    'discounts' => [
-        // Скидки по объёму покупки
-        'volume_discounts' => [
-            25000 => 45,   // При покупке от 25000₽ - скидка 45%
-            10000 => 25,   // При покупке от 10000₽ - скидка 25%
-            5000  => 10,   // При покупке от 5000₽ - скидка 10%
-            1000  => 5,    // При покупке от 1000₽ - скидка 5%
-        ],
-        
-        // Скидки по уровню лояльности
-        'loyalty_discounts' => [
-            'platinum' => ['min_spent' => 250000, 'discount' => 45],
-            'gold'     => ['min_spent' => 50000,  'discount' => 25],
-            'silver'   => ['min_spent' => 10000,  'discount' => 10],
-            'bronze'   => ['min_spent' => 0,      'discount' => 0],
-        ]
-    ],
-
-    // Тарифные планы пополнения (как в DigiSeller)
-    'top_up_plans' => [
-        [
-            'amount' => 1000,
-            'price' => 950,
-            'discount_percent' => 5,
-            'description' => 'Код оплаты номиналом 1 000 руб. (за 950 руб.)'
-        ],
-        [
-            'amount' => 2000,
-            'price' => 1750,
-            'discount_percent' => 12.5,
-            'description' => 'Код оплаты номиналом 2 000 руб. (за 1 750 руб.)'
-        ],
-        [
-            'amount' => 5000,
-            'price' => 3750,
-            'discount_percent' => 25,
-            'description' => 'Код оплаты номиналом 5 000 руб. (за 3 750 руб.)'
-        ],
-        [
-            'amount' => 10000,
-            'price' => 7500,
-            'discount_percent' => 25,
-            'description' => 'Код оплаты номиналом 10 000 руб. (за 7 500 руб.)'
-        ],
-        [
-            'amount' => 15000,
-            'price' => 11000,
-            'discount_percent' => 27,
-            'description' => 'Код оплаты номиналом 15 000 руб. (за 11 000 руб.)'
-        ],
-    ],
-
-    // Поддерживаемые способы оплаты
-    'payment_methods' => [
-        'webmoney' => [
-            'name' => 'WebMoney',
-            'icon' => 'webmoney-icon.svg',
-            'enabled' => true,
-            'description' => 'Оплата через кошелёк WebMoney'
-        ],
-        'bank_card' => [
-            'name' => 'Банковская карта',
-            'icon' => 'card-icon.svg', 
-            'enabled' => true,
-            'description' => 'Visa, MasterCard, МИР'
-        ],
-        'bitcoin' => [
-            'name' => 'Bitcoin',
-            'icon' => 'bitcoin-icon.svg',
-            'enabled' => true,
-            'description' => 'Оплата в криптовалюте Bitcoin'
-        ],
-        'ethereum' => [
-            'name' => 'Ethereum',
-            'icon' => 'ethereum-icon.svg',
-            'enabled' => true,
-            'description' => 'Оплата в криптовалюте Ethereum'
-        ],
-        'qiwi' => [
-            'name' => 'QIWI Кошелёк',
-            'icon' => 'qiwi-icon.svg',
-            'enabled' => true,
-            'description' => 'Оплата через QIWI'
-        ],
-        'yandex_money' => [
-            'name' => 'ЮMoney',
-            'icon' => 'yandex-money-icon.svg',
-            'enabled' => true,
-            'description' => 'Оплата через ЮMoney (бывш. Яндекс.Деньги)'
-        ]
-    ],
-
-    // Настройки активационных кодов
-    'activation_codes' => [
-        'length' => 16,                    // Длина кода
-        'prefix' => 'SPA',                 // Префикс для кодов
-        'expires_days' => 365,             // Срок действия кода в днях
-        'max_uses' => 1,                   // Максимальное количество использований
-    ],
-
-    // Безопасность
     'security' => [
-        'encrypt_codes' => true,           // Шифровать ли коды в БД
-        'rate_limit' => [
-            'activation_attempts' => 5,    // Максимум попыток активации в час
-            'payment_attempts' => 10,      // Максимум попыток оплаты в час
+        // IP адреса платежных систем
+        'allowed_ips' => [
+            'yookassa' => [
+                '185.71.76.0/27',
+                '185.71.77.0/27',
+                '77.75.153.0/25',
+                '77.75.156.11',
+                '77.75.156.35',
+                '2a02:5180:0:1509::1'
+            ],
+            'webmoney' => [
+                '195.24.90.0/24',
+                '195.24.91.0/24'
+            ]
+        ],
+        
+        // Шифрование данных
+        'encrypt_sensitive_data' => true,
+        'hash_algorithm' => 'sha256',
+        
+        // Проверка подписей
+        'verify_signatures' => true,
+        'signature_timeout' => 300, // секунд
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Логирование и мониторинг
+    |--------------------------------------------------------------------------
+    */
+
+    'logging' => [
+        'log_all_requests' => env('LOG_PAYMENT_REQUESTS', true),
+        'log_webhooks' => env('LOG_PAYMENT_WEBHOOKS', true),
+        'log_level' => env('PAYMENT_LOG_LEVEL', 'info'),
+        'separate_log_file' => true,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Тестовые данные
+    |--------------------------------------------------------------------------
+    */
+
+    'test' => [
+        'enabled' => env('PAYMENT_TEST_MODE', true),
+        'simulate_delays' => true,
+        'success_rate' => 90, // процент успешных тестовых платежей
+        
+        'test_cards' => [
+            'success' => '4111111111111111',
+            'decline' => '4000000000000002',
+            'insufficient_funds' => '4000000000000119',
+            '3ds_required' => '4000000000000416',
         ]
     ]
+
 ]; 

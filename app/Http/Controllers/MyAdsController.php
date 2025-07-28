@@ -96,14 +96,22 @@ class MyAdsController extends Controller
         // Запоминаем статус для правильного перенаправления
         $wasDraft = $ad->status === Ad::STATUS_DRAFT;
         
+        // ВАЖНО: Реально удаляем объявление из базы данных
         $ad->delete();
         
-        // Если удаляли со страницы черновика - перенаправляем в личный кабинет
-        if (request()->header('referer') && str_contains(request()->header('referer'), '/draft/')) {
-            return redirect('/profile/items/draft/all')->with('success', 'Черновик удален');
+        // Для AJAX запросов (Inertia.js) возвращаем redirect
+        if (request()->header('X-Inertia')) {
+            if ($wasDraft) {
+                return redirect()->route('profile.items.draft')->with('success', 'Черновик удален');
+            }
+            return back()->with('success', 'Объявление удалено');
         }
         
-        // Иначе возвращаемся назад
+        // Для обычных запросов
+        if ($wasDraft) {
+            return redirect()->route('profile.items.draft')->with('success', 'Черновик удален');
+        }
+        
         return back()->with('success', 'Объявление удалено');
     }
     

@@ -31,11 +31,19 @@ class MasterProfile extends Model
         'meta_title', 'meta_description',
         // Физические параметры
         'age', 'height', 'weight', 'breast_size',
+        // Параметры внешности
+        'hair_color', 'eye_color', 'nationality',
+        // Особенности мастера
+        'features', 'medical_certificate', 'works_during_period', 'additional_features',
+        // Модульные услуги
+        'services', 'services_additional_info',
     ];
 
     protected $casts = [
         'certificates'  => 'array',
         'education'     => 'array',
+        'features'      => 'array',
+        'services'      => 'array',
         'show_contacts' => 'boolean',
         'home_service'  => 'boolean',
         'salon_service' => 'boolean',

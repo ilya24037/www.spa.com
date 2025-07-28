@@ -31,13 +31,16 @@ class AdController extends Controller
             'specialty' => 'required|string',
             'clients' => 'array',
             'service_location' => 'required|array|min:1',
+            'taxi_option' => 'nullable|string|in:separately,included',
             'work_format' => 'required|string',
             'service_provider' => 'array',
-            'experience' => 'required|string',
+            'experience' => 'required|string|in:3260137,3260142,3260146,3260149,3260152',
+            'education_level' => 'nullable|string|in:2,3,4,5,6,7',
             'description' => 'required|string|min:50',
             'price' => 'required|numeric|min:0',
             'price_unit' => 'required|string',
             'is_starting_price' => 'array',
+            'contacts_per_hour' => 'nullable|string|in:1,2,3,4,5,6',
             'discount' => 'nullable|numeric|min:0|max:100',
             'gift' => 'nullable|string|max:500',
             'address' => 'required|string|max:500',
@@ -57,13 +60,18 @@ class AdController extends Controller
             'specialty' => $request->specialty,
             'clients' => json_encode($request->clients ?? []),
             'service_location' => json_encode($request->service_location),
+            'outcall_locations' => !empty($request->outcall_locations) ? json_encode($request->outcall_locations) : json_encode([]),
+            'taxi_option' => $request->taxi_option,
             'work_format' => $request->work_format,
             'service_provider' => json_encode($request->service_provider ?? []),
             'experience' => $request->experience,
+            'education_level' => $request->education_level,
             'description' => $request->description,
             'price' => $request->price,
             'price_unit' => $request->price_unit,
             'is_starting_price' => $request->is_starting_price ? true : false,
+            'pricing_data' => !empty($request->pricing_data) ? json_encode($request->pricing_data) : null,
+            'contacts_per_hour' => $request->contacts_per_hour,
             'discount' => $request->discount,
             'gift' => $request->gift,
             // Физические параметры
@@ -73,6 +81,7 @@ class AdController extends Controller
             'breast_size' => $request->breast_size ?: null,
             'hair_color' => $request->hair_color ?: null,
             'eye_color' => $request->eye_color ?: null,
+            'appearance' => $request->appearance ?: null,
             'nationality' => $request->nationality ?: null,
             'photos' => is_array($request->photos) ? json_encode($request->photos) : json_encode([]),
             'video' => $request->video,
@@ -97,22 +106,30 @@ class AdController extends Controller
         // Для черновика не валидируем ничего - принимаем любые данные
         // Черновик может быть полностью пустым
 
-        $ad = Ad::create([
+        $data = [
             'user_id' => Auth::id(),
             'category' => $request->category ?: null,
             'title' => $request->title ?: 'Черновик объявления',
             'specialty' => $request->specialty ?: null,
             'clients' => !empty($request->clients) ? json_encode($request->clients) : json_encode([]),
             'service_location' => !empty($request->service_location) ? json_encode($request->service_location) : json_encode([]),
+            'outcall_locations' => !empty($request->outcall_locations) ? json_encode($request->outcall_locations) : json_encode([]),
+            'taxi_option' => $request->taxi_option ?: null,
             'work_format' => $request->work_format ?: null,
             'service_provider' => !empty($request->service_provider) ? json_encode($request->service_provider) : json_encode([]),
             'experience' => $request->experience ?: null,
+            'education_level' => $request->education_level ?: null,
             'description' => $request->description ?: null,
             'price' => $request->price ? (float)$request->price : null,
             'price_unit' => $request->price_unit ?: 'service',
             'is_starting_price' => $request->is_starting_price ? true : false,
+            'pricing_data' => !empty($request->pricing_data) ? json_encode($request->pricing_data) : null,
+            'contacts_per_hour' => $request->contacts_per_hour ?: null,
             'discount' => $request->discount ? (int)$request->discount : null,
             'gift' => $request->gift ?: null,
+            // Услуги (новые поля)
+            'services' => !empty($request->services) ? json_encode($request->services) : json_encode([]),
+            'services_additional_info' => $request->services_additional_info ?: null,
             // Физические параметры
             'age' => $request->age ?: null,
             'height' => $request->height ?: null,
@@ -131,10 +148,41 @@ class AdController extends Controller
             'phone' => $request->phone ?: null,
             'contact_method' => $request->contact_method ?: 'messages',
             'status' => 'draft'
-        ]);
+        ];
+
+        // Если передан ID существующего объявления, обновляем его
+        $requestId = $request->input('id');
+        if ($request->has('id') && $requestId && $requestId !== 'null' && $requestId !== '') {
+            // Преобразуем ID в число для поиска
+            $adId = is_numeric($requestId) ? (int)$requestId : null;
+            
+            if ($adId) {
+                $ad = Ad::where('id', $adId)
+                       ->where('user_id', Auth::id())
+                       ->where('status', 'draft')
+                       ->first();
+                
+                if ($ad) {
+                    $ad->update($data);
+                    $message = 'Черновик обновлен!';
+                } else {
+                    // Если черновик не найден, создаем новый
+                    $ad = Ad::create($data);
+                    $message = 'Черновик сохранен!';
+                }
+            } else {
+                // Если ID некорректный, создаем новый
+                $ad = Ad::create($data);
+                $message = 'Черновик сохранен!';
+            }
+        } else {
+            // Иначе создаем новый черновик
+            $ad = Ad::create($data);
+            $message = 'Черновик сохранен!';
+        }
 
         // Всегда возвращаем редирект для Inertia
-        return redirect('/profile/items/draft/all')->with('success', 'Черновик сохранен!');
+        return redirect('/profile/items/draft/all')->with('success', $message);
     }
 
     /**
@@ -150,7 +198,8 @@ class AdController extends Controller
             'clients' => 'required|array|min:1',
             'service_location' => 'required|array|min:1',
             'work_format' => 'required|string',
-            'experience' => 'required|string',
+            'experience' => 'required|string|in:3260137,3260142,3260146,3260149,3260152',
+            'education_level' => 'nullable|string|in:2,3,4,5,6,7',
             'description' => 'required|string|min:50',
             'price' => 'required|numeric|min:0',
             'phone' => 'required|string',
@@ -158,9 +207,10 @@ class AdController extends Controller
             'age' => 'nullable|integer|min:18|max:65',
             'height' => 'nullable|integer|min:140|max:200',
             'weight' => 'nullable|integer|min:40|max:120',
-            'breast_size' => 'nullable|integer|min:1|max:6',
+            'breast_size' => 'nullable|integer|min:1|max:7',
             'hair_color' => 'nullable|string|max:50',
             'eye_color' => 'nullable|string|max:50',
+            'appearance' => 'nullable|string|max:50',
             'nationality' => 'nullable|string|max:50',
         ], [
             'title.required' => 'Название объявления обязательно для заполнения',
@@ -198,12 +248,17 @@ class AdController extends Controller
                 'specialty' => $request->specialty,
                 'clients' => is_array($request->clients) ? json_encode($request->clients) : '[]',
                 'service_location' => is_array($request->service_location) ? json_encode($request->service_location) : '[]',
+                'outcall_locations' => is_array($request->outcall_locations) ? json_encode($request->outcall_locations) : '[]',
+                'taxi_option' => $request->taxi_option ?: null,
                 'work_format' => $request->work_format,
                 'service_provider' => is_array($request->service_provider) ? json_encode($request->service_provider) : '[]',
                 'experience' => $request->experience,
+                'education_level' => $request->education_level,
                 'price' => $request->price,
                 'price_unit' => $request->price_unit ?: 'session',
                 'is_starting_price' => is_array($request->is_starting_price) ? json_encode($request->is_starting_price) : '[]',
+                'pricing_data' => !empty($request->pricing_data) ? json_encode($request->pricing_data) : null,
+                'contacts_per_hour' => $request->contacts_per_hour ?: null,
                 'discount' => $request->discount ?: null,
                 'gift' => $request->gift ?: null,
                 'address' => $request->address ?: null,
@@ -217,6 +272,7 @@ class AdController extends Controller
                 'breast_size' => $request->breast_size ?: null,
                 'hair_color' => $request->hair_color ?: null,
                 'eye_color' => $request->eye_color ?: null,
+                'appearance' => $request->appearance ?: null,
                 'nationality' => $request->nationality ?: null,
                 'photos' => is_array($request->photos) ? json_encode($request->photos) : json_encode([]),
                 'video' => $request->video ?: null,
@@ -306,13 +362,16 @@ class AdController extends Controller
             'specialty' => 'required|string',
             'clients' => 'array',
             'service_location' => 'required|array|min:1',
+            'taxi_option' => 'nullable|string|in:separately,included',
             'work_format' => 'required|string',
             'service_provider' => 'array',
-            'experience' => 'required|string',
+            'experience' => 'required|string|in:3260137,3260142,3260146,3260149,3260152',
+            'education_level' => 'nullable|string|in:2,3,4,5,6,7',
             'description' => 'required|string|min:50',
             'price' => 'required|numeric|min:0',
             'price_unit' => 'required|string',
             'is_starting_price' => 'array',
+            'contacts_per_hour' => 'nullable|string|in:1,2,3,4,5,6',
             'discount' => 'nullable|numeric|min:0|max:100',
             'gift' => 'nullable|string|max:500',
             'address' => 'required|string|max:500',
@@ -450,7 +509,7 @@ class AdController extends Controller
         $adData = $ad->toArray();
         
         // Убеждаемся что JSON поля декодированы в массивы
-        $jsonFields = ['clients', 'service_location', 'service_provider', 'photos', 'video'];
+        $jsonFields = ['clients', 'service_location', 'outcall_locations', 'service_provider', 'photos', 'video', 'services', 'pricing_data'];
         
         foreach ($jsonFields as $field) {
             if (isset($adData[$field]) && is_string($adData[$field])) {

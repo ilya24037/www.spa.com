@@ -3,115 +3,152 @@
         <!-- Универсальная форма для всех категорий -->
         <form @submit.prevent="handleSubmit" novalidate>
             
-            <!-- 1. Подробности (title + specialty) -->
+            <!-- 1. Формат работы (перенесено на первое место) -->
             <div class="form-group-section">
-                <TitleSection :form="form" :errors="errors" />
-                <SpecialtySection :form="form" :errors="errors" />
+                <WorkFormatSection 
+                    v-model:workFormat="form.work_format" 
+                    :errors="errors"
+                />
             </div>
 
-            <!-- 2. Ваши клиенты -->
+            <!-- 2. Кто оказывает услуги (перенесено после формата работы) -->
             <div class="form-group-section">
-                <h2 class="form-group-title">Ваши клиенты</h2>
-                <ClientsSection :form="form" :errors="errors" />
+                <ServiceProviderSection 
+                    v-model:serviceProvider="form.service_provider" 
+                    :errors="errors"
+                />
             </div>
 
-            <!-- 3. Где вы оказываете услуги -->
+            <!-- 3. Ваши клиенты (перенесено после "Кто оказывает услуги") -->
             <div class="form-group-section">
-                <h2 class="form-group-title">Где вы оказываете услуги</h2>
-                <LocationSection :form="form" :errors="errors" />
+                <ClientsSection 
+                    v-model:clients="form.clients" 
+                    :errors="errors"
+                />
             </div>
 
-            <!-- 4. Формат работы -->
+            <!-- 4. Описание (перенесено после "Ваши клиенты") -->
             <div class="form-group-section">
-                <h2 class="form-group-title">Формат работы</h2>
-                <WorkFormatSection :form="form" :errors="errors" />
+                <DescriptionSection 
+                    v-model:description="form.description" 
+                    :errors="errors"
+                />
             </div>
 
-            <!-- 5. Кто оказывает услуги -->
+            <!-- 5. Физические параметры -->
             <div class="form-group-section">
-                <h2 class="form-group-title">Кто оказывает услуги</h2>
-                <div class="checkbox-group">
-                    <div class="checkbox-item" @click="toggleServiceProvider('women')">
-                        <div 
-                            class="custom-checkbox"
-                            :class="{ 'checked': form.service_provider.includes('women') }"
-                        >
-                            <svg class="check-icon" width="100%" height="100%" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M1 4.35714L3.4 6.5L9 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
-                            </svg>
-                        </div>
-                        <span class="checkbox-label">Женщина</span>
-                    </div>
-                    
-                    <div class="checkbox-item" @click="toggleServiceProvider('men')">
-                        <div 
-                            class="custom-checkbox"
-                            :class="{ 'checked': form.service_provider.includes('men') }"
-                        >
-                            <svg class="check-icon" width="100%" height="100%" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M1 4.35714L3.4 6.5L9 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
-                            </svg>
-                        </div>
-                        <span class="checkbox-label">Мужчина</span>
-                    </div>
-                </div>
+                <ParametersSection 
+                    v-model:age="form.age"
+                    v-model:height="form.height" 
+                    v-model:weight="form.weight" 
+                    v-model:breastSize="form.breast_size"
+                    v-model:hairColor="form.hair_color" 
+                    v-model:eyeColor="form.eye_color" 
+                    v-model:appearance="form.appearance"
+                    v-model:nationality="form.nationality" 
+                    :errors="errors"
+                />
             </div>
 
-            <!-- 6. Опыт работы -->
+            <!-- 6. Особенности мастера -->
             <div class="form-group-section">
-                <h2 class="form-group-title">Опыт работы</h2>
-                <ExperienceSection :form="form" :errors="errors" />
+                <FeaturesSection 
+                    v-model:features="form.features" 
+                    v-model:additionalFeatures="form.additional_features" 
+                    v-model:experience="form.experience"
+                    v-model:educationLevel="form.education_level"
+                    :errors="errors"
+                />
             </div>
 
-            <!-- 7. Описание -->
-            <div class="form-group-section">
-                <h2 class="form-group-title">Описание</h2>
-                <DescriptionSection :form="form" :errors="errors" />
-            </div>
-
-            <!-- 8. Стоимость основной услуги -->
+            <!-- 7. Стоимость основной услуги -->
             <div class="form-group-section">
                 <h2 class="form-group-title">Стоимость основной услуги</h2>
                 <div class="field-hint" style="margin-bottom: 20px; color: #8c8c8c; font-size: 16px;">
                     Заказчик увидит эту цену рядом с названием объявления.
                 </div>
-                <PriceSection :form="form" :errors="errors" />
+                <PriceSection 
+                    v-model:price="form.price" 
+                    v-model:priceUnit="form.price_unit" 
+                    v-model:isStartingPrice="form.is_starting_price" 
+                    v-model:pricingData="form.pricing_data"
+                    v-model:contactsPerHour="form.contacts_per_hour"
+                    :errors="errors"
+                />
             </div>
 
-            <!-- 9. Физические параметры -->
+            <!-- 8. Акции -->
             <div class="form-group-section">
-                <h2 class="form-group-title">Физические параметры</h2>
-                <ParametersSection :form="form" :errors="errors" />
+                <PromoSection 
+                    v-model:newClientDiscount="form.new_client_discount" 
+                    v-model:discount="form.discount" 
+                    v-model:gift="form.gift" 
+                    :errors="errors"
+                />
             </div>
 
-            <!-- 10. Акции -->
+            <!-- 9. Где вы оказываете услуги -->
             <div class="form-group-section">
-                <h2 class="form-group-title">Акции</h2>
-                <div class="field-hint" style="margin-bottom: 20px; color: #000000; font-size: 16px;">
-                    Клиенты увидят информацию о скидках и подарках в объявлении.
-                </div>
-                <PromoSection :form="form" :errors="errors" />
+                <LocationSection 
+                    v-model:serviceLocation="form.service_location" 
+                    v-model:outcallLocations="form.outcall_locations"
+                    v-model:taxiOption="form.taxi_option"
+                    :errors="errors"
+                />
             </div>
 
-            <!-- 11. Фотографии и видео -->
+            <!-- 10.1. Услуги (новый модульный компонент) -->
             <div class="form-group-section">
-                <PhotosSection :form="form" :errors="errors" />
-                <VideosSection :form="form" :errors="errors" />
+                <ServicesModule 
+                    v-model:services="form.services" 
+                    v-model:servicesAdditionalInfo="form.services_additional_info" 
+                    :allowedCategories="[]"
+                    :errors="errors"
+                />
             </div>
 
-            <!-- 11. География с бейджем "Новое" -->
+            <!-- 10.2. График работы (новый модульный компонент) -->
+            <div class="form-group-section">
+                <ScheduleSection 
+                    v-model:schedule="form.schedule" 
+                    v-model:scheduleNotes="form.schedule_notes" 
+                    :errors="errors"
+                />
+            </div>
+
+            <!-- 11. Фотографии -->
+            <div class="form-group-section">
+                <PhotosSection 
+                    v-model:photos="form.photos" 
+                    :errors="errors"
+                />
+            </div>
+
+            <!-- 12.2 Видео -->
+            <div class="form-group-section">
+                <VideosSection 
+                    v-model:videos="form.videos" 
+                    :errors="errors"
+                />
+            </div>
+
+            <!-- 13. География -->
             <div class="form-group-section geography-section">
-                <h2 class="form-group-title">
-                    География
-                    <span class="form-group-badge">Новое</span>
-                </h2>
-                <GeoSection :form="form" :errors="errors" />
+                <GeoSection 
+                    v-model:geo="form.geo" 
+                    :errors="errors"
+                />
             </div>
 
-            <!-- 12. Контакты -->
+            <!-- 14. Контакты -->
             <div class="form-group-section">
-                <h2 class="form-group-title">Контакты</h2>
-                <ContactsSection :form="form" :errors="errors" />
+                <ContactsSection 
+                    v-model:phone="form.phone" 
+                    v-model:contactMethod="form.contact_method" 
+                    v-model:whatsapp="form.whatsapp" 
+                    v-model:telegram="form.telegram" 
+                    :errors="errors"
+                />
             </div>
 
             <!-- Кнопки действий -->
@@ -145,12 +182,10 @@ import { useAdForm } from '@/Composables/useAdForm'
 import { publishAd } from '@/utils/adApi'
 
 // Импорты секций формы
-import TitleSection from './Sections/TitleSection.vue'
-import SpecialtySection from './Sections/SpecialtySection.vue'
+import ServiceProviderSection from './Sections/ServiceProviderSection.vue'
 import ClientsSection from './Sections/ClientsSection.vue'
 import LocationSection from './Sections/LocationSection.vue'
 import WorkFormatSection from './Sections/WorkFormatSection.vue'
-import ExperienceSection from './Sections/ExperienceSection.vue'
 import PriceSection from './Sections/PriceSection.vue'
 import DescriptionSection from './Sections/DescriptionSection.vue'
 import ParametersSection from './Sections/ParametersSection.vue'
@@ -159,6 +194,11 @@ import PhotosSection from './Sections/PhotosSection.vue'
 import VideosSection from './Sections/VideosSection.vue'
 import GeoSection from './Sections/GeoSection.vue'
 import ContactsSection from './Sections/ContactsSection.vue'
+
+// Модульные компоненты (новая архитектура)
+import ServicesModule from '@/Components/Features/Services/index.vue'
+import FeaturesSection from './Sections/FeaturesSection.vue'
+import ScheduleSection from './Sections/ScheduleSection.vue'
 
 
 // Props
@@ -190,7 +230,10 @@ const {
     errors: formErrors, 
     handleSubmit: submitForm,
     loadDraft
-} = useAdForm({}, { 
+} = useAdForm({
+    category: props.category,
+    ...props.initialData
+}, { 
     isEditMode: !!props.adId,
     adId: props.adId,
     autosaveEnabled: false
@@ -288,8 +331,7 @@ const errors = computed(() => {
     return { ...formErrors.value, ...validationErrors.value }
 })
 
-// Устанавливаем категорию в форму
-form.category = props.category
+// Категория устанавливается через initialData в useAdForm
 
 // Если это режим редактирования, загружаем данные
 onMounted(async () => {
@@ -326,6 +368,7 @@ const saveDraft = async () => {
         // Отправляем данные на сервер для сохранения черновика
         // Фильтруем только поддерживаемые поля
         const draftData = {
+            id: props.adId, // ВАЖНО: передаем ID для обновления существующего черновика
             category: props.category,
             title: form.title,
             specialty: form.specialty,
@@ -382,11 +425,17 @@ const saveDraft = async () => {
 
 // Обработчик кнопки "Сохранить черновик"
 const handleSaveDraft = async () => {
+    console.log('=== SAVE DRAFT DEBUG ===')
     console.log('Начинаем сохранение черновика...')
+    console.log('props.adId:', props.adId)
+    console.log('typeof props.adId:', typeof props.adId)
+    console.log('props.adId exists:', !!props.adId)
+    console.log('initialData.id:', props.initialData?.id)
+    
     saving.value = true
     
-    // Используем Inertia router для отправки
-    router.post('/ads/draft', {
+    const draftData = {
+        id: props.adId, // ВАЖНО: передаем ID для обновления существующего черновика
         category: props.category,
         title: form.title,
         specialty: form.specialty,
@@ -409,8 +458,17 @@ const handleSaveDraft = async () => {
         video: form.video,
         show_photos_in_gallery: form.show_photos_in_gallery,
         allow_download_photos: form.allow_download_photos,
-        watermark_photos: form.watermark_photos
-    }, {
+        watermark_photos: form.watermark_photos,
+        // ВАЖНО: Добавляем поля услуг
+        services: form.services,
+        services_additional_info: form.services_additional_info
+    }
+    
+    console.log('Отправляемые данные:', draftData)
+    console.log('ID в данных:', draftData.id)
+    
+    // Используем Inertia router для отправки
+    router.post('/ads/draft', draftData, {
         preserveScroll: true,
         onFinish: () => {
             saving.value = false
@@ -471,39 +529,9 @@ const handlePublish = async () => {
     }
 }
 
-// Функция переключения поставщиков услуг
-const toggleServiceProvider = (provider) => {
-    if (!Array.isArray(form.service_provider)) {
-        form.service_provider = []
-    }
-    
-    if (!form.service_provider.includes(provider)) {
-        form.service_provider.push(provider)
-    } else {
-        const index = form.service_provider.indexOf(provider)
-        form.service_provider.splice(index, 1)
-    }
-}
 
-// Инициализация массивов
-onMounted(() => {
-    // Инициализируем все массивы, которые могут быть undefined
-    if (!Array.isArray(form.clients)) {
-        form.clients = []
-    }
-    if (!Array.isArray(form.service_location)) {
-        form.service_location = []
-    }
-    if (!Array.isArray(form.service_provider)) {
-        form.service_provider = []
-    }
-    
-    console.log('Form initialized:', {
-        clients: form.clients,
-        service_location: form.service_location,
-        service_provider: form.service_provider
-    })
-})
+
+// Инициализация происходит через useAdForm.js
 </script>
 
 <style scoped>

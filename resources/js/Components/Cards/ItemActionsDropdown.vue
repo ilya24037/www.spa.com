@@ -3,7 +3,7 @@
     <button 
       type="button" 
       class="dropdown-button-inline"
-      @click="$emit('toggle')"
+      @click.stop="$emit('toggle')"
       aria-haspopup="true"
       :aria-expanded="showDropdown"
     >
@@ -16,20 +16,20 @@
       </span>
     </button>
     
-    <div v-if="showDropdown" class="dropdown-menu">
-      <a v-if="showPay" href="#" class="dropdown-item" @click.prevent="$emit('pay')">
+    <div v-if="showDropdown" class="dropdown-menu" @click.stop>
+      <a v-if="showPay" href="#" class="dropdown-item" @click.stop.prevent="$emit('pay')">
         Оплатить размещение
       </a>
-      <a v-if="showPromote" href="#" class="dropdown-item" @click.prevent="$emit('promote')">
+      <a v-if="showPromote" href="#" class="dropdown-item" @click.stop.prevent="$emit('promote')">
         Поднять просмотры
       </a>
-      <a v-if="showEdit" href="#" class="dropdown-item" @click.prevent="$emit('edit')">
+      <a v-if="showEdit" href="#" class="dropdown-item" @click.stop.prevent="$emit('edit')">
         Редактировать
       </a>
-      <a v-if="showRestore" href="#" class="dropdown-item" @click.prevent="$emit('restore')">
+      <a v-if="showRestore" href="#" class="dropdown-item" @click.stop.prevent="$emit('restore')">
         Восстановить
       </a>
-             <a v-if="showDeactivate" href="#" class="dropdown-item" @click.prevent="$emit('deactivate')">
+             <a v-if="showDeactivate" href="#" class="dropdown-item" @click.stop.prevent="$emit('deactivate')">
          {{ showRestore ? 'Архивировать' : 'Уже не актуально' }}
        </a>
       <a v-if="showDelete" href="#" class="dropdown-item danger-item" @click.stop.prevent="$emit('delete')">
@@ -100,7 +100,8 @@ const emit = defineEmits([
 }
 
 .dropdown-menu {
-  @apply absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50;
+  @apply absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1;
+  z-index: 9999;
 }
 
 .dropdown-item {

@@ -83,8 +83,12 @@ class MasterController extends Controller
             : false;
 
         // 7. Диапазон цен
-        $priceFrom = $profile->services->min('price');
-        $priceTo   = $profile->services->max('price');
+        $priceFrom = $profile->services && $profile->services->count() > 0 
+            ? $profile->services->min('price') 
+            : 0;
+        $priceTo = $profile->services && $profile->services->count() > 0 
+            ? $profile->services->max('price') 
+            : 0;
 
         // 8. DTO для Vue
         $masterDTO = [
@@ -118,34 +122,42 @@ class MasterController extends Controller
             'height'           => $profile->height,
             'weight'           => $profile->weight,
             'breast_size'      => $profile->breast_size,
-            'services'         => $profile->services->map(fn($s) => [
-                'id'          => $s->id,
-                'name'        => $s->name,
-                'category'    => $s->category->name ?? 'Массаж',
-                'price'       => $s->price,
-                'duration'    => $s->duration,
-                'description' => $s->description,
-            ]),
-            'work_zones'       => $profile->workZones->map(fn($z) => [
-                'id'        => $z->id,
-                'district'  => $z->district,
-                'city'      => $z->city ?? $profile->city,
-                'is_active' => $z->is_active ?? true,
-            ]),
-            'schedules'        => $profile->schedules->map(fn($sch) => [
-                'id'             => $sch->id,
-                'day_of_week'    => $sch->day_of_week,
-                'start_time'     => $sch->start_time,
-                'end_time'       => $sch->end_time,
-                'is_working_day' => $sch->is_working_day ?? true,
-            ]),
-            'reviews'          => $profile->reviews->take(5)->map(fn($r) => [
-                'id'          => $r->id,
-                'rating'      => $r->rating_overall ?? $r->rating,
-                'comment'     => $r->comment,
-                'client_name' => $r->user->name ?? 'Анонимный клиент',
-                'created_at'  => $r->created_at,
-            ]),
+            'services'         => $profile->services && $profile->services->count() > 0 
+                ? $profile->services->map(fn($s) => [
+                    'id'          => $s->id,
+                    'name'        => $s->name,
+                    'category'    => $s->category->name ?? 'Массаж',
+                    'price'       => $s->price,
+                    'duration'    => $s->duration,
+                    'description' => $s->description,
+                ])
+                : collect([]),
+            'work_zones'       => $profile->workZones && $profile->workZones->count() > 0
+                ? $profile->workZones->map(fn($z) => [
+                    'id'        => $z->id,
+                    'district'  => $z->district,
+                    'city'      => $z->city ?? $profile->city,
+                    'is_active' => $z->is_active ?? true,
+                ])
+                : collect([]),
+            'schedules'        => $profile->schedules && $profile->schedules->count() > 0
+                ? $profile->schedules->map(fn($sch) => [
+                    'id'             => $sch->id,
+                    'day_of_week'    => $sch->day_of_week,
+                    'start_time'     => $sch->start_time,
+                    'end_time'       => $sch->end_time,
+                    'is_working_day' => $sch->is_working_day ?? true,
+                ])
+                : collect([]),
+            'reviews'          => $profile->reviews && $profile->reviews->count() > 0
+                ? $profile->reviews->take(5)->map(fn($r) => [
+                    'id'          => $r->id,
+                    'rating'      => $r->rating_overall ?? $r->rating,
+                    'comment'     => $r->comment,
+                    'client_name' => $r->user->name ?? 'Анонимный клиент',
+                    'created_at'  => $r->created_at,
+                ])
+                : collect([]),
             'gallery'          => $gallery,
             'created_at'       => $profile->created_at,
         ];
@@ -173,7 +185,9 @@ class MasterController extends Controller
             'gallery'        => $gallery,
             'meta'           => $meta,
             'similarMasters' => $this->getSimilarMasters($profile),
-            'reviews'        => $profile->reviews->take(10)->toArray(),
+            'reviews'        => $profile->reviews && $profile->reviews->count() > 0 
+                ? $profile->reviews->take(10)->toArray() 
+                : [],
             'availableSlots' => [],
             'canReview'      => auth()->check(),
         ]);
@@ -252,8 +266,20 @@ class MasterController extends Controller
             'age' => 'nullable|integer|min:18|max:65',
             'height' => 'nullable|integer|min:140|max:200',
             'weight' => 'nullable|integer|min:40|max:120',
-            'breast_size' => 'nullable|integer|min:1|max:6',
-        ]);
+            'breast_size' => 'nullable|integer|min:1|max:7',
+                         // Параметры внешности
+             'hair_color' => 'nullable|string|max:50',
+             'eye_color' => 'nullable|string|max:50',
+             'nationality' => 'nullable|string|max:50',
+             // Особенности мастера
+             'features' => 'nullable|array',
+             'medical_certificate' => 'nullable|in:yes,no',
+             'works_during_period' => 'nullable|in:yes,no',
+             'additional_features' => 'nullable|string|max:1000',
+             // Модульные услуги
+             'services' => 'nullable|array',
+             'services_additional_info' => 'nullable|string|max:2000',
+         ]);
 
         $master->update([
             'display_name' => $validated['name'],
@@ -267,7 +293,19 @@ class MasterController extends Controller
             'height' => $validated['height'],
             'weight' => $validated['weight'],
             'breast_size' => $validated['breast_size'],
-        ]);
+                         // Параметры внешности
+             'hair_color' => $validated['hair_color'],
+             'eye_color' => $validated['eye_color'],
+             'nationality' => $validated['nationality'],
+             // Особенности мастера
+             'features' => $validated['features'],
+             'medical_certificate' => $validated['medical_certificate'],
+             'works_during_period' => $validated['works_during_period'],
+             'additional_features' => $validated['additional_features'],
+             // Модульные услуги
+             'services' => $validated['services'],
+             'services_additional_info' => $validated['services_additional_info'],
+         ]);
 
         return redirect()->back()->with('success', 'Профиль обновлен успешно!');
     }
@@ -290,7 +328,9 @@ class MasterController extends Controller
                 'avatar'      => $m->avatar_url,
                 'rating'      => (float)$m->rating,
                 'city'        => $m->city,
-                'price_from'  => $m->services->min('price'),
+                'price_from'  => $m->services && $m->services->count() > 0 
+                    ? $m->services->min('price') 
+                    : 0,
             ])
             ->toArray();
     }

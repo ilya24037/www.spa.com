@@ -211,9 +211,8 @@
                             v-for="profile in profiles" 
                             :key="profile.id"
                             :item="profile"
-                            :show-status="true"
-                            @update="handleItemUpdate"
-                            @delete="handleItemDelete"
+                            @item-updated="handleItemUpdate"
+                            @item-deleted="handleItemDelete"
                         />
                     </div>
                     
@@ -346,8 +345,15 @@ const handleItemUpdate = (itemId, data) => {
 }
 
 const handleItemDelete = (itemId) => {
-    console.log('Удаление объявления:', itemId)
-    // Здесь логика удаления
+    console.log('Объявление удалено:', itemId)
+    // Удаляем элемент из списка
+    profiles.value = profiles.value.filter(item => item.id !== itemId)
+    // Обновляем счетчики
+    if (counts.value[activeTab.value] > 0) {
+        counts.value[activeTab.value]--
+    }
+    // Показываем уведомление
+    addToast('Объявление успешно удалено', 'success')
 }
 
 // Управление Toast уведомлениями

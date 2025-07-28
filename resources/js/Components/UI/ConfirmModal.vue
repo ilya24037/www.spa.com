@@ -4,8 +4,8 @@
     <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" @click="handleCancel"></div>
     
     <!-- Модальное окно -->
-    <div class="flex min-h-full items-center justify-center p-4">
-      <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-auto">
+    <div class="flex min-h-full items-center justify-center p-4" @click.stop>
+      <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-auto" @click.stop>
         <!-- Заголовок -->
         <div class="flex items-center justify-between p-6 border-b border-gray-200">
           <h3 class="text-lg font-medium text-gray-900">
@@ -73,10 +73,12 @@ defineProps({
 const emit = defineEmits(['confirm', 'cancel'])
 
 const handleConfirm = () => {
+  console.log('ConfirmModal: Confirm clicked')
   emit('confirm')
 }
 
 const handleCancel = () => {
+  console.log('ConfirmModal: Cancel clicked')
   emit('cancel')
 }
 </script> 

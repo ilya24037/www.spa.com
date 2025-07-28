@@ -16,6 +16,12 @@ use Illuminate\Support\Str;
  */
 class BookingService
 {
+    protected NotificationService $notificationService;
+
+    public function __construct(NotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
     /**
      * Создать новое бронирование
      */
@@ -265,7 +271,9 @@ class BookingService
     {
         $servicePrice = $service->price;
         $travelFee = ($data['service_location'] === 'home') ? 500 : 0;
-        $discountAmount = 0; // TODO: логика скидок
+        
+        // Логика скидок
+        $discountAmount = $this->calculateDiscount($service, $data);
         $totalPrice = $servicePrice + $travelFee - $discountAmount;
 
         return [
@@ -357,8 +365,7 @@ class BookingService
      */
     private function sendBookingNotifications(Booking $booking): void
     {
-        // TODO: Реализовать отправку email/SMS
-        // $this->notificationService->sendBookingCreated($booking);
+        $this->notificationService->sendBookingCreated($booking);
     }
 
     /**
@@ -366,7 +373,7 @@ class BookingService
      */
     private function sendConfirmationNotification(Booking $booking): void
     {
-        // TODO: Реализовать уведомление клиенту
+        $this->notificationService->sendBookingConfirmed($booking);
     }
 
     /**
@@ -374,7 +381,7 @@ class BookingService
      */
     private function sendCancellationNotification(Booking $booking, User $cancelledBy): void
     {
-        // TODO: Реализовать уведомление другой стороне
+        $this->notificationService->sendBookingCancelled($booking, $cancelledBy);
     }
 
     /**
@@ -382,6 +389,48 @@ class BookingService
      */
     private function sendReviewRequest(Booking $booking): void
     {
-        // TODO: Реализовать запрос отзыва
+        $this->notificationService->sendReviewRequest($booking);
+    }
+
+    // =================== РАСЧЕТ СКИДОК ===================
+
+    /**
+     * Рассчитать размер скидки
+     */
+    private function calculateDiscount(Service $service, array $data): float
+    {
+        $discount = 0;
+        
+        // Скидка для первого бронирования
+        if ($this->isFirstBooking($data)) {
+            $discount += $service->price * 0.1; // 10% скидка
+        }
+        
+        // Скидка за отсутствие выезда
+        if ($data['service_location'] === 'salon') {
+            $discount += 200; // фиксированная скидка за посещение салона
+        }
+        
+        // Скидка в будние дни
+        $bookingDate = Carbon::parse($data['booking_date']);
+        if ($bookingDate->isWeekday()) {
+            $discount += $service->price * 0.05; // 5% скидка в будни
+        }
+        
+        return min($discount, $service->price * 0.3); // максимум 30% скидки
+    }
+
+    /**
+     * Проверить, является ли это первым бронированием клиента
+     */
+    private function isFirstBooking(array $data): bool
+    {
+        // Если клиент авторизован, проверяем по user_id
+        if (auth()->check()) {
+            return !Booking::where('client_id', auth()->id())->exists();
+        }
+        
+        // Если не авторизован, проверяем по телефону
+        return !Booking::where('client_phone', $data['client_phone'])->exists();
     }
 } 

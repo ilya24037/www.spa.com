@@ -1,8 +1,9 @@
 ﻿<template>
-    <AppLayout>
-        <Head :title="`Бронирование №${booking.booking_number}`" />
+    <Head :title="`Бронирование №${booking.booking_number}`" />
 
-        <div class="container mx-auto px-4 py-8 max-w-4xl">
+    <!-- Обертка с правильными отступами как на главной -->
+    <div class="py-6 lg:py-8">
+        <div class="container mx-auto px-4 max-w-4xl">
             <!-- Хлебные крошки -->
             <nav class="mb-6 text-sm">
                 <Link :href="route('home')" class="text-gray-500 hover:text-gray-700">
@@ -337,13 +338,12 @@
                 </div>
             </div>
         </Modal>
-    </AppLayout>
+    </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
-import AppLayout from '@/Layouts/AppLayout.vue'
 import Modal from '@/Components/UI/Modal.vue'
 import { 
     StarIcon, 

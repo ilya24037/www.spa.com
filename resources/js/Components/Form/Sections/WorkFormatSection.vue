@@ -1,53 +1,33 @@
 <template>
-    <div class="form-field">
-        <div class="radio-group">
-            <BaseRadio
-                v-model="form.work_format"
-                value="individual"
-                label="Индивидуально"
-                description="Вы работаете самостоятельно"
-            />
-            
-            <BaseRadio
-                v-model="form.work_format"
-                value="salon"
-                label="Салон"
-                description="У вас есть отдельное помещение и штат мастеров"
-            />
-        </div>
-        
-        <div v-if="errors.work_format" class="error-message">
-            {{ errors.work_format }}
-        </div>
+  <div class="work-format-section">
+    <h2 class="form-group-title">Формат работы</h2>
+    <div class="work-format-fields">
+      <label>
+        <input type="radio" value="individual" v-model="localWorkFormat" @change="emitWorkFormat" /> Индивидуально
+      </label>
+      <label>
+        <input type="radio" value="salon" v-model="localWorkFormat" @change="emitWorkFormat" /> Салон
+      </label>
     </div>
+  </div>
 </template>
 
 <script setup>
-import BaseRadio from '../../UI/BaseRadio.vue'
-
+import { ref, watch } from 'vue'
 const props = defineProps({
-    form: {
-        type: Object,
-        required: true
-    },
-    errors: {
-        type: Object,
-        default: () => ({})
-    }
+  workFormat: { type: String, default: '' },
+  errors: { type: Object, default: () => ({}) }
 })
+const emit = defineEmits(['update:workFormat'])
+const localWorkFormat = ref(props.workFormat)
+watch(() => props.workFormat, val => { localWorkFormat.value = val })
+const emitWorkFormat = () => {
+  emit('update:workFormat', localWorkFormat.value)
+}
 </script>
 
 <style scoped>
-.radio-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.error-message {
-    margin-top: 8px;
-    color: #ff4d4f;
-    font-size: 14px;
-    line-height: 1.4;
-}
+.work-format-section { background: white; border-radius: 8px; padding: 20px; }
+.form-group-title { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 16px; }
+.work-format-fields { display: flex; gap: 16px; align-items: center; }
 </style> 

@@ -78,6 +78,17 @@ class AddItemController extends Controller
             'telegram' => 'nullable|string|max:50',
             'address' => 'nullable|string|max:500',
             'show_phone' => 'boolean',
+            // Модульные услуги
+            'services' => 'nullable|array',
+            'services_additional_info' => 'nullable|string|max:2000',
+            // Особенности мастера
+            'features' => 'nullable|array',
+            'medical_certificate' => 'nullable|in:yes,no',
+            'works_during_period' => 'nullable|in:yes,no',
+            'additional_features' => 'nullable|string|max:1000',
+            // График работы
+            'schedule' => 'nullable|array',
+            'schedule_notes' => 'nullable|string|max:1000',
         ]);
 
         // Здесь будет логика сохранения в базу данных
@@ -106,6 +117,17 @@ class AddItemController extends Controller
             'telegram' => 'nullable|string|max:50',
             'address' => 'nullable|string|max:500',
             'show_phone' => 'nullable|boolean',
+            // Модульные услуги
+            'services' => 'nullable|array',
+            'services_additional_info' => 'nullable|string|max:2000',
+            // Особенности мастера
+            'features' => 'nullable|array',
+            'medical_certificate' => 'nullable|in:yes,no',
+            'works_during_period' => 'nullable|in:yes,no',
+            'additional_features' => 'nullable|string|max:1000',
+            // График работы
+            'schedule' => 'nullable|array',
+            'schedule_notes' => 'nullable|string|max:1000',
         ]);
 
         // Добавляем заголовок по умолчанию если не указан

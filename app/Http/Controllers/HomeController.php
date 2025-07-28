@@ -122,14 +122,14 @@ class HomeController extends Controller
                 'is_premium' => $master->is_premium,
                 'is_online' => $master->isAvailableNow(),
                 'is_available_now' => $master->isAvailableNow(),
-                'services' => $master->services->map(function ($service) {
+                'services' => $master->services ? $master->services->map(function ($service) {
                     return [
                         'id' => $service->id,
                         'name' => $service->name,
                         'category_id' => $service->massage_category_id,
                         'price' => $service->price,
                     ];
-                }),
+                }) : [],
                 'phone' => $master->show_contacts ? $master->phone : null,
                 'whatsapp' => $master->whatsapp,
             ];

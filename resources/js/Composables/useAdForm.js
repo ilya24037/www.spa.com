@@ -23,22 +23,27 @@ export function useAdForm(initialData = {}, options = {}) {
     title: initialData.title || '',
     specialty: initialData.specialty || '',
     clients: initialData.clients || [],
-    service_location: initialData.service_location || [],
-    work_format: initialData.work_format || '',
+            service_location: initialData.service_location || [],
+        outcall_locations: initialData.outcall_locations || [],
+        taxi_option: initialData.taxi_option || '',
+        work_format: initialData.work_format || '',
     experience: initialData.experience || '',
     
     // Цены (обновленные)
-    price: String(initialData.price || ''),
-    price_unit: initialData.price_unit || 'session',
-    is_starting_price: initialData.is_starting_price || false,
-    
-    // Физические параметры
+            price: String(initialData.price || ''),
+        price_unit: initialData.price_unit || 'session',
+        is_starting_price: initialData.is_starting_price || false,
+                pricing_data: initialData.pricing_data || {},
+        contacts_per_hour: initialData.contacts_per_hour || '',
+
+        // Физические параметры
     age: initialData.age || '',
     height: initialData.height || '',
     weight: initialData.weight || '',
     breast_size: initialData.breast_size || '',
     hair_color: initialData.hair_color || '',
     eye_color: initialData.eye_color || '',
+    appearance: initialData.appearance || '',
     nationality: initialData.nationality || '',
     
     // Акции (обновленные)
@@ -95,7 +100,21 @@ export function useAdForm(initialData = {}, options = {}) {
     has_certificates: initialData.has_certificates || [],
     certificate_photos: initialData.certificate_photos || [],
     experience_years: initialData.experience_years || '',
-    work_history: initialData.work_history || ''
+    work_history: initialData.work_history || '',
+    
+    // Модульные услуги (новая архитектура)
+    services: initialData.services || [],
+    services_additional_info: initialData.services_additional_info || '',
+    
+    // Особенности мастера (новая архитектура)
+    features: initialData.features || {},
+    medical_certificate: initialData.medical_certificate || '',
+    works_during_period: initialData.works_during_period || '',
+    additional_features: initialData.additional_features || '',
+    
+    // График работы (новая архитектура)
+    schedule: initialData.schedule || {},
+    schedule_notes: initialData.schedule_notes || ''
   })
 
   // Состояние валидации
