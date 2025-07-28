@@ -1,7 +1,31 @@
 <template>
   <div class="services-module">
     <div class="module-header mb-6">
-      <h2 class="text-xl font-bold text-gray-900 mb-2">Услуги</h2>
+      <h2 class="text-xl font-bold text-gray-900 mb-2">Услуги <span class="text-red-500">*</span></h2>
+      
+      <!-- Предупреждение как на скриншоне -->
+      <div class="warning-message mb-4 p-4 bg-orange-50 border-l-4 border-orange-400 rounded">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-orange-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="ml-3">
+            <p class="text-sm text-orange-700">
+              На странице анкеты, под услугой можете выводить комментарий, например:<br>
+              <span class="font-medium">"Отличная тренировка мышц, Ты будешь приятно удивлен. | Я буду очень стараться, чтобы не разочаровать Тебя. | Просто улетаю..."</span> и т.д.
+            </p>
+            <p class="text-sm text-orange-700 mt-2">
+              <span class="font-medium">Максимум 100 символов для одного комментария.</span>
+            </p>
+            <p class="text-sm text-orange-700 mt-2">
+              Для доп. цен вводите только цифры, не нужно писать +, т.к. + ставится автоматически.
+            </p>
+          </div>
+        </div>
+      </div>
+      
       <div class="field-hint text-gray-600 text-sm">
         Выберите услуги, которые вы предоставляете. Укажите цены и дополнительную информацию для каждой услуги.
       </div>
@@ -19,13 +43,21 @@
       </div>
     </div>
     <div class="services-categories">
-          <ServiceCategory
-      v-for="category in filteredCategories"
-      :key="category.id"
-      :category="category"
-      v-model="localServices[category.id]"
-      @update:modelValue="updateCategory(category.id, $event)"
-    />
+      <!-- Заголовки полей один раз для всех категорий -->
+      <div class="global-fields-header">
+        <div class="global-header-service"></div>
+        <div class="global-header-price">Доплата</div>
+        <div class="global-header-comment">Комментарий</div>
+      </div>
+      
+      <ServiceCategory
+        v-for="(category, index) in filteredCategories"
+        :key="category.id"
+        :category="category"
+        :is-first="index === 0"
+        v-model="localServices[category.id]"
+        @update:modelValue="updateCategory(category.id, $event)"
+      />
     </div>
     <div class="additional-info mt-8">
       <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -95,6 +127,7 @@ const initializeServicesData = () => {
       if (!localServices[category.id][service.id]) {
         localServices[category.id][service.id] = {
           enabled: false,
+          price: '',
           price_comment: ''
         }
       }
@@ -117,6 +150,7 @@ const clearAllServices = () => {
     Object.keys(localServices[categoryId]).forEach(serviceId => {
       localServices[categoryId][serviceId] = {
         enabled: false,
+        price: '',
         price_comment: ''
       }
     })
@@ -158,7 +192,11 @@ if (props.services) {
   Object.keys(props.services).forEach(categoryId => {
     if (!localServices[categoryId]) localServices[categoryId] = {}
     Object.keys(props.services[categoryId]).forEach(serviceId => {
-      localServices[categoryId][serviceId] = { ...props.services[categoryId][serviceId] }
+      localServices[categoryId][serviceId] = { 
+        enabled: props.services[categoryId][serviceId].enabled || false,
+        price: props.services[categoryId][serviceId].price || '',
+        price_comment: props.services[categoryId][serviceId].price_comment || ''
+      }
     })
   })
 }
@@ -172,6 +210,35 @@ initializeServicesData()
 .services-module {}
 .module-header {}
 .category-filters {}
+
+.global-fields-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 15px;
+  padding: 8px 16px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.global-header-service {
+  /* Пустое место */
+}
+
+.global-header-price {
+  text-align: center;
+  min-width: 120px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #374151;
+}
+
+.global-header-comment {
+  text-align: left;
+  font-weight: 600;
+  font-size: 14px;
+  color: #374151;
+}
+
 .services-categories {}
 .additional-info {}
 .services-stats {}

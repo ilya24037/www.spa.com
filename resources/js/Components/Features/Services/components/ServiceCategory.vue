@@ -9,13 +9,14 @@
           {{ selectedCount }}
         </span>
       </h3>
+      
       <p v-if="category.description" class="text-sm text-gray-600 mt-1">
         {{ category.description }}
       </p>
     </div>
 
-    <!-- Список услуг -->
-    <div class="services-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <!-- Список услуг как ul/li -->
+    <ul class="services-list">
       <ServiceItem
         v-for="service in category.services"
         :key="service.id"
@@ -23,7 +24,7 @@
         v-model="serviceValues[service.id]"
         @update:modelValue="updateService(service.id, $event)"
       />
-    </div>
+    </ul>
 
     <!-- Кнопки управления (показываются только если есть услуги) -->
     <div v-if="category.services.length > 0" class="category-controls mt-4 flex space-x-2">
@@ -57,6 +58,10 @@ const props = defineProps({
   modelValue: {
     type: Object,
     default: () => ({})
+  },
+  isFirst: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -71,6 +76,7 @@ const initializeServices = () => {
     if (!serviceValues[service.id]) {
       serviceValues[service.id] = props.modelValue[service.id] || {
         enabled: false,
+        price: '',
         price_comment: ''
       }
     }
@@ -97,6 +103,7 @@ const clearAll = () => {
   props.category.services.forEach(service => {
     if (serviceValues[service.id]) {
       serviceValues[service.id].enabled = false
+      serviceValues[service.id].price = ''
       serviceValues[service.id].price_comment = ''
     }
   })
@@ -133,18 +140,17 @@ initializeServices()
 }
 
 .category-header {
-  border-bottom: 1px solid #e5e7eb;
   padding-bottom: 8px;
 }
 
-.services-grid {
-  /* Адаптивная сетка */
-}
-
-@media (max-width: 768px) {
-  .services-grid {
-    grid-template-columns: 1fr;
-  }
+.services-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .category-controls button {
