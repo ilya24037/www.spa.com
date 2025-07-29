@@ -31,14 +31,15 @@
       </div>
     </div>
     <div v-if="allowedCategories.length < allCategories.length" class="category-filters mb-6">
-      <div class="text-sm text-gray-700 mb-2">Доступные категории:</div>
-      <div class="flex flex-wrap gap-2">
+      <div class="text-sm font-medium text-gray-700 mb-3">Доступные категории:</div>
+      <div class="flex flex-wrap gap-3">
         <span 
           v-for="category in filteredCategories" 
           :key="category.id"
-          class="inline-flex items-center px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-full"
+          class="category-chip"
         >
-          {{ category.icon }} {{ category.name }}
+          <span class="category-chip-icon">{{ category.icon }}</span>
+          <span class="category-chip-text">{{ category.name }}</span>
         </span>
       </div>
     </div>
@@ -209,7 +210,38 @@ initializeServicesData()
 <style scoped>
 .services-module {}
 .module-header {}
+
+/* Красивые чипы категорий */
 .category-filters {}
+
+.category-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.25);
+  transition: all 0.2s ease;
+}
+
+.category-chip:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+  transform: translateY(-1px);
+}
+
+.category-chip-icon {
+  font-size: 16px;
+  margin-right: 8px;
+  line-height: 1;
+}
+
+.category-chip-text {
+  line-height: 1.2;
+}
 
 .global-fields-header {
   display: grid;
