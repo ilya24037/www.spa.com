@@ -3,53 +3,13 @@
     <div class="module-header mb-6">
       <h2 class="text-xl font-bold text-gray-900 mb-2">Услуги <span class="text-red-500">*</span></h2>
       
-      <!-- Предупреждение как на скриншоне -->
-      <div class="warning-message mb-4 p-4 bg-orange-50 border-l-4 border-orange-400 rounded">
-        <div class="flex">
-          <div class="flex-shrink-0">
-            <svg class="h-5 w-5 text-orange-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-            </svg>
-          </div>
-          <div class="ml-3">
-            <p class="text-sm text-orange-700">
-              На странице анкеты, под услугой можете выводить комментарий, например:<br>
-              <span class="font-medium">"Отличная тренировка мышц, Ты будешь приятно удивлен. | Я буду очень стараться, чтобы не разочаровать Тебя. | Просто улетаю..."</span> и т.д.
-            </p>
-            <p class="text-sm text-orange-700 mt-2">
-              <span class="font-medium">Максимум 100 символов для одного комментария.</span>
-            </p>
-            <p class="text-sm text-orange-700 mt-2">
-              Для доп. цен вводите только цифры, не нужно писать +, т.к. + ставится автоматически.
-            </p>
-          </div>
-        </div>
-      </div>
-      
       <div class="field-hint text-gray-600 text-sm">
         Выберите услуги, которые вы предоставляете. Укажите цены и дополнительную информацию для каждой услуги.
       </div>
     </div>
-    <div v-if="allowedCategories.length < allCategories.length" class="category-filters mb-6">
-      <div class="text-sm font-medium text-gray-700 mb-3">Доступные категории:</div>
-      <div class="flex flex-wrap gap-3">
-        <span 
-          v-for="category in filteredCategories" 
-          :key="category.id"
-          class="category-chip"
-        >
-          <span class="category-chip-icon">{{ category.icon }}</span>
-          <span class="category-chip-text">{{ category.name }}</span>
-        </span>
-      </div>
-    </div>
+
     <div class="services-categories">
-      <!-- Заголовки полей один раз для всех категорий -->
-      <div class="global-fields-header">
-        <div class="global-header-service"></div>
-        <div class="global-header-price">Доплата</div>
-        <div class="global-header-comment">Комментарий</div>
-      </div>
+      <!-- УДАЛЕНО: глобальные заголовки полей -->
       
       <ServiceCategory
         v-for="(category, index) in filteredCategories"
@@ -116,13 +76,48 @@ const filteredCategories = computed(() => {
   )
 })
 
+// Локальное хранилище данных услуг - убираем дубли
 const localServices = reactive({})
 const localAdditionalInfo = ref(props.servicesAdditionalInfo || '')
 
+// Флаг для предотвращения повторной инициализации
+let isInitialized = false
+
+// Функция очистки дублированных данных
+const cleanupServices = (services) => {
+  const cleaned = {}
+  
+  Object.keys(services).forEach(categoryId => {
+    if (!cleaned[categoryId]) cleaned[categoryId] = {}
+    
+    const categoryServices = services[categoryId]
+    if (categoryServices && typeof categoryServices === 'object') {
+      Object.keys(categoryServices).forEach(serviceId => {
+        // Берем только первое вхождение каждой услуги
+        if (!cleaned[categoryId][serviceId] && categoryServices[serviceId]) {
+          cleaned[categoryId][serviceId] = {
+            enabled: categoryServices[serviceId].enabled || false,
+            price: String(categoryServices[serviceId].price || ''),
+            price_comment: String(categoryServices[serviceId].price_comment || '')
+          }
+        }
+      })
+    }
+  })
+  
+  return cleaned
+}
+
+// Инициализация данных услуг для всех категорий
 const initializeServicesData = () => {
+  if (isInitialized) return
+  
+  let hasChanges = false
+  
   filteredCategories.value.forEach(category => {
     if (!localServices[category.id]) {
       localServices[category.id] = {}
+      hasChanges = true
     }
     category.services.forEach(service => {
       if (!localServices[category.id][service.id]) {
@@ -131,18 +126,38 @@ const initializeServicesData = () => {
           price: '',
           price_comment: ''
         }
+        hasChanges = true
       }
     })
   })
+  
+  if (hasChanges) {
+    // console.log('Services data initialized for', filteredCategories.value.length, 'categories')
+  }
+  
+  isInitialized = true
 }
 
+// Инициализация из props если переданы (без дублирования)
+if (props.services && typeof props.services === 'object' && Object.keys(props.services).length > 0) {
+  const cleanedServices = cleanupServices(props.services)
+  Object.keys(cleanedServices).forEach(categoryId => {
+    localServices[categoryId] = { ...cleanedServices[categoryId] }
+  })
+  isInitialized = true
+} else {
+  // Инициализируем пустыми данными только если props не переданы
+  initializeServicesData()
+}
+
+// Оптимизированный computed с мемоизацией
 const totalSelectedServices = computed(() => {
   let count = 0
-  Object.values(localServices).forEach(categoryServices => {
-    Object.values(categoryServices).forEach(service => {
+  for (const categoryServices of Object.values(localServices)) {
+    for (const service of Object.values(categoryServices)) {
       if (service?.enabled) count++
-    })
-  })
+    }
+  }
   return count
 })
 
@@ -161,20 +176,32 @@ const clearAllServices = () => {
 
 // Обработчик изменений категории
 const updateCategory = (categoryId, categoryData) => {
-  localServices[categoryId] = { ...categoryData }
-  emitAll()
+  // Проверяем что данные действительно изменились
+  const currentCategoryData = JSON.stringify(localServices[categoryId] || {})
+  const newCategoryData = JSON.stringify(categoryData)
+  
+  if (currentCategoryData !== newCategoryData) {
+    localServices[categoryId] = { ...categoryData }
+    emitAll()
+  }
 }
 
 watch(() => props.services, (val) => {
-  if (val) {
-    Object.keys(val).forEach(categoryId => {
-      if (!localServices[categoryId]) localServices[categoryId] = {}
-      Object.keys(val[categoryId]).forEach(serviceId => {
-        localServices[categoryId][serviceId] = { ...val[categoryId][serviceId] }
+  if (val && typeof val === 'object' && Object.keys(val).length > 0) {
+    // Предотвращаем циклические обновления
+    const currentLocal = JSON.stringify(localServices)
+    const cleanedVal = cleanupServices(val)
+    const incomingData = JSON.stringify(cleanedVal)
+    
+    if (currentLocal !== incomingData) {
+      // Очищаем текущие данные и заменяем очищенными
+      Object.keys(localServices).forEach(key => delete localServices[key])
+      Object.keys(cleanedVal).forEach(categoryId => {
+        localServices[categoryId] = { ...cleanedVal[categoryId] }
       })
-    })
+    }
   }
-}, { deep: true })
+}, { immediate: false })
 
 watch(() => props.servicesAdditionalInfo, (val) => {
   localAdditionalInfo.value = val || ''
@@ -183,72 +210,44 @@ watch(() => props.servicesAdditionalInfo, (val) => {
 // watch(localServices) убран - вызывает циклические обновления
 // emitAll() теперь вызывается только при пользовательских действиях
 
+// Предотвращение циклических обновлений
+let lastEmittedServices = null
+let emitTimeout = null
+
 const emitAll = () => {
-  emit('update:services', JSON.parse(JSON.stringify(localServices)))
-  emit('update:servicesAdditionalInfo', localAdditionalInfo.value)
+  if (emitTimeout) clearTimeout(emitTimeout)
+  emitTimeout = setTimeout(() => {
+    const currentServices = JSON.stringify(localServices)
+    
+    // Emit только если данные действительно изменились
+    if (currentServices !== lastEmittedServices) {
+      lastEmittedServices = currentServices
+      const servicesData = JSON.parse(currentServices)
+      console.log('Emitting services:', servicesData)
+      emit('update:services', servicesData)
+      emit('update:servicesAdditionalInfo', localAdditionalInfo.value)
+    }
+  }, 50) // Уменьшил задержку для более быстрой реакции
 }
 
-// Инициализация
-if (props.services) {
-  Object.keys(props.services).forEach(categoryId => {
-    if (!localServices[categoryId]) localServices[categoryId] = {}
-    Object.keys(props.services[categoryId]).forEach(serviceId => {
-      localServices[categoryId][serviceId] = { 
-        enabled: props.services[categoryId][serviceId].enabled || false,
-        price: props.services[categoryId][serviceId].price || '',
-        price_comment: props.services[categoryId][serviceId].price_comment || ''
-      }
-    })
-  })
-}
+// Инициализация additionalInfo
 if (props.servicesAdditionalInfo) {
   localAdditionalInfo.value = props.servicesAdditionalInfo
 }
-initializeServicesData()
 </script>
 
 <style scoped>
 .services-module {}
 .module-header {}
 
-/* Красивые чипы категорий */
-.category-filters {}
 
-.category-chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 8px 16px;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
-  border-radius: 12px;
-  font-size: 13px;
-  font-weight: 600;
-  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.25);
-  transition: all 0.2s ease;
-}
-
-.category-chip:hover {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
-  transform: translateY(-1px);
-}
-
-.category-chip-icon {
-  font-size: 16px;
-  margin-right: 8px;
-  line-height: 1;
-}
-
-.category-chip-text {
-  line-height: 1.2;
-}
 
 .global-fields-header {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   gap: 15px;
-  padding: 8px 16px;
-  margin-bottom: 16px;
+  padding: 0 16px;
+  margin-bottom: 0px;
   align-items: center;
 }
 
@@ -257,18 +256,22 @@ initializeServicesData()
 }
 
 .global-header-price {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-width: 120px;
-  font-weight: 600;
-  font-size: 14px;
-  color: #374151;
+  font-weight: 400;
+  font-size: 13px;
+  color: #6b7280;
 }
 
 .global-header-comment {
   text-align: left;
-  font-weight: 600;
-  font-size: 14px;
-  color: #374151;
+  font-weight: 400;
+  font-size: 13px;
+  color: #6b7280;
+  min-width: 0;
+  padding-left: 4px;
 }
 
 .services-categories {}

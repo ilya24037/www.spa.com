@@ -100,9 +100,22 @@ const addPrice = () => {
   emitUpdate()
 }
 
-// Функция для emit при изменениях пользователем
+// Предотвращение избыточных обновлений с проверкой изменений
+let updateTimeout = null
+let lastEmittedData = null
+
 const emitUpdate = () => {
-  emit('update:modelValue', { ...serviceData.value })
+  if (updateTimeout) clearTimeout(updateTimeout)
+  updateTimeout = setTimeout(() => {
+    const currentData = JSON.stringify(serviceData.value)
+    
+    // Emit только если данные действительно изменились
+    if (currentData !== lastEmittedData) {
+      lastEmittedData = currentData
+      emit('update:modelValue', { ...serviceData.value })
+      // console.log('ServiceItem updated:', props.service.name, serviceData.value.enabled)
+    }
+  }, 10) // Уменьшил delay для быстрой реакции
 }
 
 // Отслеживаем изменения из родителя

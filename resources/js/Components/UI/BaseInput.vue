@@ -167,30 +167,35 @@ const inputValue = computed({
 const handleInput = (event) => {
   let value = event.target.value
   
-  // Для числовых инпутов - безопасная обработка
+  // Для числовых инпутов - более мягкая обработка
   if (props.type === 'number') {
-    // Если пустое значение, оставляем пустым
-    if (value === '') {
-      value = ''
-    } else {
-      // Проверяем что значение является числом
-      const numValue = Number(value)
-      if (!isNaN(numValue)) {
-        // Проверяем ограничения min/max
-        if (props.min !== null && numValue < props.min) {
-          value = props.min
-        } else if (props.max !== null && numValue > props.max) {
-          value = props.max
-          // Устанавливаем исправленное значение обратно в поле
-          event.target.value = value
-        } else {
-          value = numValue
-        }
-      } else {
-        // Если не число, не изменяем значение
-        return
-      }
+    // Разрешаем пустое значение, минус, точку и цифры
+    if (value === '' || value === '-' || value === '.' || value === '-.') {
+      emit('update:modelValue', value)
+      return
     }
+    
+    // Проверяем что это допустимое число (включая частично введенные)
+    if (/^-?\d*\.?\d*$/.test(value)) {
+      const numValue = parseFloat(value)
+      
+      // Если это полное число, проверяем ограничения
+      if (!isNaN(numValue)) {
+        if (props.min !== null && numValue < props.min) {
+          // Не блокируем ввод, просто не применяем ограничение сразу
+          emit('update:modelValue', value)
+          return
+        } else if (props.max !== null && numValue > props.max) {
+          // Не блокируем ввод, просто не применяем ограничение сразу
+          emit('update:modelValue', value)
+          return
+        }
+      }
+      
+      emit('update:modelValue', value)
+    }
+    // Если паттерн не подходит, игнорируем ввод
+    return
   }
   
   emit('update:modelValue', value)
@@ -201,6 +206,27 @@ const handleFocus = (event) => {
 }
 
 const handleBlur = (event) => {
+  // Валидация числовых значений при потере фокуса
+  if (props.type === 'number' && event.target.value !== '') {
+    const numValue = parseFloat(event.target.value)
+    
+    if (!isNaN(numValue)) {
+      let finalValue = numValue
+      
+      // Применяем ограничения min/max
+      if (props.min !== null && numValue < props.min) {
+        finalValue = props.min
+      } else if (props.max !== null && numValue > props.max) {
+        finalValue = props.max
+      }
+      
+      // Если значение изменилось, обновляем
+      if (finalValue !== numValue) {
+        emit('update:modelValue', finalValue)
+      }
+    }
+  }
+  
   emit('blur', event)
 }
 

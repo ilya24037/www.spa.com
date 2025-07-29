@@ -249,19 +249,42 @@ export const prepareFormData = (form) => {
     specialty: form.specialty || '',
     clients: Array.isArray(form.clients) ? form.clients : [],
     service_location: Array.isArray(form.service_location) ? form.service_location : [],
+    outcall_locations: Array.isArray(form.outcall_locations) ? form.outcall_locations : [],
+    taxi_option: form.taxi_option || '',
     work_format: form.work_format || '',
+    has_girlfriend: form.has_girlfriend || false,
     service_provider: Array.isArray(form.service_provider) ? form.service_provider : [],
     experience: form.experience || '',
+    education_level: form.education_level || '',
+    features: form.features || {},
+    additional_features: form.additional_features || '',
     description: form.description || '',
     price: form.price || '',
     price_unit: form.price_unit || 'service',
     is_starting_price: Array.isArray(form.is_starting_price) ? form.is_starting_price : [],
+    pricing_data: form.pricing_data || {},
+    contacts_per_hour: form.contacts_per_hour || '',
     discount: form.discount || '',
+    new_client_discount: form.new_client_discount || '',
     gift: form.gift || '',
     address: form.address || '',
     travel_area: form.travel_area || '',
     phone: form.phone || '',
-    contact_method: form.contact_method || 'messages'
+    contact_method: form.contact_method || 'messages',
+    
+    // Физические параметры
+    age: form.age || '',
+    height: form.height || '',
+    weight: form.weight || '',
+    breast_size: form.breast_size || '',
+    hair_color: form.hair_color || '',
+    eye_color: form.eye_color || '',
+    appearance: form.appearance || '',
+    nationality: form.nationality || '',
+    
+    // Услуги
+    services: form.services || {},
+    services_additional_info: form.services_additional_info || ''
   }
   
   // Для черновика оставляем все поля, даже пустые

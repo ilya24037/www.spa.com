@@ -27,7 +27,11 @@ export function useAdForm(initialData = {}, options = {}) {
         outcall_locations: initialData.outcall_locations || [],
         taxi_option: initialData.taxi_option || '',
         work_format: initialData.work_format || '',
+        has_girlfriend: initialData.has_girlfriend || false,
     experience: initialData.experience || '',
+    education_level: initialData.education_level || '',
+    features: initialData.features || {},
+    additional_features: initialData.additional_features || '',
     
     // Цены (обновленные)
             price: String(initialData.price || ''),
@@ -103,7 +107,7 @@ export function useAdForm(initialData = {}, options = {}) {
     work_history: initialData.work_history || '',
     
     // Модульные услуги (новая архитектура)
-    services: initialData.services || [],
+    services: initialData.services || {},
     services_additional_info: initialData.services_additional_info || '',
     
     // Особенности мастера (новая архитектура)

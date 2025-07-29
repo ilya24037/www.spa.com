@@ -7,6 +7,7 @@
             <div class="form-group-section">
                 <WorkFormatSection 
                     v-model:workFormat="form.work_format" 
+                    v-model:hasGirlfriend="form.has_girlfriend"
                     :errors="errors"
                 />
             </div>
@@ -79,9 +80,9 @@
 
             <!-- 8. Акции -->
             <div class="form-group-section">
+                <h2 class="form-group-title">Акции</h2>
                 <PromoSection 
                     v-model:newClientDiscount="form.new_client_discount" 
-                    v-model:discount="form.discount" 
                     v-model:gift="form.gift" 
                     :errors="errors"
                 />
@@ -434,6 +435,8 @@ const handleSaveDraft = async () => {
     
     saving.value = true
     
+    console.log('form.services before save:', form.services)
+    
     const draftData = {
         id: props.adId, // ВАЖНО: передаем ID для обновления существующего черновика
         category: props.category,
@@ -441,14 +444,23 @@ const handleSaveDraft = async () => {
         specialty: form.specialty,
         clients: form.clients,
         service_location: form.service_location,
+        outcall_locations: form.outcall_locations,
+        taxi_option: form.taxi_option,
         work_format: form.work_format,
+        has_girlfriend: form.has_girlfriend,
         service_provider: form.service_provider,
         experience: form.experience,
+        education_level: form.education_level,
+        features: form.features,
+        additional_features: form.additional_features,
         description: form.description,
         price: form.price,
         price_unit: form.price_unit,
         is_starting_price: form.is_starting_price,
+        pricing_data: form.pricing_data,
+        contacts_per_hour: form.contacts_per_hour,
         discount: form.discount,
+        new_client_discount: form.new_client_discount,
         gift: form.gift,
         address: form.address,
         travel_area: form.travel_area,
@@ -461,7 +473,16 @@ const handleSaveDraft = async () => {
         watermark_photos: form.watermark_photos,
         // ВАЖНО: Добавляем поля услуг
         services: form.services,
-        services_additional_info: form.services_additional_info
+        services_additional_info: form.services_additional_info,
+        // ВАЖНО: Добавляем физические параметры
+        age: form.age,
+        height: form.height,
+        weight: form.weight,
+        breast_size: form.breast_size,
+        hair_color: form.hair_color,
+        eye_color: form.eye_color,
+        appearance: form.appearance,
+        nationality: form.nationality
     }
     
     console.log('Отправляемые данные:', draftData)

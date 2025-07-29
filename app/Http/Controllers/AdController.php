@@ -66,6 +66,8 @@ class AdController extends Controller
             'service_provider' => json_encode($request->service_provider ?? []),
             'experience' => $request->experience,
             'education_level' => $request->education_level,
+            'features' => !empty($request->features) ? json_encode($request->features) : json_encode([]),
+            'additional_features' => $request->additional_features ?: null,
             'description' => $request->description,
             'price' => $request->price,
             'price_unit' => $request->price_unit,
@@ -74,6 +76,9 @@ class AdController extends Controller
             'contacts_per_hour' => $request->contacts_per_hour,
             'discount' => $request->discount,
             'gift' => $request->gift,
+            // Услуги
+            'services' => !empty($request->services) ? json_encode($request->services) : json_encode((object)[]),
+            'services_additional_info' => $request->services_additional_info ?: null,
             // Физические параметры
             'age' => $request->age ?: null,
             'height' => $request->height ?: null,
@@ -83,6 +88,7 @@ class AdController extends Controller
             'eye_color' => $request->eye_color ?: null,
             'appearance' => $request->appearance ?: null,
             'nationality' => $request->nationality ?: null,
+            'has_girlfriend' => $request->boolean('has_girlfriend', false),
             'photos' => is_array($request->photos) ? json_encode($request->photos) : json_encode([]),
             'video' => $request->video,
             'show_photos_in_gallery' => $request->boolean('show_photos_in_gallery', true),
@@ -119,6 +125,8 @@ class AdController extends Controller
             'service_provider' => !empty($request->service_provider) ? json_encode($request->service_provider) : json_encode([]),
             'experience' => $request->experience ?: null,
             'education_level' => $request->education_level ?: null,
+            'features' => !empty($request->features) ? json_encode($request->features) : json_encode([]),
+            'additional_features' => $request->additional_features ?: null,
             'description' => $request->description ?: null,
             'price' => $request->price ? (float)$request->price : null,
             'price_unit' => $request->price_unit ?: 'service',
@@ -126,9 +134,10 @@ class AdController extends Controller
             'pricing_data' => !empty($request->pricing_data) ? json_encode($request->pricing_data) : null,
             'contacts_per_hour' => $request->contacts_per_hour ?: null,
             'discount' => $request->discount ? (int)$request->discount : null,
+            'new_client_discount' => $request->new_client_discount ?: null,
             'gift' => $request->gift ?: null,
             // Услуги (новые поля)
-            'services' => !empty($request->services) ? json_encode($request->services) : json_encode([]),
+            'services' => !empty($request->services) ? json_encode($request->services) : json_encode((object)[]),
             'services_additional_info' => $request->services_additional_info ?: null,
             // Физические параметры
             'age' => $request->age ?: null,
@@ -137,7 +146,9 @@ class AdController extends Controller
             'breast_size' => $request->breast_size ?: null,
             'hair_color' => $request->hair_color ?: null,
             'eye_color' => $request->eye_color ?: null,
+            'appearance' => $request->appearance ?: null,
             'nationality' => $request->nationality ?: null,
+            'has_girlfriend' => $request->boolean('has_girlfriend', false),
             'photos' => is_array($request->photos) ? json_encode($request->photos) : json_encode([]),
             'video' => $request->video,
             'show_photos_in_gallery' => $request->boolean('show_photos_in_gallery', true),
@@ -254,6 +265,8 @@ class AdController extends Controller
                 'service_provider' => is_array($request->service_provider) ? json_encode($request->service_provider) : '[]',
                 'experience' => $request->experience,
                 'education_level' => $request->education_level,
+                'features' => !empty($request->features) ? json_encode($request->features) : json_encode([]),
+                'additional_features' => $request->additional_features ?: null,
                 'price' => $request->price,
                 'price_unit' => $request->price_unit ?: 'session',
                 'is_starting_price' => is_array($request->is_starting_price) ? json_encode($request->is_starting_price) : '[]',
@@ -261,6 +274,9 @@ class AdController extends Controller
                 'contacts_per_hour' => $request->contacts_per_hour ?: null,
                 'discount' => $request->discount ?: null,
                 'gift' => $request->gift ?: null,
+                // Услуги
+                'services' => !empty($request->services) ? json_encode($request->services) : json_encode((object)[]),
+                'services_additional_info' => $request->services_additional_info ?: null,
                 'address' => $request->address ?: null,
                 'travel_area' => $request->travel_area ?: null,
                 'phone' => $request->phone,
@@ -274,6 +290,7 @@ class AdController extends Controller
                 'eye_color' => $request->eye_color ?: null,
                 'appearance' => $request->appearance ?: null,
                 'nationality' => $request->nationality ?: null,
+                'has_girlfriend' => $request->boolean('has_girlfriend', false),
                 'photos' => is_array($request->photos) ? json_encode($request->photos) : json_encode([]),
                 'video' => $request->video ?: null,
                 'show_photos_in_gallery' => $request->boolean('show_photos_in_gallery', true),
@@ -305,9 +322,9 @@ class AdController extends Controller
         $adData = $ad->toArray();
         
         // Преобразуем JSON поля в массивы, если они строки
-        $jsonFields = ['clients', 'service_location', 'service_provider', 'is_starting_price', 
+        $jsonFields = ['clients', 'service_location', 'outcall_locations', 'service_provider', 'is_starting_price', 
                       'photos', 'video', 'show_photos_in_gallery', 'allow_download_photos', 'watermark_photos', 
-                      'custom_travel_areas', 'working_days', 'working_hours'];
+                      'custom_travel_areas', 'working_days', 'working_hours', 'features', 'pricing_data', 'services'];
         
         foreach ($jsonFields as $field) {
             if (isset($adData[$field]) && is_string($adData[$field])) {
@@ -334,9 +351,9 @@ class AdController extends Controller
         $adData = $ad->toArray();
         
         // Преобразуем JSON поля в массивы, если они строки
-        $jsonFields = ['clients', 'service_location', 'service_provider', 'is_starting_price', 
+        $jsonFields = ['clients', 'service_location', 'outcall_locations', 'service_provider', 'is_starting_price', 
                       'photos', 'video', 'show_photos_in_gallery', 'allow_download_photos', 'watermark_photos', 
-                      'custom_travel_areas', 'working_days', 'working_hours'];
+                      'custom_travel_areas', 'working_days', 'working_hours', 'features', 'pricing_data', 'services'];
         
         foreach ($jsonFields as $field) {
             if (isset($adData[$field]) && is_string($adData[$field])) {
@@ -509,7 +526,7 @@ class AdController extends Controller
         $adData = $ad->toArray();
         
         // Убеждаемся что JSON поля декодированы в массивы
-        $jsonFields = ['clients', 'service_location', 'outcall_locations', 'service_provider', 'photos', 'video', 'services', 'pricing_data'];
+        $jsonFields = ['clients', 'service_location', 'outcall_locations', 'service_provider', 'photos', 'video', 'services', 'pricing_data', 'features'];
         
         foreach ($jsonFields as $field) {
             if (isset($adData[$field]) && is_string($adData[$field])) {

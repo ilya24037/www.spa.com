@@ -3,13 +3,20 @@
     <!-- Экспресс 30 мин (перенесено в начало) -->
     <div class="express-section">
       <label class="express-label">Экспресс 30 мин</label>
-      <input 
-        v-model="expressPrice" 
-        @input="emitAll"
-        type="text" 
-        class="express-input" 
-        placeholder="Экспресс"
-      />
+      <div class="price-input-wrapper">
+        <input 
+          v-model="expressDisplayValue" 
+          @input="handleExpressInput"
+          @keydown="handleExpressKeydown"
+          @click="handleExpressClick"
+          @keyup="handleExpressCursorPosition"
+          @focus="handleExpressCursorPosition"
+          @blur="validateExpressPrice"
+          type="text" 
+          class="express-input" 
+          placeholder="₽"
+        />
+      </div>
     </div>
     
     <!-- Таблица расценок -->
@@ -24,62 +31,104 @@
       <div class="table-row">
         <div class="row-label">(апартаменты)</div>
         <div class="price-cell">
-          <input 
-            v-model="prices.apartment.hour" 
-            @input="emitAll"
-            type="text" 
-            class="price-input" 
-            placeholder="За час"
-          />
+          <div class="price-input-wrapper">
+            <input 
+              v-model="apartmentHourDisplay" 
+              @input="(e) => handlePriceInput(e, 'apartment', 'hour')"
+              @keydown="(e) => handlePriceKeydown(e, 'apartment', 'hour')"
+              @click="(e) => handlePriceClick(e, 'apartment', 'hour')"
+              @keyup="(e) => handlePriceCursorPosition(e, 'apartment', 'hour')"
+              @focus="(e) => handlePriceCursorPosition(e, 'apartment', 'hour')"
+              @blur="(e) => validatePrice(e, 'apartment', 'hour')"
+              type="text" 
+              class="price-input" 
+              placeholder="₽"
+            />
+          </div>
         </div>
         <div class="price-cell">
-          <input 
-            v-model="prices.apartment.two_hours" 
-            @input="emitAll"
-            type="text" 
-            class="price-input" 
-            placeholder="За два"
-          />
+          <div class="price-input-wrapper">
+            <input 
+              v-model="apartmentTwoHoursDisplay" 
+              @input="(e) => handlePriceInput(e, 'apartment', 'two_hours')"
+              @keydown="(e) => handlePriceKeydown(e, 'apartment', 'two_hours')"
+              @click="(e) => handlePriceClick(e, 'apartment', 'two_hours')"
+              @keyup="(e) => handlePriceCursorPosition(e, 'apartment', 'two_hours')"
+              @focus="(e) => handlePriceCursorPosition(e, 'apartment', 'two_hours')"
+              @blur="(e) => validatePrice(e, 'apartment', 'two_hours')"
+              type="text" 
+              class="price-input" 
+              placeholder="₽"
+            />
+          </div>
         </div>
         <div class="price-cell">
-          <input 
-            v-model="prices.apartment.night" 
-            @input="emitAll"
-            type="text" 
-            class="price-input" 
-            placeholder="За ночь"
-          />
+          <div class="price-input-wrapper">
+            <input 
+              v-model="apartmentNightDisplay" 
+              @input="(e) => handlePriceInput(e, 'apartment', 'night')"
+              @keydown="(e) => handlePriceKeydown(e, 'apartment', 'night')"
+              @click="(e) => handlePriceClick(e, 'apartment', 'night')"
+              @keyup="(e) => handlePriceCursorPosition(e, 'apartment', 'night')"
+              @focus="(e) => handlePriceCursorPosition(e, 'apartment', 'night')"
+              @blur="(e) => validatePrice(e, 'apartment', 'night')"
+              type="text" 
+              class="price-input" 
+              placeholder="₽"
+            />
+          </div>
         </div>
       </div>
       
       <div class="table-row">
         <div class="row-label">(выезд)</div>
         <div class="price-cell">
-          <input 
-            v-model="prices.outcall.hour" 
-            @input="emitAll"
-            type="text" 
-            class="price-input" 
-            placeholder="За час"
-          />
+          <div class="price-input-wrapper">
+            <input 
+              v-model="outcallHourDisplay" 
+              @input="(e) => handlePriceInput(e, 'outcall', 'hour')"
+              @keydown="(e) => handlePriceKeydown(e, 'outcall', 'hour')"
+              @click="(e) => handlePriceClick(e, 'outcall', 'hour')"
+              @keyup="(e) => handlePriceCursorPosition(e, 'outcall', 'hour')"
+              @focus="(e) => handlePriceCursorPosition(e, 'outcall', 'hour')"
+              @blur="(e) => validatePrice(e, 'outcall', 'hour')"
+              type="text" 
+              class="price-input" 
+              placeholder="₽"
+            />
+          </div>
         </div>
         <div class="price-cell">
-          <input 
-            v-model="prices.outcall.two_hours" 
-            @input="emitAll"
-            type="text" 
-            class="price-input" 
-            placeholder="За два"
-          />
+          <div class="price-input-wrapper">
+            <input 
+              v-model="outcallTwoHoursDisplay" 
+              @input="(e) => handlePriceInput(e, 'outcall', 'two_hours')"
+              @keydown="(e) => handlePriceKeydown(e, 'outcall', 'two_hours')"
+              @click="(e) => handlePriceClick(e, 'outcall', 'two_hours')"
+              @keyup="(e) => handlePriceCursorPosition(e, 'outcall', 'two_hours')"
+              @focus="(e) => handlePriceCursorPosition(e, 'outcall', 'two_hours')"
+              @blur="(e) => validatePrice(e, 'outcall', 'two_hours')"
+              type="text" 
+              class="price-input" 
+              placeholder="₽"
+            />
+          </div>
         </div>
         <div class="price-cell">
-          <input 
-            v-model="prices.outcall.night" 
-            @input="emitAll"
-            type="text" 
-            class="price-input" 
-            placeholder="За ночь"
-          />
+          <div class="price-input-wrapper">
+            <input 
+              v-model="outcallNightDisplay" 
+              @input="(e) => handlePriceInput(e, 'outcall', 'night')"
+              @keydown="(e) => handlePriceKeydown(e, 'outcall', 'night')"
+              @click="(e) => handlePriceClick(e, 'outcall', 'night')"
+              @keyup="(e) => handlePriceCursorPosition(e, 'outcall', 'night')"
+              @focus="(e) => handlePriceCursorPosition(e, 'outcall', 'night')"
+              @blur="(e) => validatePrice(e, 'outcall', 'night')"
+              type="text" 
+              class="price-input" 
+              placeholder="₽"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -139,7 +188,16 @@ const prices = reactive({
 })
 
 const expressPrice = ref(props.pricingData?.express || '')
+const expressDisplayValue = ref(props.pricingData?.express ? props.pricingData.express + ' ₽' : '')
 const contactsPerHour = ref(props.contactsPerHour || '')
+
+// Display values для всех полей цен
+const apartmentHourDisplay = ref(props.pricingData?.apartment?.hour ? props.pricingData.apartment.hour + ' ₽' : '')
+const apartmentTwoHoursDisplay = ref(props.pricingData?.apartment?.two_hours ? props.pricingData.apartment.two_hours + ' ₽' : '')
+const apartmentNightDisplay = ref(props.pricingData?.apartment?.night ? props.pricingData.apartment.night + ' ₽' : '')
+const outcallHourDisplay = ref(props.pricingData?.outcall?.hour ? props.pricingData.outcall.hour + ' ₽' : '')
+const outcallTwoHoursDisplay = ref(props.pricingData?.outcall?.two_hours ? props.pricingData.outcall.two_hours + ' ₽' : '')
+const outcallNightDisplay = ref(props.pricingData?.outcall?.night ? props.pricingData.outcall.night + ' ₽' : '')
 
 // Совместимость со старой структурой
 const localPrice = ref(props.price)
@@ -161,6 +219,245 @@ watch(() => props.pricingData, (newVal) => {
 watch(() => props.contactsPerHour, (val) => {
   contactsPerHour.value = val || ''
 })
+
+// Универсальная функция для установки курсора перед ₽
+const setPriceCursorPosition = (element) => {
+  if (!element || !element.value) return
+  
+  let value = element.value
+  let numericPart = value.replace(/[^\d]/g, '')
+  let targetPos = numericPart.length
+  
+  element.setSelectionRange(targetPos, targetPos)
+}
+
+// Обработчики для поля "Экспресс"
+const handleExpressInput = (event) => {
+  let value = event.target.value
+  let numericValue = value.replace(/[^\d]/g, '')
+  
+  if (numericValue === '') {
+    expressDisplayValue.value = ''
+    expressPrice.value = ''
+  } else {
+    let num = parseInt(numericValue)
+    expressDisplayValue.value = num + ' ₽'
+    expressPrice.value = num
+  }
+  
+  setTimeout(() => {
+    setPriceCursorPosition(event.target)
+  }, 0)
+  
+  emitAll()
+}
+
+const handleExpressKeydown = (event) => {
+  if (event.key === 'Backspace' || event.key === 'Delete') {
+    let value = event.target.value
+    let numericValue = value.replace(/[^\d]/g, '')
+    
+    if (event.key === 'Backspace' && numericValue.length > 0) {
+      numericValue = numericValue.slice(0, -1)
+    }
+    
+    if (numericValue === '') {
+      expressDisplayValue.value = ''
+      expressPrice.value = ''
+    } else {
+      let num = parseInt(numericValue)
+      expressDisplayValue.value = num + ' ₽'
+      expressPrice.value = num
+    }
+    
+    event.preventDefault()
+    
+    setTimeout(() => {
+      setPriceCursorPosition(event.target)
+    }, 0)
+    
+    emitAll()
+    return
+  }
+  
+  const allowedKeys = ['Tab', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']
+  if (!allowedKeys.includes(event.key) && !/\d/.test(event.key)) {
+    event.preventDefault()
+  }
+}
+
+const handleExpressClick = (event) => {
+  setTimeout(() => {
+    setPriceCursorPosition(event.target)
+  }, 0)
+}
+
+const handleExpressCursorPosition = (event) => {
+  if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') {
+    setTimeout(() => {
+      setPriceCursorPosition(event.target)
+    }, 0)
+  } else {
+    setTimeout(() => {
+      let value = event.target.value
+      let numericPart = value.replace(/[^\d]/g, '')
+      let maxPos = numericPart.length
+      
+      if (event.target.selectionStart > maxPos) {
+        event.target.setSelectionRange(maxPos, maxPos)
+      }
+    }, 0)
+  }
+}
+
+const validateExpressPrice = (event) => {
+  let value = event.target.value.replace(/[^\d]/g, '')
+  if (value === '') {
+    expressDisplayValue.value = ''
+    expressPrice.value = ''
+  } else {
+    let num = parseInt(value)
+    expressDisplayValue.value = num + ' ₽'
+    expressPrice.value = num
+  }
+  
+  setTimeout(() => {
+    setPriceCursorPosition(event.target)
+  }, 0)
+  
+  emitAll()
+}
+
+// Универсальные обработчики для полей таблицы
+const handlePriceInput = (event, location, period) => {
+  let value = event.target.value
+  let numericValue = value.replace(/[^\d]/g, '')
+  
+  const displayRefMap = {
+    'apartment.hour': apartmentHourDisplay,
+    'apartment.two_hours': apartmentTwoHoursDisplay,
+    'apartment.night': apartmentNightDisplay,
+    'outcall.hour': outcallHourDisplay,
+    'outcall.two_hours': outcallTwoHoursDisplay,
+    'outcall.night': outcallNightDisplay
+  }
+  
+  const displayRef = displayRefMap[`${location}.${period}`]
+  
+  if (numericValue === '') {
+    displayRef.value = ''
+    prices[location][period] = ''
+  } else {
+    let num = parseInt(numericValue)
+    displayRef.value = num + ' ₽'
+    prices[location][period] = num
+  }
+  
+  setTimeout(() => {
+    setPriceCursorPosition(event.target)
+  }, 0)
+  
+  emitAll()
+}
+
+const handlePriceKeydown = (event, location, period) => {
+  if (event.key === 'Backspace' || event.key === 'Delete') {
+    let value = event.target.value
+    let numericValue = value.replace(/[^\d]/g, '')
+    
+    if (event.key === 'Backspace' && numericValue.length > 0) {
+      numericValue = numericValue.slice(0, -1)
+    }
+    
+    const displayRefMap = {
+      'apartment.hour': apartmentHourDisplay,
+      'apartment.two_hours': apartmentTwoHoursDisplay,
+      'apartment.night': apartmentNightDisplay,
+      'outcall.hour': outcallHourDisplay,
+      'outcall.two_hours': outcallTwoHoursDisplay,
+      'outcall.night': outcallNightDisplay
+    }
+    
+    const displayRef = displayRefMap[`${location}.${period}`]
+    
+    if (numericValue === '') {
+      displayRef.value = ''
+      prices[location][period] = ''
+    } else {
+      let num = parseInt(numericValue)
+      displayRef.value = num + ' ₽'
+      prices[location][period] = num
+    }
+    
+    event.preventDefault()
+    
+    setTimeout(() => {
+      setPriceCursorPosition(event.target)
+    }, 0)
+    
+    emitAll()
+    return
+  }
+  
+  const allowedKeys = ['Tab', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']
+  if (!allowedKeys.includes(event.key) && !/\d/.test(event.key)) {
+    event.preventDefault()
+  }
+}
+
+const handlePriceClick = (event, location, period) => {
+  setTimeout(() => {
+    setPriceCursorPosition(event.target)
+  }, 0)
+}
+
+const handlePriceCursorPosition = (event, location, period) => {
+  if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') {
+    setTimeout(() => {
+      setPriceCursorPosition(event.target)
+    }, 0)
+  } else {
+    setTimeout(() => {
+      let value = event.target.value
+      let numericPart = value.replace(/[^\d]/g, '')
+      let maxPos = numericPart.length
+      
+      if (event.target.selectionStart > maxPos) {
+        event.target.setSelectionRange(maxPos, maxPos)
+      }
+    }, 0)
+  }
+}
+
+const validatePrice = (event, location, period) => {
+  let value = event.target.value.replace(/[^\d]/g, '')
+  
+  const displayRefMap = {
+    'apartment.hour': apartmentHourDisplay,
+    'apartment.two_hours': apartmentTwoHoursDisplay,
+    'apartment.night': apartmentNightDisplay,
+    'outcall.hour': outcallHourDisplay,
+    'outcall.two_hours': outcallTwoHoursDisplay,
+    'outcall.night': outcallNightDisplay
+  }
+  
+  const displayRef = displayRefMap[`${location}.${period}`]
+  
+  if (value === '') {
+    displayRef.value = ''
+    prices[location][period] = ''
+  } else {
+    let num = parseInt(value)
+    displayRef.value = num + ' ₽'
+    prices[location][period] = num
+  }
+  
+  setTimeout(() => {
+    setPriceCursorPosition(event.target)
+  }, 0)
+  
+  emitAll()
+}
 
 const emitAll = () => {
   // Новая структура данных

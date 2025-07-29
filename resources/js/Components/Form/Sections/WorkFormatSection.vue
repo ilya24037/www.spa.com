@@ -2,32 +2,130 @@
   <div class="work-format-section">
     <h2 class="form-group-title">Формат работы</h2>
     <div class="work-format-fields">
-      <label>
-        <input type="radio" value="individual" v-model="localWorkFormat" @change="emitWorkFormat" /> Индивидуально
+      <label class="radio-option">
+        <input type="radio" value="individual" v-model="localWorkFormat" @change="emitWorkFormat" /> 
+        <span>Индивидуально</span>
       </label>
-      <label>
-        <input type="radio" value="salon" v-model="localWorkFormat" @change="emitWorkFormat" /> Салон
+      <label class="radio-option">
+        <input type="radio" value="salon" v-model="localWorkFormat" @change="emitWorkFormat" /> 
+        <span>Салон</span>
       </label>
+    </div>
+    
+    <!-- Опция "Есть подруга" показывается только при выборе "Индивидуально" -->
+    <div v-if="localWorkFormat === 'individual'" class="girlfriend-option">
+      <BaseCheckbox
+        v-model="localHasGirlfriend"
+        label="Есть подруга"
+        @update:modelValue="emitHasGirlfriend"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, watch } from 'vue'
+import BaseCheckbox from '@/Components/UI/BaseCheckbox.vue'
+
 const props = defineProps({
   workFormat: { type: String, default: '' },
+  hasGirlfriend: { type: Boolean, default: false },
   errors: { type: Object, default: () => ({}) }
 })
-const emit = defineEmits(['update:workFormat'])
+
+const emit = defineEmits(['update:workFormat', 'update:hasGirlfriend'])
+
+// Локальные состояния
 const localWorkFormat = ref(props.workFormat)
-watch(() => props.workFormat, val => { localWorkFormat.value = val })
+const localHasGirlfriend = ref(props.hasGirlfriend)
+
+// Отслеживаем изменения пропсов
+watch(() => props.workFormat, val => { 
+  localWorkFormat.value = val 
+  // Сбрасываем опцию подруги если переключились на салон
+  if (val !== 'individual') {
+    localHasGirlfriend.value = false
+    emitHasGirlfriend()
+  }
+})
+
+watch(() => props.hasGirlfriend, val => { 
+  localHasGirlfriend.value = val 
+})
+
+// Функции для emit
 const emitWorkFormat = () => {
   emit('update:workFormat', localWorkFormat.value)
+}
+
+const emitHasGirlfriend = () => {
+  emit('update:hasGirlfriend', localHasGirlfriend.value)
 }
 </script>
 
 <style scoped>
-.work-format-section { background: white; border-radius: 8px; padding: 20px; }
-.form-group-title { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 16px; }
-.work-format-fields { display: flex; gap: 16px; align-items: center; }
+.work-format-section { 
+  background: white; 
+  border-radius: 8px; 
+  padding: 20px 0; 
+}
+
+.form-group-title { 
+  font-size: 18px; 
+  font-weight: 600; 
+  color: #333; 
+  margin-bottom: 16px; 
+}
+
+.work-format-fields { 
+  display: flex; 
+  gap: 24px; 
+  align-items: center; 
+  margin-bottom: 16px;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 16px;
+  color: #374151;
+}
+
+.radio-option input[type="radio"] {
+  margin-right: 8px;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.radio-option span {
+  font-weight: 500;
+}
+
+/* Секция с опцией подруги */
+.girlfriend-option {
+  margin-top: 16px;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .work-format-fields {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
 </style> 

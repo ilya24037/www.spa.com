@@ -4,7 +4,7 @@
     <div class="parameters-fields">
       <div class="field-group">
         <label class="select-label">Возраст:</label>
-        <select v-model="localAge" @change="emitAll" class="age-select">
+        <select v-model="localAge" @change="handleAgeChange" class="age-select">
           <option value="">- Выбрать -</option>
           <option value="2007">18</option>
           <option value="2006">19</option>
@@ -57,9 +57,10 @@
           v-model="localHeight"
           type="number"
           label="Рост (см):"
+          placeholder="165"
           :min="100"
           :max="250"
-          @update:modelValue="emitAll"
+          @update:modelValue="handleHeightChange"
         />
       </div>
       
@@ -68,15 +69,16 @@
           v-model="localWeight"
           type="number"
           label="Вес (кг):"
+          placeholder="55"
           :min="30"
           :max="200"
-          @update:modelValue="emitAll"
+          @update:modelValue="handleWeightChange"
         />
       </div>
       
       <div class="field-group">
         <label class="select-label">Размер груди:</label>
-        <select v-model="localBreastSize" @change="emitAll" class="breast-select">
+        <select v-model="localBreastSize" @change="handleBreastSizeChange" class="breast-select">
           <option value="">- Выбрать -</option>
           <option value="1">1</option>
           <option value="2">2</option>
@@ -90,7 +92,7 @@
       
       <div class="field-group">
         <label class="select-label">Цвет волос:</label>
-        <select v-model="localHairColor" @change="emitAll" class="hair-select">
+        <select v-model="localHairColor" @change="handleHairColorChange" class="hair-select">
           <option value="">- Выбрать -</option>
           <option value="hair_blondinki">Блондинки</option>
           <option value="hair_brunetki">Брюнетки</option>
@@ -103,7 +105,7 @@
       
       <div class="field-group">
         <label class="select-label">Цвет глаз:</label>
-        <select v-model="localEyeColor" @change="emitAll" class="eyes-select">
+        <select v-model="localEyeColor" @change="handleEyeColorChange" class="eyes-select">
           <option value="">- Выбрать -</option>
           <option value="eyes_bolotnyi">Болотный</option>
           <option value="eyes_golubye">Голубой</option>
@@ -120,7 +122,7 @@
       
       <div class="field-group">
         <label class="select-label">Внешность:</label>
-        <select v-model="localAppearance" @change="emitAll" class="appearance-select">
+        <select v-model="localAppearance" @change="handleAppearanceChange" class="appearance-select">
           <option value="">---</option>
           <option value="Славянская">Славянская</option>
           <option value="Азиатская">Азиатская</option>
@@ -137,7 +139,7 @@
       
       <div class="field-group">
         <label class="select-label">Национальность:</label>
-        <select v-model="localNationality" @change="emitAll" class="nationality-select">
+        <select v-model="localNationality" @change="handleNationalityChange" class="nationality-select">
           <option value="">---</option>
           <option value="Русские">Русские</option>
           <option value="Украинки">Украинки</option>
@@ -193,23 +195,58 @@ const props = defineProps({
 
 const emit = defineEmits(['update:age', 'update:height', 'update:weight', 'update:breastSize', 'update:hairColor', 'update:eyeColor', 'update:appearance', 'update:nationality'])
 
-const localAge = ref(props.age)
-const localHeight = ref(props.height)
-const localWeight = ref(props.weight)
-const localBreastSize = ref(props.breastSize)
-const localHairColor = ref(props.hairColor)
-const localEyeColor = ref(props.eyeColor)
-const localAppearance = ref(props.appearance)
-const localNationality = ref(props.nationality)
+const localAge = ref(props.age || '')
+const localHeight = ref(props.height || '')
+const localWeight = ref(props.weight || '')
+const localBreastSize = ref(props.breastSize || '')
+const localHairColor = ref(props.hairColor || '')
+const localEyeColor = ref(props.eyeColor || '')
+const localAppearance = ref(props.appearance || '')
+const localNationality = ref(props.nationality || '')
 
-watch(() => props.age, val => { localAge.value = val })
-watch(() => props.height, val => { localHeight.value = val })
-watch(() => props.weight, val => { localWeight.value = val })
-watch(() => props.breastSize, val => { localBreastSize.value = val })
-watch(() => props.hairColor, val => { localHairColor.value = val })
-watch(() => props.eyeColor, val => { localEyeColor.value = val })
-watch(() => props.appearance, val => { localAppearance.value = val })
-watch(() => props.nationality, val => { localNationality.value = val })
+watch(() => props.age, val => { localAge.value = val || '' })
+watch(() => props.height, val => { localHeight.value = val || '' })
+watch(() => props.weight, val => { localWeight.value = val || '' })
+watch(() => props.breastSize, val => { localBreastSize.value = val || '' })
+watch(() => props.hairColor, val => { localHairColor.value = val || '' })
+watch(() => props.eyeColor, val => { localEyeColor.value = val || '' })
+watch(() => props.appearance, val => { localAppearance.value = val || '' })
+watch(() => props.nationality, val => { localNationality.value = val || '' })
+
+// Отдельные обработчики для каждого поля
+const handleAgeChange = () => {
+  emit('update:age', localAge.value)
+}
+
+const handleHeightChange = (value) => {
+  localHeight.value = value
+  emit('update:height', value)
+}
+
+const handleWeightChange = (value) => {
+  localWeight.value = value
+  emit('update:weight', value)
+}
+
+const handleBreastSizeChange = () => {
+  emit('update:breastSize', localBreastSize.value)
+}
+
+const handleHairColorChange = () => {
+  emit('update:hairColor', localHairColor.value)
+}
+
+const handleEyeColorChange = () => {
+  emit('update:eyeColor', localEyeColor.value)
+}
+
+const handleAppearanceChange = () => {
+  emit('update:appearance', localAppearance.value)
+}
+
+const handleNationalityChange = () => {
+  emit('update:nationality', localNationality.value)
+}
 
 const emitAll = () => {
   emit('update:age', localAge.value)

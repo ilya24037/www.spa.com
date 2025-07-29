@@ -1,46 +1,19 @@
 <template>
   <div class="service-category mb-8">
-    <!-- Красивый заголовок категории в стиле Avito -->
-    <div class="category-header-card mb-6">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center">
-          <div class="category-icon-wrapper">
-            <span class="category-icon">{{ category.icon }}</span>
-          </div>
-          <div class="ml-4">
-            <h3 class="category-title">
-              {{ category.name }}
-              <span v-if="selectedCount > 0" class="selected-count">
-                {{ selectedCount }}
-              </span>
-            </h3>
-            <p v-if="category.description" class="category-description">
-              {{ category.description }}
-            </p>
-          </div>
-        </div>
-        
-        <!-- Кнопки управления в заголовке -->
-        <div v-if="category.services.length > 0" class="category-header-controls">
-          <button
-            @click="selectAll"
-            type="button"
-            class="btn-select-all"
-          >
-            Выбрать все
-          </button>
-          <button
-            @click="clearAll"
-            type="button"
-            class="btn-clear-all"
-          >
-            Отменить все
-          </button>
-        </div>
+    <!-- Единая строка: категория + доплата + комментарий -->
+    <div class="category-table-header">
+      <div class="category-header-title">
+        {{ category.name }}
+        <span v-if="selectedCount > 0" class="selected-count">
+          {{ selectedCount }}
+        </span>
+        <p v-if="category.description" class="category-description">
+          {{ category.description }}
+        </p>
       </div>
+      <div class="category-header-price">Доплата</div>
+      <div class="category-header-comment">Комментарий</div>
     </div>
-
-    <!-- Список услуг -->
     <ul class="services-list">
       <ServiceItem
         v-for="service in category.services"
@@ -50,6 +23,23 @@
         @update:modelValue="updateService(service.id, $event)"
       />
     </ul>
+    <!-- Кнопки управления под списком услуг -->
+    <div v-if="category.services.length > 0" class="category-footer-controls mt-4">
+      <button
+        @click="selectAll"
+        type="button"
+        class="btn-select-all"
+      >
+        Выбрать все
+      </button>
+      <button
+        @click="clearAll"
+        type="button"
+        class="btn-clear-all"
+      >
+        Отменить все
+      </button>
+    </div>
   </div>
 </template>
 
@@ -117,10 +107,24 @@ const clearAll = () => {
   emit('update:modelValue', { ...serviceValues })
 }
 
-// Обработчик изменений отдельной услуги
+// Оптимизированный обработчик изменений отдельной услуги
+let lastCategoryData = null
+let categoryUpdateTimeout = null
+
 const updateService = (serviceId, serviceData) => {
   serviceValues[serviceId] = { ...serviceData }
-  emit('update:modelValue', { ...serviceValues })
+  
+  // Debounced emit для всей категории
+  if (categoryUpdateTimeout) clearTimeout(categoryUpdateTimeout)
+  categoryUpdateTimeout = setTimeout(() => {
+    const currentCategoryData = JSON.stringify(serviceValues)
+    
+    if (currentCategoryData !== lastCategoryData) {
+      lastCategoryData = currentCategoryData
+      emit('update:modelValue', { ...serviceValues })
+      // console.log('Category updated:', props.category.name, 'services changed')
+    }
+  }, 20)
 }
 
 // watch(serviceValues) убран - вызывает циклические обновления
@@ -142,49 +146,7 @@ initializeServices()
 </script>
 
 <style scoped>
-/* Красивая карточка категории в стиле Avito */
-.category-header-card {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 20px 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition: all 0.3s ease;
-}
-
-.category-header-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  transform: translateY(-1px);
-}
-
-/* Wrapper для иконки */
-.category-icon-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 56px;
-  height: 56px;
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-  border-radius: 14px;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-}
-
-.category-icon {
-  font-size: 28px;
-  line-height: 1;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
-}
-
-/* Заголовок категории */
-.category-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: #1e293b;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  line-height: 1.2;
-}
+/* Старые стили заголовка удалены */
 
 /* Счетчик выбранных услуг */
 .selected-count {
@@ -206,10 +168,12 @@ initializeServices()
   line-height: 1.4;
 }
 
-/* Кнопки управления в заголовке */
-.category-header-controls {
+/* Кнопки управления под списком услуг */
+.category-footer-controls {
   display: flex;
   gap: 8px;
+  justify-content: flex-start;
+  margin-top: 16px;
 }
 
 .btn-select-all,
@@ -250,7 +214,7 @@ initializeServices()
 /* Список услуг */
 .services-list {
   list-style: none;
-  padding: 0;
+  padding: 0 16px;
   margin: 0;
   background: #fff;
   border: 1px solid #e5e7eb;
@@ -264,26 +228,15 @@ initializeServices()
   margin-bottom: 2rem;
 }
 
+/* Старые стили первой категории удалены */
+
 /* Адаптивность */
 @media (max-width: 768px) {
-  .category-header-card {
-    padding: 16px 20px;
-  }
-  
-  .category-icon-wrapper {
-    width: 48px;
-    height: 48px;
-  }
-  
-  .category-icon {
-    font-size: 24px;
-  }
-  
   .category-title {
     font-size: 18px;
   }
-  
-  .category-header-controls {
+
+  .category-footer-controls {
     flex-direction: column;
     gap: 6px;
   }
@@ -293,5 +246,28 @@ initializeServices()
     padding: 6px 12px;
     font-size: 12px;
   }
+}
+
+/* --- ДОБАВЛЯЮ СТИЛИ --- */
+.category-table-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 15px;
+  padding: 0 16px;
+  margin-bottom: 8px;
+  align-items: baseline;
+}
+.category-header-title {
+  font-weight: 600;
+  font-size: 16px;
+  color: #1e293b;
+  line-height: 1.2;
+}
+.category-header-price,
+.category-header-comment {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
 }
 </style> 
