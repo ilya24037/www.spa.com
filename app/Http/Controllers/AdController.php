@@ -139,6 +139,9 @@ class AdController extends Controller
             // Услуги (новые поля)
             'services' => !empty($request->services) ? json_encode($request->services) : json_encode((object)[]),
             'services_additional_info' => $request->services_additional_info ?: null,
+            // График работы
+            'schedule' => !empty($request->schedule) ? json_encode($request->schedule) : json_encode((object)[]),
+            'schedule_notes' => $request->schedule_notes ?: null,
             // Физические параметры
             'age' => $request->age ?: null,
             'height' => $request->height ?: null,
@@ -353,7 +356,7 @@ class AdController extends Controller
         // Преобразуем JSON поля в массивы, если они строки
         $jsonFields = ['clients', 'service_location', 'outcall_locations', 'service_provider', 'is_starting_price', 
                       'photos', 'video', 'show_photos_in_gallery', 'allow_download_photos', 'watermark_photos', 
-                      'custom_travel_areas', 'working_days', 'working_hours', 'features', 'pricing_data', 'services'];
+                      'custom_travel_areas', 'working_days', 'working_hours', 'features', 'pricing_data', 'services', 'schedule'];
         
         foreach ($jsonFields as $field) {
             if (isset($adData[$field]) && is_string($adData[$field])) {
@@ -531,7 +534,7 @@ class AdController extends Controller
         $adData = $ad->toArray();
         
         // Убеждаемся что JSON поля декодированы в массивы
-        $jsonFields = ['clients', 'service_location', 'outcall_locations', 'service_provider', 'photos', 'video', 'services', 'pricing_data', 'features'];
+        $jsonFields = ['clients', 'service_location', 'outcall_locations', 'service_provider', 'photos', 'video', 'services', 'pricing_data', 'features', 'schedule'];
         
         foreach ($jsonFields as $field) {
             if (isset($adData[$field]) && is_string($adData[$field])) {

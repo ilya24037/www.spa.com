@@ -245,6 +245,17 @@ export function useAdForm(initialData = {}, options = {}) {
         form.price = String(form.price)
       }
       
+      // Убеждаемся, что schedule всегда объект
+      if (typeof form.schedule === 'string') {
+        try {
+          form.schedule = JSON.parse(form.schedule) || {}
+        } catch (e) {
+          form.schedule = {}
+        }
+      } else if (!form.schedule) {
+        form.schedule = {}
+      }
+      
       return draft
     } catch (error) {
       console.error('Ошибка при загрузке черновика:', error)
@@ -293,6 +304,17 @@ export function useAdForm(initialData = {}, options = {}) {
     // Убеждаемся, что price всегда строка
     if (form.price !== undefined && form.price !== null) {
       form.price = String(form.price)
+    }
+    
+    // Убеждаемся, что schedule всегда объект
+    if (typeof form.schedule === 'string') {
+      try {
+        form.schedule = JSON.parse(form.schedule) || {}
+      } catch (e) {
+        form.schedule = {}
+      }
+    } else if (!form.schedule) {
+      form.schedule = {}
     }
   }
 

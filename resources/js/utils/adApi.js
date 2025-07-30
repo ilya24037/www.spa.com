@@ -284,7 +284,11 @@ export const prepareFormData = (form) => {
     
     // Услуги
     services: form.services || {},
-    services_additional_info: form.services_additional_info || ''
+    services_additional_info: form.services_additional_info || '',
+    
+    // График работы
+    schedule: form.schedule || {},
+    schedule_notes: form.schedule_notes || ''
   }
   
   // Для черновика оставляем все поля, даже пустые
