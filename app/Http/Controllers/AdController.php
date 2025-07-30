@@ -135,7 +135,6 @@ class AdController extends Controller
             'is_starting_price' => $request->is_starting_price ? true : false,
             'pricing_data' => !empty($request->pricing_data) ? json_encode($request->pricing_data) : null,
             'contacts_per_hour' => $request->contacts_per_hour ?: null,
-            'payment_methods' => !empty($request->payment_methods) ? json_encode($request->payment_methods) : json_encode(['cash']),
             'discount' => $request->discount ? (int)$request->discount : null,
             'new_client_discount' => $request->new_client_discount ?: null,
             'gift' => $request->gift ?: null,
@@ -279,7 +278,6 @@ class AdController extends Controller
                 'is_starting_price' => is_array($request->is_starting_price) ? json_encode($request->is_starting_price) : '[]',
                 'pricing_data' => !empty($request->pricing_data) ? json_encode($request->pricing_data) : null,
                 'contacts_per_hour' => $request->contacts_per_hour ?: null,
-                'payment_methods' => !empty($request->payment_methods) ? json_encode($request->payment_methods) : json_encode(['cash']),
                 'discount' => $request->discount ?: null,
                 'gift' => $request->gift ?: null,
                 // Услуги
@@ -333,40 +331,12 @@ class AdController extends Controller
         // Преобразуем JSON поля в массивы, если они строки
         $jsonFields = ['clients', 'service_location', 'outcall_locations', 'service_provider', 'is_starting_price', 
                       'photos', 'video', 'show_photos_in_gallery', 'allow_download_photos', 'watermark_photos', 
-                      'custom_travel_areas', 'working_days', 'working_hours', 'features', 'pricing_data', 'services', 'schedule', 'payment_methods'];
+                      'custom_travel_areas', 'working_days', 'working_hours', 'features', 'pricing_data', 'services', 'schedule'];
         
         foreach ($jsonFields as $field) {
             if (isset($adData[$field]) && is_string($adData[$field])) {
                 $adData[$field] = json_decode($adData[$field], true) ?? [];
             }
-        }
-        
-        // Преобразуем payment_methods в правильный массив
-        if (!empty($adData['payment_methods'])) {
-            // Если это массив - убеждаемся что индексы правильные
-            if (is_array($adData['payment_methods'])) {
-                // Проверяем не объект ли это {cash: true, transfer: false}
-                if (isset($adData['payment_methods']['cash']) || isset($adData['payment_methods']['transfer'])) {
-                    // Старый объект формата - преобразуем в массив
-                    $methods = [];
-                    if (!empty($adData['payment_methods']['cash'])) $methods[] = 'cash';
-                    if (!empty($adData['payment_methods']['transfer'])) $methods[] = 'transfer';
-                    $adData['payment_methods'] = count($methods) > 0 ? $methods : ['cash'];
-                } else {
-                    // Уже массив - очищаем от пустых значений и перестраиваем индексы
-                    $adData['payment_methods'] = array_values(array_filter($adData['payment_methods'], function($value) {
-                        return !empty($value) && in_array($value, ['cash', 'transfer']);
-                    }));
-                    if (empty($adData['payment_methods'])) {
-                        $adData['payment_methods'] = [];
-                    }
-                }
-            }
-            else {
-                $adData['payment_methods'] = [];
-            }
-        } else {
-            $adData['payment_methods'] = [];
         }
 
         return Inertia::render('EditAd', [

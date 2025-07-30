@@ -19,8 +19,8 @@
         v-for="service in category.services"
         :key="service.id"
         :service="service"
-        v-model="serviceValues[service.id]"
-        @update:modelValue="updateService(service.id, $event)"
+        :category-id="category.id"
+        :store="store"
       />
     </ul>
     <!-- Кнопки управления под списком услуг -->
@@ -44,7 +44,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, reactive } from 'vue'
+import { computed } from 'vue'
 import ServiceItem from './ServiceItem.vue'
 
 const props = defineProps({
@@ -52,9 +52,9 @@ const props = defineProps({
     type: Object,
     required: true
   },
-  modelValue: {
+  store: {
     type: Object,
-    default: () => ({})
+    required: true
   },
   isFirst: {
     type: Boolean,
@@ -62,87 +62,28 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:modelValue'])
+// === АРХИТЕКТУРА МАРКЕТПЛЕЙСОВ ===
 
-// Локальное состояние для всех услуг категории
-const serviceValues = reactive({})
-
-// Инициализируем состояние услуг
-const initializeServices = () => {
-  props.category.services.forEach(service => {
-    if (!serviceValues[service.id]) {
-      serviceValues[service.id] = props.modelValue[service.id] || {
-        enabled: false,
-        price: '',
-        price_comment: ''
-      }
-    }
-  })
-}
-
-// Вычисляемое свойство для подсчета выбранных услуг
+// Подсчет выбранных в категории через store (эффективно)
 const selectedCount = computed(() => {
-  return Object.values(serviceValues).filter(service => service?.enabled).length
+  return props.store.getCategorySelectedCount(props.category.id)
 })
 
-// Функция выбора всех услуг
+// === МАССОВЫЕ ОПЕРАЦИИ (паттерн Avito) ===
+
+/**
+ * Выбрать все услуги в категории
+ */
 const selectAll = () => {
-  props.category.services.forEach(service => {
-    if (serviceValues[service.id]) {
-      serviceValues[service.id].enabled = true
-    }
-  })
-  emit('update:modelValue', { ...serviceValues })
+  props.store.selectAllInCategory(props.category.id, props.category.services)
 }
 
-// Функция очистки всех услуг
+/**
+ * Очистить все услуги в категории
+ */
 const clearAll = () => {
-  props.category.services.forEach(service => {
-    if (serviceValues[service.id]) {
-      serviceValues[service.id].enabled = false
-      serviceValues[service.id].price = ''
-      serviceValues[service.id].price_comment = ''
-    }
-  })
-  emit('update:modelValue', { ...serviceValues })
+  props.store.clearAllInCategory(props.category.id, props.category.services)
 }
-
-// Оптимизированный обработчик изменений отдельной услуги
-let lastCategoryData = null
-let categoryUpdateTimeout = null
-
-const updateService = (serviceId, serviceData) => {
-  serviceValues[serviceId] = { ...serviceData }
-  
-  // Debounced emit для всей категории
-  if (categoryUpdateTimeout) clearTimeout(categoryUpdateTimeout)
-  categoryUpdateTimeout = setTimeout(() => {
-    const currentCategoryData = JSON.stringify(serviceValues)
-    
-    if (currentCategoryData !== lastCategoryData) {
-      lastCategoryData = currentCategoryData
-      emit('update:modelValue', { ...serviceValues })
-      // console.log('Category updated:', props.category.name, 'services changed')
-    }
-  }, 20)
-}
-
-// watch(serviceValues) убран - вызывает циклические обновления
-// emit вызывается только при пользовательских действиях
-
-// Отслеживаем изменения из родителя
-watch(() => props.modelValue, (newValue) => {
-  if (newValue) {
-    Object.keys(newValue).forEach(serviceId => {
-      if (serviceValues[serviceId]) {
-        serviceValues[serviceId] = { ...newValue[serviceId] }
-      }
-    })
-  }
-}, { deep: true })
-
-// Инициализируем при монтировании
-initializeServices()
 </script>
 
 <style scoped>

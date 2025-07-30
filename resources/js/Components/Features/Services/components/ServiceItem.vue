@@ -27,8 +27,8 @@
         max="99999" 
         step="100" 
         placeholder="0"
-        v-model="serviceData.price"
-        @input="emitUpdate"
+        :value="serviceData.price"
+        @input="handlePriceInput"
       >
     </div>
     <div class="service-comment-field">
@@ -37,51 +37,51 @@
         :name="`uslugi_comm[${service.id}]`" 
         placeholder="(макс 100 символов)" 
         maxlength="100"
-        v-model="serviceData.price_comment"
-        @input="emitUpdate"
+        :value="serviceData.comment"
+        @input="handleCommentInput"
       >
     </div>
   </li>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { computed } from 'vue'
+import { useOptimizedUpdates } from '@/Composables/useOptimizedUpdates'
 
 const props = defineProps({
   service: {
     type: Object,
     required: true
   },
-  modelValue: {
+  categoryId: {
+    type: String,
+    required: true
+  },
+  store: {
     type: Object,
-    default: () => ({ enabled: false, price: '', price_comment: '' })
+    required: true
   }
 })
 
-const emit = defineEmits(['update:modelValue'])
+// === АРХИТЕКТУРА МАРКЕТПЛЕЙСОВ ===
 
-// Локальное состояние
-const serviceData = ref({
-  enabled: props.modelValue?.enabled || false,
-  price: props.modelValue?.price || '',
-  price_comment: props.modelValue?.price_comment || ''
-})
+// === РЕАКТИВНЫЕ ДАННЫЕ ИЗ STORE ===
 
-// Computed для enabled
+// Получение данных услуги из централизованного store (O(1) доступ)
+const serviceData = computed(() => 
+  props.store.getServiceData(props.service.id)
+)
+
+// Computed для checkbox с оптимистичным обновлением
 const enabled = computed({
-  get: () => serviceData.value.enabled,
+  get: () => props.store.isServiceSelected(props.service.id),
   set: (value) => {
-    serviceData.value.enabled = value
-    if (!value) {
-      // Очищаем данные при отключении
-      serviceData.value.price = ''
-      serviceData.value.price_comment = ''
-    }
-    emitUpdate()
+    // Мгновенное переключение в UI (паттерн оптимистичных обновлений)
+    props.store.toggleService(props.service.id, props.categoryId)
   }
 })
 
-// Лейбл для чекбокса с популярностью
+// Лейбл с популярностью
 const serviceLabel = computed(() => {
   let label = props.service.name
   if (props.service.popular) {
@@ -90,40 +90,52 @@ const serviceLabel = computed(() => {
   return label
 })
 
-// Функция добавления цены (кнопка +)
+// === ОПТИМИЗИРОВАННЫЕ ОБРАБОТЧИКИ ===
+
+// Обновление цены с debounce (300ms - оптимально для маркетплейсов)
+const updatePrice = createDebouncedUpdate((value) => {
+  if (enabled.value) {
+    props.store.updateServicePrice(props.service.id, value)
+  }
+}, 300)
+
+// Обновление комментария с debounce
+const updateComment = createDebouncedUpdate((value) => {
+  if (enabled.value) {
+    props.store.updateServiceComment(props.service.id, value)
+  }
+}, 300)
+
+// === ДЕЙСТВИЯ ===
+
+/**
+ * Добавление цены кнопкой "+" (паттерн Avito)
+ */
 const addPrice = () => {
-  if (!serviceData.value.price) {
-    serviceData.value.price = '1000'
+  const currentPrice = serviceData.value.price
+  const newPrice = !currentPrice ? '1000' : String(parseInt(currentPrice) + 500)
+  
+  // Если услуга не выбрана, выбираем её сначала
+  if (!enabled.value) {
+    props.store.toggleService(props.service.id, props.categoryId, { price: newPrice })
   } else {
-    serviceData.value.price = String(parseInt(serviceData.value.price) + 500)
+    updatePrice(newPrice)
   }
-  emitUpdate()
 }
 
-// Предотвращение избыточных обновлений с проверкой изменений
-let updateTimeout = null
-let lastEmittedData = null
-
-const emitUpdate = () => {
-  if (updateTimeout) clearTimeout(updateTimeout)
-  updateTimeout = setTimeout(() => {
-    const currentData = JSON.stringify(serviceData.value)
-    
-    // Emit только если данные действительно изменились
-    if (currentData !== lastEmittedData) {
-      lastEmittedData = currentData
-      emit('update:modelValue', { ...serviceData.value })
-      // console.log('ServiceItem updated:', props.service.name, serviceData.value.enabled)
-    }
-  }, 10) // Уменьшил delay для быстрой реакции
+/**
+ * Обработчик ввода цены
+ */
+const handlePriceInput = (event) => {
+  updatePrice(event.target.value)
 }
 
-// Отслеживаем изменения из родителя
-watch(() => props.modelValue, (newValue) => {
-  if (newValue) {
-    serviceData.value = { ...newValue }
-  }
-}, { deep: true })
+/**
+ * Обработчик ввода комментария
+ */
+const handleCommentInput = (event) => {
+  updateComment(event.target.value)
+}
 </script>
 
 <style scoped>

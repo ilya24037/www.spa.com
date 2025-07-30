@@ -1,54 +1,69 @@
 <template>
     <div class="universal-ad-form">
-        <!-- Универсальная форма для всех категорий -->
-        <form @submit.prevent="handleSubmit" novalidate>
-            
-            <!-- 1. Формат работы (перенесено на первое место) -->
-            <div class="form-group-section">
-                <WorkFormatSection 
-                    v-model:workFormat="form.work_format" 
-                    v-model:hasGirlfriend="form.has_girlfriend"
-                    :errors="errors"
-                />
-            </div>
+        <!-- РЕФАКТОРЕННАЯ ФОРМА - ИСПОЛЬЗУЕМ НОВУЮ АРХИТЕКТУРУ -->
+        <!-- Переключение между старой и новой архитектурой -->
+        <div v-if="useNewArchitecture" class="new-architecture">
+            <AdFormRefactored
+                :category="category"
+                :categories="categories"
+                :ad-id="adId"
+                :initial-data="initialData"
+                :show-progress="true"
+                @success="$emit('success', $event)"
+            />
+        </div>
 
-            <!-- 2. Кто оказывает услуги (перенесено после формата работы) -->
-            <div class="form-group-section">
-                <ServiceProviderSection 
-                    v-model:serviceProvider="form.service_provider" 
-                    :errors="errors"
-                />
-            </div>
+        <!-- СТАРАЯ ФОРМА - ДЛЯ СОВМЕСТИМОСТИ -->
+        <div v-else class="legacy-form">
+            <!-- Универсальная форма для всех категорий -->
+            <form @submit.prevent="handleSubmit" novalidate>
+                
+                <!-- 1. Формат работы (перенесено на первое место) -->
+                <div class="form-group-section">
+                    <WorkFormatSection 
+                        v-model:workFormat="form.work_format" 
+                        v-model:hasGirlfriend="form.has_girlfriend"
+                        :errors="errors"
+                    />
+                </div>
 
-            <!-- 3. Ваши клиенты (перенесено после "Кто оказывает услуги") -->
-            <div class="form-group-section">
-                <ClientsSection 
-                    v-model:clients="form.clients" 
-                    :errors="errors"
-                />
-            </div>
+                <!-- 2. Кто оказывает услуги (перенесено после формата работы) -->
+                <div class="form-group-section">
+                    <ServiceProviderSection 
+                        v-model:serviceProvider="form.service_provider" 
+                        :errors="errors"
+                    />
+                </div>
 
-            <!-- 4. Описание (перенесено после "Ваши клиенты") -->
-            <div class="form-group-section">
-                <DescriptionSection 
-                    v-model:description="form.description" 
-                    :errors="errors"
-                />
-            </div>
+                <!-- 3. Ваши клиенты (перенесено после "Кто оказывает услуги") -->
+                <div class="form-group-section">
+                    <ClientsSection 
+                        v-model:clients="form.clients" 
+                        :errors="errors"
+                    />
+                </div>
 
-            <!-- 5. Физические параметры -->
-            <div class="form-group-section">
-                <ParametersSection 
-                    v-model:age="form.age"
-                    v-model:height="form.height" 
-                    v-model:weight="form.weight" 
-                    v-model:breastSize="form.breast_size"
-                    v-model:hairColor="form.hair_color" 
-                    v-model:eyeColor="form.eye_color" 
-                    v-model:appearance="form.appearance"
-                    v-model:nationality="form.nationality" 
-                    :errors="errors"
-                />
+                <!-- 4. Описание (перенесено после "Ваши клиенты") -->
+                <div class="form-group-section">
+                    <DescriptionSection 
+                        v-model:description="form.description" 
+                        :errors="errors"
+                    />
+                </div>
+
+                <!-- 5. Физические параметры -->
+                <div class="form-group-section">
+                    <ParametersSection 
+                        v-model:age="form.age"
+                        v-model:height="form.height" 
+                        v-model:weight="form.weight" 
+                        v-model:breastSize="form.breast_size"
+                        v-model:hairColor="form.hair_color" 
+                        v-model:eyeColor="form.eye_color" 
+                        v-model:appearance="form.appearance"
+                        v-model:nationality="form.nationality" 
+                        :errors="errors"
+                    />
             </div>
 
             <!-- 6. Особенности мастера -->
@@ -79,12 +94,7 @@
             </div>
 
             <!-- 8. Способы оплаты -->
-            <div class="form-group-section">
-                <PaymentMethodsSection 
-                    v-model:paymentMethods="form.payment_methods" 
-                    :errors="errors"
-                />
-            </div>
+            
 
             <!-- 9. Акции -->
             <div class="form-group-section">
@@ -188,6 +198,7 @@
                 </button>
             </div>
         </form>
+        </div>
     </div>
 </template>
 
@@ -197,10 +208,12 @@ import { router } from '@inertiajs/vue3'
 import { useAdForm } from '@/Composables/useAdForm'
 import { publishAd } from '@/utils/adApi'
 
-// Импорты секций формы
+// НОВАЯ АРХИТЕКТУРА - рефакторенная форма
+import AdFormRefactored from '@/Components/AdForm/index.vue'
+
+// Импорты секций формы (старая архитектура для совместимости)
 import ServiceProviderSection from './Sections/ServiceProviderSection.vue'
 import ClientsSection from './Sections/ClientsSection.vue'
-import PaymentMethodsSection from './Sections/PaymentMethodsSection.vue'
 import LocationSection from './Sections/LocationSection.vue'
 import WorkFormatSection from './Sections/WorkFormatSection.vue'
 import PriceSection from './Sections/PriceSection.vue'
@@ -235,6 +248,10 @@ const props = defineProps({
     initialData: {
         type: Object,
         default: () => ({})
+    },
+    useNewArchitecture: {
+        type: Boolean,
+        default: true // По умолчанию используем новую архитектуру
     }
 })
 
@@ -504,8 +521,7 @@ const handleSaveDraft = async () => {
     
     saving.value = true
     
-    console.log('AdForm SAVING: form.payment_methods =', form.payment_methods)
-    console.log('form.services before save:', form.services)
+            console.log('form.services before save:', form.services)
     
     const draftData = {
         id: props.adId, // ВАЖНО: передаем ID для обновления существующего черновика
@@ -560,8 +576,7 @@ const handleSaveDraft = async () => {
         nationality: form.nationality
     }
     
-    console.log('AdForm DRAFT DATA: payment_methods =', draftData.payment_methods)
-    console.log('Отправляемые данные:', draftData)
+            console.log('Отправляемые данные:', draftData)
     console.log('ID в данных:', draftData.id)
     
     // Используем Inertia router для отправки
@@ -697,10 +712,7 @@ watch(() => form.video, async (newVideo, oldVideo) => {
     }
 }, { deep: true })
 
-// Отслеживаем изменения payment_methods (без trace для производительности)
-watch(() => form.payment_methods, (newVal, oldVal) => {
-  console.log('AdForm WATCH: form.payment_methods changed from', oldVal, 'to', newVal)
-}, { deep: true })
+
 
 // Отладка при монтировании
 onMounted(() => {
