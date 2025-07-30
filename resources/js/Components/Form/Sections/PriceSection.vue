@@ -163,7 +163,7 @@
 import { ref, reactive, watch } from 'vue'
 
 const props = defineProps({
-  price: { type: String, default: '' },
+  price: { type: [String, Number], default: '' },
   priceUnit: { type: String, default: 'hour' },
   isStartingPrice: { type: Boolean, default: false },
   pricingData: { type: Object, default: () => ({}) },
@@ -472,7 +472,8 @@ const emitAll = () => {
   
   // Совместимость со старой структурой - используем первую найденную цену как основную
   const firstPrice = prices.apartment.hour || prices.outcall.hour || expressPrice.value
-  emit('update:price', firstPrice)
+  // Преобразуем в строку для совместимости с типом пропса
+  emit('update:price', firstPrice ? String(firstPrice) : '')
   emit('update:priceUnit', localUnit.value)
   emit('update:isStartingPrice', localIsStartingPrice.value)
 }

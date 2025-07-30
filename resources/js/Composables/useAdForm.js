@@ -240,6 +240,11 @@ export function useAdForm(initialData = {}, options = {}) {
       // Обновляем форму данными из черновика
       Object.assign(form, draft)
       
+      // Убеждаемся, что price всегда строка
+      if (form.price !== undefined && form.price !== null) {
+        form.price = String(form.price)
+      }
+      
       return draft
     } catch (error) {
       console.error('Ошибка при загрузке черновика:', error)
@@ -284,6 +289,11 @@ export function useAdForm(initialData = {}, options = {}) {
    */
   const setFormData = (data) => {
     Object.assign(form, data)
+    
+    // Убеждаемся, что price всегда строка
+    if (form.price !== undefined && form.price !== null) {
+      form.price = String(form.price)
+    }
   }
 
   /**

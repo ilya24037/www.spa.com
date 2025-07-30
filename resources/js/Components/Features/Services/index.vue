@@ -176,14 +176,9 @@ const clearAllServices = () => {
 
 // Обработчик изменений категории
 const updateCategory = (categoryId, categoryData) => {
-  // Проверяем что данные действительно изменились
-  const currentCategoryData = JSON.stringify(localServices[categoryId] || {})
-  const newCategoryData = JSON.stringify(categoryData)
-  
-  if (currentCategoryData !== newCategoryData) {
-    localServices[categoryId] = { ...categoryData }
-    emitAll()
-  }
+  // Всегда обновляем данные и вызываем emitAll
+  localServices[categoryId] = { ...categoryData }
+  emitAll()
 }
 
 watch(() => props.services, (val) => {
@@ -223,11 +218,10 @@ const emitAll = () => {
     if (currentServices !== lastEmittedServices) {
       lastEmittedServices = currentServices
       const servicesData = JSON.parse(currentServices)
-      console.log('Emitting services:', servicesData)
       emit('update:services', servicesData)
       emit('update:servicesAdditionalInfo', localAdditionalInfo.value)
     }
-  }, 50) // Уменьшил задержку для более быстрой реакции
+  }, 50)
 }
 
 // Инициализация additionalInfo

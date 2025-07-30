@@ -361,6 +361,11 @@ class AdController extends Controller
             }
         }
 
+        // Убеждаемся, что price всегда строка
+        if (isset($adData['price'])) {
+            $adData['price'] = (string) $adData['price'];
+        }
+
         return response()->json($adData);
     }
 
@@ -535,6 +540,11 @@ class AdController extends Controller
             } elseif (!isset($adData[$field])) {
                 $adData[$field] = [];
             }
+        }
+
+        // Убеждаемся, что price всегда строка
+        if (isset($adData['price'])) {
+            $adData['price'] = (string) $adData['price'];
         }
 
         // Показываем страницу черновика
