@@ -119,9 +119,13 @@
 
             <!-- 11. Фотографии -->
             <div class="form-group-section">
-                <PhotosSection 
-                    v-model:photos="form.photos" 
-                    :errors="errors"
+                <PhotoUploader 
+                    v-model="form.photos" 
+                    :maxFiles="10"
+                    :maxFileSize="5242880"
+                    :uploading="uploading"
+                    :uploadProgress="uploadProgress"
+                    @error="handlePhotoError"
                 />
             </div>
 
@@ -177,7 +181,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted, nextTick, watch } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { useAdForm } from '@/Composables/useAdForm'
 import { publishAd } from '@/utils/adApi'
@@ -191,7 +195,7 @@ import PriceSection from './Sections/PriceSection.vue'
 import DescriptionSection from './Sections/DescriptionSection.vue'
 import ParametersSection from './Sections/ParametersSection.vue'
 import PromoSection from './Sections/PromoSection.vue'
-import PhotosSection from './Sections/PhotosSection.vue'
+import PhotoUploader from '@/Components/Features/PhotoUploader/index.vue'
 import VideosSection from './Sections/VideosSection.vue'
 import GeoSection from './Sections/GeoSection.vue'
 import ContactsSection from './Sections/ContactsSection.vue'
@@ -243,6 +247,10 @@ const {
 // Собственное состояние для сохранения
 const saving = ref(false)
 const validationErrors = ref({})
+
+// Состояние загрузки фото
+const uploading = ref(false)
+const uploadProgress = ref(0)
 
 // Определяем обязательные поля
 const requiredFields = {
@@ -341,7 +349,39 @@ onMounted(async () => {
             // Загружаем данные из props
             Object.keys(props.initialData).forEach(key => {
                 if (props.initialData[key] !== null && props.initialData[key] !== undefined) {
-                    form[key] = props.initialData[key]
+                    if (key === 'photos') {
+                        // Специальная обработка для photos - преобразуем объект в массив
+                        console.log('AdForm: Обрабатываем photos из initialData:', props.initialData[key], 'тип:', typeof props.initialData[key])
+                        
+                        if (Array.isArray(props.initialData[key])) {
+                            form[key] = props.initialData[key]
+                        } else if (props.initialData[key] && typeof props.initialData[key] === 'object') {
+                            // Преобразуем объект {1: {...}, 2: {...}} в массив
+                            form[key] = Object.values(props.initialData[key])
+                            console.log('AdForm: Преобразовали photos объект в массив:', form[key])
+                        } else {
+                            form[key] = []
+                        }
+                    } else if (key === 'schedule') {
+                        // Специальная обработка для schedule - разбираем JSON строку
+                        console.log('AdForm: Обрабатываем schedule из initialData:', props.initialData[key], 'тип:', typeof props.initialData[key])
+                        
+                        if (typeof props.initialData[key] === 'string') {
+                            try {
+                                form[key] = JSON.parse(props.initialData[key]) || {}
+                                console.log('AdForm: Распарсили schedule строку в объект:', form[key])
+                            } catch (e) {
+                                form[key] = {}
+                                console.log('AdForm: Ошибка парсинга schedule, установили пустой объект')
+                            }
+                        } else if (props.initialData[key] && typeof props.initialData[key] === 'object') {
+                            form[key] = props.initialData[key]
+                        } else {
+                            form[key] = {}
+                        }
+                    } else {
+                        form[key] = props.initialData[key]
+                    }
                 }
             })
         } else {
@@ -387,7 +427,10 @@ const saveDraft = async () => {
             address: form.address,
             travel_area: form.travel_area,
             phone: form.phone,
-            contact_method: form.contact_method
+            contact_method: form.contact_method,
+            // График работы
+            schedule: form.schedule,
+            schedule_notes: form.schedule_notes
         }
         
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
@@ -553,7 +596,21 @@ const handlePublish = async () => {
     }
 }
 
+// Обработчики фотографий
+const handlePhotoError = (error) => {
+    console.error('Ошибка фото:', error)
+}
 
+// Добавляем watcher для отслеживания изменений фото
+watch(() => form.photos, (newPhotos) => {
+    console.log('Фотографии изменились:', newPhotos?.length || 0, 'тип:', typeof newPhotos, 'массив?', Array.isArray(newPhotos))
+    console.log('Содержимое photos:', newPhotos)
+}, { deep: true })
+
+// Отладка при монтировании
+onMounted(() => {
+    console.log('AdForm mounted, form.photos:', form.photos, 'тип:', typeof form.photos, 'массив?', Array.isArray(form.photos))
+})
 
 // Инициализация происходит через useAdForm.js
 </script>

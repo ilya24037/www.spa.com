@@ -256,6 +256,29 @@ export function useAdForm(initialData = {}, options = {}) {
         form.schedule = {}
       }
       
+          // Убеждаемся, что photos всегда массив
+    console.log('loadDraft: До обработки photos:', form.photos, 'тип:', typeof form.photos, 'массив?', Array.isArray(form.photos))
+    
+    if (typeof form.photos === 'string') {
+      try {
+        form.photos = JSON.parse(form.photos) || []
+      } catch (e) {
+        form.photos = []
+      }
+    } else if (!Array.isArray(form.photos)) {
+      // Если это объект с числовыми ключами, преобразуем в массив
+      if (form.photos && typeof form.photos === 'object') {
+        console.log('loadDraft: Преобразуем объект photos в массив:', Object.values(form.photos))
+        form.photos = Object.values(form.photos)
+      } else {
+        // Только если это null/undefined/другой тип - сбрасываем в пустой массив
+        console.log('loadDraft: Сбрасываем photos в пустой массив (не объект)')
+        form.photos = []
+      }
+    }
+    
+    console.log('loadDraft: После обработки photos:', form.photos, 'тип:', typeof form.photos, 'массив?', Array.isArray(form.photos))
+      
       return draft
     } catch (error) {
       console.error('Ошибка при загрузке черновика:', error)
@@ -316,6 +339,29 @@ export function useAdForm(initialData = {}, options = {}) {
     } else if (!form.schedule) {
       form.schedule = {}
     }
+    
+    // Убеждаемся, что photos всегда массив
+    console.log('setFormData: До обработки photos:', form.photos, 'тип:', typeof form.photos, 'массив?', Array.isArray(form.photos))
+    
+    if (typeof form.photos === 'string') {
+      try {
+        form.photos = JSON.parse(form.photos) || []
+      } catch (e) {
+        form.photos = []
+      }
+    } else if (!Array.isArray(form.photos)) {
+      // Если это объект с числовыми ключами, преобразуем в массив
+      if (form.photos && typeof form.photos === 'object') {
+        console.log('setFormData: Преобразуем объект photos в массив:', Object.values(form.photos))
+        form.photos = Object.values(form.photos)
+      } else {
+        // Только если это null/undefined/другой тип - сбрасываем в пустой массив
+        console.log('setFormData: Сбрасываем photos в пустой массив (не объект)')
+        form.photos = []
+      }
+    }
+    
+    console.log('setFormData: После обработки photos:', form.photos, 'тип:', typeof form.photos, 'массив?', Array.isArray(form.photos))
   }
 
   /**

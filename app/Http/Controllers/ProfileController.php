@@ -169,14 +169,24 @@ class ProfileController extends Controller
             $mainImage = null;
             $photosCount = 0;
             
+            // Проверяем photos (убрана отладка)
+            
             if (isset($adData['photos']) && is_array($adData['photos']) && count($adData['photos']) > 0) {
-                $firstPhoto = $adData['photos'][0];
-                if (is_array($firstPhoto)) {
-                    $mainImage = $firstPhoto['preview'] ?? $firstPhoto['url'] ?? $firstPhoto['src'] ?? null;
-                } elseif (is_string($firstPhoto)) {
-                    $mainImage = $firstPhoto;
+                // Дополнительная проверка что первый элемент существует
+                if (isset($adData['photos'][0])) {
+                    $firstPhoto = $adData['photos'][0];
+                    if (is_array($firstPhoto)) {
+                        // Новый PhotoUploader: объект с preview, url, src
+                        $mainImage = $firstPhoto['preview'] ?? $firstPhoto['url'] ?? $firstPhoto['src'] ?? null;
+                    } elseif (is_string($firstPhoto)) {
+                        // Старый формат: просто строка URL
+                        $mainImage = $firstPhoto;
+                    } else {
+                        // Неожиданный формат - используем fallback
+                        $mainImage = null;
+                    }
+                    $photosCount = count($adData['photos']);
                 }
-                $photosCount = count($adData['photos']);
             }
             
             // Если нет фото в объявлении, используем тестовое

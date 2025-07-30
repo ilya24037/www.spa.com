@@ -288,7 +288,10 @@ export const prepareFormData = (form) => {
     
     // График работы
     schedule: form.schedule || {},
-    schedule_notes: form.schedule_notes || ''
+    schedule_notes: form.schedule_notes || '',
+    
+    // Фотографии
+    photos: Array.isArray(form.photos) ? form.photos : []
   }
   
   // Для черновика оставляем все поля, даже пустые

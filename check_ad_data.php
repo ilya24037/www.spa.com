@@ -16,6 +16,7 @@ if ($ad) {
     echo "Services Additional Info: " . ($ad->services_additional_info ?: 'empty') . "\n";
     echo "Schedule: " . json_encode($ad->schedule) . "\n";
     echo "Schedule Notes: " . ($ad->schedule_notes ?: 'empty') . "\n";
+    echo "Photos: " . json_encode($ad->photos) . "\n";
     echo "Status: " . $ad->status . "\n";
     echo "Updated: " . $ad->updated_at . "\n";
     

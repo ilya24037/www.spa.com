@@ -140,7 +140,7 @@ class AdController extends Controller
             'services' => !empty($request->services) ? json_encode($request->services) : json_encode((object)[]),
             'services_additional_info' => $request->services_additional_info ?: null,
             // График работы
-            'schedule' => !empty($request->schedule) ? json_encode($request->schedule) : json_encode((object)[]),
+            'schedule' => !empty($request->schedule) ? $request->schedule : (object)[],
             'schedule_notes' => $request->schedule_notes ?: null,
             // Физические параметры
             'age' => $request->age ?: null,

@@ -132,6 +132,13 @@ const toggleDay = (dayId) => {
     if (!localSchedule[dayId].enabled) {
         localSchedule[dayId].from = ''
         localSchedule[dayId].to = ''
+    } else {
+        // Устанавливаем время по умолчанию при включении дня
+        // только если время еще не установлено
+        if (!localSchedule[dayId].from && !localSchedule[dayId].to) {
+            localSchedule[dayId].from = '09:00'
+            localSchedule[dayId].to = '18:00'
+        }
     }
     emitSchedule()
 }
