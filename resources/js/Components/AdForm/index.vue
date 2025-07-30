@@ -79,6 +79,7 @@
           v-model:services="form.services"
           v-model:services-additional-info="form.services_additional_info"
           :allowed-categories="[]"
+          :use-new-architecture="true"
           :errors="errors"
         />
 

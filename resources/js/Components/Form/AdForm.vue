@@ -122,6 +122,7 @@
                     v-model:services="form.services" 
                     v-model:servicesAdditionalInfo="form.services_additional_info" 
                     :allowedCategories="[]"
+                    :useNewArchitecture="false"
                     :errors="errors"
                 />
             </div>

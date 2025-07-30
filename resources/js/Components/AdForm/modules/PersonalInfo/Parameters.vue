@@ -148,10 +148,10 @@ import FormSection from '@/Components/UI/Forms/FormSection.vue'
 import FormField from '@/Components/UI/Forms/FormField.vue'
 
 const props = defineProps({
-  age: { type: String, default: '' },
-  height: { type: String, default: '' },
-  weight: { type: String, default: '' },
-  breastSize: { type: String, default: '' },
+  age: { type: [String, Number], default: '' },
+  height: { type: [String, Number], default: '' },
+  weight: { type: [String, Number], default: '' },
+  breastSize: { type: [String, Number], default: '' },
   hairColor: { type: String, default: '' },
   eyeColor: { type: String, default: '' },
   appearance: { type: String, default: '' },
@@ -164,21 +164,21 @@ const emit = defineEmits([
   'update:hairColor', 'update:eyeColor', 'update:appearance', 'update:nationality'
 ])
 
-// Локальное состояние
-const localAge = ref(props.age)
-const localHeight = ref(props.height)
-const localWeight = ref(props.weight)
-const localBreastSize = ref(props.breastSize)
+// Локальное состояние (конвертируем числа в строки для v-model)
+const localAge = ref(String(props.age || ''))
+const localHeight = ref(String(props.height || ''))
+const localWeight = ref(String(props.weight || ''))
+const localBreastSize = ref(String(props.breastSize || ''))
 const localHairColor = ref(props.hairColor)
 const localEyeColor = ref(props.eyeColor)
 const localAppearance = ref(props.appearance)
 const localNationality = ref(props.nationality)
 
-// Отслеживание изменений пропсов
-watch(() => props.age, (newValue) => { localAge.value = newValue })
-watch(() => props.height, (newValue) => { localHeight.value = newValue })
-watch(() => props.weight, (newValue) => { localWeight.value = newValue })
-watch(() => props.breastSize, (newValue) => { localBreastSize.value = newValue })
+// Отслеживание изменений пропсов (конвертируем числа в строки)
+watch(() => props.age, (newValue) => { localAge.value = String(newValue || '') })
+watch(() => props.height, (newValue) => { localHeight.value = String(newValue || '') })
+watch(() => props.weight, (newValue) => { localWeight.value = String(newValue || '') })
+watch(() => props.breastSize, (newValue) => { localBreastSize.value = String(newValue || '') })
 watch(() => props.hairColor, (newValue) => { localHairColor.value = newValue })
 watch(() => props.eyeColor, (newValue) => { localEyeColor.value = newValue })
 watch(() => props.appearance, (newValue) => { localAppearance.value = newValue })

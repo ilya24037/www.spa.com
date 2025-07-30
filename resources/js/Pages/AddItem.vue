@@ -30,6 +30,7 @@
             category="erotic"
             :categories="categories"
             :initial-data="initialData"
+            :use-new-architecture="true"
             @success="handleSuccess"
           />
         </div>

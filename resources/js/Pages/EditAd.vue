@@ -52,6 +52,7 @@
             :categories="[]"
             :ad-id="ad.id"
             :initial-data="ad"
+            :use-new-architecture="true"
             @success="handleSuccess"
           />
         </div>

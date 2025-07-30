@@ -109,7 +109,6 @@
 
 <script setup>
 import { computed, watch, onMounted, onUnmounted, ref } from 'vue'
-import { storeToRefs } from 'pinia'
 import ServiceCategory from './components/ServiceCategory.vue'
 import servicesConfig from './config/services.json'
 import { useServicesSelectionStore } from '@/stores/servicesSelectionStore'
@@ -131,23 +130,18 @@ const emit = defineEmits(['update:services', 'update:servicesAdditionalInfo'])
 // Определяем какую архитектуру использовать
 const useModernArchitecture = computed(() => props.useNewArchitecture)
 
-// Условно подключаем новую архитектуру только если включена
-let servicesStore = null
-let totalSelected = ref(0)
-let totalPrice = ref(0)
-let categoryStats = ref({})
+// === РЕАКТИВНАЯ АРХИТЕКТУРА ===
 
-if (useModernArchitecture.value) {
-  // === НОВАЯ АРХИТЕКТУРА МАРКЕТПЛЕЙСОВ ===
-  servicesStore = useServicesSelectionStore()
-  const storeRefs = storeToRefs(servicesStore)
-  totalSelected = storeRefs.totalSelected
-  totalPrice = storeRefs.totalPrice
-  categoryStats = storeRefs.categoryStats
-} else {
-  // === LEGACY РЕЖИМ ===
-  // Простой подсчет для старой архитектуры
-  totalSelected = computed(() => {
+// Всегда создаём store (может быть не нужен в legacy)
+const servicesStore = useServicesSelectionStore()
+
+// Реактивные computed свойства
+const totalSelected = computed(() => {
+  if (useModernArchitecture.value) {
+    // Новая архитектура - из store
+    return servicesStore.selections.size
+  } else {
+    // Legacy архитектура - простой подсчёт
     let count = 0
     Object.values(props.services || {}).forEach(categoryServices => {
       Object.values(categoryServices || {}).forEach(service => {
@@ -155,9 +149,19 @@ if (useModernArchitecture.value) {
       })
     })
     return count
-  })
-  
-  totalPrice = computed(() => {
+  }
+})
+
+const totalPrice = computed(() => {
+  if (useModernArchitecture.value) {
+    // Новая архитектура - из store
+    let sum = 0
+    servicesStore.selections.forEach(selection => {
+      sum += Number(selection.price) || 0
+    })
+    return sum
+  } else {
+    // Legacy архитектура - простой подсчёт
     let sum = 0
     Object.values(props.services || {}).forEach(categoryServices => {
       Object.values(categoryServices || {}).forEach(service => {
@@ -167,8 +171,23 @@ if (useModernArchitecture.value) {
       })
     })
     return sum
-  })
-}
+  }
+})
+
+const categoryStats = computed(() => {
+  if (useModernArchitecture.value) {
+    // Новая архитектура - из store
+    const result = new Map()
+    servicesStore.selections.forEach((data, serviceId) => {
+      const count = result.get(data.categoryId) || 0
+      result.set(data.categoryId, count + 1)
+    })
+    return result
+  } else {
+    // Legacy архитектура - пустая карта
+    return new Map()
+  }
+})
 
 // Оптимизированные обновления
 const { debouncedApiCall, createOptimisticUpdate } = useOptimizedUpdates()
@@ -187,72 +206,57 @@ const filteredCategories = computed(() => {
 
 // === ОПТИМИЗИРОВАННАЯ ОТПРАВКА ДАННЫХ ===
 
-let emitServicesUpdate
-let updateAdditionalInfo
+// === РЕАКТИВНЫЕ ФУНКЦИИ ===
 
-if (useModernArchitecture.value) {
-  // === НОВАЯ АРХИТЕКТУРА ===
-  
-  // Паттерн "Мгновенный UI + Отложенный API" (как у Ozon)
-  emitServicesUpdate = debouncedApiCall(() => {
+// Паттерн "Мгновенный UI + Отложенный API" (как у Ozon)
+const emitServicesUpdate = debouncedApiCall(() => {
+  if (useModernArchitecture.value) {
     const formattedData = servicesStore.getFormattedData()
     emit('update:services', formattedData)
-  })
-
-  // Оптимистичное обновление дополнительной информации
-  updateAdditionalInfo = createOptimisticUpdate(
-    // Мгновенное обновление UI (ничего не делаем, v-model уже обновил)
-    () => {},
-    // Отложенная отправка родителю
-    (value) => emit('update:servicesAdditionalInfo', value)
-  )
-  
-} else {
-  // === LEGACY РЕЖИМ ===
-  
-  // Простые функции без оптимизации для совместимости
-  emitServicesUpdate = () => {
+  } else {
     emit('update:services', props.services)
   }
-  
-  updateAdditionalInfo = (value) => {
-    emit('update:servicesAdditionalInfo', value)
-  }
-}
+})
+
+// Оптимистичное обновление дополнительной информации  
+const updateAdditionalInfo = createOptimisticUpdate(
+  // Мгновенное обновление UI (ничего не делаем, v-model уже обновил)
+  () => {},
+  // Отложенная отправка родителю
+  (value) => emit('update:servicesAdditionalInfo', value)
+)
 
 // === ИНИЦИАЛИЗАЦИЯ И ОЧИСТКА ===
 
 onMounted(() => {
-  if (useModernArchitecture.value && servicesStore) {
-    // Инициализируем store существующими данными
-    if (props.services && Object.keys(props.services).length > 0) {
-      servicesStore.initializeServices(props.services)
-    }
+  // Инициализируем store данными если новая архитектура
+  if (useModernArchitecture.value && props.services && Object.keys(props.services).length > 0) {
+    servicesStore.initializeServices(props.services)
   }
 })
 
 onUnmounted(() => {
-  if (useModernArchitecture.value && servicesStore) {
-    // Очищаем состояние при размонтировании (опционально)
-    // servicesStore.resetStore()
-  }
+  // Очищаем состояние при размонтировании (опционально)
+  // if (useModernArchitecture.value) {
+  //   servicesStore.resetStore()
+  // }
 })
 
 // === ОТСЛЕЖИВАНИЕ ИЗМЕНЕНИЙ ===
 
-if (useModernArchitecture.value && servicesStore) {
-  // Следим за изменениями в store с оптимизацией
-  watch(() => servicesStore.selections.size, () => {
+// Следим за изменениями в store для новой архитектуры
+watch(() => servicesStore.selections.size, () => {
+  if (useModernArchitecture.value) {
     emitServicesUpdate()
-  }, { flush: 'post' })
+  }
+}, { flush: 'post' })
 
-  // Следим за изменениями props (если данные пришли позже)
-  watch(() => props.services, (newServices) => {
-    if (newServices && Object.keys(newServices).length > 0) {
-      servicesStore.initializeServices(newServices)
-    }
-  }, { deep: true, immediate: false })
-}
+// Следим за изменениями props для новой архитектуры
+watch(() => props.services, (newServices) => {
+  if (useModernArchitecture.value && newServices && Object.keys(newServices).length > 0) {
+    servicesStore.initializeServices(newServices)
+  }
+}, { deep: true, immediate: false })
 
 // === ДЕЙСТВИЯ ===
 
@@ -260,7 +264,7 @@ if (useModernArchitecture.value && servicesStore) {
  * Очистка всех услуг (совместимо с обеими архитектурами)
  */
 const clearAllServices = () => {
-  if (useModernArchitecture.value && servicesStore) {
+  if (useModernArchitecture.value) {
     // Новая архитектура
     servicesStore.clearAllServices()
     emitServicesUpdate()

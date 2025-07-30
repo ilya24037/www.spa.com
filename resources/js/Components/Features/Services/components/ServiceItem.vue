@@ -48,6 +48,9 @@
 import { computed } from 'vue'
 import { useOptimizedUpdates } from '@/Composables/useOptimizedUpdates'
 
+// Получаем оптимизированные функции
+const { createDebouncedUpdate } = useOptimizedUpdates()
+
 const props = defineProps({
   service: {
     type: Object,
