@@ -131,9 +131,12 @@
 
             <!-- 12.2 Видео -->
             <div class="form-group-section">
-                <VideosSection 
-                    v-model:videos="form.videos" 
-                    :errors="errors"
+                <VideoUploader 
+                    v-model="form.video" 
+                    :maxFileSize="50 * 1024 * 1024"
+                    :uploading="uploadingVideo"
+                    :uploadProgress="videoUploadProgress"
+                    @error="handleVideoError"
                 />
             </div>
 
@@ -196,7 +199,7 @@ import DescriptionSection from './Sections/DescriptionSection.vue'
 import ParametersSection from './Sections/ParametersSection.vue'
 import PromoSection from './Sections/PromoSection.vue'
 import PhotoUploader from '@/Components/Features/PhotoUploader/index.vue'
-import VideosSection from './Sections/VideosSection.vue'
+import VideoUploader from '../Features/PhotoUploader/VideoUploader.vue'
 import GeoSection from './Sections/GeoSection.vue'
 import ContactsSection from './Sections/ContactsSection.vue'
 
@@ -251,6 +254,10 @@ const validationErrors = ref({})
 // Состояние загрузки фото
 const uploading = ref(false)
 const uploadProgress = ref(0)
+
+// Состояние загрузки видео
+const uploadingVideo = ref(false)
+const videoUploadProgress = ref(0)
 
 // Определяем обязательные поля
 const requiredFields = {
@@ -599,6 +606,11 @@ const handlePublish = async () => {
 // Обработчики фотографий
 const handlePhotoError = (error) => {
     console.error('Ошибка фото:', error)
+}
+
+// Обработчик ошибок видео
+const handleVideoError = (error) => {
+    console.error('Ошибка видео:', error)
 }
 
 // Добавляем watcher для отслеживания изменений фото
