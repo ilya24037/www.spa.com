@@ -14,6 +14,8 @@ if ($ad) {
     echo "Title: " . $ad->title . "\n";
     echo "Services: " . json_encode($ad->services) . "\n";
     echo "Services Additional Info: " . ($ad->services_additional_info ?: 'empty') . "\n";
+    echo "Schedule: " . json_encode($ad->schedule) . "\n";
+    echo "Schedule Notes: " . ($ad->schedule_notes ?: 'empty') . "\n";
     echo "Status: " . $ad->status . "\n";
     echo "Updated: " . $ad->updated_at . "\n";
     
@@ -22,6 +24,10 @@ if ($ad) {
     echo "service_provider: " . json_encode($ad->service_provider) . "\n";
     echo "services: " . json_encode($ad->services) . "\n";
     echo "services_additional_info: " . ($ad->services_additional_info ?: 'empty') . "\n";
+    
+    echo "\n=== ВСЕ ПОЛЯ SCHEDULE ===\n";
+    echo "schedule: " . json_encode($ad->schedule) . "\n";
+    echo "schedule_notes: " . ($ad->schedule_notes ?: 'empty') . "\n";
 } else {
     echo "Черновик ID 137 не найден\n";
 } 

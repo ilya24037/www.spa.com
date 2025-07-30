@@ -54,8 +54,7 @@ const props = defineProps({
     errors: { type: Object, default: () => ({}) }
 })
 
-// Отладка: проверяем что приходит в schedule
-console.log('ScheduleSection received schedule:', props.schedule, 'type:', typeof props.schedule)
+// Schedule section загружен
 const emit = defineEmits(['update:schedule', 'update:scheduleNotes'])
 
 const days = [
@@ -80,7 +79,22 @@ const initSchedule = () => {
     return initial
 }
 
-const localSchedule = reactive({ ...initSchedule(), ...props.schedule })
+// Преобразуем schedule в объект если это строка
+const getScheduleObject = () => {
+    let scheduleObj = {}
+    if (typeof props.schedule === 'string') {
+        try {
+            scheduleObj = JSON.parse(props.schedule) || {}
+        } catch (e) {
+            scheduleObj = {}
+        }
+    } else if (props.schedule && typeof props.schedule === 'object') {
+        scheduleObj = props.schedule
+    }
+    return scheduleObj
+}
+
+const localSchedule = reactive({ ...initSchedule(), ...getScheduleObject() })
 const localNotes = ref(props.scheduleNotes || '')
 
 // Флаг для предотвращения рекурсивных обновлений
@@ -89,9 +103,10 @@ let isUpdatingFromProps = false
 watch(() => props.schedule, (val) => {
     if (val && !isUpdatingFromProps) {
         isUpdatingFromProps = true
+        const scheduleObj = getScheduleObject()
         days.forEach(day => {
-            if (val[day.id]) {
-                localSchedule[day.id] = { ...val[day.id] }
+            if (scheduleObj[day.id]) {
+                localSchedule[day.id] = { ...scheduleObj[day.id] }
             }
         })
         isUpdatingFromProps = false

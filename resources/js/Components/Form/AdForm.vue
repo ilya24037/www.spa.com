@@ -474,6 +474,9 @@ const handleSaveDraft = async () => {
         // ВАЖНО: Добавляем поля услуг
         services: form.services,
         services_additional_info: form.services_additional_info,
+        // ВАЖНО: Добавляем поля графика работы
+        schedule: form.schedule,
+        schedule_notes: form.schedule_notes,
         // ВАЖНО: Добавляем физические параметры
         age: form.age,
         height: form.height,
