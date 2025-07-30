@@ -76,7 +76,6 @@ const initializeValue = () => {
 
 // Проверяем выбран ли элемент
 const isSelected = (value) => {
-  console.log('CheckboxGroup isSelected: value=', value, 'modelValue=', props.modelValue, 'includes=', props.modelValue.includes(value))
   return props.modelValue.includes(value)
 }
 

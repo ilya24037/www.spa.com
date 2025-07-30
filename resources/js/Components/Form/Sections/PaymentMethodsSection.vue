@@ -20,14 +20,10 @@ const props = defineProps({
 
 const emit = defineEmits(['update:paymentMethods'])
 
-console.log('PaymentMethodsSection INIT: props.paymentMethods =', props.paymentMethods)
-const localPaymentMethods = ref(Array.isArray(props.paymentMethods) ? [...props.paymentMethods] : ['cash'])
-console.log('PaymentMethodsSection INIT: localPaymentMethods =', localPaymentMethods.value)
+const localPaymentMethods = ref([...props.paymentMethods])
 
 watch(() => props.paymentMethods, (val) => {
-  console.log('PaymentMethodsSection WATCH: new props.paymentMethods =', val)
-  localPaymentMethods.value = Array.isArray(val) ? [...val] : ['cash']
-  console.log('PaymentMethodsSection WATCH: updated localPaymentMethods =', localPaymentMethods.value)
+  localPaymentMethods.value = [...val]
 })
 
 // Опции для CheckboxGroup
@@ -37,7 +33,6 @@ const paymentOptions = computed(() => [
 ])
 
 const emitPaymentMethods = () => {
-  console.log('PaymentMethodsSection EMIT: emitting', [...localPaymentMethods.value])
   emit('update:paymentMethods', [...localPaymentMethods.value])
 }
 </script>

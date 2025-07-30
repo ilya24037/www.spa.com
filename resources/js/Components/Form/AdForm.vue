@@ -697,10 +697,9 @@ watch(() => form.video, async (newVideo, oldVideo) => {
     }
 }, { deep: true })
 
-// Отслеживаем изменения payment_methods для отладки
+// Отслеживаем изменения payment_methods (без trace для производительности)
 watch(() => form.payment_methods, (newVal, oldVal) => {
   console.log('AdForm WATCH: form.payment_methods changed from', oldVal, 'to', newVal)
-  console.trace('AdForm WATCH: payment_methods change stack trace')
 }, { deep: true })
 
 // Отладка при монтировании
