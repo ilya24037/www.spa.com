@@ -7,6 +7,7 @@ use Inertia\Inertia;
 use App\Models\Ad;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class AdController extends Controller
 {
@@ -90,7 +91,8 @@ class AdController extends Controller
             'nationality' => $request->nationality ?: null,
             'has_girlfriend' => $request->boolean('has_girlfriend', false),
             'photos' => is_array($request->photos) ? json_encode($request->photos) : json_encode([]),
-            'video' => $request->video,
+            // Видео - сохраняем полную информацию
+            'video' => $request->video ? json_encode($request->video) : null,
             'show_photos_in_gallery' => $request->boolean('show_photos_in_gallery', true),
             'allow_download_photos' => $request->boolean('allow_download_photos', false),
             'watermark_photos' => $request->boolean('watermark_photos', true),
@@ -133,6 +135,7 @@ class AdController extends Controller
             'is_starting_price' => $request->is_starting_price ? true : false,
             'pricing_data' => !empty($request->pricing_data) ? json_encode($request->pricing_data) : null,
             'contacts_per_hour' => $request->contacts_per_hour ?: null,
+            'payment_methods' => !empty($request->payment_methods) ? json_encode($request->payment_methods) : json_encode(['cash']),
             'discount' => $request->discount ? (int)$request->discount : null,
             'new_client_discount' => $request->new_client_discount ?: null,
             'gift' => $request->gift ?: null,
@@ -153,7 +156,8 @@ class AdController extends Controller
             'nationality' => $request->nationality ?: null,
             'has_girlfriend' => $request->boolean('has_girlfriend', false),
             'photos' => is_array($request->photos) ? json_encode($request->photos) : json_encode([]),
-            'video' => $request->video,
+            // Видео - сохраняем полную информацию
+            'video' => $request->video ? json_encode($request->video) : null,
             'show_photos_in_gallery' => $request->boolean('show_photos_in_gallery', true),
             'allow_download_photos' => $request->boolean('allow_download_photos', false),
             'watermark_photos' => $request->boolean('watermark_photos', true),
@@ -275,6 +279,7 @@ class AdController extends Controller
                 'is_starting_price' => is_array($request->is_starting_price) ? json_encode($request->is_starting_price) : '[]',
                 'pricing_data' => !empty($request->pricing_data) ? json_encode($request->pricing_data) : null,
                 'contacts_per_hour' => $request->contacts_per_hour ?: null,
+                'payment_methods' => !empty($request->payment_methods) ? json_encode($request->payment_methods) : json_encode(['cash']),
                 'discount' => $request->discount ?: null,
                 'gift' => $request->gift ?: null,
                 // Услуги
@@ -295,7 +300,8 @@ class AdController extends Controller
                 'nationality' => $request->nationality ?: null,
                 'has_girlfriend' => $request->boolean('has_girlfriend', false),
                 'photos' => is_array($request->photos) ? json_encode($request->photos) : json_encode([]),
-                'video' => $request->video ?: null,
+                // Видео - сохраняем только ID, если передан
+                'video' => $request->video_id ? json_encode(['id' => $request->video_id]) : null,
                 'show_photos_in_gallery' => $request->boolean('show_photos_in_gallery', true),
                 'allow_download_photos' => $request->boolean('allow_download_photos', false),
                 'watermark_photos' => $request->boolean('watermark_photos', true),
@@ -327,12 +333,40 @@ class AdController extends Controller
         // Преобразуем JSON поля в массивы, если они строки
         $jsonFields = ['clients', 'service_location', 'outcall_locations', 'service_provider', 'is_starting_price', 
                       'photos', 'video', 'show_photos_in_gallery', 'allow_download_photos', 'watermark_photos', 
-                      'custom_travel_areas', 'working_days', 'working_hours', 'features', 'pricing_data', 'services'];
+                      'custom_travel_areas', 'working_days', 'working_hours', 'features', 'pricing_data', 'services', 'schedule', 'payment_methods'];
         
         foreach ($jsonFields as $field) {
             if (isset($adData[$field]) && is_string($adData[$field])) {
                 $adData[$field] = json_decode($adData[$field], true) ?? [];
             }
+        }
+        
+        // Преобразуем payment_methods в правильный массив
+        if (!empty($adData['payment_methods'])) {
+            // Если это массив - убеждаемся что индексы правильные
+            if (is_array($adData['payment_methods'])) {
+                // Проверяем не объект ли это {cash: true, transfer: false}
+                if (isset($adData['payment_methods']['cash']) || isset($adData['payment_methods']['transfer'])) {
+                    // Старый объект формата - преобразуем в массив
+                    $methods = [];
+                    if (!empty($adData['payment_methods']['cash'])) $methods[] = 'cash';
+                    if (!empty($adData['payment_methods']['transfer'])) $methods[] = 'transfer';
+                    $adData['payment_methods'] = count($methods) > 0 ? $methods : ['cash'];
+                } else {
+                    // Уже массив - очищаем от пустых значений и перестраиваем индексы
+                    $adData['payment_methods'] = array_values(array_filter($adData['payment_methods'], function($value) {
+                        return !empty($value) && in_array($value, ['cash', 'transfer']);
+                    }));
+                    if (empty($adData['payment_methods'])) {
+                        $adData['payment_methods'] = ['cash'];
+                    }
+                }
+            }
+            else {
+                $adData['payment_methods'] = ['cash'];
+            }
+        } else {
+            $adData['payment_methods'] = ['cash'];
         }
 
         return Inertia::render('EditAd', [
@@ -356,7 +390,7 @@ class AdController extends Controller
         // Преобразуем JSON поля в массивы, если они строки
         $jsonFields = ['clients', 'service_location', 'outcall_locations', 'service_provider', 'is_starting_price', 
                       'photos', 'video', 'show_photos_in_gallery', 'allow_download_photos', 'watermark_photos', 
-                      'custom_travel_areas', 'working_days', 'working_hours', 'features', 'pricing_data', 'services', 'schedule'];
+                      'custom_travel_areas', 'working_days', 'working_hours', 'features', 'pricing_data', 'services', 'schedule', 'payment_methods'];
         
         foreach ($jsonFields as $field) {
             if (isset($adData[$field]) && is_string($adData[$field])) {
@@ -367,6 +401,34 @@ class AdController extends Controller
         // Убеждаемся, что price всегда строка
         if (isset($adData['price'])) {
             $adData['price'] = (string) $adData['price'];
+        }
+        
+        // Преобразуем payment_methods в правильный массив
+        if (!empty($adData['payment_methods'])) {
+            // Если это массив - убеждаемся что индексы правильные
+            if (is_array($adData['payment_methods'])) {
+                // Проверяем не объект ли это {cash: true, transfer: false}
+                if (isset($adData['payment_methods']['cash']) || isset($adData['payment_methods']['transfer'])) {
+                    // Старый объект формата - преобразуем в массив
+                    $methods = [];
+                    if (!empty($adData['payment_methods']['cash'])) $methods[] = 'cash';
+                    if (!empty($adData['payment_methods']['transfer'])) $methods[] = 'transfer';
+                    $adData['payment_methods'] = count($methods) > 0 ? $methods : ['cash'];
+                } else {
+                    // Уже массив - очищаем от пустых значений и перестраиваем индексы
+                    $adData['payment_methods'] = array_values(array_filter($adData['payment_methods'], function($value) {
+                        return !empty($value) && in_array($value, ['cash', 'transfer']);
+                    }));
+                    if (empty($adData['payment_methods'])) {
+                        $adData['payment_methods'] = ['cash'];
+                    }
+                }
+            }
+            else {
+                $adData['payment_methods'] = ['cash'];
+            }
+        } else {
+            $adData['payment_methods'] = ['cash'];
         }
 
         return response()->json($adData);
@@ -534,7 +596,7 @@ class AdController extends Controller
         $adData = $ad->toArray();
         
         // Убеждаемся что JSON поля декодированы в массивы
-        $jsonFields = ['clients', 'service_location', 'outcall_locations', 'service_provider', 'photos', 'video', 'services', 'pricing_data', 'features', 'schedule'];
+        $jsonFields = ['clients', 'service_location', 'outcall_locations', 'service_provider', 'photos', 'video', 'services', 'pricing_data', 'features', 'schedule', 'payment_methods'];
         
         foreach ($jsonFields as $field) {
             if (isset($adData[$field]) && is_string($adData[$field])) {
@@ -548,6 +610,34 @@ class AdController extends Controller
         // Убеждаемся, что price всегда строка
         if (isset($adData['price'])) {
             $adData['price'] = (string) $adData['price'];
+        }
+        
+        // Преобразуем payment_methods в правильный массив
+        if (!empty($adData['payment_methods'])) {
+            // Если это массив - убеждаемся что индексы правильные
+            if (is_array($adData['payment_methods'])) {
+                // Проверяем не объект ли это {cash: true, transfer: false}
+                if (isset($adData['payment_methods']['cash']) || isset($adData['payment_methods']['transfer'])) {
+                    // Старый объект формата - преобразуем в массив
+                    $methods = [];
+                    if (!empty($adData['payment_methods']['cash'])) $methods[] = 'cash';
+                    if (!empty($adData['payment_methods']['transfer'])) $methods[] = 'transfer';
+                    $adData['payment_methods'] = count($methods) > 0 ? $methods : ['cash'];
+                } else {
+                    // Уже массив - очищаем от пустых значений и перестраиваем индексы
+                    $adData['payment_methods'] = array_values(array_filter($adData['payment_methods'], function($value) {
+                        return !empty($value) && in_array($value, ['cash', 'transfer']);
+                    }));
+                    if (empty($adData['payment_methods'])) {
+                        $adData['payment_methods'] = ['cash'];
+                    }
+                }
+            }
+            else {
+                $adData['payment_methods'] = ['cash'];
+            }
+        } else {
+            $adData['payment_methods'] = ['cash'];
         }
 
         // Показываем страницу черновика
@@ -579,5 +669,46 @@ class AdController extends Controller
         // Перенаправляем на страницу "Мои объявления"
         return redirect()->route('my-ads.index')
             ->with('success', 'Черновик успешно удален');
+    }
+
+    /**
+     * Загрузить видео для объявления
+     */
+    public function uploadVideo(Request $request)
+    {
+        $request->validate([
+            'video' => 'required|file|mimes:mp4,webm,avi,mov|max:102400', // 100MB
+        ]);
+
+        try {
+            // Создаем уникальное имя файла
+            $video = $request->file('video');
+            $filename = 'video_' . time() . '_' . Str::random(10) . '.' . $video->getClientOriginalExtension();
+            
+            // Сохраняем в публичную папку
+            $path = $video->storeAs('public/videos', $filename);
+            
+            // Создаем URL для доступа к видео
+            $videoUrl = asset('storage/videos/' . $filename);
+            
+            // Возвращаем информацию о загруженном видео
+            return response()->json([
+                'success' => true,
+                'video' => [
+                    'id' => 'video_' . time() . '_' . Str::random(5),
+                    'filename' => $filename,
+                    'path' => $path,
+                    'url' => $videoUrl,
+                    'size' => $video->getSize(),
+                    'type' => $video->getMimeType(),
+                    'name' => $video->getClientOriginalName()
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Ошибка загрузки видео: ' . $e->getMessage()
+            ], 500);
+        }
     }
 } 

@@ -349,6 +349,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/ads', [AdController::class, 'store'])->name('ads.store');
     Route::post('/ads/draft', [AdController::class, 'storeDraft'])->name('ads.draft');
     Route::post('/ads/publish', [AdController::class, 'publish'])->name('ads.publish');
+    Route::post('/ads/upload-video', [AdController::class, 'uploadVideo'])->name('ads.upload-video');
     Route::get('/ads/{ad}', [AdController::class, 'show'])->name('ads.show');
     Route::get('/ads/{ad}/edit', [AdController::class, 'edit'])->name('ads.edit');
     

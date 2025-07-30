@@ -78,7 +78,15 @@
                 />
             </div>
 
-            <!-- 8. Акции -->
+            <!-- 8. Способы оплаты -->
+            <div class="form-group-section">
+                <PaymentMethodsSection 
+                    v-model:paymentMethods="form.payment_methods" 
+                    :errors="errors"
+                />
+            </div>
+
+            <!-- 9. Акции -->
             <div class="form-group-section">
                 <h2 class="form-group-title">Акции</h2>
                 <PromoSection 
@@ -192,6 +200,7 @@ import { publishAd } from '@/utils/adApi'
 // Импорты секций формы
 import ServiceProviderSection from './Sections/ServiceProviderSection.vue'
 import ClientsSection from './Sections/ClientsSection.vue'
+import PaymentMethodsSection from './Sections/PaymentMethodsSection.vue'
 import LocationSection from './Sections/LocationSection.vue'
 import WorkFormatSection from './Sections/WorkFormatSection.vue'
 import PriceSection from './Sections/PriceSection.vue'
@@ -246,6 +255,8 @@ const {
     adId: props.adId,
     autosaveEnabled: false
 })
+
+
 
 // Собственное состояние для сохранения
 const saving = ref(false)
@@ -413,6 +424,8 @@ const saveDraft = async () => {
     try {
         saving.value = true
         
+        console.log('AdForm SAVING: form.payment_methods =', form.payment_methods)
+        
         // Отправляем данные на сервер для сохранения черновика
         // Фильтруем только поддерживаемые поля
         const draftData = {
@@ -437,8 +450,14 @@ const saveDraft = async () => {
             contact_method: form.contact_method,
             // График работы
             schedule: form.schedule,
-            schedule_notes: form.schedule_notes
+            schedule_notes: form.schedule_notes,
+            // Способы оплаты
+            payment_methods: form.payment_methods,
+            // Видео - отправляем полную информацию
+            video: form.video || null
         }
+        
+        console.log('AdForm DRAFT DATA: payment_methods =', draftData.payment_methods)
         
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
         if (!csrfToken) {
@@ -485,6 +504,7 @@ const handleSaveDraft = async () => {
     
     saving.value = true
     
+    console.log('AdForm SAVING: form.payment_methods =', form.payment_methods)
     console.log('form.services before save:', form.services)
     
     const draftData = {
@@ -509,6 +529,7 @@ const handleSaveDraft = async () => {
         is_starting_price: form.is_starting_price,
         pricing_data: form.pricing_data,
         contacts_per_hour: form.contacts_per_hour,
+        payment_methods: form.payment_methods,
         discount: form.discount,
         new_client_discount: form.new_client_discount,
         gift: form.gift,
@@ -517,7 +538,8 @@ const handleSaveDraft = async () => {
         phone: form.phone,
         contact_method: form.contact_method,
         photos: form.photos,
-        video: form.video,
+        // Видео - отправляем полную информацию
+        video: form.video || null,
         show_photos_in_gallery: form.show_photos_in_gallery,
         allow_download_photos: form.allow_download_photos,
         watermark_photos: form.watermark_photos,
@@ -538,6 +560,7 @@ const handleSaveDraft = async () => {
         nationality: form.nationality
     }
     
+    console.log('AdForm DRAFT DATA: payment_methods =', draftData.payment_methods)
     console.log('Отправляемые данные:', draftData)
     console.log('ID в данных:', draftData.id)
     
@@ -613,10 +636,71 @@ const handleVideoError = (error) => {
     console.error('Ошибка видео:', error)
 }
 
+// Загрузка видео на сервер
+const uploadVideoFile = async (videoData) => {
+    if (!videoData?.file) return null
+    
+    const formData = new FormData()
+    formData.append('video', videoData.file)
+    
+    try {
+        uploadingVideo.value = true
+        videoUploadProgress.value = 0
+        
+        const response = await fetch('/ads/upload-video', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            },
+            body: formData
+        })
+        
+        if (response.ok) {
+            const result = await response.json()
+            // Обновляем form.video с информацией о загруженном видео
+            form.video = {
+                ...videoData,
+                id: result.video.id,
+                serverPath: result.video.path,
+                url: result.video.url,
+                filename: result.video.filename,
+                name: result.video.name || videoData.name,
+                size: result.video.size || videoData.size
+            }
+            return result.video
+        } else {
+            throw new Error('Ошибка загрузки видео')
+        }
+    } catch (error) {
+        console.error('Upload error:', error)
+        handleVideoError(error.message)
+        return null
+    } finally {
+        uploadingVideo.value = false
+        videoUploadProgress.value = 0
+    }
+}
+
 // Добавляем watcher для отслеживания изменений фото
 watch(() => form.photos, (newPhotos) => {
     console.log('Фотографии изменились:', newPhotos?.length || 0, 'тип:', typeof newPhotos, 'массив?', Array.isArray(newPhotos))
     console.log('Содержимое photos:', newPhotos)
+}, { deep: true })
+
+// Watcher для автоматической загрузки видео при выборе
+watch(() => form.video, async (newVideo, oldVideo) => {
+    // Если добавлено новое видео (есть файл, но нет id)
+    if (newVideo?.file && !newVideo?.id && newVideo !== oldVideo) {
+        console.log('Загружаем новое видео на сервер...')
+        await uploadVideoFile(newVideo)
+    }
+}, { deep: true })
+
+// Отслеживаем изменения payment_methods для отладки
+watch(() => form.payment_methods, (newVal, oldVal) => {
+  console.log('AdForm WATCH: form.payment_methods changed from', oldVal, 'to', newVal)
+  console.trace('AdForm WATCH: payment_methods change stack trace')
 }, { deep: true })
 
 // Отладка при монтировании

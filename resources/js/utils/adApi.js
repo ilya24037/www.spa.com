@@ -264,6 +264,7 @@ export const prepareFormData = (form) => {
     is_starting_price: Array.isArray(form.is_starting_price) ? form.is_starting_price : [],
     pricing_data: form.pricing_data || {},
     contacts_per_hour: form.contacts_per_hour || '',
+    payment_methods: form.payment_methods || ['cash'],
     discount: form.discount || '',
     new_client_discount: form.new_client_discount || '',
     gift: form.gift || '',
@@ -292,7 +293,15 @@ export const prepareFormData = (form) => {
     
     // Медиа
     photos: Array.isArray(form.photos) ? form.photos : [],
-    video: form.video || null
+    // Видео - отправляем полную информацию (без файла)
+    video: form.video ? {
+      id: form.video.id,
+      filename: form.video.filename,
+      url: form.video.url || form.video.preview,
+      size: form.video.size,
+      name: form.video.name,
+      serverPath: form.video.serverPath
+    } : null
   }
   
   // Для черновика оставляем все поля, даже пустые

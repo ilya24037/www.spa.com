@@ -30,7 +30,7 @@
       <div v-if="video" class="video-preview">
         <div class="video-container">
           <video 
-            :src="video.preview"
+            :src="video.preview || video.url"
             class="video-element"
             controls
             preload="metadata"
@@ -52,8 +52,8 @@
         
         <!-- Информация о видео -->
         <div class="video-info">
-          <p class="video-name">{{ video.name }}</p>
-          <p class="video-size">{{ formatFileSize(video.size) }}</p>
+          <p class="video-name">{{ video.name || video.filename || 'Видео' }}</p>
+          <p class="video-size">{{ formatFileSize(video.size || 0) }}</p>
         </div>
       </div>
 
@@ -67,7 +67,7 @@
             </svg>
           </div>
           <p class="upload-text">Перетащите видео сюда или нажмите для выбора</p>
-          <p class="upload-hint">Максимум 50MB, формат MP4, AVI</p>
+          <p class="upload-hint">Максимум 100MB, формат MP4, AVI</p>
         </div>
       </div>
 
@@ -89,7 +89,7 @@
     <!-- Подсказки -->
     <div class="upload-hints">
       <p class="hint-text">Добавьте видео презентацию ваших услуг</p>
-      <p class="hint-text secondary">Добавьте видео обзор до 50MB</p>
+      <p class="hint-text secondary">Добавьте видео обзор до 100MB</p>
       <p class="hint-text secondary">Первая фотография будет использоваться как превью</p>
     </div>
 
@@ -120,7 +120,7 @@ const props = defineProps({
   },
   maxFileSize: {
     type: Number,
-    default: 50 * 1024 * 1024 // 50MB
+    default: 100 * 1024 * 1024 // 100MB
   },
   uploading: {
     type: Boolean,

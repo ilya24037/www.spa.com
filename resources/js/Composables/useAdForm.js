@@ -37,8 +37,9 @@ export function useAdForm(initialData = {}, options = {}) {
             price: String(initialData.price || ''),
         price_unit: initialData.price_unit || 'session',
         is_starting_price: initialData.is_starting_price || false,
-                pricing_data: initialData.pricing_data || {},
-        contacts_per_hour: initialData.contacts_per_hour || '',
+                    pricing_data: initialData.pricing_data || {},
+    contacts_per_hour: initialData.contacts_per_hour || '',
+    payment_methods: initialData.payment_methods || ['cash'],
 
         // Физические параметры
     age: initialData.age || '',

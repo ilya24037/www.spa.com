@@ -156,11 +156,13 @@
         <option value="6">безгранично</option>
       </select>
     </div>
+    
+
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
 
 const props = defineProps({
   price: { type: [String, Number], default: '' },
@@ -191,6 +193,8 @@ const expressPrice = ref(props.pricingData?.express || '')
 const expressDisplayValue = ref(props.pricingData?.express ? props.pricingData.express + ' ₽' : '')
 const contactsPerHour = ref(props.contactsPerHour || '')
 
+
+
 // Display values для всех полей цен
 const apartmentHourDisplay = ref(props.pricingData?.apartment?.hour ? props.pricingData.apartment.hour + ' ₽' : '')
 const apartmentTwoHoursDisplay = ref(props.pricingData?.apartment?.two_hours ? props.pricingData.apartment.two_hours + ' ₽' : '')
@@ -219,6 +223,8 @@ watch(() => props.pricingData, (newVal) => {
 watch(() => props.contactsPerHour, (val) => {
   contactsPerHour.value = val || ''
 })
+
+
 
 // Универсальная функция для установки курсора перед ₽
 const setPriceCursorPosition = (element) => {
@@ -469,6 +475,7 @@ const emitAll = () => {
   
   emit('update:pricingData', pricingData)
   emit('update:contactsPerHour', contactsPerHour.value)
+  // payment_methods эмитятся отдельно через handlePaymentChange
   
   // Совместимость со старой структурой - используем первую найденную цену как основную
   const firstPrice = prices.apartment.hour || prices.outcall.hour || expressPrice.value
@@ -675,4 +682,6 @@ const emitAll = () => {
   border-color: #007bff;
   box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
+
+
 </style> 

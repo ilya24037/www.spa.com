@@ -69,12 +69,14 @@ const emit = defineEmits(['update:modelValue'])
 // Инициализация массива (из ClientsSection)
 const initializeValue = () => {
   if (!Array.isArray(props.modelValue)) {
+    console.log('CheckboxGroup: modelValue не массив, исправляем:', props.modelValue)
     emit('update:modelValue', [])
   }
 }
 
 // Проверяем выбран ли элемент
 const isSelected = (value) => {
+  console.log('CheckboxGroup isSelected: value=', value, 'modelValue=', props.modelValue, 'includes=', props.modelValue.includes(value))
   return props.modelValue.includes(value)
 }
 
@@ -94,11 +96,8 @@ const toggleOption = (value) => {
   emit('update:modelValue', currentValue)
 }
 
-// Инициализация
+// Инициализация только один раз
 initializeValue()
-watchEffect(() => {
-  initializeValue()
-})
 </script>
 
 <style scoped>
