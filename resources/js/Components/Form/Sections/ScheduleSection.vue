@@ -49,10 +49,13 @@
 import { ref, reactive, watch, computed } from 'vue'
 
 const props = defineProps({
-    schedule: { type: Object, default: () => ({}) },
+    schedule: { type: [Object, String], default: () => ({}) },
     scheduleNotes: { type: String, default: '' },
     errors: { type: Object, default: () => ({}) }
 })
+
+// Отладка: проверяем что приходит в schedule
+console.log('ScheduleSection received schedule:', props.schedule, 'type:', typeof props.schedule)
 const emit = defineEmits(['update:schedule', 'update:scheduleNotes'])
 
 const days = [
