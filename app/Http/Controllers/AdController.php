@@ -358,15 +358,15 @@ class AdController extends Controller
                         return !empty($value) && in_array($value, ['cash', 'transfer']);
                     }));
                     if (empty($adData['payment_methods'])) {
-                        $adData['payment_methods'] = ['cash'];
+                        $adData['payment_methods'] = [];
                     }
                 }
             }
             else {
-                $adData['payment_methods'] = ['cash'];
+                $adData['payment_methods'] = [];
             }
         } else {
-            $adData['payment_methods'] = ['cash'];
+            $adData['payment_methods'] = [];
         }
 
         return Inertia::render('EditAd', [
@@ -420,15 +420,15 @@ class AdController extends Controller
                         return !empty($value) && in_array($value, ['cash', 'transfer']);
                     }));
                     if (empty($adData['payment_methods'])) {
-                        $adData['payment_methods'] = ['cash'];
+                        $adData['payment_methods'] = [];
                     }
                 }
             }
             else {
-                $adData['payment_methods'] = ['cash'];
+                $adData['payment_methods'] = [];
             }
         } else {
-            $adData['payment_methods'] = ['cash'];
+            $adData['payment_methods'] = [];
         }
 
         return response()->json($adData);
@@ -629,15 +629,15 @@ class AdController extends Controller
                         return !empty($value) && in_array($value, ['cash', 'transfer']);
                     }));
                     if (empty($adData['payment_methods'])) {
-                        $adData['payment_methods'] = ['cash'];
+                        $adData['payment_methods'] = [];
                     }
                 }
             }
             else {
-                $adData['payment_methods'] = ['cash'];
+                $adData['payment_methods'] = [];
             }
         } else {
-            $adData['payment_methods'] = ['cash'];
+            $adData['payment_methods'] = [];
         }
 
         // Показываем страницу черновика

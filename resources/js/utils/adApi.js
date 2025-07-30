@@ -264,7 +264,7 @@ export const prepareFormData = (form) => {
     is_starting_price: Array.isArray(form.is_starting_price) ? form.is_starting_price : [],
     pricing_data: form.pricing_data || {},
     contacts_per_hour: form.contacts_per_hour || '',
-    payment_methods: form.payment_methods || ['cash'],
+    payment_methods: form.payment_methods || [],
     discount: form.discount || '',
     new_client_discount: form.new_client_discount || '',
     gift: form.gift || '',
