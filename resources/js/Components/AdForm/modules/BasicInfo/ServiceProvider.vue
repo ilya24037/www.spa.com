@@ -65,6 +65,16 @@ const providerOptions = [
     value: 'man',
     label: 'Мужчина',
     description: 'Услуги оказывает мужчина'
+  },
+  {
+    value: 'couple',
+    label: 'Пара',
+    description: 'Услуги оказывает пара (мужчина + женщина)'
+  },
+  {
+    value: 'team',
+    label: 'Команда',
+    description: 'Услуги оказывает команда специалистов'
   }
 ]
 

@@ -111,7 +111,7 @@
           :errors="errors"
         />
 
-        <PaymentMethodsModule
+        <PaymentModule
           v-model:payment-methods="form.payment_methods"
           :errors="errors"
         />
@@ -181,10 +181,10 @@ import ScheduleModule from './modules/Commercial/Schedule.vue'
 // Модули локации (НОВАЯ АРХИТЕКТУРА)
 import LocationModule from './modules/Location/Location.vue'
 import GeoModule from './modules/Location/Geography.vue'
-import ContactsModule from './modules/Location/Contacts.vue'
+import ContactsModule from './features/Location/Contacts/index.vue'
 
-// Модули оплаты (НОВАЯ АРХИТЕКТУРА)
-import PaymentMethodsModule from './modules/Payment/PaymentMethods.vue'
+// Модули оплаты (НОВАЯ АРХИТЕКТУРА - РЕФАКТОРЕННЫЙ)
+import PaymentModule from './features/Commercial/Payment/index.vue'
 
 // Модули базовой информации
 import ClientsModule from './modules/BasicInfo/Clients.vue'
