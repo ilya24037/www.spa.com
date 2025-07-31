@@ -2,57 +2,18 @@
 
 namespace App\Models;
 
-use App\Enums\UserRole;
-use App\Enums\UserStatus;
-use App\Traits\HasUserProfile;
-use App\Traits\HasUserRoles;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
+use App\Domain\User\Models\User as BaseUser;
+use App\Domain\User\Traits\HasRoles;
+use App\Domain\User\Traits\HasBookings;
+use App\Domain\User\Traits\HasMasterProfile;
 
-class User extends Authenticatable implements MustVerifyEmail
+/**
+ * Legacy User model для обратной совместимости
+ * Использует новую доменную структуру
+ */
+class User extends BaseUser
 {
-    use HasApiTokens, HasFactory, Notifiable, HasUserProfile, HasUserRoles;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'email',
-        'password',
-        'role',
-        'status',
-        'email_verified_at',
-    ];
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'role' => UserRole::class,
-            'status' => UserStatus::class,
-        ];
-    }
+    use HasRoles, HasBookings, HasMasterProfile;
 
     /**
      * Связь с объявлениями
@@ -63,37 +24,12 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Профиль мастера
-     */
-    public function masterProfile()
-    {
-        return $this->hasOne(MasterProfile::class);
-    }
-
-    /**
-     * Профили мастера (множественное число для Dashboard)
-     * Некоторые мастера могут иметь несколько профилей/анкет
-     */
-    public function masterProfiles()
-    {
-        return $this->hasMany(MasterProfile::class);
-    }
-
-    /**
      * Избранные мастера
      */
     public function favorites()
     {
         return $this->belongsToMany(MasterProfile::class, 'favorites')
             ->withTimestamps();
-    }
-
-    /**
-     * Бронирования клиента
-     */
-    public function bookings()
-    {
-        return $this->hasMany(Booking::class, 'client_id');
     }
 
     /**
@@ -118,16 +54,6 @@ class User extends Authenticatable implements MustVerifyEmail
     public function balance()
     {
         return $this->hasOne(UserBalance::class);
-    }
-
-    /**
-     * Проверка, есть ли у мастера активный профиль
-     */
-    public function hasActiveMasterProfile(): bool
-    {
-        return $this->isMaster() && 
-               $this->masterProfile && 
-               $this->masterProfile->status === 'active';
     }
 
     /**

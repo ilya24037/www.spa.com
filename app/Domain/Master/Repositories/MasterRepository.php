@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Domain\Master\Repositories;
 
 use App\Models\MasterProfile;
 use App\Models\User;

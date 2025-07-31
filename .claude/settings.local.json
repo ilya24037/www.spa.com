@@ -2,7 +2,16 @@
   "permissions": {
     "allow": [
       "Bash(find:*)",
-      "Bash(php artisan:*)"
+      "Bash(php artisan:*)",
+      "Bash(create-domain-structure.bat)",
+      "Bash(cmd.exe:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(true)",
+      "Bash(php:*)",
+      "Bash(where php)",
+      "Bash(C:\\Users\\user1\\.config\\herd\\bin\\php.bat update-namespaces.php)",
+      "Bash(cp:*)"
     ],
     "deny": []
   }

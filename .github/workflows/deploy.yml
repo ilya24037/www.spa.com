@@ -1,0 +1,181 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    environment: staging
+    
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Deploy to staging server
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.STAGING_HOST }}
+        username: ${{ secrets.STAGING_USER }}
+        key: ${{ secrets.STAGING_SSH_KEY }}
+        script: |
+          cd /var/www/spa-staging
+          git pull origin main
+          composer install --no-dev --optimize-autoloader
+          npm ci
+          npm run build
+          php artisan migrate --force
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+          php artisan queue:restart
+          php artisan app:optimize-performance --all
+
+    - name: Run smoke tests
+      run: |
+        curl -f https://staging.spa-platform.com/health || exit 1
+        curl -f https://staging.spa-platform.com/api/health || exit 1
+
+    - name: Notify Slack
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        text: 'Staging deployment ${{ job.status }}'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      if: always()
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    environment: production
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Create deployment
+      uses: chrnorm/deployment-action@v2
+      id: deployment
+      with:
+        token: ${{ github.token }}
+        environment: production
+
+    - name: Deploy to production servers
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.PROD_HOSTS }}
+        username: ${{ secrets.PROD_USER }}
+        key: ${{ secrets.PROD_SSH_KEY }}
+        script: |
+          cd /var/www/spa-platform
+          
+          # Включаем режим обслуживания
+          php artisan down --render="errors::503" --retry=60
+          
+          # Обновляем код
+          git pull origin main
+          
+          # Устанавливаем зависимости
+          composer install --no-dev --optimize-autoloader
+          npm ci
+          npm run build
+          
+          # Миграции и оптимизация
+          php artisan migrate --force
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+          php artisan event:cache
+          
+          # Очищаем и прогреваем кеш
+          php artisan cache:clear
+          php artisan app:optimize-performance --cache
+          
+          # Перезапускаем очереди
+          php artisan queue:restart
+          
+          # Выключаем режим обслуживания
+          php artisan up
+
+    - name: Run health checks
+      run: |
+        sleep 30
+        curl -f https://spa-platform.com/health || exit 1
+        curl -f https://spa-platform.com/api/health || exit 1
+
+    - name: Update deployment status (success)
+      if: success()
+      uses: chrnorm/deployment-status@v2
+      with:
+        token: ${{ github.token }}
+        state: success
+        deployment-id: ${{ steps.deployment.outputs.deployment_id }}
+
+    - name: Update deployment status (failure)
+      if: failure()
+      uses: chrnorm/deployment-status@v2
+      with:
+        token: ${{ github.token }}
+        state: failure
+        deployment-id: ${{ steps.deployment.outputs.deployment_id }}
+
+    - name: Notify team
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        text: |
+          Production deployment ${{ job.status }}
+          Commit: ${{ github.event.head_commit.message }}
+          Author: ${{ github.event.head_commit.author.name }}
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      if: always()
+
+  rollback:
+    name: Rollback Production
+    runs-on: ubuntu-latest
+    environment: production
+    if: failure() && needs.deploy-production.result == 'failure'
+    needs: deploy-production
+    
+    steps:
+    - name: Rollback deployment
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.PROD_HOSTS }}
+        username: ${{ secrets.PROD_USER }}
+        key: ${{ secrets.PROD_SSH_KEY }}
+        script: |
+          cd /var/www/spa-platform
+          
+          # Откатываемся на предыдущий коммит
+          git reset --hard HEAD~1
+          
+          # Восстанавливаем зависимости
+          composer install --no-dev --optimize-autoloader
+          npm ci
+          npm run build
+          
+          # Откатываем миграции если нужно
+          php artisan migrate:rollback --force
+          
+          # Очищаем кеш
+          php artisan cache:clear
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+          
+          # Перезапускаем приложение
+          php artisan queue:restart
+
+    - name: Notify about rollback
+      uses: 8398a7/action-slack@v3
+      with:
+        status: custom
+        custom_payload: |
+          {
+            text: "⚠️ Production deployment rolled back!"
+          }
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}

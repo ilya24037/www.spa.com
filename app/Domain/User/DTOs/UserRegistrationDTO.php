@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DTOs;
+namespace App\Domain\User\DTOs;
 
 use App\Enums\UserRole;
 

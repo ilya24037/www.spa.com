@@ -1,0 +1,194 @@
+<?php
+
+namespace App\Domain\Master\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany, HasOne};
+use App\Domain\Master\Traits\HasSlug;
+use App\Domain\Master\Traits\GeneratesMetaTags;
+
+/**
+ * Основная модель профиля мастера
+ * Содержит только базовую информацию и отношения
+ */
+class MasterProfile extends Model
+{
+    use HasFactory;
+    use HasSlug;
+    use GeneratesMetaTags;
+
+    protected $slugField  = 'slug';
+    protected $slugSource = 'display_name';
+
+    protected $fillable = [
+        'user_id', 'display_name', 'slug', 'bio', 'avatar',
+        'phone', 'whatsapp', 'telegram', 'show_contacts',
+        'experience_years', 'certificates', 'education',
+        'city', 'district', 'metro_station',
+        'home_service', 'salon_service', 'salon_address',
+        'rating', 'reviews_count', 'completed_bookings',
+        'views_count', 'status', 'is_verified',
+        'is_premium', 'premium_until',
+        'meta_title', 'meta_description',
+        // Физические параметры
+        'age', 'height', 'weight', 'breast_size',
+        // Параметры внешности
+        'hair_color', 'eye_color', 'nationality',
+        // Особенности мастера
+        'features', 'medical_certificate', 'works_during_period', 'additional_features',
+        // Модульные услуги
+        'services', 'services_additional_info',
+    ];
+
+    protected $casts = [
+        'certificates'  => 'array',
+        'education'     => 'array',
+        'features'      => 'array',
+        'services'      => 'array',
+        'show_contacts' => 'boolean',
+        'home_service'  => 'boolean',
+        'salon_service' => 'boolean',
+        'is_verified'   => 'boolean',
+        'is_premium'    => 'boolean',
+        'premium_until' => 'datetime',
+        'rating'        => 'decimal:2',
+    ];
+
+    /**
+     * Связь с пользователем
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\User::class);
+    }
+
+    /**
+     * Связь с услугами мастера
+     */
+    public function services(): HasMany
+    {
+        return $this->hasMany(\App\Models\Service::class);
+    }
+
+    /**
+     * Активные услуги
+     */
+    public function activeServices(): HasMany
+    {
+        return $this->services()->where('status', 'active');
+    }
+
+    /**
+     * Зоны обслуживания
+     */
+    public function workZones(): HasMany
+    {
+        return $this->hasMany(\App\Models\WorkZone::class);
+    }
+
+    /**
+     * Бронирования
+     */
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(\App\Models\Booking::class);
+    }
+
+    /**
+     * Отзывы
+     */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(\App\Models\Review::class);
+    }
+
+    /**
+     * Подписки мастера
+     */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(\App\Models\MasterSubscription::class);
+    }
+
+    /**
+     * Активная подписка
+     */
+    public function activeSubscription(): HasOne
+    {
+        return $this->hasOne(\App\Models\MasterSubscription::class)
+            ->where('status', 'active')
+            ->where('end_date', '>=', now())
+            ->latestOfMany();
+    }
+
+    /**
+     * Проверка премиум статуса
+     */
+    public function isPremium(): bool
+    {
+        return $this->is_premium && $this->premium_until?->isFuture();
+    }
+
+    /**
+     * Проверка активности профиля
+     */
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
+    }
+
+    /**
+     * Увеличить счетчик просмотров
+     */
+    public function incrementViews(): void
+    {
+        $this->increment('views_count');
+    }
+
+    /**
+     * Обновить рейтинг на основе отзывов
+     */
+    public function updateRating(): void
+    {
+        $avg = $this->reviews()
+            ->where('status', 'approved')
+            ->avg('rating_overall');
+
+        $this->update([
+            'rating'        => round($avg, 2),
+            'reviews_count' => $this->reviews()
+                                   ->where('status', 'approved')
+                                   ->count(),
+        ]);
+    }
+
+    /**
+     * Scopes
+     */
+    public function scopeActive($q)
+    {
+        return $q->where('status', 'active');
+    }
+
+    public function scopePremium($q)
+    {
+        return $q->where('is_premium', true)
+                 ->where('premium_until', '>=', now());
+    }
+
+    public function scopeVerified($q)
+    {
+        return $q->where('is_verified', true);
+    }
+
+    public function scopeInCity($q, $city)
+    {
+        return $q->where('city', $city);
+    }
+
+    public function scopeInDistrict($q, $district)
+    {
+        return $q->where('district', $district);
+    }
+}
