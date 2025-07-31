@@ -26,7 +26,8 @@
       "Bash(do sed -i 's/namespace App\\\\Services;/namespace App\\\\Domain\\\\User\\\\Services;/g' \"$file\")",
       "Bash(do sed -i 's/namespace App\\\\Services;/namespace App\\\\Domain\\\\Ad\\\\Services;/g' \"$file\")",
       "Bash(do sed -i 's/namespace App\\\\Services;/namespace App\\\\Infrastructure\\\\Media;/g' \"$file\")",
-      "Bash(do sed -i 's/namespace App\\\\Services\\\\Adapters;/namespace App\\\\Infrastructure\\\\Adapters;/g' \"$file\")"
+      "Bash(do sed -i 's/namespace App\\\\Services\\\\Adapters;/namespace App\\\\Infrastructure\\\\Adapters;/g' \"$file\")",
+      "Bash(ls:*)"
     ],
     "deny": []
   }
