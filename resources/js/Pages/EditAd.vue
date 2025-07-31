@@ -47,12 +47,11 @@
         
         <!-- Форма редактирования -->
         <div class="p-6">
-          <AdForm 
+          <AdFormRefactored 
             :category="ad.category || 'massage'"
             :categories="[]"
             :ad-id="ad.id"
             :initial-data="ad"
-            :use-new-architecture="true"
             @success="handleSuccess"
           />
         </div>
@@ -63,7 +62,7 @@
 
 <script setup>
 import { Head, Link, router } from '@inertiajs/vue3'
-import AdForm from '@/Components/Form/AdForm.vue'
+import AdFormRefactored from '@/Components/AdForm/index.vue'
 
 const props = defineProps({
   ad: {

@@ -61,11 +61,10 @@
       <!-- ГРУППА 3: Коммерческая информация -->
       <div class="form-group">
         <PriceModule
-          v-model:price="form.price"
-          v-model:price-unit="form.price_unit"
-          v-model:is-starting-price="form.is_starting_price"
-          v-model:pricing-data="form.pricing_data"
-          v-model:contacts-per-hour="form.contacts_per_hour"
+          v-model:price-per-hour="form.price_per_hour"
+          v-model:outcall-price="form.outcall_price"
+          v-model:min-duration="form.min_duration"
+          v-model:new-client-discount="form.new_client_discount"
           :errors="errors"
         />
 
@@ -109,6 +108,11 @@
           v-model:contact-method="form.contact_method"
           v-model:whatsapp="form.whatsapp"
           v-model:telegram="form.telegram"
+          :errors="errors"
+        />
+
+        <PaymentMethodsModule
+          v-model:payment-methods="form.payment_methods"
           :errors="errors"
         />
       </div>
@@ -168,16 +172,19 @@ import Description from './modules/BasicInfo/Description.vue'
 // import ParametersModule from '@/Components/Form/Sections/ParametersSection.vue'
 // import FeaturesModule from '@/Components/Form/Sections/FeaturesSection.vue'
 
-// Модули коммерческой информации (пока используем старые компоненты)
-import PriceModule from '@/Components/Form/Sections/PriceSection.vue'
-import PromoModule from '@/Components/Form/Sections/PromoSection.vue'
+// Модули коммерческой информации (НОВАЯ АРХИТЕКТУРА)
+import PriceModule from './modules/Commercial/Price.vue'
+import PromoModule from './modules/Commercial/Promo.vue'
 import ServicesModule from '@/Components/Features/Services/index.vue'
-import ScheduleModule from '@/Components/Form/Sections/ScheduleSection.vue'
+import ScheduleModule from './modules/Commercial/Schedule.vue'
 
-// Модули локации (пока используем старые компоненты)
-import LocationModule from '@/Components/Form/Sections/LocationSection.vue'
-import GeoModule from '@/Components/Form/Sections/GeoSection.vue'
-import ContactsModule from '@/Components/Form/Sections/ContactsSection.vue'
+// Модули локации (НОВАЯ АРХИТЕКТУРА)
+import LocationModule from './modules/Location/Location.vue'
+import GeoModule from './modules/Location/Geography.vue'
+import ContactsModule from './modules/Location/Contacts.vue'
+
+// Модули оплаты (НОВАЯ АРХИТЕКТУРА)
+import PaymentMethodsModule from './modules/Payment/PaymentMethods.vue'
 
 // Модули базовой информации
 import ClientsModule from './modules/BasicInfo/Clients.vue'

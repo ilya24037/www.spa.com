@@ -26,11 +26,10 @@
       <!-- Модульная форма -->
       <div class="bg-white rounded-lg shadow-sm">
         <div class="p-6">
-          <AdForm 
+          <AdFormRefactored 
             category="erotic"
             :categories="categories"
             :initial-data="initialData"
-            :use-new-architecture="true"
             @success="handleSuccess"
           />
         </div>
@@ -41,7 +40,7 @@
 
 <script setup>
 import { Head, Link, router } from '@inertiajs/vue3'
-import AdForm from '@/Components/Form/AdForm.vue'
+import AdFormRefactored from '@/Components/AdForm/index.vue'
 
 // Категории (только эротический массаж)
 const categories = [
