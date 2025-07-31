@@ -10,7 +10,6 @@
         v-model="localValue"
         type="text"
         placeholder="Например: Москва, Тверская улица, 1"
-        @input="handleInput"
         @focus="showSuggestions = true"
         :suffix="localValue ? '✕' : ''"
         @suffix-click="clearAddress"
@@ -59,6 +58,13 @@ watch(() => props.modelValue, (newValue) => {
   localValue.value = newValue || ''
 })
 
+// Watch для отправки изменений родителю и управления подсказками
+watch(localValue, (newValue) => {
+  const safeValue = newValue || ''
+  showSuggestions.value = safeValue.length > 2
+  emit('update:modelValue', safeValue)
+})
+
 // Подсказки адресов (заглушка - в реальности будет API)
 const addressSuggestions = [
   { address: 'Москва, Тверская улица, 1', details: 'Центральный район, м. Охотный Ряд' },
@@ -70,9 +76,10 @@ const addressSuggestions = [
 
 // Фильтрация подсказок по введенному тексту
 const filteredSuggestions = computed(() => {
-  if (!localValue.value || localValue.value.length < 2) return []
+  const safeValue = localValue.value || ''
+  if (safeValue.length < 2) return []
   
-  const query = localValue.value.toLowerCase()
+  const query = safeValue.toLowerCase()
   return addressSuggestions.filter(suggestion => 
     suggestion.address.toLowerCase().includes(query) ||
     suggestion.details.toLowerCase().includes(query)
@@ -80,23 +87,17 @@ const filteredSuggestions = computed(() => {
 })
 
 // Методы
-const handleInput = (value) => {
-  localValue.value = value
-  showSuggestions.value = value.length > 2
-  emit('update:modelValue', value)
-}
-
 const selectSuggestion = (suggestion) => {
   localValue.value = suggestion.address
   showSuggestions.value = false
-  emit('update:modelValue', suggestion.address)
   emit('suggestion-selected', suggestion)
+  // emit('update:modelValue') произойдет автоматически через watcher
 }
 
 const clearAddress = () => {
   localValue.value = ''
   showSuggestions.value = false
-  emit('update:modelValue', '')
+  // emit('update:modelValue') произойдет автоматически через watcher
 }
 
 // Скрытие подсказок при клике вне компонента

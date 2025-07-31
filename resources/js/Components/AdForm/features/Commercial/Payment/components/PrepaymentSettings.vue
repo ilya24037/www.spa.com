@@ -57,7 +57,7 @@
           v-model="localNote"
           :rows="2"
           placeholder="Например: предоплата через СБП, возврат при отмене за 24 часа..."
-          maxlength="200"
+          :maxlength="200"
           show-counter
         />
       </div>
@@ -85,12 +85,36 @@ const localType = ref(props.type)
 const localAmount = ref(props.amount)
 const localNote = ref(props.note)
 
-// Синхронизация с родителем
-watch(() => props.type, (newValue) => { localType.value = newValue })
-watch(() => props.amount, (newValue) => { localAmount.value = newValue })
-watch(() => props.note, (newValue) => { localNote.value = newValue })
+// Синхронизация с родителем с защитой от циклов
+watch(() => props.type, (newValue) => { 
+  if (newValue !== localType.value) {
+    localType.value = newValue 
+  }
+})
+watch(() => props.amount, (newValue) => { 
+  if (newValue !== localAmount.value) {
+    localAmount.value = newValue 
+  }
+})
+watch(() => props.note, (newValue) => { 
+  if (newValue !== localNote.value) {
+    localNote.value = newValue 
+  }
+})
 
-watch(localType, (newValue) => emit('update:type', newValue))
-watch(localAmount, (newValue) => emit('update:amount', newValue))
-watch(localNote, (newValue) => emit('update:note', newValue))
+watch(localType, (newValue) => {
+  if (newValue !== props.type) {
+    emit('update:type', newValue)
+  }
+})
+watch(localAmount, (newValue) => {
+  if (newValue !== props.amount) {
+    emit('update:amount', newValue)
+  }
+})
+watch(localNote, (newValue) => {
+  if (newValue !== props.note) {
+    emit('update:note', newValue)
+  }
+})
 </script>

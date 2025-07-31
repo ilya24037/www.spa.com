@@ -8,20 +8,24 @@
     <div class="space-y-6">
       <!-- Основной телефон -->
       <PrimaryPhone
-        v-model="localPhone"
+        :model-value="phone"
+        @update:model-value="updatePhone"
         :error="errors.phone"
       />
 
       <!-- Способ связи -->
       <ContactMethods
-        v-model="localContactMethod"
+        :model-value="contactMethod"
+        @update:model-value="updateContactMethod"
         :error="errors.contact_method"
       />
 
       <!-- Дополнительные мессенджеры -->
       <MessengerInputs
-        v-model:whatsapp="localWhatsapp"
-        v-model:telegram="localTelegram"
+        :whatsapp="whatsapp"
+        :telegram="telegram"
+        @update:whatsapp="updateWhatsapp"
+        @update:telegram="updateTelegram"
         :errors="errors"
       />
 
@@ -33,10 +37,10 @@
 
       <!-- Предварительный просмотр -->
       <ContactsPreview
-        :phone="localPhone"
-        :contact-method="localContactMethod"
-        :whatsapp="localWhatsapp"
-        :telegram="localTelegram"
+        :phone="phone"
+        :contact-method="contactMethod"
+        :whatsapp="whatsapp"
+        :telegram="telegram"
         :hide-phone="hidePhoneNumber"
       />
 
@@ -47,8 +51,9 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import FormSection from '@/Components/UI/Forms/FormSection.vue'
+import { useAdFormStore } from '../../../stores/adFormStore'
 
 // Микрокомпоненты
 import PrimaryPhone from './components/PrimaryPhone.vue'
@@ -58,54 +63,41 @@ import PrivacySettings from './components/PrivacySettings.vue'
 import ContactsPreview from './components/ContactsPreview.vue'
 import ContactsTips from './components/ContactsTips.vue'
 
+// AVITO-STYLE: Используем централизованный store
+const store = useAdFormStore()
+
 const props = defineProps({
-  phone: { type: String, default: '' },
-  contactMethod: { type: String, default: '' },
-  whatsapp: { type: String, default: '' },
-  telegram: { type: String, default: '' },
   errors: { type: Object, default: () => ({}) }
 })
 
-const emit = defineEmits([
-  'update:phone',
-  'update:contactMethod',
-  'update:whatsapp',
-  'update:telegram'
-])
+// Читаем данные ТОЛЬКО из store (как на Avito)
+const phone = computed(() => store.formData.phone || '')
+const contactMethod = computed(() => store.formData.contact_method || '')
+const whatsapp = computed(() => store.formData.whatsapp || '')
+const telegram = computed(() => store.formData.telegram || '')
 
-// Локальное состояние
-const localPhone = ref(props.phone || '')
-const localContactMethod = ref(props.contactMethod || '')
-const localWhatsapp = ref(props.whatsapp || '')
-const localTelegram = ref(props.telegram || '')
+// Локальные настройки (не нужно сохранять в store)
 const hidePhoneNumber = ref(false)
 const showOnlineStatus = ref(true)
 
-// Отслеживание изменений пропсов
-watch(() => props.phone, (newValue) => { 
-  localPhone.value = newValue || '' 
-})
-watch(() => props.contactMethod, (newValue) => { 
-  localContactMethod.value = newValue || '' 
-})
-watch(() => props.whatsapp, (newValue) => { 
-  localWhatsapp.value = newValue || '' 
-})
-watch(() => props.telegram, (newValue) => { 
-  localTelegram.value = newValue || '' 
-})
+// Методы обновляют ТОЛЬКО store (как на Avito/Ozon)
+const updatePhone = (value) => {
+  console.log('updatePhone called:', value)
+  store.updateField('phone', value)
+}
 
-// Отправка изменений родителю
-watch(localPhone, (newValue) => {
-  emit('update:phone', newValue)
-})
-watch(localContactMethod, (newValue) => {
-  emit('update:contactMethod', newValue)
-})
-watch(localWhatsapp, (newValue) => {
-  emit('update:whatsapp', newValue)
-})
-watch(localTelegram, (newValue) => {
-  emit('update:telegram', newValue)
-})
+const updateContactMethod = (value) => {
+  console.log('updateContactMethod called:', value)
+  store.updateField('contact_method', value)
+}
+
+const updateWhatsapp = (value) => {
+  console.log('updateWhatsapp called:', value)
+  store.updateField('whatsapp', value)
+}
+
+const updateTelegram = (value) => {
+  console.log('updateTelegram called:', value)
+  store.updateField('telegram', value)
+}
 </script>

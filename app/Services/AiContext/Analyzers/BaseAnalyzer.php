@@ -2,6 +2,9 @@
 
 namespace App\Services\AiContext\Analyzers;
 
+use Symfony\Component\Process\Process;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+
 abstract class BaseAnalyzer
 {
     protected array $outputLines = [];
@@ -46,18 +49,59 @@ abstract class BaseAnalyzer
     }
     
     /**
-     * Выполнить команду shell
+     * Выполнить команду shell безопасно
      */
     protected function executeCommand(string $command): ?string
     {
-        $isWindows = PHP_OS_FAMILY === 'Windows';
-        $nullDevice = $isWindows ? '2>nul' : '2>/dev/null';
+        try {
+            // Разбиваем команду на части для безопасности
+            $commandParts = $this->parseCommand($command);
+            
+            // Создаем процесс с валидацией
+            $process = new Process($commandParts);
+            $process->setTimeout(30); // Таймаут 30 секунд
+            $process->run();
+            
+            if (!$process->isSuccessful()) {
+                return null;
+            }
+            
+            return $process->getOutput();
+            
+        } catch (ProcessFailedException $exception) {
+            // Логируем ошибку, но не выбрасываем исключение
+            \Log::warning('Command execution failed', [
+                'command' => $command,
+                'error' => $exception->getMessage()
+            ]);
+            return null;
+        }
+    }
+    
+    /**
+     * Безопасный парсинг команды
+     */
+    private function parseCommand(string $command): array
+    {
+        // Удаляем перенаправления для безопасности
+        $command = preg_replace('/\s*2>.*/', '', $command);
         
-        if (strpos($command, '2>') === false) {
-            $command .= ' ' . $nullDevice;
+        // Список разрешенных команд
+        $allowedCommands = [
+            'git', 'find', 'wc', 'grep', 'ls', 'dir', 'where', 'which', 
+            'php', 'composer', 'npm', 'node', 'cat', 'type'
+        ];
+        
+        // Разбиваем команду
+        $parts = explode(' ', trim($command));
+        $baseCommand = $parts[0];
+        
+        // Проверяем разрешенные команды
+        if (!in_array($baseCommand, $allowedCommands)) {
+            throw new \InvalidArgumentException("Command not allowed: {$baseCommand}");
         }
         
-        return shell_exec($command);
+        return $parts;
     }
     
     /**

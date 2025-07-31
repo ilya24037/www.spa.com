@@ -1,96 +1,103 @@
 # 🤖 AI Context: SPA Platform - Платформа услуг массажа
-Дата генерации: 30.07.2025 07:21:44
+Дата генерации: 31.07.2025 07:21:27
 Версия Laravel: 12.20.0
 PHP: 8.4.10
 
 ## 📋 Технический стек
-- Backend: Laravel 12 (PHP 8.2+)
+- Backend: Laravel 12.20.0 (PHP 8.4.10)
 - Frontend: Vue.js 3 + Inertia.js
-- State: Pinia
+- State Management: Pinia
 - Стили: Tailwind CSS
-- БД: SQLite
+- База данных: MySQL
 - Разработчик: Один человек + ИИ помощник
 
 ## 🔥 НАД ЧЕМ РАБОТАЛИ ПОСЛЕДНИЙ РАЗ
-**Последние изменённые файлы:**
-- 🧩 Компонент resources/js\Components\Features\Services\index.vue (изменён в 07:08)
-- 🧩 Компонент resources/js\Components\Form\AdForm.vue (изменён в 07:08)
-- 🎮 Контроллер app\Http\Controllers\AdController.php (изменён в 07:08)
-- 🧩 Компонент resources/js\Components\Features\Services\components\ServiceCategory.vue (изменён в 15:52)
-- 🧩 Компонент resources/js\Components\Features\Services\components\ServiceItem.vue (изменён в 15:52)
-- 📋 Модель app\Models\Ad.php (изменён в 15:30)
-- ⚡ JavaScript resources/js\Composables\useAdForm.js (изменён в 15:18)
-- ⚡ JavaScript resources/js\utils\adApi.js (изменён в 15:12)
-- 🧩 Компонент resources/js\Components\Features\Services\config\services.json (изменён в 15:05)
-- 🧩 Компонент resources/js\Components\Form\Sections\PriceSection.vue (изменён в 14:11)
+
+**Последние коммиты:**
+- f434582 Refactor AiContextGenerator to use AiContextService
+- 7aab511 Refactor AdForm contacts and payment modules
+- 813b30a Refactor AdForm to modular architecture
+- 8629c65 Enable new services architecture and improve type handling
+- f9ce537 Refactor Ad form and remove payment_methods field
+
+**⚠️ Незакоммиченные изменения:** 43 файлов
+- AI_CONTEXT.md
+- M app/Services/AiContext/Analyzers/ProgressAnalyzer.php
+- M resources/js/Components/AdForm/features/Commercial/Payment/components/PaymentGrid.vue
+- M resources/js/Components/AdForm/features/Commercial/Payment/components/PrepaymentSettings.vue
+- M resources/js/Components/AdForm/features/Commercial/Payment/index.vue
+... и ещё 38 файлов
+
+**🌿 Текущая ветка:** main
 
 🎯 **Скорее всего работали над:** Vue компонентами и UI
 
-**⚠️ Незакоммиченные изменения:** 2 файлов
-
 ## 📊 АВТОМАТИЧЕСКИЙ АНАЛИЗ ПРОГРЕССА
-### 🎯 Общий прогресс: 178%
-[██████████] (66/37 компонентов)
 
-### ✅ Модели данных [████████░░] 80%
+### 🎯 Общий прогресс: 168%
+[██████████] (62/37 компонентов)
+
+### 🔄 Модели данных [██████████] 100%
 ✅ **Готово:** User, MasterProfile, MassageCategory, Service, Booking
-   _и ещё 3 файлов_
-❌ **Отсутствует:** PaymentPlan, MasterSubscription
+   _и ещё 5 файлов_
 
-### ✅ Контроллеры [█████████░] 88%
+### 🔄 Контроллеры [██████████] 100%
 ✅ **Готово:** HomeController, MasterController, FavoriteController, CompareController, BookingController
-   _и ещё 2 файлов_
-❌ **Отсутствует:** ReviewController
+   _и ещё 3 файлов_
 
-### ✅ Миграции БД [██████████] 100%
+### 🔄 Миграции БД [██████████] 489%
 ✅ **Готово:** 2024_12_19_000000_create_master_media_tables.php, 2025_01_13_000000_add_appearance_fields_to_master_profiles_table.php, 2025_01_13_000001_add_features_fields_to_master_profiles_table.php, 2025_01_13_000002_add_modular_services_to_master_profiles_table.php, 2025_07_15_092654_update_master_photos_table_structure.php
-   _и ещё 36 файлов_
+   _и ещё 39 файлов_
 
-### ✅ Vue страницы [██████████] 100%
-✅ **Готово:** Home, Masters/Index, Masters/Show, Profile/Edit, Bookings/Create
+### ❌ Vue страницы [░░░░░░░░░░] 0%
+❌ **Отсутствует:** Home, Masters/Index, Masters/Show, Profile/Edit, Bookings/Create
 
-### ✅ Vue компоненты [██████████] 100%
-✅ **Готово:** Masters/MasterCard, Booking/BookingForm, Booking/Calendar, Common/Navbar, Common/FilterPanel
+### ❌ Vue компоненты [░░░░░░░░░░] 0%
+❌ **Отсутствует:** Masters/MasterCard, Booking/BookingForm, Booking/Calendar, Common/Navbar, Common/FilterPanel
 
 ### 🔧 Функциональность (автоанализ кода)
-- ❌ **Поиск мастеров**: 14% (не реализовано)
-- ❌ **Система бронирования**: 8% (не реализовано)
-- ❌ **Отзывы и рейтинги**: 17% (не реализовано)
-- 🔄 **Платежная система**: 36% (в разработке)
-- ❌ **Уведомления**: 0% (не реализовано)
+- 🔄 **Поиск мастеров**: 29% (в разработке)
+- 🔄 **Система бронирования**: 17% (в разработке)
+- ❌ **Отзывы и рейтинги**: 0% (не реализовано)
+- 🔄 **Платежная система**: 29% (в разработке)
+- 🔄 **Уведомления**: 8% (в разработке)
 
 ## 📁 СТРУКТУРА ПРОЕКТА
+
 **Статистика файлов:**
 - PHP файлов: 26
 - Vue компонентов: 8
-- JavaScript: 19
-- Всего строк кода: 8,989
-
+- JavaScript: 21
+- Всего строк кода: 9,671
 
 ## ⚠️ НАЙДЕННЫЕ ПРОБЛЕМЫ И ЗАМЕТКИ
-### 📝 TODO (2)
-- Отправить SMS/Email клиенту (`C:\www.spa.com\app/Models/Booking.php:164`)
-- Отправить уведомление (`C:\www.spa.com\app/Models/Booking.php:185`)
 
-### ⚠️ Debug (17)
-- Debug (`C:\www.spa.com\resources\js/Pages/AddItem.vue:58`)
-- Debug (`C:\www.spa.com\resources\js/Pages/Dashboard.vue:343`)
-- Debug (`C:\www.spa.com\resources\js/Pages/Dashboard.vue:348`)
-- Debug (`C:\www.spa.com\resources\js/Composables/useAdForm.js:133`)
-- Debug (`C:\www.spa.com\resources\js/stores/bookingStore.js:54`)
-_... и ещё 12_
+### 📝 TODO (8)
+- Добавить поле is_adult_verified в таблицу users и создать маршрут verification.age (`app/Http/Controllers/AddItemController.php:263`)
+- Добавить поле is_adult_verified в таблицу users и создать маршрут verification.age (`app/Http/Controllers/AddItemController.php:386`)
+- Добавить поле is_adult_verified в таблицу users и создать маршрут verification.age (`app/Http/Controllers/AddItemController.php:418`)
+- Отправить SMS/Email клиенту (`app/Models/Booking.php:164`)
+- Отправить уведомление (`app/Models/Booking.php:185`)
+_... и ещё 3_
 
+### ⚠️ Debug (192)
+- Debug (`app/Http/Controllers/CompareController.php:20`)
+- Debug (`app/Http/Requests/StoreBookingRequest.php:117`)
+- Debug (`app/Http/Requests/StoreBookingRequest.php:122`)
+- Debug (`app/Http/Requests/StoreBookingRequest.php:125`)
+- Debug (`app/Http/Requests/StoreBookingRequest.php:138`)
+_... и ещё 187_
+
+### 🔧 FIXME (2)
+- комментарии (`app/Services/AiContext/Analyzers/CodeAnalyzer.php:44`)
+- FIXME (`app/Services/AiContext/Analyzers/CodeAnalyzer.php:127`)
 
 ## 🚀 РЕКОМЕНДУЕМЫЕ СЛЕДУЮЩИЕ ШАГИ
 
 *Автоматически сгенерированные рекомендации на основе анализа проекта*
 
-### 🔴 КРИТИЧНО (делаем в первую очередь)
-1. Завершить систему бронирования - ключевая функция платформы!
-
 ### 🟡 ВАЖНО (делаем сегодня)
-1. Реализовать поиск мастеров (сейчас 14%)
-2. Создать страницу списка мастеров (Masters/Index.vue)
+1. Создать страницу списка мастеров (Masters/Index.vue)
 
 ### 🟢 ЖЕЛАТЕЛЬНО (делаем потом)
 1. Создать компонент карточки мастера (MasterCard.vue)
@@ -114,4 +121,4 @@ _... и ещё 12_
 4. ✅ Фокусируйся на MVP функциональности
 5. ✅ Давай конкретные команды для терминала
 
-*Этот контекст автоматически сгенерирован 30.07.2025 в 07:21*
+*Этот контекст автоматически сгенерирован 31.07.2025 в 07:21*

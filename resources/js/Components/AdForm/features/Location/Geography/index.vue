@@ -8,7 +8,8 @@
     <div class="space-y-6">
       <!-- Поле адреса с автодополнением -->
       <AddressInput
-        v-model="localAddress"
+        :model-value="localAddress"
+        @update:model-value="updateAddress"
         :error="errors.geo"
         @suggestion-selected="handleSuggestionSelected"
       />
@@ -32,7 +33,8 @@
 
       <!-- Настройки приватности -->
       <PrivacySettings
-        v-model="privacyLevel"
+        :model-value="privacyLevel"
+        @update:model-value="updatePrivacy"
       />
 
       <!-- Советы -->
@@ -42,8 +44,9 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { computed } from 'vue'
 import FormSection from '@/Components/UI/Forms/FormSection.vue'
+import { useAdFormStore } from '../../../stores/adFormStore'
 
 // Микрокомпоненты
 import AddressInput from './components/AddressInput.vue'
@@ -53,50 +56,29 @@ import LocationDetails from './components/LocationDetails.vue'
 import PrivacySettings from './components/PrivacySettings.vue'
 import GeographyTips from './components/GeographyTips.vue'
 
+// AVITO-STYLE: Используем централизованный store
+const store = useAdFormStore()
+
 const props = defineProps({
-  geo: { type: [Object, String], default: () => ({}) },
   errors: { type: Object, default: () => ({}) }
 })
 
-const emit = defineEmits(['update:geo'])
+// Читаем данные ТОЛЬКО из store (как на Avito)
+const geo = computed(() => store.formData.geo || {})
+const localAddress = computed(() => geo.value.address || '')
+const currentGeo = computed(() => geo.value)
+const privacyLevel = computed(() => geo.value.privacy || 'district')
 
-// Локальное состояние
-const localAddress = ref('')
-const currentGeo = ref({})
-const privacyLevel = ref('district')
-
-// Инициализация данных
-const initializeGeo = () => {
-  let geo = props.geo
-  
-  if (typeof geo === 'string') {
-    try {
-      geo = JSON.parse(geo) || {}
-    } catch (e) {
-      geo = {}
-    }
-  }
-  
-  currentGeo.value = { ...geo }
-  localAddress.value = geo.address || ''
-  privacyLevel.value = geo.privacy || 'district'
+// Методы обновляют ТОЛЬКО store (как на Avito/Ozon)
+const updateGeo = (newGeoData) => {
+  console.log('updateGeo called:', newGeoData)
+  store.updateField('geo', newGeoData)
 }
 
-// Отслеживание изменений пропсов
-watch(() => props.geo, () => {
-  initializeGeo()
-}, { immediate: true })
-
-// Отслеживание изменений локальных данных
-watch([localAddress, privacyLevel], () => {
-  updateGeo()
-})
-
-// Методы
 const handleSuggestionSelected = (suggestion) => {
   // Парсим детали подсказки
   const parts = suggestion.details.split(', ')
-  currentGeo.value = {
+  const geoData = {
     ...currentGeo.value,
     address: suggestion.address,
     district: parts[0] || '',
@@ -105,25 +87,30 @@ const handleSuggestionSelected = (suggestion) => {
     lng: 37.6176,  // Заглушка
     accuracy: 100
   }
-  updateGeo()
+  updateGeo(geoData)
 }
 
 const handleDistrictSelected = (districtData) => {
-  localAddress.value = districtData.address
-  currentGeo.value = {
+  const geoData = {
     ...currentGeo.value,
     ...districtData
   }
-  updateGeo()
+  updateGeo(geoData)
 }
 
-const updateGeo = () => {
+const updatePrivacy = (newPrivacy) => {
   const geoData = {
     ...currentGeo.value,
-    address: localAddress.value,
-    privacy: privacyLevel.value
+    privacy: newPrivacy
   }
-  
-  emit('update:geo', geoData)
+  updateGeo(geoData)
+}
+
+const updateAddress = (newAddress) => {
+  const geoData = {
+    ...currentGeo.value,
+    address: newAddress
+  }
+  updateGeo(geoData)
 }
 </script>

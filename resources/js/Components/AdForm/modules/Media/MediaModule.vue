@@ -8,13 +8,13 @@
       :error-keys="['photos']"
     >
       <PhotoUploader 
-        v-model="localPhotos"
+        :model-value="photos"
+        @update:model-value="updatePhotos"
         :max-files="10"
         :max-file-size="5242880"
         :uploading="uploading"
         :upload-progress="uploadProgress"
         @error="$emit('photo-error', $event)"
-        @update:model-value="updatePhotos"
       />
     </FormSection>
 
@@ -26,32 +26,28 @@
       :error-keys="['video']"
     >
       <VideoUploader 
-        v-model="localVideo"
+        :model-value="video"
+        @update:model-value="updateVideo"
         :max-file-size="50 * 1024 * 1024"
         :uploading="uploadingVideo"
         :upload-progress="videoUploadProgress"
         @error="$emit('video-error', $event)"
-        @update:model-value="updateVideo"
       />
     </FormSection>
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { computed } from 'vue'
 import FormSection from '@/Components/UI/Forms/FormSection.vue'
 import PhotoUploader from '@/Components/Features/PhotoUploader/index.vue'
 import VideoUploader from '@/Components/Features/PhotoUploader/VideoUploader.vue'
+import { useAdFormStore } from '../../stores/adFormStore'
+
+// AVITO-STYLE: Используем централизованный store
+const store = useAdFormStore()
 
 const props = defineProps({
-  photos: {
-    type: Array,
-    default: () => []
-  },
-  video: {
-    type: Object,
-    default: null
-  },
   uploading: {
     type: Boolean,
     default: false
@@ -75,34 +71,26 @@ const props = defineProps({
 })
 
 const emit = defineEmits([
-  'update:photos', 
-  'update:video', 
   'photo-error', 
   'video-error'
 ])
 
-// Локальное состояние
-const localPhotos = ref([...props.photos])
-const localVideo = ref(props.video)
-
-// Отслеживание изменений пропсов
-watch(() => props.photos, (newValue) => {
-  localPhotos.value = [...newValue]
-}, { deep: true })
-
-watch(() => props.video, (newValue) => {
-  localVideo.value = newValue
+// Читаем данные ТОЛЬКО из store (как на Avito)
+const photos = computed(() => {
+  const storePhotos = store.formData.photos
+  return Array.isArray(storePhotos) ? storePhotos : []
 })
+const video = computed(() => store.formData.video || null)
 
-// Методы обновления
-const updatePhotos = (photos) => {
-  localPhotos.value = photos
-  emit('update:photos', photos)
+// Методы обновляют ТОЛЬКО store (как на Avito/Ozon)
+const updatePhotos = (newPhotos) => {
+  console.log('updatePhotos called:', newPhotos)
+  store.updateField('photos', newPhotos)
 }
 
-const updateVideo = (video) => {
-  localVideo.value = video
-  emit('update:video', video)
+const updateVideo = (newVideo) => {
+  console.log('updateVideo called:', newVideo)
+  store.updateField('video', newVideo)
 }
 </script>
 

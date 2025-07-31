@@ -33,6 +33,12 @@ export const useAdFormStore = defineStore('adForm', () => {
     additional_features: '',
     experience: '',
     education_level: '',
+    university: '',
+    specialization: '',
+    graduation_year: '',
+    courses: [],
+    has_certificates: false,
+    certificate_photos: [],
     
     // Коммерческая информация
     price: '',
@@ -47,6 +53,19 @@ export const useAdFormStore = defineStore('adForm', () => {
     schedule: {},
     schedule_notes: '',
     
+    // Детальные цены
+    express_price: '',
+    price_per_hour: '',
+    outcall_price: '',
+    price_two_hours: '',
+    price_night: '',
+    
+    // Прайс-лист услуг
+    main_service_name: '',
+    main_service_price: '',
+    main_service_price_unit: 'час',
+    additional_services: [],
+    
     // Локация и контакты
     service_location: [],
     outcall_locations: [],
@@ -56,6 +75,9 @@ export const useAdFormStore = defineStore('adForm', () => {
     contact_method: 'messages',
     whatsapp: '',
     telegram: '',
+    
+    // Способы оплаты
+    payment_methods: [],
     
     // Медиа
     photos: [],
@@ -204,10 +226,23 @@ export const useAdFormStore = defineStore('adForm', () => {
     isLoading.value = true
     validation.clearAllErrors()
     
-    // Заполнение данных
+    // Заполнение данных с безопасными значениями
     Object.keys(formData).forEach(key => {
-      if (initialData[key] !== undefined) {
-        formData[key] = initialData[key]
+      if (initialData[key] !== undefined && initialData[key] !== null) {
+        // Особая обработка для массивов
+        if (Array.isArray(formData[key])) {
+          formData[key] = Array.isArray(initialData[key]) ? initialData[key] : []
+        }
+        // Особая обработка для объектов
+        else if (typeof formData[key] === 'object' && formData[key] !== null) {
+          formData[key] = (typeof initialData[key] === 'object' && initialData[key] !== null) 
+            ? initialData[key] 
+            : (formData[key] || {})
+        }
+        // Остальные типы
+        else {
+          formData[key] = initialData[key]
+        }
       }
     })
     
@@ -228,12 +263,18 @@ export const useAdFormStore = defineStore('adForm', () => {
    * Обновление поля
    */
   function updateField(fieldName, value) {
-    if (formData[fieldName] !== value) {
-      formData[fieldName] = value
+    // Безопасное значение для массивов
+    let safeValue = value
+    if (Array.isArray(formData[fieldName]) && !Array.isArray(value)) {
+      safeValue = value === null || value === undefined ? [] : value
+    }
+    
+    if (formData[fieldName] !== safeValue) {
+      formData[fieldName] = safeValue
       hasUnsavedChanges.value = true
       
       // Валидация поля при изменении
-      validateField(fieldName, value)
+      validateField(fieldName, safeValue)
     }
   }
 
@@ -295,7 +336,14 @@ export const useAdFormStore = defineStore('adForm', () => {
     
     try {
       const preparedData = prepareFormData(formData)
-      const response = await saveDraft(preparedData)
+      
+      // Передаем ID черновика если редактируем существующий
+      const response = await saveDraft(preparedData, adId.value)
+      
+      // Если это новый черновик - сохраняем его ID
+      if (response && response.id && !adId.value) {
+        adId.value = response.id
+      }
       
       hasUnsavedChanges.value = false
       lastSavedAt.value = new Date()

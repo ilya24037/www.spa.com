@@ -5,12 +5,38 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Ad;
+use App\Services\AdService;
+use App\Http\Requests\CreateAdRequest;
+use App\Http\Requests\SaveAdDraftRequest;
+use App\Http\Requests\UpdateAdRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class AdController extends Controller
 {
+    private AdService $adService;
+    
+    public function __construct(AdService $adService)
+    {
+        $this->adService = $adService;
+    }
+    
+    /**
+     * Разрешенные поля для массового присвоения
+     */
+    private const ALLOWED_FIELDS = [
+        'category', 'title', 'specialty', 'clients', 'service_location', 
+        'outcall_locations', 'taxi_option', 'work_format', 'service_provider',
+        'experience', 'education_level', 'features', 'additional_features',
+        'description', 'price', 'price_unit', 'is_starting_price',
+        'contacts_per_hour', 'discount', 'gift', 'address', 'travel_area',
+        'phone', 'contact_method', 'whatsapp', 'telegram', 'age', 'height',
+        'weight', 'breast_size', 'hair_color', 'eye_color', 'appearance',
+        'nationality', 'has_girlfriend', 'services', 'services_additional_info',
+        'schedule', 'schedule_notes', 'photos', 'video', 'show_photos_in_gallery',
+        'allow_download_photos', 'watermark_photos', 'new_client_discount'
+    ];
     /**
      * Страница создания объявления в стиле Avito (/additem)
      */
@@ -24,182 +50,57 @@ class AdController extends Controller
     /**
      * Сохранить объявление (как у Avito - один метод для черновика и публикации)
      */
-    public function store(Request $request)
+    public function store(CreateAdRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'category' => 'required|string',
-            'title' => 'required|string|max:255',
-            'specialty' => 'required|string',
-            'clients' => 'array',
-            'service_location' => 'required|array|min:1',
-            'taxi_option' => 'nullable|string|in:separately,included',
-            'work_format' => 'required|string',
-            'service_provider' => 'array',
-            'experience' => 'required|string|in:3260137,3260142,3260146,3260149,3260152',
-            'education_level' => 'nullable|string|in:2,3,4,5,6,7',
-            'description' => 'required|string|min:50',
-            'price' => 'required|numeric|min:0',
-            'price_unit' => 'required|string',
-            'is_starting_price' => 'array',
-            'contacts_per_hour' => 'nullable|string|in:1,2,3,4,5,6',
-            'discount' => 'nullable|numeric|min:0|max:100',
-            'gift' => 'nullable|string|max:500',
-            'address' => 'required|string|max:500',
-            'travel_area' => 'required|string',
-            'phone' => 'required|string',
-            'contact_method' => 'required|string|in:any,calls,messages'
-        ]);
-
-        if ($validator->fails()) {
-            return back()->withErrors($validator->errors());
+        try {
+            // Используем сервис для создания объявления (данные уже валидированы)
+            $ad = $this->adService->create($request->validated(), Auth::user());
+            
+            // Пытаемся сразу опубликовать (как было в оригинале)
+            $this->adService->publish($ad);
+            
+            return redirect()->route('dashboard')->with('success', 'Объявление успешно создано и опубликовано!');
+            
+        } catch (\InvalidArgumentException $e) {
+            // Если не удалось опубликовать, сохраняем как черновик
+            return redirect()->route('dashboard')->with('warning', 'Объявление сохранено как черновик. ' . $e->getMessage());
+            
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Ошибка при создании объявления: ' . $e->getMessage()]);
         }
-
-        $ad = Ad::create([
-            'user_id' => Auth::id(),
-            'category' => $request->category,
-            'title' => $request->title,
-            'specialty' => $request->specialty,
-            'clients' => json_encode($request->clients ?? []),
-            'service_location' => json_encode($request->service_location),
-            'outcall_locations' => !empty($request->outcall_locations) ? json_encode($request->outcall_locations) : json_encode([]),
-            'taxi_option' => $request->taxi_option,
-            'work_format' => $request->work_format,
-            'service_provider' => json_encode($request->service_provider ?? []),
-            'experience' => $request->experience,
-            'education_level' => $request->education_level,
-            'features' => !empty($request->features) ? json_encode($request->features) : json_encode([]),
-            'additional_features' => $request->additional_features ?: null,
-            'description' => $request->description,
-            'price' => $request->price,
-            'price_unit' => $request->price_unit,
-            'is_starting_price' => $request->is_starting_price ? true : false,
-            'pricing_data' => !empty($request->pricing_data) ? json_encode($request->pricing_data) : null,
-            'contacts_per_hour' => $request->contacts_per_hour,
-            'discount' => $request->discount,
-            'gift' => $request->gift,
-            // Услуги
-            'services' => !empty($request->services) ? json_encode($request->services) : json_encode((object)[]),
-            'services_additional_info' => $request->services_additional_info ?: null,
-            // Физические параметры
-            'age' => $request->age ?: null,
-            'height' => $request->height ?: null,
-            'weight' => $request->weight ?: null,
-            'breast_size' => $request->breast_size ?: null,
-            'hair_color' => $request->hair_color ?: null,
-            'eye_color' => $request->eye_color ?: null,
-            'appearance' => $request->appearance ?: null,
-            'nationality' => $request->nationality ?: null,
-            'has_girlfriend' => $request->boolean('has_girlfriend', false),
-            'photos' => is_array($request->photos) ? json_encode($request->photos) : json_encode([]),
-            // Видео - сохраняем полную информацию
-            'video' => $request->video ? json_encode($request->video) : null,
-            'show_photos_in_gallery' => $request->boolean('show_photos_in_gallery', true),
-            'allow_download_photos' => $request->boolean('allow_download_photos', false),
-            'watermark_photos' => $request->boolean('watermark_photos', true),
-            'address' => $request->address,
-            'travel_area' => $request->travel_area,
-            'phone' => $request->phone,
-            'contact_method' => $request->contact_method,
-            'status' => 'active'
-        ]);
-
-        return redirect()->route('dashboard')->with('success', 'Объявление успешно создано!');
     }
 
     /**
      * Сохранить черновик объявления
      */
-    public function storeDraft(Request $request)
+    public function storeDraft(SaveAdDraftRequest $request)
     {
-        // Для черновика не валидируем ничего - принимаем любые данные
-        // Черновик может быть полностью пустым
-
-        $data = [
-            'user_id' => Auth::id(),
-            'category' => $request->category ?: null,
-            'title' => $request->title ?: 'Черновик объявления',
-            'specialty' => $request->specialty ?: null,
-            'clients' => !empty($request->clients) ? json_encode($request->clients) : json_encode([]),
-            'service_location' => !empty($request->service_location) ? json_encode($request->service_location) : json_encode([]),
-            'outcall_locations' => !empty($request->outcall_locations) ? json_encode($request->outcall_locations) : json_encode([]),
-            'taxi_option' => $request->taxi_option ?: null,
-            'work_format' => $request->work_format ?: null,
-            'service_provider' => !empty($request->service_provider) ? json_encode($request->service_provider) : json_encode([]),
-            'experience' => $request->experience ?: null,
-            'education_level' => $request->education_level ?: null,
-            'features' => !empty($request->features) ? json_encode($request->features) : json_encode([]),
-            'additional_features' => $request->additional_features ?: null,
-            'description' => $request->description ?: null,
-            'price' => $request->price ? (float)$request->price : null,
-            'price_unit' => $request->price_unit ?: 'service',
-            'is_starting_price' => $request->is_starting_price ? true : false,
-            'pricing_data' => !empty($request->pricing_data) ? json_encode($request->pricing_data) : null,
-            'contacts_per_hour' => $request->contacts_per_hour ?: null,
-            'discount' => $request->discount ? (int)$request->discount : null,
-            'new_client_discount' => $request->new_client_discount ?: null,
-            'gift' => $request->gift ?: null,
-            // Услуги (новые поля)
-            'services' => !empty($request->services) ? json_encode($request->services) : json_encode((object)[]),
-            'services_additional_info' => $request->services_additional_info ?: null,
-            // График работы
-            'schedule' => !empty($request->schedule) ? $request->schedule : (object)[],
-            'schedule_notes' => $request->schedule_notes ?: null,
-            // Физические параметры
-            'age' => $request->age ?: null,
-            'height' => $request->height ?: null,
-            'weight' => $request->weight ?: null,
-            'breast_size' => $request->breast_size ?: null,
-            'hair_color' => $request->hair_color ?: null,
-            'eye_color' => $request->eye_color ?: null,
-            'appearance' => $request->appearance ?: null,
-            'nationality' => $request->nationality ?: null,
-            'has_girlfriend' => $request->boolean('has_girlfriend', false),
-            'photos' => is_array($request->photos) ? json_encode($request->photos) : json_encode([]),
-            // Видео - сохраняем полную информацию
-            'video' => $request->video ? json_encode($request->video) : null,
-            'show_photos_in_gallery' => $request->boolean('show_photos_in_gallery', true),
-            'allow_download_photos' => $request->boolean('allow_download_photos', false),
-            'watermark_photos' => $request->boolean('watermark_photos', true),
-            'address' => $request->address ?: null,
-            'travel_area' => $request->travel_area ?: null,
-            'phone' => $request->phone ?: null,
-            'contact_method' => $request->contact_method ?: 'messages',
-            'status' => 'draft'
-        ];
-
-        // Если передан ID существующего объявления, обновляем его
-        $requestId = $request->input('id');
-        if ($request->has('id') && $requestId && $requestId !== 'null' && $requestId !== '') {
-            // Преобразуем ID в число для поиска
-            $adId = is_numeric($requestId) ? (int)$requestId : null;
+        try {
+            // Проверяем, обновляем ли существующий черновик
+            $existingAd = null;
+            $requestId = $request->input('id');
             
-            if ($adId) {
-                $ad = Ad::where('id', $adId)
-                       ->where('user_id', Auth::id())
-                       ->where('status', 'draft')
-                       ->first();
+            if ($requestId && $requestId !== 'null' && $requestId !== '') {
+                $adId = is_numeric($requestId) ? (int)$requestId : null;
                 
-                if ($ad) {
-                    $ad->update($data);
-                    $message = 'Черновик обновлен!';
-                } else {
-                    // Если черновик не найден, создаем новый
-                    $ad = Ad::create($data);
-                    $message = 'Черновик сохранен!';
+                if ($adId) {
+                    $existingAd = Ad::where('id', $adId)
+                                   ->where('user_id', Auth::id())
+                                   ->where('status', 'draft')
+                                   ->first();
                 }
-            } else {
-                // Если ID некорректный, создаем новый
-                $ad = Ad::create($data);
-                $message = 'Черновик сохранен!';
             }
-        } else {
-            // Иначе создаем новый черновик
-            $ad = Ad::create($data);
-            $message = 'Черновик сохранен!';
+            
+            // Используем сервис для сохранения черновика (данные уже валидированы и обработаны)
+            $ad = $this->adService->saveDraft($request->validated(), Auth::user(), $existingAd);
+            
+            $message = $existingAd ? 'Черновик обновлен!' : 'Черновик сохранен!';
+            
+            return redirect('/profile/items/draft/all')->with('success', $message);
+            
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Ошибка при сохранении черновика: ' . $e->getMessage()]);
         }
-
-        // Всегда возвращаем редирект для Inertia
-        return redirect('/profile/items/draft/all')->with('success', $message);
     }
 
     /**
@@ -208,7 +109,7 @@ class AdController extends Controller
     public function publish(Request $request)
     {
         // Валидация обязательных полей для публикации
-        $validator = Validator::make($request->all(), [
+        $validator = Validator::make($request->only(self::ALLOWED_FIELDS), [
             'category' => 'required|string',
             'title' => 'required|string|max:255',
             'specialty' => 'required|string',
@@ -407,59 +308,17 @@ class AdController extends Controller
     /**
      * Обновить объявление
      */
-    public function update(Request $request, Ad $ad)
+    public function update(UpdateAdRequest $request, Ad $ad)
     {
-        // Проверяем права доступа
-        if (auth()->id() !== $ad->user_id) {
-            abort(403, 'Нет доступа к редактированию этого объявления');
+        try {
+            // Используем сервис для обновления объявления (данные уже валидированы и права проверены в Request)
+            $ad = $this->adService->update($ad, $request->validated());
+            
+            return redirect()->route('profile.dashboard')->with('success', 'Объявление обновлено!');
+            
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Ошибка при обновлении объявления: ' . $e->getMessage()]);
         }
-
-        $validator = Validator::make($request->all(), [
-            'title' => 'required|string|max:255',
-            'specialty' => 'required|string',
-            'clients' => 'array',
-            'service_location' => 'required|array|min:1',
-            'taxi_option' => 'nullable|string|in:separately,included',
-            'work_format' => 'required|string',
-            'service_provider' => 'array',
-            'experience' => 'required|string|in:3260137,3260142,3260146,3260149,3260152',
-            'education_level' => 'nullable|string|in:2,3,4,5,6,7',
-            'description' => 'required|string|min:50',
-            'price' => 'required|numeric|min:0',
-            'price_unit' => 'required|string',
-            'is_starting_price' => 'array',
-            'contacts_per_hour' => 'nullable|string|in:1,2,3,4,5,6',
-            'discount' => 'nullable|numeric|min:0|max:100',
-            'gift' => 'nullable|string|max:500',
-            'address' => 'required|string|max:500',
-            'travel_area' => 'required|string',
-            'phone' => 'required|string',
-            'contact_method' => 'required|string|in:any,calls,messages',
-            'photos' => 'nullable|array',
-            'video' => 'nullable|string',
-            'show_photos_in_gallery' => 'boolean',
-            'allow_download_photos' => 'boolean',
-            'watermark_photos' => 'boolean'
-        ]);
-
-        if ($validator->fails()) {
-            return back()->withErrors($validator->errors());
-        }
-
-        $validated = $validator->validated();
-        
-        // Обрабатываем специальные поля
-        $validated['clients'] = json_encode($validated['clients'] ?? []);
-        $validated['service_location'] = json_encode($validated['service_location']);
-        $validated['service_provider'] = json_encode($validated['service_provider'] ?? []);
-        $validated['photos'] = is_array($validated['photos']) ? json_encode($validated['photos']) : json_encode([]);
-        $validated['show_photos_in_gallery'] = $request->boolean('show_photos_in_gallery', true);
-        $validated['allow_download_photos'] = $request->boolean('allow_download_photos', false);
-        $validated['watermark_photos'] = $request->boolean('watermark_photos', true);
-        
-        $ad->update($validated);
-
-        return redirect()->route('profile.dashboard')->with('success', 'Объявление обновлено!');
     }
 
     /**

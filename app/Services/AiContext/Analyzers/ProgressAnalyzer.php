@@ -151,8 +151,9 @@ class ProgressAnalyzer extends BaseAnalyzer
      */
     private function getProgressBar(int $percent): string
     {
-        $filled = round($percent / 10);
-        $empty = 10 - $filled;
+        $percent = max(0, min(100, $percent)); // Ограничиваем от 0 до 100
+        $filled = max(0, round($percent / 10));
+        $empty = max(0, 10 - $filled);
         return str_repeat('█', $filled) . str_repeat('░', $empty);
     }
     

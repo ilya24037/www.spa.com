@@ -97,9 +97,11 @@ const timeSelectOptions = [
 
 // Методы
 const isDayEnabled = (day) => {
-  return props.schedule[day] && 
-         props.schedule[day].start && 
-         props.schedule[day].end
+  return Boolean(
+    props.schedule[day] && 
+    props.schedule[day].start && 
+    props.schedule[day].end
+  )
 }
 
 const getDaySchedule = (day) => {
@@ -122,10 +124,19 @@ const updateDayTime = (day, timeType, value) => {
   const newSchedule = { ...props.schedule }
   
   if (!newSchedule[day]) {
-    newSchedule[day] = {}
+    newSchedule[day] = { start: '', end: '' }
   }
   
   newSchedule[day][timeType] = value
+  
+  // Если время не выбрано, но день включен, устанавливаем значения по умолчанию
+  if (!newSchedule[day].start && timeType === 'end') {
+    newSchedule[day].start = '10:00'
+  }
+  if (!newSchedule[day].end && timeType === 'start') {
+    newSchedule[day].end = '18:00'  
+  }
+  
   emit('update:schedule', newSchedule)
 }
 </script>

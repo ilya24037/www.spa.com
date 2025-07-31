@@ -8,29 +8,32 @@
     <div class="space-y-6">
       <!-- Основные типы локации -->
       <ServiceTypes
-        v-model="localServiceLocation"
+        :model-value="serviceLocation"
+        @update:model-value="updateServiceLocation"
         :error="errors.service_location"
       />
 
       <!-- Районы выезда (показывается только если выбран выезд) -->
       <OutcallDistricts
-        v-model="localOutcallLocations"
-        :selected-service-types="localServiceLocation"
+        :model-value="outcallLocations"
+        @update:model-value="updateOutcallLocations"
+        :selected-service-types="serviceLocation"
         :error="errors.outcall_locations"
       />
 
       <!-- Опция такси (показывается только если выбран выезд) -->
       <TaxiOption
-        v-model="localTaxiOption"
-        :selected-service-types="localServiceLocation"
+        :model-value="taxiOption"
+        @update:model-value="updateTaxiOption"
+        :selected-service-types="serviceLocation"
         :error="errors.taxi_option"
       />
 
       <!-- Предпросмотр -->
       <LocationPreview
-        :service-types="localServiceLocation"
-        :districts="localOutcallLocations"
-        :taxi-option="localTaxiOption"
+        :service-types="serviceLocation"
+        :districts="outcallLocations"
+        :taxi-option="taxiOption"
       />
 
       <!-- Советы -->
@@ -40,8 +43,9 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { computed } from 'vue'
 import FormSection from '@/Components/UI/Forms/FormSection.vue'
+import { useAdFormStore } from '../../../stores/adFormStore'
 
 // Микрокомпоненты
 import ServiceTypes from './components/ServiceTypes.vue'
@@ -50,72 +54,35 @@ import TaxiOption from './components/TaxiOption.vue'
 import LocationPreview from './components/LocationPreview.vue'
 import LocationTips from './components/LocationTips.vue'
 
+// AVITO-STYLE: Используем централизованный store
+const store = useAdFormStore()
+
 const props = defineProps({
-  serviceLocation: { type: [Array, String], default: () => [] },
-  outcallLocations: { type: [Array, String], default: () => [] },
-  taxiOption: { type: Boolean, default: false },
   errors: { type: Object, default: () => ({}) }
 })
 
-const emit = defineEmits([
-  'update:serviceLocation',
-  'update:outcallLocations',
-  'update:taxiOption'
-])
+// Читаем данные ТОЛЬКО из store (как на Avito)
+const serviceLocation = computed(() => store.formData.service_location || [])
+const outcallLocations = computed(() => store.formData.outcall_locations || [])
+const taxiOption = computed(() => store.formData.taxi_option || false)
 
-// Локальное состояние
-const localServiceLocation = ref([])
-const localOutcallLocations = ref([])
-const localTaxiOption = ref(props.taxiOption)
-
-// Инициализация массивов
-const initializeArrays = () => {
-  // Service Location
-  let serviceLocation = props.serviceLocation
-  if (typeof serviceLocation === 'string') {
-    try {
-      serviceLocation = JSON.parse(serviceLocation) || []
-    } catch (e) {
-      serviceLocation = []
-    }
-  }
-  localServiceLocation.value = Array.isArray(serviceLocation) ? [...serviceLocation] : []
-
-  // Outcall Locations
-  let outcallLocations = props.outcallLocations
-  if (typeof outcallLocations === 'string') {
-    try {
-      outcallLocations = JSON.parse(outcallLocations) || []
-    } catch (e) {
-      outcallLocations = []
-    }
-  }
-  localOutcallLocations.value = Array.isArray(outcallLocations) ? [...outcallLocations] : []
+// Методы обновляют ТОЛЬКО store (как на Avito/Ozon)
+const updateServiceLocation = (value) => {
+  console.log('updateServiceLocation called:', value)
+  // Убеждаемся что передаём массив
+  const arrayValue = Array.isArray(value) ? value : []
+  store.updateField('service_location', arrayValue)
 }
 
-// Отслеживание изменений пропсов
-watch(() => props.serviceLocation, () => {
-  initializeArrays()
-}, { immediate: true })
+const updateOutcallLocations = (value) => {
+  console.log('updateOutcallLocations called:', value)
+  // Убеждаемся что передаём массив
+  const arrayValue = Array.isArray(value) ? value : []
+  store.updateField('outcall_locations', arrayValue)
+}
 
-watch(() => props.outcallLocations, () => {
-  initializeArrays()
-}, { immediate: true })
-
-watch(() => props.taxiOption, (newValue) => { 
-  localTaxiOption.value = newValue 
-})
-
-// Отправка изменений родителю
-watch(localServiceLocation, (newValue) => {
-  emit('update:serviceLocation', newValue)
-}, { deep: true })
-
-watch(localOutcallLocations, (newValue) => {
-  emit('update:outcallLocations', newValue)
-}, { deep: true })
-
-watch(localTaxiOption, (newValue) => {
-  emit('update:taxiOption', newValue)
-})
+const updateTaxiOption = (value) => {
+  console.log('updateTaxiOption called:', value)
+  store.updateField('taxi_option', value)
+}
 </script>

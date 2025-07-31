@@ -2,16 +2,19 @@
 
 namespace App\Models;
 
+use App\Enums\UserRole;
+use App\Enums\UserStatus;
+use App\Traits\HasUserProfile;
+use App\Traits\HasUserRoles;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, HasUserProfile, HasUserRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -19,13 +22,11 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
         'email',
-        'phone',
         'password',
         'role',
-        'is_active',
-        'avatar',
+        'status',
+        'email_verified_at',
     ];
 
     /**
@@ -48,8 +49,17 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'is_active' => 'boolean',
+            'role' => UserRole::class,
+            'status' => UserStatus::class,
         ];
+    }
+
+    /**
+     * Связь с объявлениями
+     */
+    public function ads()
+    {
+        return $this->hasMany(Ad::class);
     }
 
     /**
@@ -61,7 +71,7 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * 🔥 ДОБАВЛЕНО: Профили мастера (множественное число для Dashboard)
+     * Профили мастера (множественное число для Dashboard)
      * Некоторые мастера могут иметь несколько профилей/анкет
      */
     public function masterProfiles()
@@ -70,7 +80,7 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * 🔥 ДОБАВЛЕНО: Избранные мастера
+     * Избранные мастера
      */
     public function favorites()
     {
@@ -103,143 +113,21 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Проверка роли пользователя
+     * Связь с балансом пользователя
      */
-    public function hasRole($role)
+    public function balance()
     {
-        return $this->role === $role;
-    }
-
-    /**
-     * Проверка, является ли пользователь мастером
-     */
-    public function isMaster()
-    {
-        return $this->role === 'master';
-    }
-
-    /**
-     * Проверка, является ли пользователь администратором
-     */
-    public function isAdmin()
-    {
-        return $this->role === 'admin';
-    }
-
-    /**
-     * Проверка, является ли пользователь клиентом
-     */
-    public function isClient()
-    {
-        return $this->role === 'client';
+        return $this->hasOne(UserBalance::class);
     }
 
     /**
      * Проверка, есть ли у мастера активный профиль
      */
-    public function hasActiveMasterProfile()
+    public function hasActiveMasterProfile(): bool
     {
         return $this->isMaster() && 
                $this->masterProfile && 
                $this->masterProfile->status === 'active';
-    }
-
-    /**
-     * Получить URL аватара
-     */
-    public function getAvatarUrlAttribute()
-    {
-        // Если пользователь - мастер с аватаром
-        if ($this->isMaster() && $this->masterProfile && $this->masterProfile->avatar) {
-            return \App\Helpers\ImageHelper::getImageUrl($this->masterProfile->avatar, '/images/no-avatar.jpg');
-        }
-        
-        // Если есть аватар у пользователя
-        if ($this->avatar) {
-            return \App\Helpers\ImageHelper::getImageUrl($this->avatar, '/images/no-avatar.jpg');
-        }
-
-        // Возвращаем дефолтный аватар через API или заглушку
-        return \App\Helpers\ImageHelper::getUserAvatar(null, $this->name);
-    }
-
-    /**
-     * Получить имя для отображения
-     */
-    public function getDisplayNameAttribute()
-    {
-        if ($this->isMaster() && $this->masterProfile) {
-            return $this->masterProfile->display_name;
-        }
-        
-        return $this->name;
-    }
-
-    /**
-     * Получить статистику клиента
-     */
-    public function getClientStats(): array
-    {
-        if (!$this->isClient()) {
-            return [];
-        }
-
-        $totalBookings = $this->bookings()->count();
-        $completedBookings = $this->bookings()->where('status', 'completed')->count();
-        $totalReviews = $this->reviews()->count();
-        
-        return [
-            'total_bookings' => $totalBookings,
-            'completed_bookings' => $completedBookings,
-            'cancelled_bookings' => $this->bookings()->where('status', 'cancelled')->count(),
-            'total_reviews' => $totalReviews,
-            'total_spent' => $this->bookings()
-                ->where('payment_status', 'paid')
-                ->sum('total_price'),
-        ];
-    }
-
-    /**
-     * Получить статистику мастера
-     */
-    public function getMasterStats(): array
-    {
-        if (!$this->isMaster() || !$this->masterProfile) {
-            return [];
-        }
-
-        return [
-            'total_services' => $this->masterProfile->services()->count(),
-            'active_services' => $this->masterProfile->activeServices()->count(),
-            'total_bookings' => $this->masterProfile->bookings()->count(),
-            'completed_bookings' => $this->masterProfile->completed_bookings,
-            'rating' => $this->masterProfile->rating,
-            'reviews_count' => $this->masterProfile->reviews_count,
-            'views_count' => $this->masterProfile->views_count,
-        ];
-    }
-
-    /**
-     * Получить предстоящие бронирования клиента
-     */
-    public function getUpcomingBookings($limit = 5)
-    {
-        return $this->bookings()
-            ->whereIn('status', ['pending', 'confirmed'])
-            ->where('booking_date', '>=', now()->toDateString())
-            ->orderBy('booking_date')
-            ->orderBy('start_time')
-            ->with(['masterProfile.user', 'service'])
-            ->limit($limit)
-            ->get();
-    }
-
-    /**
-     * Связь с балансом пользователя (DigiSeller стиль)
-     */
-    public function balance()
-    {
-        return $this->hasOne(UserBalance::class);
     }
 
     /**
@@ -258,36 +146,28 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Проверить достаточность средств
-     */
-    public function hasEnoughFunds($amount, $currency = 'RUB')
-    {
-        $balance = $this->getBalance();
-        $field = strtolower($currency) . '_balance';
-        
-        return $balance->$field >= $amount;
-    }
-
-    /**
-     * Получить форматированный баланс
-     */
-    public function getFormattedBalance()
-    {
-        return $this->getBalance()->formatted_balance;
-    }
-
-    /**
-     * Boot метод для автоматического создания профиля мастера
+     * Boot метод для автоматического создания связанных записей
      */
     protected static function boot()
     {
         parent::boot();
 
         static::created(function ($user) {
-            // Если создаётся мастер, создаём профиль
-            if ($user->role === 'master') {
+            // Создаём профиль пользователя
+            $user->profile()->create([
+                'user_id' => $user->id,
+                'name' => 'Пользователь',
+            ]);
+
+            // Создаём настройки пользователя
+            $user->settings()->create([
+                'user_id' => $user->id,
+            ]);
+
+            // Если создаётся мастер, создаём профиль мастера
+            if ($user->isMaster()) {
                 $user->masterProfile()->create([
-                    'display_name' => $user->name,
+                    'display_name' => 'Мастер',
                     'city' => 'Москва',
                     'status' => 'draft',
                 ]);

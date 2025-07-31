@@ -14,23 +14,18 @@
       <!-- ГРУППА 1: Базовая информация -->
       <div class="form-group">
         <WorkFormat
-          v-model:work-format="formData.work_format"
-          v-model:has-girlfriend="formData.has_girlfriend"
           :errors="formErrors"
         />
 
         <ServiceProvider
-          v-model:service-provider="formData.service_provider"
           :errors="formErrors"
         />
 
         <ClientsModule
-          v-model:clients="formData.clients"
           :errors="formErrors"
         />
 
         <Description
-          v-model:description="formData.description"
           :errors="formErrors"
         />
       </div>
@@ -38,22 +33,14 @@
       <!-- ГРУППА 2: Персональная информация -->
       <div class="form-group">
         <ParametersModule
-          v-model:age="formData.age"
-          v-model:height="formData.height"
-          v-model:weight="formData.weight"
-          v-model:breast-size="formData.breast_size"
-          v-model:hair-color="formData.hair_color"
-          v-model:eye-color="formData.eye_color"
-          v-model:appearance="formData.appearance"
-          v-model:nationality="formData.nationality"
           :errors="formErrors"
         />
 
         <FeaturesModule
-          v-model:features="formData.features"
-          v-model:additional-features="formData.additional_features"
-          v-model:experience="formData.experience"
-          v-model:education-level="formData.education_level"
+          :errors="formErrors"
+        />
+
+        <EducationModule
           :errors="formErrors"
         />
       </div>
@@ -61,73 +48,53 @@
       <!-- ГРУППА 3: Коммерческая информация -->
       <div class="form-group">
         <PriceModule
-          v-model:price-per-hour="form.price_per_hour"
-          v-model:outcall-price="form.outcall_price"
-          v-model:min-duration="form.min_duration"
-          v-model:new-client-discount="form.new_client_discount"
-          :errors="errors"
+          :errors="formErrors"
         />
 
         <PromoModule
-          v-model:new-client-discount="form.new_client_discount"
-          v-model:gift="form.gift"
-          :errors="errors"
+          :errors="formErrors"
         />
 
         <ServicesModule
-          v-model:services="form.services"
-          v-model:services-additional-info="form.services_additional_info"
           :allowed-categories="[]"
           :use-new-architecture="true"
-          :errors="errors"
+          :errors="formErrors"
         />
 
         <ScheduleModule
-          v-model:schedule="form.schedule"
-          v-model:schedule-notes="form.schedule_notes"
-          :errors="errors"
+          :errors="formErrors"
         />
       </div>
 
       <!-- ГРУППА 4: Локация и контакты -->
       <div class="form-group">
         <LocationModule
-          v-model:service-location="form.service_location"
-          v-model:outcall-locations="form.outcall_locations"
-          v-model:taxi-option="form.taxi_option"
-          :errors="errors"
+          :errors="formErrors"
         />
 
         <GeoModule
-          v-model:geo="form.geo"
-          :errors="errors"
+          :errors="formErrors"
         />
 
         <ContactsModule
-          v-model:phone="form.phone"
-          v-model:contact-method="form.contact_method"
-          v-model:whatsapp="form.whatsapp"
-          v-model:telegram="form.telegram"
-          :errors="errors"
+          :errors="formErrors"
         />
 
         <PaymentModule
-          v-model:payment-methods="form.payment_methods"
-          :errors="errors"
+          :errors="formErrors"
         />
       </div>
 
       <!-- ГРУППА 5: Медиа -->
       <div class="form-group">
         <MediaModule
-          v-model:photos="form.photos"
-          v-model:video="form.video"
           :uploading="uploading"
           :upload-progress="uploadProgress"
           :uploading-video="uploadingVideo"
           :video-upload-progress="videoUploadProgress"
           @photo-error="handlePhotoError"
           @video-error="handleVideoError"
+          :errors="formErrors"
         />
       </div>
 
@@ -192,6 +159,7 @@ import ClientsModule from './modules/BasicInfo/Clients.vue'
 // Модули персональной информации  
 import ParametersModule from './features/PersonalInfo/Parameters/index.vue'
 import FeaturesModule from './features/PersonalInfo/Features/index.vue'
+import EducationModule from './features/PersonalInfo/Education/index.vue'
 
 // Модули медиа
 import MediaModule from './modules/Media/MediaModule.vue'

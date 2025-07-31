@@ -205,10 +205,14 @@ const draggedIndex = ref(null)
 // Computed
 const photos = computed({
   get() {
-    return props.modelValue
+    // Безопасное получение массива
+    const value = props.modelValue
+    return Array.isArray(value) ? value : []
   },
   set(value) {
-    emit('update:modelValue', value)
+    // Безопасная отправка массива
+    const safeValue = Array.isArray(value) ? value : []
+    emit('update:modelValue', safeValue)
   }
 })
 
@@ -264,7 +268,8 @@ const processFiles = (files) => {
   }
   
   // Проверяем лимит файлов
-  if (photos.value.length + imageFiles.length > props.maxFiles) {
+  const currentPhotosCount = Array.isArray(photos.value) ? photos.value.length : 0
+  if (currentPhotosCount + imageFiles.length > props.maxFiles) {
     error.value = `Максимум ${props.maxFiles} фотографий`
     return
   }
@@ -296,21 +301,23 @@ const processFiles = (files) => {
 }
 
 const removePhoto = (index) => {
-  if (index < 0 || index >= photos.value.length) {
+  const currentPhotos = Array.isArray(photos.value) ? photos.value : []
+  if (index < 0 || index >= currentPhotos.length) {
     return
   }
   
-  const newPhotos = [...photos.value]
+  const newPhotos = [...currentPhotos]
   newPhotos.splice(index, 1)
   photos.value = newPhotos
 }
 
 const rotatePhoto = (index) => {
-  if (index < 0 || index >= photos.value.length) {
+  const currentPhotos = Array.isArray(photos.value) ? photos.value : []
+  if (index < 0 || index >= currentPhotos.length) {
     return
   }
   
-  const newPhotos = [...photos.value]
+  const newPhotos = [...currentPhotos]
   const currentRotation = newPhotos[index].rotation || 0
   newPhotos[index] = {
     ...newPhotos[index],
@@ -348,13 +355,14 @@ const handlePhotoDrop = (event, targetIndex) => {
     return
   }
   
-  if (sourceIndex < 0 || sourceIndex >= photos.value.length || 
-      targetIndex < 0 || targetIndex >= photos.value.length) {
+  const currentPhotos = Array.isArray(photos.value) ? photos.value : []
+  if (sourceIndex < 0 || sourceIndex >= currentPhotos.length || 
+      targetIndex < 0 || targetIndex >= currentPhotos.length) {
     return
   }
   
   // Создаем новый массив для перестановки
-  const newPhotos = [...photos.value]
+  const newPhotos = [...currentPhotos]
   const [movedPhoto] = newPhotos.splice(sourceIndex, 1)
   newPhotos.splice(targetIndex, 0, movedPhoto)
   

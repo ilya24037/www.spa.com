@@ -11,7 +11,6 @@
       type="tel"
       placeholder="(999) 123-45-67"
       prefix="+7"
-      @input="handleInput"
       @keypress="handleKeypress"
       :class="{ 
         'border-green-500': validation.isValid && localValue,
@@ -76,9 +75,9 @@ const validation = computed(() => {
   return { isValid: true, message: 'Номер корректный' }
 })
 
-// Обработка ввода
-const handleInput = (value) => {
-  let cleanValue = value.replace(/\D/g, '')
+// Единый watcher для форматирования и отправки изменений
+watch(localValue, (newValue) => {
+  let cleanValue = newValue.replace(/\D/g, '')
   
   // Ограничиваем длину
   if (cleanValue.length > 10) {
@@ -97,9 +96,15 @@ const handleInput = (value) => {
     formatted = `${formatted.substring(0, 12)}-${formatted.substring(12)}`
   }
   
-  localValue.value = formatted
-  emit('update:modelValue', formatted)
-}
+  // Если нужно переформатировать, делаем это без повторного вызова watcher
+  if (formatted !== newValue) {
+    localValue.value = formatted
+    return
+  }
+  
+  // Отправляем изменения родителю только если значение реально изменилось
+  emit('update:modelValue', newValue)
+})
 
 const handleKeypress = (event) => {
   // Разрешаем только цифры и служебные клавиши

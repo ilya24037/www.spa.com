@@ -36,7 +36,11 @@ const emit = defineEmits(['update:modelValue'])
 const localValue = ref(Array.from(Object.keys(props.modelValue || {})))
 
 watch(() => props.modelValue, (newValue) => {
-  localValue.value = Array.from(Object.keys(newValue || {}))
+  const newKeys = Array.from(Object.keys(newValue || {}))
+  // Обновляем только если есть реальные изменения
+  if (JSON.stringify(newKeys.sort()) !== JSON.stringify(localValue.value.sort())) {
+    localValue.value = newKeys
+  }
 }, { deep: true })
 
 // Группы особенностей с иконками
@@ -69,7 +73,10 @@ const selectedText = computed(() => {
 
 // Методы
 const handleUpdate = (selectedKeys) => {
-  localValue.value = selectedKeys
+  // Проверяем есть ли реальные изменения
+  if (JSON.stringify(selectedKeys.sort()) === JSON.stringify(localValue.value.sort())) {
+    return // Никаких изменений - не обновляем
+  }
   
   // Преобразуем массив ключей в объект
   const featuresObject = {}
@@ -77,6 +84,10 @@ const handleUpdate = (selectedKeys) => {
     featuresObject[key] = true
   })
   
+  // Обновляем локальное состояние первым
+  localValue.value = selectedKeys
+  
+  // Затем эмитим изменения
   emit('update:modelValue', featuresObject)
 }
 </script>

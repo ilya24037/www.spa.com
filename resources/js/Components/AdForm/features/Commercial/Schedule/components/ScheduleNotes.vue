@@ -10,7 +10,6 @@
       :rows="3"
       placeholder="Например: обеденный перерыв с 13:00 до 14:00, не работаю в праздники..."
       :maxlength="300"
-      @input="handleInput"
     />
     
     <!-- Счетчик символов -->
@@ -40,9 +39,10 @@ watch(() => props.modelValue, (newValue) => {
   localValue.value = newValue || ''
 })
 
-// Методы
-const handleInput = (value) => {
-  localValue.value = value
-  emit('update:modelValue', value)
-}
+// Watch для отправки изменений родителю
+watch(localValue, (newValue) => {
+  emit('update:modelValue', newValue)
+})
+
+// Методы (больше не нужны - используем watcher)
 </script>

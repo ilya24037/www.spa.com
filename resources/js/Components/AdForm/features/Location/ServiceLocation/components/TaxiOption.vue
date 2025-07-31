@@ -41,11 +41,15 @@ const emit = defineEmits(['update:modelValue'])
 const localValue = ref(props.modelValue)
 
 watch(() => props.modelValue, (newValue) => {
-  localValue.value = newValue
+  if (newValue !== localValue.value) {
+    localValue.value = newValue
+  }
 })
 
 watch(localValue, (newValue) => {
-  emit('update:modelValue', newValue)
+  if (newValue !== props.modelValue) {
+    emit('update:modelValue', newValue)
+  }
 })
 
 // Показывать только если выбран выезд

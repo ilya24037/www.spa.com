@@ -9,7 +9,6 @@
       :rows="3"
       placeholder="Опишите дополнительные особенности..."
       :maxlength="500"
-      @input="handleInput"
     />
     
     <!-- Подсказки -->
@@ -49,6 +48,11 @@ watch(() => props.modelValue, (newValue) => {
   localValue.value = newValue || ''
 })
 
+// Watch для отправки изменений родителю
+watch(localValue, (newValue) => {
+  emit('update:modelValue', newValue)
+})
+
 // Подсказки
 const suggestions = [
   'Опыт работы в спа-центрах',
@@ -62,20 +66,18 @@ const suggestions = [
 ]
 
 // Методы
-const handleInput = (value) => {
-  localValue.value = value
-  emit('update:modelValue', value)
-}
-
 const addSuggestion = (suggestion) => {
-  if (localValue.value.trim()) {
-    if (!localValue.value.includes(suggestion)) {
-      localValue.value += ', ' + suggestion
+  let newValue = localValue.value.trim()
+  
+  if (newValue) {
+    if (!newValue.includes(suggestion)) {
+      newValue += ', ' + suggestion
     }
   } else {
-    localValue.value = suggestion
+    newValue = suggestion
   }
   
-  emit('update:modelValue', localValue.value)
+  // Обновляем localValue (watcher автоматически отправит изменения)
+  localValue.value = newValue
 }
 </script>

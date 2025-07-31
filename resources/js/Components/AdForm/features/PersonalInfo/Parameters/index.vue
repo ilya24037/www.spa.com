@@ -12,9 +12,9 @@
         :height="height"  
         :weight="weight"
         :errors="errors"
-        @update:age="$emit('update:age', $event)"
-        @update:height="$emit('update:height', $event)"
-        @update:weight="$emit('update:weight', $event)"
+        @update:age="(value) => updateField('age', value)"
+        @update:height="(value) => updateField('height', value)"
+        @update:weight="(value) => updateField('weight', value)"
       />
 
       <!-- Особенности тела -->
@@ -23,9 +23,9 @@
         :eye-color="eyeColor"
         :breast-size="breastSize"
         :errors="errors"
-        @update:hairColor="$emit('update:hairColor', $event)"
-        @update:eyeColor="$emit('update:eyeColor', $event)"
-        @update:breastSize="$emit('update:breastSize', $event)"
+        @update:hairColor="(value) => updateField('hair_color', value)"
+        @update:eyeColor="(value) => updateField('eye_color', value)"
+        @update:breastSize="(value) => updateField('breast_size', value)"
       />
 
       <!-- Внешность и национальность -->
@@ -33,35 +33,43 @@
         :appearance="appearance"
         :nationality="nationality"
         :errors="errors"
-        @update:appearance="$emit('update:appearance', $event)"
-        @update:nationality="$emit('update:nationality', $event)"
+        @update:appearance="(value) => updateField('appearance', value)"
+        @update:nationality="(value) => updateField('nationality', value)"
       />
     </div>
   </FormSection>
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import FormSection from '@/Components/UI/Forms/FormSection.vue'
+import { useAdFormStore } from '../../../stores/adFormStore'
 
 // Микрокомпоненты
 import PhysicalMeasurements from './components/PhysicalMeasurements.vue'
 import BodyFeatures from './components/BodyFeatures.vue'
 import AppearanceSelects from './components/AppearanceSelects.vue'
 
-defineProps({
-  age: { type: [String, Number], default: '' },
-  height: { type: [String, Number], default: '' },
-  weight: { type: [String, Number], default: '' },
-  breastSize: { type: [String, Number], default: '' },
-  hairColor: { type: String, default: '' },
-  eyeColor: { type: String, default: '' },
-  appearance: { type: String, default: '' },
-  nationality: { type: String, default: '' },
+// AVITO-STYLE: Используем централизованный store
+const store = useAdFormStore()
+
+const props = defineProps({
   errors: { type: Object, default: () => ({}) }
 })
 
-defineEmits([
-  'update:age', 'update:height', 'update:weight', 'update:breastSize',
-  'update:hairColor', 'update:eyeColor', 'update:appearance', 'update:nationality'
-])
+// Читаем данные ТОЛЬКО из store (как на Avito)
+const age = computed(() => store.formData.age || '')
+const height = computed(() => store.formData.height || '')
+const weight = computed(() => store.formData.weight || '')
+const breastSize = computed(() => store.formData.breast_size || '')
+const hairColor = computed(() => store.formData.hair_color || '')
+const eyeColor = computed(() => store.formData.eye_color || '')
+const appearance = computed(() => store.formData.appearance || '')
+const nationality = computed(() => store.formData.nationality || '')
+
+// Методы обновляют ТОЛЬКО store (как на Avito/Ozon)
+const updateField = (field, value) => {
+  console.log('updateField called:', field, value)
+  store.updateField(field, value)
+}
 </script>

@@ -8,13 +8,15 @@
     <div class="space-y-6">
       <!-- Особенности -->
       <FeaturesCheckboxes
-        v-model="localFeatures"
+        :model-value="features"
+        @update:model-value="updateFeatures"
         :error="errors.features"
       />
 
       <!-- Дополнительные особенности -->
       <AdditionalFeaturesInput
-        v-model="localAdditionalFeatures"
+        :model-value="additionalFeatures"
+        @update:model-value="updateAdditionalFeatures"
         :error="errors.additional_features"
       />
 
@@ -22,13 +24,15 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Опыт работы -->
         <ExperienceSelect
-          v-model="localExperience"
+          :model-value="experience"
+          @update:model-value="updateExperience"
           :error="errors.experience"
         />
 
         <!-- Уровень образования -->
         <EducationSelect
-          v-model="localEducationLevel"
+          :model-value="educationLevel"
+          @update:model-value="updateEducationLevel"
           :error="errors.education_level"
         />
       </div>
@@ -37,8 +41,9 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { computed } from 'vue'
 import FormSection from '@/Components/UI/Forms/FormSection.vue'
+import { useAdFormStore } from '../../../stores/adFormStore'
 
 // Микрокомпоненты
 import FeaturesCheckboxes from './components/FeaturesCheckboxes.vue'
@@ -46,58 +51,37 @@ import AdditionalFeaturesInput from './components/AdditionalFeaturesInput.vue'
 import ExperienceSelect from './components/ExperienceSelect.vue'
 import EducationSelect from './components/EducationSelect.vue'
 
+// AVITO-STYLE: Используем централизованный store
+const store = useAdFormStore()
+
 const props = defineProps({
-  features: { type: Object, default: () => ({}) },
-  additionalFeatures: { type: String, default: '' },
-  experience: { type: String, default: '' },
-  educationLevel: { type: String, default: '' },
   errors: { type: Object, default: () => ({}) }
 })
 
-const emit = defineEmits([
-  'update:features', 
-  'update:additionalFeatures', 
-  'update:experience', 
-  'update:educationLevel'
-])
+// Читаем данные ТОЛЬКО из store (как на Avito)
+const features = computed(() => store.formData.features || {})
+const additionalFeatures = computed(() => store.formData.additional_features || '')
+const experience = computed(() => store.formData.experience || '')
+const educationLevel = computed(() => store.formData.education_level || '')
 
-// Локальное состояние
-const localFeatures = ref({ ...props.features })
-const localAdditionalFeatures = ref(props.additionalFeatures)
-const localExperience = ref(props.experience)
-const localEducationLevel = ref(props.educationLevel)
+// Методы обновляют ТОЛЬКО store (как на Avito/Ozon)
+const updateFeatures = (newFeatures) => {
+  console.log('updateFeatures called:', newFeatures)
+  store.updateField('features', newFeatures)
+}
 
-// Отслеживание изменений пропсов
-watch(() => props.features, (newValue) => {
-  localFeatures.value = { ...newValue }
-}, { deep: true })
+const updateAdditionalFeatures = (value) => {
+  console.log('updateAdditionalFeatures called:', value)
+  store.updateField('additional_features', value)
+}
 
-watch(() => props.additionalFeatures, (newValue) => {
-  localAdditionalFeatures.value = newValue
-})
+const updateExperience = (value) => {
+  console.log('updateExperience called:', value)
+  store.updateField('experience', value)
+}
 
-watch(() => props.experience, (newValue) => {
-  localExperience.value = newValue
-})
-
-watch(() => props.educationLevel, (newValue) => {
-  localEducationLevel.value = newValue
-})
-
-// Отправка изменений родителю
-watch(localFeatures, (newValue) => {
-  emit('update:features', { ...newValue })
-}, { deep: true })
-
-watch(localAdditionalFeatures, (newValue) => {
-  emit('update:additionalFeatures', newValue)
-})
-
-watch(localExperience, (newValue) => {
-  emit('update:experience', newValue)
-})
-
-watch(localEducationLevel, (newValue) => {
-  emit('update:educationLevel', newValue)
-})
+const updateEducationLevel = (value) => {
+  console.log('updateEducationLevel called:', value)
+  store.updateField('education_level', value)
+}
 </script>

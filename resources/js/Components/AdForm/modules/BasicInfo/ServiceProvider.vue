@@ -11,48 +11,36 @@
       required
       :error="errors.service_provider"
     >
-      <div class="checkbox-group">
-        <div
+      <div class="flex flex-col gap-3">
+        <BaseCheckbox
           v-for="option in providerOptions"
           :key="option.value"
-          class="checkbox-item"
-          @click="toggleProvider(option.value)"
-        >
-          <input
-            type="checkbox"
-            :checked="isSelected(option.value)"
-            @click.stop
-            @change="toggleProvider(option.value)"
-          />
-          <div class="checkbox-content">
-            <div class="checkbox-title">{{ option.label }}</div>
-            <div v-if="option.description" class="checkbox-description">
-              {{ option.description }}
-            </div>
-          </div>
-        </div>
+          :model-value="isSelected(option.value)"
+          :label="option.label"
+          :description="option.description"
+          @update:model-value="() => toggleProvider(option.value)"
+        />
       </div>
     </FormField>
   </FormSection>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { computed } from 'vue'
 import FormSection from '@/Components/UI/Forms/FormSection.vue'
 import FormField from '@/Components/UI/Forms/FormField.vue'
+import BaseCheckbox from '@/Components/UI/BaseCheckbox.vue'
+import { useAdFormStore } from '../../stores/adFormStore'
+
+// AVITO-STYLE: Используем централизованный store
+const store = useAdFormStore()
 
 const props = defineProps({
-  serviceProvider: {
-    type: Array,
-    default: () => []
-  },
   errors: {
     type: Object,
     default: () => ({})
   }
 })
-
-const emit = defineEmits(['update:serviceProvider'])
 
 // Опции провайдеров
 const providerOptions = [
@@ -78,80 +66,28 @@ const providerOptions = [
   }
 ]
 
-// Локальное состояние
-const localServiceProvider = ref([...props.serviceProvider])
+// Читаем данные ТОЛЬКО из store (как на Avito)
+const serviceProvider = computed(() => store.formData.service_provider || [])
 
-// Отслеживаем изменения пропсов
-watch(() => props.serviceProvider, (newValue) => {
-  localServiceProvider.value = [...newValue]
-}, { deep: true })
-
-// Методы
+// Методы обновляют ТОЛЬКО store (как на Avito/Ozon)
 const isSelected = (value) => {
-  return localServiceProvider.value.includes(value)
+  return serviceProvider.value.includes(value)
 }
 
 const toggleProvider = (value) => {
-  const index = localServiceProvider.value.indexOf(value)
+  const currentValues = [...serviceProvider.value]
+  const index = currentValues.indexOf(value)
   
   if (index > -1) {
     // Убираем из массива
-    localServiceProvider.value.splice(index, 1)
+    currentValues.splice(index, 1)
   } else {
     // Добавляем в массив
-    localServiceProvider.value.push(value)
+    currentValues.push(value)
   }
   
-  emit('update:serviceProvider', [...localServiceProvider.value])
+  console.log('toggleProvider called:', value, 'new array:', currentValues)
+  store.updateField('service_provider', currentValues)
 }
 </script>
 
-<style scoped>
-.checkbox-group {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.checkbox-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  cursor: pointer;
-  padding: 12px;
-  border: 1px solid #e5e5e5;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-}
-
-.checkbox-item:hover {
-  border-color: #1890ff;
-  background: #f0f8ff;
-}
-
-.checkbox-item input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  margin: 0;
-  margin-top: 2px;
-  flex-shrink: 0;
-}
-
-.checkbox-content {
-  flex: 1;
-}
-
-.checkbox-title {
-  font-size: 16px;
-  font-weight: 500;
-  color: #1a1a1a;
-  line-height: 1.4;
-}
-
-.checkbox-description {
-  font-size: 14px;
-  color: #8c8c8c;
-  line-height: 1.4;
-  margin-top: 2px;
-}
-</style>

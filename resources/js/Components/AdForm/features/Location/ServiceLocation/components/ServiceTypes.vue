@@ -28,11 +28,17 @@ const emit = defineEmits(['update:modelValue'])
 const localValue = ref([...props.modelValue])
 
 watch(() => props.modelValue, (newValue) => {
-  localValue.value = Array.isArray(newValue) ? [...newValue] : []
+  const normalizedNew = Array.isArray(newValue) ? newValue : []
+  if (JSON.stringify(normalizedNew.sort()) !== JSON.stringify(localValue.value.sort())) {
+    localValue.value = [...normalizedNew]
+  }
 })
 
 watch(localValue, (newValue) => {
-  emit('update:modelValue', newValue)
+  const normalizedProps = Array.isArray(props.modelValue) ? props.modelValue : []
+  if (JSON.stringify(newValue.sort()) !== JSON.stringify(normalizedProps.sort())) {
+    emit('update:modelValue', newValue)
+  }
 }, { deep: true })
 
 // Варианты местоположения с иконками и описаниями

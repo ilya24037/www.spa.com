@@ -19,7 +19,8 @@
 
       <!-- Дополнительные заметки -->
       <ScheduleNotes
-        v-model="localScheduleNotes"
+        :model-value="localScheduleNotes"
+        @update:model-value="(value) => store.updateField('schedule_notes', value)"
         :error="errors.schedule_notes"
       />
 
@@ -36,8 +37,9 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { computed } from 'vue'
 import FormSection from '@/Components/UI/Forms/FormSection.vue'
+import { useAdFormStore } from '../../../stores/adFormStore'
 
 // Микрокомпоненты
 import WeekdayGrid from './components/WeekdayGrid.vue'
@@ -46,59 +48,43 @@ import ScheduleNotes from './components/ScheduleNotes.vue'
 import SchedulePreview from './components/SchedulePreview.vue'
 import ScheduleTips from './components/ScheduleTips.vue'
 
+// AVITO-STYLE: Используем централизованный store
+const store = useAdFormStore()
+
 const props = defineProps({
-  schedule: { type: [Object, String], default: () => ({}) },
-  scheduleNotes: { type: String, default: '' },
   errors: { type: Object, default: () => ({}) }
 })
 
-const emit = defineEmits([
-  'update:schedule',
-  'update:scheduleNotes'
-])
-
-// Локальное состояние
-const localSchedule = ref({})
-const localScheduleNotes = ref(props.scheduleNotes || '')
-
-// Инициализация расписания
-const initializeSchedule = () => {
-  let schedule = props.schedule
+// Читаем данные ТОЛЬКО из store (как на Avito)
+const schedule = computed(() => {
+  let scheduleData = store.formData.schedule || {}
   
   // Если пришла строка, парсим JSON
-  if (typeof schedule === 'string') {
+  if (typeof scheduleData === 'string') {
     try {
-      schedule = JSON.parse(schedule) || {}
+      scheduleData = JSON.parse(scheduleData) || {}
     } catch (e) {
-      schedule = {}
+      scheduleData = {}
     }
   }
   
-  localSchedule.value = { ...schedule }
-}
-
-// Отслеживание изменений пропсов
-watch(() => props.schedule, () => {
-  initializeSchedule()
-}, { immediate: true })
-
-watch(() => props.scheduleNotes, (newValue) => { 
-  localScheduleNotes.value = newValue || '' 
+  return scheduleData
 })
 
-// Отслеживание изменений локальных данных
-watch(localScheduleNotes, (newValue) => {
-  emit('update:scheduleNotes', newValue)
-})
+const scheduleNotes = computed(() => store.formData.schedule_notes || '')
 
-// Методы
+// Локальное состояние для UI (нужно для компонентов)
+const localSchedule = computed(() => schedule.value)
+const localScheduleNotes = computed(() => scheduleNotes.value)
+
+// Методы обновляют ТОЛЬКО store (как на Avito/Ozon)
 const updateSchedule = (newSchedule) => {
-  localSchedule.value = { ...newSchedule }
-  emit('update:schedule', localSchedule.value)
+  console.log('updateSchedule called:', newSchedule)
+  store.updateField('schedule', newSchedule)
 }
 
 const applyPreset = (presetSchedule) => {
-  localSchedule.value = { ...presetSchedule }
-  emit('update:schedule', localSchedule.value)
+  console.log('applyPreset called:', presetSchedule)
+  store.updateField('schedule', presetSchedule)
 }
 </script>

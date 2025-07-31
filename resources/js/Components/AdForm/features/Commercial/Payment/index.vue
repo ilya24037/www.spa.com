@@ -7,15 +7,19 @@
     <div class="space-y-6">
       <!-- Основные способы оплаты -->
       <PaymentGrid 
-        v-model="selectedMethods"
+        :model-value="selectedMethods"
+        @update:model-value="updateSelectedMethods"
         :error="errors.payment_methods"
       />
 
       <!-- Настройки предоплаты -->
       <PrepaymentSettings
-        v-model:type="prepaymentType"
-        v-model:amount="prepaymentAmount"
-        v-model:note="prepaymentNote"
+        :type="prepaymentType"
+        :amount="prepaymentAmount"
+        :note="prepaymentNote"
+        @update:type="updatePrepaymentType"
+        @update:amount="updatePrepaymentAmount"
+        @update:note="updatePrepaymentNote"
       />
 
       <!-- Предварительный просмотр -->
@@ -35,8 +39,9 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
+import { computed, ref } from 'vue'
 import FormSection from '@/Components/UI/Forms/FormSection.vue'
+import { useAdFormStore } from '../../../stores/adFormStore'
 
 // Микрокомпоненты
 import PaymentGrid from './components/PaymentGrid.vue'
@@ -44,74 +49,88 @@ import PrepaymentSettings from './components/PrepaymentSettings.vue'
 import PaymentPreview from './components/PaymentPreview.vue'
 import PaymentTips from './components/PaymentTips.vue'
 
+// AVITO-STYLE: Используем централизованный store
+const store = useAdFormStore()
+
 const props = defineProps({
-  paymentMethods: { 
-    type: [Array, String, Object], 
-    default: () => [] 
-  },
   errors: { 
     type: Object, 
     default: () => ({}) 
   }
 })
 
-const emit = defineEmits(['update:paymentMethods'])
-
-// Локальное состояние
-const selectedMethods = ref([])
-const prepaymentType = ref('none')
-const prepaymentAmount = ref('30')
-const prepaymentNote = ref('')
-
-// Инициализация данных
-const initializeData = () => {
-  let methods = props.paymentMethods
-  
-  // Обработка разных форматов данных
-  if (typeof methods === 'string') {
-    try {
-      const parsed = JSON.parse(methods)
-      methods = parsed.methods || parsed || []
-    } catch (e) {
-      methods = []
-    }
-  } else if (methods && typeof methods === 'object' && !Array.isArray(methods)) {
-    // Объект с methods и prepayment
-    selectedMethods.value = Array.isArray(methods.methods) ? [...methods.methods] : []
-    if (methods.prepayment) {
-      prepaymentType.value = methods.prepayment.type || 'none'
-      prepaymentAmount.value = methods.prepayment.amount || '30'
-      prepaymentNote.value = methods.prepayment.note || ''
-    }
-    return
+// Читаем данные ТОЛЬКО из store (как на Avito)
+const paymentMethods = computed(() => store.formData.payment_methods || [])
+const selectedMethods = computed(() => {
+  const methods = paymentMethods.value
+  if (Array.isArray(methods)) return methods
+  if (typeof methods === 'object' && methods && methods.methods) {
+    return Array.isArray(methods.methods) ? methods.methods : []
   }
-  
-  selectedMethods.value = Array.isArray(methods) ? [...methods] : []
+  return []
+})
+const prepaymentType = computed(() => {
+  const methods = paymentMethods.value
+  return methods?.prepayment?.type || 'none'
+})
+const prepaymentAmount = computed(() => {
+  const methods = paymentMethods.value
+  return methods?.prepayment?.amount || '30'
+})
+const prepaymentNote = computed(() => {
+  const methods = paymentMethods.value
+  return methods?.prepayment?.note || ''
+})
+
+// Методы обновляют ТОЛЬКО store (как на Avito/Ozon)
+const updateSelectedMethods = (methods) => {
+  console.log('updateSelectedMethods called:', methods)
+  const currentData = paymentMethods.value || {}
+  const newData = {
+    ...currentData,
+    methods: Array.isArray(methods) ? methods : []
+  }
+  store.updateField('payment_methods', newData)
 }
 
-// Отслеживание изменений пропсов
-watch(() => props.paymentMethods, () => {
-  initializeData()
-}, { immediate: true })
-
-// Отправка данных родителю
-const updatePaymentMethods = () => {
-  const data = {
-    methods: [...selectedMethods.value],
+const updatePrepaymentType = (type) => {
+  console.log('updatePrepaymentType called:', type)
+  const currentData = paymentMethods.value || {}
+  const newData = {
+    ...currentData,
     prepayment: {
-      type: prepaymentType.value,
-      amount: prepaymentAmount.value,
-      note: prepaymentNote.value
+      ...(currentData.prepayment || {}),
+      type: type
     }
   }
-  
-  emit('update:paymentMethods', data)
+  store.updateField('payment_methods', newData)
 }
 
-// Отслеживание изменений локальных данных
-watch([selectedMethods, prepaymentType, prepaymentAmount, prepaymentNote], () => {
-  updatePaymentMethods()
-}, { deep: true })
+const updatePrepaymentAmount = (amount) => {
+  console.log('updatePrepaymentAmount called:', amount)
+  const currentData = paymentMethods.value || {}
+  const newData = {
+    ...currentData,
+    prepayment: {
+      ...(currentData.prepayment || {}),
+      amount: amount
+    }
+  }
+  store.updateField('payment_methods', newData)
+}
+
+const updatePrepaymentNote = (note) => {
+  console.log('updatePrepaymentNote called:', note)
+  const currentData = paymentMethods.value || {}
+  const newData = {
+    ...currentData,
+    prepayment: {
+      ...(currentData.prepayment || {}),
+      note: note
+    }
+  }
+  store.updateField('payment_methods', newData)
+}
 </script>
 
 <style scoped>

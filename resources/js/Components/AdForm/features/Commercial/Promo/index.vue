@@ -7,20 +7,22 @@
     <div class="space-y-6">
       <!-- Скидка новым клиентам -->
       <DiscountInput
-        v-model="localNewClientDiscount"
+        :model-value="newClientDiscount"
+        @update:model-value="updateNewClientDiscount"
         :error="errors.new_client_discount"
       />
 
       <!-- Подарок или бонус -->
       <GiftInput
-        v-model="localGift"
+        :model-value="gift"
+        @update:model-value="updateGift"
         :error="errors.gift"
       />
 
       <!-- Предварительный просмотр -->
       <PromoPreview
-        :discount="localNewClientDiscount"
-        :gift="localGift"
+        :discount="newClientDiscount"
+        :gift="gift"
       />
 
       <!-- Советы по акциям -->
@@ -30,8 +32,9 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { computed } from 'vue'
 import FormSection from '@/Components/UI/Forms/FormSection.vue'
+import { useAdFormStore } from '../../../stores/adFormStore'
 
 // Микрокомпоненты
 import DiscountInput from './components/DiscountInput.vue'
@@ -39,35 +42,25 @@ import GiftInput from './components/GiftInput.vue'
 import PromoPreview from './components/PromoPreview.vue'
 import PromoTips from './components/PromoTips.vue'
 
+// AVITO-STYLE: Используем централизованный store
+const store = useAdFormStore()
+
 const props = defineProps({
-  newClientDiscount: { type: [String, Number], default: '' },
-  gift: { type: String, default: '' },
   errors: { type: Object, default: () => ({}) }
 })
 
-const emit = defineEmits([
-  'update:newClientDiscount',
-  'update:gift'
-])
+// Читаем данные ТОЛЬКО из store (как на Avito)
+const newClientDiscount = computed(() => store.formData.new_client_discount || '')
+const gift = computed(() => store.formData.gift || '')
 
-// Локальное состояние
-const localNewClientDiscount = ref(String(props.newClientDiscount || ''))
-const localGift = ref(props.gift || '')
+// Методы обновляют ТОЛЬКО store (как на Avito/Ozon)
+const updateNewClientDiscount = (value) => {
+  console.log('updateNewClientDiscount called:', value)
+  store.updateField('new_client_discount', value)
+}
 
-// Отслеживание изменений пропсов
-watch(() => props.newClientDiscount, (newValue) => { 
-  localNewClientDiscount.value = String(newValue || '') 
-})
-watch(() => props.gift, (newValue) => { 
-  localGift.value = newValue || '' 
-})
-
-// Отправка изменений родителю
-watch(localNewClientDiscount, (newValue) => {
-  emit('update:newClientDiscount', newValue)
-})
-
-watch(localGift, (newValue) => {
-  emit('update:gift', newValue)
-})
+const updateGift = (value) => {
+  console.log('updateGift called:', value)
+  store.updateField('gift', value)
+}
 </script>

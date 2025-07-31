@@ -11,7 +11,6 @@
         :rows="3"
         placeholder="Например: бесплатный чай, дополнительные 15 минут массажа, ароматерапия..."
         :maxlength="200"
-        @input="handleInput"
       />
       
       <!-- Готовые варианты -->
@@ -59,6 +58,11 @@ watch(() => props.modelValue, (newValue) => {
   localValue.value = newValue || ''
 })
 
+// Watch для отправки изменений родителю
+watch(localValue, (newValue) => {
+  emit('update:modelValue', newValue)
+})
+
 // Варианты подарков
 const giftSuggestions = [
   'Бесплатный чай или кофе',
@@ -72,21 +76,19 @@ const giftSuggestions = [
 ]
 
 // Методы
-const handleInput = (value) => {
-  localValue.value = value
-  emit('update:modelValue', value)
-}
-
 const addGiftSuggestion = (suggestion) => {
-  if (localValue.value.trim()) {
+  let newValue = localValue.value.trim()
+  
+  if (newValue) {
     // Проверяем, не добавлен ли уже этот подарок
-    if (!localValue.value.includes(suggestion)) {
-      localValue.value += ', ' + suggestion
+    if (!newValue.includes(suggestion)) {
+      newValue += ', ' + suggestion
     }
   } else {
-    localValue.value = suggestion
+    newValue = suggestion
   }
   
-  emit('update:modelValue', localValue.value)
+  // Обновляем localValue (watcher автоматически отправит изменения)
+  localValue.value = newValue
 }
 </script>
