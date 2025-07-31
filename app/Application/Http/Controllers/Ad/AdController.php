@@ -2,11 +2,11 @@
 
 namespace App\Application\Http\Controllers\Ad;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\CreateAdRequest;
-use App\Http\Requests\UpdateAdRequest;
-use App\Services\AdService;
-use App\Models\Ad;
+use App\Application\Http\Controllers\Controller;
+use App\Application\Http\Requests\CreateAdRequest;
+use App\Application\Http\Requests\UpdateAdRequest;
+use App\Domain\Ad\Services\AdService;
+use App\Domain\Ad\Models\Ad;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;

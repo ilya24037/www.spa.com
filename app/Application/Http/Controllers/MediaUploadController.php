@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Application\Http\Controllers;
 
-use App\Models\MasterProfile;
-use App\Models\MasterPhoto;
-use App\Models\MasterVideo;
-use App\Services\MediaProcessingService;
+use App\Domain\Master\Models\MasterProfile;
+use App\Domain\Media\Models\Photo;
+use App\Domain\Media\Models\Video;
+use App\Infrastructure\Media\MediaProcessingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -128,7 +128,7 @@ class MediaUploadController extends Controller
     /**
      * Удалить фотографию
      */
-    public function deletePhoto(MasterPhoto $photo)
+    public function deletePhoto(Photo $photo)
     {
         // Проверяем права доступа
         if (Auth::id() !== $photo->masterProfile->user_id) {
@@ -153,7 +153,7 @@ class MediaUploadController extends Controller
     /**
      * Удалить видео
      */
-    public function deleteVideo(MasterVideo $video)
+    public function deleteVideo(Video $video)
     {
         // Проверяем права доступа
         if (Auth::id() !== $video->masterProfile->user_id) {
@@ -193,7 +193,7 @@ class MediaUploadController extends Controller
 
         try {
             foreach ($request->photos as $photoData) {
-                MasterPhoto::where('id', $photoData['id'])
+                Photo::where('id', $photoData['id'])
                     ->where('master_profile_id', $master->id)
                     ->update(['sort_order' => $photoData['sort_order']]);
             }
@@ -213,7 +213,7 @@ class MediaUploadController extends Controller
     /**
      * Установить главное фото
      */
-    public function setMainPhoto(MasterPhoto $photo)
+    public function setMainPhoto(Photo $photo)
     {
         // Проверяем права доступа
         if (Auth::id() !== $photo->masterProfile->user_id) {
@@ -222,7 +222,7 @@ class MediaUploadController extends Controller
 
         try {
             // Убираем флаг is_main у всех фото мастера
-            MasterPhoto::where('master_profile_id', $photo->master_profile_id)
+            Photo::where('master_profile_id', $photo->master_profile_id)
                 ->update(['is_main' => false]);
 
             // Устанавливаем главное фото

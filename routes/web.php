@@ -1,18 +1,18 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\MasterController;
-use App\Http\Controllers\FavoriteController;
-use App\Http\Controllers\CompareController;
-use App\Http\Controllers\BookingController;
-use App\Http\Controllers\SearchController;
-use App\Http\Controllers\AddItemController; // 🔥 ДОБАВЛЕНО
-use App\Http\Controllers\AdController;
-use App\Http\Controllers\TestController;
-use App\Http\Controllers\MyAdsController;
-use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\WebhookController;
+use App\Application\Http\Controllers\Profile\ProfileController;
+use App\Application\Http\Controllers\HomeController;
+use App\Application\Http\Controllers\MasterController;
+use App\Application\Http\Controllers\FavoriteController;
+use App\Application\Http\Controllers\CompareController;
+use App\Application\Http\Controllers\Booking\BookingController;
+use App\Application\Http\Controllers\SearchController;
+use App\Application\Http\Controllers\AddItemController; // 🔥 ДОБАВЛЕНО
+use App\Application\Http\Controllers\Ad\AdController;
+use App\Application\Http\Controllers\TestController;
+use App\Application\Http\Controllers\MyAdsController;
+use App\Application\Http\Controllers\PaymentController;
+use App\Application\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 

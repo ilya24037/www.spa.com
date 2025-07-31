@@ -2,12 +2,12 @@
 
 namespace App\Application\Http\Controllers\Booking;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreBookingRequest;
-use App\Models\Booking;
-use App\Models\MasterProfile;
-use App\Models\Service;
-use App\Services\BookingService;
+use App\Application\Http\Controllers\Controller;
+use App\Application\Http\Requests\StoreBookingRequest;
+use App\Domain\Booking\Models\Booking;
+use App\Domain\Master\Models\MasterProfile;
+use App\Domain\Service\Models\Service;
+use App\Domain\Booking\Services\BookingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;

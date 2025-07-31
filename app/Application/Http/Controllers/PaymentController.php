@@ -2,9 +2,9 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Models\Ad;
-use App\Models\AdPlan;
-use App\Models\Payment;
+use App\Domain\Ad\Models\Ad;
+use App\Domain\Ad\Models\AdPlan;
+use App\Domain\Payment\Models\Payment;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 

@@ -2,10 +2,10 @@
 
 namespace App\Application\Http\Controllers\Booking;
 
-use App\Http\Controllers\Controller;
-use App\Models\MasterProfile;
-use App\Models\Service;
-use App\Services\BookingService;
+use App\Application\Http\Controllers\Controller;
+use App\Domain\Master\Models\MasterProfile;
+use App\Domain\Service\Models\Service;
+use App\Domain\Booking\Services\BookingService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 

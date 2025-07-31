@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Services;
+namespace App\Domain\Search\Services;
 
 use App\Enums\SearchType;
 use App\Enums\SortBy;
-use App\Repositories\SearchRepository;
-use App\Services\Search\AdSearchEngine;
-use App\Services\Search\MasterSearchEngine;
-use App\Services\Search\ServiceSearchEngine;
-use App\Services\Search\GlobalSearchEngine;
-use App\Services\Search\RecommendationEngine;
-use App\Services\Search\SearchEngineInterface;
+use App\Domain\Search\Repositories\SearchRepository;
+use App\Domain\Search\Services\AdSearchEngine;
+use App\Domain\Search\Services\MasterSearchEngine;
+use App\Domain\Search\Services\ServiceSearchEngine;
+use App\Domain\Search\Services\GlobalSearchEngine;
+use App\Domain\Search\Services\RecommendationEngine;
+use App\Domain\Search\Services\SearchEngineInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;

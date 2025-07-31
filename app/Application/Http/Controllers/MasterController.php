@@ -2,7 +2,7 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Models\MasterProfile;
+use App\Domain\Master\Models\MasterProfile;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Support\Helpers\ImageHelper;

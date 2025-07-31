@@ -6,7 +6,7 @@ use App\Services\BookingService as LegacyBookingService;
 use App\Domain\Booking\Services\BookingService as ModernBookingService;
 use App\Domain\Booking\DTOs\CreateBookingDTO;
 use App\Domain\Booking\DTOs\UpdateBookingDTO;
-use App\Models\Booking;
+use App\Domain\Booking\Models\Booking;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 

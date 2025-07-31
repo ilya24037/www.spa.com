@@ -6,10 +6,10 @@ use Illuminate\Support\ServiceProvider;
 use App\Services\BookingService as LegacyBookingService;
 use App\Domain\Booking\Services\BookingService as ModernBookingService;
 use App\Services\Adapters\BookingServiceAdapter;
-use App\Services\MasterService as ModernMasterService;
+use App\Domain\Master\Services\MasterService as ModernMasterService;
 use App\Services\Adapters\MasterServiceAdapter;
 use App\Services\SearchService as LegacySearchService;
-use App\Domain\Search\SearchEngine as ModernSearchEngine;
+use App\Domain\Search\Services\SearchService as ModernSearchService;
 use App\Services\Adapters\SearchServiceAdapter;
 
 class AdapterServiceProvider extends ServiceProvider
@@ -44,7 +44,7 @@ class AdapterServiceProvider extends ServiceProvider
 
             return new SearchServiceAdapter(
                 $legacyService,
-                $app->make(ModernSearchEngine::class)
+                $app->make(ModernSearchService::class)
             );
         });
 

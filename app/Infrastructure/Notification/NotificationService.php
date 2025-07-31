@@ -2,17 +2,17 @@
 
 namespace App\Infrastructure\Notification;
 
-use App\Models\Notification;
-use App\Models\NotificationDelivery;
-use App\Models\User;
-use App\Models\Booking;
-use App\Models\Payment;
-use App\Repositories\NotificationRepository;
+use App\Domain\Notification\Models\Notification;
+use App\Domain\Notification\Models\NotificationDelivery;
+use App\Domain\User\Models\User;
+use App\Domain\Booking\Models\Booking;
+use App\Domain\Payment\Models\Payment;
+use App\Domain\Notification\Repositories\NotificationRepository;
 use App\Enums\NotificationType;
 use App\Enums\NotificationStatus;
 use App\Enums\NotificationChannel;
-use App\DTOs\Notification\CreateNotificationDTO;
-use App\Services\Notification\ChannelManager;
+use App\Domain\Notification\DTOs\CreateNotificationDTO;
+use App\Infrastructure\Notification\ChannelManager;
 use App\Events\Notification\NotificationCreated;
 use App\Events\Notification\NotificationSent;
 use App\Events\Notification\NotificationDelivered;

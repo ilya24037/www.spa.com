@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Services;
+namespace App\Domain\Booking\Services;
 
-use App\Models\Booking;
-use App\Models\MasterProfile;
-use App\Models\Service;
-use App\Models\User;
+use App\Domain\Booking\Models\Booking;
+use App\Domain\Master\Models\MasterProfile;
+use App\Domain\Service\Models\Service;
+use App\Domain\User\Models\User;
 use App\Enums\BookingStatus;
 use App\Enums\BookingType;
-use App\Repositories\BookingRepository;
+use App\Domain\Booking\Repositories\BookingRepository;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -20,7 +20,7 @@ use Illuminate\Support\Str;
 class BookingService
 {
     public function __construct(
-        private NotificationService $notificationService,
+        private \App\Infrastructure\Notification\NotificationService $notificationService,
         private BookingRepository $bookingRepository
     ) {}
     /**

@@ -2,8 +2,8 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Models\MasterProfile;
-use App\Models\MassageCategory;
+use App\Domain\Master\Models\MasterProfile;
+use App\Domain\Service\Models\MassageCategory;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
