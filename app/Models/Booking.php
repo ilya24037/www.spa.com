@@ -2,61 +2,98 @@
 
 namespace App\Models;
 
+use App\Enums\BookingStatus;
+use App\Enums\BookingType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
 
 class Booking extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'booking_number',
         'client_id',
-        'master_profile_id',
+        'master_id',
+        'master_profile_id', // Временно для совместимости
         'service_id',
-        'booking_date',
+        'type',
+        'status',
+        'booking_date', // Временно для совместимости
         'start_time',
         'end_time',
         'duration',
-        'address',
-        'address_details',
-        'is_home_service',
+        'duration_minutes',
+        'base_price',
         'service_price',
-        'travel_fee',
+        'delivery_fee',
+        'travel_fee', // Временно для совместимости
         'discount_amount',
         'total_price',
+        'deposit_amount',
+        'paid_amount',
         'payment_method',
         'payment_status',
-        'status',
+        'address',
+        'address_details',
+        'client_address',
+        'master_address',
         'client_name',
         'client_phone',
         'client_email',
+        'master_phone',
         'client_comment',
+        'notes',
+        'internal_notes',
+        'equipment_required',
+        'platform',
+        'meeting_link',
+        'is_home_service', // Временно для совместимости
         'confirmed_at',
         'cancelled_at',
+        'completed_at',
         'cancellation_reason',
         'cancelled_by',
         'reminder_sent',
-        'source'
+        'reminder_sent_at',
+        'source',
+        'metadata',
     ];
 
     protected $casts = [
-        'booking_date' => 'date',
-        'start_time' => 'datetime:H:i',
-        'end_time' => 'datetime:H:i',
-        'is_home_service' => 'boolean',
-        'reminder_sent' => 'boolean',
-        'review_requested' => 'boolean',
+        'type' => BookingType::class,
+        'status' => BookingStatus::class,
+        'booking_date' => 'date', // Временно для совместимости
+        'start_time' => 'datetime',
+        'end_time' => 'datetime',
+        'duration' => 'integer', // Временно для совместимости
+        'duration_minutes' => 'integer',
+        'base_price' => 'decimal:2',
+        'service_price' => 'decimal:2',
+        'delivery_fee' => 'decimal:2',
+        'travel_fee' => 'decimal:2', // Временно для совместимости
+        'total_price' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
+        'deposit_amount' => 'decimal:2',
+        'paid_amount' => 'decimal:2',
+        'equipment_required' => 'array',
+        'metadata' => 'array',
+        'is_home_service' => 'boolean', // Временно для совместимости
+        'reminder_sent' => 'boolean', // Временно для совместимости
         'confirmed_at' => 'datetime',
         'cancelled_at' => 'datetime',
-        'paid_at' => 'datetime',
+        'completed_at' => 'datetime',
+        'paid_at' => 'datetime', // Временно для совместимости
         'reminder_sent_at' => 'datetime',
-        'extra_data' => 'array'
+        'extra_data' => 'array', // Временно для совместимости
     ];
 
-    // Статусы бронирования
+    // Статусы бронирования (временно для совместимости)
     const STATUS_PENDING = 'pending';
     const STATUS_CONFIRMED = 'confirmed';
     const STATUS_IN_PROGRESS = 'in_progress';
@@ -64,11 +101,25 @@ class Booking extends Model
     const STATUS_CANCELLED = 'cancelled';
     const STATUS_NO_SHOW = 'no_show';
 
-    // Методы оплаты
+    // Методы оплаты (временно для совместимости)
     const PAYMENT_CASH = 'cash';
     const PAYMENT_CARD = 'card';
     const PAYMENT_ONLINE = 'online';
     const PAYMENT_TRANSFER = 'transfer';
+
+    protected $dates = [
+        'start_time',
+        'end_time',
+        'booking_date',
+        'cancelled_at',
+        'confirmed_at',
+        'completed_at',
+        'reminder_sent_at',
+        'paid_at',
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
 
     /**
      * Генерация номера бронирования при создании
@@ -95,19 +146,19 @@ class Booking extends Model
     }
 
     /**
-     * Профиль мастера
+     * Мастер
+     */
+    public function master(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'master_id');
+    }
+
+    /**
+     * Профиль мастера (для совместимости)
      */
     public function masterProfile(): BelongsTo
     {
         return $this->belongsTo(MasterProfile::class);
-    }
-
-    /**
-     * Мастер (через профиль)
-     */
-    public function master()
-    {
-        return $this->hasOneThrough(User::class, MasterProfile::class, 'id', 'id', 'master_profile_id', 'user_id');
     }
 
     /**
@@ -116,6 +167,38 @@ class Booking extends Model
     public function service(): BelongsTo
     {
         return $this->belongsTo(Service::class);
+    }
+
+    /**
+     * Услуги бронирования
+     */
+    public function bookingServices(): HasMany
+    {
+        return $this->hasMany(BookingService::class);
+    }
+
+    /**
+     * Слоты бронирования
+     */
+    public function slots(): HasMany
+    {
+        return $this->hasMany(BookingSlot::class);
+    }
+
+    /**
+     * Платеж
+     */
+    public function payment(): HasOne
+    {
+        return $this->hasOne(Payment::class);
+    }
+
+    /**
+     * Отзывы
+     */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
     }
 
     /**
@@ -206,6 +289,162 @@ class Booking extends Model
         $this->masterProfile->increment('completed_bookings');
 
         return true;
+    }
+
+    // =================== НОВЫЕ МЕТОДЫ С ENUMS ===================
+
+    /**
+     * Получить доступен ли статус
+     */
+    public function getIsActiveAttribute(): bool
+    {
+        return $this->status instanceof BookingStatus ? $this->status->isActive() : in_array($this->status, [
+            self::STATUS_PENDING, self::STATUS_CONFIRMED, self::STATUS_IN_PROGRESS
+        ]);
+    }
+
+    /**
+     * Получить завершено ли бронирование
+     */
+    public function getIsCompletedAttribute(): bool
+    {
+        return $this->status instanceof BookingStatus ? $this->status->isCompleted() : $this->status === self::STATUS_COMPLETED;
+    }
+
+    /**
+     * Получить отменено ли бронирование
+     */
+    public function getIsCancelledAttribute(): bool
+    {
+        return $this->status instanceof BookingStatus ? $this->status->isCancelled() : in_array($this->status, [
+            self::STATUS_CANCELLED, self::STATUS_NO_SHOW
+        ]);
+    }
+
+    /**
+     * Подтвердить бронирование (новый метод)
+     */
+    public function confirmBooking(): self
+    {
+        if ($this->status instanceof BookingStatus) {
+            if (!$this->status->canTransitionTo(BookingStatus::CONFIRMED)) {
+                throw new \Exception('Нельзя подтвердить бронирование в текущем статусе');
+            }
+            $this->status = BookingStatus::CONFIRMED;
+        } else {
+            // Старая логика для совместимости
+            if ($this->status !== self::STATUS_PENDING) {
+                throw new \Exception('Можно подтвердить только ожидающие бронирования');
+            }
+            $this->status = self::STATUS_CONFIRMED;
+        }
+        
+        $this->confirmed_at = now();
+        $this->save();
+        return $this;
+    }
+
+    /**
+     * Начать выполнение услуги
+     */
+    public function startService(): self
+    {
+        if ($this->status instanceof BookingStatus) {
+            if (!$this->status->canTransitionTo(BookingStatus::IN_PROGRESS)) {
+                throw new \Exception('Нельзя начать услугу в текущем статусе');
+            }
+            $this->status = BookingStatus::IN_PROGRESS;
+        } else {
+            if ($this->status !== self::STATUS_CONFIRMED) {
+                throw new \Exception('Можно начать только подтвержденные услуги');
+            }
+            $this->status = self::STATUS_IN_PROGRESS;
+        }
+        
+        $this->save();
+        return $this;
+    }
+
+    /**
+     * Завершить услугу (новый метод)
+     */
+    public function completeService(): self
+    {
+        if ($this->status instanceof BookingStatus) {
+            if (!$this->status->canTransitionTo(BookingStatus::COMPLETED)) {
+                throw new \Exception('Нельзя завершить услугу в текущем статусе');
+            }
+            $this->status = BookingStatus::COMPLETED;
+        } else {
+            if ($this->status !== self::STATUS_IN_PROGRESS) {
+                throw new \Exception('Можно завершить только выполняющиеся услуги');
+            }
+            $this->status = self::STATUS_COMPLETED;
+        }
+        
+        $this->completed_at = now();
+        $this->save();
+        
+        // Обновить статистику мастера
+        if ($this->masterProfile) {
+            $this->masterProfile->increment('completed_bookings');
+        }
+        return $this;
+    }
+
+    /**
+     * Отменить бронирование (новый метод)
+     */
+    public function cancelBooking(string $reason, bool $byClient = true): self
+    {
+        if ($this->status instanceof BookingStatus) {
+            $newStatus = $byClient ? BookingStatus::CANCELLED_BY_CLIENT : BookingStatus::CANCELLED_BY_MASTER;
+            if (!$this->status->canTransitionTo($newStatus)) {
+                throw new \Exception('Нельзя отменить бронирование в текущем статусе');
+            }
+            $this->status = $newStatus;
+        } else {
+            if (!$this->canCancel()) {
+                throw new \Exception('Нельзя отменить данное бронирование');
+            }
+            $this->status = self::STATUS_CANCELLED;
+        }
+        
+        $this->cancellation_reason = $reason;
+        $this->cancelled_at = now();
+        $this->cancelled_by = auth()->id();
+        $this->save();
+        return $this;
+    }
+
+    /**
+     * Получить форматированную продолжительность
+     */
+    public function getFormattedDurationAttribute(): string
+    {
+        $minutes = $this->duration_minutes ?? $this->duration ?? 0;
+        $hours = floor($minutes / 60);
+        $remainingMinutes = $minutes % 60;
+        
+        if ($hours > 0 && $remainingMinutes > 0) {
+            return "{$hours} ч {$remainingMinutes} мин";
+        } elseif ($hours > 0) {
+            return "{$hours} ч";
+        } else {
+            return "{$remainingMinutes} мин";
+        }
+    }
+
+    /**
+     * Можно ли отменить (новая версия)
+     */
+    public function canCancelBooking(): bool
+    {
+        if ($this->status instanceof BookingStatus) {
+            return $this->status->canBeCancelled();
+        }
+        
+        return $this->canCancel(); // Старый метод для совместимости
     }
 
     // =================== SCOPES ===================
