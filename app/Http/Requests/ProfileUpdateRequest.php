@@ -2,29 +2,13 @@
 
 namespace App\Http\Requests;
 
-use App\Models\User;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
+use App\Application\Http\Requests${request} as BaseProfileUpdateRequest;
 
-class ProfileUpdateRequest extends FormRequest
+/**
+ * Legacy ProfileUpdateRequest for backward compatibility
+ * @deprecated Use App\Application\Http\Requests${request} instead
+ */
+class ProfileUpdateRequest extends BaseProfileUpdateRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
-    public function rules(): array
-    {
-        return [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => [
-                'required',
-                'string',
-                'lowercase',
-                'email',
-                'max:255',
-                Rule::unique(User::class)->ignore($this->user()->id),
-            ],
-        ];
-    }
+    // Все функциональность наследуется из Application request
 }

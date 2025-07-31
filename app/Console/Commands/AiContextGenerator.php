@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Services\AiContext\AiContextService;
+use App\Infrastructure\Analysis\AiContext\AiContextService;
 
 class AiContextGenerator extends Command
 {

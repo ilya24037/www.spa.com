@@ -2,38 +2,13 @@
 
 namespace App\Http\Middleware;
 
-use Illuminate\Http\Request;
-use Inertia\Middleware;
+use App\Application\Http\Middleware${middleware} as BaseHandleInertiaRequests;
 
-class HandleInertiaRequests extends Middleware
+/**
+ * Legacy HandleInertiaRequests for backward compatibility
+ * @deprecated Use App\Application\Http\Middleware${middleware} instead
+ */
+class HandleInertiaRequests extends BaseHandleInertiaRequests
 {
-    /**
-     * The root template that is loaded on the first page visit.
-     *
-     * @var string
-     */
-    protected $rootView = 'app';
-
-    /**
-     * Determine the current asset version.
-     */
-    public function version(Request $request): ?string
-    {
-        return parent::version($request);
-    }
-
-    /**
-     * Define the props that are shared by default.
-     *
-     * @return array<string, mixed>
-     */
-    public function share(Request $request): array
-    {
-        return [
-            ...parent::share($request),
-            'auth' => [
-                'user' => $request->user(),
-            ],
-        ];
-    }
+    // Все функциональность наследуется из Application middleware
 }

@@ -51,6 +51,16 @@ Route::get('/test', function() {
     return Inertia::render('Test');
 })->name('test');
 
+// Демо интерактивной карты
+Route::get('/map-demo', function() {
+    return Inertia::render('MapDemo');
+})->name('map-demo');
+
+// Быстрый тест карты
+Route::get('/test-map', function() {
+    return Inertia::render('TestMap');
+})->name('test-map');
+
 // Тестовый маршрут для добавления фотографий
 Route::get('/test/add-photos', [TestController::class, 'addPhotos'])->name('test.add-photos');
 

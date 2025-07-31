@@ -2,50 +2,13 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
-use App\Models\User;
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
-use Inertia\Inertia;
-use Inertia\Response;
+use App\Application\Http\Controllers\Auth\RegisteredUserController as BaseRegisteredUserController;
 
-class RegisteredUserController extends Controller
+/**
+ * Legacy RegisteredUserController for backward compatibility
+ * @deprecated Use App\Application\Http\Controllers\Auth\RegisteredUserController instead
+ */
+class RegisteredUserController extends BaseRegisteredUserController
 {
-    /**
-     * Display the registration view.
-     */
-    public function create(): Response
-    {
-        return Inertia::render('Auth/Register');
-    }
-
-    /**
-     * Handle an incoming registration request.
-     *
-     * @throws \Illuminate\Validation\ValidationException
-     */
-    public function store(Request $request): RedirectResponse
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
-
-        event(new Registered($user));
-
-        Auth::login($user);
-
-        return redirect('/');
-    }
+    // Все функциональность наследуется из Application контроллера
 }

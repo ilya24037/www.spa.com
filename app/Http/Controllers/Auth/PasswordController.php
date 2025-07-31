@@ -2,28 +2,13 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules\Password;
+use App\Application\Http\Controllers\Auth\PasswordController as BasePasswordController;
 
-class PasswordController extends Controller
+/**
+ * Legacy PasswordController for backward compatibility
+ * @deprecated Use App\Application\Http\Controllers\Auth\PasswordController instead
+ */
+class PasswordController extends BasePasswordController
 {
-    /**
-     * Update the user's password.
-     */
-    public function update(Request $request): RedirectResponse
-    {
-        $validated = $request->validate([
-            'current_password' => ['required', 'current_password'],
-            'password' => ['required', Password::defaults(), 'confirmed'],
-        ]);
-
-        $request->user()->update([
-            'password' => Hash::make($validated['password']),
-        ]);
-
-        return back();
-    }
+    // Все функциональность наследуется из Application контроллера
 }

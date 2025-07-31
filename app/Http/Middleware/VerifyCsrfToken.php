@@ -2,17 +2,13 @@
 
 namespace App\Http\Middleware;
 
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken as Middleware;
+use App\Application\Http\Middleware${middleware} as BaseVerifyCsrfToken;
 
-class VerifyCsrfToken extends Middleware
+/**
+ * Legacy VerifyCsrfToken for backward compatibility
+ * @deprecated Use App\Application\Http\Middleware${middleware} instead
+ */
+class VerifyCsrfToken extends BaseVerifyCsrfToken
 {
-    /**
-     * The URIs that should be excluded from CSRF verification.
-     *
-     * @var array<int, string>
-     */
-    protected $except = [
-        'masters/*/upload/photos/test',
-        'api/*',
-    ];
-} 
+    // Все функциональность наследуется из Application middleware
+}

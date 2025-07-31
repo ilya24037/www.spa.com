@@ -11,7 +11,22 @@
       "Bash(php:*)",
       "Bash(where php)",
       "Bash(C:\\Users\\user1\\.config\\herd\\bin\\php.bat update-namespaces.php)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(copy:*)",
+      "Bash(rm:*)",
+      "Bash(sed:*)",
+      "Bash(for file in MasterMediaController.php MediaUploadController.php MyAdsController.php TestController.php WebhookController.php AddItemController.php)",
+      "Bash(do if [ -f \"$file\" ])",
+      "Bash(then cp \"$file\" C:/www.spa.com/app/Application/Http/Controllers/)",
+      "Bash(fi)",
+      "Bash(done)",
+      "Bash(then sed -i 's/namespace App\\\\Http\\\\Controllers;/namespace App\\\\Application\\\\Http\\\\Controllers;/g' \"$file\")",
+      "Bash(for file in *.php)",
+      "Bash(do sed -i 's/namespace App\\\\Services;/namespace App\\\\Domain\\\\Payment\\\\Services;/g' \"$file\")",
+      "Bash(do sed -i 's/namespace App\\\\Services;/namespace App\\\\Domain\\\\User\\\\Services;/g' \"$file\")",
+      "Bash(do sed -i 's/namespace App\\\\Services;/namespace App\\\\Domain\\\\Ad\\\\Services;/g' \"$file\")",
+      "Bash(do sed -i 's/namespace App\\\\Services;/namespace App\\\\Infrastructure\\\\Media;/g' \"$file\")",
+      "Bash(do sed -i 's/namespace App\\\\Services\\\\Adapters;/namespace App\\\\Infrastructure\\\\Adapters;/g' \"$file\")"
     ],
     "deny": []
   }
