@@ -55,7 +55,7 @@
         </label>
         <BaseTextarea
           v-model="localNote"
-          rows="2"
+          :rows="2"
           placeholder="Например: предоплата через СБП, возврат при отмене за 24 часа..."
           maxlength="200"
           show-counter

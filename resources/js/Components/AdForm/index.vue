@@ -37,7 +37,7 @@
 
       <!-- ГРУППА 2: Персональная информация -->
       <div class="form-group">
-        <ParametersModuleNew
+        <ParametersModule
           v-model:age="formData.age"
           v-model:height="formData.height"
           v-model:weight="formData.weight"
@@ -49,7 +49,7 @@
           :errors="formErrors"
         />
 
-        <FeaturesModuleNew
+        <FeaturesModule
           v-model:features="formData.features"
           v-model:additional-features="formData.additional_features"
           v-model:experience="formData.experience"
@@ -173,14 +173,14 @@ import Description from './modules/BasicInfo/Description.vue'
 // import FeaturesModule from '@/Components/Form/Sections/FeaturesSection.vue'
 
 // Модули коммерческой информации (НОВАЯ АРХИТЕКТУРА)
-import PriceModule from './modules/Commercial/Price.vue'
-import PromoModule from './modules/Commercial/Promo.vue'
+import PriceModule from './features/Commercial/Price/index.vue'
+import PromoModule from './features/Commercial/Promo/index.vue'
 import ServicesModule from '@/Components/Features/Services/index.vue'
-import ScheduleModule from './modules/Commercial/Schedule.vue'
+import ScheduleModule from './features/Commercial/Schedule/index.vue'
 
 // Модули локации (НОВАЯ АРХИТЕКТУРА)
-import LocationModule from './modules/Location/Location.vue'
-import GeoModule from './modules/Location/Geography.vue'
+import LocationModule from './features/Location/ServiceLocation/index.vue'
+import GeoModule from './features/Location/Geography/index.vue'
 import ContactsModule from './features/Location/Contacts/index.vue'
 
 // Модули оплаты (НОВАЯ АРХИТЕКТУРА - РЕФАКТОРЕННЫЙ)
@@ -190,8 +190,8 @@ import PaymentModule from './features/Commercial/Payment/index.vue'
 import ClientsModule from './modules/BasicInfo/Clients.vue'
 
 // Модули персональной информации  
-import ParametersModuleNew from './modules/PersonalInfo/Parameters.vue'
-import FeaturesModuleNew from './modules/PersonalInfo/Features.vue'
+import ParametersModule from './features/PersonalInfo/Parameters/index.vue'
+import FeaturesModule from './features/PersonalInfo/Features/index.vue'
 
 // Модули медиа
 import MediaModule from './modules/Media/MediaModule.vue'

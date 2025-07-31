@@ -126,15 +126,15 @@ const props = defineProps({
     default: false
   },
   min: {
-    type: Number,
+    type: [Number, String],
     default: null
   },
   max: {
-    type: Number,
+    type: [Number, String],
     default: null
   },
   step: {
-    type: Number,
+    type: [Number, String],
     default: null
   },
   prefix: {
