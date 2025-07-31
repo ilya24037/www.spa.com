@@ -2,285 +2,540 @@
 
 namespace App\Services;
 
+use App\Models\Notification;
+use App\Models\NotificationDelivery;
+use App\Models\User;
 use App\Models\Booking;
 use App\Models\Payment;
-use App\Models\User;
-use Illuminate\Support\Facades\Mail;
+use App\Repositories\NotificationRepository;
+use App\Enums\NotificationType;
+use App\Enums\NotificationStatus;
+use App\Enums\NotificationChannel;
+use App\DTOs\Notification\CreateNotificationDTO;
+use App\Services\Notification\ChannelManager;
+use App\Events\Notification\NotificationCreated;
+use App\Events\Notification\NotificationSent;
+use App\Events\Notification\NotificationDelivered;
+use App\Events\Notification\NotificationFailed;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Collection;
+use Carbon\Carbon;
 
 /**
- * Сервис уведомлений для системы бронирования
+ * Сервис для работы с уведомлениями
  */
 class NotificationService
 {
+    protected NotificationRepository $repository;
+    protected ChannelManager $channelManager;
+    protected LegacyNotificationService $legacyService;
+
+    public function __construct(
+        NotificationRepository $repository,
+        ChannelManager $channelManager,
+        LegacyNotificationService $legacyService
+    ) {
+        $this->repository = $repository;
+        $this->channelManager = $channelManager;
+        $this->legacyService = $legacyService;
+    }
+
+    // ============ LEGACY COMPATIBILITY METHODS ============
+    
     /**
-     * Отправить уведомление о новом бронировании
+     * @deprecated Используйте новые методы создания уведомлений
      */
     public function sendBookingCreated(Booking $booking): void
     {
-        try {
-            // Уведомление мастеру
-            $this->sendEmailToMaster($booking);
-            
-            // Уведомление клиенту
-            $this->sendEmailToClient($booking);
-            
-            // SMS уведомления (опционально)
-            if (config('notifications.sms_enabled')) {
-                $this->sendSmsToMaster($booking);
-                $this->sendSmsToClient($booking);
-            }
-            
-            Log::info('Booking notifications sent', ['booking_id' => $booking->id]);
-            
-        } catch (\Exception $e) {
-            Log::error('Failed to send booking notifications', [
-                'booking_id' => $booking->id,
-                'error' => $e->getMessage()
-            ]);
-        }
+        // Вызываем старый метод для совместимости
+        $this->legacyService->sendBookingCreated($booking);
+        
+        // Создаем новое уведомление
+        $this->createBookingNotification($booking, NotificationType::BOOKING_CREATED);
     }
 
     /**
-     * Отправить уведомление о подтверждении бронирования
+     * @deprecated Используйте новые методы создания уведомлений
      */
     public function sendBookingConfirmed(Booking $booking): void
     {
-        try {
-            $this->sendEmail($booking->client_email, 'Бронирование подтверждено', $this->getConfirmationTemplate($booking));
-            
-            if (config('notifications.sms_enabled')) {
-                $this->sendSms($booking->client_phone, "Ваше бронирование #{$booking->booking_number} подтверждено мастером");
-            }
-            
-        } catch (\Exception $e) {
-            Log::error('Failed to send confirmation notification', [
-                'booking_id' => $booking->id,
-                'error' => $e->getMessage()
-            ]);
-        }
+        $this->legacyService->sendBookingConfirmed($booking);
+        $this->createBookingNotification($booking, NotificationType::BOOKING_CONFIRMED);
     }
 
     /**
-     * Отправить уведомление об отмене бронирования
+     * @deprecated Используйте новые методы создания уведомлений
      */
     public function sendBookingCancelled(Booking $booking, User $cancelledBy): void
     {
-        try {
-            $recipientEmail = $cancelledBy->id === $booking->client_id 
-                ? $booking->masterProfile->user->email 
-                : $booking->client_email;
-                
-            $this->sendEmail($recipientEmail, 'Бронирование отменено', $this->getCancellationTemplate($booking, $cancelledBy));
-            
-        } catch (\Exception $e) {
-            Log::error('Failed to send cancellation notification', [
-                'booking_id' => $booking->id,
-                'error' => $e->getMessage()
-            ]);
-        }
+        $this->legacyService->sendBookingCancelled($booking, $cancelledBy);
+        $this->createBookingNotification($booking, NotificationType::BOOKING_CANCELLED);
     }
 
     /**
-     * Отправить запрос на отзыв
+     * @deprecated Используйте новые методы создания уведомлений
      */
     public function sendReviewRequest(Booking $booking): void
     {
-        try {
-            $this->sendEmail($booking->client_email, 'Оставьте отзыв о визите', $this->getReviewRequestTemplate($booking));
-            
-        } catch (\Exception $e) {
-            Log::error('Failed to send review request', [
-                'booking_id' => $booking->id,
-                'error' => $e->getMessage()
-            ]);
-        }
+        $this->legacyService->sendReviewRequest($booking);
+        $this->createBookingNotification($booking, NotificationType::REVIEW_RECEIVED);
     }
 
     /**
-     * Отправить уведомление об успешной оплате
+     * @deprecated Используйте новые методы создания уведомлений
      */
     public function sendPaymentCompleted(Payment $payment): void
     {
+        $this->legacyService->sendPaymentCompleted($payment);
+        $this->createPaymentNotification($payment, NotificationType::PAYMENT_COMPLETED);
+    }
+
+    // ============ NEW NOTIFICATION SYSTEM ============
+
+    /**
+     * Создать уведомление
+     */
+    public function create(CreateNotificationDTO $dto): Notification
+    {
         try {
-            $this->sendEmail($payment->user->email, 'Платеж успешно завершен', $this->getPaymentCompletedTemplate($payment));
-            
+            DB::beginTransaction();
+
+            // Определяем каналы доставки
+            $channels = $dto->channels ?: NotificationChannel::getDefaultChannels($dto->type);
+
+            // Создаем уведомление
+            $notification = $this->repository->create([
+                'user_id' => $dto->userId,
+                'type' => $dto->type,
+                'title' => $dto->title,
+                'message' => $dto->message,
+                'data' => $dto->data,
+                'channels' => array_map(fn($c) => $c->value, $channels),
+                'notifiable_type' => $dto->notifiableType,
+                'notifiable_id' => $dto->notifiableId,
+                'scheduled_at' => $dto->scheduledAt,
+                'expires_at' => $dto->expiresAt,
+                'priority' => $dto->priority,
+                'group_key' => $dto->groupKey,
+                'template' => $dto->template,
+                'locale' => $dto->locale,
+                'max_retries' => $dto->maxRetries,
+                'metadata' => $dto->metadata,
+            ]);
+
+            // Создаем записи доставки для каждого канала
+            foreach ($channels as $channel) {
+                $this->createDelivery($notification, $channel, $dto);
+            }
+
+            DB::commit();
+
+            // Событие создания уведомления
+            event(new NotificationCreated($notification));
+
+            // Если не запланировано на будущее - отправляем сразу
+            if (!$dto->scheduledAt || $dto->scheduledAt->isPast()) {
+                $this->send($notification);
+            }
+
+            Log::info('Notification created', [
+                'notification_id' => $notification->id,
+                'user_id' => $dto->userId,
+                'type' => $dto->type->value,
+            ]);
+
+            return $notification;
+
         } catch (\Exception $e) {
-            Log::error('Failed to send payment notification', [
-                'payment_id' => $payment->id,
-                'error' => $e->getMessage()
+            DB::rollBack();
+            
+            Log::error('Failed to create notification', [
+                'error' => $e->getMessage(),
+                'user_id' => $dto->userId,
+                'type' => $dto->type->value,
+            ]);
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Создать запись доставки для канала
+     */
+    protected function createDelivery(
+        Notification $notification, 
+        NotificationChannel $channel,
+        CreateNotificationDTO $dto
+    ): NotificationDelivery {
+        return NotificationDelivery::create([
+            'notification_id' => $notification->id,
+            'channel' => $channel,
+            'status' => NotificationStatus::PENDING,
+            'recipient' => $this->getRecipientForChannel($notification->user, $channel),
+            'content' => $this->prepareContentForChannel($dto, $channel),
+            'max_retries' => $dto->maxRetries,
+        ]);
+    }
+
+    /**
+     * Получить получателя для канала
+     */
+    protected function getRecipientForChannel(User $user, NotificationChannel $channel): ?string
+    {
+        return match($channel) {
+            NotificationChannel::EMAIL => $user->email,
+            NotificationChannel::SMS => $user->phone,
+            NotificationChannel::TELEGRAM => $user->telegram_id,
+            NotificationChannel::PUSH => $this->getUserPushTokens($user),
+            default => null,
+        };
+    }
+
+    /**
+     * Подготовить контент для канала
+     */
+    protected function prepareContentForChannel(
+        CreateNotificationDTO $dto, 
+        NotificationChannel $channel
+    ): array {
+        $content = [
+            'title' => $dto->title,
+            'message' => $dto->message,
+            'data' => $dto->data,
+        ];
+
+        // Адаптируем контент под канал
+        if ($channel === NotificationChannel::SMS) {
+            // Для SMS объединяем заголовок и сообщение
+            $content['message'] = trim($dto->title . ': ' . $dto->message);
+            
+            // Обрезаем до лимита SMS
+            $maxLength = $channel->getMaxMessageLength();
+            if ($maxLength && strlen($content['message']) > $maxLength) {
+                $content['message'] = substr($content['message'], 0, $maxLength - 3) . '...';
+            }
+        }
+
+        if ($channel === NotificationChannel::PUSH) {
+            // Для Push добавляем специфичные поля
+            $content['badge'] = 1;
+            $content['sound'] = 'default';
+            $content['click_action'] = $dto->data['action_url'] ?? null;
+        }
+
+        return $content;
+    }
+
+    /**
+     * Получить Push токены пользователя
+     */
+    protected function getUserPushTokens(User $user): ?string
+    {
+        // TODO: Реализовать получение push токенов
+        return null;
+    }
+
+    /**
+     * Отправить уведомление
+     */
+    public function send(Notification $notification): array
+    {
+        $results = [];
+
+        try {
+            $notification->markAsSent();
+
+            $deliveries = $notification->deliveries()->pending()->get();
+
+            foreach ($deliveries as $delivery) {
+                $result = $this->sendViaChannel($delivery);
+                $results[$delivery->channel->value] = $result;
+            }
+
+            // Если все доставки успешны - помечаем уведомление как доставленное
+            $allDelivered = $notification->deliveries()
+                ->whereIn('status', [NotificationStatus::DELIVERED, NotificationStatus::SENT])
+                ->count() === $notification->deliveries()->count();
+
+            if ($allDelivered) {
+                $notification->markAsDelivered();
+                event(new NotificationDelivered($notification));
+            }
+
+            event(new NotificationSent($notification, $results));
+
+            Log::info('Notification sent', [
+                'notification_id' => $notification->id,
+                'results' => $results,
+            ]);
+
+        } catch (\Exception $e) {
+            $notification->markAsFailed($e->getMessage());
+            
+            event(new NotificationFailed($notification, $e->getMessage()));
+
+            Log::error('Failed to send notification', [
+                'notification_id' => $notification->id,
+                'error' => $e->getMessage(),
             ]);
         }
+
+        return $results;
     }
 
     /**
-     * Отправить email мастеру о новом бронировании
+     * Отправить через определенный канал
      */
-    private function sendEmailToMaster(Booking $booking): void
+    protected function sendViaChannel(NotificationDelivery $delivery): array
     {
-        $masterEmail = $booking->masterProfile->user->email;
-        $subject = 'Новое бронирование #' . $booking->booking_number;
-        $template = $this->getNewBookingMasterTemplate($booking);
-        
-        $this->sendEmail($masterEmail, $subject, $template);
-    }
+        try {
+            $channel = $this->channelManager->getChannel($delivery->channel);
+            
+            if (!$channel->isAvailable()) {
+                $delivery->markAsFailed('Channel not available');
+                return ['success' => false, 'error' => 'Channel not available'];
+            }
 
-    /**
-     * Отправить email клиенту о создании бронирования
-     */
-    private function sendEmailToClient(Booking $booking): void
-    {
-        if (!$booking->client_email) return;
-        
-        $subject = 'Ваше бронирование #' . $booking->booking_number;
-        $template = $this->getNewBookingClientTemplate($booking);
-        
-        $this->sendEmail($booking->client_email, $subject, $template);
-    }
+            $result = $channel->send($delivery);
 
-    /**
-     * Базовый метод отправки email
-     */
-    private function sendEmail(string $to, string $subject, string $content): void
-    {
-        // В продакшене здесь будет реальная отправка email
-        // Пока логируем для тестирования
-        Log::info('Email notification sent', [
-            'to' => $to,
-            'subject' => $subject,
-            'content_preview' => substr($content, 0, 100) . '...'
-        ]);
-        
-        // Для разработки выводим в лог
-        if (config('app.debug')) {
-            \Log::channel('single')->info("📧 EMAIL TO: {$to}\nSUBJECT: {$subject}\nCONTENT:\n{$content}");
+            if ($result['success']) {
+                $delivery->markAsSent($result['external_id'] ?? null);
+                
+                // Для некоторых каналов сразу помечаем как доставленное
+                if (in_array($delivery->channel, [NotificationChannel::DATABASE, NotificationChannel::WEBSOCKET])) {
+                    $delivery->markAsDelivered();
+                }
+            } else {
+                $delivery->markAsFailed($result['error'] ?? 'Unknown error');
+            }
+
+            return $result;
+
+        } catch (\Exception $e) {
+            $delivery->markAsFailed($e->getMessage());
+            
+            Log::error('Failed to send via channel', [
+                'delivery_id' => $delivery->id,
+                'channel' => $delivery->channel->value,
+                'error' => $e->getMessage(),
+            ]);
+
+            return ['success' => false, 'error' => $e->getMessage()];
         }
     }
 
+    // ============ HELPER METHODS ============
+
     /**
-     * Отправить SMS
+     * Создать уведомление для бронирования
      */
-    private function sendSms(string $phone, string $message): void
+    protected function createBookingNotification(Booking $booking, NotificationType $type): Notification
     {
-        // В продакшене здесь будет интеграция с SMS провайдером
-        Log::info('SMS notification sent', [
-            'phone' => $phone,
-            'message' => $message
-        ]);
+        $dto = new CreateNotificationDTO(
+            userId: $booking->client_id,
+            type: $type,
+            title: $type->getTitle(),
+            message: $this->getBookingMessage($booking, $type),
+            notifiableType: 'App\\Models\\Booking',
+            notifiableId: $booking->id,
+            data: [
+                'booking_id' => $booking->id,
+                'booking_number' => $booking->booking_number,
+                'action_url' => route('bookings.show', $booking->id),
+                'action_text' => 'Посмотреть бронирование',
+            ]
+        );
+
+        return $this->create($dto);
+    }
+
+    /**
+     * Создать уведомление для платежа
+     */
+    protected function createPaymentNotification(Payment $payment, NotificationType $type): Notification
+    {
+        $dto = new CreateNotificationDTO(
+            userId: $payment->user_id,
+            type: $type,
+            title: $type->getTitle(),
+            message: $this->getPaymentMessage($payment, $type),
+            notifiableType: 'App\\Models\\Payment',
+            notifiableId: $payment->id,
+            data: [
+                'payment_id' => $payment->id,
+                'amount' => $payment->amount,
+                'action_url' => route('payments.show', $payment->id),
+                'action_text' => 'Посмотреть платеж',
+            ]
+        );
+
+        return $this->create($dto);
+    }
+
+    /**
+     * Получить сообщение для бронирования
+     */
+    protected function getBookingMessage(Booking $booking, NotificationType $type): string
+    {
+        return match($type) {
+            NotificationType::BOOKING_CREATED => "Ваше бронирование #{$booking->booking_number} создано и ожидает подтверждения",
+            NotificationType::BOOKING_CONFIRMED => "Бронирование #{$booking->booking_number} подтверждено мастером",
+            NotificationType::BOOKING_CANCELLED => "Бронирование #{$booking->booking_number} было отменено",
+            NotificationType::BOOKING_REMINDER => "Напоминание: через час у вас сеанс массажа",
+            NotificationType::BOOKING_COMPLETED => "Сеанс массажа успешно завершен",
+            default => $type->getDefaultMessage(),
+        };
+    }
+
+    /**
+     * Получить сообщение для платежа
+     */
+    protected function getPaymentMessage(Payment $payment, NotificationType $type): string
+    {
+        $amount = number_format($payment->amount, 0, ',', ' ') . ' ₽';
         
-        if (config('app.debug')) {
-            \Log::channel('single')->info("📱 SMS TO: {$phone}\nMESSAGE: {$message}");
+        return match($type) {
+            NotificationType::PAYMENT_COMPLETED => "Платеж на сумму {$amount} успешно обработан",
+            NotificationType::PAYMENT_FAILED => "Не удалось обработать платеж на сумму {$amount}",
+            NotificationType::PAYMENT_REFUNDED => "Возврат средств на сумму {$amount} обработан",
+            default => $type->getDefaultMessage(),
+        };
+    }
+
+    /**
+     * Пометить как прочитанное
+     */
+    public function markAsRead(int $notificationId, int $userId = null): bool
+    {
+        $notification = $this->repository->find($notificationId);
+
+        if (!$notification) {
+            return false;
         }
+
+        // Проверяем права доступа
+        if ($userId && $notification->user_id !== $userId) {
+            return false;
+        }
+
+        $notification->markAsRead();
+        return true;
     }
 
     /**
-     * Отправить SMS мастеру
+     * Пометить все как прочитанные
      */
-    private function sendSmsToMaster(Booking $booking): void
+    public function markAllAsRead(int $userId): int
     {
-        $phone = $booking->masterProfile->user->phone ?? $booking->masterProfile->phone;
-        if (!$phone) return;
-        
-        $message = "Новое бронирование #{$booking->booking_number} от {$booking->client_name} на {$booking->booking_date->format('d.m.Y')} в {$booking->start_time->format('H:i')}";
-        $this->sendSms($phone, $message);
+        return $this->repository->markAllAsReadForUser($userId);
     }
 
     /**
-     * Отправить SMS клиенту
+     * Получить уведомления пользователя
      */
-    private function sendSmsToClient(Booking $booking): void
+    public function getForUser(int $userId, array $filters = []): Collection
     {
-        $message = "Ваше бронирование #{$booking->booking_number} создано. Ожидайте подтверждения от мастера.";
-        $this->sendSms($booking->client_phone, $message);
+        return $this->repository->getPaginatedForUser($userId, 20, $filters);
     }
 
-    // =================== ШАБЛОНЫ EMAIL ===================
-
-    private function getNewBookingMasterTemplate(Booking $booking): string
+    /**
+     * Получить количество непрочитанных
+     */
+    public function getUnreadCount(int $userId): int
     {
-        return "
-Новое бронирование #{$booking->booking_number}
-
-Клиент: {$booking->client_name}
-Телефон: {$booking->client_phone}
-Email: {$booking->client_email}
-
-Услуга: {$booking->service->name}
-Дата: {$booking->booking_date->format('d.m.Y')}
-Время: {$booking->start_time->format('H:i')} - {$booking->end_time->format('H:i')}
-
-Место: " . ($booking->is_home_service ? "Выезд на дом ({$booking->address})" : 'В салоне') . "
-
-Комментарий: {$booking->client_comment}
-
-Стоимость: {$booking->total_price} ₽
-
-Для подтверждения перейдите в личный кабинет.
-        ";
+        return $this->repository->getUnreadCountForUser($userId);
     }
 
-    private function getNewBookingClientTemplate(Booking $booking): string
-    {
-        return "
-Ваше бронирование #{$booking->booking_number} создано
+    /**
+     * Создать системное уведомление
+     */
+    public function createSystem(
+        string $title,
+        string $message,
+        array $userIds = [],
+        array $data = []
+    ): Collection {
+        $dto = new CreateNotificationDTO(
+            userId: 0, // Системное
+            type: NotificationType::SYSTEM_UPDATE,
+            title: $title,
+            message: $message,
+            data: $data,
+            priority: 'high'
+        );
 
-Мастер: {$booking->masterProfile->user->name}
-Услуга: {$booking->service->name}
-Дата: {$booking->booking_date->format('d.m.Y')}
-Время: {$booking->start_time->format('H:i')} - {$booking->end_time->format('H:i')}
+        if (empty($userIds)) {
+            // Отправляем всем активным пользователям
+            $userIds = User::active()->pluck('id')->toArray();
+        }
 
-Место: " . ($booking->is_home_service ? "Выезд на дом ({$booking->address})" : 'В салоне') . "
-
-Стоимость: {$booking->total_price} ₽
-
-Ожидайте подтверждения от мастера.
-        ";
+        return $this->createForUsers($userIds, $dto);
     }
 
-    private function getConfirmationTemplate(Booking $booking): string
+    /**
+     * Создать уведомление для нескольких пользователей
+     */
+    public function createForUsers(array $userIds, CreateNotificationDTO $dto): Collection
     {
-        return "
-Ваше бронирование #{$booking->booking_number} подтверждено!
+        $notifications = collect();
 
-Мастер: {$booking->masterProfile->user->name}
-Дата: {$booking->booking_date->format('d.m.Y')}
-Время: {$booking->start_time->format('H:i')}
-        ";
+        DB::transaction(function() use ($userIds, $dto, $notifications) {
+            foreach ($userIds as $userId) {
+                $userDto = clone $dto;
+                $userDto->userId = $userId;
+                
+                $notifications->push($this->create($userDto));
+            }
+        });
+
+        return $notifications;
     }
 
-    private function getCancellationTemplate(Booking $booking, User $cancelledBy): string
+    /**
+     * Получить статистику
+     */
+    public function getStats(int $days = 7): array
     {
-        $who = $cancelledBy->id === $booking->client_id ? 'клиентом' : 'мастером';
-        
-        return "
-Бронирование #{$booking->booking_number} отменено {$who}
-
-Дата: {$booking->booking_date->format('d.m.Y')}
-Время: {$booking->start_time->format('H:i')}
-
-Причина: {$booking->cancellation_reason}
-        ";
+        return $this->repository->getStats($days);
     }
 
-    private function getReviewRequestTemplate(Booking $booking): string
+    /**
+     * Очистка старых уведомлений
+     */
+    public function cleanup(): array
     {
-        return "
-Как прошел ваш визит к мастеру {$booking->masterProfile->user->name}?
+        $deletedOld = $this->repository->deleteOld(30);
+        $deletedExpired = $this->repository->deleteExpired();
+        $cleanedNotifications = Notification::cleanup();
 
-Оставьте отзыв о качестве услуг.
-        ";
+        return [
+            'deleted_old' => $deletedOld,
+            'deleted_expired' => $deletedExpired,
+            'cleaned_notifications' => $cleanedNotifications,
+            'total_cleaned' => $deletedOld + $deletedExpired + $cleanedNotifications,
+        ];
     }
 
-    private function getPaymentCompletedTemplate(Payment $payment): string
+    /**
+     * Тестовое уведомление
+     */
+    public function sendTest(int $userId, NotificationChannel $channel = null): Notification
     {
-        return "
-Платеж #{$payment->payment_id} успешно завершен
+        $channels = $channel ? [$channel] : [NotificationChannel::DATABASE];
 
-Сумма: " . ($payment->metadata['final_amount'] ?? $payment->amount) . " ₽
-Описание: {$payment->description}
-Дата: " . $payment->paid_at->format('d.m.Y H:i') . "
+        $dto = new CreateNotificationDTO(
+            userId: $userId,
+            type: NotificationType::SYSTEM_UPDATE,
+            title: 'Тестовое уведомление',
+            message: 'Это тестовое уведомление для проверки системы',
+            channels: $channels,
+            data: [
+                'test' => true,
+                'timestamp' => now()->toISOString(),
+            ]
+        );
 
-Спасибо за использование нашего сервиса!
-        ";
+        return $this->create($dto);
     }
 } 
