@@ -2,7 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\Ad;
+use App\Domain\Ad\Models\Ad;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 

@@ -7,6 +7,7 @@ use App\Application\Http\Requests\CreateAdRequest;
 use App\Application\Http\Requests\UpdateAdRequest;
 use App\Domain\Ad\Services\AdService;
 use App\Domain\Ad\Models\Ad;
+use App\Enums\AdStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -26,9 +27,10 @@ class AdController extends Controller
     protected const ALLOWED_FIELDS = [
         'category', 'title', 'specialty', 'clients', 'service_location', 
         'outcall_locations', 'taxi_option', 'work_format', 'service_provider',
-        'experience', 'education_level', 'features', 'additional_features',
+        'experience', 'features', 'additional_features',
         'description', 'price', 'price_unit', 'is_starting_price',
-        'contacts_per_hour', 'discount', 'gift', 'address', 'travel_area',
+        'contacts_per_hour', 'express_price', 'price_per_hour', 'outcall_price', 
+        'price_two_hours', 'price_night', 'min_duration', 'discount', 'gift', 'address', 'travel_area',
         'phone', 'contact_method', 'whatsapp', 'telegram', 'age', 'height',
         'weight', 'breast_size', 'hair_color', 'eye_color', 'appearance',
         'nationality', 'has_girlfriend', 'services', 'services_additional_info',
@@ -111,6 +113,54 @@ class AdController extends Controller
     }
 
     /**
+     * Обновить черновик объявления
+     */
+    public function updateDraft(Request $request, Ad $ad)
+    {
+        try {
+            // Проверяем права доступа
+            $this->authorize('update', $ad);
+            
+            // Проверяем, что это черновик
+            if ($ad->status !== AdStatus::DRAFT) {
+                return back()->withErrors(['error' => 'Можно редактировать только черновики']);
+            }
+            
+            // Получаем только разрешенные поля
+            $data = $request->only(self::ALLOWED_FIELDS);
+            
+
+            
+            // Обновляем существующий черновик
+            $ad = $this->adService->updateDraft($ad, $data);
+            
+            // Для Inertia запросов возвращаем редирект на страницу черновиков
+            if ($request->header('X-Inertia')) {
+                return redirect()->route('my-ads.index', ['tab' => 'drafts'])
+                    ->with('success', 'Черновик обновлен');
+            }
+            
+            // Для обычных AJAX запросов возвращаем JSON
+            return response()->json([
+                'success' => true,
+                'message' => 'Черновик обновлен',
+                'id' => $ad->id,
+                'redirect' => route('my-ads.index', ['tab' => 'drafts'])
+            ]);
+            
+        } catch (\Exception $e) {
+            if ($request->header('X-Inertia')) {
+                return back()->withErrors(['error' => 'Ошибка при обновлении черновика: ' . $e->getMessage()]);
+            }
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Ошибка при обновлении черновика: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Опубликовать объявление
      */
     public function publish(Request $request)
@@ -141,6 +191,12 @@ class AdController extends Controller
     public function edit(Ad $ad)
     {
         $this->authorize('update', $ad);
+
+        // Проверяем, что можно редактировать только черновики
+        if ($ad->status !== AdStatus::DRAFT) {
+            return redirect()->route('my-ads.index')
+                ->with('error', 'Можно редактировать только черновики');
+        }
 
         $adData = $this->prepareAdData($ad);
 
@@ -256,6 +312,14 @@ class AdController extends Controller
             'is_starting_price' => $this->encodeJson($request->is_starting_price, []),
             'pricing_data' => $this->encodeJson($request->pricing_data),
             'contacts_per_hour' => $request->contacts_per_hour,
+            
+            // Поля цены
+            'price_per_hour' => $request->price_per_hour,
+            'outcall_price' => $request->outcall_price,
+            'express_price' => $request->express_price,
+            'price_two_hours' => $request->price_two_hours,
+            'price_night' => $request->price_night,
+            'min_duration' => $request->min_duration,
             'discount' => $request->discount,
             'gift' => $request->gift,
             'services' => $this->encodeJson($request->services, (object)[]),
@@ -289,6 +353,8 @@ class AdController extends Controller
     {
         $adData = $ad->toArray();
         
+
+        
         $jsonFields = [
             'clients', 'service_location', 'outcall_locations', 'service_provider', 
             'is_starting_price', 'photos', 'video', 'features', 'pricing_data', 
@@ -300,6 +366,26 @@ class AdController extends Controller
                 $adData[$field] = json_decode($adData[$field], true) ?? [];
             }
         }
+        
+        // Обработка скалярных полей - обеспечиваем что они не null
+        $scalarFields = [
+            'price_per_hour', 'outcall_price', 'express_price', 'price_two_hours', 
+            'price_night', 'min_duration', 'contacts_per_hour', 'age', 'height', 
+            'weight', 'breast_size', 'hair_color', 'eye_color', 'appearance', 
+            'nationality', 'work_format', 'experience', 'additional_features',
+            'description', 'price', 'price_unit'
+        ];
+        
+        foreach ($scalarFields as $field) {
+            if (!isset($adData[$field]) || $adData[$field] === null) {
+                $adData[$field] = '';
+            }
+        }
+        
+        // Обеспечиваем boolean поля
+        $adData['has_girlfriend'] = (bool) ($adData['has_girlfriend'] ?? false);
+        
+
         
         return $adData;
     }
@@ -314,5 +400,26 @@ class AdController extends Controller
         }
         
         return is_array($data) ? json_encode($data) : json_encode([]);
+    }
+
+    /**
+     * Показать черновик объявления
+     */
+    public function showDraft(Ad $ad)
+    {
+        // Проверяем права доступа
+        $this->authorize('view', $ad);
+        
+        // Проверяем, что это черновик
+        if ($ad->status !== AdStatus::DRAFT) {
+            return redirect()->route('ads.show', $ad->id);
+        }
+        
+        // Подготавливаем данные для отображения (используем тот же метод что и в edit)
+        $adData = $this->prepareAdData($ad);
+        
+        return inertia('Draft/Show', [
+            'ad' => $adData
+        ]);
     }
 }

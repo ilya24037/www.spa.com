@@ -3,6 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Models\Ad;
+use App\Enums\AdStatus;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -47,10 +48,11 @@ class MyAdsController extends Controller
         ];
         
         return Inertia::render('Dashboard', [
-            'ads' => $ads,
+            'profiles' => $ads,
             'isMyAds' => true,
             'counts' => $counts,
-            'currentTab' => $tab
+            'currentTab' => $tab,
+            'activeTab' => $tab
         ]);
     }
     
@@ -64,7 +66,7 @@ class MyAdsController extends Controller
         // Здесь будет логика оплаты
         // Пока просто помечаем как оплаченное
         $ad->update([
-            'status' => Ad::STATUS_ACTIVE,
+            'status' => AdStatus::ACTIVE,
             'is_paid' => true,
             'paid_at' => now(),
             'expires_at' => now()->addDays(30) // На 30 дней
@@ -81,7 +83,7 @@ class MyAdsController extends Controller
         $this->authorize('update', $ad);
         
         $ad->update([
-            'status' => Ad::STATUS_ARCHIVED
+            'status' => AdStatus::ARCHIVED
         ]);
         
         return back()->with('success', 'Объявление перемещено в архив');
@@ -95,7 +97,7 @@ class MyAdsController extends Controller
         $this->authorize('delete', $ad);
         
         // Запоминаем статус для правильного перенаправления
-        $wasDraft = $ad->status === Ad::STATUS_DRAFT;
+        $wasDraft = $ad->status === AdStatus::DRAFT;
         
         // ВАЖНО: Реально удаляем объявление из базы данных
         $ad->delete();
@@ -123,12 +125,12 @@ class MyAdsController extends Controller
     {
         $this->authorize('update', $ad);
         
-        if ($ad->status !== Ad::STATUS_DRAFT) {
+        if ($ad->status !== AdStatus::DRAFT) {
             return back()->with('error', 'Только черновики можно опубликовать');
         }
         
         $ad->update([
-            'status' => Ad::STATUS_WAITING_PAYMENT
+            'status' => AdStatus::WAITING_PAYMENT
         ]);
         
         return back()->with('success', 'Объявление отправлено на модерацию');
@@ -141,12 +143,12 @@ class MyAdsController extends Controller
     {
         $this->authorize('update', $ad);
         
-        if ($ad->status !== Ad::STATUS_ARCHIVED) {
+        if ($ad->status !== AdStatus::ARCHIVED) {
             return back()->with('error', 'Только архивные объявления можно восстановить');
         }
         
         $ad->update([
-            'status' => Ad::STATUS_DRAFT
+            'status' => AdStatus::DRAFT
         ]);
         
         return back()->with('success', 'Объявление восстановлено в черновики');

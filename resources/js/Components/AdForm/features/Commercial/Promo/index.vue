@@ -60,7 +60,6 @@ const updateNewClientDiscount = (value) => {
 }
 
 const updateGift = (value) => {
-  console.log('updateGift called:', value)
   store.updateField('gift', value)
 }
 </script>

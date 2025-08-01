@@ -120,7 +120,7 @@ class CreateNotificationDTO
             title: $title ?: $type->getTitle(),
             message: $message ?: $type->getDefaultMessage(),
             data: array_merge($data, ['ad_id' => $adId]),
-            notifiableType: 'App\\Models\\Ad',
+            notifiableType: 'App\\Domain\\Ad\\Models\\Ad',
             notifiableId: $adId,
             priority: $type->getPriority(),
         );

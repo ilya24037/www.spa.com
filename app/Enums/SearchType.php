@@ -75,7 +75,7 @@ enum SearchType: string
     public function getModel(): string
     {
         return match($this) {
-            self::ADS => 'App\\Models\\Ad',
+            self::ADS => 'App\\Domain\\Ad\\Models\\Ad',
             self::MASTERS => 'App\\Models\\User',
             self::SERVICES => 'App\\Models\\Service',
             self::GLOBAL => 'mixed',

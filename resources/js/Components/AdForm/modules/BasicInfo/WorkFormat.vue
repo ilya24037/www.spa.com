@@ -66,8 +66,8 @@ const props = defineProps({
 })
 
 // Читаем данные ТОЛЬКО из store (как на Avito)
-const workFormat = computed(() => store.formData.work_format)
-const hasGirlfriend = computed(() => store.formData.has_girlfriend)
+const workFormat = computed(() => store.formData.work_format || '')
+const hasGirlfriend = computed(() => store.formData.has_girlfriend || false)
 
 // Методы обновляют ТОЛЬКО store (как на Avito/Ozon)
 const selectFormat = (format) => {

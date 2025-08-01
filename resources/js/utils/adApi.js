@@ -56,16 +56,29 @@ export const updateAd = async (adId, formData) => {
 /**
  * Сохранить черновик объявления
  */
-export const saveDraft = async (formData) => {
+export const saveDraft = async (formData, draftId = null) => {
   return new Promise((resolve, reject) => {
-    router.post('/ads/draft', formData, {
-      onSuccess: (page) => {
-        resolve(page)
-      },
-      onError: (errors) => {
-        reject(errors)
-      }
-    })
+    if (draftId) {
+      // Обновляем существующий черновик
+      router.put(`/draft/${draftId}`, formData, {
+        onSuccess: (page) => {
+          resolve(page)
+        },
+        onError: (errors) => {
+          reject(errors)
+        }
+      })
+    } else {
+      // Создаем новый черновик
+      router.post('/ads/draft', formData, {
+        onSuccess: (page) => {
+          resolve(page)
+        },
+        onError: (errors) => {
+          reject(errors)
+        }
+      })
+    }
   })
 }
 
@@ -255,7 +268,6 @@ export const prepareFormData = (form) => {
     has_girlfriend: form.has_girlfriend || false,
     service_provider: Array.isArray(form.service_provider) ? form.service_provider : [],
     experience: form.experience || '',
-    education_level: form.education_level || '',
     features: form.features || {},
     additional_features: form.additional_features || '',
     description: form.description || '',
@@ -264,6 +276,14 @@ export const prepareFormData = (form) => {
     is_starting_price: Array.isArray(form.is_starting_price) ? form.is_starting_price : [],
     pricing_data: form.pricing_data || {},
     contacts_per_hour: form.contacts_per_hour || '',
+    
+    // Детальные цены
+    express_price: form.express_price || '',
+    price_per_hour: form.price_per_hour || '',
+    outcall_price: form.outcall_price || '',
+    price_two_hours: form.price_two_hours || '',
+    price_night: form.price_night || '',
+    min_duration: form.min_duration || '',
 
     discount: form.discount || '',
     new_client_discount: form.new_client_discount || '',

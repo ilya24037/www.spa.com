@@ -43,6 +43,15 @@ class AdRepository
     }
 
     /**
+     * Обновить объявление
+     */
+    public function update(Ad $ad, array $data): Ad
+    {
+        $ad->update($data);
+        return $ad->fresh();
+    }
+
+    /**
      * Получить объявления пользователя
      */
     public function findByUser(User $user, ?AdStatus $status = null, int $perPage = 15): LengthAwarePaginator

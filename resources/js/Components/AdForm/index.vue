@@ -39,10 +39,6 @@
         <FeaturesModule
           :errors="formErrors"
         />
-
-        <EducationModule
-          :errors="formErrors"
-        />
       </div>
 
       <!-- ГРУППА 3: Коммерческая информация -->
@@ -56,20 +52,34 @@
         />
 
         <ServicesModule
+          :services="store.formData.services"
+          :services-additional-info="store.formData.services_additional_info"
           :allowed-categories="[]"
           :use-new-architecture="true"
           :errors="formErrors"
+          @update:services="handleServicesUpdate"
+          @update:servicesAdditionalInfo="handleServicesAdditionalInfoUpdate"
         />
 
         <ScheduleModule
+          :schedule="store.formData.schedule"
+          :schedule-notes="store.formData.schedule_notes"
           :errors="formErrors"
+          @update:schedule="handleScheduleUpdate"
+          @update:scheduleNotes="handleScheduleNotesUpdate"
         />
       </div>
 
       <!-- ГРУППА 4: Локация и контакты -->
       <div class="form-group">
         <LocationModule
+          :service-location="store.formData.service_location"
+          :outcall-locations="store.formData.outcall_locations"
+          :address="store.formData.address"
           :errors="formErrors"
+          @update:serviceLocation="handleServiceLocationUpdate"
+          @update:outcallLocations="handleOutcallLocationsUpdate"
+          @update:address="handleAddressUpdate"
         />
 
         <GeoModule
@@ -159,7 +169,6 @@ import ClientsModule from './modules/BasicInfo/Clients.vue'
 // Модули персональной информации  
 import ParametersModule from './features/PersonalInfo/Parameters/index.vue'
 import FeaturesModule from './features/PersonalInfo/Features/index.vue'
-import EducationModule from './features/PersonalInfo/Education/index.vue'
 
 // Модули медиа
 import MediaModule from './modules/Media/MediaModule.vue'
@@ -196,6 +205,8 @@ const store = useAdFormStore()
 
 // Инициализация store
 onMounted(() => {
+
+  
   store.initializeForm(props.initialData, {
     adId: props.adId,
     category: props.category
@@ -288,6 +299,37 @@ const handlePublish = async () => {
 
 const handlePhotoError = (error) => {
   console.error('Ошибка загрузки фото:', error)
+}
+
+// Обработчики событий от ServicesModule
+const handleServicesUpdate = (services) => {
+  store.updateField('services', services)
+}
+
+const handleServicesAdditionalInfoUpdate = (info) => {
+  store.updateField('services_additional_info', info)
+}
+
+// Обработчики событий от ScheduleModule
+const handleScheduleUpdate = (schedule) => {
+  store.updateField('schedule', schedule)
+}
+
+const handleScheduleNotesUpdate = (notes) => {
+  store.updateField('schedule_notes', notes)
+}
+
+// Обработчики событий от LocationModule
+const handleServiceLocationUpdate = (location) => {
+  store.updateField('service_location', location)
+}
+
+const handleOutcallLocationsUpdate = (locations) => {
+  store.updateField('outcall_locations', locations)
+}
+
+const handleAddressUpdate = (address) => {
+  store.updateField('address', address)
 }
 
 const handleVideoError = (error) => {

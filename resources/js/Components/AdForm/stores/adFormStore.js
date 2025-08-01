@@ -32,13 +32,6 @@ export const useAdFormStore = defineStore('adForm', () => {
     features: {},
     additional_features: '',
     experience: '',
-    education_level: '',
-    university: '',
-    specialization: '',
-    graduation_year: '',
-    courses: [],
-    has_certificates: false,
-    certificate_photos: [],
     
     // Коммерческая информация
     price: '',
@@ -69,6 +62,7 @@ export const useAdFormStore = defineStore('adForm', () => {
     // Локация и контакты
     service_location: [],
     outcall_locations: [],
+    address: '',
     taxi_option: '',
     geo: {},
     phone: '',
@@ -165,6 +159,7 @@ export const useAdFormStore = defineStore('adForm', () => {
     locationInfo: {
       service_location: formData.service_location,
       outcall_locations: formData.outcall_locations,
+      address: formData.address,
       taxi_option: formData.taxi_option,
       geo: formData.geo,
       phone: formData.phone,
@@ -235,16 +230,39 @@ export const useAdFormStore = defineStore('adForm', () => {
         }
         // Особая обработка для объектов
         else if (typeof formData[key] === 'object' && formData[key] !== null) {
-          formData[key] = (typeof initialData[key] === 'object' && initialData[key] !== null) 
-            ? initialData[key] 
-            : (formData[key] || {})
+          // Специальная обработка для JSON полей которые могут прийти как строки
+          if (typeof initialData[key] === 'string' && initialData[key].trim().startsWith('{')) {
+            try {
+              formData[key] = JSON.parse(initialData[key])
+            } catch (e) {
+              formData[key] = formData[key] || {}
+            }
+          } else {
+            formData[key] = (typeof initialData[key] === 'object' && initialData[key] !== null) 
+              ? initialData[key] 
+              : (formData[key] || {})
+          }
         }
         // Остальные типы
         else {
           formData[key] = initialData[key]
         }
       }
+      // Специальная обработка для строковых полей (цены, текст) - даже если null, конвертируем в строку
+      else if (typeof formData[key] === 'string') {
+        formData[key] = String(initialData[key] || '')
+      }
     })
+    
+      // Дополнительная обработка для полей цены - ensure они строки
+  const priceFields = ['price_per_hour', 'outcall_price', 'express_price', 'price_two_hours', 'price_night', 'min_duration']
+  priceFields.forEach(field => {
+    if (formData[field] !== undefined) {
+      formData[field] = String(formData[field] || '')
+    }
+  })
+  
+
     
     // Настройка опций
     if (options.adId) {

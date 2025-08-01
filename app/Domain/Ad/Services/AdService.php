@@ -117,16 +117,40 @@ class AdService
     }
     
     /**
+     * Обновить черновик объявления
+     */
+    public function updateDraft(Ad $ad, array $data): Ad
+    {
+        return DB::transaction(function () use ($ad, $data) {
+            // Подготавливаем данные
+            $preparedData = $this->prepareMainAdData($data);
+            
+            // Сохраняем статус черновика
+            $preparedData['status'] = 'draft';
+            
+            // Обновляем объявление
+            $updated = $this->adRepository->update($ad, $preparedData);
+            
+            // Обновляем связанные компоненты
+            $this->updateAdComponents($ad, $data);
+            
+            Log::info('Draft ad updated', ['ad_id' => $ad->id]);
+            
+            return $updated;
+        });
+    }
+
+    /**
      * Сохранить как черновик
      */
     public function saveDraft(array $data, User $user, ?Ad $ad = null): Ad
     {
         if ($ad) {
             // Обновляем существующий черновик
-            return $this->update($ad, $data);
+            return $this->updateDraft($ad, $data);
         } else {
             // Создаем новый черновик
-            return $this->create($data, $user);
+            return $this->createDraft($data, $user);
         }
     }
     
@@ -188,7 +212,11 @@ class AdService
             'title', 'specialty', 'description', 'category', 'taxi_option', 'work_format', 'experience', 'education_level',
             'address', 'travel_area', 'phone', 'contact_method', 'whatsapp', 'telegram',
             'age', 'height', 'weight', 'breast_size', 'hair_color', 'eye_color',
-            'appearance', 'nationality', 'has_girlfriend', 'schedule_notes'
+            'appearance', 'nationality', 'has_girlfriend', 'schedule_notes',
+            // Поля цены
+            'price', 'price_unit', 'price_per_hour', 'outcall_price', 'express_price', 
+            'price_two_hours', 'price_night', 'min_duration', 'contacts_per_hour',
+            'discount', 'new_client_discount', 'gift', 'additional_features'
         ];
         
         foreach ($mainFields as $field) {
@@ -196,6 +224,8 @@ class AdService
                 $prepared[$field] = $data[$field];
             }
         }
+        
+
         
         // JSON поля в основной таблице
         $jsonFields = [

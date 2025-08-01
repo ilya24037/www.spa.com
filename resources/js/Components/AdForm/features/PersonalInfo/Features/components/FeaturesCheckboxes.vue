@@ -4,12 +4,15 @@
     hint="Выберите ваши особенности"
     :error="error"
   >
-    <CheckboxGroup
-      v-model="localValue"
-      :options="featureOptions"
-      class="grid grid-cols-1 md:grid-cols-2 gap-3"
-      @update:modelValue="handleUpdate"
-    />
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <BaseCheckbox
+        v-for="option in featureOptions"
+        :key="option.value"
+        :model-value="isSelected(option.value)"
+        :label="option.label"
+        @update:model-value="() => toggleFeature(option.value)"
+      />
+    </div>
     
     <!-- Счетчик выбранных -->
     <div v-if="selectedCount > 0" class="mt-3 flex items-center space-x-2 text-sm text-blue-600">
@@ -22,9 +25,13 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { computed } from 'vue'
 import FormField from '@/Components/UI/Forms/FormField.vue'
-import CheckboxGroup from '@/Components/UI/CheckboxGroup.vue'
+import BaseCheckbox from '@/Components/UI/BaseCheckbox.vue'
+import { useAdFormStore } from '../../../../stores/adFormStore'
+
+// AVITO-STYLE: Используем централизованный store
+const store = useAdFormStore()
 
 const props = defineProps({
   modelValue: { type: Object, default: () => ({}) },
@@ -33,15 +40,8 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-const localValue = ref(Array.from(Object.keys(props.modelValue || {})))
-
-watch(() => props.modelValue, (newValue) => {
-  const newKeys = Array.from(Object.keys(newValue || {}))
-  // Обновляем только если есть реальные изменения
-  if (JSON.stringify(newKeys.sort()) !== JSON.stringify(localValue.value.sort())) {
-    localValue.value = newKeys
-  }
-}, { deep: true })
+// Читаем данные ТОЛЬКО из store (как на Avito)
+const features = computed(() => store.formData.features || {})
 
 // Группы особенностей с иконками
 const featureOptions = [
@@ -61,8 +61,33 @@ const featureOptions = [
   { value: 'late_hours', label: '🌙 Работаю допоздна' }
 ]
 
+// Методы обновляют ТОЛЬКО store (как на Avito/Ozon)
+const isSelected = (value) => {
+  return features.value[value] === true
+}
+
+const toggleFeature = (value) => {
+  const currentFeatures = { ...features.value }
+  
+  if (currentFeatures[value]) {
+    // Убираем особенность
+    delete currentFeatures[value]
+  } else {
+    // Добавляем особенность
+    currentFeatures[value] = true
+  }
+  
+  console.log('toggleFeature called:', value, 'new features:', currentFeatures)
+  store.updateField('features', currentFeatures)
+  
+  // Также эмитим для совместимости
+  emit('update:modelValue', currentFeatures)
+}
+
 // Computed
-const selectedCount = computed(() => localValue.value.length)
+const selectedCount = computed(() => {
+  return Object.keys(features.value).filter(key => features.value[key]).length
+})
 
 const selectedText = computed(() => {
   const count = selectedCount.value
@@ -70,24 +95,4 @@ const selectedText = computed(() => {
   if (count >= 2 && count <= 4) return 'особенности выбраны'
   return 'особенностей выбрано'
 })
-
-// Методы
-const handleUpdate = (selectedKeys) => {
-  // Проверяем есть ли реальные изменения
-  if (JSON.stringify(selectedKeys.sort()) === JSON.stringify(localValue.value.sort())) {
-    return // Никаких изменений - не обновляем
-  }
-  
-  // Преобразуем массив ключей в объект
-  const featuresObject = {}
-  selectedKeys.forEach(key => {
-    featuresObject[key] = true
-  })
-  
-  // Обновляем локальное состояние первым
-  localValue.value = selectedKeys
-  
-  // Затем эмитим изменения
-  emit('update:modelValue', featuresObject)
-}
 </script>

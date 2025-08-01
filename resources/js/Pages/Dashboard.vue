@@ -37,7 +37,7 @@
                             >
                                 <span class="flex items-center gap-2">
                                     Ждут действий
-                                    <sup v-if="counts.waiting_payment" class="text-sm font-normal">{{ counts.waiting_payment }}</sup>
+                                    <sup v-if="counts.waiting" class="text-sm font-normal">{{ counts.waiting }}</sup>
                                 </span>
                             </Link>
                             
@@ -67,7 +67,7 @@
                             >
                                 <span class="flex items-center gap-2">
                                     Черновики
-                                    <sup v-if="counts.draft" class="text-sm font-normal">{{ counts.draft }}</sup>
+                                    <sup v-if="counts.drafts" class="text-sm font-normal">{{ counts.drafts }}</sup>
                                 </span>
                             </Link>
                             
@@ -82,16 +82,16 @@
                             >
                                 <span class="flex items-center gap-2">
                                     Архив
-                                    <sup v-if="counts.archive" class="text-sm font-normal">{{ counts.archive }}</sup>
+                                    <sup v-if="counts.archived" class="text-sm font-normal">{{ counts.archived }}</sup>
                                 </span>
                             </Link>
                         </div>
                     </div>
                     
                     <!-- Контент вкладки -->
-                    <div v-if="profiles && profiles.length > 0" class="space-y-6">
+                    <div v-if="profiles && profiles.data && profiles.data.length > 0" class="space-y-6">
                         <ItemCard 
-                            v-for="profile in profiles" 
+                            v-for="profile in profiles.data" 
                             :key="profile.id"
                             :item="profile"
                             @item-updated="handleItemUpdate"
@@ -131,8 +131,8 @@
 import { ref, computed } from 'vue'
 import { Head, Link, usePage } from '@inertiajs/vue3'
 import ProfileSidebar from '@/Components/Layout/ProfileSidebar.vue'
-import ItemCard from '../Components/Profile/ItemCard.vue'
-import Toast from '../Components/UI/Toast.vue'
+import ItemCard from '@/Components/Profile/ItemCard.vue'
+import Toast from '@/Components/UI/Toast.vue'
 
 // Props
 const props = defineProps({
@@ -157,6 +157,8 @@ const props = defineProps({
         default: 'Мои объявления'
     }
 })
+
+
 
 // Состояние
 const toasts = ref([])
