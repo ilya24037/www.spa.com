@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DTOs;
+namespace App\Domain\Master\DTOs;
 
 use Illuminate\Http\UploadedFile;
 
@@ -14,14 +14,14 @@ class CreateMasterDTO
         public readonly string $display_name,
         public readonly string $bio,
         public readonly string $phone,
-        public readonly ?string $whatsapp = null,
-        public readonly ?string $telegram = null,
-        public readonly int $experience_years = 0,
         public readonly string $city,
-        public readonly ?string $district = null,
-        public readonly ?string $metro_station = null,
+        public readonly int $experience_years = 0,
         public readonly bool $home_service = false,
         public readonly bool $salon_service = false,
+        public readonly ?string $whatsapp = null,
+        public readonly ?string $telegram = null,
+        public readonly ?string $district = null,
+        public readonly ?string $metro_station = null,
         public readonly ?string $salon_address = null,
         public readonly ?int $age = null,
         public readonly ?array $features = null,

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Helpers;
+namespace App\Support\Helpers;
 
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Domain\Notification\Repositories;
 
 use App\Models\Notification;
 use App\Models\NotificationDelivery;

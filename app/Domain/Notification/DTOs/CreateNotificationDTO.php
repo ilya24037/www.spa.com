@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DTOs\Notification;
+namespace App\Domain\Notification\DTOs;
 
 use App\Enums\NotificationType;
 use App\Enums\NotificationChannel;

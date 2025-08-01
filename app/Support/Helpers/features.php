@@ -10,7 +10,7 @@ if (!function_exists('feature')) {
      * @param mixed $user
      * @return bool
      */
-    function feature(string $feature, $user = null): bool
+    function feature(string $feature, mixed $user = null): bool
     {
         return app(FeatureFlagService::class)->isEnabled($feature, $user ?? auth()->user());
     }

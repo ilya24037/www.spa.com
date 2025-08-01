@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Domain\Review\Repositories;
 
 use App\Models\Review;
 use App\Models\ReviewReply;
@@ -380,7 +380,7 @@ class ReviewRepository
             ]);
     }
 
-    public function batchReject(array $ids, string $reason = null): int
+    public function batchReject(array $ids, ?string $reason = null): int
     {
         return $this->model->whereIn('id', $ids)
             ->update([

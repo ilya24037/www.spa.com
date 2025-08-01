@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Infrastructure\Media;
 
 use App\Models\Media;
 use App\Enums\MediaType;
@@ -29,7 +29,7 @@ class MediaService
 
     public function upload(
         UploadedFile $file, 
-        Model $entity = null, 
+        ?Model $entity = null, 
         string $collection = 'default',
         array $metadata = []
     ): Media {
@@ -322,7 +322,7 @@ class MediaService
         ];
     }
 
-    protected function getThumbnailPath(Media $media, string $conversion, string $extension = null): string
+    protected function getThumbnailPath(Media $media, string $conversion, ?string $extension = null): string
     {
         $extension = $extension ?? pathinfo($media->file_name, PATHINFO_EXTENSION);
         $baseName = pathinfo($media->file_name, PATHINFO_FILENAME);
@@ -390,7 +390,7 @@ class MediaService
         return $updated;
     }
 
-    public function reorder(Model $entity, array $mediaIds, string $collection = null): bool
+    public function reorder(Model $entity, array $mediaIds, ?string $collection = null): bool
     {
         return $this->mediaRepository->reorderForEntity($entity, $mediaIds, $collection);
     }
@@ -442,7 +442,7 @@ class MediaService
         return $baseName . '_' . uniqid() . '.' . $extension;
     }
 
-    protected function getNextSortOrder(Model $entity = null, string $collection = 'default'): int
+    protected function getNextSortOrder(?Model $entity = null, string $collection = 'default'): int
     {
         if (!$entity) {
             return 1;

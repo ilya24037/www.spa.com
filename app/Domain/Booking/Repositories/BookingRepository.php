@@ -211,7 +211,7 @@ class BookingRepository
                           ->get();
     }
 
-    public function getTodayBookings(int $masterId = null): Collection
+    public function getTodayBookings(?int $masterId = null): Collection
     {
         $query = $this->model->today()->active();
         
@@ -222,7 +222,7 @@ class BookingRepository
         return $query->orderBy('start_time')->get();
     }
 
-    public function getBookingsForDate(Carbon $date, int $masterId = null): Collection
+    public function getBookingsForDate(Carbon $date, ?int $masterId = null): Collection
     {
         $query = $this->model->whereDate('start_time', $date);
         
@@ -233,7 +233,7 @@ class BookingRepository
         return $query->orderBy('start_time')->get();
     }
 
-    public function getBookingsForDateRange(Carbon $startDate, Carbon $endDate, int $masterId = null): Collection
+    public function getBookingsForDateRange(Carbon $startDate, Carbon $endDate, ?int $masterId = null): Collection
     {
         $query = $this->model->whereBetween('start_time', [$startDate, $endDate]);
         
@@ -244,7 +244,7 @@ class BookingRepository
         return $query->orderBy('start_time')->get();
     }
 
-    public function findOverlapping(Carbon $startTime, Carbon $endTime, int $masterId, int $excludeId = null): Collection
+    public function findOverlapping(Carbon $startTime, Carbon $endTime, int $masterId, ?int $excludeId = null): Collection
     {
         $query = $this->model->where('master_id', $masterId)
                             ->active()
@@ -309,7 +309,7 @@ class BookingRepository
         ];
     }
 
-    public function getRevenueByMonth(int $year, int $masterId = null): Collection
+    public function getRevenueByMonth(int $year, ?int $masterId = null): Collection
     {
         $query = $this->model->whereYear('start_time', $year)
                             ->where('status', 'completed');
@@ -328,7 +328,7 @@ class BookingRepository
         ->get();
     }
 
-    public function getPopularServices(int $limit = 10, int $masterId = null): Collection
+    public function getPopularServices(int $limit = 10, ?int $masterId = null): Collection
     {
         $query = $this->model->join('services', 'bookings.service_id', '=', 'services.id')
                             ->where('bookings.status', 'completed');
@@ -368,7 +368,7 @@ class BookingRepository
                           ->get();
     }
 
-    public function getFrequentClients(int $limit = 10, int $masterId = null): Collection
+    public function getFrequentClients(int $limit = 10, ?int $masterId = null): Collection
     {
         $query = $this->model->join('users', 'bookings.client_id', '=', 'users.id')
                             ->where('bookings.status', 'completed');
@@ -404,7 +404,7 @@ class BookingRepository
         return $this->model->whereIn('id', $ids)->update(['status' => $status]);
     }
 
-    public function getBookingCalendar(Carbon $startDate, Carbon $endDate, int $masterId = null): array
+    public function getBookingCalendar(Carbon $startDate, Carbon $endDate, ?int $masterId = null): array
     {
         $query = $this->model->whereBetween('start_time', [$startDate, $endDate]);
         

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Domain\User\Repositories;
 
 use App\Models\User;
 use App\Enums\UserRole;

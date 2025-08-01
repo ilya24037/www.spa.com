@@ -373,7 +373,7 @@ class UserAuthService
     /**
      * Проверка может ли пользователь выполнить действие
      */
-    public function canPerformAction(User $user, string $action, $resource = null): bool
+    public function canPerformAction(User $user, string $action, mixed $resource = null): bool
     {
         // Основные проверки
         if (!$user->isActive()) {

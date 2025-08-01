@@ -2,128 +2,117 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Models\MasterProfile;
-use App\Domain\Media\Models\Photo;
+use App\Domain\Master\Models\MasterProfile;
+use App\Models\MasterPhoto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
-class PhotoController extends Controller
+class MasterPhotoController extends Controller
 {
     /**
      * Загрузить фотографии мастера
      */
-    public function upload(Request $request, MasterProfile $master)
+    public function store(Request $request, MasterProfile $master)
     {
+        // Проверка прав
+        if (Auth::id() !== $master->user_id) {
+            abort(403, 'Нет прав для загрузки фотографий');
+        }
+
         $request->validate([
-            'photos.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'photos' => 'required|array',
+            'photos.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120', // 5MB
         ]);
 
         $uploadedPhotos = [];
 
-        if ($request->hasFile('photos')) {
-            foreach ($request->file('photos') as $file) {
-                // Генерируем уникальное имя файла
-                $fileName = Str::random(20) . '.' . $file->getClientOriginalExtension();
+        DB::beginTransaction();
+        try {
+            foreach ($request->file('photos') as $photo) {
+                $path = $photo->store('masters/' . $master->id . '/photos', 'public');
                 
-                // Сохраняем в storage/app/public/masters
-                $path = $file->storeAs('masters', $fileName, 'public');
-                
-                // Создаем запись в базе данных
-                $photo = Photo::create([
+                $masterPhoto = MasterPhoto::create([
                     'master_profile_id' => $master->id,
-                    'path' => $path,
-                    'is_main' => false,
-                    'order' => $master->photos()->count() + 1,
+                    'photo_url' => Storage::url($path),
+                    'photo_path' => $path,
+                    'is_main' => $master->photos()->count() === 0, // Первое фото - главное
+                    'sort_order' => $master->photos()->count(),
                 ]);
 
-                $uploadedPhotos[] = [
-                    'id' => $photo->id,
-                    'url' => Storage::url($path),
-                    'path' => $path,
-                ];
+                $uploadedPhotos[] = $masterPhoto;
             }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'photos' => $uploadedPhotos,
+                'message' => 'Фотографии успешно загружены'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            // Удаляем загруженные файлы
+            foreach ($uploadedPhotos as $photo) {
+                Storage::disk('public')->delete($photo->photo_path);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Ошибка при загрузке фотографий'
+            ], 500);
         }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Загружено ' . count($uploadedPhotos) . ' фотографий',
-            'photos' => $uploadedPhotos,
-        ]);
-    }
-
-    /**
-     * Добавить фотографию из локального файла
-     */
-    public function addLocalPhoto(Request $request)
-    {
-        $request->validate([
-            'master_id' => 'required|exists:master_profiles,id',
-            'file_path' => 'required|string',
-            'is_main' => 'boolean',
-        ]);
-
-        $master = MasterProfile::findOrFail($request->master_id);
-        $localPath = $request->file_path;
-
-        // Проверяем, что файл существует
-        if (!file_exists(public_path($localPath))) {
-            return response()->json(['error' => 'Файл не найден: ' . $localPath], 404);
-        }
-
-        // Создаем запись в базе данных
-        $photo = Photo::create([
-            'master_profile_id' => $master->id,
-            'path' => $localPath,
-            'is_main' => $request->boolean('is_main', false),
-            'order' => $master->photos()->count() + 1,
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Фотография добавлена',
-            'photo' => [
-                'id' => $photo->id,
-                'url' => asset($localPath),
-                'path' => $localPath,
-            ],
-        ]);
     }
 
     /**
      * Удалить фотографию
      */
-    public function destroy(Photo $photo)
+    public function destroy(MasterProfile $master, MasterPhoto $photo)
     {
-        // Удаляем файл из storage (если он там)
-        if (Storage::disk('public')->exists($photo->path)) {
-            Storage::disk('public')->delete($photo->path);
+        // Проверка прав
+        if (Auth::id() !== $master->user_id || $photo->master_profile_id !== $master->id) {
+            abort(403, 'Нет прав для удаления фотографии');
         }
 
-        // Удаляем запись из базы данных
+        // Удаляем файл
+        Storage::disk('public')->delete($photo->photo_path);
+        
+        // Удаляем запись
         $photo->delete();
+
+        // Если удалили главное фото, делаем первое оставшееся главным
+        if ($photo->is_main && $master->photos()->count() > 0) {
+            $master->photos()->orderBy('sort_order')->first()->update(['is_main' => true]);
+        }
 
         return response()->json([
             'success' => true,
-            'message' => 'Фотография удалена',
+            'message' => 'Фотография удалена'
         ]);
     }
 
     /**
-     * Установить главную фотографию
+     * Установить главное фото
      */
-    public function setMain(Photo $photo)
+    public function setMain(MasterProfile $master, MasterPhoto $photo)
     {
-        // Убираем флаг is_main у всех фотографий мастера
-        Photo::where('master_profile_id', $photo->master_profile_id)
-            ->update(['is_main' => false]);
+        // Проверка прав
+        if (Auth::id() !== $master->user_id || $photo->master_profile_id !== $master->id) {
+            abort(403, 'Нет прав для изменения фотографии');
+        }
 
-        // Устанавливаем текущую фотографию как главную
+        // Снимаем флаг с текущего главного
+        $master->photos()->where('is_main', true)->update(['is_main' => false]);
+        
+        // Устанавливаем новое главное
         $photo->update(['is_main' => true]);
 
         return response()->json([
             'success' => true,
-            'message' => 'Главная фотография установлена',
+            'message' => 'Главное фото установлено'
         ]);
     }
 
@@ -132,21 +121,25 @@ class PhotoController extends Controller
      */
     public function reorder(Request $request, MasterProfile $master)
     {
+        // Проверка прав
+        if (Auth::id() !== $master->user_id) {
+            abort(403, 'Нет прав для изменения порядка фотографий');
+        }
+
         $request->validate([
-            'photos' => 'required|array',
-            'photos.*.id' => 'required|exists:master_photos,id',
-            'photos.*.order' => 'required|integer|min:1',
+            'photo_ids' => 'required|array',
+            'photo_ids.*' => 'exists:master_photos,id'
         ]);
 
-        foreach ($request->photos as $photoData) {
-            Photo::where('id', $photoData['id'])
+        foreach ($request->photo_ids as $index => $photoId) {
+            MasterPhoto::where('id', $photoId)
                 ->where('master_profile_id', $master->id)
-                ->update(['order' => $photoData['order']]);
+                ->update(['sort_order' => $index]);
         }
 
         return response()->json([
             'success' => true,
-            'message' => 'Порядок фотографий изменен',
+            'message' => 'Порядок фотографий обновлен'
         ]);
     }
-} 
+}

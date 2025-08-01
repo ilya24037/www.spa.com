@@ -8,6 +8,7 @@ namespace App\Enums;
 enum WorkFormat: string
 {
     case INDIVIDUAL = 'individual';
+    case SALON = 'salon';
     case DUO = 'duo';
     case GROUP = 'group';
 
@@ -18,6 +19,7 @@ enum WorkFormat: string
     {
         return match($this) {
             self::INDIVIDUAL => 'Индивидуально',
+            self::SALON => 'Салон',
             self::DUO => 'В паре',
             self::GROUP => 'Групповые услуги',
         };
@@ -29,7 +31,8 @@ enum WorkFormat: string
     public function getDescription(): string
     {
         return match($this) {
-            self::INDIVIDUAL => 'Работаю только индивидуально с одним клиентом',
+            self::INDIVIDUAL => 'Работаю только индивидуально',
+            self::SALON => 'Работаю в команде',
             self::DUO => 'Работаю в паре с другим специалистом',
             self::GROUP => 'Провожу групповые сеансы для нескольких клиентов',
         };

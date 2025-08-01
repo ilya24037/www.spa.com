@@ -3,7 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Models\MasterProfile;
-use App\Http\Controllers\BookingController;
+use App\Application\Http\Controllers\Booking\BookingController;
 
 Route::middleware('api')->group(function () {
     // Тестовый маршрут

@@ -13,15 +13,15 @@ use Illuminate\Support\Facades\Route;
 /* -------------------------------------------------
  |  Controllers
  * -------------------------------------------------*/
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\ConfirmablePasswordController;
-use App\Http\Controllers\Auth\EmailVerificationNotificationController;
-use App\Http\Controllers\Auth\EmailVerificationPromptController;
-use App\Http\Controllers\Auth\NewPasswordController;
-use App\Http\Controllers\Auth\PasswordController;
-use App\Http\Controllers\Auth\PasswordResetLinkController;
-use App\Http\Controllers\Auth\RegisteredUserController;
-use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Application\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Application\Http\Controllers\Auth\ConfirmablePasswordController;
+use App\Application\Http\Controllers\Auth\EmailVerificationNotificationController;
+use App\Application\Http\Controllers\Auth\EmailVerificationPromptController;
+use App\Application\Http\Controllers\Auth\NewPasswordController;
+use App\Application\Http\Controllers\Auth\PasswordController;
+use App\Application\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Application\Http\Controllers\Auth\RegisteredUserController;
+use App\Application\Http\Controllers\Auth\VerifyEmailController;
 
 /* -------------------------------------------------
  |  Guests (неавторизованный пользователь)
@@ -48,10 +48,10 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
 
     // Подтверждение e-mail
-    Route::get('verify-email', EmailVerificationPromptController::class)   // ← только один класс!
+    Route::get('verify-email', [EmailVerificationPromptController::class, '__invoke'])
          ->name('verification.notice');
 
-    Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
+    Route::get('verify-email/{id}/{hash}', [VerifyEmailController::class, '__invoke'])
          ->middleware(['signed', 'throttle:6,1'])
          ->name('verification.verify');
 

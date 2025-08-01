@@ -72,14 +72,14 @@ Route::get('/test/add-local-photos', [TestController::class, 'addLocalPhotos'])-
 
 // Управление фотографиями мастеров
 Route::prefix('masters/{master}/photos')->group(function () {
-    Route::post('/', [App\Http\Controllers\MasterPhotoController::class, 'upload'])->name('master.photos.upload');
-    Route::delete('/{photo}', [App\Http\Controllers\MasterPhotoController::class, 'destroy'])->name('master.photos.destroy');
-    Route::patch('/{photo}/main', [App\Http\Controllers\MasterPhotoController::class, 'setMain'])->name('master.photos.set-main');
-    Route::patch('/reorder', [App\Http\Controllers\MasterPhotoController::class, 'reorder'])->name('master.photos.reorder');
+    Route::post('/', [App\Application\Http\Controllers\MasterPhotoController::class, 'upload'])->name('master.photos.upload');
+    Route::delete('/{photo}', [App\Application\Http\Controllers\MasterPhotoController::class, 'destroy'])->name('master.photos.destroy');
+    Route::patch('/{photo}/main', [App\Application\Http\Controllers\MasterPhotoController::class, 'setMain'])->name('master.photos.set-main');
+    Route::patch('/reorder', [App\Application\Http\Controllers\MasterPhotoController::class, 'reorder'])->name('master.photos.reorder');
 });
 
 // Добавление локальных фотографий
-Route::post('/master/photos/local', [App\Http\Controllers\MasterPhotoController::class, 'addLocalPhoto'])->name('master.photos.local');
+Route::post('/master/photos/local', [App\Application\Http\Controllers\MasterPhotoController::class, 'addLocalPhoto'])->name('master.photos.local');
 
 // Публичный маршрут для тестирования загрузки фотографий (без авторизации и CSRF)
 Route::post('/masters/{master}/upload/photos/test', function(\Illuminate\Http\Request $request, $masterId) {
@@ -216,11 +216,12 @@ Route::middleware('auth')->group(function () {
         Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
         
         Route::prefix('items')->name('items.')->group(function () {
-            Route::get('/active/all', [ProfileController::class, 'activeItems'])->name('active');
-            Route::get('/draft/all', [ProfileController::class, 'draftItems'])->name('draft');
-            Route::get('/inactive/all', [ProfileController::class, 'inactiveItems'])->name('inactive');
-            Route::get('/old/all', [ProfileController::class, 'oldItems'])->name('old');
-            Route::get('/archive/all', [ProfileController::class, 'archiveItems'])->name('archive');
+            // Перенаправляем на my-ads с соответствующими табами
+            Route::get('/active/all', fn() => redirect()->route('my-ads.index', ['tab' => 'active']))->name('active');
+            Route::get('/draft/all', fn() => redirect()->route('my-ads.index', ['tab' => 'drafts']))->name('draft');
+            Route::get('/inactive/all', fn() => redirect()->route('my-ads.index', ['tab' => 'archived']))->name('inactive');
+            Route::get('/old/all', fn() => redirect()->route('my-ads.index', ['tab' => 'expired']))->name('old');
+            Route::get('/archive/all', fn() => redirect()->route('my-ads.index', ['tab' => 'archived']))->name('archive');
         });
     });
 
@@ -240,9 +241,9 @@ Route::middleware('auth')->group(function () {
         Route::patch('/{master}/restore',   [ProfileController::class, 'restoreProfile'])->whereNumber('master')->name('restore');
         
         // 🔥 ДОБАВЛЕНО: маршруты для загрузки медиа
-        Route::post('/{master}/upload/avatar', [App\Http\Controllers\MediaUploadController::class, 'uploadAvatar'])->name('upload.avatar');
-        Route::post('/{master}/upload/photos', [App\Http\Controllers\MediaUploadController::class, 'uploadPhotos'])->name('upload.photos');
-        Route::post('/{master}/upload/video', [App\Http\Controllers\MediaUploadController::class, 'uploadVideo'])->name('upload.video');
+        Route::post('/{master}/upload/avatar', [App\Application\Http\Controllers\MediaUploadController::class, 'uploadAvatar'])->name('upload.avatar');
+        Route::post('/{master}/upload/photos', [App\Application\Http\Controllers\MediaUploadController::class, 'uploadPhotos'])->name('upload.photos');
+        Route::post('/{master}/upload/video', [App\Application\Http\Controllers\MediaUploadController::class, 'uploadVideo'])->name('upload.video');
     });
 
     /*
@@ -270,10 +271,10 @@ Route::middleware('auth')->group(function () {
     | Управление медиафайлами
     */
     Route::prefix('media')->name('media.')->group(function () {
-        Route::delete('/photos/{photo}', [App\Http\Controllers\MediaUploadController::class, 'deletePhoto'])->name('photos.delete');
-        Route::delete('/videos/{video}', [App\Http\Controllers\MediaUploadController::class, 'deleteVideo'])->name('videos.delete');
-        Route::post('/photos/{photo}/set-main', [App\Http\Controllers\MediaUploadController::class, 'setMainPhoto'])->name('photos.set-main');
-        Route::post('/photos/reorder', [App\Http\Controllers\MediaUploadController::class, 'reorderPhotos'])->name('photos.reorder');
+        Route::delete('/photos/{photo}', [App\Application\Http\Controllers\MediaUploadController::class, 'deletePhoto'])->name('photos.delete');
+        Route::delete('/videos/{video}', [App\Application\Http\Controllers\MediaUploadController::class, 'deleteVideo'])->name('videos.delete');
+        Route::post('/photos/{photo}/set-main', [App\Application\Http\Controllers\MediaUploadController::class, 'setMainPhoto'])->name('photos.set-main');
+        Route::post('/photos/reorder', [App\Application\Http\Controllers\MediaUploadController::class, 'reorderPhotos'])->name('photos.reorder');
     });
 
     /*
@@ -300,11 +301,11 @@ require __DIR__.'/auth.php';
 
 // Медиа с AI-обработкой
 Route::prefix('masters/{master}/media')->group(function () {
-    Route::post('/upload-ai', [App\Http\Controllers\MasterMediaController::class, 'uploadWithAI'])
+    Route::post('/upload-ai', [App\Application\Http\Controllers\MasterMediaController::class, 'uploadWithAI'])
         ->name('master.media.upload-ai');
-    Route::post('/process-privacy', [App\Http\Controllers\MasterMediaController::class, 'processPrivacy'])
+    Route::post('/process-privacy', [App\Application\Http\Controllers\MasterMediaController::class, 'processPrivacy'])
         ->name('master.media.process-privacy');
-    Route::patch('/blur-settings', [App\Http\Controllers\MasterMediaController::class, 'updateBlurSettings'])
+    Route::patch('/blur-settings', [App\Application\Http\Controllers\MasterMediaController::class, 'updateBlurSettings'])
         ->name('master.media.blur-settings');
 });
 
@@ -336,23 +337,23 @@ Route::get('/masters/{master}/avatar/thumb', function($master) {
 // Удалены дублирующиеся маршруты - используются контроллеры ниже
 
 // Маршруты для медиа файлов мастеров
-Route::get('/masters/{master}/photo/{filename}', [App\Http\Controllers\MasterMediaController::class, 'photo'])->name('master.photo');
-Route::get('/masters/{master}/video/{filename}', [App\Http\Controllers\MasterMediaController::class, 'video'])->name('master.video');
-Route::get('/masters/{master}/video/poster/{filename}', [App\Http\Controllers\MasterMediaController::class, 'videoPoster'])->name('master.video.poster');
-Route::get('/masters/{master}/avatar', [App\Http\Controllers\MasterMediaController::class, 'avatar'])->name('master.avatar');
-Route::get('/masters/{master}/avatar/thumb', [App\Http\Controllers\MasterMediaController::class, 'avatarThumb'])->name('master.avatar.thumb');
+Route::get('/masters/{master}/photo/{filename}', [App\Application\Http\Controllers\MasterMediaController::class, 'photo'])->name('master.photo');
+Route::get('/masters/{master}/video/{filename}', [App\Application\Http\Controllers\MasterMediaController::class, 'video'])->name('master.video');
+Route::get('/masters/{master}/video/poster/{filename}', [App\Application\Http\Controllers\MasterMediaController::class, 'videoPoster'])->name('master.video.poster');
+Route::get('/masters/{master}/avatar', [App\Application\Http\Controllers\MasterMediaController::class, 'avatar'])->name('master.avatar');
+Route::get('/masters/{master}/avatar/thumb', [App\Application\Http\Controllers\MasterMediaController::class, 'avatarThumb'])->name('master.avatar.thumb');
 
 // Маршруты для загрузки медиа (только для авторизованных)
 Route::middleware('auth')->group(function () {
-    Route::post('/masters/{master}/upload/avatar', [App\Http\Controllers\MediaUploadController::class, 'uploadAvatar'])->name('master.upload.avatar');
-    Route::post('/masters/{master}/upload/photos', [App\Http\Controllers\MediaUploadController::class, 'uploadPhotos'])->name('master.upload.photos');
-    Route::post('/masters/{master}/upload/video', [App\Http\Controllers\MediaUploadController::class, 'uploadVideo'])->name('master.upload.video');
+    Route::post('/masters/{master}/upload/avatar', [App\Application\Http\Controllers\MediaUploadController::class, 'uploadAvatar'])->name('master.upload.avatar');
+    Route::post('/masters/{master}/upload/photos', [App\Application\Http\Controllers\MediaUploadController::class, 'uploadPhotos'])->name('master.upload.photos');
+    Route::post('/masters/{master}/upload/video', [App\Application\Http\Controllers\MediaUploadController::class, 'uploadVideo'])->name('master.upload.video');
     
-    Route::delete('/photos/{photo}', [App\Http\Controllers\MediaUploadController::class, 'deletePhoto'])->name('master.delete.photo');
-    Route::delete('/videos/{video}', [App\Http\Controllers\MediaUploadController::class, 'deleteVideo'])->name('master.delete.video');
+    Route::delete('/photos/{photo}', [App\Application\Http\Controllers\MediaUploadController::class, 'deletePhoto'])->name('master.delete.photo');
+    Route::delete('/videos/{video}', [App\Application\Http\Controllers\MediaUploadController::class, 'deleteVideo'])->name('master.delete.video');
     
-    Route::post('/masters/{master}/photos/reorder', [App\Http\Controllers\MediaUploadController::class, 'reorderPhotos'])->name('master.reorder.photos');
-    Route::post('/photos/{photo}/set-main', [App\Http\Controllers\MediaUploadController::class, 'setMainPhoto'])->name('master.set.main.photo');
+    Route::post('/masters/{master}/photos/reorder', [App\Application\Http\Controllers\MediaUploadController::class, 'reorderPhotos'])->name('master.reorder.photos');
+    Route::post('/photos/{photo}/set-main', [App\Application\Http\Controllers\MediaUploadController::class, 'setMainPhoto'])->name('master.set.main.photo');
     
     // Маршруты для объявлений
             // Удалено: ads/create - теперь используем /additem

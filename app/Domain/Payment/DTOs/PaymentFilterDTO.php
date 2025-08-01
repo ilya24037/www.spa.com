@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DTOs\Payment;
+namespace App\Domain\Payment\DTOs;
 
 use App\Enums\PaymentStatus;
 use App\Enums\PaymentMethod;

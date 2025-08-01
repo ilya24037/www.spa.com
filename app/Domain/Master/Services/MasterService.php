@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Domain\Master\Services;
 
 use App\Models\MasterProfile;
 use App\Models\User;
@@ -9,8 +9,8 @@ use App\Enums\MasterLevel;
 use App\Repositories\MasterRepository;
 use App\Services\MediaService;
 use App\Infrastructure\Notification\NotificationService;
-use App\DTOs\CreateMasterDTO;
-use App\DTOs\UpdateMasterDTO;
+use App\Domain\Master\DTOs\CreateMasterDTO;
+use App\Domain\Master\DTOs\UpdateMasterDTO;
 use App\DTOs\MasterFilterDTO;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
@@ -192,7 +192,7 @@ class MasterService
     /**
      * Деактивировать профиль
      */
-    public function deactivateProfile(int $masterId, string $reason = null): MasterProfile
+    public function deactivateProfile(int $masterId, ?string $reason = null): MasterProfile
     {
         $profile = $this->repository->findById($masterId);
         
@@ -242,7 +242,7 @@ class MasterService
     /**
      * Установить отпуск
      */
-    public function setVacation(int $masterId, \DateTime $until, string $message = null): MasterProfile
+    public function setVacation(int $masterId, \DateTime $until, ?string $message = null): MasterProfile
     {
         $profile = $this->repository->findById($masterId);
         

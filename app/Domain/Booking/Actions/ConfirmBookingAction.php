@@ -1,26 +1,23 @@
 <?php
 
-namespace App\Actions\Booking;
+namespace App\Domain\Booking\Actions;
 
-use App\Models\Booking;
-use App\Models\User;
+use App\Domain\Booking\Models\Booking;
+use App\Domain\Booking\Repositories\BookingRepository;
 use App\Enums\BookingStatus;
-use App\Services\NotificationService;
-use App\Services\PaymentGatewayService;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
  * Action для подтверждения бронирования
- * Инкапсулирует всю логику подтверждения с уведомлениями и настройкой напоминаний
  */
 class ConfirmBookingAction
 {
-    public function __construct(
-        private NotificationService $notificationService,
-        private PaymentGatewayService $paymentService
-    ) {}
+    private BookingRepository $bookingRepository;
+
+    public function __construct(BookingRepository $bookingRepository)
+    {
+        $this->bookingRepository = $bookingRepository;
+    }
 
     /**
      * Выполнить подтверждение бронирования

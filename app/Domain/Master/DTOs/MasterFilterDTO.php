@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DTOs;
+namespace App\Domain\Master\DTOs;
 
 use App\Enums\MasterStatus;
 use App\Enums\MasterLevel;

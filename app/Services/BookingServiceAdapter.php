@@ -81,7 +81,7 @@ class BookingServiceAdapter
     /**
      * Адаптер для cancelBooking
      */
-    public function cancelBooking(Booking $booking, User $user, string $reason = null): bool
+    public function cancelBooking(Booking $booking, User $user, ?string $reason = null): bool
     {
         try {
             $this->modernService->cancel($booking->id, $user, $reason ?? 'Отменено пользователем');

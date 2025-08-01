@@ -50,6 +50,7 @@ class Ad extends Model
         'contacts_shown' => 'integer',
         'favorites_count' => 'integer',
         'status' => AdStatus::class,
+        // work_format обрабатывается через mutator в app/Models/Ad.php
     ];
 
     /**
@@ -190,6 +191,57 @@ class Ad extends Model
     public function isPublic(): bool
     {
         return $this->status?->isPublic() ?? false;
+    }
+
+    /**
+     * Accessor для work_format - возвращает enum
+     */
+    public function getWorkFormatAttribute($value): ?WorkFormat
+    {
+        if (!$value) {
+            return null;
+        }
+        
+        try {
+            return WorkFormat::from($value);
+        } catch (\ValueError $e) {
+            // Если значение не валидное, возвращаем значение по умолчанию
+            return WorkFormat::INDIVIDUAL;
+        }
+    }
+
+    /**
+     * Мутатор для work_format - преобразует неизвестные значения
+     */
+    public function setWorkFormatAttribute($value)
+    {
+        // Маппинг старых/неправильных значений к правильным
+        $mapping = [
+            'private_master' => 'individual',
+            'частный мастер' => 'individual',
+            'индивидуальный' => 'individual',
+            'салон' => 'salon',
+            'team' => 'salon',
+            'команда' => 'salon',
+            'пара' => 'duo',
+            'групповой' => 'group',
+        ];
+
+        // Если значение в маппинге, используем преобразованное
+        if (isset($mapping[$value])) {
+            $value = $mapping[$value];
+        }
+
+        // Проверяем, является ли значение валидным для enum
+        if ($value) {
+            $validValues = array_column(WorkFormat::cases(), 'value');
+            if (!in_array($value, $validValues)) {
+                // Если не валидное, используем значение по умолчанию
+                $value = 'individual';
+            }
+        }
+
+        $this->attributes['work_format'] = $value;
     }
 
     /**

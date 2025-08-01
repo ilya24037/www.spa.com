@@ -50,7 +50,7 @@ class AdService
     /**
      * @deprecated Используйте DomainAdService::saveDraft()
      */
-    public function saveDraft(array $data, User $user, Ad $ad = null): Ad
+    public function saveDraft(array $data, User $user, ?Ad $ad = null): Ad
     {
         Log::info('Using legacy AdService::saveDraft - consider migrating to Domain service');
         return $this->domainService->saveDraft($data, $user, $ad);

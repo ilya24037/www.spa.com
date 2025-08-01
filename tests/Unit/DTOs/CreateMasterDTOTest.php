@@ -3,7 +3,7 @@
 namespace Tests\Unit\DTOs;
 
 use Tests\TestCase;
-use App\DTOs\CreateMasterDTO;
+use App\Domain\Master\DTOs\CreateMasterDTO;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 

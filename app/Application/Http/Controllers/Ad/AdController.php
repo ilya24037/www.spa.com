@@ -73,6 +73,44 @@ class AdController extends Controller
     }
 
     /**
+     * Сохранить черновик объявления
+     */
+    public function storeDraft(Request $request)
+    {
+        try {
+            // Получаем только разрешенные поля
+            $data = $request->only(self::ALLOWED_FIELDS);
+            
+            // Создаем объявление в статусе черновика
+            $ad = $this->adService->createDraft($data, Auth::user());
+            
+            // Для Inertia запросов возвращаем редирект на страницу черновиков
+            if ($request->header('X-Inertia')) {
+                return redirect()->route('my-ads.index', ['tab' => 'drafts'])
+                    ->with('success', 'Черновик сохранен');
+            }
+            
+            // Для обычных AJAX запросов возвращаем JSON
+            return response()->json([
+                'success' => true,
+                'message' => 'Черновик сохранен',
+                'id' => $ad->id,
+                'redirect' => route('my-ads.index', ['tab' => 'drafts'])
+            ]);
+            
+        } catch (\Exception $e) {
+            if ($request->header('X-Inertia')) {
+                return back()->withErrors(['error' => 'Ошибка при сохранении черновика: ' . $e->getMessage()]);
+            }
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Ошибка при сохранении черновика: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Опубликовать объявление
      */
     public function publish(Request $request)

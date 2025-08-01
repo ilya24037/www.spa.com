@@ -31,7 +31,7 @@
 <script setup>
 import FormField from '@/Components/UI/Forms/FormField.vue'
 import BaseCheckbox from '@/Components/UI/BaseCheckbox.vue'
-import PhotoUploader from '@/Components/Features/PhotoUploader/PhotoUploader.vue'
+import PhotoUploader from '@/Components/Form/Upload/PhotoUploader.vue'
 
 const props = defineProps({
   hasCertificates: {

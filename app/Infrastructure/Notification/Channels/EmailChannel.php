@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Notification\Channels;
+namespace App\Infrastructure\Notification\Channels;
 
 use App\Models\NotificationDelivery;
 use Illuminate\Support\Facades\Mail;

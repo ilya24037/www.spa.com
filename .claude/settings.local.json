@@ -27,7 +27,18 @@
       "Bash(do sed -i 's/namespace App\\\\Services;/namespace App\\\\Domain\\\\Ad\\\\Services;/g' \"$file\")",
       "Bash(do sed -i 's/namespace App\\\\Services;/namespace App\\\\Infrastructure\\\\Media;/g' \"$file\")",
       "Bash(do sed -i 's/namespace App\\\\Services\\\\Adapters;/namespace App\\\\Infrastructure\\\\Adapters;/g' \"$file\")",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(touch:*)",
+      "Bash(dir)",
+      "Bash(dir:*)",
+      "Bash(del:*)",
+      "Bash(composer test)",
+      "Bash(diff:*)",
+      "Bash(rg:*)",
+      "Bash(grep:*)",
+      "Bash(curl:*)",
+      "Bash(composer:*)",
+      "Bash(powershell:*)"
     ],
     "deny": []
   }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Infrastructure\Notification;
 
 use App\Models\Booking;
 use App\Models\Payment;

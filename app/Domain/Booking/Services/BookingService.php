@@ -2,816 +2,296 @@
 
 namespace App\Domain\Booking\Services;
 
+use App\Domain\Booking\Actions\CancelBookingAction;
+use App\Domain\Booking\Actions\CompleteBookingAction;
+use App\Domain\Booking\Actions\ConfirmBookingAction;
+use App\Domain\Booking\Actions\CreateBookingAction;
+use App\Domain\Booking\Actions\RescheduleBookingAction;
+use App\Domain\Booking\DTOs\BookingData;
 use App\Domain\Booking\Models\Booking;
-use App\Domain\Master\Models\MasterProfile;
-use App\Domain\Service\Models\Service;
-use App\Domain\User\Models\User;
-use App\Enums\BookingStatus;
-use App\Enums\BookingType;
 use App\Domain\Booking\Repositories\BookingRepository;
+use App\Domain\User\Models\User;
+use App\Enums\BookingType;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use Illuminate\Support\Collection;
 
 /**
- * Сервис для работы с бронированиями
- * Содержит всю бизнес-логику системы бронирования
+ * Главный сервис бронирования - координатор
+ * Делегирует работу специализированным сервисам и actions
  */
 class BookingService
 {
     public function __construct(
-        private \App\Infrastructure\Notification\NotificationService $notificationService,
-        private BookingRepository $bookingRepository
+        private BookingRepository $bookingRepository,
+        private AvailabilityService $availabilityService,
+        private PricingService $pricingService,
+        private ValidationService $validationService,
+        private BookingSlotService $slotService,
+        private CreateBookingAction $createBookingAction,
+        private ConfirmBookingAction $confirmBookingAction,
+        private CancelBookingAction $cancelBookingAction,
+        private CompleteBookingAction $completeBookingAction,
+        private RescheduleBookingAction $rescheduleBookingAction
     ) {}
+
     /**
      * Создать новое бронирование
      */
     public function createBooking(array $data): Booking
     {
-        // Проверяем доступность слота
-        $this->validateTimeSlot(
-            $data['master_profile_id'],
-            $data['booking_date'],
-            $data['booking_time'],
-            $data['service_id']
-        );
+        // Валидация данных
+        $this->validationService->validateBookingData($data);
 
-        // Получаем данные для расчета
-        $service = Service::findOrFail($data['service_id']);
-        $masterProfile = MasterProfile::findOrFail($data['master_profile_id']);
-
-        // Рассчитываем время окончания
-        $startTime = Carbon::parse($data['booking_time']);
-        $endTime = $startTime->copy()->addMinutes($service->duration_minutes ?? 60);
-
-        // Рассчитываем стоимость
-        $pricing = $this->calculatePricing($service, $data);
-
-        // Создаем запись в БД
-        $booking = DB::transaction(function () use ($data, $service, $startTime, $endTime, $pricing) {
-            return Booking::create([
-                'booking_number' => $this->generateBookingNumber(),
-                'client_id' => $data['client_id'] ?? auth()->id(),
-                'master_profile_id' => $data['master_profile_id'],
-                'service_id' => $data['service_id'],
-                'booking_date' => $data['booking_date'],
-                'start_time' => $startTime->format('H:i:s'),
-                'end_time' => $endTime->format('H:i:s'),
-                'duration' => $service->duration_minutes ?? 60,
-                'address' => $data['address'] ?? null,
-                'address_details' => $data['address_details'] ?? null,
-                'is_home_service' => $data['service_location'] === 'home',
-                'service_price' => $pricing['service_price'],
-                'travel_fee' => $pricing['travel_fee'],
-                'discount_amount' => $pricing['discount_amount'],
-                'total_price' => $pricing['total_price'],
-                'payment_method' => $data['payment_method'],
-                'payment_status' => 'pending',
-                'status' => Booking::STATUS_PENDING,
-                'client_name' => $data['client_name'],
-                'client_phone' => $data['client_phone'],
-                'client_email' => $data['client_email'] ?? null,
-                'client_comment' => $data['client_comment'] ?? null,
-                'source' => 'website'
-            ]);
-        });
-
-        // Отправляем уведомления
-        $this->sendBookingNotifications($booking);
-
-        return $booking->load(['masterProfile.user', 'service', 'client']);
-    }
-
-    /**
-     * Получить доступные слоты для мастера и услуги
-     */
-    public function getAvailableSlots(int $masterProfileId, int $serviceId, int $days = 14): array
-    {
-        $masterProfile = MasterProfile::with('schedules')->findOrFail($masterProfileId);
-        $service = Service::findOrFail($serviceId);
-        
-        $slots = [];
-        $startDate = now();
-        $endDate = now()->addDays($days);
-
-        for ($date = $startDate->copy(); $date <= $endDate; $date->addDay()) {
-            $dayOfWeek = $date->dayOfWeek;
-            
-            // Получаем расписание на этот день недели
-            $schedule = $masterProfile->schedules()
-                ->where('day_of_week', $dayOfWeek)
-                ->where('is_working_day', true)
-                ->first();
-                
-            if (!$schedule) continue;
-
-            // Генерируем слоты с учётом длительности услуги
-            $daySlots = $this->generateDaySlots(
-                $date->format('Y-m-d'),
-                $schedule,
-                $service,
-                $masterProfile
+        // Проверка доступности
+        if (isset($data['type'])) {
+            $type = BookingType::from($data['type']);
+            $this->availabilityService->validateTimeSlotAvailability($data, $type);
+        } else {
+            // Старая логика для совместимости
+            $this->availabilityService->validateTimeSlot(
+                $data['master_profile_id'] ?? $data['master_id'],
+                $data['booking_date'] ?? Carbon::parse($data['start_time'])->format('Y-m-d'),
+                $data['booking_time'] ?? Carbon::parse($data['start_time'])->format('H:i'),
+                $data['service_id']
             );
-
-            if (!empty($daySlots)) {
-                $slots[$date->format('Y-m-d')] = $daySlots;
-            }
         }
 
-        return $slots;
+        // Создание через Action
+        $bookingData = BookingData::fromArray($data);
+        return $this->createBookingAction->execute($bookingData);
     }
 
     /**
      * Подтвердить бронирование
      */
-    public function confirmBooking(Booking $booking, User $master): bool
+    public function confirmBooking(Booking $booking, User $master): Booking
     {
-        // Проверяем права
-        if (!$master->masterProfile || $booking->master_profile_id !== $master->masterProfile->id) {
-            throw new \Exception('У вас нет прав для подтверждения этого бронирования');
-        }
+        // Валидация прав
+        $this->validationService->validateMasterPermission($booking, $master);
+        
+        // Валидация возможности подтверждения
+        $this->validationService->validateConfirmationAbility($booking);
 
-        if ($booking->status !== Booking::STATUS_PENDING) {
-            throw new \Exception('Это бронирование уже обработано');
-        }
-
-        $booking->update([
-            'status' => Booking::STATUS_CONFIRMED,
-            'confirmed_at' => now()
-        ]);
-
-        // Отправляем уведомление клиенту
-        $this->sendConfirmationNotification($booking);
-
-        return true;
+        // Выполнение через Action
+        return $this->confirmBookingAction->execute($booking, $master);
     }
 
     /**
      * Отменить бронирование
      */
-    public function cancelBooking(Booking $booking, User $user, string $reason = null): bool
+    public function cancelBooking(Booking $booking, User $user, ?string $reason = null): Booking
     {
-        // Проверяем права на отмену
-        $canCancel = $booking->client_id === $user->id || 
-                    ($user->masterProfile && $booking->master_profile_id === $user->masterProfile->id);
-                    
-        if (!$canCancel) {
-            throw new \Exception('У вас нет прав для отмены этого бронирования');
-        }
-
-        // Проверяем статус
-        if (!in_array($booking->status, [Booking::STATUS_PENDING, Booking::STATUS_CONFIRMED])) {
+        // Валидация прав
+        $this->validationService->validateCancellationPermission($booking, $user);
+        
+        // Проверка возможности отмены
+        if (!$this->availabilityService->canCancelBooking($booking)) {
             throw new \Exception('Это бронирование нельзя отменить');
         }
 
-        // Проверяем время (за 2 часа до начала)
-        $bookingDateTime = Carbon::parse($booking->booking_date . ' ' . $booking->start_time);
-        if (now()->diffInHours($bookingDateTime, false) < 2) {
-            throw new \Exception('Отмена возможна не позднее чем за 2 часа до начала');
-        }
-
-        $booking->update([
-            'status' => Booking::STATUS_CANCELLED,
-            'cancelled_at' => now(),
-            'cancelled_by' => $user->id,
-            'cancellation_reason' => $reason
-        ]);
-
-        // Отправляем уведомление другой стороне
-        $this->sendCancellationNotification($booking, $user);
-
-        return true;
+        // Выполнение через Action
+        return $this->cancelBookingAction->execute($booking, $user, $reason);
     }
 
     /**
-     * Завершить услугу
+     * Завершить бронирование
      */
-    public function completeBooking(Booking $booking, User $master): bool
+    public function completeBooking(Booking $booking, User $master): Booking
     {
-        // Проверяем права
-        if (!$master->masterProfile || $booking->master_profile_id !== $master->masterProfile->id) {
-            throw new \Exception('У вас нет прав для завершения этого бронирования');
-        }
-
-        // Проверяем статус
-        if ($booking->status !== Booking::STATUS_CONFIRMED) {
-            throw new \Exception('Можно завершить только подтверждённое бронирование');
-        }
-
-        // Проверяем время
-        $bookingDateTime = Carbon::parse($booking->booking_date . ' ' . $booking->start_time);
-        if ($bookingDateTime->isFuture()) {
-            throw new \Exception('Нельзя завершить услугу до её начала');
-        }
-
-        DB::transaction(function () use ($booking, $master) {
-            // Обновляем бронирование
-            $booking->update([
-                'status' => Booking::STATUS_COMPLETED,
-                'payment_status' => 'paid',
-                'paid_at' => now()
-            ]);
-
-            // Увеличиваем счётчик у мастера
-            $master->masterProfile->increment('completed_bookings_count');
-
-            // Запрашиваем отзыв
-            $booking->update([
-                'review_requested' => true,
-                'review_requested_at' => now()
-            ]);
-        });
-
-        // Отправляем запрос на отзыв
-        $this->sendReviewRequest($booking);
-
-        return true;
-    }
-
-    // =================== ПРИВАТНЫЕ МЕТОДЫ ===================
-
-    /**
-     * Проверка доступности временного слота
-     */
-    private function validateTimeSlot(int $masterProfileId, string $date, string $time, int $serviceId): void
-    {
-        $service = Service::findOrFail($serviceId);
-        $startTime = Carbon::parse($time);
-        $endTime = $startTime->copy()->addMinutes($service->duration_minutes ?? 60);
-
-        // Проверяем пересечения с другими бронированиями
-        $conflict = Booking::where('master_profile_id', $masterProfileId)
-            ->where('booking_date', $date)
-            ->whereIn('status', [Booking::STATUS_PENDING, Booking::STATUS_CONFIRMED])
-            ->where(function($query) use ($startTime, $endTime) {
-                $query->whereTime('start_time', '<', $endTime->format('H:i:s'))
-                      ->whereTime('end_time', '>', $startTime->format('H:i:s'));
-            })
-            ->exists();
-
-        if ($conflict) {
-            throw new \Exception('Выбранное время уже занято');
-        }
-
-        // Проверяем, что бронирование не в прошлом
-        $bookingDateTime = Carbon::parse($date . ' ' . $time);
-        if ($bookingDateTime->isPast()) {
-            throw new \Exception('Нельзя забронировать время в прошлом');
-        }
-
-        // Проверяем минимальное время до бронирования (ОТКЛЮЧЕНО ДЛЯ ТЕСТОВ)
-        // if ($bookingDateTime->diffInMinutes(now()) < 15) {
-        //     throw new \Exception('Бронирование возможно минимум за 15 минут');
-        // }
-    }
-
-    /**
-     * Расчет стоимости бронирования
-     */
-    private function calculatePricing(Service $service, array $data): array
-    {
-        $servicePrice = $service->price;
-        $travelFee = ($data['service_location'] === 'home') ? 500 : 0;
+        // Валидация прав
+        $this->validationService->validateMasterPermission($booking, $master);
         
-        // Логика скидок
-        $discountAmount = $this->calculateDiscount($service, $data);
-        $totalPrice = $servicePrice + $travelFee - $discountAmount;
+        // Валидация возможности завершения
+        $this->validationService->validateCompletionAbility($booking);
 
-        return [
-            'service_price' => $servicePrice,
-            'travel_fee' => $travelFee,
-            'discount_amount' => $discountAmount,
-            'total_price' => $totalPrice
-        ];
-    }
-
-    /**
-     * Генерация уникального номера бронирования
-     */
-    private function generateBookingNumber(): string
-    {
-        do {
-            $number = 'BK' . date('Ymd') . strtoupper(Str::random(4));
-        } while (Booking::where('booking_number', $number)->exists());
-
-        return $number;
-    }
-
-    /**
-     * Генерация слотов на день (ПУБЛИЧНЫЙ МЕТОД)
-     */
-    public function generateDaySlots(string $date, $schedule, Service $service, MasterProfile $masterProfile): array
-    {
-        $slots = [];
-        $serviceDuration = $service->duration_minutes ?? 60;
-        
-        $startTime = Carbon::parse($date . ' ' . $schedule->start_time);
-        $endTime = Carbon::parse($date . ' ' . $schedule->end_time);
-        $breakStart = $schedule->break_start ? Carbon::parse($date . ' ' . $schedule->break_start) : null;
-        $breakEnd = $schedule->break_end ? Carbon::parse($date . ' ' . $schedule->break_end) : null;
-
-        // Получаем существующие бронирования
-        $existingBookings = Booking::where('master_profile_id', $masterProfile->id)
-            ->where('booking_date', $date)
-            ->whereIn('status', [Booking::STATUS_PENDING, Booking::STATUS_CONFIRMED])
-            ->get();
-
-        $currentSlot = $startTime->copy();
-        
-        while ($currentSlot->copy()->addMinutes($serviceDuration) <= $endTime) {
-            // Пропускаем время обеда
-            if ($breakStart && $breakEnd) {
-                if ($currentSlot >= $breakStart && $currentSlot < $breakEnd) {
-                    $currentSlot = $breakEnd->copy();
-                    continue;
-                }
-                if ($currentSlot->copy()->addMinutes($serviceDuration) > $breakStart && 
-                    $currentSlot < $breakStart) {
-                    $currentSlot = $breakEnd->copy();
-                    continue;
-                }
-            }
-
-            // Проверяем занятость
-            $isAvailable = true;
-            foreach ($existingBookings as $booking) {
-                $bookingStart = Carbon::parse($date . ' ' . $booking->start_time);
-                $bookingEnd = Carbon::parse($date . ' ' . $booking->end_time);
-                
-                if ($currentSlot < $bookingEnd && $currentSlot->copy()->addMinutes($serviceDuration) > $bookingStart) {
-                    $isAvailable = false;
-                    break;
-                }
-            }
-
-            // Проверяем, что слот в будущем
-            $slotDateTime = Carbon::parse($date . ' ' . $currentSlot->format('H:i'));
-            if ($isAvailable && $slotDateTime > now()->addMinutes(15)) {
-                $slots[] = [
-                    'time' => $currentSlot->format('H:i'),
-                    'available' => true
-                ];
-            }
-
-            $currentSlot->addMinutes(30); // Шаг 30 минут
-        }
-
-        return $slots;
-    }
-
-    // =================== УВЕДОМЛЕНИЯ ===================
-
-    /**
-     * Отправить уведомления о новом бронировании
-     */
-    private function sendBookingNotifications(Booking $booking): void
-    {
-        $this->notificationService->sendBookingCreated($booking);
-    }
-
-    /**
-     * Отправить уведомление о подтверждении
-     */
-    private function sendConfirmationNotification(Booking $booking): void
-    {
-        $this->notificationService->sendBookingConfirmed($booking);
-    }
-
-    /**
-     * Отправить уведомление об отмене
-     */
-    private function sendCancellationNotification(Booking $booking, User $cancelledBy): void
-    {
-        $this->notificationService->sendBookingCancelled($booking, $cancelledBy);
-    }
-
-    /**
-     * Отправить запрос на отзыв
-     */
-    private function sendReviewRequest(Booking $booking): void
-    {
-        $this->notificationService->sendReviewRequest($booking);
-    }
-
-    // =================== РАСЧЕТ СКИДОК ===================
-
-    /**
-     * Рассчитать размер скидки
-     */
-    private function calculateDiscount(Service $service, array $data): float
-    {
-        $discount = 0;
-        
-        // Скидка для первого бронирования
-        if ($this->isFirstBooking($data)) {
-            $discount += $service->price * 0.1; // 10% скидка
-        }
-        
-        // Скидка за отсутствие выезда
-        if ($data['service_location'] === 'salon') {
-            $discount += 200; // фиксированная скидка за посещение салона
-        }
-        
-        // Скидка в будние дни
-        $bookingDate = Carbon::parse($data['booking_date']);
-        if ($bookingDate->isWeekday()) {
-            $discount += $service->price * 0.05; // 5% скидка в будни
-        }
-        
-        return min($discount, $service->price * 0.3); // максимум 30% скидки
-    }
-
-    /**
-     * Проверить, является ли это первым бронированием клиента
-     */
-    private function isFirstBooking(array $data): bool
-    {
-        // Если клиент авторизован, проверяем по user_id
-        if (auth()->check()) {
-            return !Booking::where('client_id', auth()->id())->exists();
-        }
-        
-        // Если не авторизован, проверяем по телефону
-        return !Booking::where('client_phone', $data['client_phone'])->exists();
-    }
-
-    // =================== НОВЫЕ МЕТОДЫ С ENUMS ===================
-
-    /**
-     * Создать новое бронирование с Enum поддержкой
-     */
-    public function createBookingWithEnums(array $data): Booking
-    {
-        $this->validateBookingData($data);
-
-        $type = BookingType::from($data['type'] ?? BookingType::INCALL->value);
-        $service = Service::findOrFail($data['service_id']);
-        
-        // Проверяем доступность слота
-        $this->validateTimeSlotAvailability($data, $type);
-
-        // Рассчитываем стоимость
-        $pricing = $this->calculatePricingWithType($service, $data, $type);
-
-        // Создаем бронирование
-        $booking = DB::transaction(function () use ($data, $service, $type, $pricing) {
-            $startTime = Carbon::parse($data['start_time']);
-            $duration = $data['duration_minutes'] ?? $service->duration_minutes ?? $type->getDefaultDurationMinutes();
-            $endTime = $startTime->copy()->addMinutes($duration);
-
-            return $this->bookingRepository->create([
-                'booking_number' => $this->generateBookingNumber(),
-                'client_id' => $data['client_id'] ?? auth()->id(),
-                'master_id' => $data['master_id'],
-                'master_profile_id' => $data['master_profile_id'] ?? null, // Совместимость
-                'service_id' => $data['service_id'],
-                'type' => $type,
-                'status' => BookingStatus::default(),
-                'start_time' => $startTime,
-                'end_time' => $endTime,
-                'duration_minutes' => $duration,
-                'base_price' => $service->price,
-                'service_price' => $pricing['service_price'],
-                'delivery_fee' => $pricing['delivery_fee'],
-                'total_price' => $pricing['total_price'],
-                'discount_amount' => $pricing['discount_amount'],
-                'client_address' => $data['client_address'] ?? null,
-                'master_address' => $data['master_address'] ?? null,
-                'client_name' => $data['client_name'],
-                'client_phone' => $data['client_phone'],
-                'client_email' => $data['client_email'] ?? null,
-                'master_phone' => $data['master_phone'] ?? null,
-                'notes' => $data['notes'] ?? null,
-                'equipment_required' => $data['equipment_required'] ?? null,
-                'platform' => $data['platform'] ?? null,
-                'meeting_link' => $data['meeting_link'] ?? null,
-                'metadata' => $data['metadata'] ?? null,
-                'source' => $data['source'] ?? 'website',
-            ]);
-        });
-
-        // Отправляем уведомления
-        $this->sendBookingNotifications($booking);
-
-        return $booking->load(['client', 'master', 'service']);
-    }
-
-    /**
-     * Подтвердить бронирование с Enum
-     */
-    public function confirmBookingWithEnum(Booking $booking, User $master): Booking
-    {
-        $this->validateMasterPermission($booking, $master);
-
-        if ($booking->status instanceof BookingStatus) {
-            if (!$booking->status->canTransitionTo(BookingStatus::CONFIRMED)) {
-                throw new \Exception('Нельзя подтвердить бронирование в статусе: ' . $booking->status->getLabel());
-            }
-        } else {
-            // Старая логика для совместимости
-            if ($booking->status !== Booking::STATUS_PENDING) {
-                throw new \Exception('Это бронирование уже обработано');
-            }
-        }
-
-        $booking->confirmBooking();
-        $this->sendConfirmationNotification($booking);
-
-        return $booking;
-    }
-
-    /**
-     * Отменить бронирование с Enum
-     */
-    public function cancelBookingWithEnum(Booking $booking, User $user, string $reason): Booking
-    {
-        $this->validateCancellationPermission($booking, $user);
-
-        $byClient = $booking->client_id === $user->id;
-        $booking->cancelBooking($reason, $byClient);
-        
-        $this->sendCancellationNotification($booking, $user);
-
-        return $booking;
-    }
-
-    /**
-     * Завершить бронирование с Enum
-     */
-    public function completeBookingWithEnum(Booking $booking, User $master): Booking
-    {
-        $this->validateMasterPermission($booking, $master);
-
-        if ($booking->status instanceof BookingStatus) {
-            if (!$booking->status->canTransitionTo(BookingStatus::COMPLETED)) {
-                throw new \Exception('Нельзя завершить бронирование в статусе: ' . $booking->status->getLabel());
-            }
-        }
-
-        DB::transaction(function () use ($booking, $master) {
-            $booking->completeService();
-            
-            // Увеличиваем счётчик у мастера
-            if ($master->masterProfile) {
-                $master->masterProfile->increment('completed_bookings_count');
-            }
-        });
-
-        $this->sendReviewRequest($booking);
-
-        return $booking;
+        // Выполнение через Action
+        return $this->completeBookingAction->execute($booking, $master);
     }
 
     /**
      * Перенести бронирование
      */
-    public function rescheduleBooking(Booking $booking, Carbon $newStartTime, int $newDuration = null): Booking
-    {
-        if ($booking->status instanceof BookingStatus) {
-            if (!$booking->status->canBeRescheduled()) {
-                throw new \Exception('Нельзя перенести бронирование в статусе: ' . $booking->status->getLabel());
-            }
-        } else {
-            if (!$booking->canCancelBooking()) {
-                throw new \Exception('Нельзя перенести данное бронирование');
-            }
+    public function rescheduleBooking(
+        Booking $booking, 
+        Carbon $newStartTime, 
+        int $newDuration = null
+    ): Booking {
+        // Проверка возможности переноса
+        if (!$this->availabilityService->canRescheduleBooking($booking)) {
+            throw new \Exception('Это бронирование нельзя перенести');
         }
 
-        // Проверяем доступность нового времени
+        // Проверка доступности нового времени
+        $masterId = $booking->master_id ?? $booking->master->id;
         $duration = $newDuration ?? $booking->duration_minutes;
-        $newEndTime = $newStartTime->copy()->addMinutes($duration);
         
-        $masterId = $booking->master_id ?? $booking->masterProfile->user_id ?? null;
-        if ($masterId) {
-            $overlapping = $this->bookingRepository->findOverlapping(
-                $newStartTime, 
-                $newEndTime, 
-                $masterId, 
-                $booking->id
-            );
-
-            if ($overlapping->isNotEmpty()) {
-                throw new \Exception('Новое время занято другим бронированием');
-            }
+        if (!$this->availabilityService->isMasterAvailable($masterId, $newStartTime, $duration)) {
+            throw new \Exception('Выбранное время недоступно');
         }
 
-        $booking->reschedule($newStartTime, $duration);
-        
-        // Отправляем уведомления о переносе
-        $this->notificationService->sendBookingRescheduled($booking);
-
-        return $booking;
+        // Выполнение через Action
+        return $this->rescheduleBookingAction->execute($booking, $newStartTime, $newDuration);
     }
 
     /**
-     * Получить доступные слоты с учетом типа бронирования
+     * Получить доступные слоты
      */
-    public function getAvailableSlotsForType(int $masterId, int $serviceId, BookingType $type, int $days = 14): array
-    {
-        $service = Service::findOrFail($serviceId);
-        $duration = $type->getDefaultDurationMinutes();
-        $minAdvanceHours = $type->getMinAdvanceHours();
-        
-        $slots = [];
-        $startDate = now()->addHours($minAdvanceHours);
-        $endDate = now()->addDays($days);
-
-        for ($date = $startDate->copy()->startOfDay(); $date <= $endDate; $date->addDay()) {
-            $daySlots = $this->generateDaySlotsForType($date, $masterId, $service, $type, $duration);
-            
-            if (!empty($daySlots)) {
-                $slots[$date->format('Y-m-d')] = $daySlots;
-            }
-        }
-
-        return $slots;
+    public function getAvailableSlots(
+        int $masterProfileId, 
+        int $serviceId, 
+        int $days = 14
+    ): array {
+        return $this->availabilityService->getAvailableSlots($masterProfileId, $serviceId, $days);
     }
 
     /**
-     * Валидация данных бронирования
+     * Получить доступные слоты с учетом типа
      */
-    protected function validateBookingData(array $data): void
-    {
-        $required = ['master_id', 'service_id', 'start_time', 'client_name', 'client_phone'];
-        
-        foreach ($required as $field) {
-            if (empty($data[$field])) {
-                throw new \InvalidArgumentException("Поле {$field} обязательно для заполнения");
-            }
-        }
-
-        if (isset($data['type'])) {
-            $type = BookingType::from($data['type']);
-            $typeRequired = $type->getRequiredFields();
-            
-            foreach ($typeRequired as $field) {
-                if (empty($data[$field])) {
-                    throw new \InvalidArgumentException("Для типа {$type->getLabel()} поле {$field} обязательно");
-                }
-            }
-        }
+    public function getAvailableSlotsForType(
+        int $masterId, 
+        int $serviceId, 
+        BookingType $type, 
+        int $days = 14
+    ): array {
+        return $this->availabilityService->getAvailableSlotsForType($masterId, $serviceId, $type, $days);
     }
 
     /**
-     * Валидация доступности временного слота с учетом типа
+     * Найти бронирование по номеру
      */
-    protected function validateTimeSlotAvailability(array $data, BookingType $type): void
+    public function findByNumber(string $bookingNumber): ?Booking
     {
-        $startTime = Carbon::parse($data['start_time']);
-        $minAdvanceHours = $type->getMinAdvanceHours();
-        
-        if ($startTime->lt(now()->addHours($minAdvanceHours))) {
-            throw new \Exception("Для типа {$type->getLabel()} необходимо бронировать минимум за {$minAdvanceHours} часов");
-        }
-
-        $duration = $data['duration_minutes'] ?? $type->getDefaultDurationMinutes();
-        $endTime = $startTime->copy()->addMinutes($duration);
-        
-        $masterId = $data['master_id'];
-        $overlapping = $this->bookingRepository->findOverlapping($startTime, $endTime, $masterId);
-        
-        if ($overlapping->isNotEmpty()) {
-            throw new \Exception('Выбранное время уже занято');
-        }
+        return $this->bookingRepository->findByNumber($bookingNumber);
     }
 
     /**
-     * Расчет стоимости с учетом типа бронирования
+     * Получить бронирования пользователя
      */
-    protected function calculatePricingWithType(Service $service, array $data, BookingType $type): array
-    {
-        $servicePrice = $service->price;
-        $deliveryFee = 0;
-        
-        if ($type->hasDeliveryFee()) {
-            $deliveryFee = $data['delivery_fee'] ?? 500; // Стандартная плата за выезд
+    public function getUserBookings(
+        User $user, 
+        array $filters = []
+    ): Collection {
+        if ($user->isMaster()) {
+            return $this->getMasterBookings($user, $filters);
         }
         
-        $discountAmount = $this->calculateDiscountForType($service, $data, $type);
-        $totalPrice = $servicePrice + $deliveryFee - $discountAmount;
+        return $this->getClientBookings($user, $filters);
+    }
+
+    /**
+     * Получить бронирования клиента
+     */
+    public function getClientBookings(
+        User $client, 
+        array $filters = []
+    ): Collection {
+        $query = $this->bookingRepository->query()
+            ->where('client_id', $client->id);
+
+        if (isset($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (isset($filters['from_date'])) {
+            $query->where('start_time', '>=', $filters['from_date']);
+        }
+
+        if (isset($filters['to_date'])) {
+            $query->where('start_time', '<=', $filters['to_date']);
+        }
+
+        return $query->with(['master', 'service'])->orderBy('start_time', 'desc')->get();
+    }
+
+    /**
+     * Получить бронирования мастера
+     */
+    public function getMasterBookings(
+        User $master, 
+        array $filters = []
+    ): Collection {
+        $query = $this->bookingRepository->query()
+            ->where('master_id', $master->id);
+
+        if (isset($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (isset($filters['date'])) {
+            $query->whereDate('start_time', $filters['date']);
+        }
+
+        if (isset($filters['from_date'])) {
+            $query->where('start_time', '>=', $filters['from_date']);
+        }
+
+        return $query->with(['client', 'service'])->orderBy('start_time')->get();
+    }
+
+    /**
+     * Получить статистику бронирований
+     */
+    public function getBookingStats(User $user, string $period = 'month'): array
+    {
+        $query = $user->isMaster() 
+            ? $this->bookingRepository->query()->where('master_id', $user->id)
+            : $this->bookingRepository->query()->where('client_id', $user->id);
+
+        $startDate = match($period) {
+            'week' => now()->startOfWeek(),
+            'month' => now()->startOfMonth(),
+            'year' => now()->startOfYear(),
+            default => now()->startOfMonth()
+        };
 
         return [
-            'service_price' => $servicePrice,
-            'delivery_fee' => $deliveryFee,
-            'discount_amount' => $discountAmount,
-            'total_price' => max(0, $totalPrice),
+            'total' => (clone $query)->where('created_at', '>=', $startDate)->count(),
+            'completed' => (clone $query)->where('created_at', '>=', $startDate)
+                ->where('status', 'completed')->count(),
+            'cancelled' => (clone $query)->where('created_at', '>=', $startDate)
+                ->where('status', 'cancelled')->count(),
+            'revenue' => (clone $query)->where('created_at', '>=', $startDate)
+                ->where('status', 'completed')->sum('total_price'),
         ];
     }
 
     /**
-     * Расчет скидки с учетом типа бронирования
+     * Рассчитать стоимость бронирования
      */
-    protected function calculateDiscountForType(Service $service, array $data, BookingType $type): float
+    public function calculatePrice(int $serviceId, array $options = []): array
     {
-        $discount = 0;
+        $service = app(\App\Domain\Service\Models\Service::class)->findOrFail($serviceId);
         
-        // Базовые скидки
-        if ($this->isFirstBooking($data)) {
-            $discount += $service->price * 0.1;
+        if (isset($options['type'])) {
+            $type = BookingType::from($options['type']);
+            return $this->pricingService->calculatePricingWithType($service, $options, $type);
         }
         
-        // Скидки по типу бронирования
-        if ($type === BookingType::INCALL) {
-            $discount += 200; // Скидка за посещение салона
-        } elseif ($type === BookingType::ONLINE) {
-            $discount += $service->price * 0.05; // 5% скидка за онлайн
-        }
-        
-        // Скидка в будние дни
-        $startTime = Carbon::parse($data['start_time']);
-        if ($startTime->isWeekday()) {
-            $discount += $service->price * 0.05;
-        }
-        
-        return min($discount, $service->price * 0.3); // максимум 30%
+        return $this->pricingService->calculatePricing($service, $options);
     }
 
     /**
-     * Генерация слотов на день с учетом типа
+     * Применить промокод
      */
-    protected function generateDaySlotsForType(Carbon $date, int $masterId, Service $service, BookingType $type, int $duration): array
+    public function applyPromoCode(float $totalPrice, string $promoCode): array
     {
-        // Получаем расписание мастера
-        $master = User::find($masterId);
-        if (!$master || !$master->masterProfile) {
-            return [];
-        }
-
-        $dayOfWeek = $date->dayOfWeek;
-        $schedule = $master->masterProfile->schedules()
-            ->where('day_of_week', $dayOfWeek)
-            ->where('is_working_day', true)
-            ->first();
-
-        if (!$schedule) {
-            return [];
-        }
-
-        $slots = [];
-        $startTime = Carbon::parse($date->format('Y-m-d') . ' ' . $schedule->start_time);
-        $endTime = Carbon::parse($date->format('Y-m-d') . ' ' . $schedule->end_time);
-        
-        // Получаем существующие бронирования
-        $existingBookings = $this->bookingRepository->getBookingsForDate($date, $masterId);
-        
-        $currentSlot = $startTime->copy();
-        $slotInterval = 30; // Интервал между слотами в минутах
-        
-        while ($currentSlot->copy()->addMinutes($duration) <= $endTime) {
-            // Проверяем доступность слота
-            $isAvailable = true;
-            
-            foreach ($existingBookings as $booking) {
-                if ($currentSlot->lt($booking->end_time) && 
-                    $currentSlot->copy()->addMinutes($duration)->gt($booking->start_time)) {
-                    $isAvailable = false;
-                    break;
-                }
-            }
-            
-            // Проверяем минимальное время заранее
-            $minAdvanceTime = now()->addHours($type->getMinAdvanceHours());
-            if ($isAvailable && $currentSlot->gt($minAdvanceTime)) {
-                $slots[] = [
-                    'time' => $currentSlot->format('H:i'),
-                    'datetime' => $currentSlot->toISOString(),
-                    'available' => true,
-                    'type' => $type->value,
-                ];
-            }
-            
-            $currentSlot->addMinutes($slotInterval);
-        }
-
-        return $slots;
+        return $this->pricingService->applyPromoCode($totalPrice, $promoCode);
     }
 
     /**
-     * Валидация прав мастера
+     * Найти следующий доступный слот
      */
-    protected function validateMasterPermission(Booking $booking, User $master): void
-    {
-        $canManage = $booking->master_id === $master->id || 
-                    ($booking->master_profile_id && $master->masterProfile && 
-                     $booking->master_profile_id === $master->masterProfile->id);
-        
-        if (!$canManage) {
-            throw new \Exception('У вас нет прав для управления этим бронированием');
-        }
+    public function findNextAvailableSlot(
+        int $masterId,
+        int $serviceId,
+        ?Carbon $preferredTime = null,
+        ?BookingType $type = null
+    ): ?array {
+        return $this->availabilityService->findNextAvailableSlot(
+            $masterId, 
+            $serviceId, 
+            $preferredTime, 
+            $type
+        );
     }
-
-    /**
-     * Валидация прав на отмену
-     */
-    protected function validateCancellationPermission(Booking $booking, User $user): void
-    {
-        $canCancel = $booking->client_id === $user->id || 
-                    $booking->master_id === $user->id ||
-                    ($booking->master_profile_id && $user->masterProfile && 
-                     $booking->master_profile_id === $user->masterProfile->id);
-        
-        if (!$canCancel) {
-            throw new \Exception('У вас нет прав для отмены этого бронирования');
-        }
-    }
-} 
+}

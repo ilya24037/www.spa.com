@@ -61,7 +61,7 @@ class MasterProfile extends BaseMasterProfile
     /**
      * Связь с расписанием (делегируем в MasterSchedule)
      */
-    public function schedules()
+    public function schedules(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Schedule::class);
     }
@@ -69,7 +69,7 @@ class MasterProfile extends BaseMasterProfile
     /**
      * Связь с исключениями расписания
      */
-    public function scheduleExceptions()
+    public function scheduleExceptions(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(ScheduleException::class);
     }
@@ -78,7 +78,7 @@ class MasterProfile extends BaseMasterProfile
     /**
      * Связь с фотографиями (делегируем в MasterMedia)
      */
-    public function photos()
+    public function photos(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(MasterPhoto::class, 'master_profile_id');
     }
@@ -86,7 +86,7 @@ class MasterProfile extends BaseMasterProfile
     /**
      * Связь с видео
      */
-    public function videos()
+    public function videos(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(MasterVideo::class, 'master_profile_id');
     }

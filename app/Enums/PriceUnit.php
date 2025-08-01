@@ -13,6 +13,7 @@ enum PriceUnit: string
     case MINUTE = 'minute';
     case UNIT = 'unit';
     case MONTH = 'month';
+    case SESSION = 'session';
 
     /**
      * Получить читаемое название единицы
@@ -26,6 +27,7 @@ enum PriceUnit: string
             self::MINUTE => 'за минуту',
             self::UNIT => 'за единицу',
             self::MONTH => 'за месяц',
+            self::SESSION => 'за сеанс',
         };
     }
 
@@ -41,6 +43,7 @@ enum PriceUnit: string
             self::MINUTE => '/мин',
             self::UNIT => '/ед',
             self::MONTH => '/мес',
+            self::SESSION => '/сеанс',
         };
     }
 

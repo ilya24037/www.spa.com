@@ -1,91 +1,108 @@
 <?php
 
-namespace App\Actions\Booking;
+namespace App\Domain\Booking\Actions;
 
-use App\Models\Booking;
-use App\Models\User;
+use App\Domain\Booking\Models\Booking;
+use App\Domain\Booking\Repositories\BookingRepository;
 use App\Enums\BookingStatus;
-use App\Services\NotificationService;
-use App\Services\PaymentGatewayService;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
  * Action для отмены бронирования
- * Инкапсулирует всю логику отмены с возвратами и уведомлениями
  */
 class CancelBookingAction
 {
-    public function __construct(
-        private NotificationService $notificationService,
-        private PaymentGatewayService $paymentService
-    ) {}
+    private BookingRepository $bookingRepository;
 
-    /**
-     * Выполнить отмену бронирования
-     */
-    public function execute(Booking $booking, User $user, string $reason, bool $forceCancel = false): Booking
+    public function __construct(BookingRepository $bookingRepository)
     {
-        Log::info('Cancelling booking', [
-            'booking_id' => $booking->id,
-            'booking_number' => $booking->booking_number,
-            'cancelled_by' => $user->id,
-            'reason' => $reason,
-            'force' => $forceCancel,
-        ]);
-
-        // Валидация прав и возможности отмены
-        $this->validateCancellation($booking, $user, $forceCancel);
-
-        // Расчет штрафа
-        $cancellationFee = $this->calculateCancellationFee($booking, $user);
-
-        // Выполнение отмены в транзакции
-        $result = DB::transaction(function () use ($booking, $user, $reason, $cancellationFee) {
-            return $this->performCancellation($booking, $user, $reason, $cancellationFee);
-        });
-
-        // Отправка уведомлений
-        $this->sendCancellationNotifications($booking, $user, $cancellationFee);
-
-        Log::info('Booking cancelled successfully', [
-            'booking_id' => $booking->id,
-            'cancellation_fee' => $cancellationFee,
-        ]);
-
-        return $booking->fresh();
+        $this->bookingRepository = $bookingRepository;
     }
 
     /**
-     * Валидация возможности отмены
+     * Отменить бронирование
      */
-    protected function validateCancellation(Booking $booking, User $user, bool $forceCancel): void
+    public function execute(int $bookingId, int $userId, string $reason = ''): array
     {
-        // Проверяем права пользователя
-        $this->validateUserPermissions($booking, $user);
+        try {
+            return DB::transaction(function () use ($bookingId, $userId, $reason) {
+                $booking = $this->bookingRepository->findById($bookingId);
+                
+                if (!$booking) {
+                    return [
+                        'success' => false,
+                        'message' => 'Бронирование не найдено',
+                    ];
+                }
 
-        // Проверяем статус бронирования
-        if (!$forceCancel) {
-            $this->validateBookingStatus($booking);
-            $this->validateCancellationTime($booking, $user);
+                // Проверяем права доступа
+                if (!$this->canCancel($booking, $userId)) {
+                    return [
+                        'success' => false,
+                        'message' => 'У вас нет прав для отмены этого бронирования',
+                    ];
+                }
+
+                // Проверяем статус
+                if (!in_array($booking->status, [BookingStatus::PENDING, BookingStatus::CONFIRMED])) {
+                    return [
+                        'success' => false,
+                        'message' => 'Невозможно отменить бронирование в текущем статусе',
+                    ];
+                }
+
+                // Проверяем время до начала
+                $hoursBeforeStart = now()->diffInHours($booking->start_at, false);
+                if ($hoursBeforeStart < 2) {
+                    return [
+                        'success' => false,
+                        'message' => 'Отмена возможна не позднее чем за 2 часа до начала',
+                    ];
+                }
+
+                // Отменяем бронирование
+                $booking->status = BookingStatus::CANCELLED;
+                $booking->cancelled_at = now();
+                $booking->cancellation_reason = $reason;
+                $booking->cancelled_by = $userId;
+                $booking->save();
+
+                Log::info('Booking cancelled', [
+                    'booking_id' => $booking->id,
+                    'cancelled_by' => $userId,
+                    'reason' => $reason,
+                ]);
+
+                // TODO: Отправить уведомления
+
+                return [
+                    'success' => true,
+                    'message' => 'Бронирование успешно отменено',
+                    'booking' => $booking,
+                ];
+            });
+        } catch (\Exception $e) {
+            Log::error('Failed to cancel booking', [
+                'booking_id' => $bookingId,
+                'user_id' => $userId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Ошибка при отмене бронирования',
+            ];
         }
     }
 
     /**
-     * Проверка прав пользователя
+     * Проверить права на отмену
      */
-    protected function validateUserPermissions(Booking $booking, User $user): void
+    private function canCancel(Booking $booking, int $userId): bool
     {
-        $isClient = $booking->client_id === $user->id;
-        $isMaster = $booking->master_id === $user->id || 
-                   ($booking->master_profile_id && $user->masterProfile && 
-                    $booking->master_profile_id === $user->masterProfile->id);
-        $isAdmin = $user->hasRole('admin') || $user->hasRole('moderator');
-
-        if (!$isClient && !$isMaster && !$isAdmin) {
-            throw new \Exception('У вас нет прав для отмены этого бронирования');
-        }
+        return $booking->client_id === $userId || 
+               $booking->master_id === $userId;
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Domain\Review\Services;
 
 use App\Models\Review;
 use App\Models\ReviewReply;
@@ -192,7 +192,7 @@ class ReviewService
     /**
      * Отклонить отзыв (модератор)
      */
-    public function reject(int $reviewId, User $moderator, string $reason = null): Review
+    public function reject(int $reviewId, User $moderator, ?string $reason = null): Review
     {
         $review = $this->repository->findOrFail($reviewId);
         
@@ -420,7 +420,7 @@ class ReviewService
         return $count;
     }
 
-    public function batchReject(array $ids, User $moderator, string $reason = null): int
+    public function batchReject(array $ids, User $moderator, ?string $reason = null): int
     {
         $count = $this->repository->batchReject($ids, $reason);
 

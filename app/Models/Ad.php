@@ -97,8 +97,9 @@ class Ad extends BaseAd
         'views_count' => 'integer',
         'contacts_shown' => 'integer',
         'favorites_count' => 'integer',
-        'price_unit' => PriceUnit::class,
-        'work_format' => WorkFormat::class,
+        // Убираем каст к enum, так как используем mutator
+        // 'price_unit' => PriceUnit::class,
+        // 'work_format' => WorkFormat::class,
     ];
 
     /* --------------------------------------------------------------------- */
@@ -128,6 +129,72 @@ class Ad extends BaseAd
 
 
 
+
+    /**
+     * Accessor для work_format - возвращает enum
+     */
+    public function getWorkFormatAttribute($value): ?WorkFormat
+    {
+        if (!$value) {
+            return null;
+        }
+        
+        try {
+            return WorkFormat::from($value);
+        } catch (\ValueError $e) {
+            // Если значение не валидное, возвращаем значение по умолчанию
+            return WorkFormat::INDIVIDUAL;
+        }
+    }
+
+    /**
+     * Accessor для price_unit - возвращает enum
+     */
+    public function getPriceUnitAttribute($value): ?PriceUnit
+    {
+        if (!$value) {
+            return null;
+        }
+        
+        try {
+            return PriceUnit::from($value);
+        } catch (\ValueError $e) {
+            // Если значение не валидное, возвращаем значение по умолчанию
+            return PriceUnit::SERVICE;
+        }
+    }
+
+    /**
+     * Мутатор для price_unit - преобразует неизвестные значения
+     */
+    public function setPriceUnitAttribute($value)
+    {
+        // Маппинг старых/неправильных значений к правильным
+        $mapping = [
+            'час' => 'hour',
+            'сеанс' => 'session',
+            'услуга' => 'service',
+            'минута' => 'minute',
+            'день' => 'day',
+            'месяц' => 'month',
+        ];
+
+        // Если значение в маппинге, используем преобразованное
+        if (isset($mapping[$value])) {
+            $value = $mapping[$value];
+        }
+
+        // Проверяем, является ли значение валидным для enum
+        if ($value) {
+            $validValues = array_column(PriceUnit::cases(), 'value');
+            if (!in_array($value, $validValues)) {
+                // Если не валидное, используем значение по умолчанию
+                $value = 'service';
+            }
+        }
+
+        $this->attributes['price_unit'] = $value;
+    }
 
     /**
      * Проверить готовность к публикации (используем старую логику + новую)

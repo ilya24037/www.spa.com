@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -33,7 +34,7 @@ return new class extends Migration
         // Перенос данных из основной таблицы
         DB::statement("
             INSERT INTO ad_pricing (ad_id, price, price_unit, is_starting_price, pricing_data, discount, new_client_discount, gift, contacts_per_hour, created_at, updated_at)
-            SELECT id, price, price_unit, is_starting_price, pricing_data, discount, new_client_discount, gift, contacts_per_hour, created_at, updated_at
+            SELECT id, price, price_unit, COALESCE(is_starting_price, 0), pricing_data, COALESCE(discount, 0), COALESCE(new_client_discount, 0), gift, contacts_per_hour, created_at, updated_at
             FROM ads
             WHERE price IS NOT NULL
         ");

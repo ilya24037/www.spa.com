@@ -38,8 +38,7 @@ class MasterRepository
             'photos',
             'videos',
             'reviews',
-            'schedules',
-            'prices'
+            'schedules'
         ])->find($id);
     }
 

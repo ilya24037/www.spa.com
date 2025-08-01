@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Adapters;
+namespace App\Infrastructure\Adapters;
 
 use App\Services\SearchService as LegacySearchService;
 use App\Domain\Search\SearchEngine as ModernSearchEngine;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Domain\Payment\Repositories;
 
 use App\Models\Payment;
 use App\Enums\PaymentStatus;
@@ -43,7 +43,7 @@ class PaymentRepository
     /**
      * Найти платеж по внешнему ID
      */
-    public function findByExternalId(string $externalId, string $gateway = null): ?Payment
+    public function findByExternalId(string $externalId, ?string $gateway = null): ?Payment
     {
         $query = $this->model->where('external_id', $externalId);
         
@@ -99,7 +99,7 @@ class PaymentRepository
     /**
      * Получить платежи по статусу
      */
-    public function getByStatus(PaymentStatus $status, int $limit = null): Collection
+    public function getByStatus(PaymentStatus $status, ?int $limit = null): Collection
     {
         $query = $this->model->where('status', $status)
             ->with(['user', 'payable'])

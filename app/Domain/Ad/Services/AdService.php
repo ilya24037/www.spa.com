@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Services;
+namespace App\Domain\Ad\Services;
 
-use App\Models\Ad;
-use App\Models\AdContent;
-use App\Models\AdPricing;
-use App\Models\AdSchedule;
-use App\Models\AdMedia;
-use App\Models\User;
+use App\Domain\Ad\Models\Ad;
+use App\Domain\Ad\Models\AdPricing;
+use App\Domain\Ad\Models\AdMedia;
+use App\Domain\Ad\Repositories\AdRepository;
+use App\Domain\User\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -16,6 +15,13 @@ use Illuminate\Support\Facades\Log;
  */
 class AdService
 {
+    private AdRepository $adRepository;
+
+    public function __construct(AdRepository $adRepository)
+    {
+        $this->adRepository = $adRepository;
+    }
+
     /**
      * Создать новое объявление
      */
@@ -39,20 +45,52 @@ class AdService
     }
     
     /**
+     * Создать черновик объявления
+     */
+    public function createDraft(array $data, User $user): Ad
+    {
+        return DB::transaction(function () use ($data, $user) {
+            // Создаем основное объявление в статусе черновика
+            $adData = $this->prepareMainAdData($data);
+            $adData['user_id'] = $user->id;
+            $adData['status'] = 'draft';
+            
+            // Устанавливаем пустые значения для обязательных полей
+            $adData['title'] = $adData['title'] ?? '';
+            $adData['specialty'] = $adData['specialty'] ?? '';
+            $adData['description'] = $adData['description'] ?? '';
+            
+            $ad = Ad::create($adData);
+            
+            // Создаем связанные компоненты, если есть данные
+            if (!empty($data)) {
+                $this->createAdComponents($ad, $data);
+            }
+            
+            Log::info('Draft ad created', ['ad_id' => $ad->id, 'user_id' => $user->id]);
+            
+            return $ad;
+        });
+    }
+    
+    /**
      * Обновить объявление
      */
     public function update(Ad $ad, array $data): Ad
     {
         return DB::transaction(function () use ($ad, $data) {
             // Подготавливаем данные
-            $preparedData = $this->prepareAdData($data);
+            $preparedData = $this->prepareMainAdData($data);
             
             // Обновляем объявление
-            $ad->update($preparedData);
+            $updated = $this->adRepository->update($ad, $preparedData);
+            
+            // Обновляем связанные компоненты
+            $this->updateAdComponents($ad, $data);
             
             Log::info('Ad updated', ['ad_id' => $ad->id]);
             
-            return $ad->fresh();
+            return $updated;
         });
     }
     
@@ -67,21 +105,21 @@ class AdService
                 throw new \InvalidArgumentException('Объявление не готово к публикации');
             }
             
-            $ad->update([
+            $published = $this->adRepository->update($ad, [
                 'status' => 'waiting_payment',
                 'published_at' => now()
             ]);
             
             Log::info('Ad published', ['ad_id' => $ad->id]);
             
-            return $ad->fresh();
+            return $published;
         });
     }
     
     /**
      * Сохранить как черновик
      */
-    public function saveDraft(array $data, User $user, Ad $ad = null): Ad
+    public function saveDraft(array $data, User $user, ?Ad $ad = null): Ad
     {
         if ($ad) {
             // Обновляем существующий черновик
@@ -97,11 +135,11 @@ class AdService
      */
     public function archive(Ad $ad): Ad
     {
-        $ad->update(['status' => 'archived']);
+        $archived = $this->adRepository->update($ad, ['status' => 'archived']);
         
         Log::info('Ad archived', ['ad_id' => $ad->id]);
         
-        return $ad->fresh();
+        return $archived;
     }
     
     /**
@@ -109,11 +147,11 @@ class AdService
      */
     public function restore(Ad $ad): Ad
     {
-        $ad->update(['status' => 'draft']);
+        $restored = $this->adRepository->update($ad, ['status' => 'draft']);
         
         Log::info('Ad restored', ['ad_id' => $ad->id]);
         
-        return $ad->fresh();
+        return $restored;
     }
     
     /**
@@ -124,10 +162,11 @@ class AdService
         return DB::transaction(function () use ($ad) {
             $adId = $ad->id;
             
-            // Можно добавить здесь удаление связанных файлов
-            // $this->deleteAssociatedFiles($ad);
+            // Удаляем связанные компоненты
+            $this->deleteAdComponents($ad);
             
-            $deleted = $ad->delete();
+            // Удаляем само объявление
+            $deleted = $this->adRepository->delete($ad);
             
             if ($deleted) {
                 Log::info('Ad deleted', ['ad_id' => $adId]);
@@ -146,10 +185,10 @@ class AdService
         
         // Основные поля объявления
         $mainFields = [
-            'category', 'taxi_option', 'work_format', 'experience', 'education_level',
+            'title', 'specialty', 'description', 'category', 'taxi_option', 'work_format', 'experience', 'education_level',
             'address', 'travel_area', 'phone', 'contact_method', 'whatsapp', 'telegram',
             'age', 'height', 'weight', 'breast_size', 'hair_color', 'eye_color',
-            'appearance', 'nationality', 'has_girlfriend'
+            'appearance', 'nationality', 'has_girlfriend', 'schedule_notes'
         ];
         
         foreach ($mainFields as $field) {
@@ -160,7 +199,8 @@ class AdService
         
         // JSON поля в основной таблице
         $jsonFields = [
-            'clients', 'service_location', 'outcall_locations', 'service_provider', 'features', 'services'
+            'clients', 'service_location', 'outcall_locations', 'service_provider', 'features', 'services',
+            'schedule' // Добавлено поле расписания
         ];
         
         foreach ($jsonFields as $field) {
@@ -184,17 +224,51 @@ class AdService
      */
     private function createAdComponents(Ad $ad, array $data): void
     {
-        // Создаем контент
-        $this->createAdContent($ad, $data);
+        // Создаем контент - закомментировано, т.к. контент хранится в основной таблице
+        // $this->createAdContent($ad, $data);
         
         // Создаем цены
         $this->createAdPricing($ad, $data);
         
-        // Создаем расписание
-        $this->createAdSchedule($ad, $data);
+        // Создаем расписание - закомментировано, т.к. расписание хранится в основной таблице
+        // $this->createAdSchedule($ad, $data);
         
         // Создаем медиа
         $this->createAdMedia($ad, $data);
+    }
+    
+    /**
+     * Обновить компоненты объявления
+     */
+    private function updateAdComponents(Ad $ad, array $data): void
+    {
+        // Обновляем контент - закомментировано, т.к. контент хранится в основной таблице
+        // if ($ad->content) {
+        //     $this->updateAdContent($ad->content, $data);
+        // } else {
+        //     $this->createAdContent($ad, $data);
+        // }
+        
+        // Обновляем цены
+        if ($ad->pricing) {
+            $this->updateAdPricing($ad->pricing, $data);
+        } else {
+            $this->createAdPricing($ad, $data);
+        }
+        
+        // Обновляем расписание - закомментировано, т.к. расписание хранится в основной таблице
+        // if ($ad->schedule) {
+        //     $this->updateAdSchedule($ad->schedule, $data);
+        // } else {
+        //     $this->createAdSchedule($ad, $data);
+        // }
+        
+        // Обновляем медиа
+        if ($ad->media) {
+            $this->updateAdMedia($ad->media, $data);
+        } else {
+            $this->createAdMedia($ad, $data);
+        }
     }
     
     /**
@@ -215,6 +289,26 @@ class AdService
         if (!empty($contentData)) {
             $contentData['ad_id'] = $ad->id;
             AdContent::create($contentData);
+        }
+    }
+    
+    /**
+     * Обновить контент объявления
+     */
+    private function updateAdContent(AdContent $content, array $data): void
+    {
+        $contentData = [];
+        
+        $contentFields = ['title', 'description', 'specialty', 'additional_features', 'services_additional_info', 'schedule_notes'];
+        
+        foreach ($contentFields as $field) {
+            if (isset($data[$field])) {
+                $contentData[$field] = $data[$field];
+            }
+        }
+        
+        if (!empty($contentData)) {
+            $content->update($contentData);
         }
     }
     
@@ -247,6 +341,33 @@ class AdService
     }
     
     /**
+     * Обновить цены объявления
+     */
+    private function updateAdPricing(AdPricing $pricing, array $data): void
+    {
+        $pricingData = [];
+        
+        $pricingFields = ['price', 'price_unit', 'contacts_per_hour', 'discount', 'new_client_discount', 'gift', 'pricing_data'];
+        
+        foreach ($pricingFields as $field) {
+            if (isset($data[$field])) {
+                $pricingData[$field] = $data[$field];
+            }
+        }
+        
+        // Обработка is_starting_price
+        if (isset($data['is_starting_price'])) {
+            $pricingData['is_starting_price'] = is_array($data['is_starting_price']) 
+                ? !empty($data['is_starting_price'])
+                : (bool) $data['is_starting_price'];
+        }
+        
+        if (!empty($pricingData)) {
+            $pricing->update($pricingData);
+        }
+    }
+    
+    /**
      * Создать расписание объявления
      */
     private function createAdSchedule(Ad $ad, array $data): void
@@ -264,6 +385,26 @@ class AdService
         if (!empty($scheduleData)) {
             $scheduleData['ad_id'] = $ad->id;
             AdSchedule::create($scheduleData);
+        }
+    }
+    
+    /**
+     * Обновить расписание объявления
+     */
+    private function updateAdSchedule(AdSchedule $schedule, array $data): void
+    {
+        $scheduleData = [];
+        
+        $scheduleFields = ['schedule', 'schedule_notes', 'working_days', 'working_hours'];
+        
+        foreach ($scheduleFields as $field) {
+            if (isset($data[$field])) {
+                $scheduleData[$field] = $data[$field];
+            }
+        }
+        
+        if (!empty($scheduleData)) {
+            $schedule->update($scheduleData);
         }
     }
     
@@ -289,6 +430,37 @@ class AdService
     }
     
     /**
+     * Обновить медиа объявления
+     */
+    private function updateAdMedia(AdMedia $media, array $data): void
+    {
+        $mediaData = [];
+        
+        $mediaFields = ['photos', 'video', 'show_photos_in_gallery', 'allow_download_photos', 'watermark_photos'];
+        
+        foreach ($mediaFields as $field) {
+            if (isset($data[$field])) {
+                $mediaData[$field] = $data[$field];
+            }
+        }
+        
+        if (!empty($mediaData)) {
+            $media->update($mediaData);
+        }
+    }
+    
+    /**
+     * Удалить компоненты объявления
+     */
+    private function deleteAdComponents(Ad $ad): void
+    {
+        $ad->content()->delete();
+        $ad->pricing()->delete();
+        $ad->schedule()->delete();
+        $ad->media()->delete();
+    }
+    
+    /**
      * Проверить, может ли объявление быть опубликовано
      */
     private function canBePublished(Ad $ad): bool
@@ -302,14 +474,22 @@ class AdService
      */
     public function getUserAdStats(User $user): array
     {
-        $ads = Ad::where('user_id', $user->id);
-        
-        return [
-            'total' => $ads->count(),
-            'active' => $ads->where('status', 'active')->count(),
-            'drafts' => $ads->where('status', 'draft')->count(),
-            'waiting_payment' => $ads->where('status', 'waiting_payment')->count(),
-            'archived' => $ads->where('status', 'archived')->count(),
-        ];
+        return $this->adRepository->getUserStats($user->id);
+    }
+    
+    /**
+     * Найти активные объявления
+     */
+    public function findActive(int $limit = 20): array
+    {
+        return $this->adRepository->findActive($limit);
+    }
+    
+    /**
+     * Найти объявления по фильтрам
+     */
+    public function findByFilters(array $filters): array
+    {
+        return $this->adRepository->findByFilters($filters);
     }
 }

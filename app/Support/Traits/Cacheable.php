@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Traits;
+namespace App\Support\Traits;
 
 use App\Services\CacheService;
 use Illuminate\Support\Facades\Cache;
@@ -37,7 +37,7 @@ trait Cacheable
     /**
      * Получить модель из кеша или БД
      */
-    public static function findCached($id, $ttl = null)
+    public static function findCached(mixed $id, ?int $ttl = null)
     {
         $instance = new static;
         $cacheKey = $instance->getCacheKey($id);
@@ -55,7 +55,7 @@ trait Cacheable
     /**
      * Получить модель с отношениями из кеша
      */
-    public static function findWithCached($id, array $relations, $ttl = null)
+    public static function findWithCached(mixed $id, array $relations, ?int $ttl = null)
     {
         $instance = new static;
         $cacheKey = $instance->getCacheKey($id) . ':with:' . implode(',', $relations);
@@ -73,7 +73,7 @@ trait Cacheable
     /**
      * Кешировать коллекцию
      */
-    public static function getCached($key, $query, $ttl = null)
+    public static function getCached(string $key, mixed $query, ?int $ttl = null)
     {
         $instance = new static;
         $cacheKey = $instance->getCollectionCacheKey($key);
@@ -116,7 +116,7 @@ trait Cacheable
     /**
      * Получить ключ кеша для модели
      */
-    protected function getCacheKey($id = null)
+    protected function getCacheKey(mixed $id = null)
     {
         $id = $id ?? $this->getKey();
         return $this->getCachePrefix() . ':' . $id;

@@ -96,7 +96,7 @@ class ReviewReply extends Model
     /**
      * Одобрить ответ
      */
-    public function approve(User $moderator = null): void
+    public function approve(?User $moderator = null): void
     {
         $this->update([
             'status' => ReviewStatus::APPROVED,
@@ -111,7 +111,7 @@ class ReviewReply extends Model
     /**
      * Отклонить ответ
      */
-    public function reject(User $moderator = null, string $reason = null): void
+    public function reject(?User $moderator = null, ?string $reason = null): void
     {
         $this->update([
             'status' => ReviewStatus::REJECTED,

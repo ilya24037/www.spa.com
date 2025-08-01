@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions\Payment;
+namespace App\Domain\Payment\Actions;
 
 use App\Models\Payment;
 use App\Enums\PaymentStatus;
@@ -26,7 +26,7 @@ class RefundPaymentAction
     /**
      * Выполнить возврат платежа
      */
-    public function execute(Payment $payment, float $amount, string $reason = null): Payment
+    public function execute(Payment $payment, float $amount, ?string $reason = null): Payment
     {
         $this->validateRefund($payment, $amount, $reason);
 

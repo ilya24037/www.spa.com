@@ -57,7 +57,7 @@ class SearchFilter
     /**
      * Получить конкретный фильтр
      */
-    public function get(string $key, $default = null)
+    public function get(string $key, mixed $default = null)
     {
         return $this->filters[$key] ?? $default;
     }

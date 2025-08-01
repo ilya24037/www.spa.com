@@ -213,12 +213,10 @@ class SearchRepository
                 DB::raw($this->getRelevanceScore($query, [
                     'services.name' => 3.0,
                     'services.description' => 2.0,
-                    'services.category' => 2.5,
-                    'services.tags' => 1.5,
                 ]) . ' as relevance_score')
             ])
             ->with(['category', 'media'])
-            ->where('is_active', true);
+            ->where('status', 'active');
 
         // Текстовый поиск
         if (!empty($query)) {
@@ -227,9 +225,7 @@ class SearchRepository
                 
                 foreach ($searchTerms as $term) {
                     $q->orWhere('name', 'LIKE', "%{$term}%")
-                      ->orWhere('description', 'LIKE', "%{$term}%")
-                      ->orWhere('category', 'LIKE', "%{$term}%")
-                      ->orWhere('tags', 'LIKE', "%{$term}%");
+                      ->orWhere('description', 'LIKE', "%{$term}%");
                 }
             });
         }

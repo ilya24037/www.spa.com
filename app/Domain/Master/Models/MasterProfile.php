@@ -80,6 +80,30 @@ class MasterProfile extends Model
     }
 
     /**
+     * Фотографии мастера
+     */
+    public function photos(): HasMany
+    {
+        return $this->hasMany(\App\Models\MasterPhoto::class);
+    }
+
+    /**
+     * Видео мастера
+     */
+    public function videos(): HasMany
+    {
+        return $this->hasMany(\App\Models\MasterVideo::class);
+    }
+
+    /**
+     * Расписание мастера
+     */
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(\App\Domain\Master\Models\MasterSchedule::class);
+    }
+
+    /**
      * Зоны обслуживания
      */
     public function workZones(): HasMany
@@ -161,6 +185,50 @@ class MasterProfile extends Model
                                    ->where('status', 'approved')
                                    ->count(),
         ]);
+    }
+
+    /**
+     * Проверить доступность мастера сейчас
+     */
+    public function isAvailableNow(): bool
+    {
+        // Базовая логика: мастер доступен если профиль активен
+        // В будущем можно расширить проверкой расписания
+        return $this->isActive();
+    }
+
+    /**
+     * Получить URL аватара
+     */
+    public function getAvatarUrlAttribute(): ?string
+    {
+        if (!$this->avatar) {
+            return null;
+        }
+
+        // Если avatar уже полный URL
+        if (filter_var($this->avatar, FILTER_VALIDATE_URL)) {
+            return $this->avatar;
+        }
+
+        // Иначе считаем что это путь относительно storage
+        return asset('storage/' . $this->avatar);
+    }
+
+    /**
+     * Получить минимальную цену услуг
+     */
+    public function getPriceFromAttribute(): ?float
+    {
+        return $this->services()->min('price');
+    }
+
+    /**
+     * Получить максимальную цену услуг
+     */
+    public function getPriceToAttribute(): ?float
+    {
+        return $this->services()->max('price');
     }
 
     /**

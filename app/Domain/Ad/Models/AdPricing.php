@@ -37,7 +37,8 @@ class AdPricing extends Model
         'prepayment_required' => 'boolean',
         'prepayment_percent' => 'integer',
         'contacts_per_hour' => 'integer',
-        'price_unit' => PriceUnit::class,
+        // Убираем каст к enum, так как используем mutator
+        // 'price_unit' => PriceUnit::class,
     ];
 
     /**
@@ -46,6 +47,53 @@ class AdPricing extends Model
     public function ad(): BelongsTo
     {
         return $this->belongsTo(Ad::class);
+    }
+
+    /**
+     * Accessor для price_unit - возвращает enum
+     */
+    public function getPriceUnitAttribute($value): ?PriceUnit
+    {
+        if (!$value) {
+            return null;
+        }
+        
+        try {
+            return PriceUnit::from($value);
+        } catch (\ValueError $e) {
+            // Если значение не валидное, возвращаем значение по умолчанию
+            return PriceUnit::SERVICE;
+        }
+    }
+
+    /**
+     * Мутатор для price_unit - преобразует неизвестные значения
+     */
+    public function setPriceUnitAttribute($value)
+    {
+        // Маппинг старых/неправильных значений к правильным
+        $mapping = [
+            'час' => 'hour',
+            'сеанс' => 'session',
+            'услуга' => 'service',
+            'минута' => 'minute',
+            'день' => 'day',
+            'месяц' => 'month',
+        ];
+
+        // Если значение в маппинге, используем преобразованное
+        if (isset($mapping[$value])) {
+            $value = $mapping[$value];
+        }
+
+        // Проверяем, является ли значение валидным для enum
+        $validValues = array_column(PriceUnit::cases(), 'value');
+        if (!in_array($value, $validValues)) {
+            // Если не валидное, используем значение по умолчанию
+            $value = 'service';
+        }
+
+        $this->attributes['price_unit'] = $value;
     }
 
     /**
@@ -164,7 +212,7 @@ class AdPricing extends Model
     /**
      * Получить сумму предоплаты
      */
-    public function getPrepaymentAmount(float $totalPrice = null): float
+    public function getPrepaymentAmount(?float $totalPrice = null): float
     {
         if (!$this->requiresPrepayment()) {
             return 0;

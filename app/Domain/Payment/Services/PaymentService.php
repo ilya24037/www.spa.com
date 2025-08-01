@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Domain\Payment\Services;
 
 use App\Models\Payment;
 use App\Models\User;
@@ -164,7 +164,7 @@ class PaymentService
     /**
      * Отклонить платеж
      */
-    public function failPayment(Payment $payment, string $reason = null): bool
+    public function failPayment(Payment $payment, ?string $reason = null): bool
     {
         DB::beginTransaction();
         
@@ -203,7 +203,7 @@ class PaymentService
     /**
      * Отменить платеж
      */
-    public function cancelPayment(Payment $payment, string $reason = null): bool
+    public function cancelPayment(Payment $payment, ?string $reason = null): bool
     {
         if (!$payment->isCancellable()) {
             return false;
@@ -248,7 +248,7 @@ class PaymentService
     public function createRefund(
         Payment $payment, 
         float $amount, 
-        string $reason = null
+        ?string $reason = null
     ): ?Payment {
         
         if (!$payment->isRefundable() || $amount > $payment->getRemainingRefundAmount()) {
@@ -367,7 +367,7 @@ class PaymentService
     /**
      * Заморозить платеж
      */
-    public function holdPayment(Payment $payment, string $reason = null): bool
+    public function holdPayment(Payment $payment, ?string $reason = null): bool
     {
         return $this->repository->update($payment, [
             'status' => PaymentStatus::HELD,

@@ -19,8 +19,9 @@ trait HasRoles
 
     /**
      * Проверка разрешений на основе роли
+     * Переименован в hasPermission чтобы избежать конфликта с Laravel User::can()
      */
-    public function can(string $permission): bool
+    public function hasPermission(string $permission): bool
     {
         $permissions = [
             UserRole::ADMIN->value => [

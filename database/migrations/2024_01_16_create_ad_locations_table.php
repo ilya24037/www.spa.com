@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -34,7 +35,7 @@ return new class extends Migration
         // Перенос данных из основной таблицы
         DB::statement("
             INSERT INTO ad_locations (ad_id, work_format, service_location, outcall_locations, taxi_option, address, travel_area, phone, contact_method, schedule, schedule_notes, created_at, updated_at)
-            SELECT id, work_format, service_location, outcall_locations, taxi_option, address, travel_area, phone, contact_method, schedule, schedule_notes, created_at, updated_at
+            SELECT id, work_format, service_location, outcall_locations, COALESCE(taxi_option, 0), address, travel_area, phone, COALESCE(contact_method, 'phone'), schedule, schedule_notes, created_at, updated_at
             FROM ads
             WHERE address IS NOT NULL OR phone IS NOT NULL
         ");

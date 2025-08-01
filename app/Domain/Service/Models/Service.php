@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
 
 class Service extends Model
@@ -107,7 +108,7 @@ class Service extends Model
      */
     public function category(): BelongsTo
     {
-        return $this->belongsTo(MassageCategory::class, 'massage_category_id');
+        return $this->belongsTo(\App\Models\MassageCategory::class, 'massage_category_id');
     }
 
     /**
@@ -132,6 +133,14 @@ class Service extends Model
     public function approvedReviews(): HasMany
     {
         return $this->reviews()->where('status', 'approved');
+    }
+
+    /**
+     * Медиа файлы услуги (фотографии, видео)
+     */
+    public function media(): MorphMany
+    {
+        return $this->morphMany(\App\Models\Media::class, 'mediable');
     }
 
     /**
@@ -283,7 +292,7 @@ class Service extends Model
      */
     public function scopeInCategoryWithChildren($query, $categoryId)
     {
-        $category = MassageCategory::find($categoryId);
+        $category = \App\Models\MassageCategory::find($categoryId);
         
         if (!$category) {
             return $query;

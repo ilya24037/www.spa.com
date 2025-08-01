@@ -3,8 +3,8 @@
 namespace App\Services\Adapters;
 
 use App\Services\MasterService as ModernMasterService;
-use App\DTOs\CreateMasterDTO;
-use App\DTOs\UpdateMasterDTO;
+use App\Domain\Master\DTOs\CreateMasterDTO;
+use App\Domain\Master\DTOs\UpdateMasterDTO;
 use App\DTOs\MasterFilterDTO;
 use App\Models\MasterProfile;
 use App\Models\User;

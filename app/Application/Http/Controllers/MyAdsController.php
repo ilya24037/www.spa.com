@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Application\Http\Controllers;
 
 use App\Models\Ad;
 use Illuminate\Http\Request;
@@ -46,8 +46,9 @@ class MyAdsController extends Controller
             'archived' => Ad::where('user_id', $user->id)->archived()->count(),
         ];
         
-        return Inertia::render('MyAds/Index', [
+        return Inertia::render('Dashboard', [
             'ads' => $ads,
+            'isMyAds' => true,
             'counts' => $counts,
             'currentTab' => $tab
         ]);

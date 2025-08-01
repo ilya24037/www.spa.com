@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DTOs\Review;
+namespace App\Domain\Review\DTOs;
 
 use App\Enums\ReviewType;
 use App\Enums\ReviewRating;

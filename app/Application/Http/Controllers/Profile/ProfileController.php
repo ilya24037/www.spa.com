@@ -2,8 +2,8 @@
 
 namespace App\Application\Http\Controllers\Profile;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\ProfileUpdateRequest;
+use App\Application\Http\Controllers\Controller;
+use App\Application\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,6 +18,28 @@ use Inertia\Response;
  */
 class ProfileController extends Controller
 {
+    /**
+     * Отображение личного кабинета
+     */
+    public function index(Request $request): Response
+    {
+        $user = $request->user();
+        
+        return Inertia::render('Dashboard', [
+            'user' => $user->load(['profile', 'masterProfile']),
+            'stats' => [
+                'bookings_count' => $user->bookings()->count(),
+                'reviews_count' => $user->reviews()->count(),
+                'favorites_count' => $user->favorites()->count(),
+            ],
+            'recent_bookings' => $user->bookings()
+                ->with(['masterProfile.user', 'service'])
+                ->latest()
+                ->take(5)
+                ->get(),
+        ]);
+    }
+
     /**
      * Отображение формы профиля пользователя
      */

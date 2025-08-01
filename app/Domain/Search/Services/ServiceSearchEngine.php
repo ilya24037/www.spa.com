@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Search;
+namespace App\Domain\Search\Services;
 
 use App\Models\Service;
 use Illuminate\Database\Eloquent\Builder;
@@ -15,7 +15,7 @@ class ServiceSearchEngine extends BaseSearchEngine
     {
         return Service::query()
             ->with(['category', 'media'])
-            ->where('is_active', true);
+            ->where('status', 'active');
     }
 
     protected function applyTextSearch(Builder $builder, string $query): void
@@ -23,8 +23,6 @@ class ServiceSearchEngine extends BaseSearchEngine
         $relevanceScore = $this->getRelevanceScore($query, [
             'services.name' => 4.0,
             'services.description' => 2.5,
-            'services.category' => 3.0,
-            'services.tags' => 2.0,
         ]);
         
         $builder->addSelect(DB::raw($relevanceScore . ' as relevance_score'));
@@ -34,9 +32,7 @@ class ServiceSearchEngine extends BaseSearchEngine
         $builder->where(function($q) use ($searchTerms) {
             foreach ($searchTerms as $term) {
                 $q->orWhere('name', 'LIKE', "%{$term}%")
-                  ->orWhere('description', 'LIKE', "%{$term}%")
-                  ->orWhere('category', 'LIKE', "%{$term}%")
-                  ->orWhere('tags', 'LIKE', "%{$term}%");
+                  ->orWhere('description', 'LIKE', "%{$term}%");
             }
         });
     }
@@ -55,7 +51,7 @@ class ServiceSearchEngine extends BaseSearchEngine
         }
 
         if (!empty($filters['duration'])) {
-            $builder->where('duration', '<=', (int)$filters['duration']);
+            $builder->where('duration_minutes', '<=', (int)$filters['duration']);
         }
     }
 
@@ -69,9 +65,8 @@ class ServiceSearchEngine extends BaseSearchEngine
         return [
             'id' => $item->id,
             'name' => $item->name,
-            'category' => $item->category,
             'price' => $item->price,
-            'duration' => $item->duration,
+            'duration' => $item->duration_minutes,
             'url' => route('services.show', $item->id),
         ];
     }

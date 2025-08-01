@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Domain\Payment\Services;
 
 use App\Models\Payment;
 use Illuminate\Support\Facades\Http;

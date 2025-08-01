@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Domain\Ad\Services;
 
 use App\Models\Ad;
 use App\Models\AdMedia;

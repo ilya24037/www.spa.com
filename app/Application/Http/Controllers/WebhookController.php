@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Application\Http\Controllers;
 
 use App\Services\PaymentGatewayService;
 use Illuminate\Http\Request;

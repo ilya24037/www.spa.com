@@ -206,7 +206,7 @@ class MasterController extends Controller
         // Загружаем профиль с медиафайлами
         $master->load(['photos' => function($query) {
             $query->orderBy('sort_order')->orderBy('created_at');
-        }, 'video']);
+        }, 'videos']);
 
         return Inertia::render('Masters/Edit', [
             'master' => [
