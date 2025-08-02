@@ -4,7 +4,7 @@ namespace App\Domain\Ad\Services;
 
 use App\Domain\Ad\Models\Ad;
 use App\Enums\AdStatus;
-use App\Repositories\AdRepository;
+use App\Domain\Ad\Repositories\AdRepository;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Collection;
 

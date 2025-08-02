@@ -3,7 +3,7 @@
 namespace App\Domain\User\Services;
 
 use App\Domain\User\Models\User;
-use App\Repositories\UserRepository;
+use App\Domain\User\Repositories\UserRepository;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use Illuminate\Support\Facades\Auth;

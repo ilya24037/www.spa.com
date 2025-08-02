@@ -11,7 +11,7 @@ $kernel->bootstrap();
 
 use App\Domain\Ad\Models\Ad;
 use App\Domain\Ad\Services\AdMediaService;
-use App\Domain\Media\Services\MediaService;
+use App\Infrastructure\Media\MediaService;
 
 // Проверка 1: Загрузка существующего объявления
 echo "=== ПРОВЕРКА 1: Загрузка объявления ===\n";

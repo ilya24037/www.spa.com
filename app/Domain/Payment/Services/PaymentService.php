@@ -4,7 +4,7 @@ namespace App\Domain\Payment\Services;
 
 use App\Domain\Payment\Models\Payment;
 use App\Domain\User\Models\User;
-use App\Repositories\PaymentRepository;
+use App\Domain\Payment\Repositories\PaymentRepository;
 use App\Enums\PaymentStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentType;

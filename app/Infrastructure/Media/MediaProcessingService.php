@@ -3,8 +3,8 @@
 namespace App\Infrastructure\Media;
 
 use App\Domain\Media\Services\MasterMediaService;
-use App\Domain\Media\Services\ImageProcessor;
-use App\Domain\Media\Services\VideoProcessor;
+use App\Infrastructure\Media\ImageProcessor;
+use App\Infrastructure\Media\VideoProcessor;
 use App\Domain\Media\Services\ThumbnailGenerator;
 use App\Domain\Media\Models\Photo;
 use App\Domain\Media\Models\Video;

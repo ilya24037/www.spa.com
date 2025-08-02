@@ -4,8 +4,8 @@ namespace App\Infrastructure\Adapters;
 
 use App\Domain\Booking\Models\Booking;
 use App\Domain\User\Models\User;
-use App\DTOs\CreateBookingDTO;
-use App\DTOs\BookingFilterDTO;
+use App\Domain\Booking\DTOs\CreateBookingDTO;
+use App\Domain\Booking\DTOs\BookingFilterDTO;
 use App\Domain\Booking\Services\BookingService as ModernBookingService;
 use App\Domain\Booking\Services\BookingSlotService;
 use App\Enums\BookingType;

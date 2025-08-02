@@ -5,7 +5,7 @@ namespace App\Domain\Booking\Actions;
 use App\Domain\Booking\Models\Booking;
 use App\Domain\User\Models\User;
 use App\Enums\BookingStatus;
-use App\Repositories\BookingRepository;
+use App\Domain\Booking\Repositories\BookingRepository;
 use App\Infrastructure\Notification\NotificationService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;

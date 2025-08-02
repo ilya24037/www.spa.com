@@ -5,7 +5,7 @@ namespace App\Infrastructure\Adapters;
 use App\Domain\Master\Services\MasterService as ModernMasterService;
 use App\Domain\Master\DTOs\CreateMasterDTO;
 use App\Domain\Master\DTOs\UpdateMasterDTO;
-use App\DTOs\MasterFilterDTO;
+use App\Domain\Master\DTOs\MasterFilterDTO;
 use App\Domain\Master\Models\MasterProfile;
 use App\Domain\User\Models\User;
 use Illuminate\Support\Facades\Log;

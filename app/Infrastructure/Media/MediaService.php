@@ -5,7 +5,7 @@ namespace App\Infrastructure\Media;
 use App\Domain\Media\Models\Media;
 use App\Enums\MediaType;
 use App\Enums\MediaStatus;
-use App\Repositories\MediaRepository;
+use App\Domain\Media\Repositories\MediaRepository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;

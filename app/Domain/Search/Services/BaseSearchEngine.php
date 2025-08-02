@@ -3,7 +3,7 @@
 namespace App\Domain\Search\Services;
 
 use App\Enums\SortBy;
-use App\Repositories\SearchRepository;
+use App\Domain\Search\Repositories\SearchRepository;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;

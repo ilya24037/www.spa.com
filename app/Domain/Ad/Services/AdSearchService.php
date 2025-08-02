@@ -3,7 +3,7 @@
 namespace App\Domain\Ad\Services;
 
 use App\Domain\Ad\Models\Ad;
-use App\Repositories\AdRepository;
+use App\Domain\Ad\Repositories\AdRepository;
 use App\Enums\AdStatus;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
