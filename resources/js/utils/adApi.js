@@ -378,11 +378,11 @@ export const prepareFormData = (form) => {
     schedule: form.schedule || {},
     schedule_notes: form.schedule_notes || '',
     
-    // Медиа - отправляем только метаданные (без файлов и больших preview)
+    // Медиа - отправляем метаданные с preview
     photos: Array.isArray(form.photos) ? form.photos.map(photo => ({
       id: photo.id,
-      // Не отправляем большие base64 preview - они могут превышать лимиты
-      // preview: photo.preview,
+      // Отправляем preview только если он не слишком большой (меньше 1MB)
+      preview: photo.preview && photo.preview.length < 1024 * 1024 ? photo.preview : null,
       name: photo.name,
       size: photo.size,
       rotation: photo.rotation || 0,

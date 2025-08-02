@@ -13,8 +13,8 @@ $ad = Ad::find(166);
 
 if ($ad) {
     echo "=== ОБЪЯВЛЕНИЕ 166 ===\n";
-    echo "Заголовок: " . $ad->title . "\n";
-    echo "Статус: " . $ad->status . "\n";
+    echo "Заголовок: " . ($ad->title ?: '(пусто)') . "\n";
+    echo "Статус: " . $ad->status->value . "\n";
     
     $photos = $ad->photos;
     
