@@ -72,8 +72,8 @@
 
 <script setup>
 import { Head, Link } from '@inertiajs/vue3'
-import ProfileSidebar from '@/Components/Layout/ProfileSidebar.vue'
-import ContentCard from '@/Components/Layout/ContentCard.vue'
+// 🎯 FSD Импорты
+import { ProfileSidebar, ContentCard } from '@/src/shared'
 
 defineProps({
     compareList: {

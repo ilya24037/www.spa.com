@@ -538,4 +538,254 @@ class NotificationService
 
         return $this->create($dto);
     }
+
+    // ============ DOMAIN COMPATIBILITY LAYER ============
+
+    /**
+     * Отправить уведомление по шаблону (для совместимости с Domain слоем)
+     */
+    public function send(User $user, string $template, array $data): void
+    {
+        try {
+            $type = $this->getNotificationTypeFromTemplate($template);
+            $title = $this->getTemplateTitle($template, $data);
+            $message = $this->compileTemplate($template, $data);
+
+            $dto = new CreateNotificationDTO(
+                userId: $user->id,
+                type: $type,
+                title: $title,
+                message: $message,
+                data: $data,
+                priority: $type->getPriority(),
+                channels: $this->getChannelsForType($type),
+            );
+
+            $this->create($dto);
+
+            Log::info('Template notification sent', [
+                'user_id' => $user->id,
+                'template' => $template,
+                'type' => $type->value,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to send template notification', [
+                'user_id' => $user->id,
+                'template' => $template,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Получить тип уведомления по шаблону
+     */
+    protected function getNotificationTypeFromTemplate(string $template): NotificationType
+    {
+        $templateMapping = [
+            // Booking templates
+            'booking.created' => NotificationType::BOOKING_CREATED,
+            'booking.confirmed' => NotificationType::BOOKING_CONFIRMED,
+            'booking.cancelled' => NotificationType::BOOKING_CANCELLED,
+            'booking.reminder' => NotificationType::BOOKING_REMINDER,
+            'booking.completed' => NotificationType::BOOKING_COMPLETED,
+            'booking.rescheduled' => NotificationType::BOOKING_CONFIRMED, // Переназначение как подтверждение
+
+            // Payment templates
+            'payment.completed' => NotificationType::PAYMENT_COMPLETED,
+            'payment.failed' => NotificationType::PAYMENT_FAILED,
+            'payment.refunded' => NotificationType::PAYMENT_REFUNDED,
+
+            // Review templates
+            'review.received' => NotificationType::REVIEW_RECEIVED,
+            'review.response' => NotificationType::REVIEW_RESPONSE,
+
+            // Ad templates
+            'ad.approved' => NotificationType::AD_APPROVED,
+            'ad.rejected' => NotificationType::AD_REJECTED,
+            'ad.expired' => NotificationType::AD_EXPIRED,
+
+            // System templates
+            'system.maintenance' => NotificationType::SYSTEM_MAINTENANCE,
+            'system.update' => NotificationType::SYSTEM_UPDATE,
+
+            // Communication templates
+            'chat.message' => NotificationType::CHAT_MESSAGE,
+            'call.request' => NotificationType::CALL_REQUEST,
+
+            // Marketing templates
+            'promo.new' => NotificationType::PROMO_NEW,
+            'promo.expiring' => NotificationType::PROMO_EXPIRING,
+        ];
+
+        if (!isset($templateMapping[$template])) {
+            throw new \InvalidArgumentException("Unknown notification template: {$template}");
+        }
+
+        return $templateMapping[$template];
+    }
+
+    /**
+     * Получить заголовок для шаблона
+     */
+    protected function getTemplateTitle(string $template, array $data): string
+    {
+        $type = $this->getNotificationTypeFromTemplate($template);
+        $baseTitle = $type->getTitle();
+
+        // Кастомизация заголовков для специфичных шаблонов
+        return match($template) {
+            'booking.rescheduled' => 'Бронирование перенесено',
+            default => $baseTitle,
+        };
+    }
+
+    /**
+     * Скомпилировать шаблон с данными
+     */
+    protected function compileTemplate(string $template, array $data): string
+    {
+        $type = $this->getNotificationTypeFromTemplate($template);
+        
+        // Базовое сообщение из енума
+        $message = $type->getDefaultMessage();
+
+        // Кастомизация сообщений для специфичных шаблонов с данными
+        return match($template) {
+            'booking.created' => $this->compileBookingCreatedMessage($data),
+            'booking.confirmed' => $this->compileBookingConfirmedMessage($data),
+            'booking.cancelled' => $this->compileBookingCancelledMessage($data),
+            'booking.reminder' => $this->compileBookingReminderMessage($data),
+            'booking.completed' => $this->compileBookingCompletedMessage($data),
+            'booking.rescheduled' => $this->compileBookingRescheduledMessage($data),
+            
+            'payment.completed' => $this->compilePaymentMessage($data, 'completed'),
+            'payment.failed' => $this->compilePaymentMessage($data, 'failed'),
+            
+            default => $message,
+        };
+    }
+
+    /**
+     * Получить каналы для типа уведомления
+     */
+    protected function getChannelsForType(NotificationType $type): array
+    {
+        $channels = [NotificationChannel::DATABASE]; // Всегда сохраняем в БД
+
+        if ($type->shouldSendEmail()) {
+            $channels[] = NotificationChannel::EMAIL;
+        }
+
+        if ($type->shouldSendSms()) {
+            $channels[] = NotificationChannel::SMS;
+        }
+
+        if ($type->shouldSendPush()) {
+            $channels[] = NotificationChannel::PUSH;
+        }
+
+        return $channels;
+    }
+
+    // ============ MESSAGE COMPILERS ============
+
+    /**
+     * Скомпилировать сообщение для создания бронирования
+     */
+    protected function compileBookingCreatedMessage(array $data): string
+    {
+        $bookingNumber = $data['booking_number'] ?? 'N/A';
+        return "Ваше бронирование #{$bookingNumber} создано и ожидает подтверждения мастером";
+    }
+
+    /**
+     * Скомпилировать сообщение для подтверждения бронирования
+     */
+    protected function compileBookingConfirmedMessage(array $data): string
+    {
+        $bookingNumber = $data['booking_number'] ?? 'N/A';
+        $masterName = $data['master_name'] ?? 'мастером';
+        $date = $data['date'] ?? '';
+        $time = $data['time'] ?? '';
+        
+        return "Бронирование #{$bookingNumber} подтверждено {$masterName} на {$date} в {$time}";
+    }
+
+    /**
+     * Скомпилировать сообщение для отмены бронирования
+     */
+    protected function compileBookingCancelledMessage(array $data): string
+    {
+        $bookingNumber = $data['booking_number'] ?? 'N/A';
+        $reason = $data['reason'] ?? 'Причина не указана';
+        
+        return "Бронирование #{$bookingNumber} было отменено. Причина: {$reason}";
+    }
+
+    /**
+     * Скомпилировать сообщение напоминания
+     */
+    protected function compileBookingReminderMessage(array $data): string
+    {
+        $masterName = $data['master_name'] ?? 'мастер';
+        $time = $data['time'] ?? '';
+        $address = $data['address'] ?? '';
+        
+        $message = "Напоминание: через час у вас сеанс массажа у {$masterName}";
+        
+        if ($time) {
+            $message .= " в {$time}";
+        }
+        
+        if ($address) {
+            $message .= " по адресу: {$address}";
+        }
+        
+        return $message;
+    }
+
+    /**
+     * Скомпилировать сообщение о завершении
+     */
+    protected function compileBookingCompletedMessage(array $data): string
+    {
+        $masterName = $data['master_name'] ?? 'мастер';
+        $bookingNumber = $data['booking_number'] ?? 'N/A';
+        
+        return "Ваш сеанс массажа у {$masterName} (#{$bookingNumber}) успешно завершен. Спасибо за использование нашего сервиса!";
+    }
+
+    /**
+     * Скомпилировать сообщение о переносе
+     */
+    protected function compileBookingRescheduledMessage(array $data): string
+    {
+        $bookingNumber = $data['booking_number'] ?? 'N/A';
+        $oldDate = $data['old_date'] ?? '';
+        $oldTime = $data['old_time'] ?? '';
+        $newDate = $data['new_date'] ?? '';
+        $newTime = $data['new_time'] ?? '';
+        
+        return "Бронирование #{$bookingNumber} перенесено с {$oldDate} {$oldTime} на {$newDate} {$newTime}";
+    }
+
+    /**
+     * Скомпилировать сообщение о платеже
+     */
+    protected function compilePaymentMessage(array $data, string $status): string
+    {
+        $amount = $data['amount'] ?? 0;
+        $formattedAmount = number_format($amount, 0, ',', ' ') . ' ₽';
+        
+        return match($status) {
+            'completed' => "Платеж на сумму {$formattedAmount} успешно обработан",
+            'failed' => "Не удалось обработать платеж на сумму {$formattedAmount}. Попробуйте еще раз",
+            'refunded' => "Возврат средств на сумму {$formattedAmount} обработан",
+            default => "Операция с платежом на сумму {$formattedAmount}",
+        };
+    }
 } 

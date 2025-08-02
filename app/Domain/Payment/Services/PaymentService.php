@@ -501,7 +501,7 @@ class PaymentService
     protected function handleServicePayment(Payment $payment): void
     {
         // Логика обработки оплаты услуги
-        if ($payment->payable_type === 'App\Models\Booking') {
+        if ($payment->payable_type === 'App\Domain\Booking\Models\Booking') {
             // Подтверждаем бронирование
             $booking = $payment->payable;
             if ($booking) {

@@ -47,7 +47,7 @@
         
         <!-- Форма редактирования -->
         <div class="p-6">
-          <AdFormRefactored 
+          <AdForm 
             :category="ad.category || 'massage'"
             :categories="[]"
             :ad-id="ad.id"
@@ -62,7 +62,8 @@
 
 <script setup>
 import { Head, Link, router } from '@inertiajs/vue3'
-import AdFormRefactored from '@/Components/AdForm/index.vue'
+// 🎯 FSD Импорты
+import { AdForm } from '@/src/entities/ad'
 import { onMounted } from 'vue'
 
 const props = defineProps({

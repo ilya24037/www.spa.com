@@ -48,7 +48,9 @@
       "Bash(C:Usersuser1.configherdbinphp.bat artisan refactor:update-model-imports)",
       "Bash(C:Usersuser1.configherdbinphp.bat artisan test:create-ad)",
       "Bash(cmd /c:*)",
-      "Bash(C:Usersuser1.configherdbinphp.bat artisan refactor:update-service-imports)"
+      "Bash(C:Usersuser1.configherdbinphp.bat artisan refactor:update-service-imports)",
+      "Bash(cat:*)",
+      "Bash(\"C:\\ProgramData\\ComposerSetup\\bin\\composer.bat\" dump-autoload)"
     ],
     "deny": []
   }

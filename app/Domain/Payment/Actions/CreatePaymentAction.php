@@ -154,21 +154,21 @@ class CreatePaymentAction
             case PaymentType::SERVICE_PAYMENT:
             case PaymentType::BOOKING_DEPOSIT:
                 if (isset($data['booking_id'])) {
-                    $paymentData['payable_type'] = 'App\Models\Booking';
+                    $paymentData['payable_type'] = 'App\Domain\Booking\Models\Booking';
                     $paymentData['payable_id'] = $data['booking_id'];
                 }
                 break;
 
             case PaymentType::SUBSCRIPTION:
                 if (isset($data['subscription_id'])) {
-                    $paymentData['payable_type'] = 'App\Models\Subscription';
+                    $paymentData['payable_type'] = 'App\Domain\User\Models\Subscription';
                     $paymentData['payable_id'] = $data['subscription_id'];
                 }
                 break;
 
             case PaymentType::TOP_UP:
                 // Для пополнения баланса payable = User
-                $paymentData['payable_type'] = 'App\Models\User';
+                $paymentData['payable_type'] = 'App\Domain\User\Models\User';
                 $paymentData['payable_id'] = $data['user_id'];
                 break;
         }
@@ -234,7 +234,7 @@ class CreatePaymentAction
      */
     protected function handleBookingDeposit(Payment $payment, array $data): void
     {
-        if ($payment->payable_type === 'App\Models\Booking') {
+        if ($payment->payable_type === 'App\Domain\Booking\Models\Booking') {
             $booking = $payment->payable;
             if ($booking) {
                 $booking->update([
@@ -257,7 +257,7 @@ class CreatePaymentAction
      */
     protected function handleServicePayment(Payment $payment, array $data): void
     {
-        if ($payment->payable_type === 'App\Models\Booking') {
+        if ($payment->payable_type === 'App\Domain\Booking\Models\Booking') {
             $booking = $payment->payable;
             if ($booking) {
                 $booking->update([

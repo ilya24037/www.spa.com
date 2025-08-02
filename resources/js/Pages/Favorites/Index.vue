@@ -45,9 +45,9 @@
 
 <script setup>
 import { Head } from '@inertiajs/vue3'
-import ProfileSidebar from '@/Components/Layout/ProfileSidebar.vue'
-import ContentCard from '@/Components/Layout/ContentCard.vue'
-import MasterCard from '@/Components/Cards/MasterCard.vue'
+// 🎯 FSD Импорты
+import { ProfileSidebar, ContentCard } from '@/src/shared'
+import { MasterCard } from '@/src/entities/master'
 
 // Props
 defineProps({

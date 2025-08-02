@@ -60,7 +60,7 @@ class MasterProfile extends Model
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class);
+        return $this->belongsTo(\App\Domain\User\Models\User::class);
     }
 
     /**
@@ -68,7 +68,7 @@ class MasterProfile extends Model
      */
     public function services(): HasMany
     {
-        return $this->hasMany(\App\Models\Service::class);
+        return $this->hasMany(\App\Domain\Service\Models\Service::class);
     }
 
     /**
@@ -84,7 +84,7 @@ class MasterProfile extends Model
      */
     public function photos(): HasMany
     {
-        return $this->hasMany(\App\Models\MasterPhoto::class);
+        return $this->hasMany(\App\Domain\Master\Models\MasterPhoto::class);
     }
 
     /**
@@ -92,7 +92,7 @@ class MasterProfile extends Model
      */
     public function videos(): HasMany
     {
-        return $this->hasMany(\App\Models\MasterVideo::class);
+        return $this->hasMany(\App\Domain\Master\Models\MasterVideo::class);
     }
 
     /**
@@ -108,7 +108,7 @@ class MasterProfile extends Model
      */
     public function workZones(): HasMany
     {
-        return $this->hasMany(\App\Models\WorkZone::class);
+        return $this->hasMany(\App\Domain\Master\Models\WorkZone::class);
     }
 
     /**
@@ -116,7 +116,7 @@ class MasterProfile extends Model
      */
     public function bookings(): HasMany
     {
-        return $this->hasMany(\App\Models\Booking::class);
+        return $this->hasMany(\App\Domain\Booking\Models\Booking::class);
     }
 
     /**
@@ -124,7 +124,7 @@ class MasterProfile extends Model
      */
     public function reviews(): HasMany
     {
-        return $this->hasMany(\App\Models\Review::class);
+        return $this->hasMany(\App\Domain\Review\Models\Review::class);
     }
 
     /**
@@ -132,7 +132,7 @@ class MasterProfile extends Model
      */
     public function subscriptions(): HasMany
     {
-        return $this->hasMany(\App\Models\MasterSubscription::class);
+        return $this->hasMany(\App\Domain\Master\Models\MasterSubscription::class);
     }
 
     /**
@@ -140,7 +140,7 @@ class MasterProfile extends Model
      */
     public function activeSubscription(): HasOne
     {
-        return $this->hasOne(\App\Models\MasterSubscription::class)
+        return $this->hasOne(\App\Domain\Master\Models\MasterSubscription::class)
             ->where('status', 'active')
             ->where('end_date', '>=', now())
             ->latestOfMany();

@@ -1,7 +1,16 @@
 // UI Components
 export { BookingCalendar } from './ui/BookingCalendar'
-export { BookingForm } from './ui/BookingForm'
-export { BookingWidget } from './ui/BookingWidget'
+// BookingForm перемещен в features/booking-form согласно FSD
+export { BookingModal } from './ui/BookingModal'
+export { 
+  BookingWidget, 
+  BookingWidgetCompact,
+  BookingActions,
+  PriceCalculator,
+  TimeSlotPicker,
+  WorkSchedule,
+  useBooking 
+} from './ui/BookingWidget'
 export { BookingStatus } from './ui/BookingStatus'
 
 // Store

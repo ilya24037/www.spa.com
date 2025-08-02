@@ -2,7 +2,7 @@
 
 namespace App\Application\Http\Controllers\Ad;
 
-use App\Http\Controllers\Controller;
+use App\Application\Http\Controllers\Controller;
 use App\Http\Requests\SaveAdDraftRequest;
 use App\Domain\Ad\Services\AdService;
 use App\Domain\Ad\Models\Ad;

@@ -33,7 +33,7 @@
         </div>
 
         <div class="space-y-4">
-        <ItemCard 
+        <AdCard 
           v-for="item in items" 
           :key="item.id"
           :item="item"
@@ -65,7 +65,8 @@
 <script setup>
 import { ref } from 'vue'
 import { Head } from '@inertiajs/vue3'
-import ItemCard from '@/Components/Profile/ItemCard.vue'
+// 🎯 FSD Импорты
+import { AdCard } from '@/src/entities/ad'
 
 const items = ref([])
 

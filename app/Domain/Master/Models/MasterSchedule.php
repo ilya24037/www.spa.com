@@ -16,7 +16,7 @@ class MasterSchedule extends Model
      */
     public function schedules(): HasMany
     {
-        return $this->hasMany(\App\Models\Schedule::class, 'master_profile_id');
+        return $this->hasMany(\App\Domain\Master\Models\Schedule::class, 'master_profile_id');
     }
 
     /**
@@ -24,7 +24,7 @@ class MasterSchedule extends Model
      */
     public function scheduleExceptions(): HasMany
     {
-        return $this->hasMany(\App\Models\ScheduleException::class, 'master_profile_id');
+        return $this->hasMany(\App\Domain\Master\Models\ScheduleException::class, 'master_profile_id');
     }
 
     /**
@@ -40,14 +40,14 @@ class MasterSchedule extends Model
         $dow = $now->dayOfWeek;
         $timeString = $now->format('H:i');
 
-        $schedule = \App\Models\Schedule::where('master_profile_id', $masterProfileId)
+        $schedule = \App\Domain\Master\Models\Schedule::where('master_profile_id', $masterProfileId)
             ->where('day_of_week', $dow)
             ->where('is_working_day', true)
             ->first();
 
         if (!$schedule) {
             // Если расписания нет, проверяем есть ли активные зоны обслуживания
-            return \App\Models\WorkZone::where('master_profile_id', $masterProfileId)
+            return \App\Domain\Master\Models\WorkZone::where('master_profile_id', $masterProfileId)
                 ->where('is_active', true)
                 ->exists();
         }
@@ -60,7 +60,7 @@ class MasterSchedule extends Model
      */
     public function getScheduleForDay(int $masterProfileId, int $dayOfWeek)
     {
-        return \App\Models\Schedule::where('master_profile_id', $masterProfileId)
+        return \App\Domain\Master\Models\Schedule::where('master_profile_id', $masterProfileId)
             ->where('day_of_week', $dayOfWeek)
             ->first();
     }
@@ -70,7 +70,7 @@ class MasterSchedule extends Model
      */
     public function getExceptionsForDate(int $masterProfileId, string $date)
     {
-        return \App\Models\ScheduleException::where('master_profile_id', $masterProfileId)
+        return \App\Domain\Master\Models\ScheduleException::where('master_profile_id', $masterProfileId)
             ->whereDate('exception_date', $date)
             ->get();
     }

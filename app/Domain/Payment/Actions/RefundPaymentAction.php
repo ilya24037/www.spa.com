@@ -166,7 +166,7 @@ class RefundPaymentAction
      */
     protected function validateServicePaymentRefund(Payment $payment, float $amount): void
     {
-        if ($payment->payable_type === 'App\Models\Booking') {
+        if ($payment->payable_type === 'App\Domain\Booking\Models\Booking') {
             $booking = $payment->payable;
             
             // Нельзя вернуть после завершения услуги
@@ -186,7 +186,7 @@ class RefundPaymentAction
      */
     protected function validateDepositRefund(Payment $payment, float $amount): void
     {
-        if ($payment->payable_type === 'App\Models\Booking') {
+        if ($payment->payable_type === 'App\Domain\Booking\Models\Booking') {
             $booking = $payment->payable;
             
             // Депозит можно вернуть только до начала услуги
@@ -327,7 +327,7 @@ class RefundPaymentAction
     protected function updateRelatedEntities(Payment $refund, Payment $originalPayment): void
     {
         // Обновляем статус бронирования
-        if ($originalPayment->payable_type === 'App\Models\Booking') {
+        if ($originalPayment->payable_type === 'App\Domain\Booking\Models\Booking') {
             $this->updateBookingAfterRefund($originalPayment->payable, $refund);
         }
 
@@ -335,7 +335,7 @@ class RefundPaymentAction
         $this->updateUserStatistics($refund->user, $refund);
 
         // Обновляем статистику мастера
-        if ($originalPayment->payable_type === 'App\Models\Booking') {
+        if ($originalPayment->payable_type === 'App\Domain\Booking\Models\Booking') {
             $booking = $originalPayment->payable;
             if ($booking && $booking->master) {
                 $this->updateMasterStatistics($booking->master, $refund);

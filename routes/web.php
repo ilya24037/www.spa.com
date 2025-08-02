@@ -13,9 +13,9 @@ use App\Application\Http\Controllers\TestController;
 use App\Application\Http\Controllers\MyAdsController;
 use App\Application\Http\Controllers\PaymentController;
 use App\Application\Http\Controllers\WebhookController;
-use App\Application\Http\Controllers\MasterPhotoController;
-use App\Application\Http\Controllers\MediaUploadController;
-use App\Application\Http\Controllers\MasterMediaController;
+use App\Application\Http\Controllers\Media\MasterPhotoController;
+use App\Application\Http\Controllers\Media\MediaUploadController;
+use App\Application\Http\Controllers\Media\MasterMediaController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -86,7 +86,7 @@ Route::post('/master/photos/local', [MasterPhotoController::class, 'addLocalPhot
 
 // Публичный маршрут для тестирования загрузки фотографий (без авторизации и CSRF)
 Route::post('/masters/{master}/upload/photos/test', function(\Illuminate\Http\Request $request, $masterId) {
-    $master = \App\Models\MasterProfile::findOrFail($masterId);
+    $master = \App\Domain\Master\Models\MasterProfile::findOrFail($masterId);
     
     $request->validate([
         'photos' => 'required|array|min:1|max:10',
@@ -94,7 +94,7 @@ Route::post('/masters/{master}/upload/photos/test', function(\Illuminate\Http\Re
     ]);
 
     try {
-        $mediaService = new \App\Services\MediaProcessingService();
+        $mediaService = new \App\Infrastructure\Media\MediaProcessingService();
         $photos = $mediaService->uploadPhotos($master, $request->file('photos'));
 
         return response()->json([
@@ -314,7 +314,7 @@ Route::prefix('masters/{master}/media')->group(function () {
 
 // Публичные маршруты для медиафайлов
 Route::get('/masters/{master}/avatar', function($master) {
-    $masterProfile = \App\Models\MasterProfile::findOrFail($master);
+    $masterProfile = \App\Domain\Master\Models\MasterProfile::findOrFail($master);
     $disk = \Illuminate\Support\Facades\Storage::disk('masters_public');
     $path = "{$masterProfile->folder_name}/avatar.jpg";
     
@@ -326,7 +326,7 @@ Route::get('/masters/{master}/avatar', function($master) {
 })->name('master.avatar');
 
 Route::get('/masters/{master}/avatar/thumb', function($master) {
-    $masterProfile = \App\Models\MasterProfile::findOrFail($master);
+    $masterProfile = \App\Domain\Master\Models\MasterProfile::findOrFail($master);
     $disk = \Illuminate\Support\Facades\Storage::disk('masters_public');
     $path = "{$masterProfile->folder_name}/avatar_thumb.jpg";
     

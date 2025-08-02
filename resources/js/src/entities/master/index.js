@@ -10,11 +10,7 @@ export {
   MasterCardListItem
 } from './ui/MasterCard'
 
-// MasterGallery - галерея фотографий
-export {
-  MasterGallery,
-  MasterGalleryModal
-} from './ui/MasterGallery'
+// MasterGallery перемещен в features/gallery согласно FSD
 
 // MasterInfo - информация о мастере
 export {

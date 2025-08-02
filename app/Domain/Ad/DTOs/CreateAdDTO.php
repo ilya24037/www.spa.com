@@ -2,9 +2,9 @@
 
 namespace App\Domain\Ad\DTOs;
 
-use App\Domain\Ad\DTOs\AdContentData;
-use App\Domain\Ad\DTOs\AdLocationData;
-use App\Domain\Ad\DTOs\AdPricingData;
+use App\Domain\Ad\DTOs\Data\AdContentData;
+use App\Domain\Ad\DTOs\Data\AdLocationData;
+use App\Domain\Ad\DTOs\Data\AdPricingData;
 
 class CreateAdDTO
 {

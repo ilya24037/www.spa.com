@@ -247,7 +247,8 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import ContentCard from '@/Components/Layout/ContentCard.vue'
+// 🎯 FSD Импорты
+import { ContentCard } from '@/src/shared'
 
 const props = defineProps({
   reviews: {

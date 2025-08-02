@@ -107,7 +107,7 @@ class Ad extends Model
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class);
+        return $this->belongsTo(\App\Domain\User\Models\User::class);
     }
 
     /**
@@ -115,7 +115,7 @@ class Ad extends Model
      */
     public function content(): HasOne
     {
-        return $this->hasOne(\App\Models\AdContent::class);
+        return $this->hasOne(\App\Domain\Ad\Models\AdContent::class);
     }
 
     /**
@@ -131,7 +131,7 @@ class Ad extends Model
      */
     public function schedule(): HasOne
     {
-        return $this->hasOne(\App\Models\AdSchedule::class);
+        return $this->hasOne(\App\Domain\Ad\Models\AdSchedule::class);
     }
 
     /**

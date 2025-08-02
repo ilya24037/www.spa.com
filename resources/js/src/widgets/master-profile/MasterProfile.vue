@@ -181,7 +181,6 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { router } from '@inertiajs/vue3'
 import {
-  MasterGallery,
   MasterInfo,
   MasterParameters,
   MasterServices,
@@ -190,6 +189,7 @@ import {
   useMaster
 } from '@/src/entities/master'
 import { BookingWidget } from '@/src/entities/booking'
+import { PhotoGallery as MasterGallery } from '@/src/features/gallery'
 import { MasterCard } from '@/src/entities/master'
 import MasterProfileModals from './MasterProfileModals.vue'
 import dayjs from 'dayjs'

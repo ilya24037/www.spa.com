@@ -18,7 +18,7 @@
                     <!-- Левая колонка - Галерея и основная информация -->
                     <div class="lg:col-span-2 space-y-6">
                         <!-- Галерея фотографий -->
-                        <MasterGalleryPreview
+                        <MasterGallery
                             :images="masterImages"
                             :master-name="master.user.name"
                             :is-premium="master.is_premium"
@@ -105,9 +105,9 @@
 import { computed } from 'vue'
 import { Link } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
-import MasterGalleryPreview from '@/Components/Masters/MasterGalleryPreview.vue'
-import BookingWidget from '@/Components/Masters/BookingWidget/index.vue'
-import ServicesSection from '@/Components/Masters/ServicesSection.vue'
+import { MasterGallery } from '@/src/entities/master'
+import { BookingWidget } from '@/src/entities/booking'
+// ServicesSection - это текущий компонент, удаляем рекурсивный импорт
 import ReviewsSection from '@/Components/Masters/ReviewsSection.vue'
 import SimilarMastersSection from '@/Components/Masters/SimilarMastersSection.vue'
 

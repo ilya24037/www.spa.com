@@ -64,7 +64,7 @@ class CreatePaymentDTO
             type: PaymentType::SERVICE_PAYMENT,
             method: $method,
             description: $description ?? 'Оплата массажной услуги',
-            payableType: 'App\Models\Booking',
+            payableType: 'App\Domain\Booking\Models\Booking',
             payableId: $bookingId,
         );
     }
@@ -85,7 +85,7 @@ class CreatePaymentDTO
             type: PaymentType::BOOKING_DEPOSIT,
             method: $method,
             description: $description ?? 'Депозит за бронирование',
-            payableType: 'App\Models\Booking',
+            payableType: 'App\Domain\Booking\Models\Booking',
             payableId: $bookingId,
         );
     }
@@ -105,7 +105,7 @@ class CreatePaymentDTO
             type: PaymentType::TOP_UP,
             method: $method,
             description: $description ?? 'Пополнение баланса',
-            payableType: 'App\Models\User',
+            payableType: 'App\Domain\User\Models\User',
             payableId: $userId,
         );
     }
@@ -126,7 +126,7 @@ class CreatePaymentDTO
             type: PaymentType::SUBSCRIPTION,
             method: $method,
             description: $description ?? 'Оплата подписки',
-            payableType: 'App\Models\Subscription',
+            payableType: 'App\Domain\User\Models\Subscription',
             payableId: $subscriptionId,
         );
     }
@@ -147,7 +147,7 @@ class CreatePaymentDTO
             type: PaymentType::WITHDRAWAL,
             method: $method,
             description: $description ?? 'Вывод средств',
-            payableType: 'App\Models\User',
+            payableType: 'App\Domain\User\Models\User',
             payableId: $userId,
             metadata: array_merge(['withdrawal_data' => $withdrawalData], []),
         );

@@ -42,6 +42,7 @@
 
       <!-- Основной контент -->
       <div :class="MAIN_CONTENT_CLASSES">
+        <ContentCard>
         <!-- Контролы сортировки и отображения -->
         <div :class="CONTROLS_CLASSES">
           <div :class="RESULTS_INFO_CLASSES">
@@ -176,6 +177,7 @@
             Сбросить фильтры
           </button>
         </div>
+        </ContentCard>
       </div>
     </div>
   </div>
@@ -184,7 +186,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { router } from '@inertiajs/vue3'
-import { SidebarWrapper } from '@/src/shared/layouts/components'
+import { SidebarWrapper, ContentCard } from '@/src/shared/layouts/components'
 import { FilterPanel } from '@/src/features/masters-filter'
 import { UniversalMap } from '@/src/features/map'
 import { MasterCard, MasterCardListItem, useMasterList } from '@/src/entities/master'

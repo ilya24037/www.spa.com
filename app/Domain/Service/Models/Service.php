@@ -5,7 +5,7 @@ namespace App\Domain\Service\Models;
 use App\Domain\Master\Models\MasterProfile;
 use App\Domain\Booking\Models\Booking;
 use App\Domain\Review\Models\Review;
-use App\Models\MassageCategory;
+use App\Domain\Service\Models\MassageCategory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

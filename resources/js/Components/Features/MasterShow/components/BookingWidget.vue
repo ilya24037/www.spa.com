@@ -103,7 +103,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { PhoneIcon } from '@heroicons/vue/24/outline'
-import BookingModal from '@/Components/Booking/BookingModal.vue'
+import { BookingModal } from '@/src/entities/booking'
 
 const props = defineProps({
   master: {

@@ -144,8 +144,8 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { Head, Link, usePage } from '@inertiajs/vue3'
-import SidebarWrapper from '@/Components/Layout/SidebarWrapper.vue'
-import ContentCard from '@/Components/Layout/ContentCard.vue'
+// 🎯 FSD Импорты
+import { SidebarWrapper, ContentCard } from '@/src/shared'
 
 const showSidebar = ref(false)
 const page = usePage()

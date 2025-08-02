@@ -31,7 +31,7 @@ class MasterServiceTest extends TestCase
         parent::setUp();
 
         $this->mockRepository = Mockery::mock(MasterRepository::class);
-        $this->mockMediaService = Mockery::mock(MediaService::class);
+        $this->mockMediaService = Mockery::mock(MasterMediaService::class);
         $this->mockNotificationService = Mockery::mock(NotificationService::class);
 
         $this->service = new MasterService(

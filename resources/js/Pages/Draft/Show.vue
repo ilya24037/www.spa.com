@@ -214,7 +214,8 @@ import { Head, Link, router } from '@inertiajs/vue3'
 import { MapPinIcon, PhoneIcon } from '@heroicons/vue/24/outline'
 import ConfirmModal from '@/Components/UI/ConfirmModal.vue'
 import PhotoGallery from '@/Components/Gallery/PhotoGallery.vue'
-import Breadcrumbs from '@/Components/Common/Breadcrumbs.vue'
+// 🎯 FSD Импорты
+import { Breadcrumbs } from '@/src/shared'
 
 // Импортируем route из window.route (Ziggy)
 const route = window.route || ((name, params) => {

@@ -256,7 +256,8 @@
 import { ref, computed } from 'vue'
 import { Head, Link } from '@inertiajs/vue3'
 import { usePage } from '@inertiajs/vue3'
-import SidebarWrapper from '@/Components/Layout/SidebarWrapper.vue'
+// 🎯 FSD Импорты
+import { SidebarWrapper } from '@/src/shared'
 
 const page = usePage()
 const user = computed(() => page.props.auth.user)
