@@ -25,6 +25,7 @@
         "@vuepic/vue-datepicker": "^7.4.1",
         "@vueuse/core": "^13.3.0",
         "date-fns": "^4.1.0",
+        "dayjs": "^1.11.13",
         "lodash": "^4.17.21",
         "lucide-vue-next": "^0.515.0",
         "maska": "^3.1.1",

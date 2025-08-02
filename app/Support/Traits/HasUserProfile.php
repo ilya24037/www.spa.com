@@ -2,8 +2,8 @@
 
 namespace App\Support\Traits;
 
-use App\Models\UserProfile;
-use App\Models\UserSettings;
+use App\Domain\User\Models\UserProfile;
+use App\Domain\User\Models\UserSettings;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**

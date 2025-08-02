@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
-use App\Models\Ad;
+use App\Domain\Ad\Models\Ad;
 
 /**
  * Контроллер для управления объявлениями в личном кабинете

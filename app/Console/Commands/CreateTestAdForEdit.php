@@ -3,8 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Models\User;
-use App\Models\Ad;
+use App\Domain\User\Models\User;
+use App\Domain\Ad\Models\Ad;
 
 class CreateTestAdForEdit extends Command
 {

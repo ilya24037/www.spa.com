@@ -2,7 +2,7 @@
 
 namespace App\Support\Traits;
 
-use App\Services\CacheService;
+use App\Infrastructure\Cache\CacheService;
 use Illuminate\Support\Facades\Cache;
 
 /**

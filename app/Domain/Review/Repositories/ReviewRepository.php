@@ -2,9 +2,9 @@
 
 namespace App\Domain\Review\Repositories;
 
-use App\Models\Review;
-use App\Models\ReviewReply;
-use App\Models\ReviewReaction;
+use App\Domain\Review\Models\Review;
+use App\Domain\Review\Models\ReviewReply;
+use App\Domain\Review\Models\ReviewReaction;
 use App\Enums\ReviewStatus;
 use App\Enums\ReviewType;
 use App\Enums\ReviewRating;

@@ -2,8 +2,8 @@
 
 namespace App\Infrastructure\Adapters;
 
-use App\Models\Booking;
-use App\Models\User;
+use App\Domain\Booking\Models\Booking;
+use App\Domain\User\Models\User;
 use App\DTOs\CreateBookingDTO;
 use App\DTOs\BookingFilterDTO;
 use App\Domain\Booking\Services\BookingService as ModernBookingService;

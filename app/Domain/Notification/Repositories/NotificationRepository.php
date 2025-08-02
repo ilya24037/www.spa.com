@@ -2,8 +2,8 @@
 
 namespace App\Domain\Notification\Repositories;
 
-use App\Models\Notification;
-use App\Models\NotificationDelivery;
+use App\Domain\Notification\Models\Notification;
+use App\Domain\Notification\Models\NotificationDelivery;
 use App\Enums\NotificationType;
 use App\Enums\NotificationStatus;
 use App\Enums\NotificationChannel;

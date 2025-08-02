@@ -3,8 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Models\MasterProfile;
-use App\Models\Schedule;
+use App\Domain\Master\Models\MasterProfile;
+use App\Domain\Master\Models\Schedule;
 
 class CreateMasterSchedules extends Command
 {

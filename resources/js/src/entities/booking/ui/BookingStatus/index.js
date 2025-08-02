@@ -1,0 +1,1 @@
+export { default as BookingStatus } from './BookingStatus.vue'

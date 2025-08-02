@@ -2,7 +2,7 @@
 
 namespace App\Domain\User\Traits;
 
-use App\Models\MasterProfile;
+use App\Domain\Master\Models\MasterProfile;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 

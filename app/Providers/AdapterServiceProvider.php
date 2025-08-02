@@ -3,14 +3,12 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use App\Services\BookingService as LegacyBookingService;
-use App\Domain\Booking\Services\BookingService as ModernBookingService;
-use App\Services\Adapters\BookingServiceAdapter;
-use App\Domain\Master\Services\MasterService as ModernMasterService;
-use App\Services\Adapters\MasterServiceAdapter;
-use App\Services\SearchService as LegacySearchService;
-use App\Domain\Search\Services\SearchService as ModernSearchService;
-use App\Services\Adapters\SearchServiceAdapter;
+use App\Domain\Booking\Services\BookingService;
+use App\Infrastructure\Adapters\BookingServiceAdapter;
+use App\Domain\Master\Services\MasterService;
+use App\Infrastructure\Adapters\MasterServiceAdapter;
+use App\Domain\Search\Services\SearchService;
+use App\Infrastructure\Adapters\SearchServiceAdapter;
 
 class AdapterServiceProvider extends ServiceProvider
 {
@@ -22,37 +20,25 @@ class AdapterServiceProvider extends ServiceProvider
         // Регистрация BookingService адаптера
         $this->app->bind(BookingServiceAdapter::class, function ($app) {
             return new BookingServiceAdapter(
-                $app->make(LegacyBookingService::class),
-                $app->make(ModernBookingService::class)
+                $app->make(BookingService::class)
             );
         });
 
         // Регистрация MasterService адаптера
         $this->app->bind(MasterServiceAdapter::class, function ($app) {
             return new MasterServiceAdapter(
-                $app->make(ModernMasterService::class)
+                $app->make(MasterService::class)
             );
         });
 
         // Регистрация SearchService адаптера
         $this->app->bind(SearchServiceAdapter::class, function ($app) {
-            // Legacy SearchService может не существовать
-            $legacyService = null;
-            if (class_exists(LegacySearchService::class)) {
-                $legacyService = $app->make(LegacySearchService::class);
-            }
-
             return new SearchServiceAdapter(
-                $legacyService,
-                $app->make(ModernSearchService::class)
+                $app->make(SearchService::class)
             );
         });
 
-        // Переопределение старых сервисов на адаптеры (опционально)
-        if (config('features.use_adapters', false)) {
-            $this->app->bind(LegacyBookingService::class, BookingServiceAdapter::class);
-            $this->app->bind(LegacySearchService::class, SearchServiceAdapter::class);
-        }
+        // Адаптеры теперь используются по умолчанию
     }
 
     /**

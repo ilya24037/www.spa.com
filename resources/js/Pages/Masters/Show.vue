@@ -388,19 +388,48 @@
       </div>
 
       <!-- Модальное окно бронирования -->
-      <BookingModal 
+      <div 
         v-if="showBookingModal"
-        :master="master"
-        @close="showBookingModal = false"
-        @success="handleBookingSuccess"
-                     />
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+        @click="showBookingModal = false"
+      >
+        <div 
+          class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+          @click.stop
+        >
+          <!-- Заголовок модального окна -->
+          <div class="flex items-center justify-between p-6 border-b">
+            <h2 class="text-xl font-bold text-gray-900">
+              Запись к мастеру {{ master.name }}
+            </h2>
+            <button 
+              @click="showBookingModal = false"
+              class="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Содержимое модального окна -->
+          <div class="p-6">
+            <BookingWidget 
+              :master="master"
+              :is-open="showBookingModal"
+              @booking-created="handleBookingSuccess"
+              @close="showBookingModal = false"
+            />
+          </div>
+        </div>
+      </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { router } from '@inertiajs/vue3'
-import BookingModal from '@/Components/Booking/BookingModal.vue'
+import { BookingWidget } from '@/src/entities/booking'
 
 const props = defineProps({
   master: {
@@ -511,7 +540,12 @@ const openBookingModal = () => {
 
 const handleBookingSuccess = (bookingData) => {
   showBookingModal.value = false
-  // Можно добавить уведомление об успехе
+  
+  // Показываем уведомление об успехе
+  alert(`Запись успешно создана! Номер записи: ${bookingData.bookingNumber}`)
+  
+  // Можно добавить toast уведомление или редирект
+  console.log('Booking created:', bookingData)
 }
 
 // Обработка клавиатуры

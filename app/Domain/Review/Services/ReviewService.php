@@ -2,16 +2,16 @@
 
 namespace App\Domain\Review\Services;
 
-use App\Models\Review;
-use App\Models\ReviewReply;
-use App\Models\User;
-use App\Repositories\ReviewRepository;
+use App\Domain\Review\Models\Review;
+use App\Domain\Review\Models\ReviewReply;
+use App\Domain\User\Models\User;
+use App\Domain\Review\Repositories\ReviewRepository;
 use App\Enums\ReviewStatus;
 use App\Enums\ReviewType;
 use App\Enums\ReviewRating;
-use App\DTOs\Review\CreateReviewDTO;
-use App\DTOs\Review\UpdateReviewDTO;
-use App\Services\NotificationService;
+use App\Domain\Review\DTOs\CreateReviewDTO;
+use App\Domain\Review\DTOs\UpdateReviewDTO;
+use App\Infrastructure\Notification\NotificationService;
 use App\Enums\NotificationType;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;

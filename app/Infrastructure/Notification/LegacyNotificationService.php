@@ -2,9 +2,9 @@
 
 namespace App\Infrastructure\Notification;
 
-use App\Models\Booking;
-use App\Models\Payment;
-use App\Models\User;
+use App\Domain\Booking\Models\Booking;
+use App\Domain\Payment\Models\Payment;
+use App\Domain\User\Models\User;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 

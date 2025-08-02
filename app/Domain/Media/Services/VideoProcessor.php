@@ -2,8 +2,8 @@
 
 namespace App\Domain\Media\Services;
 
-use App\Models\MasterProfile;
-use App\Models\MasterVideo;
+use App\Domain\Master\Models\MasterProfile;
+use App\Domain\Media\Models\Video;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;

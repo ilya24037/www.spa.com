@@ -2,7 +2,7 @@
 
 namespace App\Domain\Payment\DTOs;
 
-use App\Models\Payment;
+use App\Domain\Payment\Models\Payment;
 use App\Enums\PaymentStatus;
 
 /**

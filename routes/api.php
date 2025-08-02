@@ -19,6 +19,12 @@ Route::middleware('api')->group(function () {
         Route::get('/available-slots', [BookingController::class, 'availableSlots']);
     });
 
+    // Публичные роуты для расписания (не требуют авторизации для просмотра)
+    Route::prefix('masters')->group(function () {
+        Route::get('/{master}/schedule', [BookingController::class, 'getMasterSchedule']);
+        Route::get('/{master}/time-slots', [BookingController::class, 'getTimeSlots']);
+    });
+
     // Защищенные роуты (требуют авторизации)
     Route::middleware('auth:sanctum')->prefix('bookings')->group(function () {
         // CRUD операции с бронированиями
@@ -27,9 +33,22 @@ Route::middleware('api')->group(function () {
         Route::get('/{booking}', [BookingController::class, 'show']);    // Просмотр бронирования
         
         // Действия с бронированиями
-        Route::post('/{booking}/cancel', [BookingController::class, 'cancel']);     // Отменить
-        Route::post('/{booking}/confirm', [BookingController::class, 'confirm']);   // Подтвердить (мастер)
-        Route::post('/{booking}/complete', [BookingController::class, 'complete']); // Завершить (мастер)
+        Route::patch('/{booking}/cancel', [BookingController::class, 'cancel']);     // Отменить
+        Route::patch('/{booking}/confirm', [BookingController::class, 'confirm']);   // Подтвердить (мастер)
+        Route::patch('/{booking}/complete', [BookingController::class, 'complete']); // Завершить (мастер)
+        Route::patch('/{booking}/reschedule', [BookingController::class, 'reschedule']); // Перенести
+        
+        // Проверка доступности времени
+        Route::post('/check-availability', [BookingController::class, 'checkAvailability']);
+        
+        // Статистика и дополнительные функции
+        Route::get('/stats', [BookingController::class, 'getStats']);
+        Route::post('/{booking}/reminder', [BookingController::class, 'sendReminder']);
+    });
+
+    // Роуты для пользователей
+    Route::middleware('auth:sanctum')->prefix('user')->group(function () {
+        Route::get('/bookings', [BookingController::class, 'getUserBookings']); // Бронирования пользователя
     });
 
     // =================== МАСТЕРА (существующие) ===================

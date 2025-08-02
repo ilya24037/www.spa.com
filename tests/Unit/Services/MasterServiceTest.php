@@ -3,15 +3,15 @@
 namespace Tests\Unit\Services;
 
 use Tests\TestCase;
-use App\Services\MasterService;
-use App\Repositories\MasterRepository;
-use App\Services\MediaService;
-use App\Services\NotificationService;
-use App\Models\MasterProfile;
-use App\Models\User;
+use App\Domain\Master\Services\MasterService;
+use App\Domain\Master\Repositories\MasterRepository;
+use App\Domain\Media\Services\MasterMediaService;
+use App\Infrastructure\Notification\NotificationService;
+use App\Domain\Master\Models\MasterProfile;
+use App\Domain\User\Models\User;
 use App\Domain\Master\DTOs\CreateMasterDTO;
 use App\Domain\Master\DTOs\UpdateMasterDTO;
-use App\DTOs\MasterFilterDTO;
+use App\Domain\Master\DTOs\MasterFilterDTO;
 use App\Enums\MasterStatus;
 use App\Enums\MasterLevel;
 use Illuminate\Http\UploadedFile;

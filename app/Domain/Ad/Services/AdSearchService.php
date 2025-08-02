@@ -2,7 +2,7 @@
 
 namespace App\Domain\Ad\Services;
 
-use App\Models\Ad;
+use App\Domain\Ad\Models\Ad;
 use App\Repositories\AdRepository;
 use App\Enums\AdStatus;
 use Illuminate\Pagination\LengthAwarePaginator;

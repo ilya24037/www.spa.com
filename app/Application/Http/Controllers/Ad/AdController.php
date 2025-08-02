@@ -7,6 +7,7 @@ use App\Application\Http\Requests\CreateAdRequest;
 use App\Application\Http\Requests\UpdateAdRequest;
 use App\Domain\Ad\Services\AdService;
 use App\Domain\Ad\Models\Ad;
+use App\Domain\Ad\DTOs\CreateAdDTO;
 use App\Enums\AdStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -57,7 +58,12 @@ class AdController extends Controller
     public function store(CreateAdRequest $request)
     {
         try {
-            $ad = $this->adService->create($request->validated(), Auth::user());
+            // Создаем DTO из валидированных данных запроса
+            $validatedData = $request->validated();
+            $validatedData['user_id'] = Auth::id(); // Добавляем user_id для DTO
+            
+            $dto = CreateAdDTO::fromRequest($validatedData);
+            $ad = $this->adService->createFromDTO($dto);
             
             // Пытаемся сразу опубликовать
             $this->adService->publish($ad);

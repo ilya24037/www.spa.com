@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\MasterProfile;
+use App\Domain\Master\Models\MasterProfile;
 use Illuminate\Console\Command;
 
 class GenerateMasterMetaTags extends Command

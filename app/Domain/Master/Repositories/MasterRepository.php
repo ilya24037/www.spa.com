@@ -2,8 +2,8 @@
 
 namespace App\Domain\Master\Repositories;
 
-use App\Models\MasterProfile;
-use App\Models\User;
+use App\Domain\Master\Models\MasterProfile;
+use App\Domain\User\Models\User;
 use App\Enums\MasterStatus;
 use App\Enums\MasterLevel;
 use Illuminate\Database\Eloquent\Collection;

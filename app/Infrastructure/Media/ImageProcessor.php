@@ -2,7 +2,7 @@
 
 namespace App\Infrastructure\Media;
 
-use App\Models\Media;
+use App\Domain\Media\Models\Media;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Intervention\Image\Facades\Image;

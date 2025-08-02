@@ -32,14 +32,20 @@ class AdPricingData
 
     public function toArray(): array
     {
-        return array_filter([
+        $data = [
             'price' => $this->price,
             'discount_price' => $this->discountPrice,
             'currency' => $this->currency->value,
             'price_type' => $this->priceType->value,
             'min_order_amount' => $this->minOrderAmount,
-            'additional_prices' => $this->additionalPrices,
             'negotiable' => $this->negotiable,
-        ], fn($value) => $value !== null);
+        ];
+        
+        // Добавляем дополнительные цены если они есть
+        if ($this->additionalPrices !== null) {
+            $data['additional_prices'] = $this->additionalPrices;
+        }
+        
+        return array_filter($data, fn($value) => $value !== null);
     }
 }

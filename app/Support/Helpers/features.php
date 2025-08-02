@@ -1,6 +1,6 @@
 <?php
 
-use App\Services\FeatureFlagService;
+use App\Infrastructure\Feature\FeatureFlagService;
 
 if (!function_exists('feature')) {
     /**

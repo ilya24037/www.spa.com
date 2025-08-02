@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Services\FeatureFlagService;
+use App\Infrastructure\Feature\FeatureFlagService;
 
 class FeatureFlagCommand extends Command
 {

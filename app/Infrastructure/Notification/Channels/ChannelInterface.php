@@ -2,7 +2,7 @@
 
 namespace App\Infrastructure\Notification\Channels;
 
-use App\Models\NotificationDelivery;
+use App\Domain\Notification\Models\NotificationDelivery;
 
 /**
  * Интерфейс для каналов уведомлений

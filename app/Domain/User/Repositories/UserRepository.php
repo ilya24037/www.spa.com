@@ -2,7 +2,7 @@
 
 namespace App\Domain\User\Repositories;
 
-use App\Models\User;
+use App\Domain\User\Models\User;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use Illuminate\Database\Eloquent\Collection;

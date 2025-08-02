@@ -2,9 +2,9 @@
 
 namespace App\Domain\Search\Services;
 
-use App\Models\Ad;
-use App\Models\User;
-use App\Models\Service;
+use App\Domain\Ad\Models\Ad;
+use App\Domain\User\Models\User;
+use App\Domain\Service\Models\Service;
 use App\Enums\SortBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;

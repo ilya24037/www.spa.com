@@ -12,7 +12,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Привязка MediaService к MasterMediaService для обратной совместимости
+        $this->app->bind(
+            \App\Domain\Media\Services\MediaService::class,
+            \App\Domain\Media\Services\MasterMediaService::class
+        );
     }
 
     /**

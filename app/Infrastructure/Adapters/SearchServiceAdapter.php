@@ -2,7 +2,7 @@
 
 namespace App\Infrastructure\Adapters;
 
-use App\Services\SearchService as LegacySearchService;
+// use App\Services\SearchService as LegacySearchService; // Legacy service removed
 use App\Domain\Search\SearchEngine as ModernSearchEngine;
 use App\Domain\Search\DTOs\SearchQueryDTO;
 use Illuminate\Support\Facades\Log;

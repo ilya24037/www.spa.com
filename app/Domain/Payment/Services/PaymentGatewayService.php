@@ -2,7 +2,7 @@
 
 namespace App\Domain\Payment\Services;
 
-use App\Models\Payment;
+use App\Domain\Payment\Models\Payment;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 

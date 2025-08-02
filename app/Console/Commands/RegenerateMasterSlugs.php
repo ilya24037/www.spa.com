@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\MasterProfile;
+use App\Domain\Master\Models\MasterProfile;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 

@@ -2,13 +2,13 @@
 
 namespace App\Infrastructure\Media;
 
-use App\Domain\Media\Services\MediaService;
+use App\Domain\Media\Services\MasterMediaService;
 use App\Domain\Media\Services\ImageProcessor;
 use App\Domain\Media\Services\VideoProcessor;
 use App\Domain\Media\Services\ThumbnailGenerator;
-use App\Models\MasterPhoto;
-use App\Models\MasterVideo;
-use App\Models\MasterProfile;
+use App\Domain\Media\Models\Photo;
+use App\Domain\Media\Models\Video;
+use App\Domain\Master\Models\MasterProfile;
 use Illuminate\Http\UploadedFile;
 
 /**
@@ -17,7 +17,7 @@ use Illuminate\Http\UploadedFile;
  */
 class MediaProcessingService
 {
-    private MediaService $mediaService;
+    private MasterMediaService $mediaService;
     private ImageProcessor $imageProcessor;
     private VideoProcessor $videoProcessor;
 
@@ -26,7 +26,7 @@ class MediaProcessingService
         $thumbnailGenerator = app(ThumbnailGenerator::class);
         $this->imageProcessor = app(ImageProcessor::class);
         $this->videoProcessor = app(VideoProcessor::class);
-        $this->mediaService = new MediaService(
+        $this->mediaService = new MasterMediaService(
             $this->imageProcessor,
             $this->videoProcessor,
             $thumbnailGenerator

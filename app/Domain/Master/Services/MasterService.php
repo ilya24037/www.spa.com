@@ -2,16 +2,16 @@
 
 namespace App\Domain\Master\Services;
 
-use App\Models\MasterProfile;
-use App\Models\User;
+use App\Domain\Master\Models\MasterProfile;
+use App\Domain\User\Models\User;
 use App\Enums\MasterStatus;
 use App\Enums\MasterLevel;
-use App\Repositories\MasterRepository;
-use App\Services\MediaService;
+use App\Domain\Master\Repositories\MasterRepository;
+use App\Domain\Media\Services\MasterMediaService;
 use App\Infrastructure\Notification\NotificationService;
 use App\Domain\Master\DTOs\CreateMasterDTO;
 use App\Domain\Master\DTOs\UpdateMasterDTO;
-use App\DTOs\MasterFilterDTO;
+use App\Domain\Master\DTOs\MasterFilterDTO;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -23,7 +23,7 @@ class MasterService
 {
     public function __construct(
         private MasterRepository $repository,
-        private MediaService $mediaService,
+        private MasterMediaService $mediaService,
         private NotificationService $notificationService
     ) {}
 

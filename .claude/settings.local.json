@@ -42,7 +42,13 @@
       "Bash(powershell:*)",
       "Bash(npm run build:*)",
       "Bash(npm run dev:*)",
-      "Bash(Get-Content \"C:\\www.spa.com\\storage\\logs\\laravel.log\" -Tail 50)"
+      "Bash(Get-Content \"C:\\www.spa.com\\storage\\logs\\laravel.log\" -Tail 50)",
+      "Bash(fc /L /N:*)",
+      "Bash(move:*)",
+      "Bash(C:Usersuser1.configherdbinphp.bat artisan refactor:update-model-imports)",
+      "Bash(C:Usersuser1.configherdbinphp.bat artisan test:create-ad)",
+      "Bash(cmd /c:*)",
+      "Bash(C:Usersuser1.configherdbinphp.bat artisan refactor:update-service-imports)"
     ],
     "deny": []
   }

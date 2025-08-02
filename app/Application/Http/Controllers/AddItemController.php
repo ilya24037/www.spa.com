@@ -6,7 +6,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
-use App\Models\{MasterProfile, MassageCategory, Service, WorkZone};
+use App\Domain\Master\Models\MasterProfile;
+use App\Domain\Service\Models\MassageCategory;
+use App\Domain\Service\Models\Service;
+use App\Domain\Master\Models\WorkZone;
 
 class AddItemController extends Controller
 {

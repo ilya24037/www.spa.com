@@ -2,14 +2,14 @@
 
 namespace App\Domain\Payment\Services;
 
-use App\Models\Payment;
-use App\Models\User;
+use App\Domain\Payment\Models\Payment;
+use App\Domain\User\Models\User;
 use App\Repositories\PaymentRepository;
 use App\Enums\PaymentStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentType;
-use App\Services\Payment\PaymentGatewayFactory;
-use App\Services\Payment\PaymentProcessorInterface;
+use App\Domain\Payment\Services\PaymentGatewayFactory;
+use App\Domain\Payment\Contracts\PaymentProcessorInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Event;

@@ -2,7 +2,7 @@
 
 namespace App\Domain\Search\Services;
 
-use App\Models\Ad;
+use App\Domain\Ad\Models\Ad;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 

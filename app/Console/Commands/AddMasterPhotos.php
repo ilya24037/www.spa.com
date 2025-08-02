@@ -3,8 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Models\MasterProfile;
-use App\Models\MasterPhoto;
+use App\Domain\Master\Models\MasterProfile;
+use App\Domain\Media\Models\Photo;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
 

@@ -2,7 +2,7 @@
 
 namespace App\Domain\User\Traits;
 
-use App\Models\Booking;
+use App\Domain\Booking\Models\Booking;
 use App\Enums\BookingStatus;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 

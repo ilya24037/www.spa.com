@@ -108,7 +108,7 @@ class Service extends Model
      */
     public function category(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\MassageCategory::class, 'massage_category_id');
+        return $this->belongsTo(MassageCategory::class, 'massage_category_id');
     }
 
     /**
@@ -140,7 +140,7 @@ class Service extends Model
      */
     public function media(): MorphMany
     {
-        return $this->morphMany(\App\Models\Media::class, 'mediable');
+        return $this->morphMany(\App\Domain\Media\Models\Media::class, 'mediable');
     }
 
     /**
@@ -292,7 +292,7 @@ class Service extends Model
      */
     public function scopeInCategoryWithChildren($query, $categoryId)
     {
-        $category = \App\Models\MassageCategory::find($categoryId);
+        $category = MassageCategory::find($categoryId);
         
         if (!$category) {
             return $query;

@@ -2,7 +2,7 @@
 
 namespace App\Events\Booking;
 
-use App\Models\Booking;
+use App\Domain\Booking\Models\Booking;
 use Carbon\Carbon;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;

@@ -2,10 +2,10 @@
 
 namespace App\Domain\Payment\Actions;
 
-use App\Models\Payment;
+use App\Domain\Payment\Models\Payment;
 use App\Enums\PaymentStatus;
 use App\Enums\PaymentType;
-use App\Services\PaymentService;
+use App\Domain\Payment\Services\PaymentService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;

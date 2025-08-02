@@ -2,9 +2,9 @@
 
 namespace App\Domain\Booking\Services;
 
-use App\Models\User;
-use App\Models\Service;
-use App\Models\BookingSlot;
+use App\Domain\User\Models\User;
+use App\Domain\Service\Models\Service;
+use App\Domain\Booking\Models\BookingSlot;
 use App\Enums\BookingType;
 use App\Repositories\BookingRepository;
 use Carbon\Carbon;

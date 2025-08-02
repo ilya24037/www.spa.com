@@ -10,10 +10,12 @@ use App\Domain\Booking\Actions\RescheduleBookingAction;
 use App\Domain\Booking\DTOs\BookingData;
 use App\Domain\Booking\Models\Booking;
 use App\Domain\Booking\Repositories\BookingRepository;
+use App\Domain\Booking\Services\NotificationService;
 use App\Domain\User\Models\User;
 use App\Enums\BookingType;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Главный сервис бронирования - координатор
@@ -27,6 +29,7 @@ class BookingService
         private PricingService $pricingService,
         private ValidationService $validationService,
         private BookingSlotService $slotService,
+        private NotificationService $notificationService,
         private CreateBookingAction $createBookingAction,
         private ConfirmBookingAction $confirmBookingAction,
         private CancelBookingAction $cancelBookingAction,
@@ -58,7 +61,20 @@ class BookingService
 
         // Создание через Action
         $bookingData = BookingData::fromArray($data);
-        return $this->createBookingAction->execute($bookingData);
+        $booking = $this->createBookingAction->execute($bookingData);
+        
+        // Отправляем уведомление о создании бронирования
+        try {
+            $this->notificationService->sendBookingCreated($booking);
+        } catch (\Exception $e) {
+            // Логируем ошибку, но не прерываем процесс создания
+            \Log::error('Failed to send booking created notification', [
+                'booking_id' => $booking->id,
+                'error' => $e->getMessage()
+            ]);
+        }
+        
+        return $booking;
     }
 
     /**
@@ -73,7 +89,20 @@ class BookingService
         $this->validationService->validateConfirmationAbility($booking);
 
         // Выполнение через Action
-        return $this->confirmBookingAction->execute($booking, $master);
+        $confirmedBooking = $this->confirmBookingAction->execute($booking, $master);
+        
+        // Отправляем уведомление о подтверждении
+        try {
+            $this->notificationService->sendBookingConfirmation($confirmedBooking);
+        } catch (\Exception $e) {
+            // Логируем ошибку, но не прерываем процесс
+            \Log::error('Failed to send booking confirmation notification', [
+                'booking_id' => $confirmedBooking->id,
+                'error' => $e->getMessage()
+            ]);
+        }
+        
+        return $confirmedBooking;
     }
 
     /**
@@ -90,7 +119,20 @@ class BookingService
         }
 
         // Выполнение через Action
-        return $this->cancelBookingAction->execute($booking, $user, $reason);
+        $cancelledBooking = $this->cancelBookingAction->execute($booking, $user, $reason);
+        
+        // Отправляем уведомление об отмене
+        try {
+            $this->notificationService->sendBookingCancellation($cancelledBooking);
+        } catch (\Exception $e) {
+            // Логируем ошибку, но не прерываем процесс
+            \Log::error('Failed to send booking cancellation notification', [
+                'booking_id' => $cancelledBooking->id,
+                'error' => $e->getMessage()
+            ]);
+        }
+        
+        return $cancelledBooking;
     }
 
     /**
@@ -105,7 +147,20 @@ class BookingService
         $this->validationService->validateCompletionAbility($booking);
 
         // Выполнение через Action
-        return $this->completeBookingAction->execute($booking, $master);
+        $completedBooking = $this->completeBookingAction->execute($booking, $master);
+        
+        // Отправляем уведомление о завершении
+        try {
+            $this->notificationService->sendBookingCompleted($completedBooking);
+        } catch (\Exception $e) {
+            // Логируем ошибку, но не прерываем процесс
+            \Log::error('Failed to send booking completed notification', [
+                'booking_id' => $completedBooking->id,
+                'error' => $e->getMessage()
+            ]);
+        }
+        
+        return $completedBooking;
     }
 
     /**
@@ -129,8 +184,27 @@ class BookingService
             throw new \Exception('Выбранное время недоступно');
         }
 
+        // Сохраняем старые дату и время для уведомления
+        $oldDateTime = [
+            'date' => $booking->start_time->format('d.m.Y'),
+            'time' => $booking->start_time->format('H:i'),
+        ];
+        
         // Выполнение через Action
-        return $this->rescheduleBookingAction->execute($booking, $newStartTime, $newDuration);
+        $rescheduledBooking = $this->rescheduleBookingAction->execute($booking, $newStartTime, $newDuration);
+        
+        // Отправляем уведомление о переносе
+        try {
+            $this->notificationService->sendBookingRescheduled($rescheduledBooking, $oldDateTime);
+        } catch (\Exception $e) {
+            // Логируем ошибку, но не прерываем процесс
+            \Log::error('Failed to send booking rescheduled notification', [
+                'booking_id' => $rescheduledBooking->id,
+                'error' => $e->getMessage()
+            ]);
+        }
+        
+        return $rescheduledBooking;
     }
 
     /**
@@ -293,5 +367,55 @@ class BookingService
             $preferredTime, 
             $type
         );
+    }
+
+    /**
+     * Отправить напоминание о бронировании
+     */
+    public function sendBookingReminder(Booking $booking): void
+    {
+        try {
+            $this->notificationService->sendBookingReminder($booking);
+        } catch (\Exception $e) {
+            Log::error('Failed to send booking reminder', [
+                'booking_id' => $booking->id,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Отправить напоминания о предстоящих бронированиях
+     * Используется в scheduled задачах
+     */
+    public function sendUpcomingBookingReminders(): int
+    {
+        $tomorrow = Carbon::tomorrow();
+        $bookings = $this->bookingRepository->query()
+            ->where('status', 'confirmed')
+            ->whereDate('start_time', $tomorrow->toDateString())
+            ->whereNull('reminder_sent_at')
+            ->get();
+
+        $sentCount = 0;
+        foreach ($bookings as $booking) {
+            try {
+                $this->sendBookingReminder($booking);
+                
+                // Отмечаем, что напоминание отправлено
+                $booking->reminder_sent_at = now();
+                $booking->save();
+                
+                $sentCount++;
+            } catch (\Exception $e) {
+                Log::error('Failed to send reminder for booking', [
+                    'booking_id' => $booking->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
+
+        return $sentCount;
     }
 }

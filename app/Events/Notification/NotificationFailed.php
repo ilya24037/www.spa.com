@@ -2,7 +2,7 @@
 
 namespace App\Events\Notification;
 
-use App\Models\Notification;
+use App\Domain\Notification\Models\Notification;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 

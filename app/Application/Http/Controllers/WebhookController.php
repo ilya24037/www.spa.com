@@ -2,7 +2,7 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Services\PaymentGatewayService;
+use App\Domain\Payment\Services\PaymentGatewayService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;

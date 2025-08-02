@@ -2,7 +2,7 @@
 
 namespace App\Infrastructure\Media;
 
-use App\Models\Media;
+use App\Domain\Media\Models\Media;
 use App\Enums\MediaType;
 use App\Enums\MediaStatus;
 use App\Repositories\MediaRepository;

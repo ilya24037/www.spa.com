@@ -2,7 +2,7 @@
 
 namespace App\Domain\Payment\Repositories;
 
-use App\Models\Payment;
+use App\Domain\Payment\Models\Payment;
 use App\Enums\PaymentStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentType;

@@ -4,7 +4,7 @@ namespace App\Application\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use App\Services\FeatureFlagService;
+use App\Infrastructure\Feature\FeatureFlagService;
 use Symfony\Component\HttpFoundation\Response;
 
 class TrackFeatureUsage

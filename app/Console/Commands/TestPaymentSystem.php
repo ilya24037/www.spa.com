@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Ad;
-use App\Models\AdPlan;
-use App\Models\Payment;
-use App\Models\User;
-use App\Services\PaymentGatewayService;
+use App\Domain\Ad\Models\Ad;
+use App\Domain\Ad\Models\AdPlan;
+use App\Domain\Payment\Models\Payment;
+use App\Domain\User\Models\User;
+use App\Domain\Payment\Services\PaymentGatewayService;
 use Illuminate\Console\Command;
 
 class TestPaymentSystem extends Command

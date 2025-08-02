@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use App\Services\FeatureFlagService;
+use App\Infrastructure\Feature\FeatureFlagService;
 
 class MonitorMigration extends Command
 {

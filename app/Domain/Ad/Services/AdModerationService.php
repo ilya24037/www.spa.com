@@ -2,7 +2,7 @@
 
 namespace App\Domain\Ad\Services;
 
-use App\Models\Ad;
+use App\Domain\Ad\Models\Ad;
 use App\Enums\AdStatus;
 use App\Repositories\AdRepository;
 use Illuminate\Support\Facades\Log;

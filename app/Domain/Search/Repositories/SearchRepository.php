@@ -4,9 +4,9 @@ namespace App\Domain\Search\Repositories;
 
 use App\Enums\SearchType;
 use App\Enums\SortBy;
-use App\Models\Ad;
-use App\Models\User;
-use App\Models\Service;
+use App\Domain\Ad\Models\Ad;
+use App\Domain\User\Models\User;
+use App\Domain\Service\Models\Service;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;

@@ -3,7 +3,7 @@
 namespace App\Domain\Ad\Services;
 
 use App\Domain\Ad\Models\Ad;
-use App\Domain\Media\Services\MediaService;
+use App\Domain\Media\Services\MasterMediaService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -15,13 +15,13 @@ use Illuminate\Support\Str;
  */
 class AdMediaService
 {
-    private MediaService $mediaService;
+    private MasterMediaService $mediaService;
     
     // Лимиты для объявлений
     private const MAX_PHOTOS = 10;
     private const MAX_VIDEOS = 1;
 
-    public function __construct(MediaService $mediaService)
+    public function __construct(MasterMediaService $mediaService)
     {
         $this->mediaService = $mediaService;
     }

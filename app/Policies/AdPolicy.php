@@ -3,7 +3,7 @@
 namespace App\Policies;
 
 use App\Domain\Ad\Models\Ad;
-use App\Models\User;
+use App\Domain\User\Models\User;
 use Illuminate\Auth\Access\Response;
 
 class AdPolicy

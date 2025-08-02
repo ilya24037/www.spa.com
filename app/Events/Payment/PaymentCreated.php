@@ -2,7 +2,7 @@
 
 namespace App\Events\Payment;
 
-use App\Models\Payment;
+use App\Domain\Payment\Models\Payment;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;

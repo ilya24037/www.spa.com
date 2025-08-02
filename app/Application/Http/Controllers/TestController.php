@@ -3,8 +3,8 @@
 namespace App\Application\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\MasterProfile;
-use App\Models\MasterPhoto;
+use App\Domain\Master\Models\MasterProfile;
+use App\Domain\Media\Models\Photo;
 
 class TestController extends Controller
 {

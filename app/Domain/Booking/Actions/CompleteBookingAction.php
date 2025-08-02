@@ -2,11 +2,11 @@
 
 namespace App\Domain\Booking\Actions;
 
-use App\Models\Booking;
-use App\Models\User;
+use App\Domain\Booking\Models\Booking;
+use App\Domain\User\Models\User;
 use App\Enums\BookingStatus;
-use App\Services\NotificationService;
-use App\Services\PaymentGatewayService;
+use App\Infrastructure\Notification\NotificationService;
+use App\Domain\Payment\Services\PaymentGatewayService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

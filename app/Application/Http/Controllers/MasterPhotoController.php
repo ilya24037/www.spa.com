@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domain\Master\Models\MasterProfile;
-use App\Models\MasterPhoto;
+use App\Domain\Media\Models\Photo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;

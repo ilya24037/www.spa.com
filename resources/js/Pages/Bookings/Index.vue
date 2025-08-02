@@ -1,508 +1,409 @@
 ﻿<template>
-    <Head :title="isMaster ? 'Мои заказы' : 'Мои бронирования'" />
-
-    <!-- Обертка с правильными отступами как в Dashboard -->
-    <div class="py-6 lg:py-8">
-        
-        <!-- Основной контент с гэпом между блоками -->
-        <div class="flex gap-6">
-            
-            <!-- Боковая панель через SidebarWrapper (копируем из Dashboard) -->
-            <SidebarWrapper 
-                v-model="showMobileSidebar"
-                content-class="p-0"
-                :show-desktop-header="false"
-                :always-visible-desktop="true"
-            >
-                <!-- Профиль пользователя -->
-                <div class="p-6 border-b">
-                    <div class="flex items-center gap-4">
-                        <div 
-                            class="w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold"
-                            :style="{ backgroundColor: avatarColor }"
-                        >
-                            {{ userInitial }}
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-lg">{{ userName }}</h3>
-                            <div class="flex items-center gap-2 text-sm text-gray-600">
-                                <span class="font-medium">{{ userStats?.rating || '—' }}</span>
-                                <div class="flex">
-                                    <svg 
-                                        v-for="i in 5" 
-                                        :key="i"
-                                        class="w-4 h-4"
-                                        :class="i <= Math.floor(userStats?.rating || 0) ? 'text-yellow-400' : 'text-gray-300'"
-                                        fill="currentColor"
-                                        viewBox="0 0 20 20"
-                                    >
-                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                    </svg>
-                                </div>
-                                <span class="text-xs">{{ userStats?.reviewsCount || 0 }} отзывов</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Меню навигации -->
-                <nav class="py-2">
-                    <div class="px-3 py-2">
-                        <ul class="space-y-1">
-                            <li>
-                                <Link 
-                                    href="/profile"
-                                    :class="menuItemClass(isCurrentRoute('profile'))"
-                                >
-                                    Мои анкеты
-                                    <span v-if="counts?.profiles > 0" class="ml-auto text-xs bg-gray-100 px-2 py-0.5 rounded">
-                                        {{ counts.profiles }}
-                                    </span>
-                                </Link>
-                            </li>
-                            <li>
-                                <Link 
-                                    href="/bookings"
-                                    :class="menuItemClass(isCurrentRoute('bookings'))"
-                                >
-                                    Бронирования
-                                    <span v-if="counts?.bookings > 0" class="ml-auto text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded">
-                                        {{ counts.bookings }}
-                                    </span>
-                                </Link>
-                            </li>
-                            <li>
-                                <Link 
-                                    href="/favorites"
-                                    :class="menuItemClass(isCurrentRoute('favorites'))"
-                                >
-                                    Избранное
-                                    <span v-if="counts?.favorites > 0" class="ml-auto text-xs bg-gray-100 px-2 py-0.5 rounded">
-                                        {{ counts.favorites }}
-                                    </span>
-                                </Link>
-                            </li>
-                            <li>
-                                <Link 
-                                    href="/profile/edit"
-                                    :class="menuItemClass(isCurrentRoute('profile/edit'))"
-                                >
-                                    Настройки профиля
-                                </Link>
-                            </li>
-                        </ul>
-                    </div>
-                </nav>
-            </SidebarWrapper>
-            
-            <!-- Основной контент -->
-            <main class="flex-1">
-                <ContentCard :noPadding="true">
-                    <div class="p-6">
-                        <!-- Заголовок и фильтры -->
-                        <div class="mb-6">
-                            <h1 class="text-2xl font-bold mb-4">
-                                {{ isMaster ? 'Заказы на услуги' : 'Мои бронирования' }}
-                            </h1>
-                            
-                            <!-- Фильтры по статусу -->
-                            <div class="flex flex-wrap gap-2">
-                                <button 
-                                    v-for="status in statuses" 
-                                    :key="status.value"
-                                    @click="filterStatus = status.value"
-                                    :class="[
-                                        'px-4 py-2 rounded-lg transition',
-                                        filterStatus === status.value 
-                                            ? 'bg-blue-600 text-white' 
-                                            : 'bg-gray-100 hover:bg-gray-200'
-                                    ]"
-                                >
-                                    {{ status.label }}
-                                    <span v-if="status.count > 0" class="ml-1 text-sm">
-                                        ({{ status.count }})
-                                    </span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Список бронирований -->
-                    <div v-if="filteredBookings.length > 0" class="divide-y divide-gray-200">
-                        <div 
-                            v-for="booking in filteredBookings" 
-                            :key="booking.id"
-                            class="p-6 hover:bg-gray-50 transition"
-                        >
-                            <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-                                <!-- Основная информация -->
-                                <div class="flex-1">
-                                    <!-- Номер и статус -->
-                                    <div class="flex items-center gap-3 mb-3">
-                                        <span class="text-sm text-gray-500">
-                                            № {{ booking.booking_number }}
-                                        </span>
-                                        <span :class="getStatusClass(booking.status)">
-                                            {{ getStatusLabel(booking.status) }}
-                                        </span>
-                                    </div>
-
-                                    <!-- Информация о мастере/клиенте -->
-                                    <div class="mb-3">
-                                        <h3 class="font-semibold text-lg">
-                                            <template v-if="isMaster">
-                                                Клиент: {{ booking.client_name }}
-                                            </template>
-                                            <template v-else>
-                                                {{ booking.master_profile.user.name }}
-                                            </template>
-                                        </h3>
-                                        <p class="text-gray-600">
-                                            {{ booking.service.name }}
-                                        </p>
-                                    </div>
-
-                                    <!-- Дата и время -->
-                                    <div class="flex items-center gap-4 text-sm">
-                                        <div class="flex items-center gap-1">
-                                            <CalendarIcon class="w-4 h-4 text-gray-400" />
-                                            <span>{{ formatDate(booking.booking_date) }}</span>
-                                        </div>
-                                        <div class="flex items-center gap-1">
-                                            <ClockIcon class="w-4 h-4 text-gray-400" />
-                                            <span>{{ booking.booking_time }} - {{ booking.booking_end_time }}</span>
-                                        </div>
-                                    </div>
-
-                                    <!-- Адрес (если на выезде) -->
-                                    <div v-if="booking.service_location === 'home'" class="mt-2 text-sm text-gray-600">
-                                        <MapPinIcon class="w-4 h-4 inline mr-1" />
-                                        {{ booking.address }}
-                                    </div>
-                                </div>
-
-                                <!-- Цена и действия -->
-                                <div class="flex flex-col items-end gap-3">
-                                    <div class="text-right">
-                                        <p class="text-2xl font-bold">{{ formatPrice(booking.total_price) }}</p>
-                                        <p class="text-sm text-gray-500">
-                                            {{ getPaymentLabel(booking.payment_method) }}
-                                        </p>
-                                    </div>
-
-                                    <!-- Кнопки действий -->
-                                    <div class="flex gap-2">
-                                        <Link 
-                                            :href="route('bookings.show', booking.id)"
-                                            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
-                                        >
-                                            Подробнее
-                                        </Link>
-
-                                        <!-- Действия для мастера -->
-                                        <template v-if="isMaster && booking.status === 'pending'">
-                                            <button 
-                                                @click="confirmBooking(booking)"
-                                                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
-                                            >
-                                                Принять
-                                            </button>
-                                            <button 
-                                                @click="showCancelModal(booking)"
-                                                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-                                            >
-                                                Отклонить
-                                            </button>
-                                        </template>
-
-                                        <!-- Действия для клиента -->
-                                        <template v-else-if="!isMaster && canCancel(booking)">
-                                            <button 
-                                                @click="showCancelModal(booking)"
-                                                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-                                            >
-                                                Отменить
-                                            </button>
-                                        </template>
-
-                                        <!-- Завершить услугу (для мастера) -->
-                                        <template v-if="isMaster && booking.status === 'confirmed'">
-                                            <button 
-                                                @click="completeBooking(booking)"
-                                                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                                            >
-                                                Завершить
-                                            </button>
-                                        </template>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Пустое состояние -->
-                    <div v-else class="p-6 text-center py-12">
-                        <div class="text-gray-400 mb-4">
-                            <CalendarDaysIcon class="w-16 h-16 mx-auto" />
-                        </div>
-                        <p class="text-xl text-gray-600 mb-4">
-                            {{ filterStatus === 'all' ? 'У вас пока нет бронирований' : 'Нет бронирований с таким статусом' }}
-                        </p>
-                        <Link 
-                            v-if="!isMaster"
-                            :href="route('home')"
-                            class="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                        >
-                            Найти мастера
-                        </Link>
-                    </div>
-
-                    <!-- Пагинация -->
-                    <div v-if="bookings.meta && bookings.meta.last_page > 1" class="p-6 pt-0">
-                        <div class="flex justify-center">
-                            <nav class="flex gap-1">
-                                <Link
-                                    v-for="link in bookings.meta.links"
-                                    :key="link.label"
-                                    :href="link.url"
-                                    :class="[
-                                        'px-3 py-2 rounded',
-                                        link.active ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200',
-                                        !link.url ? 'opacity-50 cursor-not-allowed' : ''
-                                    ]"
-                                    v-html="link.label"
-                                    :disabled="!link.url"
-                                />
-                            </nav>
-                        </div>
-                    </div>
-                </ContentCard>
-            </main>
-        </div>
+  <div class="py-6 lg:py-8">
+    <!-- Заголовок страницы -->
+    <div class="mb-6">
+      <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
+        Мои записи
+      </h1>
+      <p class="text-gray-600">
+        Управление вашими записями к мастерам
+      </p>
     </div>
 
-    <!-- Модальное окно отмены -->
-    <Modal :show="showCancelModalState" @close="showCancelModalState = false">
-        <div class="p-6">
-            <h3 class="text-lg font-semibold mb-4">
-                {{ isMaster ? 'Отклонить заказ' : 'Отменить бронирование' }}
-            </h3>
+    <!-- Фильтры и статистика -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <!-- Статистика -->
+      <div class="bg-white rounded-lg p-4 shadow-sm border">
+        <div class="text-sm text-gray-500 mb-1">Всего записей</div>
+        <div class="text-2xl font-bold text-gray-900">{{ totalBookings }}</div>
+      </div>
+      
+      <div class="bg-white rounded-lg p-4 shadow-sm border">
+        <div class="text-sm text-gray-500 mb-1">Предстоящие</div>
+        <div class="text-2xl font-bold text-blue-600">{{ upcomingBookings }}</div>
+      </div>
+      
+      <div class="bg-white rounded-lg p-4 shadow-sm border">
+        <div class="text-sm text-gray-500 mb-1">Завершенные</div>
+        <div class="text-2xl font-bold text-green-600">{{ completedBookings }}</div>
+      </div>
+      
+      <div class="bg-white rounded-lg p-4 shadow-sm border">
+        <div class="text-sm text-gray-500 mb-1">Отмененные</div>
+        <div class="text-2xl font-bold text-red-600">{{ cancelledBookings }}</div>
+      </div>
+    </div>
+
+    <!-- Вкладки фильтров -->
+    <div class="mb-6">
+      <div class="border-b border-gray-200">
+        <nav class="-mb-px flex space-x-8">
+          <button
+            v-for="tab in tabs"
+            :key="tab.key"
+            @click="activeTab = tab.key"
+            :class="[
+              'py-2 px-1 border-b-2 font-medium text-sm transition-colors',
+              activeTab === tab.key
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            ]"
+          >
+            {{ tab.label }}
+            <span v-if="tab.count !== undefined" :class="[
+              'ml-2 px-2 py-0.5 rounded-full text-xs',
+              activeTab === tab.key ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'
+            ]">
+              {{ tab.count }}
+            </span>
+          </button>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Список бронирований -->
+    <div class="space-y-4">
+      <!-- Состояние загрузки -->
+      <div v-if="loading" class="flex justify-center py-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+
+      <!-- Пустое состояние -->
+      <div v-else-if="filteredBookings.length === 0" class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Нет записей</h3>
+        <p class="text-gray-500 mb-4">
+          У вас пока нет записей в этой категории
+        </p>
+        <router-link
+          to="/masters"
+          class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Найти мастера
+        </router-link>
+      </div>
+
+      <!-- Карточки бронирований -->
+      <div v-else>
+        <BookingStatus
+          v-for="booking in filteredBookings"
+          :key="booking.id"
+          :booking="booking"
+          :show-quick-actions="true"
+          :user-role="userRole"
+          @cancel="handleCancelBooking"
+          @reschedule="handleRescheduleBooking"
+          @complete="handleCompleteBooking"
+          class="mb-4"
+        />
+
+        <!-- Пагинация -->
+        <div v-if="pagination && pagination.total > pagination.per_page" class="mt-8">
+          <nav class="flex items-center justify-between">
+            <div class="flex-1 flex justify-between sm:hidden">
+              <button
+                @click="loadPage(pagination.current_page - 1)"
+                :disabled="!pagination.prev_page_url"
+                class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Предыдущая
+              </button>
+              <button
+                @click="loadPage(pagination.current_page + 1)"
+                :disabled="!pagination.next_page_url"
+                class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Следующая
+              </button>
+            </div>
             
-            <p class="text-gray-600 mb-4">
-                Вы уверены, что хотите {{ isMaster ? 'отклонить этот заказ' : 'отменить бронирование' }}?
-            </p>
-
-            <div class="mb-4">
-                <label class="block text-sm font-medium mb-2">Причина отмены</label>
-                <textarea 
-                    v-model="cancelReason"
-                    rows="3"
-                    class="w-full border-gray-300 rounded-lg"
-                    :placeholder="isMaster ? 'Укажите причину отклонения' : 'Укажите причину отмены'"
-                ></textarea>
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+              <div>
+                <p class="text-sm text-gray-700">
+                  Показано <span class="font-medium">{{ pagination.from }}</span> до 
+                  <span class="font-medium">{{ pagination.to }}</span> из 
+                  <span class="font-medium">{{ pagination.total }}</span> записей
+                </p>
+              </div>
+              <div>
+                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                  <!-- Пагинация для больших экранов -->
+                  <button
+                    v-for="page in visiblePages"
+                    :key="page"
+                    @click="loadPage(page)"
+                    :class="[
+                      'relative inline-flex items-center px-4 py-2 border text-sm font-medium transition-colors',
+                      page === pagination.current_page
+                        ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                        : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                    ]"
+                  >
+                    {{ page }}
+                  </button>
+                </nav>
+              </div>
             </div>
-
-            <div class="flex justify-end gap-3">
-                <button 
-                    @click="showCancelModalState = false"
-                    class="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
-                >
-                    Отмена
-                </button>
-                <button 
-                    @click="cancelBooking"
-                    class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-                >
-                    {{ isMaster ? 'Отклонить' : 'Отменить бронирование' }}
-                </button>
-            </div>
+          </nav>
         </div>
-    </Modal>
+      </div>
+    </div>
+
+    <!-- Модальное окно переноса записи -->
+    <div v-if="showRescheduleModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between p-6 border-b">
+          <h2 class="text-xl font-bold text-gray-900">Перенести запись</h2>
+          <button @click="showRescheduleModal = false" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="p-6">
+          <BookingCalendar
+            v-if="rescheduleBooking"
+            :master-id="rescheduleBooking.masterId"
+            :selected-service="rescheduleBooking.service"
+            @selection-change="handleNewTimeSelection"
+          />
+          
+          <div v-if="newDateTime" class="mt-6 flex gap-3">
+            <button
+              @click="showRescheduleModal = false"
+              class="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+            >
+              Отменить
+            </button>
+            <button
+              @click="confirmReschedule"
+              :disabled="rescheduling"
+              class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+            >
+              {{ rescheduling ? 'Переношу...' : 'Перенести запись' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { Head, Link, router, usePage } from '@inertiajs/vue3'
-import SidebarWrapper from '@/Components/Layout/SidebarWrapper.vue'
-import ContentCard from '@/Components/Layout/ContentCard.vue'
-import Modal from '@/Components/UI/Modal.vue'
-import { CalendarIcon, ClockIcon, MapPinIcon, CalendarDaysIcon } from '@heroicons/vue/24/outline'
-import { format } from 'date-fns'
-import { ru } from 'date-fns/locale'
+import { ref, computed, onMounted, watch } from 'vue'
+import { router } from '@inertiajs/vue3'
+import { BookingStatus, BookingCalendar, useBookingStore } from '@/src/entities/booking'
 
+// Props от Inertia
 const props = defineProps({
-    bookings: Object,
-    isMaster: Boolean,
-    counts: {
-        type: Object,
-        default: () => ({})
-    },
-    userStats: {
-        type: Object,
-        default: () => ({})
-    }
+  bookings: {
+    type: Object,
+    required: true
+  },
+  isMaster: {
+    type: Boolean,
+    default: false
+  }
 })
 
-// Состояние
-const filterStatus = ref('all')
-const showCancelModalState = ref(false)
-const selectedBooking = ref(null)
-const cancelReason = ref('')
-const showMobileSidebar = ref(false)
+// Store
+const bookingStore = useBookingStore()
 
-// Пользователь (копируем логику из Dashboard)
-const page = usePage()
-const user = computed(() => page.props.auth?.user || {})
-const userName = computed(() => user.value.name || 'Пользователь')
-const userInitial = computed(() => userName.value.charAt(0).toUpperCase())
+// Состояние компонента
+const activeTab = ref('all')
+const loading = ref(false)
+const showRescheduleModal = ref(false)
+const rescheduleBooking = ref(null)
+const newDateTime = ref(null)
+const rescheduling = ref(false)
 
-// Цвет аватара
-const colors = ['#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#00bcd4', '#009688', '#4caf50', '#ff9800', '#ff5722']
-const avatarColor = computed(() => {
-    const charCode = userName.value.charCodeAt(0) || 85
-    return colors[charCode % colors.length]
-})
+// Данные
+const allBookings = ref(props.bookings.data || [])
+const pagination = ref(props.bookings.meta || props.bookings)
 
-// Проверка текущего роута
-const isCurrentRoute = (routeName) => {
-    return page.url.endsWith(routeName)
-}
+// Вычисляемые свойства
+const userRole = computed(() => props.isMaster ? 'master' : 'client')
 
-// Класс для пунктов меню
-const menuItemClass = (isActive) => [
-    'flex items-center justify-between px-3 py-2 text-sm rounded-lg transition',
-    isActive 
-        ? 'bg-blue-50 text-blue-600 font-medium' 
-        : 'text-gray-700 hover:bg-gray-50'
-]
+const totalBookings = computed(() => allBookings.value.length)
 
-// Статусы для фильтрации
-const statuses = computed(() => {
-    const allBookings = props.bookings.data || []
-    
-    const statusCounts = {
-        all: allBookings.length,
-        pending: allBookings.filter(b => b.status === 'pending').length,
-        confirmed: allBookings.filter(b => b.status === 'confirmed').length,
-        completed: allBookings.filter(b => b.status === 'completed').length,
-        cancelled: allBookings.filter(b => b.status === 'cancelled').length,
-    }
+const upcomingBookings = computed(() => 
+  allBookings.value.filter(b => ['pending', 'confirmed'].includes(b.status)).length
+)
 
-    return [
-        { value: 'all', label: 'Все', count: statusCounts.all },
-        { value: 'pending', label: 'Ожидают', count: statusCounts.pending },
-        { value: 'confirmed', label: 'Подтверждены', count: statusCounts.confirmed },
-        { value: 'completed', label: 'Завершены', count: statusCounts.completed },
-        { value: 'cancelled', label: 'Отменены', count: statusCounts.cancelled },
-    ]
-})
+const completedBookings = computed(() => 
+  allBookings.value.filter(b => b.status === 'completed').length
+)
 
-// Фильтрованные бронирования
+const cancelledBookings = computed(() => 
+  allBookings.value.filter(b => b.status === 'cancelled').length
+)
+
+const tabs = computed(() => [
+  { key: 'all', label: 'Все записи', count: totalBookings.value },
+  { key: 'upcoming', label: 'Предстоящие', count: upcomingBookings.value },
+  { key: 'completed', label: 'Завершенные', count: completedBookings.value },
+  { key: 'cancelled', label: 'Отмененные', count: cancelledBookings.value }
+])
+
 const filteredBookings = computed(() => {
-    const allBookings = props.bookings.data || []
-    if (filterStatus.value === 'all') return allBookings
-    return allBookings.filter(b => b.status === filterStatus.value)
+  switch (activeTab.value) {
+    case 'upcoming':
+      return allBookings.value.filter(b => ['pending', 'confirmed', 'in_progress'].includes(b.status))
+    case 'completed':
+      return allBookings.value.filter(b => b.status === 'completed')
+    case 'cancelled':
+      return allBookings.value.filter(b => b.status === 'cancelled')
+    default:
+      return allBookings.value
+  }
 })
 
-// Форматирование даты
-const formatDate = (date) => {
-    return format(new Date(date), 'd MMMM yyyy', { locale: ru })
-}
+const visiblePages = computed(() => {
+  if (!pagination.value) return []
+  
+  const current = pagination.value.current_page
+  const total = pagination.value.last_page
+  const delta = 2
+  
+  const range = []
+  const start = Math.max(1, current - delta)
+  const end = Math.min(total, current + delta)
+  
+  for (let i = start; i <= end; i++) {
+    range.push(i)
+  }
+  
+  return range
+})
 
-// Форматирование цены
-const formatPrice = (price) => {
-    return new Intl.NumberFormat('ru-RU', {
-        style: 'currency',
-        currency: 'RUB',
-        minimumFractionDigits: 0
-    }).format(price)
-}
-
-// Получение класса для статуса
-const getStatusClass = (status) => {
-    const classes = {
-        pending: 'px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800',
-        confirmed: 'px-2 py-1 text-xs rounded-full bg-green-100 text-green-800',
-        completed: 'px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800',
-        cancelled: 'px-2 py-1 text-xs rounded-full bg-red-100 text-red-800',
-        in_progress: 'px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800',
-    }
-    return classes[status] || ''
-}
-
-// Получение текста статуса
-const getStatusLabel = (status) => {
-    const labels = {
-        pending: 'Ожидает подтверждения',
-        confirmed: 'Подтверждено',
-        completed: 'Завершено',
-        cancelled: 'Отменено',
-        in_progress: 'Выполняется',
-    }
-    return labels[status] || status
-}
-
-// Получение текста способа оплаты
-const getPaymentLabel = (method) => {
-    const labels = {
-        cash: 'Наличными',
-        card: 'Картой',
-        online: 'Онлайн',
-        transfer: 'Переводом'
-    }
-    return labels[method] || method
-}
-
-// Проверка возможности отмены
-const canCancel = (booking) => {
-    if (booking.status !== 'pending' && booking.status !== 'confirmed') return false
-    
-    // Проверяем время до начала (минимум 2 часа)
-    const bookingDateTime = new Date(`${booking.booking_date} ${booking.booking_time}`)
-    const hoursUntilBooking = (bookingDateTime - new Date()) / (1000 * 60 * 60)
-    
-    return hoursUntilBooking > 2
-}
-
-// Показать модальное окно отмены
-const showCancelModal = (booking) => {
-    selectedBooking.value = booking
-    cancelReason.value = ''
-    showCancelModalState.value = true
-}
-
-// Подтвердить бронирование
-const confirmBooking = (booking) => {
-    router.post(route('bookings.confirm', booking.id), {}, {
-        preserveScroll: true,
-        onSuccess: () => {
-            // Обновится автоматически через Inertia
-        }
+// Методы
+const loadPage = async (page) => {
+  if (loading.value || page === pagination.value.current_page) return
+  
+  loading.value = true
+  
+  try {
+    router.get(route('bookings.index'), { page }, {
+      preserveState: true,
+      preserveScroll: true,
+      onSuccess: (page) => {
+        allBookings.value = page.props.bookings.data
+        pagination.value = page.props.bookings.meta || page.props.bookings
+      }
     })
+  } finally {
+    loading.value = false
+  }
 }
 
-// Отменить бронирование
-const cancelBooking = () => {
-    if (!selectedBooking.value) return
+const handleCancelBooking = async ({ bookingId, reason }) => {
+  try {
+    const result = await bookingStore.cancelBooking(bookingId, reason)
     
-    router.post(route('bookings.cancel', selectedBooking.value.id), {
-        reason: cancelReason.value
-    }, {
-        preserveScroll: true,
-        onSuccess: () => {
-            showCancelModalState.value = false
-            selectedBooking.value = null
-            cancelReason.value = ''
-        }
-    })
+    if (result) {
+      // Обновляем локальные данные
+      const bookingIndex = allBookings.value.findIndex(b => b.id === bookingId)
+      if (bookingIndex !== -1) {
+        allBookings.value[bookingIndex].status = 'cancelled'
+        allBookings.value[bookingIndex].cancellationReason = reason
+      }
+      
+      // Показываем уведомление
+      alert('Запись успешно отменена')
+    }
+  } catch (error) {
+    alert('Ошибка при отмене записи: ' + error.message)
+  }
 }
 
-// Завершить услугу
-const completeBooking = (booking) => {
-    if (confirm('Отметить услугу как выполненную?')) {
-        router.post(route('bookings.complete', booking.id), {}, {
-            preserveScroll: true
-        })
-    }
+const handleRescheduleBooking = (bookingId) => {
+  const booking = allBookings.value.find(b => b.id === bookingId)
+  if (booking) {
+    rescheduleBooking.value = booking
+    showRescheduleModal.value = true
+    newDateTime.value = null
+  }
 }
+
+const handleCompleteBooking = async (bookingId) => {
+  if (!confirm('Отметить запись как завершенную?')) return
+  
+  try {
+    // API вызов для завершения записи
+    const bookingIndex = allBookings.value.findIndex(b => b.id === bookingId)
+    if (bookingIndex !== -1) {
+      allBookings.value[bookingIndex].status = 'completed'
+    }
+    
+    alert('Запись отмечена как завершенная')
+  } catch (error) {
+    alert('Ошибка при завершении записи: ' + error.message)
+  }
+}
+
+const handleNewTimeSelection = (selection) => {
+  newDateTime.value = selection.datetime
+}
+
+const confirmReschedule = async () => {
+  if (!newDateTime.value || !rescheduleBooking.value) return
+  
+  rescheduling.value = true
+  
+  try {
+    // API вызов для переноса записи
+    const bookingIndex = allBookings.value.findIndex(b => b.id === rescheduleBooking.value.id)
+    if (bookingIndex !== -1) {
+      allBookings.value[bookingIndex].startTime = newDateTime.value
+      allBookings.value[bookingIndex].status = 'rescheduled'
+    }
+    
+    showRescheduleModal.value = false
+    rescheduleBooking.value = null
+    newDateTime.value = null
+    
+    alert('Запись успешно перенесена')
+  } catch (error) {
+    alert('Ошибка при переносе записи: ' + error.message)
+  } finally {
+    rescheduling.value = false
+  }
+}
+
+// Инициализация
+onMounted(() => {
+  // Устанавливаем активную вкладку из URL параметра если есть
+  const urlParams = new URLSearchParams(window.location.search)
+  const tabParam = urlParams.get('tab')
+  if (tabParam && tabs.value.some(t => t.key === tabParam)) {
+    activeTab.value = tabParam
+  }
+})
+
+// Наблюдатели
+watch(activeTab, (newTab) => {
+  // Обновляем URL при смене вкладки
+  const url = new URL(window.location)
+  url.searchParams.set('tab', newTab)
+  window.history.replaceState({}, '', url)
+})
 </script>
+
+<style scoped>
+/* Анимации */
+.booking-status {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Стилизация загрузки */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+</style>

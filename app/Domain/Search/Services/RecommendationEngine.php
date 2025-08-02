@@ -2,8 +2,8 @@
 
 namespace App\Domain\Search\Services;
 
-use App\Models\Ad;
-use App\Models\User;
+use App\Domain\Ad\Models\Ad;
+use App\Domain\User\Models\User;
 use App\Enums\SortBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;

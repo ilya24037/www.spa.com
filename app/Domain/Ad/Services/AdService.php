@@ -7,6 +7,7 @@ use App\Domain\Ad\Models\AdPricing;
 // use App\Domain\Ad\Models\AdMedia; // Не используется - медиа хранится в основной таблице
 use App\Domain\Ad\Repositories\AdRepository;
 use App\Domain\Ad\Services\AdMediaService;
+use App\Domain\Ad\DTOs\CreateAdDTO;
 use App\Domain\User\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -28,7 +29,31 @@ class AdService
     }
 
     /**
-     * Создать новое объявление
+     * Создать новое объявление из DTO
+     */
+    public function createFromDTO(CreateAdDTO $dto): Ad
+    {
+        $data = $dto->toArray();
+        
+        return DB::transaction(function () use ($data) {
+            // Создаем основное объявление
+            $adData = $this->prepareMainAdData($data);
+            $adData['user_id'] = $data['user_id'];
+            $adData['status'] = 'draft'; // По умолчанию черновик
+            
+            $ad = Ad::create($adData);
+            
+            // Создаем связанные компоненты
+            $this->createAdComponents($ad, $data);
+            
+            Log::info('Ad created with components', ['ad_id' => $ad->id, 'user_id' => $data['user_id']]);
+            
+            return $ad;
+        });
+    }
+
+    /**
+     * Создать новое объявление (legacy метод для обратной совместимости)
      */
     public function create(array $data, User $user): Ad
     {

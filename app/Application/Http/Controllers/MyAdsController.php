@@ -2,7 +2,7 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Models\Ad;
+use App\Domain\Ad\Models\Ad;
 use App\Enums\AdStatus;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

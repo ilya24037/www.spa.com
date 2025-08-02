@@ -4,8 +4,8 @@ namespace App\Application\Http\Controllers\Ad;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SaveAdDraftRequest;
-use App\Services\AdService;
-use App\Models\Ad;
+use App\Domain\Ad\Services\AdService;
+use App\Domain\Ad\Models\Ad;
 use Illuminate\Support\Facades\Auth;
 
 /**
