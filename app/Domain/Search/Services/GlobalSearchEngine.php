@@ -16,7 +16,7 @@ use Illuminate\Support\Collection;
 class GlobalSearchEngine extends BaseSearchEngine
 {
     public function __construct(
-        protected \App\Repositories\SearchRepository $repository,
+        protected \App\Domain\Search\Repositories\SearchRepository $repository,
         protected AdSearchEngine $adEngine,
         protected MasterSearchEngine $masterEngine,
         protected ServiceSearchEngine $serviceEngine

@@ -1,42 +1,23 @@
-<!-- resources/js/Pages/Dashboard.vue - FSD Refactored -->
+<!-- resources/js/Pages/Dashboard.vue - FSD Refactored согласно плану 5.3 -->
 <template>
-  <AppLayout>
-    <Head title="Личный кабинет" />
-    
-    <!-- FSD Widget: ProfileDashboard -->
+  <ProfileLayout>
     <ProfileDashboard 
-      :user="user"
-      :initial-tab="activeTab"
+      :ads="ads"
       :counts="counts"
+      :stats="userStats"
     />
-  </AppLayout>
+  </ProfileLayout>
 </template>
 
 <script setup>
-import { Head } from '@inertiajs/vue3'
-
-// Layout (используем существующий AppLayout вместо ProfileLayout)
-import AppLayout from '@/Layouts/AppLayout.vue'
-
-// 🎯 FSD Импорты согласно плану
+import { ProfileLayout } from '@/src/shared'
 import { ProfileDashboard } from '@/src/widgets/profile-dashboard'
 
 // Props из Inertia
 defineProps({
-  user: {
-    type: Object,
-    required: true,
-    default: () => ({
-      id: null,
-      name: 'Пользователь',
-      email: '',
-      is_master: false,
-      avatar: null
-    })
-  },
-  activeTab: {
-    type: String,
-    default: 'ads'
+  ads: {
+    type: Array,
+    default: () => []
   },
   counts: {
     type: Object,
@@ -51,14 +32,14 @@ defineProps({
       archived: 0
     })
   },
-  // Сохраняем для обратной совместимости
-  profiles: {
-    type: Array,
-    default: () => []
-  },
   userStats: {
     type: Object,
-    default: () => ({})
+    default: () => ({
+      views: 0,
+      calls: 0,
+      bookings: 0,
+      revenue: 0
+    })
   }
 })
 </script>

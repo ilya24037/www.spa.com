@@ -76,8 +76,8 @@ enum SearchType: string
     {
         return match($this) {
             self::ADS => 'App\\Domain\\Ad\\Models\\Ad',
-            self::MASTERS => 'App\\Models\\User',
-            self::SERVICES => 'App\\Models\\Service',
+            self::MASTERS => 'App\\Domain\\User\\Models\\User',
+            self::SERVICES => 'App\\Domain\\Service\\Models\\Service',
             self::GLOBAL => 'mixed',
             self::RECOMMENDATIONS => 'mixed',
         };

@@ -50,7 +50,10 @@
       "Bash(cmd /c:*)",
       "Bash(C:Usersuser1.configherdbinphp.bat artisan refactor:update-service-imports)",
       "Bash(cat:*)",
-      "Bash(\"C:\\ProgramData\\ComposerSetup\\bin\\composer.bat\" dump-autoload)"
+      "Bash(\"C:\\ProgramData\\ComposerSetup\\bin\\composer.bat\" dump-autoload)",
+      "Bash(where composer)",
+      "Bash(C:Usersuser1.configherdbincomposer.bat dump-autoload)",
+      "Bash(C:Usersuser1.configherdbinphp.bat artisan optimize:clear)"
     ],
     "deny": []
   }
