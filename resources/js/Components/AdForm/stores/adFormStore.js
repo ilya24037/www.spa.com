@@ -6,7 +6,7 @@
 import { defineStore } from 'pinia'
 import { ref, reactive, computed } from 'vue'
 import { useFieldValidation } from '../composables/useFieldValidation'
-import { prepareFormData, saveDraft, publishAd } from '@/utils/adApi'
+import { prepareFormData, saveDraft, publishAd, uploadAdPhotos } from '@/utils/adApi'
 
 export const useAdFormStore = defineStore('adForm', () => {
   // === СОСТОЯНИЕ ===
@@ -65,6 +65,7 @@ export const useAdFormStore = defineStore('adForm', () => {
     address: '',
     taxi_option: '',
     geo: {},
+    travel_area: '',
     phone: '',
     contact_method: 'messages',
     whatsapp: '',
@@ -162,6 +163,7 @@ export const useAdFormStore = defineStore('adForm', () => {
       address: formData.address,
       taxi_option: formData.taxi_option,
       geo: formData.geo,
+      travel_area: formData.travel_area,
       phone: formData.phone,
       contact_method: formData.contact_method,
       whatsapp: formData.whatsapp,
@@ -217,6 +219,9 @@ export const useAdFormStore = defineStore('adForm', () => {
    * Инициализация формы
    */
   function initializeForm(initialData = {}, options = {}) {
+    console.log('adFormStore.initializeForm called with:', initialData)
+    console.log('initialData.photos:', initialData.photos)
+    
     // Сброс состояния
     isLoading.value = true
     validation.clearAllErrors()
@@ -226,7 +231,20 @@ export const useAdFormStore = defineStore('adForm', () => {
       if (initialData[key] !== undefined && initialData[key] !== null) {
         // Особая обработка для массивов
         if (Array.isArray(formData[key])) {
-          formData[key] = Array.isArray(initialData[key]) ? initialData[key] : []
+          if (Array.isArray(initialData[key])) {
+            formData[key] = initialData[key]
+          } else if (typeof initialData[key] === 'string' && initialData[key].trim().startsWith('[')) {
+            // Парсинг JSON массивов приходящих как строки
+            try {
+              formData[key] = JSON.parse(initialData[key])
+              console.log(`initializeForm: parsed ${key} from JSON string:`, formData[key])
+            } catch (e) {
+              console.warn(`initializeForm: failed to parse ${key} JSON:`, initialData[key])
+              formData[key] = []
+            }
+          } else {
+            formData[key] = []
+          }
         }
         // Особая обработка для объектов
         else if (typeof formData[key] === 'object' && formData[key] !== null) {
@@ -353,7 +371,18 @@ export const useAdFormStore = defineStore('adForm', () => {
     isSaving.value = true
     
     try {
+      console.log('saveAsDraft - formData.photos:', formData.photos)
+      console.log('saveAsDraft - formData.photos length:', formData.photos ? formData.photos.length : 0)
+      console.log('saveAsDraft - formData.photos JSON:', JSON.stringify(formData.photos))
+      
+      // Получаем файлы фото для загрузки
+      const photosToUpload = formData.photos ? formData.photos.filter(photo => photo.file && !photo.id) : []
+      console.log('saveAsDraft - photos to upload:', photosToUpload.length)
+      
       const preparedData = prepareFormData(formData)
+      
+      console.log('saveAsDraft - preparedData.photos:', preparedData.photos)
+      console.log('saveAsDraft - preparedData.photos length:', preparedData.photos ? preparedData.photos.length : 0)
       
       // Передаем ID черновика если редактируем существующий
       const response = await saveDraft(preparedData, adId.value)
@@ -361,6 +390,26 @@ export const useAdFormStore = defineStore('adForm', () => {
       // Если это новый черновик - сохраняем его ID
       if (response && response.id && !adId.value) {
         adId.value = response.id
+      }
+      
+      // Загружаем новые фото если есть
+      if (photosToUpload.length > 0 && (adId.value || response?.id)) {
+        const currentAdId = adId.value || response.id
+        console.log('Uploading photos for ad:', currentAdId)
+        
+        try {
+          const files = photosToUpload.map(photo => photo.file)
+          const uploadResult = await uploadAdPhotos(currentAdId, files)
+          console.log('Photos uploaded successfully:', uploadResult)
+          
+          // Обновляем фото в store с серверными данными
+          if (uploadResult.success && uploadResult.photos) {
+            formData.photos = uploadResult.photos
+          }
+        } catch (uploadError) {
+          console.error('Ошибка загрузки фото:', uploadError)
+          // Продолжаем, даже если фото не загрузились
+        }
       }
       
       hasUnsavedChanges.value = false

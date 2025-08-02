@@ -57,29 +57,60 @@ export const updateAd = async (adId, formData) => {
  * Сохранить черновик объявления
  */
 export const saveDraft = async (formData, draftId = null) => {
-  return new Promise((resolve, reject) => {
-    if (draftId) {
-      // Обновляем существующий черновик
-      router.put(`/draft/${draftId}`, formData, {
-        onSuccess: (page) => {
-          resolve(page)
-        },
-        onError: (errors) => {
-          reject(errors)
-        }
-      })
-    } else {
-      // Создаем новый черновик
-      router.post('/ads/draft', formData, {
-        onSuccess: (page) => {
-          resolve(page)
-        },
-        onError: (errors) => {
-          reject(errors)
-        }
-      })
+  console.log('saveDraft called with formData:', formData)
+  console.log('saveDraft - formData.photos:', formData.photos)
+  console.log('saveDraft - formData.photos length:', formData.photos ? formData.photos.length : 0)
+  console.log('saveDraft - typeof formData:', typeof formData)
+  console.log('saveDraft - formData keys:', Object.keys(formData))
+  
+  // Проверяем что photos действительно есть в данных
+  const dataToSend = {
+    ...formData,
+    photos: formData.photos || []
+  }
+  console.log('saveDraft - dataToSend has photos:', 'photos' in dataToSend)
+  console.log('saveDraft - dataToSend.photos is:', dataToSend.photos)
+  
+  // Используем обычный fetch вместо Inertia router для отладки
+  try {
+    const url = draftId ? `/draft/${draftId}` : '/ads/draft'
+    const method = draftId ? 'PUT' : 'POST'
+    
+    console.log(`Sending ${method} request to ${url}`)
+    console.log('Data being sent:', JSON.stringify(dataToSend, null, 2))
+    
+    const response = await fetch(url, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify(dataToSend)
+    })
+    
+    if (!response.ok) {
+      const error = await response.json()
+      console.error('Server error:', error)
+      throw new Error(error.message || 'Ошибка сохранения черновика')
     }
-  })
+    
+    const result = await response.json()
+    console.log('Draft saved successfully:', result)
+    
+    // Редирект на страницу черновиков после успешного сохранения
+    if (result.redirect || result.success) {
+      const redirectUrl = result.redirect || '/my-ads?tab=drafts'
+      console.log('Redirecting to:', redirectUrl)
+      router.visit(redirectUrl)
+    }
+    
+    return result
+  } catch (error) {
+    console.error('Ошибка при сохранении черновика:', error)
+    throw error
+  }
 }
 
 /**
@@ -187,7 +218,7 @@ export const getUserAds = async (filters = {}) => {
 }
 
 /**
- * Загрузить фотографии для объявления
+ * Загрузить фотографии для объявления через API
  */
 export const uploadAdPhotos = async (adId, files) => {
   const formData = new FormData()
@@ -195,16 +226,26 @@ export const uploadAdPhotos = async (adId, files) => {
     formData.append(`photos[${index}]`, file)
   })
   
-  return new Promise((resolve, reject) => {
-    router.post(`/ads/${adId}/photos`, formData, {
-      onSuccess: (page) => {
-        resolve(page)
+  try {
+    const response = await fetch(`/ads/${adId}/media/photos`, {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        'Accept': 'application/json'
       },
-      onError: (errors) => {
-        reject(errors)
-      }
+      body: formData
     })
-  })
+    
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.message || 'Ошибка загрузки фото')
+    }
+    
+    return await response.json()
+  } catch (error) {
+    console.error('Ошибка загрузки фото:', error)
+    throw error
+  }
 }
 
 /**
@@ -227,9 +268,15 @@ export const deleteAdPhoto = async (adId, photoId) => {
  * Автосохранение черновика (без редиректа)
  */
 export const autosaveDraft = async (formData) => {
+  console.log('autosaveDraft called with formData:', formData)
+  console.log('autosaveDraft - formData.photos:', formData.photos)
+  
   try {
     // Подготавливаем данные для черновика
     const preparedData = prepareFormData(formData)
+    
+    console.log('autosaveDraft - preparedData.photos:', preparedData.photos)
+    console.log('autosaveDraft - sending to server:', JSON.stringify(preparedData))
     
     // Используем обычный fetch для автосохранения
     const response = await fetch('/ads/draft', {
@@ -257,6 +304,23 @@ export const autosaveDraft = async (formData) => {
  * Подготовить данные формы для отправки
  */
 export const prepareFormData = (form) => {
+  console.log('prepareFormData - input form:', form)
+  console.log('prepareFormData - form.photos:', form.photos)
+  
+  // Дополнительная отладка для фото
+  if (form.photos && Array.isArray(form.photos)) {
+    console.log('prepareFormData - photos count:', form.photos.length)
+    form.photos.forEach((photo, index) => {
+      console.log(`Photo ${index}:`, {
+        hasId: !!photo.id,
+        hasFile: !!photo.file,
+        hasPreview: !!photo.preview,
+        fileName: photo.name,
+        size: photo.size
+      })
+    })
+  }
+  
   const data = {
     title: form.title || '',
     specialty: form.specialty || '',
@@ -290,8 +354,11 @@ export const prepareFormData = (form) => {
     gift: form.gift || '',
     address: form.address || '',
     travel_area: form.travel_area || '',
+    geo: form.geo || {},
     phone: form.phone || '',
     contact_method: form.contact_method || 'messages',
+    whatsapp: form.whatsapp || '',
+    telegram: form.telegram || '',
     
     // Физические параметры
     age: form.age || '',
@@ -311,8 +378,18 @@ export const prepareFormData = (form) => {
     schedule: form.schedule || {},
     schedule_notes: form.schedule_notes || '',
     
-    // Медиа
-    photos: Array.isArray(form.photos) ? form.photos : [],
+    // Медиа - отправляем только метаданные (без файлов и больших preview)
+    photos: Array.isArray(form.photos) ? form.photos.map(photo => ({
+      id: photo.id,
+      // Не отправляем большие base64 preview - они могут превышать лимиты
+      // preview: photo.preview,
+      name: photo.name,
+      size: photo.size,
+      rotation: photo.rotation || 0,
+      // Флаг что это новое фото
+      isNew: !photo.serverPath
+      // НЕ отправляем photo.file - это объект File, который не сериализуется в JSON
+    })) : [],
     // Видео - отправляем полную информацию (без файла)
     video: form.video ? {
       id: form.video.id,
@@ -326,6 +403,24 @@ export const prepareFormData = (form) => {
   
   // Для черновика оставляем все поля, даже пустые
   // Это позволит сохранить черновик даже с полностью пустой формой
+  
+  console.log('prepareFormData - output data:', data)
+  console.log('prepareFormData - data.photos:', data.photos)
+  console.log('prepareFormData - data.photos length:', data.photos ? data.photos.length : 0)
+  console.log('prepareFormData - data.photos JSON:', JSON.stringify(data.photos))
+  
+  // Детальная проверка первого фото
+  if (data.photos && data.photos.length > 0) {
+    console.log('prepareFormData - first photo details:', {
+      id: data.photos[0].id,
+      hasPreview: !!data.photos[0].preview,
+      previewLength: data.photos[0].preview ? data.photos[0].preview.length : 0,
+      name: data.photos[0].name,
+      size: data.photos[0].size,
+      rotation: data.photos[0].rotation
+    })
+  }
+  
   return data
 } 
 

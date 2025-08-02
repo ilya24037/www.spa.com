@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
       "Bash(find:*)",
@@ -38,7 +39,10 @@
       "Bash(grep:*)",
       "Bash(curl:*)",
       "Bash(composer:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run dev:*)",
+      "Bash(Get-Content \"C:\\www.spa.com\\storage\\logs\\laravel.log\" -Tail 50)"
     ],
     "deny": []
   }

@@ -376,4 +376,15 @@ Route::middleware('auth')->group(function () {
     Route::put('/ads/{ad}', [AdController::class, 'update'])->name('ads.update');
     Route::delete('/ads/{ad}', [AdController::class, 'destroy'])->name('ads.destroy');
     Route::patch('/ads/{ad}/status', [AdController::class, 'toggleStatus'])->name('ads.toggle-status');
+    
+    // Маршруты для работы с медиа объявлений
+    Route::prefix('ads/{ad}/media')->name('ads.media.')->group(function () {
+        Route::get('/', [App\Application\Http\Controllers\Ad\AdMediaController::class, 'getMediaInfo'])->name('info');
+        Route::post('/photos', [App\Application\Http\Controllers\Ad\AdMediaController::class, 'uploadPhotos'])->name('photos.upload');
+        Route::post('/photo', [App\Application\Http\Controllers\Ad\AdMediaController::class, 'uploadPhoto'])->name('photo.upload');
+        Route::delete('/photo', [App\Application\Http\Controllers\Ad\AdMediaController::class, 'deletePhoto'])->name('photo.delete');
+        Route::post('/photos/reorder', [App\Application\Http\Controllers\Ad\AdMediaController::class, 'reorderPhotos'])->name('photos.reorder');
+        Route::post('/video', [App\Application\Http\Controllers\Ad\AdMediaController::class, 'uploadVideo'])->name('video.upload');
+        Route::delete('/video', [App\Application\Http\Controllers\Ad\AdMediaController::class, 'deleteVideo'])->name('video.delete');
+    });
 });

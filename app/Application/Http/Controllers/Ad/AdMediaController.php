@@ -2,29 +2,29 @@
 
 namespace App\Application\Http\Controllers\Ad;
 
-use App\Http\Controllers\Controller;
-use App\Models\Ad;
-use App\Services\MediaProcessingService;
+use App\Application\Http\Controllers\Controller;
+use App\Domain\Ad\Models\Ad;
+use App\Domain\Ad\Services\AdMediaService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\JsonResponse;
 
 /**
  * Контроллер для работы с медиа-файлами объявлений
- * Управляет загрузкой и удалением фото/видео
+ * Использует AdMediaService для всех операций с медиа
  */
 class AdMediaController extends Controller
 {
-    private MediaProcessingService $mediaService;
+    private AdMediaService $adMediaService;
     
-    public function __construct(MediaProcessingService $mediaService)
+    public function __construct(AdMediaService $adMediaService)
     {
-        $this->mediaService = $mediaService;
+        $this->adMediaService = $adMediaService;
     }
 
     /**
      * Загрузить фотографии для объявления
      */
-    public function uploadPhotos(Request $request, Ad $ad)
+    public function uploadPhotos(Request $request, Ad $ad): JsonResponse
     {
         $this->authorize('update', $ad);
         
@@ -33,226 +33,113 @@ class AdMediaController extends Controller
             'photos.*' => 'required|image|max:10240' // 10MB
         ]);
         
-        try {
-            $uploadedPhotos = [];
-            
-            foreach ($request->file('photos') as $photo) {
-                $path = $photo->store('ads/' . $ad->id . '/photos', 'public');
-                
-                $uploadedPhotos[] = [
-                    'url' => Storage::url($path),
-                    'path' => $path,
-                    'size' => $photo->getSize(),
-                    'name' => $photo->getClientOriginalName()
-                ];
-            }
-            
-            // Добавляем к существующим фото
-            $currentPhotos = $ad->media ? $ad->media->photos : [];
-            $allPhotos = array_merge($currentPhotos, $uploadedPhotos);
-            
-            // Обновляем медиа объявления
-            if ($ad->media) {
-                $ad->media->update(['photos' => $allPhotos]);
-            } else {
-                $ad->media()->create(['photos' => $allPhotos]);
-            }
-            
-            return response()->json([
-                'success' => true,
-                'photos' => $uploadedPhotos,
-                'message' => 'Фотографии успешно загружены'
-            ]);
-            
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Ошибка при загрузке фотографий: ' . $e->getMessage()
-            ], 500);
-        }
+        $result = $this->adMediaService->addMultiplePhotos($ad, $request->file('photos'));
+        
+        return response()->json($result, $result['success'] ? 200 : 422);
+    }
+
+    /**
+     * Загрузить одну фотографию
+     */
+    public function uploadPhoto(Request $request, Ad $ad): JsonResponse
+    {
+        $this->authorize('update', $ad);
+        
+        $request->validate([
+            'photo' => 'required|image|max:10240' // 10MB
+        ]);
+        
+        $result = $this->adMediaService->addPhoto($ad, $request->file('photo'));
+        
+        return response()->json($result, $result['success'] ? 200 : 422);
     }
 
     /**
      * Удалить фотографию
      */
-    public function deletePhoto(Request $request, Ad $ad)
+    public function deletePhoto(Request $request, Ad $ad): JsonResponse
     {
         $this->authorize('update', $ad);
         
         $request->validate([
-            'photo_index' => 'required|integer|min:0'
+            'photo_id' => 'required|string'
         ]);
         
-        try {
-            if (!$ad->media || empty($ad->media->photos)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Фотографии не найдены'
-                ], 404);
-            }
-            
-            $photos = $ad->media->photos;
-            $photoIndex = $request->photo_index;
-            
-            if (!isset($photos[$photoIndex])) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Фотография не найдена'
-                ], 404);
-            }
-            
-            // Удаляем файл
-            if (isset($photos[$photoIndex]['path'])) {
-                Storage::disk('public')->delete($photos[$photoIndex]['path']);
-            }
-            
-            // Удаляем из массива
-            array_splice($photos, $photoIndex, 1);
-            
-            // Обновляем медиа
-            $ad->media->update(['photos' => $photos]);
-            
-            return response()->json([
-                'success' => true,
-                'message' => 'Фотография удалена'
-            ]);
-            
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Ошибка при удалении фотографии: ' . $e->getMessage()
-            ], 500);
-        }
+        $success = $this->adMediaService->removePhoto($ad, $request->photo_id);
+        
+        return response()->json([
+            'success' => $success,
+            'message' => $success ? 'Фотография удалена' : 'Фотография не найдена'
+        ], $success ? 200 : 404);
     }
 
     /**
      * Изменить порядок фотографий
      */
-    public function reorderPhotos(Request $request, Ad $ad)
+    public function reorderPhotos(Request $request, Ad $ad): JsonResponse
     {
         $this->authorize('update', $ad);
         
         $request->validate([
-            'photo_order' => 'required|array',
-            'photo_order.*' => 'integer|min:0'
+            'photo_ids' => 'required|array',
+            'photo_ids.*' => 'string'
         ]);
         
-        try {
-            if (!$ad->media || empty($ad->media->photos)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Фотографии не найдены'
-                ], 404);
-            }
-            
-            $photos = $ad->media->photos;
-            $newOrder = $request->photo_order;
-            $reorderedPhotos = [];
-            
-            // Переупорядочиваем фотографии
-            foreach ($newOrder as $oldIndex) {
-                if (isset($photos[$oldIndex])) {
-                    $reorderedPhotos[] = $photos[$oldIndex];
-                }
-            }
-            
-            // Обновляем медиа
-            $ad->media->update(['photos' => $reorderedPhotos]);
-            
-            return response()->json([
-                'success' => true,
-                'message' => 'Порядок фотографий изменен'
-            ]);
-            
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Ошибка при изменении порядка: ' . $e->getMessage()
-            ], 500);
-        }
+        $success = $this->adMediaService->reorderPhotos($ad, $request->photo_ids);
+        
+        return response()->json([
+            'success' => $success,
+            'message' => $success ? 'Порядок фотографий изменен' : 'Ошибка при изменении порядка'
+        ]);
     }
 
     /**
      * Загрузить видео для объявления
      */
-    public function uploadVideo(Request $request, Ad $ad)
+    public function uploadVideo(Request $request, Ad $ad): JsonResponse
     {
         $this->authorize('update', $ad);
         
         $request->validate([
-            'video' => 'required|file|mimetypes:video/mp4,video/webm|max:102400' // 100MB
+            'video' => 'required|file|mimetypes:video/mp4,video/webm,video/avi|max:102400' // 100MB
         ]);
         
-        try {
-            $video = $request->file('video');
-            $path = $video->store('ads/' . $ad->id . '/videos', 'public');
-            
-            $videoData = [
-                'url' => Storage::url($path),
-                'path' => $path,
-                'size' => $video->getSize(),
-                'name' => $video->getClientOriginalName(),
-                'duration' => null // Можно добавить определение длительности
-            ];
-            
-            // Обновляем медиа объявления
-            if ($ad->media) {
-                $ad->media->update(['video' => [$videoData]]);
-            } else {
-                $ad->media()->create(['video' => [$videoData]]);
-            }
-            
-            return response()->json([
-                'success' => true,
-                'video' => $videoData,
-                'message' => 'Видео успешно загружено'
-            ]);
-            
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Ошибка при загрузке видео: ' . $e->getMessage()
-            ], 500);
-        }
+        $result = $this->adMediaService->setVideo($ad, $request->file('video'));
+        
+        return response()->json($result, $result['success'] ? 200 : 422);
     }
 
     /**
      * Удалить видео
      */
-    public function deleteVideo(Ad $ad)
+    public function deleteVideo(Ad $ad): JsonResponse
     {
         $this->authorize('update', $ad);
         
-        try {
-            if (!$ad->media || empty($ad->media->video)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Видео не найдено'
-                ], 404);
-            }
-            
-            $videos = $ad->media->video;
-            
-            // Удаляем файлы
-            foreach ($videos as $video) {
-                if (isset($video['path'])) {
-                    Storage::disk('public')->delete($video['path']);
-                }
-            }
-            
-            // Очищаем видео
-            $ad->media->update(['video' => []]);
-            
-            return response()->json([
-                'success' => true,
-                'message' => 'Видео удалено'
-            ]);
-            
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Ошибка при удалении видео: ' . $e->getMessage()
-            ], 500);
-        }
+        $success = $this->adMediaService->removeVideo($ad);
+        
+        return response()->json([
+            'success' => $success,
+            'message' => $success ? 'Видео удалено' : 'Ошибка при удалении видео'
+        ]);
+    }
+
+    /**
+     * Получить информацию о медиа объявления
+     */
+    public function getMediaInfo(Ad $ad): JsonResponse
+    {
+        $this->authorize('view', $ad);
+        
+        $stats = $this->adMediaService->getMediaStats($ad);
+        
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'photos' => $ad->photos ?? [],
+                'video' => $ad->video,
+                'stats' => $stats
+            ]
+        ]);
     }
 }

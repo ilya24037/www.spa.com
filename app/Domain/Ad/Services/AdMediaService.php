@@ -2,67 +2,67 @@
 
 namespace App\Domain\Ad\Services;
 
-use App\Models\Ad;
-use App\Models\AdMedia;
+use App\Domain\Ad\Models\Ad;
+use App\Domain\Media\Services\MediaService;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Intervention\Image\Facades\Image;
 
 /**
- * Сервис для работы с медиа объявлений
+ * Адаптер для работы с медиа объявлений
+ * Использует универсальный MediaService для обработки файлов
+ * Сохраняет данные в JSON поля таблицы ads
  */
 class AdMediaService
 {
-    private const MAX_PHOTOS = 20;
-    private const MAX_PHOTO_SIZE = 10 * 1024 * 1024; // 10MB
-    private const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100MB
+    private MediaService $mediaService;
     
-    private const ALLOWED_PHOTO_TYPES = ['jpg', 'jpeg', 'png', 'webp'];
-    private const ALLOWED_VIDEO_TYPES = ['mp4', 'webm', 'avi', 'mov'];
+    // Лимиты для объявлений
+    private const MAX_PHOTOS = 10;
+    private const MAX_VIDEOS = 1;
 
-    private const PHOTO_SIZES = [
-        'thumbnail' => [200, 200],
-        'medium' => [600, 600],
-        'large' => [1200, 1200],
-    ];
+    public function __construct(MediaService $mediaService)
+    {
+        $this->mediaService = $mediaService;
+    }
 
     /**
-     * Загрузить фото для объявления
+     * Обработать и добавить фото к объявлению
+     * Фото сохраняются в JSON поле photos таблицы ads
      */
-    public function uploadPhoto(Ad $ad, UploadedFile $file): array
+    public function addPhoto(Ad $ad, UploadedFile $file): array
     {
         try {
-            // Валидация файла
-            $this->validatePhotoFile($file);
+            // Проверяем лимит
+            $currentPhotos = $ad->photos ?? [];
+            if (count($currentPhotos) >= self::MAX_PHOTOS) {
+                throw new \InvalidArgumentException('Максимальное количество фото: ' . self::MAX_PHOTOS);
+            }
 
-            // Проверка лимита фотографий
-            $this->checkPhotoLimit($ad);
-
-            // Генерация уникального имени
-            $filename = $this->generateFilename($file);
-
-            // Сохранение оригинала и создание разных размеров
-            $paths = $this->processAndSavePhoto($file, $filename);
-
-            // Обновление медиа объявления
-            $this->addPhotoToAd($ad, $paths);
-
-            Log::info('Photo uploaded successfully', [
+            // Обрабатываем фото через MediaService
+            $photoData = $this->mediaService->processPhotoForStorage($file, 'ad');
+            
+            // Добавляем к существующим фото
+            $photos = $currentPhotos;
+            $photos[] = $photoData;
+            
+            // Сохраняем в базу
+            $ad->update(['photos' => $photos]);
+            
+            Log::info('Photo added to ad', [
                 'ad_id' => $ad->id,
-                'filename' => $filename,
-                'size' => $file->getSize()
+                'photo_id' => $photoData['id'],
+                'total_photos' => count($photos)
             ]);
 
             return [
                 'success' => true,
-                'paths' => $paths,
-                'message' => 'Фото успешно загружено'
+                'photo' => $photoData,
+                'message' => 'Фото успешно добавлено'
             ];
 
         } catch (\Exception $e) {
-            Log::error('Photo upload failed', [
+            Log::error('Failed to add photo to ad', [
                 'ad_id' => $ad->id,
                 'error' => $e->getMessage()
             ]);
@@ -75,352 +75,222 @@ class AdMediaService
     }
 
     /**
-     * Загрузить видео для объявления
+     * Добавить несколько фото к объявлению
      */
-    public function uploadVideo(Ad $ad, UploadedFile $file): array
+    public function addMultiplePhotos(Ad $ad, array $files): array
     {
-        try {
-            // Валидация файла
-            $this->validateVideoFile($file);
-
-            // Генерация уникального имени
-            $filename = $this->generateFilename($file);
-
-            // Сохранение видео
-            $path = $this->saveVideo($file, $filename);
-
-            // Обновление медиа объявления
-            $this->setVideoForAd($ad, [
-                'id' => Str::random(10),
-                'filename' => $filename,
-                'path' => $path,
-                'url' => Storage::url($path),
-                'size' => $file->getSize(),
-                'type' => $file->getMimeType(),
-                'name' => $file->getClientOriginalName()
-            ]);
-
-            Log::info('Video uploaded successfully', [
-                'ad_id' => $ad->id,
-                'filename' => $filename,
-                'size' => $file->getSize()
-            ]);
-
-            return [
-                'success' => true,
-                'video' => [
-                    'filename' => $filename,
-                    'url' => Storage::url($path)
-                ],
-                'message' => 'Видео успешно загружено'
-            ];
-
-        } catch (\Exception $e) {
-            Log::error('Video upload failed', [
-                'ad_id' => $ad->id,
-                'error' => $e->getMessage()
-            ]);
-
-            return [
-                'success' => false,
-                'error' => $e->getMessage()
-            ];
-        }
-    }
-
-    /**
-     * Удалить фото объявления
-     */
-    public function deletePhoto(Ad $ad, int $photoIndex): bool
-    {
-        try {
-            $media = $ad->media;
-            
-            if (!$media || empty($media->photos)) {
-                return false;
-            }
-
-            $photos = $media->photos;
-            
-            if (!isset($photos[$photoIndex])) {
-                return false;
-            }
-
-            // Удаляем файлы с диска
-            $photoPath = $photos[$photoIndex];
-            $this->deletePhotoFiles($photoPath);
-
-            // Удаляем из массива
-            $media->removePhoto($photoIndex);
-
-            Log::info('Photo deleted successfully', [
-                'ad_id' => $ad->id,
-                'photo_index' => $photoIndex
-            ]);
-
-            return true;
-
-        } catch (\Exception $e) {
-            Log::error('Photo deletion failed', [
-                'ad_id' => $ad->id,
-                'photo_index' => $photoIndex,
-                'error' => $e->getMessage()
-            ]);
-
-            return false;
-        }
-    }
-
-    /**
-     * Удалить видео объявления
-     */
-    public function deleteVideo(Ad $ad): bool
-    {
-        try {
-            $media = $ad->media;
-            
-            if (!$media || !$media->hasVideo()) {
-                return false;
-            }
-
-            // Удаляем файл с диска
-            $video = $media->video;
-            if (isset($video['path'])) {
-                Storage::delete($video['path']);
-            }
-
-            // Очищаем в базе
-            $media->video = null;
-            $media->save();
-
-            Log::info('Video deleted successfully', [
-                'ad_id' => $ad->id
-            ]);
-
-            return true;
-
-        } catch (\Exception $e) {
-            Log::error('Video deletion failed', [
-                'ad_id' => $ad->id,
-                'error' => $e->getMessage()
-            ]);
-
-            return false;
-        }
-    }
-
-    /**
-     * Обновить настройки медиа
-     */
-    public function updateMediaSettings(Ad $ad, array $settings): bool
-    {
-        try {
-            $media = $ad->media ?? new AdMedia(['ad_id' => $ad->id]);
-
-            if (isset($settings['show_photos_in_gallery'])) {
-                $media->show_photos_in_gallery = (bool) $settings['show_photos_in_gallery'];
-            }
-
-            if (isset($settings['allow_download_photos'])) {
-                $media->allow_download_photos = (bool) $settings['allow_download_photos'];
-            }
-
-            if (isset($settings['watermark_photos'])) {
-                $media->watermark_photos = (bool) $settings['watermark_photos'];
-            }
-
-            $media->save();
-
-            return true;
-
-        } catch (\Exception $e) {
-            Log::error('Media settings update failed', [
-                'ad_id' => $ad->id,
-                'error' => $e->getMessage()
-            ]);
-
-            return false;
-        }
-    }
-
-    /**
-     * Валидация фото файла
-     */
-    private function validatePhotoFile(UploadedFile $file): void
-    {
-        // Проверка размера
-        if ($file->getSize() > self::MAX_PHOTO_SIZE) {
-            throw new \InvalidArgumentException('Размер фото не должен превышать 10MB');
-        }
-
-        // Проверка типа
-        $extension = strtolower($file->getClientOriginalExtension());
-        if (!in_array($extension, self::ALLOWED_PHOTO_TYPES)) {
-            throw new \InvalidArgumentException('Разрешены только файлы: ' . implode(', ', self::ALLOWED_PHOTO_TYPES));
-        }
-
-        // Проверка что это действительно изображение
-        if (!$file->isValid() || !getimagesize($file->getPathname())) {
-            throw new \InvalidArgumentException('Файл не является корректным изображением');
-        }
-    }
-
-    /**
-     * Валидация видео файла
-     */
-    private function validateVideoFile(UploadedFile $file): void
-    {
-        // Проверка размера
-        if ($file->getSize() > self::MAX_VIDEO_SIZE) {
-            throw new \InvalidArgumentException('Размер видео не должен превышать 100MB');
-        }
-
-        // Проверка типа
-        $extension = strtolower($file->getClientOriginalExtension());
-        if (!in_array($extension, self::ALLOWED_VIDEO_TYPES)) {
-            throw new \InvalidArgumentException('Разрешены только видео файлы: ' . implode(', ', self::ALLOWED_VIDEO_TYPES));
-        }
-
-        if (!$file->isValid()) {
-            throw new \InvalidArgumentException('Файл не является корректным видео');
-        }
-    }
-
-    /**
-     * Проверка лимита фотографий
-     */
-    private function checkPhotoLimit(Ad $ad): void
-    {
-        $media = $ad->media;
+        $results = [];
+        $successCount = 0;
+        $allPhotos = [];
         
-        if ($media && $media->getPhotosCountAttribute() >= self::MAX_PHOTOS) {
-            throw new \InvalidArgumentException('Максимальное количество фото: ' . self::MAX_PHOTOS);
+        foreach ($files as $file) {
+            if ($file instanceof UploadedFile) {
+                $result = $this->addPhoto($ad, $file);
+                if ($result['success']) {
+                    $successCount++;
+                    $allPhotos[] = $result['photo'];
+                }
+                $results[] = $result;
+            }
         }
-    }
-
-    /**
-     * Генерация уникального имени файла
-     */
-    private function generateFilename(UploadedFile $file): string
-    {
-        $extension = $file->getClientOriginalExtension();
-        return 'ad_' . time() . '_' . Str::random(10) . '.' . $extension;
-    }
-
-    /**
-     * Обработка и сохранение фото в разных размерах
-     */
-    private function processAndSavePhoto(UploadedFile $file, string $filename): array
-    {
-        $paths = [];
-        $basePath = 'public/ads/photos';
-
-        // Создание разных размеров
-        foreach (self::PHOTO_SIZES as $sizeName => [$width, $height]) {
-            $image = Image::make($file);
-            
-            // Изменение размера с сохранением пропорций
-            $image->fit($width, $height, function ($constraint) {
-                $constraint->upsize();
-            });
-
-            // Оптимизация качества
-            $quality = $sizeName === 'thumbnail' ? 80 : 90;
-            $image->encode('jpg', $quality);
-
-            // Путь для сохранения
-            $sizePath = $basePath . '/' . $sizeName . '/' . $filename;
-            
-            // Сохранение
-            Storage::put($sizePath, $image->stream());
-            
-            $paths[$sizeName] = $sizePath;
-        }
-
-        return $paths;
-    }
-
-    /**
-     * Сохранение видео
-     */
-    private function saveVideo(UploadedFile $file, string $filename): string
-    {
-        $path = 'public/ads/videos/' . $filename;
         
-        Storage::putFileAs('public/ads/videos', $file, $filename);
+        // Перезагружаем объявление для получения всех фото
+        $ad->refresh();
         
-        return $path;
-    }
-
-    /**
-     * Добавление фото к объявлению
-     */
-    private function addPhotoToAd(Ad $ad, array $paths): void
-    {
-        $media = $ad->media ?? new AdMedia(['ad_id' => $ad->id]);
-
-        // Используем URL среднего размера для основного массива
-        $photoUrl = Storage::url($paths['medium']);
-        $media->addPhoto($photoUrl);
-    }
-
-    /**
-     * Установка видео для объявления
-     */
-    private function setVideoForAd(Ad $ad, array $videoData): void
-    {
-        $media = $ad->media ?? new AdMedia(['ad_id' => $ad->id]);
-        
-        $media->video = $videoData;
-        $media->save();
-    }
-
-    /**
-     * Удаление файлов фото всех размеров
-     */
-    private function deletePhotoFiles(string $photoUrl): void
-    {
-        // Получаем базовое имя файла из URL
-        $filename = basename($photoUrl);
-        
-        // Удаляем все размеры
-        foreach (array_keys(self::PHOTO_SIZES) as $sizeName) {
-            $path = 'public/ads/photos/' . $sizeName . '/' . $filename;
-            Storage::delete($path);
-        }
-    }
-
-    /**
-     * Получить статистику по медиа
-     */
-    public function getMediaStats(): array
-    {
         return [
-            'total_photos' => AdMedia::whereNotNull('photos')
-                ->where('photos', '!=', '[]')
-                ->count(),
-            'total_videos' => AdMedia::whereNotNull('video')
-                ->where('video', '!=', '[]')
-                ->count(),
-            'disk_usage' => [
-                'photos' => $this->calculateDirectorySize('public/ads/photos'),
-                'videos' => $this->calculateDirectorySize('public/ads/videos'),
-            ]
+            'success' => $successCount > 0,
+            'added' => $successCount,
+            'total' => count($files),
+            'results' => $results,
+            'photos' => $ad->photos ?? [] // Возвращаем все фото объявления
         ];
     }
 
     /**
-     * Рассчитать размер директории
+     * Удалить фото из объявления
      */
-    private function calculateDirectorySize(string $directory): int
+    public function removePhoto(Ad $ad, string $photoId): bool
     {
-        $size = 0;
-        $files = Storage::allFiles($directory);
-        
-        foreach ($files as $file) {
-            $size += Storage::size($file);
+        try {
+            $photos = $ad->photos ?? [];
+            $photoToDelete = null;
+            $newPhotos = [];
+            
+            // Находим и удаляем фото
+            foreach ($photos as $photo) {
+                if (isset($photo['id']) && $photo['id'] === $photoId) {
+                    $photoToDelete = $photo;
+                } else {
+                    $newPhotos[] = $photo;
+                }
+            }
+            
+            if (!$photoToDelete) {
+                return false;
+            }
+            
+            // Удаляем файлы из хранилища
+            $this->mediaService->deletePhotoFromStorage($photoToDelete);
+            
+            // Обновляем в базе
+            $ad->update(['photos' => $newPhotos]);
+            
+            Log::info('Photo removed from ad', [
+                'ad_id' => $ad->id,
+                'photo_id' => $photoId,
+                'remaining_photos' => count($newPhotos)
+            ]);
+            
+            return true;
+            
+        } catch (\Exception $e) {
+            Log::error('Failed to remove photo from ad', [
+                'ad_id' => $ad->id,
+                'photo_id' => $photoId,
+                'error' => $e->getMessage()
+            ]);
+            
+            return false;
         }
+    }
+
+    /**
+     * Изменить порядок фото
+     */
+    public function reorderPhotos(Ad $ad, array $photoIds): bool
+    {
+        try {
+            $photos = $ad->photos ?? [];
+            $reorderedPhotos = [];
+            
+            // Переупорядочиваем согласно новому порядку
+            foreach ($photoIds as $photoId) {
+                foreach ($photos as $photo) {
+                    if (isset($photo['id']) && $photo['id'] === $photoId) {
+                        $reorderedPhotos[] = $photo;
+                        break;
+                    }
+                }
+            }
+            
+            // Добавляем фото, которых не было в списке (на всякий случай)
+            foreach ($photos as $photo) {
+                if (isset($photo['id']) && !in_array($photo['id'], $photoIds)) {
+                    $reorderedPhotos[] = $photo;
+                }
+            }
+            
+            // Сохраняем
+            $ad->update(['photos' => $reorderedPhotos]);
+            
+            return true;
+            
+        } catch (\Exception $e) {
+            Log::error('Failed to reorder photos', [
+                'ad_id' => $ad->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return false;
+        }
+    }
+
+    /**
+     * Обработать и установить видео для объявления
+     */
+    public function setVideo(Ad $ad, UploadedFile $file): array
+    {
+        try {
+            // Для видео используем аналогичный подход (пока заглушка)
+            // TODO: Реализовать обработку видео через VideoProcessor
+            
+            $videoData = [
+                'id' => Str::uuid()->toString(),
+                'filename' => $file->getClientOriginalName(),
+                'size' => $file->getSize(),
+                'mime_type' => $file->getMimeType(),
+                'uploaded_at' => now()->toIso8601String()
+            ];
+            
+            $ad->update(['video' => $videoData]);
+            
+            return [
+                'success' => true,
+                'video' => $videoData,
+                'message' => 'Видео успешно добавлено'
+            ];
+            
+        } catch (\Exception $e) {
+            Log::error('Failed to set video for ad', [
+                'ad_id' => $ad->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return [
+                'success' => false,
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Удалить видео из объявления
+     */
+    public function removeVideo(Ad $ad): bool
+    {
+        try {
+            // TODO: Удалить файлы видео из хранилища
+            
+            $ad->update(['video' => null]);
+            
+            Log::info('Video removed from ad', ['ad_id' => $ad->id]);
+            
+            return true;
+            
+        } catch (\Exception $e) {
+            Log::error('Failed to remove video from ad', [
+                'ad_id' => $ad->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return false;
+        }
+    }
+
+    /**
+     * Получить статистику медиа для объявления
+     */
+    public function getMediaStats(Ad $ad): array
+    {
+        $photos = $ad->photos ?? [];
+        $video = $ad->video;
         
-        return $size;
+        return [
+            'photos_count' => count($photos),
+            'has_video' => !empty($video),
+            'can_add_photos' => count($photos) < self::MAX_PHOTOS,
+            'photos_limit' => self::MAX_PHOTOS,
+            'videos_limit' => self::MAX_VIDEOS
+        ];
+    }
+
+    /**
+     * Синхронизировать фото из фронтенда
+     * Используется при сохранении формы с уже загруженными фото
+     */
+    public function syncPhotos(Ad $ad, array $photosData): void
+    {
+        // Фильтруем только валидные данные о фото
+        $validPhotos = array_filter($photosData, function ($photo) {
+            return is_array($photo) && isset($photo['id']);
+        });
+        
+        // Сохраняем
+        $ad->update(['photos' => array_values($validPhotos)]);
+        
+        Log::info('Photos synced for ad', [
+            'ad_id' => $ad->id,
+            'photos_count' => count($validPhotos)
+        ]);
     }
 }

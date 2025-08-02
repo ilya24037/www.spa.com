@@ -196,4 +196,54 @@ class ImageProcessor
         // Легкая резкость
         $image->sharpen(10);
     }
+
+    /**
+     * Валидировать файл изображения (публичный метод для использования в MediaService)
+     */
+    public function validatePhotoFilePublic(UploadedFile $file): void
+    {
+        $this->validatePhotoFile($file);
+    }
+
+    /**
+     * Обработать и сохранить изображение в нескольких размерах для объявлений
+     */
+    public function processAndSaveMultipleSizes(UploadedFile $file, string $filename, string $context = 'ad'): array
+    {
+        $paths = [];
+        $basePath = "public/{$context}s/photos";
+        
+        // Размеры для объявлений
+        $sizes = [
+            'thumbnail' => [200, 200],
+            'medium' => [600, 600],
+            'large' => [1200, 1200],
+            'original' => null // Оригинал без изменения размера
+        ];
+        
+        foreach ($sizes as $sizeName => $dimensions) {
+            $image = Image::make($file->getRealPath());
+            
+            if ($dimensions !== null) {
+                // Изменяем размер с сохранением пропорций
+                $image->fit($dimensions[0], $dimensions[1], function ($constraint) {
+                    $constraint->upsize();
+                });
+            }
+            
+            // Оптимизация качества
+            $quality = $sizeName === 'thumbnail' ? 80 : 90;
+            $image->encode('jpg', $quality);
+            
+            // Путь для сохранения
+            $sizePath = "{$basePath}/{$sizeName}/{$filename}";
+            
+            // Сохраняем
+            Storage::put($sizePath, $image->stream());
+            
+            $paths[$sizeName] = $sizePath;
+        }
+        
+        return $paths;
+    }
 }

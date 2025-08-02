@@ -30,7 +30,7 @@ class AdController extends Controller
         'experience', 'features', 'additional_features',
         'description', 'price', 'price_unit', 'is_starting_price',
         'contacts_per_hour', 'express_price', 'price_per_hour', 'outcall_price', 
-        'price_two_hours', 'price_night', 'min_duration', 'discount', 'gift', 'address', 'travel_area',
+        'price_two_hours', 'price_night', 'min_duration', 'discount', 'gift', 'address', 'travel_area', 'geo',
         'phone', 'contact_method', 'whatsapp', 'telegram', 'age', 'height',
         'weight', 'breast_size', 'hair_color', 'eye_color', 'appearance',
         'nationality', 'has_girlfriend', 'services', 'services_additional_info',
@@ -83,6 +83,13 @@ class AdController extends Controller
             // Получаем только разрешенные поля
             $data = $request->only(self::ALLOWED_FIELDS);
             
+            // ОТЛАДКА: Проверяем photos в контроллере
+            \Log::info('AdController::storeDraft - photos data:', [
+                'photos_in_request' => $request->photos,
+                'photos_in_data' => $data['photos'] ?? 'NOT IN DATA',
+                'all_data_keys' => array_keys($data)
+            ]);
+            
             // Создаем объявление в статусе черновика
             $ad = $this->adService->createDraft($data, Auth::user());
             
@@ -126,9 +133,29 @@ class AdController extends Controller
                 return back()->withErrors(['error' => 'Можно редактировать только черновики']);
             }
             
+            // ДЕТАЛЬНАЯ ОТЛАДКА запроса
+            \Log::info('AdController::updateDraft - REQUEST DEBUG:', [
+                'ad_id' => $ad->id,
+                'method' => $request->method(),
+                'content_type' => $request->header('Content-Type'),
+                'is_json' => $request->isJson(),
+                'all_input' => $request->all(),
+                'input_photos' => $request->input('photos'),
+                'has_photos_key' => $request->has('photos'),
+                'raw_content_length' => strlen($request->getContent()),
+                'raw_content_preview' => substr($request->getContent(), 0, 500)
+            ]);
+            
             // Получаем только разрешенные поля
             $data = $request->only(self::ALLOWED_FIELDS);
             
+            // ОТЛАДКА: Проверяем photos в контроллере UPDATE
+            \Log::info('AdController::updateDraft - photos data:', [
+                'ad_id' => $ad->id,
+                'photos_in_request' => $request->photos,
+                'photos_in_data' => $data['photos'] ?? 'NOT IN DATA',
+                'all_data_keys' => array_keys($data)
+            ]);
 
             
             // Обновляем существующий черновик
@@ -358,12 +385,15 @@ class AdController extends Controller
         $jsonFields = [
             'clients', 'service_location', 'outcall_locations', 'service_provider', 
             'is_starting_price', 'photos', 'video', 'features', 'pricing_data', 
-            'services', 'schedule'
+            'services', 'schedule', 'geo'
         ];
         
         foreach ($jsonFields as $field) {
             if (isset($adData[$field]) && is_string($adData[$field])) {
                 $adData[$field] = json_decode($adData[$field], true) ?? [];
+            } elseif (!isset($adData[$field]) || $adData[$field] === null) {
+                // Обеспечиваем что JSON поля всегда массивы/объекты, а не null
+                $adData[$field] = [];
             }
         }
         

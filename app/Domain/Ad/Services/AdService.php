@@ -4,8 +4,9 @@ namespace App\Domain\Ad\Services;
 
 use App\Domain\Ad\Models\Ad;
 use App\Domain\Ad\Models\AdPricing;
-use App\Domain\Ad\Models\AdMedia;
+// use App\Domain\Ad\Models\AdMedia; // Не используется - медиа хранится в основной таблице
 use App\Domain\Ad\Repositories\AdRepository;
+use App\Domain\Ad\Services\AdMediaService;
 use App\Domain\User\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -16,10 +17,14 @@ use Illuminate\Support\Facades\Log;
 class AdService
 {
     private AdRepository $adRepository;
+    private AdMediaService $adMediaService;
 
-    public function __construct(AdRepository $adRepository)
-    {
+    public function __construct(
+        AdRepository $adRepository,
+        AdMediaService $adMediaService
+    ) {
         $this->adRepository = $adRepository;
+        $this->adMediaService = $adMediaService;
     }
 
     /**
@@ -67,7 +72,12 @@ class AdService
                 $this->createAdComponents($ad, $data);
             }
             
-            Log::info('Draft ad created', ['ad_id' => $ad->id, 'user_id' => $user->id]);
+            Log::info('Draft ad created', [
+                'ad_id' => $ad->id, 
+                'user_id' => $user->id,
+                'photos_saved' => $ad->photos,
+                'photos_count' => is_array($ad->photos) ? count($ad->photos) : 0
+            ]);
             
             return $ad;
         });
@@ -205,6 +215,8 @@ class AdService
      */
     private function prepareMainAdData(array $data): array
     {
+
+        
         $prepared = [];
         
         // Основные поля объявления
@@ -230,7 +242,7 @@ class AdService
         // JSON поля в основной таблице
         $jsonFields = [
             'clients', 'service_location', 'outcall_locations', 'service_provider', 'features', 'services',
-            'schedule' // Добавлено поле расписания
+            'schedule', 'geo', 'photos', 'video' // Добавлены поля медиа
         ];
         
         foreach ($jsonFields as $field) {
@@ -238,12 +250,25 @@ class AdService
                 $prepared[$field] = is_array($data[$field]) 
                     ? json_encode($data[$field]) 
                     : $data[$field];
+                    
+                // ОТЛАДКА: Специально для photos
+                if ($field === 'photos') {
+                    \Log::info('AdService PHOTOS processing:', [
+                        'field' => $field,
+                        'original' => $data[$field],
+                        'prepared' => $prepared[$field],
+                        'is_array' => is_array($data[$field])
+                    ]);
+                }
             }
         }
         
         // Булевы поля
-        if (isset($data['has_girlfriend'])) {
-            $prepared['has_girlfriend'] = (bool) $data['has_girlfriend'];
+        $booleanFields = ['has_girlfriend', 'show_photos_in_gallery', 'allow_download_photos', 'watermark_photos'];
+        foreach ($booleanFields as $field) {
+            if (isset($data[$field])) {
+                $prepared[$field] = (bool) $data[$field];
+            }
         }
         
         return $prepared;
@@ -263,8 +288,11 @@ class AdService
         // Создаем расписание - закомментировано, т.к. расписание хранится в основной таблице
         // $this->createAdSchedule($ad, $data);
         
-        // Создаем медиа
-        $this->createAdMedia($ad, $data);
+        // Медиа теперь хранится в основной таблице ads через prepareMainAdData
+        // Но если есть фото, синхронизируем их через AdMediaService для валидации
+        if (isset($data['photos']) && is_array($data['photos'])) {
+            $this->adMediaService->syncPhotos($ad, $data['photos']);
+        }
     }
     
     /**
@@ -293,11 +321,10 @@ class AdService
         //     $this->createAdSchedule($ad, $data);
         // }
         
-        // Обновляем медиа
-        if ($ad->media) {
-            $this->updateAdMedia($ad->media, $data);
-        } else {
-            $this->createAdMedia($ad, $data);
+        // Медиа теперь хранится в основной таблице ads через prepareMainAdData
+        // Но если есть фото, синхронизируем их через AdMediaService для валидации
+        if (isset($data['photos']) && is_array($data['photos'])) {
+            $this->adMediaService->syncPhotos($ad, $data['photos']);
         }
     }
     
@@ -438,46 +465,48 @@ class AdService
         }
     }
     
-    /**
-     * Создать медиа объявления
-     */
-    private function createAdMedia(Ad $ad, array $data): void
-    {
-        $mediaData = [];
-        
-        $mediaFields = ['photos', 'video', 'show_photos_in_gallery', 'allow_download_photos', 'watermark_photos'];
-        
-        foreach ($mediaFields as $field) {
-            if (isset($data[$field])) {
-                $mediaData[$field] = $data[$field];
-            }
-        }
-        
-        if (!empty($mediaData)) {
-            $mediaData['ad_id'] = $ad->id;
-            AdMedia::create($mediaData);
-        }
-    }
+    // /**
+    //  * Создать медиа объявления - УСТАРЕЛО
+    //  * Медиа теперь хранится в основной таблице ads
+    //  */
+    // private function createAdMedia(Ad $ad, array $data): void
+    // {
+    //     $mediaData = [];
+    //     
+    //     $mediaFields = ['photos', 'video', 'show_photos_in_gallery', 'allow_download_photos', 'watermark_photos'];
+    //     
+    //     foreach ($mediaFields as $field) {
+    //         if (isset($data[$field])) {
+    //             $mediaData[$field] = $data[$field];
+    //         }
+    //     }
+    //     
+    //     if (!empty($mediaData)) {
+    //         $mediaData['ad_id'] = $ad->id;
+    //         AdMedia::create($mediaData);
+    //     }
+    // }
     
-    /**
-     * Обновить медиа объявления
-     */
-    private function updateAdMedia(AdMedia $media, array $data): void
-    {
-        $mediaData = [];
-        
-        $mediaFields = ['photos', 'video', 'show_photos_in_gallery', 'allow_download_photos', 'watermark_photos'];
-        
-        foreach ($mediaFields as $field) {
-            if (isset($data[$field])) {
-                $mediaData[$field] = $data[$field];
-            }
-        }
-        
-        if (!empty($mediaData)) {
-            $media->update($mediaData);
-        }
-    }
+    // /**
+    //  * Обновить медиа объявления - УСТАРЕЛО
+    //  * Медиа теперь хранится в основной таблице ads
+    //  */
+    // private function updateAdMedia(AdMedia $media, array $data): void
+    // {
+    //     $mediaData = [];
+    //     
+    //     $mediaFields = ['photos', 'video', 'show_photos_in_gallery', 'allow_download_photos', 'watermark_photos'];
+    //     
+    //     foreach ($mediaFields as $field) {
+    //         if (isset($data[$field])) {
+    //             $mediaData[$field] = $data[$field];
+    //         }
+    //     }
+    //     
+    //     if (!empty($mediaData)) {
+    //         $media->update($mediaData);
+    //     }
+    // }
     
     /**
      * Удалить компоненты объявления

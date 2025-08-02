@@ -7,6 +7,8 @@ use App\Models\MasterPhoto;
 use App\Models\MasterVideo;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 /**
  * Основной сервис для работы с медиа
@@ -143,6 +145,71 @@ class MediaService
         $videosSize = $master->videos()->sum('file_size');
         
         return $photosSize + $videosSize;
+    }
+
+    /**
+     * Универсальный метод для обработки фото (для объявлений)
+     * Возвращает массив с данными о фото для сохранения в JSON
+     */
+    public function processPhotoForStorage(UploadedFile $file, string $context = 'ad'): array
+    {
+        // Валидация
+        $this->imageProcessor->validatePhotoFilePublic($file);
+        
+        // Генерация уникального имени
+        $filename = $this->generateUniqueFilename($file);
+        
+        // Обработка и сохранение разных размеров
+        $paths = $this->imageProcessor->processAndSaveMultipleSizes($file, $filename, $context);
+        
+        // Возвращаем данные для сохранения в JSON поле
+        return [
+            'id' => Str::uuid()->toString(),
+            'filename' => $filename,
+            'paths' => $paths,
+            'preview' => Storage::url($paths['medium'] ?? $paths['original']),
+            'size' => $file->getSize(),
+            'mime_type' => $file->getMimeType(),
+            'original_name' => $file->getClientOriginalName(),
+            'uploaded_at' => now()->toIso8601String()
+        ];
+    }
+
+    /**
+     * Обработать несколько фото для хранения в JSON
+     */
+    public function processMultiplePhotosForStorage(array $files, string $context = 'ad'): array
+    {
+        $processedPhotos = [];
+        
+        foreach ($files as $file) {
+            if ($file instanceof UploadedFile) {
+                $processedPhotos[] = $this->processPhotoForStorage($file, $context);
+            }
+        }
+        
+        return $processedPhotos;
+    }
+
+    /**
+     * Удалить фото из хранилища по данным из JSON
+     */
+    public function deletePhotoFromStorage(array $photoData): void
+    {
+        if (isset($photoData['paths']) && is_array($photoData['paths'])) {
+            foreach ($photoData['paths'] as $path) {
+                Storage::delete($path);
+            }
+        }
+    }
+
+    /**
+     * Генерация уникального имени файла
+     */
+    private function generateUniqueFilename(UploadedFile $file): string
+    {
+        $extension = $file->getClientOriginalExtension();
+        return Str::uuid() . '_' . time() . '.' . $extension;
     }
 
     /**

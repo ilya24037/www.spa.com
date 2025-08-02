@@ -87,7 +87,15 @@
         />
 
         <ContactsModule
+          :phone="store.formData.phone"
+          :contact-method="store.formData.contact_method"
+          :whatsapp="store.formData.whatsapp"
+          :telegram="store.formData.telegram"
           :errors="formErrors"
+          @update:phone="handlePhoneUpdate"
+          @update:contactMethod="handleContactMethodUpdate"
+          @update:whatsapp="handleWhatsappUpdate"
+          @update:telegram="handleTelegramUpdate"
         />
 
         <PaymentModule
@@ -301,6 +309,8 @@ const handlePhotoError = (error) => {
   console.error('Ошибка загрузки фото:', error)
 }
 
+// Обработчики событий от MediaModule удалены - теперь MediaModule работает напрямую со store
+
 // Обработчики событий от ServicesModule
 const handleServicesUpdate = (services) => {
   store.updateField('services', services)
@@ -330,6 +340,23 @@ const handleOutcallLocationsUpdate = (locations) => {
 
 const handleAddressUpdate = (address) => {
   store.updateField('address', address)
+}
+
+// Обработчики событий от ContactsModule
+const handlePhoneUpdate = (phone) => {
+  store.updateField('phone', phone)
+}
+
+const handleContactMethodUpdate = (method) => {
+  store.updateField('contact_method', method)
+}
+
+const handleWhatsappUpdate = (whatsapp) => {
+  store.updateField('whatsapp', whatsapp)
+}
+
+const handleTelegramUpdate = (telegram) => {
+  store.updateField('telegram', telegram)
 }
 
 const handleVideoError = (error) => {

@@ -14,7 +14,7 @@
         :max-file-size="5242880"
         :uploading="uploading"
         :upload-progress="uploadProgress"
-        @error="$emit('photo-error', $event)"
+        @error="handlePhotoError"
       />
     </FormSection>
 
@@ -31,7 +31,7 @@
         :max-file-size="50 * 1024 * 1024"
         :uploading="uploadingVideo"
         :upload-progress="videoUploadProgress"
-        @error="$emit('video-error', $event)"
+        @error="handleVideoError"
       />
     </FormSection>
   </div>
@@ -44,9 +44,10 @@ import PhotoUploader from '@/Components/Features/PhotoUploader/index.vue'
 import VideoUploader from '@/Components/Features/PhotoUploader/VideoUploader.vue'
 import { useAdFormStore } from '../../stores/adFormStore'
 
-// AVITO-STYLE: Используем централизованный store
+// Используем централизованный store (как в Clients и Parameters)
 const store = useAdFormStore()
 
+// Props только для UI состояния и ошибок
 const props = defineProps({
   uploading: {
     type: Boolean,
@@ -70,27 +71,40 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits([
-  'photo-error', 
-  'video-error'
-])
+// Emit только для ошибок
+const emit = defineEmits(['photo-error', 'video-error'])
 
-// Читаем данные ТОЛЬКО из store (как на Avito)
+// Читаем данные ТОЛЬКО из store (как в Clients/Parameters)
 const photos = computed(() => {
-  const storePhotos = store.formData.photos
-  return Array.isArray(storePhotos) ? storePhotos : []
+  console.log('MediaModule photos from store:', store.formData.photos)
+  return store.formData.photos || []
 })
-const video = computed(() => store.formData.video || null)
 
-// Методы обновляют ТОЛЬКО store (как на Avito/Ozon)
+const video = computed(() => {
+  console.log('MediaModule video from store:', store.formData.video)
+  return store.formData.video || null
+})
+
+// Обновляем ТОЛЬКО store (без emit, как в Clients/Parameters)
 const updatePhotos = (newPhotos) => {
-  console.log('updatePhotos called:', newPhotos)
+  console.log('MediaModule updatePhotos:', newPhotos)
   store.updateField('photos', newPhotos)
 }
 
 const updateVideo = (newVideo) => {
-  console.log('updateVideo called:', newVideo)
+  console.log('MediaModule updateVideo:', newVideo)
   store.updateField('video', newVideo)
+}
+
+// Обработчики ошибок
+const handlePhotoError = (error) => {
+  console.error('Photo error:', error)
+  emit('photo-error', error)
+}
+
+const handleVideoError = (error) => {
+  console.error('Video error:', error)
+  emit('video-error', error)
 }
 </script>
 

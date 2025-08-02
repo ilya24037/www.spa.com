@@ -63,12 +63,19 @@
 <script setup>
 import { Head, Link, router } from '@inertiajs/vue3'
 import AdFormRefactored from '@/Components/AdForm/index.vue'
+import { onMounted } from 'vue'
 
 const props = defineProps({
   ad: {
     type: Object,
     required: true
   }
+})
+
+onMounted(() => {
+  console.log('EditAd - ad data:', props.ad)
+  console.log('EditAd - ad.photos:', props.ad.photos)
+  console.log('EditAd - ad.id:', props.ad.id)
 })
 
 const goBack = () => {
