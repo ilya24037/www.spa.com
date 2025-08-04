@@ -1,6 +1,11 @@
 <!-- resources/js/src/entities/ad/ui/AdCard/AdCard.vue -->
 <template>
-  <div :class="CARD_CLASSES">
+  <div 
+    :class="CARD_CLASSES"
+    role="article"
+    :aria-label="`Объявление: ${props.ad.title || props.ad.name || props.ad.display_name}`"
+    data-testid="ad-card"
+  >
     <!-- Бейджи статуса -->
     <div :class="BADGES_CONTAINER_CLASSES">
       <!-- Распродажа/Скидка -->
@@ -29,6 +34,8 @@
         FAVORITE_BUTTON_CLASSES,
         isFavorite ? 'text-[#f91155]' : 'text-gray-400 hover:text-[#f91155]'
       ]"
+      :aria-label="isFavorite ? 'Удалить из избранного' : 'Добавить в избранное'"
+      data-testid="favorite-button"
     >
       <svg :class="FAVORITE_ICON_CLASSES" :fill="isFavorite ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
@@ -41,6 +48,10 @@
       @click="openAd"
       @mousemove="handleMouseMove"
       @mouseleave="currentImage = 0"
+      role="button"
+      tabindex="0"
+      :aria-label="`Открыть объявление ${props.ad.title || props.ad.name}`"
+      data-testid="ad-image"
     >
       <!-- Основное изображение -->
       <transition name="fade" mode="out-in">
@@ -147,6 +158,8 @@
         <button
           @click.stop="contactMaster"
           :class="CONTACT_BUTTON_CLASSES"
+          aria-label="Связаться с мастером"
+          data-testid="contact-button"
         >
           <svg :class="CONTACT_ICON_CLASSES" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -157,6 +170,8 @@
         <button
           @click.stop="openBooking"
           :class="BOOKING_BUTTON_CLASSES"
+          aria-label="Записаться на услугу"
+          data-testid="booking-button"
         >
           <svg :class="BOOKING_ICON_CLASSES" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -169,87 +184,98 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed } from 'vue'
+<script setup lang="ts">
+import { ref, computed, type Ref } from 'vue'
 import { router } from '@inertiajs/vue3'
+import { useToast } from '@/src/shared/composables/useToast'
+import type { 
+  AdCardProps, 
+  AdCardEmits, 
+  AdCardState,
+  AdImage,
+  MouseMoveEvent,
+  FavoriteToggleResponse 
+} from './AdCard.types'
+
+// Toast для замены alert()
+const toast = useToast()
+
+// Props
+const props = defineProps<AdCardProps>()
+
+// Emits  
+const emit = defineEmits<AdCardEmits>()
 
 // 🎯 Стили согласно дизайн-системе
-const CARD_CLASSES = 'relative group bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden'
-const BADGES_CONTAINER_CLASSES = 'absolute top-2 left-2 z-10 flex flex-col gap-1'
-const SALE_BADGE_CLASSES = 'bg-[#f91155] text-white px-2 py-0.5 rounded text-xs font-medium'
-const PREMIUM_BADGE_CLASSES = 'bg-[#7000ff] text-white px-2 py-0.5 rounded text-xs font-medium'
-const VERIFIED_BADGE_CLASSES = 'bg-green-500 text-white px-2 py-0.5 rounded text-xs font-medium'
-const VERIFIED_ICON_CLASSES = 'w-3 h-3 inline mr-0.5'
-const FAVORITE_BUTTON_CLASSES = 'absolute top-2 right-2 z-10 p-2 bg-white/90 backdrop-blur rounded-lg hover:bg-white shadow-sm transition-all'
-const FAVORITE_ICON_CLASSES = 'w-5 h-5'
-const IMAGE_CONTAINER_CLASSES = 'relative h-56 bg-gray-100 cursor-pointer overflow-hidden'
-const IMAGE_CLASSES = 'w-full h-full object-cover'
-const PLACEHOLDER_CLASSES = 'w-full h-full flex items-center justify-center bg-gray-100'
-const PLACEHOLDER_ICON_CLASSES = 'w-16 h-16 text-gray-300'
-const INDICATORS_CONTAINER_CLASSES = 'absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1'
-const INDICATOR_CLASSES = 'block h-1 rounded-full bg-white/80 transition-all duration-200'
-const DISCOUNT_BADGE_CLASSES = 'absolute bottom-2 left-2 bg-[#f91155] text-white px-2 py-0.5 rounded text-xs font-bold'
-const CONTENT_CLASSES = 'p-3'
-const PRICE_CONTAINER_CLASSES = 'mb-2'
-const PRICE_WRAPPER_CLASSES = 'flex items-baseline gap-2'
-const PRICE_CLASSES = 'text-2xl font-bold text-gray-900'
-const OLD_PRICE_CLASSES = 'text-base line-through text-gray-400'
-const DISCOUNT_TEXT_CLASSES = 'text-sm text-[#f91155] font-medium'
-const PRICE_UNIT_CLASSES = 'text-sm text-gray-500'
-const TITLE_CLASSES = 'font-semibold text-gray-900 mb-1 line-clamp-2'
-const DESCRIPTION_CLASSES = 'text-sm text-gray-600 line-clamp-2 mb-3'
-const METRICS_CONTAINER_CLASSES = 'flex items-center justify-between text-xs text-gray-500 mb-3'
-const RATING_WRAPPER_CLASSES = 'flex items-center gap-1'
-const STAR_ICON_CLASSES = 'w-3 h-3 text-yellow-400'
-const RATING_VALUE_CLASSES = 'font-medium'
-const RATING_COUNT_CLASSES = 'text-gray-400'
-const LOCATION_WRAPPER_CLASSES = 'flex items-center gap-1'
-const LOCATION_ICON_CLASSES = 'w-3 h-3'
-const ACTIONS_CONTAINER_CLASSES = 'flex gap-2'
-const CONTACT_BUTTON_CLASSES = 'flex-1 bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-1'
-const CONTACT_ICON_CLASSES = 'w-4 h-4'
-const BOOKING_BUTTON_CLASSES = 'flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-1'
-const BOOKING_ICON_CLASSES = 'w-4 h-4'
-
-const props = defineProps({
-  ad: {
-    type: Object,
-    required: true
-  }
-})
+const CARD_CLASSES: string = 'relative group bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden'
+const BADGES_CONTAINER_CLASSES: string = 'absolute top-2 left-2 z-10 flex flex-col gap-1'
+const SALE_BADGE_CLASSES: string = 'bg-[#f91155] text-white px-2 py-0.5 rounded text-xs font-medium'
+const PREMIUM_BADGE_CLASSES: string = 'bg-[#7000ff] text-white px-2 py-0.5 rounded text-xs font-medium'
+const VERIFIED_BADGE_CLASSES: string = 'bg-green-500 text-white px-2 py-0.5 rounded text-xs font-medium'
+const VERIFIED_ICON_CLASSES: string = 'w-3 h-3 inline mr-0.5'
+const FAVORITE_BUTTON_CLASSES: string = 'absolute top-2 right-2 z-10 p-2 bg-white/90 backdrop-blur rounded-lg hover:bg-white shadow-sm transition-all'
+const FAVORITE_ICON_CLASSES: string = 'w-5 h-5'
+const IMAGE_CONTAINER_CLASSES: string = 'relative h-56 bg-gray-100 cursor-pointer overflow-hidden'
+const IMAGE_CLASSES: string = 'w-full h-full object-cover'
+const PLACEHOLDER_CLASSES: string = 'w-full h-full flex items-center justify-center bg-gray-100'
+const PLACEHOLDER_ICON_CLASSES: string = 'w-16 h-16 text-gray-300'
+const INDICATORS_CONTAINER_CLASSES: string = 'absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1'
+const INDICATOR_CLASSES: string = 'block h-1 rounded-full bg-white/80 transition-all duration-200'
+const DISCOUNT_BADGE_CLASSES: string = 'absolute bottom-2 left-2 bg-[#f91155] text-white px-2 py-0.5 rounded text-xs font-bold'
+const CONTENT_CLASSES: string = 'p-3'
+const PRICE_CONTAINER_CLASSES: string = 'mb-2'
+const PRICE_WRAPPER_CLASSES: string = 'flex items-baseline gap-2'
+const PRICE_CLASSES: string = 'text-2xl font-bold text-gray-900'
+const OLD_PRICE_CLASSES: string = 'text-base line-through text-gray-400'
+const DISCOUNT_TEXT_CLASSES: string = 'text-sm text-[#f91155] font-medium'
+const PRICE_UNIT_CLASSES: string = 'text-sm text-gray-500'
+const TITLE_CLASSES: string = 'font-semibold text-gray-900 mb-1 line-clamp-2'
+const DESCRIPTION_CLASSES: string = 'text-sm text-gray-600 line-clamp-2 mb-3'
+const METRICS_CONTAINER_CLASSES: string = 'flex items-center justify-between text-xs text-gray-500 mb-3'
+const RATING_WRAPPER_CLASSES: string = 'flex items-center gap-1'
+const STAR_ICON_CLASSES: string = 'w-3 h-3 text-yellow-400'
+const RATING_VALUE_CLASSES: string = 'font-medium'
+const RATING_COUNT_CLASSES: string = 'text-gray-400'
+const LOCATION_WRAPPER_CLASSES: string = 'flex items-center gap-1'
+const LOCATION_ICON_CLASSES: string = 'w-3 h-3'
+const ACTIONS_CONTAINER_CLASSES: string = 'flex gap-2'
+const CONTACT_BUTTON_CLASSES: string = 'flex-1 bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-1'
+const CONTACT_ICON_CLASSES: string = 'w-4 h-4'
+const BOOKING_BUTTON_CLASSES: string = 'flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-1'
+const BOOKING_ICON_CLASSES: string = 'w-4 h-4'
 
 // Состояние
-const currentImage = ref(0)
+const currentImage: Ref<number> = ref(0)
 
 // Вычисляемые свойства
-const isFavorite = computed(() => props.ad.is_favorite || false)
+const isFavorite = computed((): boolean => props.ad.is_favorite || false)
 
-const allImages = computed(() => {
+const allImages = computed((): AdImage[] => {
   return props.ad.images || props.ad.photos || []
 })
 
-const currentImageUrl = computed(() => {
+const currentImageUrl = computed((): string => {
   if (!allImages.value.length) {
     return '/images/placeholders/master-1.jpg'
   }
   
   const image = allImages.value[currentImage.value]
-  return image?.url || image?.path || image || '/images/placeholders/master-1.jpg'
+  return image?.url || image?.path || (typeof image === 'string' ? image : '') || '/images/placeholders/master-1.jpg'
 })
 
 // Методы
-const formatPrice = (price) => {
+const formatPrice = (price: number | undefined): string => {
   if (!price) return '0'
   return new Intl.NumberFormat('ru-RU').format(price)
 }
 
-const getDescription = () => {
+const getDescription = (): string => {
   return props.ad.description || 
          props.ad.specialty || 
          'Массаж и SPA услуги'
 }
 
-const handleMouseMove = (event) => {
+const handleMouseMove = (event: MouseMoveEvent): void => {
   if (allImages.value.length <= 1) return
   
   const rect = event.currentTarget.getBoundingClientRect()
@@ -262,29 +288,68 @@ const handleMouseMove = (event) => {
   }
 }
 
-const openAd = () => {
-  router.visit(`/ads/${props.ad.id}`)
-}
-
-const toggleFavorite = () => {
-  router.post('/api/favorites/toggle', {
-    ad_id: props.ad.id
-  }, {
-    preserveState: true,
-    preserveScroll: true
-  })
-}
-
-const contactMaster = () => {
-  if (props.ad.phone && props.ad.show_contacts) {
-    window.location.href = `tel:${props.ad.phone.replace(/\D/g, '')}`
-  } else {
-    alert('Контакты будут доступны после записи')
+const openAd = (): void => {
+  try {
+    emit('adOpened', props.ad.id)
+    router.visit(`/ads/${props.ad.id}`)
+  } catch (error: unknown) {
+    console.error('Ошибка открытия объявления:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
+    toast.error('Ошибка перехода: ' + errorMessage)
   }
 }
 
-const openBooking = () => {
-  router.visit(`/ads/${props.ad.id}?booking=true`)
+const toggleFavorite = async (): Promise<void> => {
+  try {
+    const currentState = isFavorite.value
+    emit('favoriteToggled', props.ad.id, !currentState)
+    
+    await router.post('/api/favorites/toggle', {
+      ad_id: props.ad.id
+    }, {
+      preserveState: true,
+      preserveScroll: true,
+      onSuccess: () => {
+        toast.success(currentState ? 'Удалено из избранного' : 'Добавлено в избранное')
+      },
+      onError: (errors) => {
+        console.error('Ошибка избранного:', errors)
+        toast.error('Ошибка обновления избранного')
+      }
+    })
+  } catch (error: unknown) {
+    console.error('Ошибка toggleFavorite:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
+    toast.error('Ошибка: ' + errorMessage)
+  }
+}
+
+const contactMaster = (): void => {
+  try {
+    emit('contactRequested', props.ad.id)
+    
+    if (props.ad.phone && props.ad.show_contacts) {
+      const cleanPhone = props.ad.phone.replace(/\D/g, '')
+      window.location.href = `tel:${cleanPhone}`
+    } else {
+      toast.info('Контакты будут доступны после записи')
+    }
+  } catch (error: unknown) {
+    console.error('Ошибка contactMaster:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
+    toast.error('Ошибка связи: ' + errorMessage)
+  }
+}
+
+const openBooking = (): void => {
+  try {
+    emit('bookingRequested', props.ad.id)
+    router.visit(`/ads/${props.ad.id}?booking=true`)
+  } catch (error: unknown) {
+    console.error('Ошибка openBooking:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
+    toast.error('Ошибка бронирования: ' + errorMessage)
+  }
 }
 </script>
 

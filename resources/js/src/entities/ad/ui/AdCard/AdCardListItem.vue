@@ -118,6 +118,10 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { router } from '@inertiajs/vue3'
+import { useToast } from '@/src/shared/composables/useToast'
+
+// Toast для замены alert()
+const toast = useToast()
 
 // 🎯 Стили согласно дизайн-системе
 const CARD_CLASSES = 'bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 cursor-pointer'
@@ -232,7 +236,7 @@ const contactMaster = () => {
   if (props.ad.phone && props.ad.show_contacts) {
     window.location.href = `tel:${props.ad.phone.replace(/\D/g, '')}`
   } else {
-    alert('Контакты будут доступны после записи')
+    toast.info('Контакты будут доступны после записи')
   }
 }
 

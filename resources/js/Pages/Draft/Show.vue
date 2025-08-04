@@ -216,6 +216,10 @@ import ConfirmModal from '@/Components/UI/ConfirmModal.vue'
 import { PhotoGallery } from '@/src/features/gallery'
 // 🎯 FSD Импорты
 import { Breadcrumbs } from '@/src/shared'
+import { useToast } from '@/src/shared/composables/useToast'
+
+// Toast для замены alert()
+const toast = useToast()
 
 // Импортируем route из window.route (Ziggy)
 const route = window.route || ((name, params) => {
@@ -303,7 +307,7 @@ const showPhone = () => {
   if (props.ad.phone) {
     window.location.href = `tel:${props.ad.phone.replace(/\D/g, '')}`
   } else {
-    alert('Телефон будет доступен после публикации объявления')
+    toast.info('Телефон будет доступен после публикации объявления')
   }
 }
 
@@ -335,7 +339,7 @@ const deleteDraft = () => {
       console.log('=== DELETE FAILED ===')
       console.error('Delete failed with errors:', errors)
       // Показываем ошибку пользователю
-      alert('Ошибка удаления: ' + (errors.message || JSON.stringify(errors)))
+      toast.error('Ошибка удаления: ' + (errors.message || JSON.stringify(errors)))
       // Модалка остается открытой при ошибке
     },
     onFinish: () => {

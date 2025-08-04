@@ -1,5 +1,16 @@
 <template>
-  <div :class="cardClasses">
+  <div 
+    :class="cardClasses"
+    :aria-busy="loading"
+    :aria-disabled="disabled"
+    role="article"
+    @click="handleClick"
+  >
+    <!-- Loading overlay -->
+    <div v-if="loading" class="card-loading">
+      <div class="card-spinner" aria-label="Загрузка..." />
+    </div>
+
     <!-- Заголовок карточки -->
     <div v-if="$slots.header || title" class="card-header">
       <slot name="header">
@@ -19,38 +30,39 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
+import type { CardProps } from './Card.types'
 
-const props = defineProps({
-  title: {
-    type: String,
-    default: ''
-  },
-  variant: {
-    type: String,
-    default: 'default',
-    validator: (value) => ['default', 'bordered', 'elevated', 'outlined'].includes(value)
-  },
-  size: {
-    type: String,
-    default: 'medium',
-    validator: (value) => ['small', 'medium', 'large'].includes(value)
-  },
-  hoverable: {
-    type: Boolean,
-    default: false
-  }
+const props = withDefaults(defineProps<CardProps>(), {
+  variant: 'default',
+  size: 'medium',
+  hoverable: false,
+  loading: false,
+  disabled: false
 })
+
+const emit = defineEmits<{
+  click: [event: MouseEvent]
+}>()
 
 const cardClasses = computed(() => [
   'card',
   `card--${props.variant}`,
   `card--${props.size}`,
+  props.customClass,
   {
-    'card--hoverable': props.hoverable
+    'card--hoverable': props.hoverable && !props.disabled && !props.loading,
+    'card--loading': props.loading,
+    'card--disabled': props.disabled
   }
 ])
+
+const handleClick = (event: MouseEvent) => {
+  if (!props.disabled && !props.loading) {
+    emit('click', event)
+  }
+}
 </script>
 
 <style scoped>
@@ -154,5 +166,71 @@ const cardClasses = computed(() => [
 
 .card--large .card-footer {
   padding: 20px 32px;
+}
+
+/* Состояния карточки */
+.card--loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.card--disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.card--disabled * {
+  color: #999 !important;
+}
+
+/* Loading overlay */
+.card-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: inherit;
+}
+
+.card-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #1890ff;
+  border-radius: 50%;
+  animation: card-spin 1s linear infinite;
+}
+
+@keyframes card-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .card-header,
+  .card-body,
+  .card-footer {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  
+  .card--large .card-header,
+  .card--large .card-body,
+  .card--large .card-footer {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  
+  .card-title {
+    font-size: 16px;
+  }
 }
 </style>

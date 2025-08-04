@@ -15,6 +15,9 @@
           `toast-${type}`,
           positionClass
         ]"
+        role="alert"
+        aria-live="polite"
+        :aria-label="`${type} уведомление: ${message}`"
       >
         <div class="toast-content">
           <!-- Иконка -->
@@ -44,6 +47,8 @@
             v-if="closable"
             @click="close"
             class="toast-close"
+            type="button"
+            :aria-label="`Закрыть ${type} уведомление`"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -63,45 +68,22 @@
   </Teleport>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import type { ToastProps, ToastEmits } from './Toast.types'
 
-const props = defineProps({
-  type: {
-    type: String,
-    default: 'info',
-    validator: (value) => ['success', 'error', 'warning', 'info'].includes(value)
-  },
-  title: {
-    type: String,
-    default: ''
-  },
-  message: {
-    type: String,
-    required: true
-  },
-  duration: {
-    type: Number,
-    default: 4000
-  },
-  position: {
-    type: String,
-    default: 'top-right',
-    validator: (value) => [
-      'top-left', 'top-center', 'top-right',
-      'bottom-left', 'bottom-center', 'bottom-right'
-    ].includes(value)
-  },
-  closable: {
-    type: Boolean,
-    default: true
-  }
+const props = withDefaults(defineProps<ToastProps>(), {
+  type: 'info',
+  title: '',
+  duration: 4000,
+  position: 'top-right',
+  closable: true
 })
 
-const emit = defineEmits(['close'])
+const emit = defineEmits<ToastEmits>()
 
 const visible = ref(false)
-let timeoutId = null
+let timeoutId: NodeJS.Timeout | null = null
 
 const positionClass = computed(() => {
   const classes = {
@@ -127,6 +109,7 @@ const close = () => {
   visible.value = false
   if (timeoutId) {
     clearTimeout(timeoutId)
+    timeoutId = null
   }
   emit('close')
 }
@@ -138,6 +121,7 @@ onMounted(() => {
 onUnmounted(() => {
   if (timeoutId) {
     clearTimeout(timeoutId)
+    timeoutId = null
   }
 })
 

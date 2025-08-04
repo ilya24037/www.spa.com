@@ -104,6 +104,10 @@
 import { computed, ref } from 'vue'
 import { PhoneIcon } from '@heroicons/vue/24/outline'
 import { BookingModal } from '@/src/entities/booking'
+import { useToast } from '@/src/shared/composables/useToast'
+
+// Toast для замены alert()
+const toast = useToast()
 
 const props = defineProps({
   master: {
@@ -138,7 +142,7 @@ const showPhone = () => {
   if (props.master.phone) {
     window.location.href = `tel:${props.master.phone.replace(/\D/g, '')}`
   } else {
-    alert('Телефон будет доступен после бронирования')
+    toast.info('Телефон будет доступен после бронирования')
   }
 }
 

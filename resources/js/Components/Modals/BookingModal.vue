@@ -61,13 +61,17 @@
 <script setup>
 import { ref } from 'vue'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
+import { useToast } from '@/src/shared/composables/useToast'
+
+// Toast для замены alert()
+const toast = useToast()
 
 const props = defineProps({
   show: Boolean,
   master: Object
 })
 
-defineEmits(['close'])
+const emit = defineEmits(['close'])
 
 const booking = ref({
   date: '',
@@ -79,7 +83,7 @@ const booking = ref({
 const submitBooking = () => {
   // Логика отправки бронирования
   console.log('Бронирование:', booking.value)
-  alert('Заявка отправлена! Мастер свяжется с вами.')
+  toast.success('Заявка отправлена! Мастер свяжется с вами.')
   emit('close')
 }
 </script>

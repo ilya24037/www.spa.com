@@ -47,6 +47,10 @@ import MasterInfo from './components/MasterInfo.vue'
 import ServicesList from './components/ServicesList.vue'
 import ReviewsList from './components/ReviewsList.vue'
 import BookingWidget from './components/BookingWidget.vue'
+import { useToast } from '@/src/shared/composables/useToast'
+
+// Toast для замены alert()
+const toast = useToast()
 
 const props = defineProps({
   master: Object
@@ -70,12 +74,12 @@ const showPhone = () => {
   if (props.master.phone) {
     window.location.href = `tel:${props.master.phone.replace(/\D/g, '')}`
   } else {
-    alert('Телефон будет доступен после бронирования')
+    toast.info('Телефон будет доступен после бронирования')
   }
 }
 
 const openBooking = () => {
-  alert('Форма бронирования появится здесь')
+  toast.info('Форма бронирования появится здесь')
 }
 </script>
 

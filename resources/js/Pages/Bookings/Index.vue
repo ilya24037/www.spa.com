@@ -196,6 +196,10 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { BookingStatus, BookingCalendar, useBookingStore } from '@/src/entities/booking'
+import { useToast } from '@/src/shared/composables/useToast'
+
+// Toast для замены alert()
+const toast = useToast()
 
 // Props от Inertia
 const props = defineProps({
@@ -312,10 +316,10 @@ const handleCancelBooking = async ({ bookingId, reason }) => {
       }
       
       // Показываем уведомление
-      alert('Запись успешно отменена')
+      toast.success('Запись успешно отменена')
     }
   } catch (error) {
-    alert('Ошибка при отмене записи: ' + error.message)
+    toast.error('Ошибка при отмене записи: ' + error.message)
   }
 }
 
@@ -338,9 +342,9 @@ const handleCompleteBooking = async (bookingId) => {
       allBookings.value[bookingIndex].status = 'completed'
     }
     
-    alert('Запись отмечена как завершенная')
+    toast.success('Запись отмечена как завершенная')
   } catch (error) {
-    alert('Ошибка при завершении записи: ' + error.message)
+    toast.error('Ошибка при завершении записи: ' + error.message)
   }
 }
 
@@ -365,9 +369,9 @@ const confirmReschedule = async () => {
     rescheduleBooking.value = null
     newDateTime.value = null
     
-    alert('Запись успешно перенесена')
+    toast.success('Запись успешно перенесена')
   } catch (error) {
-    alert('Ошибка при переносе записи: ' + error.message)
+    toast.error('Ошибка при переносе записи: ' + error.message)
   } finally {
     rescheduling.value = false
   }

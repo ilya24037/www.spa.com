@@ -75,6 +75,10 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
+import { useToast } from '@/src/shared/composables/useToast'
+
+// Toast для замены alert()
+const toast = useToast()
 
 const props = defineProps({
     // Размеры карты
@@ -260,7 +264,7 @@ const handleZoomChange = () => {
 // Центрирование на текущей позиции
 const centerOnCurrentLocation = () => {
     if (!navigator.geolocation) {
-        alert('Геолокация не поддерживается вашим браузером')
+        toast.error('Геолокация не поддерживается вашим браузером')
         return
     }
 
@@ -285,7 +289,7 @@ const centerOnCurrentLocation = () => {
         },
         (error) => {
             console.error('Ошибка получения геолокации:', error)
-            alert('Не удалось получить ваше местоположение')
+            toast.error('Не удалось получить ваше местоположение')
         },
         {
             enableHighAccuracy: true,

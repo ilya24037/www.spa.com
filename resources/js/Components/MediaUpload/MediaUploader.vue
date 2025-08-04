@@ -160,42 +160,43 @@
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted, type Ref } from 'vue'
 import { router } from '@inertiajs/vue3'
+import { useToast } from '@/src/shared/composables/useToast'
+import type { 
+  MediaUploaderProps, 
+  MediaUploaderEmits, 
+  Photo, 
+  Video, 
+  UploadingState,
+  UploadResponse 
+} from './MediaUploader.types'
 
-const props = defineProps({
-  masterId: {
-    type: Number,
-    required: true
-  },
-  masterName: {
-    type: String,
-    required: true
-  },
-  initialPhotos: {
-    type: Array,
-    default: () => []
-  },
-  initialVideo: {
-    type: Object,
-    default: null
-  }
+// Toast для замены alert()
+const toast = useToast()
+
+const props = withDefaults(defineProps<MediaUploaderProps>(), {
+  initialPhotos: () => [],
+  initialVideo: null
 })
 
+const emit = defineEmits<MediaUploaderEmits>()
+
 // Состояние
-const photos = ref([...props.initialPhotos])
-const video = ref(props.initialVideo)
-const avatarUrl = ref(`/masters/${props.masterId}/avatar`)
-const uploading = ref({
+const photos: Ref<Photo[]> = ref([...props.initialPhotos])
+const video: Ref<Video | null> = ref(props.initialVideo)
+const avatarUrl: Ref<string> = ref(`/masters/${props.masterId}/avatar`)
+const uploading: Ref<UploadingState> = ref({
   avatar: false,
   photos: false,
   video: false
 })
 
 // Загрузка аватара
-const uploadAvatar = async (event) => {
-  const file = event.target.files[0]
+const uploadAvatar = async (event: Event): Promise<void> => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
   if (!file) return
 
   uploading.value.avatar = true
@@ -204,33 +205,43 @@ const uploadAvatar = async (event) => {
     const formData = new FormData()
     formData.append('avatar', file)
 
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+    if (!csrfToken) {
+      throw new Error('CSRF token не найден')
+    }
+
     const response = await fetch(`/masters/${props.masterId}/upload/avatar`, {
       method: 'POST',
       body: formData,
       headers: {
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        'X-CSRF-TOKEN': csrfToken
       }
     })
 
-    const result = await response.json()
+    const result: UploadResponse = await response.json()
     
-    if (result.success) {
+    if (result.success && result.avatar_url) {
       avatarUrl.value = result.avatar_url + '?t=' + Date.now()
-      alert('Аватар загружен успешно!')
+      emit('avatarUpdated', avatarUrl.value)
+      toast.success('Аватар загружен успешно!')
     } else {
-      alert('Ошибка: ' + result.error)
+      toast.error('Ошибка: ' + (result.error || 'Неизвестная ошибка'))
     }
-  } catch (error) {
-    alert('Ошибка загрузки: ' + error.message)
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
+    toast.error('Ошибка загрузки: ' + errorMessage)
   } finally {
     uploading.value.avatar = false
-    event.target.value = ''
+    if (target) {
+      target.value = ''
+    }
   }
 }
 
 // Загрузка фотографий
-const uploadPhotos = async (event) => {
-  const files = Array.from(event.target.files)
+const uploadPhotos = async (event: Event): Promise<void> => {
+  const target = event.target as HTMLInputElement
+  const files = Array.from(target.files || [])
   if (!files.length) return
 
   uploading.value.photos = true
@@ -239,33 +250,43 @@ const uploadPhotos = async (event) => {
     const formData = new FormData()
     files.forEach(file => formData.append('photos[]', file))
 
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+    if (!csrfToken) {
+      throw new Error('CSRF token не найден')
+    }
+
     const response = await fetch(`/masters/${props.masterId}/upload/photos`, {
       method: 'POST',
       body: formData,
       headers: {
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        'X-CSRF-TOKEN': csrfToken
       }
     })
 
-    const result = await response.json()
+    const result: UploadResponse = await response.json()
     
-    if (result.success) {
+    if (result.success && result.photos) {
       photos.value.push(...result.photos)
-      alert(result.message)
+      emit('photosUpdated', photos.value)
+      toast.success(result.message || 'Фотографии загружены успешно!')
     } else {
-      alert('Ошибка: ' + result.error)
+      toast.error('Ошибка: ' + (result.error || 'Неизвестная ошибка'))
     }
-  } catch (error) {
-    alert('Ошибка загрузки: ' + error.message)
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
+    toast.error('Ошибка загрузки: ' + errorMessage)
   } finally {
     uploading.value.photos = false
-    event.target.value = ''
+    if (target) {
+      target.value = ''
+    }
   }
 }
 
 // Загрузка видео
-const uploadVideo = async (event) => {
-  const file = event.target.files[0]
+const uploadVideo = async (event: Event): Promise<void> => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
   if (!file) return
 
   uploading.value.video = true
@@ -274,107 +295,144 @@ const uploadVideo = async (event) => {
     const formData = new FormData()
     formData.append('video', file)
 
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+    if (!csrfToken) {
+      throw new Error('CSRF token не найден')
+    }
+
     const response = await fetch(`/masters/${props.masterId}/upload/video`, {
       method: 'POST',
       body: formData,
       headers: {
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        'X-CSRF-TOKEN': csrfToken
       }
     })
 
-    const result = await response.json()
+    const result: UploadResponse = await response.json()
     
-    if (result.success) {
+    if (result.success && result.video) {
       video.value = result.video
-      alert('Видео загружено успешно!')
+      emit('videoUpdated', video.value)
+      toast.success('Видео загружено успешно!')
     } else {
-      alert('Ошибка: ' + result.error)
+      toast.error('Ошибка: ' + (result.error || 'Неизвестная ошибка'))
     }
-  } catch (error) {
-    alert('Ошибка загрузки: ' + error.message)
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
+    toast.error('Ошибка загрузки: ' + errorMessage)
   } finally {
     uploading.value.video = false
-    event.target.value = ''
+    if (target) {
+      target.value = ''
+    }
   }
 }
 
 // Удаление фото
-const deletePhoto = async (photoId) => {
+const deletePhoto = async (photoId: number): Promise<void> => {
+  // TODO: Заменить confirm на Modal компонент
   if (!confirm('Удалить фотографию?')) return
 
   try {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+    if (!csrfToken) {
+      throw new Error('CSRF token не найден')
+    }
+
     const response = await fetch(`/photos/${photoId}`, {
       method: 'DELETE',
       headers: {
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        'X-CSRF-TOKEN': csrfToken
       }
     })
 
-    const result = await response.json()
+    const result: UploadResponse = await response.json()
     
     if (result.success) {
       photos.value = photos.value.filter(p => p.id !== photoId)
-      alert('Фотография удалена')
+      emit('photosUpdated', photos.value)
+      toast.success('Фотография удалена')
     } else {
-      alert('Ошибка: ' + result.error)
+      toast.error('Ошибка: ' + (result.error || 'Неизвестная ошибка'))
     }
-  } catch (error) {
-    alert('Ошибка удаления: ' + error.message)
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
+    toast.error('Ошибка удаления: ' + errorMessage)
   }
 }
 
 // Удаление видео
-const deleteVideo = async () => {
+const deleteVideo = async (): Promise<void> => {
+  // TODO: Заменить confirm на Modal компонент
   if (!confirm('Удалить видео?')) return
 
+  if (!video.value?.id) {
+    toast.error('Видео не найдено')
+    return
+  }
+
   try {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+    if (!csrfToken) {
+      throw new Error('CSRF token не найден')
+    }
+
     const response = await fetch(`/videos/${video.value.id}`, {
       method: 'DELETE',
       headers: {
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        'X-CSRF-TOKEN': csrfToken
       }
     })
 
-    const result = await response.json()
+    const result: UploadResponse = await response.json()
     
     if (result.success) {
       video.value = null
-      alert('Видео удалено')
+      emit('videoUpdated', null)
+      toast.success('Видео удалено')
     } else {
-      alert('Ошибка: ' + result.error)
+      toast.error('Ошибка: ' + (result.error || 'Неизвестная ошибка'))
     }
-  } catch (error) {
-    alert('Ошибка удаления: ' + error.message)
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
+    toast.error('Ошибка удаления: ' + errorMessage)
   }
 }
 
 // Установка главного фото
-const setMainPhoto = async (photoId) => {
+const setMainPhoto = async (photoId: number): Promise<void> => {
   try {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+    if (!csrfToken) {
+      throw new Error('CSRF token не найден')
+    }
+
     const response = await fetch(`/photos/${photoId}/set-main`, {
       method: 'POST',
       headers: {
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        'X-CSRF-TOKEN': csrfToken
       }
     })
 
-    const result = await response.json()
+    const result: UploadResponse = await response.json()
     
     if (result.success) {
       photos.value.forEach(p => {
         p.is_main = p.id === photoId
       })
-      alert('Главное фото установлено')
+      emit('photosUpdated', photos.value)
+      toast.success('Главное фото установлено')
     } else {
-      alert('Ошибка: ' + result.error)
+      toast.error('Ошибка: ' + (result.error || 'Неизвестная ошибка'))
     }
-  } catch (error) {
-    alert('Ошибка: ' + error.message)
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
+    toast.error('Ошибка: ' + errorMessage)
   }
 }
 
 // Форматирование размера файла
-const formatFileSize = (bytes) => {
+const formatFileSize = (bytes: number): string => {
   const units = ['B', 'KB', 'MB', 'GB']
   let size = bytes
   let unitIndex = 0

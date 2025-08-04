@@ -3,6 +3,10 @@
   <article 
     :class="CARD_CLASSES"
     @click="goToProfile"
+    role="button"
+    tabindex="0"
+    :aria-label="`Профиль мастера ${props.master.display_name || props.master.name}`"
+    data-testid="master-card"
   >
     <!-- Бейджи -->
     <div :class="BADGES_CONTAINER_CLASSES">
@@ -28,6 +32,8 @@
         FAVORITE_BUTTON_CLASSES,
         isFavorite ? 'text-red-500' : 'text-gray-400 hover:text-red-500'
       ]"
+      :aria-label="isFavorite ? 'Удалить из избранного' : 'Добавить в избранное'"
+      data-testid="favorite-button"
     >
       <svg :class="FAVORITE_ICON_CLASSES" :fill="isFavorite ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -43,6 +49,7 @@
         :class="IMAGE_CLASSES"
         loading="lazy"
         @error="handleImageError"
+        data-testid="master-avatar"
       >
       <!-- Онлайн статус -->
       <div 
@@ -100,6 +107,8 @@
         <button
           @click.stop="showPhone"
           :class="PHONE_BUTTON_CLASSES"
+          aria-label="Показать телефон мастера"
+          data-testid="phone-button"
         >
           <svg :class="PHONE_ICON_CLASSES" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -110,6 +119,8 @@
         <button
           @click.stop="openBooking"
           :class="BOOKING_BUTTON_CLASSES"
+          aria-label="Записаться к мастеру"
+          data-testid="booking-button"
         >
           <svg :class="BOOKING_ICON_CLASSES" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -122,54 +133,64 @@
   </article>
 </template>
 
-<script setup>
-import { ref, computed } from 'vue'
+<script setup lang="ts">
+import { ref, computed, type Ref } from 'vue'
 import { router } from '@inertiajs/vue3'
+import { useToast } from '@/src/shared/composables/useToast'
+import type { 
+  MasterCardProps, 
+  MasterCardEmits, 
+  MasterCardStyles,
+  MasterCardState,
+  FavoriteToggleResponse 
+} from './MasterCard.types'
+
+// Toast для замены alert()
+const toast = useToast()
+
+// Props
+const props = defineProps<MasterCardProps>()
+
+// Emits  
+const emit = defineEmits<MasterCardEmits>()
 
 // 🎯 Стили согласно дизайн-системе
-const CARD_CLASSES = 'relative bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden cursor-pointer'
-const BADGES_CONTAINER_CLASSES = 'absolute top-2 left-2 z-10 flex flex-col gap-1'
-const PREMIUM_BADGE_CLASSES = 'bg-purple-600 text-white px-2 py-0.5 rounded text-xs font-medium'
-const VERIFIED_BADGE_CLASSES = 'bg-green-500 text-white px-2 py-0.5 rounded text-xs font-medium flex items-center gap-0.5'
-const VERIFIED_ICON_CLASSES = 'w-3 h-3'
-const FAVORITE_BUTTON_CLASSES = 'absolute top-2 right-2 z-10 p-2 bg-white/90 backdrop-blur rounded-lg hover:bg-white shadow-sm transition-all'
-const FAVORITE_ICON_CLASSES = 'w-5 h-5'
-const IMAGE_CONTAINER_CLASSES = 'relative aspect-[4/5] overflow-hidden bg-gray-100'
-const IMAGE_CLASSES = 'w-full h-full object-cover'
-const ONLINE_STATUS_CLASSES = 'absolute bottom-2 left-2 px-2 py-1 bg-green-500 text-white text-xs font-medium rounded-full flex items-center gap-1'
-const ONLINE_INDICATOR_CLASSES = 'w-2 h-2 bg-white rounded-full animate-pulse'
-const CONTENT_CLASSES = 'p-4'
-const PRICE_RATING_CONTAINER_CLASSES = 'flex items-start justify-between gap-2 mb-2'
-const PRICE_CLASSES = 'font-bold text-xl text-gray-900'
-const PRICE_UNIT_CLASSES = 'text-xs text-gray-500'
-const RATING_CONTAINER_CLASSES = 'flex items-center gap-1 text-sm'
-const STAR_ICON_CLASSES = 'w-4 h-4 text-yellow-400'
-const RATING_VALUE_CLASSES = 'font-medium'
-const RATING_COUNT_CLASSES = 'text-gray-400'
-const NAME_CLASSES = 'font-semibold text-gray-900 truncate mb-1'
-const SERVICES_CLASSES = 'text-sm text-gray-600 line-clamp-2 mb-3'
-const LOCATION_CONTAINER_CLASSES = 'flex items-center gap-1 text-xs text-gray-500 mb-3'
-const LOCATION_ICON_CLASSES = 'w-3 h-3'
-const ACTIONS_CONTAINER_CLASSES = 'flex gap-2'
-const PHONE_BUTTON_CLASSES = 'flex-1 bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-1'
-const PHONE_ICON_CLASSES = 'w-4 h-4'
-const BOOKING_BUTTON_CLASSES = 'flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-1'
-const BOOKING_ICON_CLASSES = 'w-4 h-4'
-
-const props = defineProps({
-  master: {
-    type: Object,
-    required: true
-  }
-})
+const CARD_CLASSES: string = 'relative bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden cursor-pointer'
+const BADGES_CONTAINER_CLASSES: string = 'absolute top-2 left-2 z-10 flex flex-col gap-1'
+const PREMIUM_BADGE_CLASSES: string = 'bg-purple-600 text-white px-2 py-0.5 rounded text-xs font-medium'
+const VERIFIED_BADGE_CLASSES: string = 'bg-green-500 text-white px-2 py-0.5 rounded text-xs font-medium flex items-center gap-0.5'
+const VERIFIED_ICON_CLASSES: string = 'w-3 h-3'
+const FAVORITE_BUTTON_CLASSES: string = 'absolute top-2 right-2 z-10 p-2 bg-white/90 backdrop-blur rounded-lg hover:bg-white shadow-sm transition-all'
+const FAVORITE_ICON_CLASSES: string = 'w-5 h-5'
+const IMAGE_CONTAINER_CLASSES: string = 'relative aspect-[4/5] overflow-hidden bg-gray-100'
+const IMAGE_CLASSES: string = 'w-full h-full object-cover'
+const ONLINE_STATUS_CLASSES: string = 'absolute bottom-2 left-2 px-2 py-1 bg-green-500 text-white text-xs font-medium rounded-full flex items-center gap-1'
+const ONLINE_INDICATOR_CLASSES: string = 'w-2 h-2 bg-white rounded-full animate-pulse'
+const CONTENT_CLASSES: string = 'p-4'
+const PRICE_RATING_CONTAINER_CLASSES: string = 'flex items-start justify-between gap-2 mb-2'
+const PRICE_CLASSES: string = 'font-bold text-xl text-gray-900'
+const PRICE_UNIT_CLASSES: string = 'text-xs text-gray-500'
+const RATING_CONTAINER_CLASSES: string = 'flex items-center gap-1 text-sm'
+const STAR_ICON_CLASSES: string = 'w-4 h-4 text-yellow-400'
+const RATING_VALUE_CLASSES: string = 'font-medium'
+const RATING_COUNT_CLASSES: string = 'text-gray-400'
+const NAME_CLASSES: string = 'font-semibold text-gray-900 truncate mb-1'
+const SERVICES_CLASSES: string = 'text-sm text-gray-600 line-clamp-2 mb-3'
+const LOCATION_CONTAINER_CLASSES: string = 'flex items-center gap-1 text-xs text-gray-500 mb-3'
+const LOCATION_ICON_CLASSES: string = 'w-3 h-3'
+const ACTIONS_CONTAINER_CLASSES: string = 'flex gap-2'
+const PHONE_BUTTON_CLASSES: string = 'flex-1 bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-1'
+const PHONE_ICON_CLASSES: string = 'w-4 h-4'
+const BOOKING_BUTTON_CLASSES: string = 'flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-1'
+const BOOKING_ICON_CLASSES: string = 'w-4 h-4'
 
 // Состояние
-const imageError = ref(false)
+const imageError: Ref<boolean> = ref(false)
 
 // Вычисляемые свойства
-const isFavorite = computed(() => props.master.is_favorite || false)
+const isFavorite = computed((): boolean => props.master.is_favorite || false)
 
-const masterPhoto = computed(() => {
+const masterPhoto = computed((): string => {
   if (imageError.value) {
     return '/images/placeholders/master-1.jpg'
   }
@@ -180,12 +201,12 @@ const masterPhoto = computed(() => {
 })
 
 // Методы
-const formatPrice = (price) => {
+const formatPrice = (price: number | undefined): string => {
   if (!price) return '0'
   return new Intl.NumberFormat('ru-RU').format(price)
 }
 
-const getServicesText = () => {
+const getServicesText = (): string => {
   if (props.master.specialty) {
     return props.master.specialty
   }
@@ -197,33 +218,71 @@ const getServicesText = () => {
   return 'Массаж и SPA услуги'
 }
 
-const handleImageError = () => {
+const handleImageError = (): void => {
   imageError.value = true
 }
 
-const goToProfile = () => {
-  router.visit(`/masters/${props.master.id}`)
-}
-
-const toggleFavorite = () => {
-  // Логика добавления/удаления из избранного
-  router.post('/api/favorites/toggle', {
-    master_profile_id: props.master.id
-  }, {
-    preserveState: true,
-    preserveScroll: true
-  })
-}
-
-const showPhone = () => {
-  if (props.master.phone && props.master.show_contacts) {
-    window.location.href = `tel:${props.master.phone.replace(/\D/g, '')}`
-  } else {
-    alert('Телефон будет доступен после записи к мастеру')
+const goToProfile = (): void => {
+  try {
+    emit('profileVisited', props.master.id)
+    router.visit(`/masters/${props.master.id}`)
+  } catch (error: unknown) {
+    console.error('Ошибка перехода к профилю:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
+    toast.error('Ошибка перехода: ' + errorMessage)
   }
 }
 
-const openBooking = () => {
-  router.visit(`/masters/${props.master.id}?booking=true`)
+const toggleFavorite = async (): Promise<void> => {
+  try {
+    const currentState = isFavorite.value
+    emit('favoriteToggled', props.master.id, !currentState)
+    
+    await router.post('/api/favorites/toggle', {
+      master_profile_id: props.master.id
+    }, {
+      preserveState: true,
+      preserveScroll: true,
+      onSuccess: () => {
+        toast.success(currentState ? 'Удалено из избранного' : 'Добавлено в избранное')
+      },
+      onError: (errors) => {
+        console.error('Ошибка избранного:', errors)
+        toast.error('Ошибка обновления избранного')
+      }
+    })
+  } catch (error: unknown) {
+    console.error('Ошибка toggleFavorite:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
+    toast.error('Ошибка: ' + errorMessage)
+  }
+}
+
+const showPhone = (): void => {
+  try {
+    emit('phoneRequested', props.master.id)
+    
+    if (props.master.phone && props.master.show_contacts) {
+      const cleanPhone = props.master.phone.replace(/\D/g, '')
+      window.location.href = `tel:${cleanPhone}`
+    } else {
+      toast.info('Телефон будет доступен после записи к мастеру')
+    }
+  } catch (error: unknown) {
+    console.error('Ошибка showPhone:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
+    toast.error('Ошибка звонка: ' + errorMessage)
+  }
+}
+
+const openBooking = (): void => {
+  try {
+    emit('bookingRequested', props.master.id)
+    router.visit(`/masters/${props.master.id}?booking=true`)
+  } catch (error: unknown) {
+    console.error('Ошибка openBooking:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
+    toast.error('Ошибка бронирования: ' + errorMessage)
+  }
 }
 </script>

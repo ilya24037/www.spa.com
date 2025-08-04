@@ -53,7 +53,9 @@
       "Bash(\"C:\\ProgramData\\ComposerSetup\\bin\\composer.bat\" dump-autoload)",
       "Bash(where composer)",
       "Bash(C:Usersuser1.configherdbincomposer.bat dump-autoload)",
-      "Bash(C:Usersuser1.configherdbinphp.bat artisan optimize:clear)"
+      "Bash(C:Usersuser1.configherdbinphp.bat artisan optimize:clear)",
+      "Bash(C:Usersuser1.configherdbinphp.bat artisan --version)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }

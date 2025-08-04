@@ -188,6 +188,10 @@
 import { ref, reactive } from 'vue'
 import { router } from '@inertiajs/vue3'
 import MediaUploader from '@/Components/MediaUpload/MediaUploader.vue'
+import { useToast } from '@/src/shared/composables/useToast'
+
+// Toast для замены alert()
+const toast = useToast()
 
 const props = defineProps({
   master: {
@@ -216,9 +220,9 @@ const updateProfile = async () => {
   
   try {
     await router.put(`/masters/${props.master.id}`, form)
-    alert('Профиль обновлен успешно!')
+    toast.success('Профиль обновлен успешно!')
   } catch (error) {
-    alert('Ошибка обновления профиля: ' + error.message)
+    toast.error('Ошибка обновления профиля: ' + error.message)
   } finally {
     updating.value = false
   }

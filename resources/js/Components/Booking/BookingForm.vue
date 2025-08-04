@@ -44,7 +44,12 @@
     </div>
 
     <!-- Контент формы -->
-    <form @submit.prevent="handleSubmit" class="space-y-6">
+    <form 
+      @submit.prevent="handleSubmit" 
+      class="space-y-6"
+      role="form"
+      aria-label="Форма бронирования услуги"
+    >
       <!-- Шаг 1: Выбор услуги -->
       <div v-show="currentStep === 0" class="animate-fadeIn">
         <h3 class="text-lg font-semibold text-gray-900 mb-4">Выберите услугу</h3>
@@ -58,6 +63,7 @@
               'border-blue-600 bg-blue-50': formData.service?.id === service.id,
               'border-gray-200': formData.service?.id !== service.id
             }"
+            data-testid="service-option"
           >
             <input 
               type="radio"
@@ -250,8 +256,11 @@
               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               :class="{'border-red-500': errors.name}"
               placeholder="Введите ваше имя"
+              aria-label="Ваше имя"
+              aria-required="true"
+              :aria-describedby="errors.name ? 'name-error' : undefined"
             >
-            <p v-if="errors.name" class="mt-1 text-sm text-red-600">{{ errors.name }}</p>
+            <p v-if="errors.name" id="name-error" class="mt-1 text-sm text-red-600" role="alert">{{ errors.name }}</p>
           </div>
 
           <!-- Телефон -->
@@ -267,8 +276,11 @@
               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               :class="{'border-red-500': errors.phone}"
               placeholder="+7 (999) 999-99-99"
+              aria-label="Номер телефона"
+              aria-required="true"
+              :aria-describedby="errors.phone ? 'phone-error' : undefined"
             >
-            <p v-if="errors.phone" class="mt-1 text-sm text-red-600">{{ errors.phone }}</p>
+            <p v-if="errors.phone" id="phone-error" class="mt-1 text-sm text-red-600" role="alert">{{ errors.phone }}</p>
           </div>
 
           <!-- Email -->
@@ -339,17 +351,20 @@
           <!-- Мастер -->
           <div class="flex items-center">
             <img 
-              :src="master.photo"
+              :src="master.avatar || '/default-avatar.jpg'"
               :alt="master.name"
               class="w-16 h-16 rounded-full object-cover"
             >
             <div class="ml-4">
               <h4 class="font-medium text-gray-900">{{ master.name }}</h4>
-              <div class="flex items-center text-sm text-gray-600">
+              <div v-if="master.rating && master.reviewsCount" class="flex items-center text-sm text-gray-600">
                 <svg class="w-4 h-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                 </svg>
                 {{ master.rating }} ({{ master.reviewsCount }} отзывов)
+              </div>
+              <div v-else class="text-sm text-gray-500">
+                Новый мастер
               </div>
             </div>
           </div>
@@ -473,33 +488,44 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed, watch, onUnmounted } from 'vue'
+<script setup lang="ts">
+import { ref, computed, watch, onUnmounted, type Ref } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { vMaska } from 'maska'
 import BookingCalendar from './Calendar.vue'
 import { useBookingStore } from '@/stores/bookingStore'
+import { useToast } from '@/src/shared/composables/useToast'
+import type {
+  BookingFormProps,
+  BookingFormEmits,
+  FormData,
+  FormErrors,
+  Step,
+  TimeSlot,
+  BookingData,
+  BookingResult,
+  ApiError,
+  StepIndex
+} from './BookingForm.types'
+
+// Toast для замены alert()
+const toast = useToast()
 
 // Props
-const props = defineProps({
-  master: {
-    type: Object,
-    required: true
-  }
-})
+const props = defineProps<BookingFormProps>()
 
 // Emit
-const emit = defineEmits(['close', 'success'])
+const emit = defineEmits<BookingFormEmits>()
 
 // Подключаем Store
 const bookingStore = useBookingStore()
 
 // Состояние формы
-const currentStep = ref(0)
-const isSubmitting = ref(false)
-const loadingSlots = ref(false)
+const currentStep: Ref<StepIndex> = ref(0)
+const isSubmitting: Ref<boolean> = ref(false)
+const loadingSlots: Ref<boolean> = ref(false)
 
-const steps = [
+const steps: Step[] = [
   { label: 'Услуга' },
   { label: 'Дата и время' },
   { label: 'Контакты' },
@@ -507,7 +533,7 @@ const steps = [
 ]
 
 // Данные формы
-const formData = ref({
+const formData: Ref<FormData> = ref({
   service: null,
   date: null,
   time: null,
@@ -522,11 +548,11 @@ const formData = ref({
 })
 
 // Ошибки валидации
-const errors = ref({})
+const errors: Ref<FormErrors> = ref({})
 
 // Доступные даты и слоты
-const availableDates = ref([])
-const availableSlots = ref([])
+const availableDates: Ref<string[]> = ref([])
+const availableSlots: Ref<TimeSlot[]> = ref([])
 
 // Вычисляемые свойства
 const totalPrice = computed(() => {
@@ -554,7 +580,7 @@ const canProceed = computed(() => {
 })
 
 // Методы
-const formatPrice = (price) => {
+const formatPrice = (price: number): string => {
   return new Intl.NumberFormat('ru-RU', {
     style: 'currency',
     currency: 'RUB',
@@ -562,7 +588,7 @@ const formatPrice = (price) => {
   }).format(price)
 }
 
-const formatDate = (date) => {
+const formatDate = (date: string | null): string => {
   if (!date) return ''
   return new Date(date).toLocaleDateString('ru-RU', {
     weekday: 'long',
@@ -571,19 +597,19 @@ const formatDate = (date) => {
   })
 }
 
-const nextStep = () => {
+const nextStep = (): void => {
   if (canProceed.value && currentStep.value < steps.length - 1) {
     currentStep.value++
   }
 }
 
-const previousStep = () => {
+const previousStep = (): void => {
   if (currentStep.value > 0) {
     currentStep.value--
   }
 }
 
-const loadAvailableSlots = async (date) => {
+const loadAvailableSlots = async (date: string): Promise<void> => {
   if (!date) return
   
   loadingSlots.value = true
@@ -591,16 +617,17 @@ const loadAvailableSlots = async (date) => {
     // Используем Store для загрузки слотов
     const slots = await bookingStore.loadTimeSlots(props.master.id, date)
     availableSlots.value = slots
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Ошибка загрузки слотов:', error)
-    // Показываем пользователю сообщение об ошибке
+    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
+    toast.error('Ошибка загрузки времени: ' + errorMessage)
     availableSlots.value = []
   } finally {
     loadingSlots.value = false
   }
 }
 
-const validateForm = () => {
+const validateForm = (): boolean => {
   errors.value = {}
   
   if (!formData.value.name) {
@@ -618,7 +645,7 @@ const validateForm = () => {
   return Object.keys(errors.value).length === 0
 }
 
-const handleSubmit = async () => {
+const handleSubmit = async (): Promise<void> => {
   if (!validateForm()) {
     currentStep.value = 2
     return
@@ -627,8 +654,14 @@ const handleSubmit = async () => {
   isSubmitting.value = true
   
   try {
+    // Проверяем обязательные поля
+    if (!formData.value.service?.id || !formData.value.date || !formData.value.time) {
+      toast.error('Заполните все обязательные поля')
+      return
+    }
+    
     // Подготавливаем данные для Store
-    const bookingData = {
+    const bookingData: BookingData = {
       masterId: props.master.id,
       serviceId: formData.value.service.id,
       date: formData.value.date,
@@ -636,30 +669,33 @@ const handleSubmit = async () => {
       locationType: formData.value.locationType,
       clientName: formData.value.name,
       clientPhone: formData.value.phone,
-      clientEmail: formData.value.email,
-      address: formData.value.address,
-      comment: formData.value.comment,
+      clientEmail: formData.value.email || undefined,
+      address: formData.value.address || undefined,
+      comment: formData.value.comment || undefined,
       paymentMethod: formData.value.paymentMethod
     }
     
     // Используем Store для создания бронирования
-    const result = await bookingStore.createBooking(bookingData)
+    const result: BookingResult = await bookingStore.createBooking(bookingData)
     
     // Успешное бронирование
     emit('success', result)
     
     // Можно перенаправить на страницу успеха
     // router.visit(`/booking/success/${result.id}`)
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('❌ Ошибка бронирования:', error)
     
+    const apiError = error as ApiError
+    
     // Показываем ошибки валидации
-    if (error.response?.status === 422) {
-      errors.value = error.response.data.errors
+    if (apiError.response?.status === 422) {
+      errors.value = apiError.response.data.errors
       currentStep.value = 2 // Возвращаемся к форме
     } else {
       // Показываем общую ошибку
-      alert('Произошла ошибка при создании записи. Попробуйте позже.')
+      const errorMessage = apiError.message || 'Произошла ошибка при создании записи'
+      toast.error(errorMessage)
     }
   } finally {
     isSubmitting.value = false
@@ -667,12 +703,14 @@ const handleSubmit = async () => {
 }
 
 // Загрузка доступных дат при инициализации
-const loadAvailableDates = async () => {
+const loadAvailableDates = async (): Promise<void> => {
   try {
     const dates = await bookingStore.loadAvailableDates(props.master.id)
     availableDates.value = dates
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Ошибка загрузки дат:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
+    toast.error('Ошибка загрузки доступных дат: ' + errorMessage)
     // Используем тестовые данные если API не работает
     availableDates.value = bookingStore.generateTestDates()
   }
