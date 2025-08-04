@@ -1,22 +1,8 @@
-// 🎯 Feature MastersFilter - Фильтрация мастеров для главной страницы
-// Feature-Sliced Design экспорты
+// Feature Masters Filter
+// Feature-Sliced Design exports
 
-// === UI КОМПОНЕНТЫ ===
-
-// Основная панель фильтров
+// Main filter panel
 export { FilterPanel } from './ui'
 
-// Отдельные компоненты фильтров (для кастомизации)
-export {
-  FilterSearch,
-  FilterPrice,
-  FilterLocation,
-  FilterCategory,
-  FilterRating,
-  FilterAdditional
-} from './ui'
-
-// === MODEL СЛОЙ ===
-
-// Store для управления фильтрами
-export { useMastersFilterStore } from './model/mastersFilterStore'
+// Individual filter components  
+export * from './ui'

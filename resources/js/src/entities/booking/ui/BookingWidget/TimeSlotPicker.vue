@@ -120,7 +120,7 @@
 import { ref, computed, watch } from 'vue'
 import { format, addDays, isToday, isTomorrow, parseISO } from 'date-fns'
 import { ru } from 'date-fns/locale'
-import Modal from '@/Components/UI/Modal.vue'
+import Modal from '@/src/shared/ui/organisms/Modal/Modal.vue'
 import Calendar from '@/Components/Booking/Calendar.vue'
 
 const props = defineProps({

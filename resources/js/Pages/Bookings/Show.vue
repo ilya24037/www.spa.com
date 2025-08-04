@@ -344,7 +344,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
-import Modal from '@/Components/UI/Modal.vue'
+import Modal from '@/src/shared/ui/organisms/Modal/Modal.vue'
 import { 
     StarIcon, 
     PhoneIcon, 

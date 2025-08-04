@@ -2,6 +2,7 @@
 
 namespace App\Application\Http\Controllers\Media;
 
+use App\Application\Http\Controllers\Controller;
 use App\Domain\Master\Models\MasterProfile;
 use App\Domain\Media\Models\Photo;
 use Illuminate\Http\Request;

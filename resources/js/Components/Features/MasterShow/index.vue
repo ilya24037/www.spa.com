@@ -42,7 +42,7 @@
 
 <script setup>
 import { PhoneIcon, CalendarIcon, StarIcon, MapPinIcon } from '@heroicons/vue/24/outline'
-import PhotoGallery from '@/Components/Gallery/PhotoGallery.vue'
+import { PhotoGallery } from '@/src/features/gallery'
 import MasterInfo from './components/MasterInfo.vue'
 import ServicesList from './components/ServicesList.vue'
 import ReviewsList from './components/ReviewsList.vue'

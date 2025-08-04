@@ -15,7 +15,10 @@ class NotificationService extends BaseNotificationService
      */
     public function sendPaymentSuccess(int $userId, array $paymentData): void
     {
-        $this->send($userId, 'payment_success', $paymentData);
+        $user = \App\Domain\User\Models\User::find($userId);
+        if ($user) {
+            $this->sendByTemplate($user, 'payment_success', $paymentData);
+        }
     }
 
     /**
@@ -23,7 +26,10 @@ class NotificationService extends BaseNotificationService
      */
     public function sendPaymentFailed(int $userId, array $paymentData): void
     {
-        $this->send($userId, 'payment_failed', $paymentData);
+        $user = \App\Domain\User\Models\User::find($userId);
+        if ($user) {
+            $this->sendByTemplate($user, 'payment_failed', $paymentData);
+        }
     }
 
     /**
@@ -31,7 +37,10 @@ class NotificationService extends BaseNotificationService
      */
     public function sendRefundProcessed(int $userId, array $refundData): void
     {
-        $this->send($userId, 'refund_processed', $refundData);
+        $user = \App\Domain\User\Models\User::find($userId);
+        if ($user) {
+            $this->sendByTemplate($user, 'refund_processed', $refundData);
+        }
     }
 
     /**
@@ -39,7 +48,10 @@ class NotificationService extends BaseNotificationService
      */
     public function sendSubscriptionExpiring(int $userId, array $subscriptionData): void
     {
-        $this->send($userId, 'subscription_expiring', $subscriptionData);
+        $user = \App\Domain\User\Models\User::find($userId);
+        if ($user) {
+            $this->sendByTemplate($user, 'subscription_expiring', $subscriptionData);
+        }
     }
 
     /**
@@ -47,6 +59,9 @@ class NotificationService extends BaseNotificationService
      */
     public function sendReceipt(int $userId, array $receiptData): void
     {
-        $this->send($userId, 'payment_receipt', $receiptData, ['email']);
+        $user = \App\Domain\User\Models\User::find($userId);
+        if ($user) {
+            $this->sendByTemplate($user, 'payment_receipt', $receiptData);
+        }
     }
 }

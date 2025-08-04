@@ -213,7 +213,7 @@ import { ref } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import { MapPinIcon, PhoneIcon } from '@heroicons/vue/24/outline'
 import ConfirmModal from '@/Components/UI/ConfirmModal.vue'
-import PhotoGallery from '@/Components/Gallery/PhotoGallery.vue'
+import { PhotoGallery } from '@/src/features/gallery'
 // 🎯 FSD Импорты
 import { Breadcrumbs } from '@/src/shared'
 

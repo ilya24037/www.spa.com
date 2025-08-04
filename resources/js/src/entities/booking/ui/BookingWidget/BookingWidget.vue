@@ -228,7 +228,7 @@ import { ref, computed, watch } from 'vue'
 import dayjs from 'dayjs'
 import 'dayjs/locale/ru'
 import { BookingCalendar } from '../BookingCalendar'
-import { BookingForm } from '../BookingForm'
+import { BookingForm } from '../../../features/booking-form/ui/BookingForm'
 
 // Настройка dayjs
 dayjs.locale('ru')

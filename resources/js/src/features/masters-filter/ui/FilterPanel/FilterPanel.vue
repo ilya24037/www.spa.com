@@ -78,7 +78,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { useMastersFilterStore } from '../model/mastersFilterStore'
+import { useMastersFilterStore } from '../model/mastersFilterStore.js'
 import FilterSearch from './FilterSearch.vue'
 import FilterPrice from './FilterPrice.vue'
 import FilterLocation from './FilterLocation.vue'

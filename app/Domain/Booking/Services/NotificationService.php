@@ -14,7 +14,7 @@ class NotificationService
     public function sendBookingCreated(Booking $booking): void
     {
         // Уведомление клиенту о создании бронирования
-        $this->notificationService->send(
+        $this->notificationService->sendByTemplate(
             $booking->client,
             'booking.created',
             [
@@ -29,7 +29,7 @@ class NotificationService
         
         // Уведомление мастеру о новом бронировании
         if ($booking->master && $booking->master->user) {
-            $this->notificationService->send(
+            $this->notificationService->sendByTemplate(
                 $booking->master->user,
                 'booking.new.master',
                 [
@@ -45,7 +45,7 @@ class NotificationService
 
     public function sendBookingConfirmation(Booking $booking): void
     {
-        $this->notificationService->send(
+        $this->notificationService->sendByTemplate(
             $booking->client,
             'booking.confirmed',
             [
@@ -59,7 +59,7 @@ class NotificationService
 
     public function sendBookingCancellation(Booking $booking): void
     {
-        $this->notificationService->send(
+        $this->notificationService->sendByTemplate(
             $booking->client,
             'booking.cancelled',
             [
@@ -72,7 +72,7 @@ class NotificationService
         );
 
         // Уведомляем мастера о отмене
-        $this->notificationService->send(
+        $this->notificationService->sendByTemplate(
             $booking->master->user,
             'booking.cancelled.master',
             [
@@ -86,7 +86,7 @@ class NotificationService
     public function sendBookingReminder(Booking $booking): void
     {
         // Напоминание клиенту за день до визита
-        $this->notificationService->send(
+        $this->notificationService->sendByTemplate(
             $booking->client,
             'booking.reminder',
             [
@@ -103,7 +103,7 @@ class NotificationService
     public function sendBookingCompleted(Booking $booking): void
     {
         // Уведомление после завершения услуги
-        $this->notificationService->send(
+        $this->notificationService->sendByTemplate(
             $booking->client,
             'booking.completed',
             [
@@ -117,7 +117,7 @@ class NotificationService
     public function sendBookingRescheduled(Booking $booking, array $oldDateTime): void
     {
         // Уведомление о переносе времени
-        $this->notificationService->send(
+        $this->notificationService->sendByTemplate(
             $booking->client,
             'booking.rescheduled',
             [

@@ -137,7 +137,7 @@
 
 <script setup>
 import { Head, Link } from '@inertiajs/vue3'
-import PhotoGallery from '@/Components/Gallery/PhotoGallery.vue'
+import { PhotoGallery } from '@/src/features/gallery'
 
 const props = defineProps({
   ad: {

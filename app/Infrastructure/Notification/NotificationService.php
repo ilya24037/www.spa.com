@@ -544,7 +544,7 @@ class NotificationService
     /**
      * Отправить уведомление по шаблону (для совместимости с Domain слоем)
      */
-    public function send(User $user, string $template, array $data): void
+    public function sendByTemplate(User $user, string $template, array $data): void
     {
         try {
             $type = $this->getNotificationTypeFromTemplate($template);

@@ -2,7 +2,7 @@
 import AppLayout from '@/Layouts/AppLayout.vue'
 import InputError from '@/Components/UI/Forms/InputError.vue';
 import InputLabel from '@/Components/UI/Forms/InputLabel.vue';
-import PrimaryButton from '@/Components/UI/Buttons/PrimaryButton.vue';
+import PrimaryButton from '@/Components/UI/Forms/PrimaryButton.vue';
 import TextInput from '@/Components/UI/Forms/TextInput.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 
