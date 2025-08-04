@@ -322,7 +322,6 @@ const handleStatusFilterChange = (status) => {
 
 const handleAdStatusChange = (ad, newStatus) => {
   // Обновление статуса объявления
-  console.log('Changing ad status:', ad.id, newStatus)
 }
 
 const editAd = (ad) => {
@@ -332,7 +331,6 @@ const editAd = (ad) => {
 const deleteAd = (ad) => {
   if (confirm('Вы уверены, что хотите удалить объявление?')) {
     // API вызов для удаления
-    console.log('Deleting ad:', ad.id)
   }
 }
 
@@ -341,17 +339,14 @@ const duplicateAd = (ad) => {
 }
 
 const confirmBooking = (booking) => {
-  console.log('Confirming booking:', booking.id)
 }
 
 const cancelBooking = (booking) => {
   if (confirm('Вы уверены, что хотите отменить запись?')) {
-    console.log('Cancelling booking:', booking.id)
   }
 }
 
 const completeBooking = (booking) => {
-  console.log('Completing booking:', booking.id)
 }
 
 const goToMaster = (master) => {
@@ -359,7 +354,6 @@ const goToMaster = (master) => {
 }
 
 const removeFromFavorites = (master) => {
-  console.log('Removing from favorites:', master.id)
 }
 
 const goToCreateAd = () => {

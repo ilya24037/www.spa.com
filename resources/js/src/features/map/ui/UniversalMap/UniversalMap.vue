@@ -238,7 +238,6 @@ const zoomOut = () => {
 
 const goToMyLocation = () => {
   // Имитация определения местоположения
-  console.log('Getting user location...')
 }
 
 const toggleFullscreen = () => {
@@ -248,7 +247,6 @@ const toggleFullscreen = () => {
 // Жизненный цикл
 onMounted(() => {
   // Инициализация карты
-  console.log('Map initialized with', props.markers.length, 'markers')
 })
 </script>
 

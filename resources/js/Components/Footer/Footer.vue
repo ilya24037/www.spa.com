@@ -183,6 +183,5 @@ const { route } = window
 
 const enableAccessibility = () => {
     // Функция для включения режима для слабовидящих
-    console.log('Включение режима для слабовидящих')
 }
 </script>

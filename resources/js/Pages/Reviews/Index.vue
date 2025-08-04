@@ -345,7 +345,6 @@ const submitReply = async (reviewId) => {
     if (!replyText.value.trim()) return
     
     // Здесь будет отправка на сервер
-    console.log('Reply to review:', reviewId, replyText.value)
     
     // Обновляем локально для демонстрации
     const review = reviews.value.find(r => r.id === reviewId)

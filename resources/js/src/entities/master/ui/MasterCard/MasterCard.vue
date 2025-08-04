@@ -227,7 +227,6 @@ const goToProfile = (): void => {
     emit('profileVisited', props.master.id)
     router.visit(`/masters/${props.master.id}`)
   } catch (error: unknown) {
-    console.error('Ошибка перехода к профилю:', error)
     const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
     toast.error('Ошибка перехода: ' + errorMessage)
   }
@@ -247,12 +246,10 @@ const toggleFavorite = async (): Promise<void> => {
         toast.success(currentState ? 'Удалено из избранного' : 'Добавлено в избранное')
       },
       onError: (errors) => {
-        console.error('Ошибка избранного:', errors)
         toast.error('Ошибка обновления избранного')
       }
     })
   } catch (error: unknown) {
-    console.error('Ошибка toggleFavorite:', error)
     const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
     toast.error('Ошибка: ' + errorMessage)
   }
@@ -269,7 +266,6 @@ const showPhone = (): void => {
       toast.info('Телефон будет доступен после записи к мастеру')
     }
   } catch (error: unknown) {
-    console.error('Ошибка showPhone:', error)
     const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
     toast.error('Ошибка звонка: ' + errorMessage)
   }
@@ -280,7 +276,6 @@ const openBooking = (): void => {
     emit('bookingRequested', props.master.id)
     router.visit(`/masters/${props.master.id}?booking=true`)
   } catch (error: unknown) {
-    console.error('Ошибка openBooking:', error)
     const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
     toast.error('Ошибка бронирования: ' + errorMessage)
   }

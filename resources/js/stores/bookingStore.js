@@ -51,7 +51,6 @@ export const useBookingStore = defineStore('booking', () => {
   
   // 📋 Получить список бронирований
   async function fetchBookings() {
-    console.log('📤 Загружаем список бронирований...')
     
     isLoading.value = true
     error.value = null
@@ -65,11 +64,9 @@ export const useBookingStore = defineStore('booking', () => {
       })
       
       bookings.value = response.data.data || response.data
-      console.log('✅ Загружено бронирований:', bookings.value.length)
       
       return bookings.value
     } catch (error) {
-      console.error('❌ Ошибка загрузки бронирований:', error)
       
       if (error.response?.status === 401) {
         this.error = 'Необходимо войти в систему'
@@ -85,7 +82,6 @@ export const useBookingStore = defineStore('booking', () => {
   
   // 📅 Получить доступные слоты
   async function fetchAvailableSlots(masterId, serviceId, date = null) {
-    console.log('📤 Получаем доступные слоты для мастера:', masterId, 'услуга:', serviceId)
     
     isLoading.value = true
     error.value = null
@@ -115,11 +111,9 @@ export const useBookingStore = defineStore('booking', () => {
         availableSlots.value = response.data.slots || {}
       }
       
-      console.log('✅ Получены доступные слоты:', Object.keys(availableSlots.value).length, 'дней')
       
       return availableSlots.value
     } catch (error) {
-      console.error('❌ Ошибка получения слотов:', error)
       this.error = 'Не удалось получить доступные слоты'
       throw error
     } finally {
@@ -129,7 +123,6 @@ export const useBookingStore = defineStore('booking', () => {
   
   // 📝 Создать новое бронирование (ОБНОВЛЕННЫЙ МЕТОД)
   async function createBooking(bookingData) {
-    console.log('📤 Отправляем бронирование:', bookingData)
     
     isLoading.value = true
     error.value = null
@@ -169,11 +162,9 @@ export const useBookingStore = defineStore('booking', () => {
       // Очищаем форму
       resetCurrentBooking()
       
-      console.log('✅ Бронирование создано:', response.data.booking_number)
       
       return response.data.booking
     } catch (error) {
-      console.error('❌ Ошибка создания бронирования:', error)
       
       // Обработка ошибок валидации
       if (error.response?.status === 422) {
@@ -197,7 +188,6 @@ export const useBookingStore = defineStore('booking', () => {
   
   // ❌ Отменить бронирование
   async function cancelBooking(bookingId, reason = null) {
-    console.log('📤 Отменяем бронирование:', bookingId)
     
     isLoading.value = true
     error.value = null
@@ -220,11 +210,9 @@ export const useBookingStore = defineStore('booking', () => {
         booking.cancelled_at = new Date().toISOString()
       }
       
-      console.log('✅ Бронирование отменено')
       
       return response.data
     } catch (error) {
-      console.error('❌ Ошибка отмены бронирования:', error)
       this.error = error.response?.data?.message || 'Не удалось отменить бронирование'
       throw error
     } finally {
@@ -234,7 +222,6 @@ export const useBookingStore = defineStore('booking', () => {
   
   // ✅ Подтвердить бронирование (для мастеров)
   async function confirmBooking(bookingId) {
-    console.log('📤 Подтверждаем бронирование:', bookingId)
     
     isLoading.value = true
     error.value = null
@@ -254,11 +241,9 @@ export const useBookingStore = defineStore('booking', () => {
         booking.confirmed_at = new Date().toISOString()
       }
       
-      console.log('✅ Бронирование подтверждено')
       
       return response.data
     } catch (error) {
-      console.error('❌ Ошибка подтверждения бронирования:', error)
       this.error = error.response?.data?.message || 'Не удалось подтвердить бронирование'
       throw error
     } finally {
@@ -268,7 +253,6 @@ export const useBookingStore = defineStore('booking', () => {
   
   // 🏁 Завершить услугу (для мастеров)
   async function completeBooking(bookingId) {
-    console.log('📤 Завершаем услугу:', bookingId)
     
     isLoading.value = true
     error.value = null
@@ -289,11 +273,9 @@ export const useBookingStore = defineStore('booking', () => {
         booking.paid_at = new Date().toISOString()
       }
       
-      console.log('✅ Услуга завершена')
       
       return response.data
     } catch (error) {
-      console.error('❌ Ошибка завершения услуги:', error)
       this.error = error.response?.data?.message || 'Не удалось завершить услугу'
       throw error
     } finally {

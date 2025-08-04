@@ -166,7 +166,6 @@ export default {
       this.$emit('address-selected', address)
     },
     handleMapClick(data) {
-      console.log('Выбрано место на карте:', data)
       // Здесь можно установить координаты в форму
       this.$emit('map-location-selected', data)
     }

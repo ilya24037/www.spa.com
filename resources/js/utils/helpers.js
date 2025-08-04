@@ -193,7 +193,6 @@ export async function copyToClipboard(text) {
         await navigator.clipboard.writeText(text)
         return true
     } catch (err) {
-        console.error('Ошибка копирования:', err)
         return false
     }
 }

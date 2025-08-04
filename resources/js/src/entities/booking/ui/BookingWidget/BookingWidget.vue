@@ -326,7 +326,6 @@ const handleFormSubmit = async (formData) => {
     emit('booking-created', createdBooking.value)
 
   } catch (error) {
-    console.error('Booking creation failed:', error)
     errorMessage.value = error.message
     currentStep.value = 'error'
   } finally {

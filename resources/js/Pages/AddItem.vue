@@ -63,7 +63,6 @@ const initialData = {
 
 // Обработчики событий
 const handleSuccess = (response) => {
-  console.log('Объявление создано успешно', response)
   
   // Перенаправляем на страницу созданного объявления
   if (response.ad && response.ad.id) {
@@ -74,7 +73,6 @@ const handleSuccess = (response) => {
 }
 
 const handleDraftSaved = (draftData) => {
-  console.log('Черновик сохранен', draftData)
   // Можно показать уведомление
 }
 </script> 

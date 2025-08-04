@@ -180,7 +180,6 @@ const callPhone = async (): Promise<void> => {
       message: 'Не удалось открыть приложение для звонка',
       originalError: error
     }
-    console.error('Phone call error:', phoneError)
     toast.error(phoneError.message)
   }
 }
@@ -212,7 +211,6 @@ const copyPhone = async (): Promise<void> => {
       message: 'Не удалось скопировать телефон',
       originalError: error
     }
-    console.error('Copy error:', phoneError)
     toast.error(phoneError.message)
   } finally {
     state.value.isCopying = false

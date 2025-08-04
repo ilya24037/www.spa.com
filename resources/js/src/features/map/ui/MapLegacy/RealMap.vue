@@ -96,7 +96,6 @@ const initMap = async () => {
         emit('map-ready', map)
 
     } catch (error) {
-        console.error('Ошибка инициализации карты:', error)
         loading.value = false
     }
 }

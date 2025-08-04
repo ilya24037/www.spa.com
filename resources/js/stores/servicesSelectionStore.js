@@ -140,7 +140,6 @@ export const useServicesSelectionStore = defineStore('servicesSelection', () => 
     } catch (error) {
       // Откат при ошибке API
       selections.value.set(serviceId, oldSelection)
-      console.error('Ошибка обновления цены:', error)
       throw error
     }
   }

@@ -77,7 +77,6 @@ export const useAuthStore = defineStore('auth', {
                 this.isAuthenticated = false
                 window.location.href = '/'
             } catch (error) {
-                console.error('Logout error:', error)
             }
         },
 

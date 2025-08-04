@@ -200,7 +200,6 @@ export function useAd(adId = null) {
         }
       } catch (err) {
         // Не показываем ошибку пользователю для просмотров
-        console.warn('Ошибка обновления просмотров:', err)
       }
     },
 

@@ -201,7 +201,6 @@ export default {
         this.showSuggestions = true
         this.activeIndex = -1
       } catch (error) {
-        console.error('Ошибка поиска адресов:', error)
       } finally {
         this.loading = false
       }
@@ -268,7 +267,6 @@ export default {
     // Метод для интеграции с Yandex Geocoder API
     async searchWithYandex(query) {
       if (!this.apiKey) {
-        console.warn('API ключ для Yandex Geocoder не указан')
         return []
       }
       

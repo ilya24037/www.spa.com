@@ -71,7 +71,6 @@ function fallbackCopyTextToClipboard(text) {
             window.toast.success('Скопировано в буфер обмена!');
         }
     } catch (err) {
-        console.error('Fallback: Ошибка копирования', err);
     }
     
     document.body.removeChild(textArea);
@@ -79,11 +78,9 @@ function fallbackCopyTextToClipboard(text) {
 
 // Глобальный обработчик ошибок JavaScript
 window.addEventListener('error', (event) => {
-    console.error('Глобальная JS ошибка:', event.error);
 });
 
 // Обработчик необработанных Promise rejection
 window.addEventListener('unhandledrejection', (event) => {
-    console.error('Необработанный Promise rejection:', event.reason);
     event.preventDefault();
 });

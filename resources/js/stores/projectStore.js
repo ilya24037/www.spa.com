@@ -94,7 +94,6 @@ export const useProjectStore = defineStore('project', {
                 this.error = null;
             } catch (error) {
                 this.error = error.response?.data?.message || 'Ошибка загрузки проектов';
-                console.error('Error fetching projects:', error);
             } finally {
                 this.loading = false;
             }
@@ -118,7 +117,6 @@ export const useProjectStore = defineStore('project', {
                 this.error = null;
             } catch (error) {
                 this.error = error.response?.data?.message || 'Ошибка загрузки проекта';
-                console.error('Error fetching project:', error);
             } finally {
                 this.loading = false;
             }
@@ -161,7 +159,6 @@ export const useProjectStore = defineStore('project', {
                 this.tasks = response.data.tasks;
                 this.updateKanban();
             } catch (error) {
-                console.error('Error fetching tasks:', error);
             }
         },
 
@@ -206,7 +203,6 @@ export const useProjectStore = defineStore('project', {
                 await this.updateProjectProgress(projectId);
                 return response.data.task;
             } catch (error) {
-                console.error('Error updating task progress:', error);
             }
         },
 
@@ -239,7 +235,6 @@ export const useProjectStore = defineStore('project', {
                 this.updateKanban();
                 await this.updateProjectProgress(projectId);
             } catch (error) {
-                console.error('Error moving task:', error);
             }
         },
 
@@ -249,7 +244,6 @@ export const useProjectStore = defineStore('project', {
                 const response = await axios.get(`/projects/${projectId}/milestones`);
                 this.milestones = response.data.milestones;
             } catch (error) {
-                console.error('Error fetching milestones:', error);
             }
         },
 
@@ -276,7 +270,6 @@ export const useProjectStore = defineStore('project', {
                 await this.updateProjectProgress(projectId);
                 return response.data;
             } catch (error) {
-                console.error('Error completing milestone:', error);
                 throw error;
             }
         },
@@ -287,7 +280,6 @@ export const useProjectStore = defineStore('project', {
                 const response = await axios.get(`/projects/${projectId}/members`);
                 this.members = response.data.members;
             } catch (error) {
-                console.error('Error fetching members:', error);
             }
         },
 
@@ -318,7 +310,6 @@ export const useProjectStore = defineStore('project', {
                     this.projects[index].health_score = response.data.health_score;
                 }
             } catch (error) {
-                console.error('Error updating project progress:', error);
             }
         },
 
@@ -343,7 +334,6 @@ export const useProjectStore = defineStore('project', {
                     const metricsResponse = await axios.get(`/projects/${projectId}/metrics`);
                     this.metrics = metricsResponse.data.metrics;
                 } catch (error) {
-                    console.error('Auto-update error:', error);
                 }
             }, 30000); // 30 секунд
         },

@@ -1,127 +1,121 @@
-<!-- resources/js/src/features/masters-filter/ui/FilterCategory/FilterCategory.vue -->
+<!--
+  Категория фильтра с коллапсом
+  Обертка для группировки связанных фильтров
+  Поддерживает состояние active и счетчик выбранных элементов
+-->
 <template>
-  <div :class="CONTAINER_CLASSES">
-    <h4 :class="TITLE_CLASSES">Вид массажа</h4>
-    
-    <div :class="CATEGORIES_CONTAINER_CLASSES">
-      <label
-        v-for="category in categories"
-        :key="category.id"
-        :class="CATEGORY_ITEM_CLASSES"
-      >
-        <input
-          type="checkbox"
-          :value="category.id"
-          :checked="isSelected(category.id)"
-          @change="toggleCategory(category.id)"
-          :class="CHECKBOX_CLASSES"
+  <div class="border-b border-gray-200 last:border-b-0">
+    <!-- Заголовок категории -->
+    <button
+      @click="toggleExpanded"
+      class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
+      :class="[
+        active ? 'bg-blue-50' : ''
+      ]"
+    >
+      <!-- Иконка и название -->
+      <div class="flex items-center gap-3">
+        <span class="text-lg">{{ icon }}</span>
+        <span class="font-medium text-gray-900">{{ title }}</span>
+        <!-- Счетчик активных фильтров -->
+        <span 
+          v-if="count && count > 0"
+          class="px-2 py-1 text-xs font-medium text-white bg-blue-600 rounded-full"
         >
-        <div :class="CATEGORY_INFO_CLASSES">
-          <span :class="CATEGORY_NAME_CLASSES">{{ category.name }}</span>
-          <span v-if="category.masters_count" :class="CATEGORY_COUNT_CLASSES">
-            {{ category.masters_count }}
-          </span>
-        </div>
-      </label>
-    </div>
-
-    <!-- Показать выбранные -->
-    <div v-if="hasSelected" :class="SELECTED_CONTAINER_CLASSES">
-      <div :class="SELECTED_HEADER_CLASSES">
-        <span :class="SELECTED_TITLE_CLASSES">Выбрано ({{ selectedCount }})</span>
-        <button
-          @click="clearSelection"
-          :class="CLEAR_BUTTON_CLASSES"
-        >
-          Очистить
-        </button>
-      </div>
-      <div :class="SELECTED_TAGS_CLASSES">
-        <span
-          v-for="categoryId in selected"
-          :key="categoryId"
-          :class="SELECTED_TAG_CLASSES"
-        >
-          {{ getCategoryName(categoryId) }}
-          <button
-            @click="removeCategory(categoryId)"
-            :class="REMOVE_TAG_BUTTON_CLASSES"
-          >
-            ✕
-          </button>
+          {{ count }}
         </span>
       </div>
-    </div>
+
+      <!-- Кнопка сворачивания -->
+      <div class="flex items-center gap-2">
+        <!-- Индикатор активности -->
+        <div
+          v-if="active"
+          class="w-2 h-2 bg-blue-600 rounded-full"
+        />
+        
+        <!-- Стрелка -->
+        <svg
+          class="w-5 h-5 text-gray-400 transition-transform"
+          :class="[
+            isExpanded ? 'rotate-180' : ''
+          ]"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path 
+            stroke-linecap="round" 
+            stroke-linejoin="round" 
+            stroke-width="2" 
+            d="M19 9l-7 7-7-7" 
+          />
+        </svg>
+      </div>
+    </button>
+
+    <!-- Контент категории -->
+    <Transition name="collapse">
+      <div 
+        v-if="isExpanded"
+        class="px-4 pb-4"
+      >
+        <slot />
+      </div>
+    </Transition>
   </div>
 </template>
 
-<script setup>
-import { computed } from 'vue'
+<script setup lang="ts">
+import { ref } from 'vue'
+import type { FilterCategoryProps } from '../../model/types'
 
-// 🎯 Стили согласно дизайн-системе
-const CONTAINER_CLASSES = 'space-y-3'
-const TITLE_CLASSES = 'font-medium text-gray-900'
-const CATEGORIES_CONTAINER_CLASSES = 'space-y-2 max-h-48 overflow-y-auto'
-const CATEGORY_ITEM_CLASSES = 'flex items-center cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors'
-const CHECKBOX_CLASSES = 'mr-3 rounded text-blue-600 focus:ring-blue-500 flex-shrink-0'
-const CATEGORY_INFO_CLASSES = 'flex items-center justify-between w-full'
-const CATEGORY_NAME_CLASSES = 'text-sm text-gray-700'
-const CATEGORY_COUNT_CLASSES = 'text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full'
-const SELECTED_CONTAINER_CLASSES = 'mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg'
-const SELECTED_HEADER_CLASSES = 'flex items-center justify-between mb-2'
-const SELECTED_TITLE_CLASSES = 'text-sm font-medium text-blue-800'
-const CLEAR_BUTTON_CLASSES = 'text-xs text-blue-600 hover:text-blue-800 font-medium'
-const SELECTED_TAGS_CLASSES = 'flex flex-wrap gap-1'
-const SELECTED_TAG_CLASSES = 'inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full'
-const REMOVE_TAG_BUTTON_CLASSES = 'text-blue-600 hover:text-blue-800 font-medium'
+// =================== PROPS ===================
 
-const props = defineProps({
-  selected: {
-    type: Array,
-    default: () => []
-  },
-  categories: {
-    type: Array,
-    default: () => []
-  }
+interface Props {
+  title: string
+  icon: string
+  active?: boolean
+  count?: number
+  defaultExpanded?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  active: false,
+  count: 0,
+  defaultExpanded: true
 })
 
-const emit = defineEmits(['update'])
+// =================== СОСТОЯНИЕ ===================
 
-// Вычисляемые свойства
-const hasSelected = computed(() => props.selected.length > 0)
+const isExpanded = ref(props.defaultExpanded)
 
-const selectedCount = computed(() => props.selected.length)
+// =================== МЕТОДЫ ===================
 
-// Методы
-const isSelected = (categoryId) => {
-  return props.selected.includes(categoryId)
-}
-
-const getCategoryName = (categoryId) => {
-  const category = props.categories.find(cat => cat.id === categoryId)
-  return category?.name || categoryId
-}
-
-const toggleCategory = (categoryId) => {
-  const newSelected = [...props.selected]
-  const index = newSelected.indexOf(categoryId)
-  
-  if (index >= 0) {
-    newSelected.splice(index, 1)
-  } else {
-    newSelected.push(categoryId)
-  }
-  
-  emit('update', newSelected)
-}
-
-const removeCategory = (categoryId) => {
-  const newSelected = props.selected.filter(id => id !== categoryId)
-  emit('update', newSelected)
-}
-
-const clearSelection = () => {
-  emit('update', [])
+const toggleExpanded = () => {
+  isExpanded.value = !isExpanded.value
 }
 </script>
+
+<style scoped>
+/* Анимация сворачивания/разворачивания */
+.collapse-enter-active,
+.collapse-leave-active {
+  transition: all 0.3s ease-out;
+  overflow: hidden;
+}
+
+.collapse-enter-from,
+.collapse-leave-to {
+  max-height: 0;
+  opacity: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.collapse-enter-to,
+.collapse-leave-from {
+  max-height: 1000px;
+  opacity: 1;
+}
+</style>

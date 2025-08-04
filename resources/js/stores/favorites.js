@@ -24,7 +24,6 @@ export const useFavoritesStore = defineStore('favorites', () => {
       const response = await axios.get('/api/favorites')
       favorites.value = response.data.data || []
     } catch (error) {
-      console.error('Ошибка загрузки избранного:', error)
       favorites.value = []
     } finally {
       loading.value = false
@@ -50,7 +49,6 @@ export const useFavoritesStore = defineStore('favorites', () => {
       
       return response.data
     } catch (error) {
-      console.error('Ошибка при изменении избранного:', error)
       throw error
     }
   }

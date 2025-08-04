@@ -177,7 +177,6 @@ const handleImageLoad = () => {
 
 const handleImageError = () => {
   // Обработка ошибки загрузки
-  console.warn('Failed to load image:', currentPhoto.value.url)
 }
 
 const getPhotoWord = () => {

@@ -48,7 +48,6 @@ export const useMasterStore = defineStore('master', {
                 this.masters = response.data.data
                 return response.data
             } catch (error) {
-                console.error('Error fetching masters:', error)
                 throw error
             } finally {
                 this.loading = false
@@ -62,7 +61,6 @@ export const useMasterStore = defineStore('master', {
                 this.currentMaster = response.data
                 return response.data
             } catch (error) {
-                console.error('Error fetching master:', error)
                 throw error
             } finally {
                 this.loading = false
@@ -104,7 +102,6 @@ export const useMasterStore = defineStore('master', {
                 
                 return response.data
             } catch (error) {
-                console.error('Error toggling favorite:', error)
                 throw error
             }
         },
@@ -114,7 +111,6 @@ export const useMasterStore = defineStore('master', {
                 const response = await axios.get('/api/favorites')
                 this.favorites = response.data.map(f => f.master_id)
             } catch (error) {
-                console.error('Error loading favorites:', error)
             }
         },
 

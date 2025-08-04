@@ -74,9 +74,6 @@ const props = defineProps({
 })
 
 onMounted(() => {
-  console.log('EditAd - ad data:', props.ad)
-  console.log('EditAd - ad.photos:', props.ad.photos)
-  console.log('EditAd - ad.id:', props.ad.id)
 })
 
 const goBack = () => {

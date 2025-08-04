@@ -618,7 +618,6 @@ const loadAvailableSlots = async (date: string): Promise<void> => {
     const slots = await bookingStore.loadTimeSlots(props.master.id, date)
     availableSlots.value = slots
   } catch (error: unknown) {
-    console.error('Ошибка загрузки слотов:', error)
     const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
     toast.error('Ошибка загрузки времени: ' + errorMessage)
     availableSlots.value = []
@@ -684,7 +683,6 @@ const handleSubmit = async (): Promise<void> => {
     // Можно перенаправить на страницу успеха
     // router.visit(`/booking/success/${result.id}`)
   } catch (error: unknown) {
-    console.error('❌ Ошибка бронирования:', error)
     
     const apiError = error as ApiError
     
@@ -708,7 +706,6 @@ const loadAvailableDates = async (): Promise<void> => {
     const dates = await bookingStore.loadAvailableDates(props.master.id)
     availableDates.value = dates
   } catch (error: unknown) {
-    console.error('Ошибка загрузки дат:', error)
     const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
     toast.error('Ошибка загрузки доступных дат: ' + errorMessage)
     // Используем тестовые данные если API не работает

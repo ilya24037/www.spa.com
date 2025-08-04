@@ -82,7 +82,6 @@ const booking = ref({
 
 const submitBooking = () => {
   // Логика отправки бронирования
-  console.log('Бронирование:', booking.value)
   toast.success('Заявка отправлена! Мастер свяжется с вами.')
   emit('close')
 }

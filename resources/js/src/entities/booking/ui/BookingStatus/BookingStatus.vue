@@ -392,7 +392,6 @@ const confirmCancel = async () => {
     showCancelModal.value = false
     cancelReason.value = ''
   } catch (error) {
-    console.error('Cancel booking failed:', error)
   } finally {
     cancelling.value = false
   }

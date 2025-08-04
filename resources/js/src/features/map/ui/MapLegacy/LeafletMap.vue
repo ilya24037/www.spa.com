@@ -211,7 +211,6 @@ const initMap = async () => {
         emit('map-ready', map)
 
     } catch (error) {
-        console.error('Ошибка инициализации карты:', error)
         loading.value = false
     }
 }
@@ -288,7 +287,6 @@ const centerOnCurrentLocation = () => {
             emit('center-change', { lat: latitude, lng: longitude })
         },
         (error) => {
-            console.error('Ошибка получения геолокации:', error)
             toast.error('Не удалось получить ваше местоположение')
         },
         {

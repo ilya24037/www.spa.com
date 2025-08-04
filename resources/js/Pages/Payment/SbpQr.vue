@@ -136,7 +136,6 @@ const checkPaymentStatus = async () => {
       router.visit(route('payment.success', { payment: props.payment.id }))
     }
   } catch (error) {
-    console.error('Ошибка проверки статуса:', error)
   } finally {
     isChecking.value = false
   }

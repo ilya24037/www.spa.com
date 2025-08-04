@@ -207,7 +207,6 @@ const downloadImage = async () => {
         document.body.removeChild(link)
         window.URL.revokeObjectURL(url)
     } catch (error) {
-        console.error('Ошибка при скачивании изображения:', error)
     }
 }
 

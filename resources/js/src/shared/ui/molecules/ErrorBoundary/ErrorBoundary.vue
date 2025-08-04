@@ -142,7 +142,6 @@ onErrorCaptured((err: Error, instance: any, info: string) => {
   
   // Логируем ошибку если включено
   if (props.logErrors) {
-    console.error('🚨 ErrorBoundary перехватил ошибку:', {
       message: err.message,
       stack: err.stack,
       component: info,
@@ -186,7 +185,6 @@ const copyErrorDetails = async () => {
     await navigator.clipboard.writeText(JSON.stringify(details, null, 2))
     emit('copy-success')
   } catch (err) {
-    console.error('Не удалось скопировать детали ошибки:', err)
     emit('copy-error')
   }
 }

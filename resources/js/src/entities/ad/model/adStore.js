@@ -162,7 +162,6 @@ export const useAdStore = defineStore('ad', () => {
       
       return response
     } catch (error) {
-      console.error('Ошибка загрузки объявлений:', error)
       throw error
     } finally {
       loading.value = false
@@ -191,7 +190,6 @@ export const useAdStore = defineStore('ad', () => {
       
       return processedData
     } catch (error) {
-      console.error('Ошибка загрузки объявления:', error)
       throw error
     } finally {
       loading.value = false
@@ -218,7 +216,6 @@ export const useAdStore = defineStore('ad', () => {
       
       return newAd
     } catch (error) {
-      console.error('Ошибка создания объявления:', error)
       throw error
     } finally {
       saving.value = false
@@ -248,7 +245,6 @@ export const useAdStore = defineStore('ad', () => {
       
       return updatedAd
     } catch (error) {
-      console.error('Ошибка обновления объявления:', error)
       throw error
     } finally {
       saving.value = false
@@ -283,7 +279,6 @@ export const useAdStore = defineStore('ad', () => {
       }
       
     } catch (error) {
-      console.error('Ошибка удаления объявления:', error)
       throw error
     } finally {
       saving.value = false
@@ -317,7 +312,6 @@ export const useAdStore = defineStore('ad', () => {
       
       return ads.value[index]
     } catch (error) {
-      console.error('Ошибка изменения статуса:', error)
       throw error
     } finally {
       saving.value = false
@@ -351,7 +345,6 @@ export const useAdStore = defineStore('ad', () => {
       
       return ad.is_favorite
     } catch (error) {
-      console.error('Ошибка изменения избранного:', error)
       throw error
     }
   }
@@ -367,7 +360,6 @@ export const useAdStore = defineStore('ad', () => {
       favoriteAds.value = response.data
       return response
     } catch (error) {
-      console.error('Ошибка загрузки избранных:', error)
       throw error
     } finally {
       loading.value = false
@@ -383,7 +375,6 @@ export const useAdStore = defineStore('ad', () => {
       Object.assign(userStats, response)
       return response
     } catch (error) {
-      console.error('Ошибка загрузки статистики:', error)
       throw error
     }
   }

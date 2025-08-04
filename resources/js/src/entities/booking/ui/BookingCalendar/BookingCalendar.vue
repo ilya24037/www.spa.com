@@ -250,7 +250,6 @@ const loadTimeSlots = async (date) => {
     
   } catch (err) {
     error.value = 'Ошибка загрузки доступного времени. Попробуйте еще раз.'
-    console.error('Error loading time slots:', err)
   } finally {
     loadingTimeSlots.value = false
   }

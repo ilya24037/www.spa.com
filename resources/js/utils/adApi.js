@@ -14,7 +14,6 @@ const getCsrfToken = async () => {
     const data = await response.json()
     return data.token
   } catch (error) {
-    console.error('Ошибка получения CSRF токена:', error)
     // Fallback - пытаемся получить из meta тега
     const metaToken = document.querySelector('meta[name="csrf-token"]')
     return metaToken ? metaToken.getAttribute('content') : ''
@@ -57,27 +56,18 @@ export const updateAd = async (adId, formData) => {
  * Сохранить черновик объявления
  */
 export const saveDraft = async (formData, draftId = null) => {
-  console.log('saveDraft called with formData:', formData)
-  console.log('saveDraft - formData.photos:', formData.photos)
-  console.log('saveDraft - formData.photos length:', formData.photos ? formData.photos.length : 0)
-  console.log('saveDraft - typeof formData:', typeof formData)
-  console.log('saveDraft - formData keys:', Object.keys(formData))
   
   // Проверяем что photos действительно есть в данных
   const dataToSend = {
     ...formData,
     photos: formData.photos || []
   }
-  console.log('saveDraft - dataToSend has photos:', 'photos' in dataToSend)
-  console.log('saveDraft - dataToSend.photos is:', dataToSend.photos)
   
   // Используем обычный fetch вместо Inertia router для отладки
   try {
     const url = draftId ? `/draft/${draftId}` : '/ads/draft'
     const method = draftId ? 'PUT' : 'POST'
     
-    console.log(`Sending ${method} request to ${url}`)
-    console.log('Data being sent:', JSON.stringify(dataToSend, null, 2))
     
     const response = await fetch(url, {
       method: method,
@@ -92,23 +82,19 @@ export const saveDraft = async (formData, draftId = null) => {
     
     if (!response.ok) {
       const error = await response.json()
-      console.error('Server error:', error)
       throw new Error(error.message || 'Ошибка сохранения черновика')
     }
     
     const result = await response.json()
-    console.log('Draft saved successfully:', result)
     
     // Редирект на страницу черновиков после успешного сохранения
     if (result.redirect || result.success) {
       const redirectUrl = result.redirect || '/my-ads?tab=drafts'
-      console.log('Redirecting to:', redirectUrl)
       router.visit(redirectUrl)
     }
     
     return result
   } catch (error) {
-    console.error('Ошибка при сохранении черновика:', error)
     throw error
   }
 }
@@ -132,7 +118,6 @@ export const loadDraftById = async (draftId) => {
       throw new Error('Ошибка при загрузке черновика')
     }
   } catch (error) {
-    console.error('Ошибка при загрузке черновика:', error)
     throw error
   }
 }
@@ -243,7 +228,6 @@ export const uploadAdPhotos = async (adId, files) => {
     
     return await response.json()
   } catch (error) {
-    console.error('Ошибка загрузки фото:', error)
     throw error
   }
 }
@@ -268,15 +252,11 @@ export const deleteAdPhoto = async (adId, photoId) => {
  * Автосохранение черновика (без редиректа)
  */
 export const autosaveDraft = async (formData) => {
-  console.log('autosaveDraft called with formData:', formData)
-  console.log('autosaveDraft - formData.photos:', formData.photos)
   
   try {
     // Подготавливаем данные для черновика
     const preparedData = prepareFormData(formData)
     
-    console.log('autosaveDraft - preparedData.photos:', preparedData.photos)
-    console.log('autosaveDraft - sending to server:', JSON.stringify(preparedData))
     
     // Используем обычный fetch для автосохранения
     const response = await fetch('/ads/draft', {
@@ -295,7 +275,6 @@ export const autosaveDraft = async (formData) => {
       throw new Error('Ошибка сохранения')
     }
   } catch (error) {
-    console.warn('Автосохранение не удалось:', error)
     return false
   }
 }
@@ -304,14 +283,10 @@ export const autosaveDraft = async (formData) => {
  * Подготовить данные формы для отправки
  */
 export const prepareFormData = (form) => {
-  console.log('prepareFormData - input form:', form)
-  console.log('prepareFormData - form.photos:', form.photos)
   
   // Дополнительная отладка для фото
   if (form.photos && Array.isArray(form.photos)) {
-    console.log('prepareFormData - photos count:', form.photos.length)
     form.photos.forEach((photo, index) => {
-      console.log(`Photo ${index}:`, {
         hasId: !!photo.id,
         hasFile: !!photo.file,
         hasPreview: !!photo.preview,
@@ -404,14 +379,9 @@ export const prepareFormData = (form) => {
   // Для черновика оставляем все поля, даже пустые
   // Это позволит сохранить черновик даже с полностью пустой формой
   
-  console.log('prepareFormData - output data:', data)
-  console.log('prepareFormData - data.photos:', data.photos)
-  console.log('prepareFormData - data.photos length:', data.photos ? data.photos.length : 0)
-  console.log('prepareFormData - data.photos JSON:', JSON.stringify(data.photos))
   
   // Детальная проверка первого фото
   if (data.photos && data.photos.length > 0) {
-    console.log('prepareFormData - first photo details:', {
       id: data.photos[0].id,
       hasPreview: !!data.photos[0].preview,
       previewLength: data.photos[0].preview ? data.photos[0].preview.length : 0,
@@ -453,7 +423,6 @@ export async function publishAd(formData) {
 
     return await response.json()
   } catch (error) {
-    console.error('Ошибка при публикации объявления:', error)
     throw error
   }
 } 

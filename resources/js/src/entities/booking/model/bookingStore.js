@@ -136,7 +136,6 @@ export const useBookingStore = defineStore('booking', () => {
 
     } catch (err) {
       error.value = 'Ошибка загрузки расписания мастера'
-      console.error('Error loading master schedule:', err)
       throw err
     } finally {
       loading.value = false
@@ -159,7 +158,6 @@ export const useBookingStore = defineStore('booking', () => {
 
     } catch (err) {
       error.value = 'Ошибка загрузки временных слотов'
-      console.error('Error loading time slots:', err)
       throw err
     } finally {
       loading.value = false
@@ -224,7 +222,6 @@ export const useBookingStore = defineStore('booking', () => {
 
     } catch (err) {
       error.value = err.message || 'Ошибка создания бронирования'
-      console.error('Error creating booking:', err)
       throw err
     } finally {
       loading.value = false
@@ -250,7 +247,6 @@ export const useBookingStore = defineStore('booking', () => {
 
     } catch (err) {
       error.value = 'Ошибка загрузки бронирований'
-      console.error('Error loading bookings:', err)
       throw err
     } finally {
       loading.value = false
@@ -280,7 +276,6 @@ export const useBookingStore = defineStore('booking', () => {
 
     } catch (err) {
       error.value = 'Ошибка отмены бронирования'
-      console.error('Error cancelling booking:', err)
       throw err
     } finally {
       loading.value = false

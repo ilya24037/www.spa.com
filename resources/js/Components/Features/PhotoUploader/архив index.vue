@@ -225,14 +225,12 @@ const handleDrop = (event) => {
   
   // Если это перестановка фото - игнорируем
   if (draggedIndex !== null) {
-    console.log('🔄 Игнорируем drop - это перестановка фото')
     return
   }
   
   // Иначе обрабатываем как загрузку новых файлов
   const files = Array.from(event.dataTransfer.files)
   if (files.length > 0) {
-    console.log('📁 Загружаем новые файлы:', files.length)
     processFiles(files)
   }
 }
@@ -290,9 +288,7 @@ const processFiles = (files) => {
 }
 
 const removePhoto = (index) => {
-  console.log('Удаляем фото с индексом:', index)
   if (index < 0 || index >= photos.value.length) {
-    console.error('Неверный индекс фото:', index)
     return
   }
   
@@ -300,13 +296,10 @@ const removePhoto = (index) => {
   newPhotos.splice(index, 1)
   photos.value = newPhotos
   
-  console.log('Фото удалено, осталось:', newPhotos.length)
 }
 
 const rotatePhoto = (index) => {
-  console.log('Поворачиваем фото с индексом:', index)
   if (index < 0 || index >= photos.value.length) {
-    console.error('Неверный индекс фото:', index)
     return
   }
   
@@ -315,12 +308,10 @@ const rotatePhoto = (index) => {
   newPhotos[index].rotation = (currentRotation + 90) % 360
   photos.value = newPhotos
   
-  console.log('Фото повернуто на:', newPhotos[index].rotation, 'градусов')
 }
 
 // Drag and drop для перестановки фото
 const handlePhotoStart = (event, index) => {
-  console.log('🚀 НАЧАЛО ПЕРЕТАСКИВАНИЯ: фото с индексом', index)
   draggedIndex = index
   event.dataTransfer.effectAllowed = 'move'
   event.dataTransfer.setData('text/plain', index.toString())
@@ -337,28 +328,23 @@ const handlePhotoMove = (event, targetIndex) => {
   event.preventDefault()
   event.stopPropagation()
   
-  console.log('🔄 ПЕРЕСТАНОВКА: Перемещаем фото', draggedIndex, '→', targetIndex)
   
   if (draggedIndex === null || draggedIndex === targetIndex) {
-    console.log('❌ Отменяем: одинаковые индексы или null')
     return
   }
   
   if (draggedIndex < 0 || draggedIndex >= photos.value.length || 
       targetIndex < 0 || targetIndex >= photos.value.length) {
-    console.log('❌ Отменяем: некорректные индексы')
     return
   }
   
   const newPhotos = [...photos.value]
-  console.log('📋 Исходный порядок:', newPhotos.map((p, i) => `${i}: ${p.name.substring(0, 10)}...`))
   
   // Простая логика: меняем местами
   const temp = newPhotos[draggedIndex]
   newPhotos[draggedIndex] = newPhotos[targetIndex]
   newPhotos[targetIndex] = temp
   
-  console.log('✅ Новый порядок:', newPhotos.map((p, i) => `${i}: ${p.name.substring(0, 10)}... ${i === 0 ? '(ГЛАВНОЕ)' : ''}`))
   
   photos.value = newPhotos
   
@@ -374,7 +360,6 @@ const handleDragOverPhoto = (event, index) => {
   
   if (draggedIndex !== null && draggedIndex !== index) {
     dragOverIndex.value = index
-    console.log('🎯 Наведение на фото', index)
   }
 }
 
@@ -386,7 +371,6 @@ const handleDragLeavePhoto = (event, index) => {
 }
 
 const handleDragEnd = (event) => {
-  console.log('🏁 ЗАВЕРШЕНИЕ ПЕРЕТАСКИВАНИЯ')
   
   // Возвращаем нормальную прозрачность
   if (event.target) {

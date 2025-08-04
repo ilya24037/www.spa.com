@@ -59,7 +59,6 @@ export function useAutosave(form, options = {}) {
         }
       }
     } catch (error) {
-      console.warn('Автосохранение не удалось:', error)
       
       if (onError) {
         onError(error)

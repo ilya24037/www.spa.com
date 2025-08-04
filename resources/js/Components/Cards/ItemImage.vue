@@ -135,7 +135,6 @@ const handleMouseMove = (event) => {
 }
 
 const handleImageError = (event) => {
-  console.log('Ошибка загрузки изображения:', event.target.src)
   
   // Если это уже fallback изображение, показываем placeholder
   if (event.target.src.includes('demo-')) {

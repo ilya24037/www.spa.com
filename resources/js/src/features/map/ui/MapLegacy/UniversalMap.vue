@@ -381,7 +381,6 @@ const centerOnCurrentLocation = () => {
         emit('center-change', { lat: latitude, lng: longitude })
       },
       (error) => {
-        console.error('Ошибка получения геолокации:', error)
       }
     )
   }

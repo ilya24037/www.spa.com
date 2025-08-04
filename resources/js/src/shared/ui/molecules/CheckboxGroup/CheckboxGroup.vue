@@ -69,7 +69,6 @@ const emit = defineEmits(['update:modelValue'])
 // Инициализация массива (из ClientsSection)
 const initializeValue = () => {
   if (!Array.isArray(props.modelValue)) {
-    console.log('CheckboxGroup: modelValue не массив, исправляем:', props.modelValue)
     emit('update:modelValue', [])
   }
 }

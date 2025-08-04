@@ -602,7 +602,6 @@ const fetchAvailableSlots = async (): Promise<void> => {
       message: 'Ошибка загрузки доступного времени',
       originalError: error
     }
-    console.error('Error fetching slots:', bookingError)
     toast.error(bookingError.message)
     formErrors.value.general = bookingError.message
   } finally {
@@ -628,7 +627,6 @@ const submitBooking = async (): Promise<void> => {
         emit('close')
       },
       onError: (errors) => {
-        console.error('Booking validation errors:', errors)
         
         if (typeof errors === 'object' && errors !== null) {
           Object.keys(errors).forEach(key => {
@@ -647,7 +645,6 @@ const submitBooking = async (): Promise<void> => {
       message: 'Ошибка сети. Попробуйте позже.',
       originalError: error
     }
-    console.error('Booking error:', bookingError)
     toast.error(bookingError.message)
     formErrors.value.general = bookingError.message
   } finally {

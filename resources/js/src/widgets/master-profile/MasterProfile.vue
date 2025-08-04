@@ -307,7 +307,6 @@ const toggleFavorite = async () => {
     await masterToggleFavorite()
     props.master.is_favorite = !props.master.is_favorite
   } catch (error) {
-    console.error('Ошибка при добавлении в избранное:', error)
   } finally {
     favoriteLoading.value = false
   }
@@ -322,23 +321,19 @@ const reportMaster = () => {
 }
 
 const handleBookingSuccess = (bookingData) => {
-  console.log('Booking success:', bookingData)
   // Показать уведомление об успешном бронировании
 }
 
 const handleBookingError = (error) => {
-  console.error('Booking error:', error)
   // Показать уведомление об ошибке
 }
 
 const handleLoadMoreReviews = () => {
   // Загружаем дополнительные отзывы
-  console.log('Loading more reviews...')
 }
 
 const handleReportSent = () => {
   // Обработка отправленной жалобы
-  console.log('Report sent')
 }
 
 const goToMaster = (master) => {

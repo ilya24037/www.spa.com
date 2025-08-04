@@ -180,10 +180,8 @@ const centerOnCurrentLocation = () => {
             (position) => {
                 const { latitude, longitude } = position.coords
                 // Центрирование карты на текущей позиции
-                console.log('Центрирование на:', latitude, longitude)
             },
             (error) => {
-                console.error('Ошибка получения геолокации:', error)
             }
         )
     }
@@ -191,12 +189,10 @@ const centerOnCurrentLocation = () => {
 
 const zoomIn = () => {
     // Увеличение масштаба
-    console.log('Приближение')
 }
 
 const zoomOut = () => {
     // Уменьшение масштаба
-    console.log('Отдаление')
 }
 
 const showMarkersInView = () => {

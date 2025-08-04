@@ -56,6 +56,5 @@ const formatPrice = (price) => {
 }
 
 const handleCall = () => {
-  console.log('Звонок мастеру')
 }
 </script>

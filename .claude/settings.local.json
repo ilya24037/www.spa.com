@@ -55,7 +55,10 @@
       "Bash(C:Usersuser1.configherdbincomposer.bat dump-autoload)",
       "Bash(C:Usersuser1.configherdbinphp.bat artisan optimize:clear)",
       "Bash(C:Usersuser1.configherdbinphp.bat artisan --version)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(node:*)",
+      "Bash(node:*)"
     ],
     "deny": []
   }

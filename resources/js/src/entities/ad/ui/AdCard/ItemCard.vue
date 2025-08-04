@@ -116,7 +116,6 @@ const payItem = (): void => {
   try {
     router.visit(`/payment/select-plan?item_id=${props.item.id}`)
   } catch (error: unknown) {
-    console.error('Ошибка перехода к оплате:', error)
     const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
     toast.error('Ошибка оплаты: ' + errorMessage)
   }
@@ -126,7 +125,6 @@ const promoteItem = (): void => {
   try {
     router.visit(`/payment/promotion?item_id=${props.item.id}`)
   } catch (error: unknown) {
-    console.error('Ошибка перехода к продвижению:', error)
     const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
     toast.error('Ошибка продвижения: ' + errorMessage)
   }
@@ -134,22 +132,15 @@ const promoteItem = (): void => {
 
 const editItem = (): void => {
   try {
-    console.log('=== EDIT ITEM CALLED ===')
-    console.log('Item ID:', props.item.id)
-    console.log('Item status:', props.item.status)
-    console.log('Modal open:', showDeleteModal.value)
     
     // Если модальное окно открыто, НЕ редактируем
     if (showDeleteModal.value) {
-      console.log('Blocking edit - delete modal is open')
       return
     }
     
     // Для всех объявлений (включая черновики) используем один роут
-    console.log('Navigating to edit page...')
     router.visit(`/ads/${props.item.id}/edit`)
   } catch (error: unknown) {
-    console.error('Ошибка редактирования:', error)
     const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
     toast.error('Ошибка редактирования: ' + errorMessage)
   }
@@ -166,13 +157,11 @@ const deactivateItem = async (): Promise<void> => {
         toast.success('Объявление деактивировано')
       },
       onError: (errors) => {
-        console.error('Ошибка при деактивации:', errors)
         const errorMessage = typeof errors === 'string' ? errors : 'Ошибка деактивации'
         toast.error(errorMessage)
       }
     })
   } catch (error: unknown) {
-    console.error('Ошибка при деактивации:', error)
     const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
     toast.error('Ошибка деактивации: ' + errorMessage)
   }
@@ -189,29 +178,20 @@ const restoreItem = async (): Promise<void> => {
         toast.success('Объявление восстановлено')
       },
       onError: (errors) => {
-        console.error('Ошибка при восстановлении:', errors)
         const errorMessage = typeof errors === 'string' ? errors : 'Ошибка восстановления'
         toast.error(errorMessage)
       }
     })
   } catch (error: unknown) {
-    console.error('Ошибка при восстановлении:', error)
     const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
     toast.error('Ошибка восстановления: ' + errorMessage)
   }
 }
 
 const handleContainerClick = (event: ClickEvent): void => {
-  console.log('Container clicked')
-  console.log('Target:', event.target)
-  console.log('Current target:', event.currentTarget)
 }
 
 const handleDeleteClick = (event: ClickEvent): void => {
-  console.log('=== DELETE CLICKED IN ITEMCARD ===')
-  console.log('Item status:', props.item.status)
-  console.log('Item ID:', props.item.id)
-  console.log('Current URL:', window.location.href)
   
   // Безопасно останавливаем всплытие события чтобы не сработал Link
   if (event && typeof event.stopPropagation === 'function') {
@@ -221,34 +201,25 @@ const handleDeleteClick = (event: ClickEvent): void => {
     event.preventDefault()
   }
   
-  console.log('Opening delete modal immediately...')
   showDeleteModal.value = true
 }
 
 const deleteItem = async (): Promise<void> => {
   try {
-    console.log('=== DELETING ITEM ===')
-    console.log('Item ID:', props.item.id)
-    console.log('Item status:', props.item.status)
     
     // Выбираем правильный роут в зависимости от типа объявления
     const deleteUrl = props.item.status === 'draft' 
       ? `/draft/${props.item.id}` 
       : `/my-ads/${props.item.id}`
     
-    console.log('Delete URL:', deleteUrl)
     
     // Используем правильный роут через router для удаления
     await router.delete(deleteUrl, {
       preserveScroll: false,
       preserveState: false,
       onStart: () => {
-        console.log('Delete request started')
       },
       onSuccess: (page) => {
-        console.log('=== DELETE SUCCESSFUL ===')
-        console.log('Redirected to:', page.url)
-        console.log('Page props:', page.props)
         
         // Эмитим событие для обновления списка
         emit('item-deleted', props.item.id)
@@ -256,8 +227,6 @@ const deleteItem = async (): Promise<void> => {
         toast.success('Объявление удалено')
       },
       onError: (errors) => {
-        console.error('=== DELETE FAILED ===')
-        console.error('Delete failed with errors:', errors)
         
         const errorMessage = typeof errors === 'object' && errors !== null && 'message' in errors
           ? String(errors.message)
@@ -267,11 +236,9 @@ const deleteItem = async (): Promise<void> => {
         showDeleteModal.value = false
       },
       onFinish: () => {
-        console.log('Delete request finished')
       }
     })
   } catch (error: unknown) {
-    console.error('Ошибка при удалении:', error)
     const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
     toast.error('Ошибка удаления: ' + errorMessage)
     showDeleteModal.value = false

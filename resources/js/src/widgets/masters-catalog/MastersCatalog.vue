@@ -356,7 +356,6 @@ const handleToggleFavorite = async (master) => {
   master.is_favorite = !master.is_favorite
   
   // Здесь бы был API вызов
-  console.log('Toggle favorite for master:', master.id)
 }
 
 const handleMarkerClick = (marker) => {

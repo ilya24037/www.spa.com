@@ -131,10 +131,8 @@ export function useAdForm(initialData = {}, options = {}) {
   const autosave = useAutosave(ref(form), {
     enabled: autosaveEnabled,
     onSave: (timestamp) => {
-      console.log('Автосохранение выполнено:', timestamp)
     },
     onError: (error) => {
-      console.warn('Ошибка автосохранения:', error)
     }
   })
 
@@ -186,7 +184,6 @@ export function useAdForm(initialData = {}, options = {}) {
 
     // Валидация
     if (!validateForm()) {
-      console.warn('Форма содержит ошибки:', errors.value)
       return Promise.reject(new Error('Validation failed'))
     }
 
@@ -213,7 +210,6 @@ export function useAdForm(initialData = {}, options = {}) {
 
       return result
     } catch (error) {
-      console.error('Ошибка при отправке формы:', error)
       
       // Обрабатываем ошибки валидации с сервера
       if (error.response?.data?.errors) {
@@ -258,7 +254,6 @@ export function useAdForm(initialData = {}, options = {}) {
       }
       
           // Убеждаемся, что photos всегда массив
-    console.log('loadDraft: До обработки photos:', form.photos, 'тип:', typeof form.photos, 'массив?', Array.isArray(form.photos))
     
     if (typeof form.photos === 'string') {
       try {
@@ -269,20 +264,16 @@ export function useAdForm(initialData = {}, options = {}) {
     } else if (!Array.isArray(form.photos)) {
       // Если это объект с числовыми ключами, преобразуем в массив
       if (form.photos && typeof form.photos === 'object') {
-        console.log('loadDraft: Преобразуем объект photos в массив:', Object.values(form.photos))
         form.photos = Object.values(form.photos)
       } else {
         // Только если это null/undefined/другой тип - сбрасываем в пустой массив
-        console.log('loadDraft: Сбрасываем photos в пустой массив (не объект)')
         form.photos = []
       }
     }
     
-    console.log('loadDraft: После обработки photos:', form.photos, 'тип:', typeof form.photos, 'массив?', Array.isArray(form.photos))
       
       return draft
     } catch (error) {
-      console.error('Ошибка при загрузке черновика:', error)
       throw error
     }
   }
@@ -296,7 +287,6 @@ export function useAdForm(initialData = {}, options = {}) {
       const result = await saveDraft(formData)
       return result
     } catch (error) {
-      console.error('Ошибка при сохранении черновика:', error)
       throw error
     }
   }
@@ -342,7 +332,6 @@ export function useAdForm(initialData = {}, options = {}) {
     }
     
     // Убеждаемся, что photos всегда массив
-    console.log('setFormData: До обработки photos:', form.photos, 'тип:', typeof form.photos, 'массив?', Array.isArray(form.photos))
     
     if (typeof form.photos === 'string') {
       try {
@@ -353,16 +342,13 @@ export function useAdForm(initialData = {}, options = {}) {
     } else if (!Array.isArray(form.photos)) {
       // Если это объект с числовыми ключами, преобразуем в массив
       if (form.photos && typeof form.photos === 'object') {
-        console.log('setFormData: Преобразуем объект photos в массив:', Object.values(form.photos))
         form.photos = Object.values(form.photos)
       } else {
         // Только если это null/undefined/другой тип - сбрасываем в пустой массив
-        console.log('setFormData: Сбрасываем photos в пустой массив (не объект)')
         form.photos = []
       }
     }
     
-    console.log('setFormData: После обработки photos:', form.photos, 'тип:', typeof form.photos, 'массив?', Array.isArray(form.photos))
   }
 
   /**

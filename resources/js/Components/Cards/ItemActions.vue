@@ -57,9 +57,6 @@ const mainActionText = computed(() => {
 
 // Всегда редактирование как основное действие
 const handleMainAction = (event) => {
-  console.log('Main action (Edit) clicked in ItemActions')
-  console.log('Event target:', event?.target)
-  console.log('Dropdown open:', showDropdown.value)
   
   // Безопасно останавливаем всплытие события
   if (event && typeof event.stopPropagation === 'function') {
@@ -71,7 +68,6 @@ const handleMainAction = (event) => {
   
   // Небольшая задержка чтобы модальные окна успели открыться
   setTimeout(() => {
-    console.log('Emitting edit event after delay')
     emit('edit', props.item)
   }, 200)
 }
@@ -81,7 +77,6 @@ const toggleDropdown = () => {
 }
 
 const handleDelete = (event) => {
-  console.log('Delete action triggered in ItemActions')
   // Закрываем dropdown
   showDropdown.value = false
   // Эмитим событие delete

@@ -281,7 +281,6 @@ const submitReport = async () => {
     // Здесь бы был API вызов
     await new Promise(resolve => setTimeout(resolve, 1000))
     
-    console.log('Report submitted:', {
       masterId: props.master.id,
       reason: reportForm.value.reason,
       comment: reportForm.value.comment
@@ -296,7 +295,6 @@ const submitReport = async () => {
       comment: ''
     }
   } catch (error) {
-    console.error('Error submitting report:', error)
   } finally {
     reportSubmitting.value = false
   }

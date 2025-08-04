@@ -92,6 +92,5 @@ const sampleItems = ref([
 
 const handleItemDeleted = (itemId) => {
   sampleItems.value = sampleItems.value.filter(item => item.id !== itemId)
-  console.log('Item deleted:', itemId)
 }
 </script> 

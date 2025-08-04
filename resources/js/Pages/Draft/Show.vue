@@ -223,7 +223,6 @@ const toast = useToast()
 
 // Импортируем route из window.route (Ziggy)
 const route = window.route || ((name, params) => {
-  console.warn('Route helper not found, using fallback')
   // Fallback для роутов
   if (name === 'my-ads.destroy' && params) {
     return `/my-ads/${params}`
@@ -246,23 +245,18 @@ const showDeleteModal = ref(false)
 
 // Обработчик клика по кнопке редактирования
 const handleEditClick = (event) => {
-  console.log('Edit button clicked')
-  console.log('Modal open:', showDeleteModal.value)
   
   // Если модальное окно открыто, блокируем переход
   if (showDeleteModal.value) {
-    console.log('Blocking edit - delete modal is open')
     event.preventDefault()
     event.stopPropagation()
     return false
   }
   
-  console.log('Allowing edit navigation')
 }
 
 // Обработчик клика по кнопке удаления
 const handleDeleteClick = (event) => {
-  console.log('Delete button clicked, event:', event)
   event.stopPropagation()
   event.preventDefault()
   showDeleteModal.value = true
@@ -270,13 +264,11 @@ const handleDeleteClick = (event) => {
 
 // Обработчик отмены удаления
 const handleDeleteCancel = () => {
-  console.log('Modal canceled')
   showDeleteModal.value = false
 }
 
 // Обработчик подтверждения удаления
 const handleDeleteConfirm = () => {
-  console.log('Modal confirmed, calling deleteDraft')
   deleteDraft()
 }
 
@@ -313,37 +305,26 @@ const showPhone = () => {
 
 // Удаление черновика
 const deleteDraft = () => {
-  console.log('=== STARTING DELETE DRAFT ===')
-  console.log('Draft ID:', props.ad.id)
-  console.log('Current URL:', window.location.href)
   
   // НЕ закрываем модалку - оставляем открытой до завершения операции
-  console.log('Starting delete request with modal open...')
   
   // Используем специальный роут для черновиков
   router.delete(`/draft/${props.ad.id}`, {
     preserveScroll: false,
     preserveState: false,
     onStart: () => {
-      console.log('Delete request started')
     },
     onSuccess: (page) => {
-      console.log('=== DELETE SUCCESSFUL ===')
-      console.log('Redirected to:', page.url)
-      console.log('Page props:', page.props)
       // Закрываем модалку только при успехе
       showDeleteModal.value = false
       // Контроллер перенаправляет в личный кабинет
     },
     onError: (errors) => {
-      console.log('=== DELETE FAILED ===')
-      console.error('Delete failed with errors:', errors)
       // Показываем ошибку пользователю
       toast.error('Ошибка удаления: ' + (errors.message || JSON.stringify(errors)))
       // Модалка остается открытой при ошибке
     },
     onFinish: () => {
-      console.log('Delete request finished')
     }
   })
 }

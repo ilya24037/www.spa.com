@@ -200,7 +200,6 @@ export const useMasterStore = defineStore('master', () => {
       
       return response
     } catch (error) {
-      console.error('Ошибка загрузки мастеров:', error)
       throw error
     } finally {
       loading.value = false
@@ -228,7 +227,6 @@ export const useMasterStore = defineStore('master', () => {
       
       return response
     } catch (error) {
-      console.error('Ошибка загрузки мастера:', error)
       throw error
     } finally {
       loading.value = false
@@ -259,7 +257,6 @@ export const useMasterStore = defineStore('master', () => {
       
       return response
     } catch (error) {
-      console.error('Ошибка поиска мастеров:', error)
       throw error
     } finally {
       loading.value = false
@@ -283,7 +280,6 @@ export const useMasterStore = defineStore('master', () => {
       
       return response
     } catch (error) {
-      console.error('Ошибка загрузки отзывов:', error)
       throw error
     } finally {
       loadingReviews.value = false
@@ -299,7 +295,6 @@ export const useMasterStore = defineStore('master', () => {
       similarMasters.value = response.data
       return response
     } catch (error) {
-      console.error('Ошибка загрузки похожих мастеров:', error)
       throw error
     }
   }
@@ -331,7 +326,6 @@ export const useMasterStore = defineStore('master', () => {
       
       return master.is_favorite
     } catch (error) {
-      console.error('Ошибка изменения избранного:', error)
       throw error
     }
   }
@@ -347,7 +341,6 @@ export const useMasterStore = defineStore('master', () => {
       favoriteMasters.value = response.data
       return response
     } catch (error) {
-      console.error('Ошибка загрузки избранных:', error)
       throw error
     } finally {
       loading.value = false
@@ -368,7 +361,6 @@ export const useMasterStore = defineStore('master', () => {
       }
     } catch (error) {
       // Не показываем ошибку пользователю для просмотров
-      console.warn('Ошибка обновления просмотров:', error)
     }
   }
   

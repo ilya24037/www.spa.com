@@ -202,7 +202,6 @@ const clearItems = () => {
 
 const handleItemDeleted = (itemId) => {
   items.value = items.value.filter(item => item.id !== itemId)
-  console.log('Item deleted:', itemId)
 }
 
 // Загружаем примеры при монтировании

@@ -221,27 +221,22 @@ const addMasterMarkers = () => {
 // Обработчики событий карты
 const handleMarkerClick = (marker) => {
     lastClick.value = `Маркер: ${marker.title}`
-    console.log('Клик по маркеру:', marker)
 }
 
 const handleMapClick = (event) => {
     lastClick.value = `Карта: ${event.coordinates.lat.toFixed(4)}, ${event.coordinates.lng.toFixed(4)}`
-    console.log('Клик по карте:', event)
 }
 
 const handleCenterChange = (newCenter) => {
     mapCenter.lat = newCenter.lat
     mapCenter.lng = newCenter.lng
-    console.log('Центр изменен:', newCenter)
 }
 
 const handleZoomChange = (newZoom) => {
     mapZoom.value = newZoom
-    console.log('Зум изменен:', newZoom)
 }
 
 const handleMapReady = (mapInstance) => {
-    console.log('Карта готова:', mapInstance)
 }
 
 // Инициализация с несколькими маркерами

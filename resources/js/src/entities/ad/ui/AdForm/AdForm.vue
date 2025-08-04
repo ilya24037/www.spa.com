@@ -159,7 +159,6 @@ const handleSaveDraft = async () => {
     await store.saveAsDraft()
     emit('success', { action: 'draft', data: store.formData })
   } catch (error) {
-    console.error('Ошибка сохранения черновика:', error)
     emit('error', { action: 'draft', error })
   } finally {
     saving.value = false
@@ -172,7 +171,6 @@ const handlePublish = async () => {
     await store.publishAd()
     emit('success', { action: 'publish', data: store.formData })
   } catch (error) {
-    console.error('Ошибка публикации:', error)
     emit('error', { action: 'publish', error })
   } finally {
     saving.value = false
@@ -180,12 +178,10 @@ const handlePublish = async () => {
 }
 
 const handlePhotoError = (error) => {
-  console.error('Ошибка загрузки фото:', error)
   emit('error', { action: 'photo_upload', error })
 }
 
 const handleVideoError = (error) => {
-  console.error('Ошибка загрузки видео:', error)
   emit('error', { action: 'video_upload', error })
 }
 </script>

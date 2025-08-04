@@ -28,7 +28,6 @@ class BookingApi {
         booking: response.data.booking
       }
     } catch (error) {
-      console.error('Booking creation failed:', error)
       
       return {
         success: false,
@@ -61,7 +60,6 @@ class BookingApi {
         pagination: response.data.meta || response.data
       }
     } catch (error) {
-      console.error('Failed to load user bookings:', error)
       
       return {
         success: false,
@@ -92,7 +90,6 @@ class BookingApi {
         pagination: response.data.meta || response.data
       }
     } catch (error) {
-      console.error('Failed to load master bookings:', error)
       
       return {
         success: false,
@@ -114,7 +111,6 @@ class BookingApi {
         booking: response.data.booking || response.data
       }
     } catch (error) {
-      console.error('Failed to load booking details:', error)
       
       return {
         success: false,
@@ -135,7 +131,6 @@ class BookingApi {
         booking: response.data.booking
       }
     } catch (error) {
-      console.error('Failed to confirm booking:', error)
       
       return {
         success: false,
@@ -158,7 +153,6 @@ class BookingApi {
         booking: response.data.booking
       }
     } catch (error) {
-      console.error('Failed to cancel booking:', error)
       
       return {
         success: false,
@@ -181,7 +175,6 @@ class BookingApi {
         booking: response.data.booking
       }
     } catch (error) {
-      console.error('Failed to reschedule booking:', error)
       
       return {
         success: false,
@@ -208,7 +201,6 @@ class BookingApi {
         availableDates: response.data.available_dates || []
       }
     } catch (error) {
-      console.error('Failed to load master schedule:', error)
       
       // Возвращаем заглушку для разработки
       return {
@@ -274,7 +266,6 @@ class BookingApi {
         date: response.data.date
       }
     } catch (error) {
-      console.error('Failed to load time slots:', error)
       
       return {
         success: false,
@@ -301,7 +292,6 @@ class BookingApi {
         conflictingBookings: response.data.conflicting_bookings || []
       }
     } catch (error) {
-      console.error('Failed to check time availability:', error)
       
       return {
         success: false,
@@ -328,7 +318,6 @@ class BookingApi {
         stats: response.data
       }
     } catch (error) {
-      console.error('Failed to load booking stats:', error)
       
       return {
         success: false,
@@ -350,7 +339,6 @@ class BookingApi {
         message: response.data.message
       }
     } catch (error) {
-      console.error('Failed to send booking reminder:', error)
       
       return {
         success: false,

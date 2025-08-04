@@ -84,7 +84,6 @@ export function useBooking(master, initialService = null) {
                 }
             }
         } catch (error) {
-            console.error('Error loading slots:', error)
             showError('Не удалось загрузить доступное время')
         } finally {
             loadingSlots.value = false
@@ -120,7 +119,6 @@ export function useBooking(master, initialService = null) {
             }, 2000)
             
         } catch (error) {
-            console.error('Booking error:', error)
             showError(error.response?.data?.message || 'Ошибка при создании бронирования')
         } finally {
             isCreating.value = false
