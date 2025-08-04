@@ -100,7 +100,7 @@ class AddMasterPhotos extends Command
 
                 // Добавляем запись в базу данных
                 $currentOrder++;
-                MasterPhoto::create([
+                Photo::create([
                     'master_profile_id' => $masterId,
                     'filename' => $filename,
                     'mime_type' => $mimeType,

@@ -56,7 +56,7 @@ class TestController extends Controller
             ];
 
             foreach ($photos as $photo) {
-                MasterPhoto::create([
+                Photo::create([
                     'master_profile_id' => $master->id,
                     'path' => $photo['path'],
                     'is_main' => $photo['is_main'],
@@ -116,7 +116,7 @@ class TestController extends Controller
             foreach ($localPhotos as $index => $photoPath) {
                 // Проверяем существование файла
                 if (file_exists(public_path($photoPath))) {
-                    $photo = MasterPhoto::create([
+                    $photo = Photo::create([
                         'master_profile_id' => $master->id,
                         'path' => $photoPath,
                         'is_main' => $index === 0,
@@ -130,7 +130,7 @@ class TestController extends Controller
                     ];
                 } else {
                     // Если файл не найден, создаем placeholder
-                    $photo = MasterPhoto::create([
+                    $photo = Photo::create([
                         'master_profile_id' => $master->id,
                         'path' => 'images/no-photo.jpg',
                         'is_main' => $index === 0,

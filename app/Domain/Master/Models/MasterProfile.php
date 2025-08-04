@@ -84,7 +84,7 @@ class MasterProfile extends Model
      */
     public function photos(): HasMany
     {
-        return $this->hasMany(\App\Domain\Master\Models\MasterPhoto::class);
+        return $this->hasMany(\App\Domain\Media\Models\Photo::class, 'master_profile_id');
     }
 
     /**
@@ -92,7 +92,7 @@ class MasterProfile extends Model
      */
     public function videos(): HasMany
     {
-        return $this->hasMany(\App\Domain\Master\Models\MasterVideo::class);
+        return $this->hasMany(\App\Domain\Media\Models\Video::class, 'master_profile_id');
     }
 
     /**

@@ -18,7 +18,7 @@ class MasterMedia extends Model
      */
     public function photos(): HasMany
     {
-        return $this->hasMany(\App\Domain\Master\Models\MasterPhoto::class, 'master_profile_id');
+        return $this->hasMany(\App\Domain\Media\Models\Photo::class, 'master_profile_id');
     }
 
     /**
@@ -26,7 +26,7 @@ class MasterMedia extends Model
      */
     public function videos(): HasMany
     {
-        return $this->hasMany(\App\Domain\Master\Models\MasterVideo::class, 'master_profile_id');
+        return $this->hasMany(\App\Domain\Media\Models\Video::class, 'master_profile_id');
     }
 
     /**
@@ -34,7 +34,7 @@ class MasterMedia extends Model
      */
     public function mainPhoto(): HasOne
     {
-        return $this->hasOne(\App\Domain\Master\Models\MasterPhoto::class, 'master_profile_id')
+        return $this->hasOne(\App\Domain\Media\Models\Photo::class, 'master_profile_id')
                     ->where('is_main', true);
     }
 
@@ -43,7 +43,7 @@ class MasterMedia extends Model
      */
     public function mainVideo(): HasOne
     {
-        return $this->hasOne(\App\Domain\Master\Models\MasterVideo::class, 'master_profile_id')
+        return $this->hasOne(\App\Domain\Media\Models\Video::class, 'master_profile_id')
                     ->where('is_main', true);
     }
 
@@ -63,7 +63,7 @@ class MasterMedia extends Model
      */
     public function getAllPhotosFormatted($masterProfileId): array
     {
-        return \App\Domain\Master\Models\MasterPhoto::where('master_profile_id', $masterProfileId)
+        return \App\Domain\Media\Models\Photo::where('master_profile_id', $masterProfileId)
             ->orderBy('order')
             ->get()
             ->map(function ($photo) {
@@ -84,7 +84,7 @@ class MasterMedia extends Model
      */
     public function getAllVideosFormatted($masterProfileId): array
     {
-        return \App\Domain\Master\Models\MasterVideo::where('master_profile_id', $masterProfileId)
+        return \App\Domain\Media\Models\Video::where('master_profile_id', $masterProfileId)
             ->orderBy('order')
             ->get()
             ->map(function ($video) {

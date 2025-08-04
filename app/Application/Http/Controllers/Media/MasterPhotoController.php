@@ -33,7 +33,7 @@ class MasterPhotoController extends Controller
             foreach ($request->file('photos') as $photo) {
                 $path = $photo->store('masters/' . $master->id . '/photos', 'public');
                 
-                $masterPhoto = MasterPhoto::create([
+                $masterPhoto = Photo::create([
                     'master_profile_id' => $master->id,
                     'photo_url' => Storage::url($path),
                     'photo_path' => $path,
@@ -132,7 +132,7 @@ class MasterPhotoController extends Controller
         ]);
 
         foreach ($request->photo_ids as $index => $photoId) {
-            MasterPhoto::where('id', $photoId)
+            Photo::where('id', $photoId)
                 ->where('master_profile_id', $master->id)
                 ->update(['sort_order' => $index]);
         }

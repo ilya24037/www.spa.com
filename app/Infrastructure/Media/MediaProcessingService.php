@@ -8,6 +8,7 @@ use App\Domain\Media\Services\VideoProcessor;
 use App\Domain\Media\Services\ThumbnailGenerator;
 use App\Domain\Media\Models\Photo;
 use App\Domain\Media\Models\Video;
+use App\Domain\Media\Models\Video as MasterVideo;
 use App\Domain\Master\Models\MasterProfile;
 use Illuminate\Http\UploadedFile;
 
@@ -62,7 +63,7 @@ class MediaProcessingService
      * Обработать и сохранить фото
      * @deprecated Используйте MediaService::uploadPhotos()
      */
-    private function processPhoto(UploadedFile $file, MasterProfile $master, int $photoNumber): MasterPhoto
+    private function processPhoto(UploadedFile $file, MasterProfile $master, int $photoNumber): Photo
     {
         return $this->imageProcessor->processPhoto($file, $master, $photoNumber);
     }
@@ -79,7 +80,7 @@ class MediaProcessingService
     /**
      * Удалить фотографию
      */
-    public function deletePhoto(MasterPhoto $photo): void
+    public function deletePhoto(Photo $photo): void
     {
         $this->mediaService->deletePhoto($photo);
     }
