@@ -1,3 +1,5 @@
+import { logger } from '@/src/shared/lib/logger'
+
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
@@ -24,7 +26,7 @@ export const useUserStore = defineStore('user', () => {
       items.value = []
     } catch (err) {
       error.value = err.message || 'Ошибка загрузки'
-      console.error('Error fetching users:', err)
+      logger.error('Error fetching users:', err)
     } finally {
       loading.value = false
     }
@@ -41,7 +43,7 @@ export const useUserStore = defineStore('user', () => {
       currentItem.value = null
     } catch (err) {
       error.value = err.message || 'Ошибка загрузки'
-      console.error('Error fetching user:', err)
+      logger.error('Error fetching user:', err)
     } finally {
       loading.value = false
     }
@@ -59,7 +61,7 @@ export const useUserStore = defineStore('user', () => {
       return null
     } catch (err) {
       error.value = err.message || 'Ошибка создания'
-      console.error('Error creating user:', err)
+      logger.error('Error creating user:', err)
       throw err
     } finally {
       loading.value = false
@@ -81,7 +83,7 @@ export const useUserStore = defineStore('user', () => {
       return null
     } catch (err) {
       error.value = err.message || 'Ошибка обновления'
-      console.error('Error updating user:', err)
+      logger.error('Error updating user:', err)
       throw err
     } finally {
       loading.value = false
@@ -98,7 +100,7 @@ export const useUserStore = defineStore('user', () => {
       items.value = items.value.filter(item => item.id !== id)
     } catch (err) {
       error.value = err.message || 'Ошибка удаления'
-      console.error('Error deleting user:', err)
+      logger.error('Error deleting user:', err)
       throw err
     } finally {
       loading.value = false

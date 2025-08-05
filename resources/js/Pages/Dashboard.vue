@@ -24,6 +24,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/src/shared/lib/logger'
 import { onMounted } from 'vue'
 import ProfileLayout from '@/src/shared/layouts/ProfileLayout/ProfileLayout.vue'
 import { ProfileDashboard } from '@/src/widgets/profile-dashboard'
@@ -83,13 +84,13 @@ const pageLoader = usePageLoading({
   showProgress: true,
   timeout: 15000,
   onStart: () => {
-    console.log('Dashboard loading started')
+    // Dashboard loading started
   },
   onComplete: () => {
-    console.log('Dashboard loading completed')
+    // Dashboard loading completed
   },
   onError: (error) => {
-    console.error('Dashboard loading error:', error)
+    logger.error('Dashboard loading error:', error)
   }
 })
 

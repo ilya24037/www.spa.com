@@ -697,8 +697,9 @@ class PaymentService
     public function createTopUpPayment(int $userId, float $amount, string $paymentMethod): Payment
     {
         return DB::transaction(function () use ($userId, $amount, $paymentMethod) {
-            // Получаем пользователя и его баланс
-            $user = User::findOrFail($userId);
+            // Получаем пользователя и его баланс через репозиторий
+            $userRepository = app(\App\Domain\User\Repositories\UserRepository::class);
+            $user = $userRepository->findOrFail($userId);
             $balance = $user->getBalance();
 
             // Рассчитываем скидку
@@ -732,5 +733,34 @@ class PaymentService
 
             return $payment;
         });
+    }
+
+    /**
+     * Проверить возможность оплаты объявления
+     */
+    public function canPayForAd(Ad $ad): bool
+    {
+        return $ad->status === 'waiting_payment';
+    }
+
+    /**
+     * Получить доступные планы через репозиторий
+     */
+    public function getAvailablePlans(): array
+    {
+        // Используем Repository для получения планов
+        $plans = app(\App\Domain\Ad\Repositories\AdPlanRepository::class)->getOrderedPlans();
+        
+        return $plans->map(function ($plan) {
+            return [
+                'id' => $plan->id,
+                'name' => $plan->name,
+                'days' => $plan->days,
+                'price' => $plan->price,
+                'formatted_price' => $plan->formatted_price,
+                'description' => $plan->description,
+                'is_popular' => $plan->is_popular
+            ];
+        })->toArray();
     }
 }

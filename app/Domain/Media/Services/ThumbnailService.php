@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Storage;
  * Сервис для генерации миниатюр
  * Создаёт различные размеры изображений для оптимальной загрузки
  */
-class ThumbnailGenerator
+class ThumbnailService
 {
     private const SIZES = [
         'thumb' => [

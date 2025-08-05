@@ -2,37 +2,31 @@
 
 namespace App\Application\Http\Controllers;
 
+use App\Domain\Ad\Services\AdProfileService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class CompareController extends Controller
 {
-    public function index()
+    private AdProfileService $adProfileService;
+
+    public function __construct(AdProfileService $adProfileService)
     {
-        $user = auth()->user();
+        $this->adProfileService = $adProfileService;
+    }
+
+    public function index(Request $request)
+    {
+        $user = $request->user();
         
         // Тестовые данные для сравнения
         $compareList = [];
 
-        // Подсчеты для бокового меню (как в ProfileController)
-        $allAds = \App\Models\Ad::where('user_id', $user->id)->get();
-        $counts = [
-            'active' => $allAds->where('status', 'active')->count(),
-            'draft' => $allAds->where('status', 'draft')->count(),
-            'archived' => $allAds->where('status', 'archived')->count(),
-            'waiting_payment' => $allAds->where('status', 'waiting_payment')->count(),
-            'old' => $allAds->where('status', 'archived')->count(),
-            'bookings' => $user->bookings()->where('status', 'pending')->count(),
-            'favorites' => $user->favorites()->count(),
-            'unreadMessages' => 0,
-        ];
+        // Получаем счетчики через сервис
+        $counts = $this->adProfileService->getUserAdCounts($user);
         
-        // Статистика пользователя  
-        $userStats = [
-            'rating' => 0, // Временно 0, пока нет поля rating_overall
-            'reviewsCount' => $user->reviews()->count(),
-            'balance' => $user->balance ?? 0,
-        ];
+        // Статистика пользователя через сервис
+        $userStats = $this->adProfileService->getUserStats($user);
 
         return Inertia::render('Compare/Index', [
             'compareList' => $compareList,

@@ -105,6 +105,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/src/shared/lib/logger'
 import { onMounted } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
@@ -146,13 +147,13 @@ const pageLoader = usePageLoading({
   autoStart: true,
   timeout: 5000,
   onStart: () => {
-    console.log(`Payment checkout loading started for payment: ${props.payment?.id}`)
+    // Payment checkout loading started
   },
   onComplete: () => {
-    console.log(`Payment checkout loading completed for amount: ${props.payment?.formatted_amount}`)
+    // Payment checkout loading completed
   },
   onError: (error) => {
-    console.error('Payment checkout loading error:', error)
+    logger.error('Payment checkout loading error:', error)
   }
 })
 

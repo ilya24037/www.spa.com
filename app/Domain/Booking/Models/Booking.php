@@ -4,6 +4,7 @@ namespace App\Domain\Booking\Models;
 
 use App\Enums\BookingStatus;
 use App\Enums\BookingType;
+use App\Support\Traits\JsonFieldsTrait;
 use App\Domain\User\Models\User;
 use App\Domain\Master\Models\MasterProfile;
 use App\Domain\Service\Models\Service;
@@ -19,7 +20,7 @@ use Carbon\Carbon;
 
 class Booking extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, JsonFieldsTrait;
 
     protected $fillable = [
         'booking_number',
@@ -70,6 +71,15 @@ class Booking extends Model
         'metadata',
     ];
 
+    /**
+     * JSON поля для использования с JsonFieldsTrait
+     */
+    protected $jsonFields = [
+        'equipment_required',
+        'metadata',
+        'extra_data',
+    ];
+
     protected $casts = [
         'type' => BookingType::class,
         'status' => BookingStatus::class,
@@ -86,8 +96,7 @@ class Booking extends Model
         'discount_amount' => 'decimal:2',
         'deposit_amount' => 'decimal:2',
         'paid_amount' => 'decimal:2',
-        'equipment_required' => 'array',
-        'metadata' => 'array',
+        // JSON поля обрабатываются через JsonFieldsTrait
         'is_home_service' => 'boolean', // Временно для совместимости
         'reminder_sent' => 'boolean', // Временно для совместимости
         'confirmed_at' => 'datetime',
@@ -95,7 +104,7 @@ class Booking extends Model
         'completed_at' => 'datetime',
         'paid_at' => 'datetime', // Временно для совместимости
         'reminder_sent_at' => 'datetime',
-        'extra_data' => 'array', // Временно для совместимости
+        // extra_data обрабатывается через JsonFieldsTrait
     ];
 
     // Статусы бронирования (временно для совместимости)
@@ -126,19 +135,6 @@ class Booking extends Model
         'deleted_at',
     ];
 
-    /**
-     * Генерация номера бронирования при создании
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($booking) {
-            if (empty($booking->booking_number)) {
-                $booking->booking_number = 'B' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -6));
-            }
-        });
-    }
 
     // =================== СВЯЗИ ===================
 

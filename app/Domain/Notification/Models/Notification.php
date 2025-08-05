@@ -5,6 +5,7 @@ namespace App\Domain\Notification\Models;
 use App\Enums\NotificationType;
 use App\Enums\NotificationStatus;
 use App\Enums\NotificationChannel;
+use App\Support\Traits\JsonFieldsTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -19,7 +20,7 @@ use App\Domain\User\Models\User;
  */
 class Notification extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, JsonFieldsTrait;
 
     protected $fillable = [
         'user_id',
@@ -46,12 +47,19 @@ class Notification extends Model
         'metadata',
     ];
 
+    /**
+     * JSON поля для использования с JsonFieldsTrait
+     */
+    protected $jsonFields = [
+        'data',
+        'channels',
+        'metadata',
+    ];
+
     protected $casts = [
         'type' => NotificationType::class,
         'status' => NotificationStatus::class,
-        'data' => 'array',
-        'channels' => 'array',
-        'metadata' => 'array',
+        // JSON поля обрабатываются через JsonFieldsTrait
         'scheduled_at' => 'datetime',
         'sent_at' => 'datetime',
         'delivered_at' => 'datetime',

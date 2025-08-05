@@ -2,6 +2,13 @@
 
 namespace App\Domain\User\Models;
 
+use App\Domain\User\Traits\HasAdsIntegration;
+use App\Domain\User\Traits\HasBookingIntegration;
+use App\Domain\User\Traits\HasFavoritesIntegration;
+use App\Domain\User\Traits\HasMasterIntegration;
+use App\Domain\User\Traits\HasProfile;
+use App\Domain\User\Traits\HasReviewsIntegration;
+use App\Domain\User\Traits\HasRoles;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -17,6 +24,8 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
+    use HasRoles, HasProfile, HasBookingIntegration, HasMasterIntegration;
+    use HasFavoritesIntegration, HasReviewsIntegration, HasAdsIntegration;
 
     /**
      * The attributes that are mass assignable.
@@ -72,43 +81,14 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(UserSettings::class);
     }
 
-    /**
-     * Проверка роли
-     */
-    public function hasRole(string $role): bool
-    {
-        return $this->role->value === $role;
-    }
-
-    /**
-     * Проверка, является ли пользователь мастером
-     */
-    public function isMaster(): bool
-    {
-        return $this->role === UserRole::MASTER;
-    }
-
-    /**
-     * Проверка, является ли пользователь клиентом
-     */
-    public function isClient(): bool
-    {
-        return $this->role === UserRole::CLIENT;
-    }
-
-    /**
-     * Проверка, является ли пользователь администратором
-     */
-    public function isAdmin(): bool
-    {
-        return $this->role === UserRole::ADMIN;
-    }
-
-    /**
-     * Проверка, активен ли пользователь
-     */
-    public function isActive(): bool
-    {
-        return $this->status === UserStatus::ACTIVE;
-    }
+    // ✅ DDD РЕФАКТОРИНГ ЗАВЕРШЕН:
+    // - HasRoles: методы ролей и разрешений
+    // - HasProfile: профиль и настройки пользователя  
+    // - HasBookingIntegration: интеграция с бронированиями через события
+    // - HasMasterIntegration: интеграция с мастерами через события
+    // - HasFavoritesIntegration: интеграция с избранным через события
+    // - HasReviewsIntegration: интеграция с отзывами через события  
+    // - HasAdsIntegration: интеграция с объявлениями через события
+    // - Удалены прямые связи с другими доменами
+    // - Используются Integration Services для взаимодействия
 }

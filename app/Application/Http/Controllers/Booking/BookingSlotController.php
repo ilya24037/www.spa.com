@@ -3,10 +3,7 @@
 namespace App\Application\Http\Controllers\Booking;
 
 use App\Application\Http\Controllers\Controller;
-use App\Domain\Master\Models\MasterProfile;
-use App\Domain\Service\Models\Service;
 use App\Domain\Booking\Services\BookingService;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 /**
@@ -51,26 +48,10 @@ class BookingSlotController extends Controller
      */
     protected function getSlotsForDate(Request $request)
     {
-        $date = Carbon::parse($request->date);
-        $masterProfile = MasterProfile::with('schedules')->findOrFail($request->master_profile_id);
-        $service = Service::findOrFail($request->service_id);
-        
-        $dayOfWeek = $date->dayOfWeek;
-        $schedule = $masterProfile->schedules()
-            ->where('day_of_week', $dayOfWeek)
-            ->where('is_working_day', true)
-            ->first();
-            
-        if (!$schedule) {
-            return response()->json(['slots' => []]);
-        }
-
-        // Используем метод из сервиса для генерации слотов
-        $slots = $this->bookingService->generateDaySlots(
-            $date->format('Y-m-d'),
-            $schedule,
-            $service,
-            $masterProfile
+        $slots = $this->bookingService->getSlotsForDate(
+            $request->master_profile_id,
+            $request->service_id,
+            $request->date
         );
 
         return response()->json(['slots' => $slots]);
@@ -199,11 +180,7 @@ class BookingSlotController extends Controller
                 $weekOffset
             );
 
-            return response()->json([
-                'schedule' => $schedule,
-                'week_start' => Carbon::now()->addWeeks($weekOffset)->startOfWeek()->format('Y-m-d'),
-                'week_end' => Carbon::now()->addWeeks($weekOffset)->endOfWeek()->format('Y-m-d')
-            ]);
+            return response()->json(['schedule' => $schedule]);
 
         } catch (\Exception $e) {
             return response()->json([

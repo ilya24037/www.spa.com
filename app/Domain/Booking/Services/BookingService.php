@@ -303,6 +303,30 @@ class BookingService
     }
 
     /**
+     * Получить список бронирований для контроллера
+     */
+    public function getBookingsForUser(User $user, int $perPage = 10)
+    {
+        return $this->bookingRepository->getBookingsForUser($user, $perPage);
+    }
+
+    /**
+     * Получить мастера и услугу для создания бронирования
+     */
+    public function validateBookingRequest(int $masterProfileId, int $serviceId): array
+    {
+        return $this->bookingRepository->validateBookingRequest($masterProfileId, $serviceId);
+    }
+
+    /**
+     * Найти бронирование с загруженными связями
+     */
+    public function findBookingWithRelations(int $bookingId): ?Booking
+    {
+        return $this->bookingRepository->findWithRelations($bookingId);
+    }
+
+    /**
      * Получить статистику бронирований
      */
     public function getBookingStats(User $user, string $period = 'month'): array
@@ -417,5 +441,53 @@ class BookingService
         }
 
         return $sentCount;
+    }
+
+    /**
+     * Получить слоты для конкретной даты
+     */
+    public function getSlotsForDate(int $masterProfileId, int $serviceId, string $date): array
+    {
+        return $this->bookingRepository->getSlotsForDate($masterProfileId, $serviceId, $date);
+    }
+
+    /**
+     * Проверить доступность слота
+     */
+    public function checkSlotAvailability(int $masterProfileId, string $date, string $time, int $serviceId): bool
+    {
+        return $this->availabilityService->validateTimeSlot($masterProfileId, $date, $time, $serviceId);
+    }
+
+    /**
+     * Получить занятые слоты мастера
+     */
+    public function getBusySlots(int $masterProfileId, string $startDate, string $endDate): array
+    {
+        return $this->bookingRepository->getBusySlots($masterProfileId, $startDate, $endDate);
+    }
+
+    /**
+     * Получить следующий доступный слот
+     */
+    public function getNextAvailableSlot(int $masterProfileId, int $serviceId): ?array
+    {
+        return $this->availabilityService->findNextAvailableSlot($masterProfileId, $serviceId);
+    }
+
+    /**
+     * Получить расписание мастера на неделю
+     */
+    public function getMasterWeekSchedule(int $masterProfileId, int $weekOffset = 0): array
+    {
+        return $this->bookingRepository->getMasterWeekSchedule($masterProfileId, $weekOffset);
+    }
+
+    /**
+     * Генерировать слоты для дня (метод уже существует в сервисе)
+     */
+    public function generateDaySlots(string $date, $schedule, $service, $masterProfile): array
+    {
+        return $this->availabilityService->generateDaySlots($date, $schedule, $service, $masterProfile);
     }
 }

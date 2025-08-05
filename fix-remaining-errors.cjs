@@ -2,8 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 
-console.log('🔧 ИСПРАВЛЕНИЕ ОСТАВШИХСЯ TYPESCRIPT ОШИБОК\n');
-console.log('='.repeat(60));
+);
 
 // 1. Создаем недостающие composables
 const ensureComposables = [
@@ -109,7 +108,7 @@ import { ref } from 'vue'
 export const useBookingStore = defineStore('booking', () => {
   const bookings = ref([])
   const loading = ref(false)
-  
+
   return {
     bookings,
     loading
@@ -130,7 +129,7 @@ ensureComposables.forEach(({ path: filePath, content }) => {
       fs.mkdirSync(dir, { recursive: true });
     }
     fs.writeFileSync(filePath, content);
-    console.log(`   ✅ Создан composable: ${filePath}`);
+
     fixedCount++;
   }
 });
@@ -143,7 +142,7 @@ ensureStores.forEach(({ path: filePath, content }) => {
       fs.mkdirSync(dir, { recursive: true });
     }
     fs.writeFileSync(filePath, content);
-    console.log(`   ✅ Создан store: ${filePath}`);
+
     fixedCount++;
   }
 });
@@ -155,7 +154,7 @@ readonlyFixes.forEach(filePath => {
     if (content.includes('readonly') && !content.includes('Readonly')) {
       content = content.replace(/readonly/g, 'Readonly');
       fs.writeFileSync(filePath, content);
-      console.log(`   ✅ Исправлен readonly: ${filePath}`);
+
       fixedCount++;
     }
   }
@@ -168,7 +167,7 @@ refFixes.forEach(filePath => {
     if (content.includes(': Ref<') && !content.includes('import("vue").Ref')) {
       content = content.replace(/: Ref</g, ': import("vue").Ref<');
       fs.writeFileSync(filePath, content);
-      console.log(`   ✅ Исправлен Ref: ${filePath}`);
+
       fixedCount++;
     }
   }
@@ -185,28 +184,27 @@ fixUnusedImports.forEach(filePath => {
   if (fs.existsSync(filePath)) {
     let content = fs.readFileSync(filePath, 'utf-8');
     let changed = false;
-    
+
     // Удаляем onMounted если не используется
     if (content.includes('onMounted') && !content.includes('onMounted(')) {
       content = content.replace(/,?\s*onMounted/g, '');
       changed = true;
     }
-    
+
     // Удаляем другие неиспользуемые импорты
     if (content.includes('beforeEach') && !content.includes('beforeEach(')) {
       content = content.replace(/,?\s*beforeEach/g, '');
       changed = true;
     }
-    
+
     if (changed) {
       fs.writeFileSync(filePath, content);
-      console.log(`   ✅ Удалены неиспользуемые импорты: ${filePath}`);
+
       fixedCount++;
     }
   }
 });
 
-console.log('\n' + '='.repeat(60));
-console.log(`✅ ИСПРАВЛЕНО: ${fixedCount} файлов`);
-console.log('='.repeat(60));
-console.log('\n🎯 СЛЕДУЮЩИЙ ШАГ: Запустить проверку TypeScript');
+);
+
+);

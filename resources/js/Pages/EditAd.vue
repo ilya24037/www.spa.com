@@ -73,6 +73,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/src/shared/lib/logger'
 import { Head, Link, router } from '@inertiajs/vue3'
 import { onMounted } from 'vue'
 
@@ -107,13 +108,13 @@ const pageLoader = usePageLoading({
   autoStart: true,
   timeout: 10000,
   onStart: () => {
-    console.log(`EditAd loading started for ID: ${props.ad?.id}`)
+    // EditAd loading started
   },
   onComplete: () => {
-    console.log(`EditAd loading completed for: ${props.ad?.title || props.ad?.name}`)
+    // EditAd loading completed
   },
   onError: (error) => {
-    console.error('EditAd loading error:', error)
+    logger.error('EditAd loading error:', error)
   }
 })
 

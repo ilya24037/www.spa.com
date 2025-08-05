@@ -19,11 +19,11 @@ const componentsToCreate = [
 
 componentsToCreate.forEach(({ path: compPath, name }) => {
   const dir = path.dirname(compPath);
-  
+
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
-  
+
   if (!fs.existsSync(compPath)) {
     const content = `<template>
   <div class="${name.toLowerCase()}">
@@ -47,10 +47,9 @@ defineProps<{
   loading?: boolean
 }>()
 </script>`;
-    
+
     fs.writeFileSync(compPath, content);
-    console.log(`✨ Created: ${name}`);
+
   }
 });
 
-console.log('\n✅ All components created!');

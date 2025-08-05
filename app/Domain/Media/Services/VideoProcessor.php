@@ -14,6 +14,12 @@ use Intervention\Image\Facades\Image;
  */
 class VideoProcessor
 {
+    private \App\Domain\Media\Repositories\VideoRepository $videoRepository;
+    
+    public function __construct(\App\Domain\Media\Repositories\VideoRepository $videoRepository)
+    {
+        $this->videoRepository = $videoRepository;
+    }
     private const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100MB
     
     private const ALLOWED_MIME_TYPES = [
@@ -54,8 +60,8 @@ class VideoProcessor
         // Получаем метаданные видео
         $videoInfo = $this->getVideoInfo($file);
 
-        // Сохраняем в базу данных
-        return MasterVideo::create([
+        // Сохраняем в базу данных через репозиторий
+        return $this->videoRepository->createVideo([
             'master_profile_id' => $master->id,
             'filename' => $filename,
             'poster_filename' => $posterFilename,
@@ -86,8 +92,8 @@ class VideoProcessor
             $privateDisk->delete("{$masterFolder}/video/{$video->poster_filename}");
         }
         
-        // Удаляем запись из БД
-        $video->delete();
+        // Удаляем запись из БД через репозиторий
+        $this->videoRepository->deleteVideo($video->id, $video->master_profile_id);
     }
 
     /**

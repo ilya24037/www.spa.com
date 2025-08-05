@@ -1,5 +1,5 @@
 // usePageLoading.ts
-import { computed, onMounted, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import type { Ref } from 'vue'
 import type {
   UsePageLoadingOptions,
@@ -9,6 +9,7 @@ import type {
   PageLoaderType,
   PageLoadingAnalytics
 } from '../ui/organisms/PageLoader/PageLoader.types'
+import { logger } from '../lib/logger'
 
 /**
  * Composable для управления состояниями загрузки страниц
@@ -90,11 +91,7 @@ export function usePageLoading(options: UsePageLoadingOptions = {}): UsePageLoad
 
       retryAttempts.value = 0
 
-      // Логируем начало загрузки
-      console.log(`PageLoading [${type}]: Started`, {
-        message: state.value.message,
-        timestamp: new Date().toISOString()
-      })
+      // Начало загрузки
 
       // Колбек начала загрузки
       onStart?.()
@@ -138,11 +135,7 @@ export function usePageLoading(options: UsePageLoadingOptions = {}): UsePageLoad
         state.value.message = progressMessage
       }
 
-      // Логируем прогресс
-      console.log(`PageLoading [${type}]: Progress ${clampedProgress}%`, {
-        message: state.value.message,
-        timestamp: new Date().toISOString()
-      })
+      // Обновление прогресса
 
       // Колбек прогресса
       onProgress?.(clampedProgress)
@@ -157,7 +150,11 @@ export function usePageLoading(options: UsePageLoadingOptions = {}): UsePageLoad
       }
 
     } catch (err: unknown) {
-      console.error(`PageLoading [${type}]: Error setting progress`, err)
+      logger.error('Error setting progress', err, { 
+        module: `PageLoading[${type}]`,
+        action: 'setProgress',
+        metadata: { progress: newProgress }
+      })
     }
   }
 
@@ -170,11 +167,7 @@ export function usePageLoading(options: UsePageLoadingOptions = {}): UsePageLoad
 
       const duration = Date.now() - state.value.startTime
 
-      // Логируем завершение
-      console.log(`PageLoading [${type}]: Completed`, {
-        duration: `${duration}ms`,
-        timestamp: new Date().toISOString()
-      })
+      // Завершение загрузки
 
       // Отправляем аналитику
       sendAnalytics({
@@ -192,7 +185,10 @@ export function usePageLoading(options: UsePageLoadingOptions = {}): UsePageLoad
       onComplete?.()
 
     } catch (err: unknown) {
-      console.error(`PageLoading [${type}]: Error completing loading`, err)
+      logger.error('Error completing loading', err, {
+        module: `PageLoading[${type}]`,
+        action: 'completeLoading'
+      })
     }
   }
 
@@ -207,11 +203,13 @@ export function usePageLoading(options: UsePageLoadingOptions = {}): UsePageLoad
       const duration = Date.now() - state.value.startTime
 
       // Логируем ошибку
-      console.error(`PageLoading [${type}]: Error`, {
-        error: loadingError,
-        duration: `${duration}ms`,
-        retryAttempts: retryAttempts.value,
-        timestamp: new Date().toISOString()
+      logger.error('Loading error occurred', loadingError, {
+        module: `PageLoading[${type}]`,
+        action: 'errorLoading',
+        metadata: {
+          duration: `${duration}ms`,
+          retryAttempts: retryAttempts.value
+        }
       })
 
       // Отправляем аналитику
@@ -228,7 +226,10 @@ export function usePageLoading(options: UsePageLoadingOptions = {}): UsePageLoad
       onError?.(loadingError)
 
     } catch (err: unknown) {
-      console.error(`PageLoading [${type}]: Error handling error`, err)
+      logger.fatal('Critical error in error handler', err, {
+        module: `PageLoading[${type}]`,
+        action: 'errorHandling'
+      })
     }
   }
 
@@ -247,7 +248,7 @@ export function usePageLoading(options: UsePageLoadingOptions = {}): UsePageLoad
 
       retryAttempts.value++
       
-      console.log(`PageLoading [${type}]: Retry attempt ${retryAttempts.value}/${retryCount}`)
+      // Повторная попытка загрузки
       
       const retryMessage = `Повторная попытка ${retryAttempts.value}/${retryCount}...`
       startLoading(retryMessage)
@@ -295,11 +296,14 @@ export function usePageLoading(options: UsePageLoadingOptions = {}): UsePageLoad
         })
       }
 
-      // Можно также отправить в собственную аналитику
-      console.log('PageLoading Analytics:', analytics)
+      // Аналитика отправлена
       
     } catch (err: unknown) {
-      console.warn('Failed to send page loading analytics:', err)
+      logger.warn('Failed to send page loading analytics', {
+        module: `PageLoading[${type}]`,
+        action: 'sendAnalytics',
+        metadata: { error: err }
+      })
     }
   }
 

@@ -3,23 +3,32 @@
 namespace App\Application\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Domain\Master\Models\MasterProfile;
-use App\Domain\Media\Models\Photo;
+use App\Domain\Master\Services\MasterService;
+use App\Domain\Media\Services\MediaService;
 
 class TestController extends Controller
 {
+    private MasterService $masterService;
+    private MediaService $mediaService;
+
+    public function __construct(MasterService $masterService, MediaService $mediaService)
+    {
+        $this->masterService = $masterService;
+        $this->mediaService = $mediaService;
+    }
+
     public function addPhotos()
     {
         try {
-            // Найдем мастера Елену Сидорову
-            $master = MasterProfile::where('display_name', 'Елена Сидорова')->first();
+            // Найдем мастера через сервис
+            $master = $this->masterService->findByDisplayName('Елена Сидорова');
             
             if (!$master) {
                 return response()->json(['error' => 'Мастер Елена Сидорова не найден!'], 404);
             }
 
-            // Удалим существующие фотографии
-            $master->photos()->delete();
+            // Удалим существующие фотографии через сервис
+            $this->mediaService->clearMasterPhotos($master);
 
             // Добавим тестовые фотографии
             $photos = [
@@ -55,17 +64,11 @@ class TestController extends Controller
                 ]
             ];
 
-            foreach ($photos as $photo) {
-                Photo::create([
-                    'master_profile_id' => $master->id,
-                    'path' => $photo['path'],
-                    'is_main' => $photo['is_main'],
-                    'order' => $photo['order']
-                ]);
-            }
+            // Добавляем фотографии через сервис
+            $addedPhotos = $this->mediaService->addTestPhotos($master, $photos);
 
-            // Обновим аватар мастера и статусы
-            $master->update([
+            // Обновляем мастера через сервис
+            $this->masterService->updateMasterStatus($master, [
                 'avatar' => $photos[0]['path'],
                 'is_verified' => true,
                 'is_premium' => true,
@@ -76,7 +79,7 @@ class TestController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Успешно добавлено ' . count($photos) . ' фотографий для мастера: ' . $master->display_name,
-                'photos_count' => count($photos),
+                'photos_count' => count($addedPhotos),
                 'master_url' => route('masters.show', ['slug' => $master->slug, 'master' => $master->id])
             ]);
 
@@ -91,15 +94,15 @@ class TestController extends Controller
     public function addLocalPhotos()
     {
         try {
-            // Найдем мастера Елену Сидорову
-            $master = MasterProfile::where('display_name', 'Елена Сидорова')->first();
+            // Найдем мастера через сервис
+            $master = $this->masterService->findByDisplayName('Елена Сидорова');
             
             if (!$master) {
                 return response()->json(['error' => 'Мастер Елена Сидорова не найден!'], 404);
             }
 
-            // Удалим существующие фотографии
-            $master->photos()->delete();
+            // Удалим существующие фотографии через сервис
+            $this->mediaService->clearMasterPhotos($master);
 
             // Локальные фотографии (поместите их в public/images/masters/)
             $localPhotos = [
@@ -111,44 +114,12 @@ class TestController extends Controller
                 'images/masters/elena6.jpg'
             ];
 
-            $addedPhotos = [];
-            
-            foreach ($localPhotos as $index => $photoPath) {
-                // Проверяем существование файла
-                if (file_exists(public_path($photoPath))) {
-                    $photo = Photo::create([
-                        'master_profile_id' => $master->id,
-                        'path' => $photoPath,
-                        'is_main' => $index === 0,
-                        'order' => $index + 1
-                    ]);
-                    
-                    $addedPhotos[] = [
-                        'id' => $photo->id,
-                        'url' => asset($photoPath),
-                        'path' => $photoPath,
-                    ];
-                } else {
-                    // Если файл не найден, создаем placeholder
-                    $photo = Photo::create([
-                        'master_profile_id' => $master->id,
-                        'path' => 'images/no-photo.jpg',
-                        'is_main' => $index === 0,
-                        'order' => $index + 1
-                    ]);
-                    
-                    $addedPhotos[] = [
-                        'id' => $photo->id,
-                        'url' => asset('images/no-photo.jpg'),
-                        'path' => 'images/no-photo.jpg',
-                        'note' => "Файл $photoPath не найден, использован placeholder"
-                    ];
-                }
-            }
+            // Добавляем локальные фотографии через сервис
+            $addedPhotos = $this->mediaService->addLocalPhotos($master, $localPhotos);
 
-            // Обновим аватар мастера
-            $master->update([
-                'avatar' => $addedPhotos[0]['url'],
+            // Обновляем мастера через сервис
+            $this->masterService->updateMasterStatus($master, [
+                'avatar' => $addedPhotos[0]['url'] ?? asset('images/no-photo.jpg'),
                 'is_verified' => true,
                 'is_premium' => true,
                 'premium_until' => now()->addMonths(3),

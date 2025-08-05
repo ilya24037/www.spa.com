@@ -6,19 +6,18 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
-use App\Domain\Master\Models\MasterProfile;
-use App\Domain\Service\Models\MassageCategory;
-use App\Domain\Service\Models\Service;
-use App\Domain\Master\Models\WorkZone;
 use App\Domain\Master\Services\MasterService;
+use App\Domain\Service\Services\ServiceCategoryService;
 
 class AddItemController extends Controller
 {
     protected MasterService $masterService;
+    protected ServiceCategoryService $categoryService;
 
-    public function __construct(MasterService $masterService)
+    public function __construct(MasterService $masterService, ServiceCategoryService $categoryService)
     {
         $this->masterService = $masterService;
+        $this->categoryService = $categoryService;
     }
 
     /**
@@ -161,8 +160,8 @@ class AddItemController extends Controller
      */
     public function massage()
     {
-        $categories = MassageCategory::with('subcategories')->get();
-        $cities = ['Москва', 'Санкт-Петербург', 'Екатеринбург', 'Казань', 'Новосибирск'];
+        $categories = $this->categoryService->getCategoriesWithSubcategories();
+        $cities = $this->masterService->getAvailableCities();
         
         return Inertia::render('AddItem/Massage', [
             'categories' => $categories,

@@ -24,11 +24,15 @@ class ImageProcessor
         'image/webp'
     ];
 
-    private ThumbnailGenerator $thumbnailGenerator;
+    private ThumbnailService $thumbnailGenerator;
+    private \App\Domain\Media\Repositories\PhotoRepository $photoRepository;
 
-    public function __construct(ThumbnailGenerator $thumbnailGenerator)
-    {
+    public function __construct(
+        ThumbnailService $thumbnailGenerator,
+        \App\Domain\Media\Repositories\PhotoRepository $photoRepository
+    ) {
         $this->thumbnailGenerator = $thumbnailGenerator;
+        $this->photoRepository = $photoRepository;
     }
 
     /**
@@ -61,8 +65,8 @@ class ImageProcessor
         // Создаем размеры
         $this->thumbnailGenerator->generateSizes($image, $privateDisk, $masterFolder, $photoNumber);
         
-        // Сохраняем в базу данных
-        return MasterPhoto::create([
+        // Сохраняем в базу данных через репозиторий
+        return $this->photoRepository->createPhoto([
             'master_profile_id' => $master->id,
             'filename' => $filename,
             'mime_type' => 'image/jpeg',
@@ -117,8 +121,8 @@ class ImageProcessor
         $privateDisk->delete("{$masterFolder}/photos/{$photo->getMediumFilename()}");
         $privateDisk->delete("{$masterFolder}/photos/{$photo->getThumbFilename()}");
 
-        // Удаляем запись из БД
-        $photo->delete();
+        // Удаляем запись из БД через репозиторий
+        $this->photoRepository->deletePhoto($photo->id, $photo->master_profile_id);
     }
 
     /**

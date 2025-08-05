@@ -79,17 +79,17 @@ const obsoletePatterns = [
 // Сканируем legacy директорию
 function scanLegacyComponents(dir) {
   const components = [];
-  
+
   if (!fs.existsSync(dir)) {
     return components;
   }
-  
+
   const files = fs.readdirSync(dir);
-  
+
   files.forEach(file => {
     const filePath = path.join(dir, file);
     const stat = fs.statSync(filePath);
-    
+
     if (stat.isDirectory()) {
       components.push(...scanLegacyComponents(filePath));
     } else if (file.endsWith('.vue')) {
@@ -98,12 +98,12 @@ function scanLegacyComponents(dir) {
         name: path.basename(file, '.vue'),
         size: stat.size
       };
-      
+
       // Проверяем на устаревшие паттерны
       const isObsolete = obsoletePatterns.some(pattern => 
         component.name.includes(pattern) || filePath.includes(pattern)
       );
-      
+
       if (isObsolete) {
         deletionPlan.categories.obsolete.files.push({
           path: filePath,
@@ -115,7 +115,7 @@ function scanLegacyComponents(dir) {
         const content = fs.readFileSync(filePath, 'utf-8');
         const hasExports = content.includes('export default') || content.includes('export {');
         const isUsed = checkComponentUsage(component.name);
-        
+
         if (!isUsed && hasExports) {
           deletionPlan.categories.review.files.push({
             path: filePath,
@@ -124,11 +124,11 @@ function scanLegacyComponents(dir) {
           });
         }
       }
-      
+
       components.push(component);
     }
   });
-  
+
   return components;
 }
 
@@ -137,9 +137,9 @@ function checkComponentUsage(componentName) {
   // Упрощенная проверка - ищем импорты
   const pagesDir = 'resources/js/Pages';
   const srcDir = 'resources/js/src';
-  
+
   const searchDirs = [pagesDir, srcDir];
-  
+
   for (const dir of searchDirs) {
     if (fs.existsSync(dir)) {
       const usage = findInFiles(dir, componentName);
@@ -148,20 +148,20 @@ function checkComponentUsage(componentName) {
       }
     }
   }
-  
+
   return false;
 }
 
 // Поиск в файлах
 function findInFiles(dir, searchTerm) {
   const results = [];
-  
+
   const files = fs.readdirSync(dir);
-  
+
   files.forEach(file => {
     const filePath = path.join(dir, file);
     const stat = fs.statSync(filePath);
-    
+
     if (stat.isDirectory()) {
       results.push(...findInFiles(filePath, searchTerm));
     } else if (file.endsWith('.vue') || file.endsWith('.js') || file.endsWith('.ts')) {
@@ -171,7 +171,7 @@ function findInFiles(dir, searchTerm) {
       }
     }
   });
-  
+
   return results;
 }
 
@@ -193,14 +193,14 @@ const migrationMap = {
 Object.entries(migrationMap).forEach(([legacyName, fsdPath]) => {
   const legacyPath = `resources/js/Components/${legacyName}`;
   const fullFsdPath = `resources/js/src/${fsdPath}`;
-  
+
   // Ищем legacy версии
   const possiblePaths = [
     `${legacyPath}.vue`,
     `${legacyPath}/index.vue`,
     `resources/js/Components/${legacyName}/${legacyName}.vue`
   ];
-  
+
   possiblePaths.forEach(path => {
     if (fs.existsSync(path)) {
       // Проверяем что FSD версия существует
@@ -232,7 +232,7 @@ legacyComponents.forEach(comp => {
   const shouldKeep = mustKeep.some(keep => 
     comp.path.includes(keep) || comp.name === keep.replace('.vue', '')
   );
-  
+
   if (shouldKeep) {
     const alreadyListed = [
       ...deletionPlan.categories.duplicates.files,
@@ -240,7 +240,7 @@ legacyComponents.forEach(comp => {
       ...deletionPlan.categories.migrated.files,
       ...deletionPlan.categories.review.files
     ].some(f => f.path === comp.path);
-    
+
     if (!alreadyListed) {
       deletionPlan.categories.keep.files.push({
         path: comp.path,
@@ -329,13 +329,4 @@ fs.writeFileSync('delete-legacy.bat', batchScript);
 fs.writeFileSync('delete-legacy.sh', shellScript);
 
 // Выводим сводку
-console.log('📋 План удаления создан!\n');
-console.log('📊 СТАТИСТИКА:');
-console.log(`   Безопасно для удаления: ${deletionPlan.summary.safeToDelete}`);
-console.log(`   Требует проверки: ${deletionPlan.summary.requiresReview}`);
-console.log(`   Необходимо сохранить: ${deletionPlan.summary.mustKeep}`);
-console.log('\n📁 ФАЙЛЫ:');
-console.log('   deletion-plan.json - детальный план');
-console.log('   delete-legacy.bat - скрипт для Windows');
-console.log('   delete-legacy.sh - скрипт для Unix/Linux');
-console.log('\n✅ Готово к выполнению!');
+

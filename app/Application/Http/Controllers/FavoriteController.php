@@ -2,56 +2,38 @@
 
 namespace App\Application\Http\Controllers;
 
+use App\Domain\Ad\Services\AdProfileService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class FavoriteController extends Controller
 {
-    public function index()
-    {
-        $user = auth()->user();
-        
-        // Тестовые данные избранного
-        $favorites = [
-            [
-                'id' => 1,
-                'name' => 'Анна Иванова',
-                'specialization' => 'Классический массаж',
-                'age' => 28,
-                'height' => 165,
-                'rating' => 4.8,
-                'reviewsCount' => 142,
-                'pricePerHour' => 3000,
-                'photo' => '/images/masters/1.jpg',
-                'photosCount' => 5,
-                'isAvailableNow' => true,
-                'phone' => '+79991234567',
-                'isFavorite' => true
-            ]
-        ];
+    private AdProfileService $adProfileService;
 
-        // Подсчеты для бокового меню (как в ProfileController)
-        $allAds = \App\Models\Ad::where('user_id', $user->id)->get();
-        $counts = [
-            'active' => $allAds->where('status', 'active')->count(),
-            'draft' => $allAds->where('status', 'draft')->count(),
-            'archived' => $allAds->where('status', 'archived')->count(),
-            'waiting_payment' => $allAds->where('status', 'waiting_payment')->count(),
-            'old' => $allAds->where('status', 'archived')->count(),
-            'bookings' => $user->bookings()->where('status', 'pending')->count(),
-            'favorites' => $user->favorites()->count(),
-            'unreadMessages' => 0,
-        ];
+    public function __construct(AdProfileService $adProfileService)
+    {
+        $this->adProfileService = $adProfileService;
+    }
+
+    public function index(Request $request)
+    {
+        $user = $request->user();
         
-        // Статистика пользователя  
-        $userStats = [
-            'rating' => 0, // Временно 0, пока нет поля rating_overall
-            'reviewsCount' => $user->reviews()->count(),
-            'balance' => $user->balance ?? 0,
-        ];
+        // ✅ DDD: Используем новый интеграционный метод вместо $user->favorites()
+        $favorites = $user->getFavorites();
+        $favoritesCount = $user->getFavoritesCount();
+        $favoritesStats = $user->getFavoritesStatistics();
+
+        // Получаем счетчики через сервис
+        $counts = $this->adProfileService->getUserAdCounts($user);
+        
+        // Статистика пользователя через сервис
+        $userStats = $this->adProfileService->getUserStats($user);
 
         return Inertia::render('Favorites/Index', [
             'favorites' => $favorites,
+            'favoritesCount' => $favoritesCount,
+            'favoritesStats' => $favoritesStats,
             'counts' => $counts,
             'userStats' => $userStats,
         ]);
@@ -59,14 +41,34 @@ class FavoriteController extends Controller
 
     public function toggle(Request $request)
     {
-        $masterId = $request->master_id;
+        $user = $request->user();
+        $adId = $request->input('ad_id');
         
-        // Здесь должна быть логика добавления/удаления из избранного
-        // Например, работа с базой данных
+        if (!$adId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'ID объявления не указан'
+            ], 400);
+        }
+        
+        // ✅ DDD: Используем новый интеграционный метод вместо прямой работы с БД
+        $result = $user->toggleFavorite($adId);
+        
+        if ($result) {
+            $isFavorite = $user->hasFavorite($adId);
+            $message = $isFavorite ? 'Добавлено в избранное' : 'Удалено из избранного';
+            
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'is_favorite' => $isFavorite,
+                'favorites_count' => $user->getFavoritesCount()
+            ]);
+        }
         
         return response()->json([
-            'success' => true,
-            'message' => 'Добавлено в избранное'
-        ]);
+            'success' => false,
+            'message' => 'Не удалось обновить избранное'
+        ], 500);
     }
 }

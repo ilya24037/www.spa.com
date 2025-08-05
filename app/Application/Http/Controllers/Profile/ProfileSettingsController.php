@@ -3,6 +3,7 @@
 namespace App\Application\Http\Controllers\Profile;
 
 use App\Application\Http\Controllers\Controller;
+use App\Domain\User\Services\UserService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -12,15 +13,21 @@ use Illuminate\Http\Request;
  */
 class ProfileSettingsController extends Controller
 {
+    private UserService $userService;
+
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
+    }
     /**
      * Переключение статуса профиля мастера
      */
     public function toggleProfile(Request $request, $masterId): RedirectResponse
     {
-        $profile = $request->user()->masterProfiles()->findOrFail($masterId);
-        $profile->update(['is_active' => !$profile->is_active]);
+        $success = $this->userService->toggleMasterProfile($request->user(), $masterId);
         
-        return back()->with('success', 'Статус анкеты изменен');
+        $message = $success ? 'Статус анкеты изменен' : 'Ошибка изменения статуса';
+        return back()->with($success ? 'success' : 'error', $message);
     }
 
     /**
@@ -28,16 +35,12 @@ class ProfileSettingsController extends Controller
      */
     public function publishProfile(Request $request, $masterId): RedirectResponse
     {
-        $profile = $request->user()->masterProfiles()->findOrFail($masterId);
+        $result = $this->userService->publishMasterProfile($request->user(), $masterId);
         
-        // Проверяем готовность к публикации
-        if (!$this->canPublish($profile)) {
-            return back()->with('error', 'Анкета не готова к публикации. Заполните все обязательные поля.');
-        }
+        $status = $result['success'] ? 'success' : 'error';
+        $message = $result['message'] ?? $result['error'] ?? 'Неизвестная ошибка';
         
-        $profile->update(['status' => 'active']);
-        
-        return back()->with('success', 'Анкета опубликована');
+        return back()->with($status, $message);
     }
 
     /**
@@ -45,10 +48,10 @@ class ProfileSettingsController extends Controller
      */
     public function restoreProfile(Request $request, $masterId): RedirectResponse
     {
-        $profile = $request->user()->masterProfiles()->findOrFail($masterId);
-        $profile->update(['status' => 'active']);
+        $success = $this->userService->restoreMasterProfile($request->user(), $masterId);
         
-        return back()->with('success', 'Анкета восстановлена');
+        $message = $success ? 'Анкета восстановлена' : 'Ошибка восстановления анкеты';
+        return back()->with($success ? 'success' : 'error', $message);
     }
 
     /**
@@ -56,10 +59,10 @@ class ProfileSettingsController extends Controller
      */
     public function archiveProfile(Request $request, $masterId): RedirectResponse
     {
-        $profile = $request->user()->masterProfiles()->findOrFail($masterId);
-        $profile->update(['status' => 'archived']);
+        $success = $this->userService->archiveMasterProfile($request->user(), $masterId);
         
-        return back()->with('success', 'Анкета перемещена в архив');
+        $message = $success ? 'Анкета перемещена в архив' : 'Ошибка архивирования анкеты';
+        return back()->with($success ? 'success' : 'error', $message);
     }
 
     /**
@@ -67,47 +70,12 @@ class ProfileSettingsController extends Controller
      */
     public function deleteProfile(Request $request, $masterId): RedirectResponse
     {
-        $profile = $request->user()->masterProfiles()->findOrFail($masterId);
+        $result = $this->userService->deleteMasterProfile($request->user(), $masterId);
         
-        // Проверяем, можно ли удалить
-        if ($profile->hasActiveBookings()) {
-            return back()->with('error', 'Невозможно удалить анкету с активными бронированиями');
-        }
+        $status = $result['success'] ? 'success' : 'error';
+        $message = $result['message'] ?? $result['error'] ?? 'Неизвестная ошибка';
         
-        $profile->delete();
-        
-        return back()->with('success', 'Анкета удалена');
+        return back()->with($status, $message);
     }
 
-    /**
-     * Проверка готовности профиля к публикации
-     */
-    private function canPublish($profile): bool
-    {
-        // Проверяем обязательные поля
-        $requiredFields = [
-            'display_name',
-            'city',
-            'phone',
-            'bio',
-        ];
-        
-        foreach ($requiredFields as $field) {
-            if (empty($profile->$field)) {
-                return false;
-            }
-        }
-        
-        // Проверяем наличие хотя бы одной услуги
-        if ($profile->services()->count() === 0) {
-            return false;
-        }
-        
-        // Проверяем наличие фото
-        if ($profile->photos()->count() === 0) {
-            return false;
-        }
-        
-        return true;
-    }
 }

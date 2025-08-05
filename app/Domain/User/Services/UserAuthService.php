@@ -11,9 +11,14 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Events\Verified;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Auth\Events\Lockout;
 
 /**
  * Сервис аутентификации пользователей
@@ -167,6 +172,60 @@ class UserAuthService
     }
 
     /**
+     * Аутентификация через Request (для LoginRequest)
+     * @throws ValidationException
+     */
+    public function authenticateRequest(Request $request): void
+    {
+        $email = $request->input('email');
+        $password = $request->input('password');
+        $remember = $request->boolean('remember');
+        
+        // Проверяем rate limiting
+        $throttleKey = $this->getThrottleKey($request);
+        
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            event(new Lockout($request));
+            
+            $seconds = RateLimiter::availableIn($throttleKey);
+            
+            throw ValidationException::withMessages([
+                'email' => trans('auth.throttle', [
+                    'seconds' => $seconds,
+                    'minutes' => ceil($seconds / 60),
+                ]),
+            ]);
+        }
+        
+        // Пытаемся авторизовать пользователя
+        if (!Auth::attempt($request->only('email', 'password'), $remember)) {
+            RateLimiter::hit($throttleKey);
+            
+            throw ValidationException::withMessages([
+                'email' => trans('auth.failed'),
+            ]);
+        }
+        
+        // Очищаем счетчик попыток при успешной авторизации
+        RateLimiter::clear($throttleKey);
+        
+        // Логируем успешный вход
+        Log::info('User logged in via request', [
+            'user_id' => Auth::id(),
+            'email' => $email,
+            'ip' => $request->ip(),
+        ]);
+    }
+    
+    /**
+     * Получить ключ для rate limiting
+     */
+    private function getThrottleKey(Request $request): string
+    {
+        return Str::transliterate(Str::lower($request->string('email')).'|'.$request->ip());
+    }
+
+    /**
      * Выход пользователя
      */
     public function logout(?User $user = null): bool
@@ -181,9 +240,7 @@ class UserAuthService
                 ]);
             }
 
-            Auth::logout();
-            request()->session()->invalidate();
-            request()->session()->regenerateToken();
+            Auth::guard('web')->logout();
 
             return true;
 
@@ -363,6 +420,63 @@ class UserAuthService
     }
 
     /**
+     * Сброс пароля через Laravel Password (для NewPasswordController)
+     * @throws ValidationException
+     */
+    public function resetPasswordWithToken(array $credentials): string
+    {
+        // Используем Laravel Password facade для сброса пароля
+        $status = Password::reset(
+            $credentials,
+            function ($user) use ($credentials) {
+                $user->forceFill([
+                    'password' => Hash::make($credentials['password']),
+                    'remember_token' => Str::random(60),
+                ])->save();
+
+                event(new PasswordReset($user));
+                
+                Log::info('Password reset via token', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                ]);
+            }
+        );
+        
+        if ($status !== Password::PASSWORD_RESET) {
+            throw ValidationException::withMessages([
+                'email' => [trans($status)],
+            ]);
+        }
+        
+        return $status;
+    }
+
+
+    /**
+     * Отправка ссылки для сброса пароля через Laravel Password (для контроллера)
+     * @throws ValidationException
+     */
+    public function sendPasswordResetLinkViaFacade(string $email): string
+    {
+        // Используем Laravel Password facade для отправки ссылки
+        $status = Password::sendResetLink(['email' => $email]);
+        
+        if ($status !== Password::RESET_LINK_SENT) {
+            throw ValidationException::withMessages([
+                'email' => [trans($status)],
+            ]);
+        }
+        
+        Log::info('Password reset link sent via facade', [
+            'email' => $email,
+            'ip' => request()->ip(),
+        ]);
+        
+        return $status;
+    }
+
+    /**
      * Проверка прав доступа
      */
     public function checkPermission(User $user, string $permission): bool
@@ -451,14 +565,7 @@ class UserAuthService
      */
     public function getAuthStats(): array
     {
-        return [
-            'total_users' => User::count(),
-            'verified_users' => User::whereNotNull('email_verified_at')->count(),
-            'active_users' => User::where('status', UserStatus::ACTIVE)->count(),
-            'blocked_users' => User::whereIn('status', [UserStatus::SUSPENDED, UserStatus::BANNED])->count(),
-            'registrations_today' => User::whereDate('created_at', today())->count(),
-            'registrations_week' => User::where('created_at', '>=', now()->subWeek())->count(),
-            'logins_today' => User::whereDate('updated_at', today())->count(),
-        ];
+        // Используем репозиторий для получения статистики
+        return $this->userRepository->getStatistics();
     }
 }

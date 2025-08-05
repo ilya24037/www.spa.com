@@ -1,4 +1,5 @@
-import { watch, Ref } from 'vue'
+import { watch, Ref, ref } from 'vue'
+import { logger } from '../lib/logger'
 
 /**
  * Composable для работы с localStorage с реактивностью
@@ -30,7 +31,7 @@ export function useLocalStorage<T>(
       }
       return deserializer(item)
     } catch (error) {
-      console.error(`Error reading localStorage key "${key}":`, error)
+      logger.error(`Error reading localStorage key "${key}"`, error)
       return defaultValue
     }
   }
@@ -40,7 +41,7 @@ export function useLocalStorage<T>(
     try {
       window.localStorage.setItem(key, serializer(value))
     } catch (error) {
-      console.error(`Error writing localStorage key "${key}":`, error)
+      logger.error(`Error writing localStorage key "${key}"`, error)
     }
   }
   
@@ -63,7 +64,7 @@ export function useLocalStorage<T>(
       try {
         data.value = deserializer(e.newValue)
       } catch (error) {
-        console.error(`Error syncing localStorage key "${key}":`, error)
+        logger.error(`Error syncing localStorage key "${key}"`, error)
       }
     }
   })
@@ -93,7 +94,7 @@ export function useSessionStorage<T>(
       }
       return deserializer(item)
     } catch (error) {
-      console.error(`Error reading sessionStorage key "${key}":`, error)
+      logger.error(`Error reading sessionStorage key "${key}"`, error)
       return defaultValue
     }
   }
@@ -102,7 +103,7 @@ export function useSessionStorage<T>(
     try {
       window.sessionStorage.setItem(key, serializer(value))
     } catch (error) {
-      console.error(`Error writing sessionStorage key "${key}":`, error)
+      logger.error(`Error writing sessionStorage key "${key}"`, error)
     }
   }
   

@@ -30,21 +30,8 @@ class BookingController extends Controller
      */
     public function index(Request $request)
     {
-        $user = Auth::user();
-        
-        $bookings = Booking::with(['masterProfile.user', 'service', 'client'])
-            ->where(function($query) use ($user) {
-                // Показываем бронирования где пользователь - клиент
-                $query->where('client_id', $user->id);
-                
-                // Или где пользователь - мастер
-                if ($user->masterProfile) {
-                    $query->orWhere('master_profile_id', $user->masterProfile->id);
-                }
-            })
-            ->orderBy('booking_date', 'desc')
-            ->orderBy('start_time', 'desc')
-            ->paginate(10);
+        $user = $request->user();
+        $bookings = $this->bookingService->getBookingsForUser($user, 10);
 
         return Inertia::render('Bookings/Index', [
             'bookings' => $bookings,
@@ -65,28 +52,27 @@ class BookingController extends Controller
                 ->with('error', 'Выберите мастера и услугу');
         }
 
-        $masterProfile = MasterProfile::with(['user', 'services', 'schedules'])
-            ->findOrFail($masterProfileId);
+        try {
+            // Валидируем запрос через сервис
+            $validated = $this->bookingService->validateBookingRequest($masterProfileId, $serviceId);
             
-        $service = Service::findOrFail($serviceId);
-        
-        // Проверяем, что услуга принадлежит мастеру
-        if (!$masterProfile->services->contains($service)) {
-            return redirect()->route('masters.show', $masterProfile)
-                ->with('error', 'Выбранная услуга не доступна у этого мастера');
+            // Получаем доступные слоты через сервис
+            $availableSlots = $this->bookingService->getAvailableSlots(
+                $validated['masterProfile']->id,
+                $validated['service']->id
+            );
+
+            return Inertia::render('Bookings/NewBooking', [
+                'masterProfile' => $validated['masterProfile'],
+                'service' => $validated['service'],
+                'availableSlots' => $availableSlots
+            ]);
+
+        } catch (\InvalidArgumentException $e) {
+            return redirect()->route('home')->with('error', $e->getMessage());
+        } catch (\Exception $e) {
+            return redirect()->route('home')->with('error', 'Ошибка при загрузке формы бронирования');
         }
-
-        // Получаем доступные слоты через сервис
-        $availableSlots = $this->bookingService->getAvailableSlots(
-            $masterProfile->id,
-            $service->id
-        );
-
-        return Inertia::render('Bookings/NewBooking', [
-            'masterProfile' => $masterProfile,
-            'service' => $service,
-            'availableSlots' => $availableSlots
-        ]);
     }
 
     /**
@@ -132,13 +118,13 @@ class BookingController extends Controller
     {
         $this->authorize('view', $booking);
 
-        $booking->load(['masterProfile.user', 'service', 'client']);
+        $bookingWithRelations = $this->bookingService->findBookingWithRelations($booking->id);
 
-        $user = Auth::user();
+        $user = $request->user();
         return Inertia::render('Bookings/Show', [
-            'booking' => $booking,
-            'canManage' => $user->masterProfile && 
-                          $booking->master_profile_id === $user->masterProfile->id
+            'booking' => $bookingWithRelations,
+            'canManage' => $user->getMasterProfile() && 
+                          $bookingWithRelations->master_profile_id === $user->getMasterProfile()->id
         ]);
     }
 
@@ -150,7 +136,7 @@ class BookingController extends Controller
         try {
             $this->bookingService->cancelBooking(
                 $booking, 
-                Auth::user(), 
+                $request->user(), 
                 $request->input('reason')
             );
 
@@ -181,7 +167,7 @@ class BookingController extends Controller
     public function confirm(Booking $booking, Request $request)
     {
         try {
-            $this->bookingService->confirmBooking($booking, Auth::user());
+            $this->bookingService->confirmBooking($booking, $request->user());
 
             if ($request->expectsJson()) {
                 return response()->json([
@@ -210,7 +196,7 @@ class BookingController extends Controller
     public function complete(Booking $booking, Request $request)
     {
         try {
-            $this->bookingService->completeBooking($booking, Auth::user());
+            $this->bookingService->completeBooking($booking, $request->user());
 
             if ($request->expectsJson()) {
                 return response()->json([

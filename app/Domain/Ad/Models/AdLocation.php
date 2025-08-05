@@ -3,6 +3,7 @@
 namespace App\Domain\Ad\Models;
 
 use App\Enums\WorkFormat;
+use App\Support\Traits\JsonFieldsTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class AdLocation extends Model
 {
+    use JsonFieldsTrait;
     protected $table = 'ad_locations';
 
     protected $fillable = [
@@ -28,10 +30,17 @@ class AdLocation extends Model
         'schedule_notes',
     ];
 
+    /**
+     * JSON поля для использования с JsonFieldsTrait
+     */
+    protected $jsonFields = [
+        'service_location',
+        'outcall_locations',
+        'schedule',
+    ];
+
     protected $casts = [
-        'service_location' => 'array',
-        'outcall_locations' => 'array',
-        'schedule' => 'array',
+        // JSON поля обрабатываются через JsonFieldsTrait
         'taxi_option' => 'boolean',
         'work_format' => WorkFormat::class,
     ];

@@ -55,6 +55,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/src/shared/lib/logger'
 import { Head } from '@inertiajs/vue3'
 import { onMounted } from 'vue'
 
@@ -120,13 +121,13 @@ const pageLoader = usePageLoading({
   autoStart: true,
   timeout: 8000,
   onStart: () => {
-    console.log('Favorites page loading started')
+    // Favorites page loading started
   },
   onComplete: () => {
-    console.log('Favorites page loading completed')
+    // Favorites page loading completed
   },
   onError: (error) => {
-    console.error('Favorites page loading error:', error)
+    logger.error('Favorites page loading error:', error)
   }
 })
 

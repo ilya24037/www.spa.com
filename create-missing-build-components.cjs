@@ -2,8 +2,6 @@
 const fs = require('fs');
 const path = require('path');
 
-console.log('🔧 СОЗДАНИЕ НЕДОСТАЮЩИХ КОМПОНЕНТОВ ДЛЯ СБОРКИ\n');
-
 // Список недостающих компонентов и их базовое содержимое
 const missingComponents = [
   {
@@ -93,19 +91,17 @@ let createdCount = 0;
 
 missingComponents.forEach(({ path: filePath, content }) => {
   const dir = path.dirname(filePath);
-  
+
   // Создаем директорию если её нет
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
-  
+
   // Создаем файл если его нет
   if (!fs.existsSync(filePath)) {
     fs.writeFileSync(filePath, content);
-    console.log(`   ✅ Создан: ${filePath}`);
+
     createdCount++;
   }
 });
 
-console.log(`\n✅ СОЗДАНО: ${createdCount} компонентов`);
-console.log('\n🎯 СЛЕДУЮЩИЙ ШАГ: Запустить сборку проекта');

@@ -3,11 +3,9 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-console.log('🔍 ПОЛНЫЙ АНАЛИЗ ПРОЕКТА ПО МЕТОДИКЕ CLAUDE.md\n');
-console.log('=' .repeat(60));
+);
 
 // 1. Собираем ВСЕ ошибки сборки
-console.log('\n📦 ШАГ 1: Анализ ВСЕХ ошибок сборки...\n');
 
 let buildErrors = [];
 try {
@@ -17,7 +15,6 @@ try {
 }
 
 // 2. Анализируем ВСЕ импорты
-console.log('📦 ШАГ 2: Анализ ВСЕХ импортов в проекте...\n');
 
 const allImports = new Set();
 const missingFiles = new Set();
@@ -25,17 +22,17 @@ const brokenImports = [];
 
 function analyzeFile(filePath) {
   if (!fs.existsSync(filePath)) return;
-  
+
   const content = fs.readFileSync(filePath, 'utf-8');
-  
+
   // Находим все импорты
   const importRegex = /import\s+(?:{[^}]+}|\w+)\s+from\s+['"]([^'"]+)['"]/g;
   let match;
-  
+
   while ((match = importRegex.exec(content)) !== null) {
     const importPath = match[1];
     allImports.add(importPath);
-    
+
     // Проверяем существование файла
     if (importPath.startsWith('@/')) {
       const realPath = importPath.replace('@/', 'resources/js/');
@@ -47,7 +44,7 @@ function analyzeFile(filePath) {
         realPath + '/index.js',
         realPath + '/index.ts'
       ];
-      
+
       const exists = possiblePaths.some(p => fs.existsSync(p));
       if (!exists) {
         missingFiles.add(importPath);
@@ -63,12 +60,12 @@ function analyzeFile(filePath) {
 // Сканируем ВСЕ файлы
 function scanDirectory(dir) {
   if (!fs.existsSync(dir)) return;
-  
+
   const files = fs.readdirSync(dir);
   files.forEach(file => {
     const fullPath = path.join(dir, file);
     const stat = fs.statSync(fullPath);
-    
+
     if (stat.isDirectory() && !file.includes('node_modules')) {
       scanDirectory(fullPath);
     } else if (file.endsWith('.vue') || file.endsWith('.js') || file.endsWith('.ts')) {
@@ -80,7 +77,6 @@ function scanDirectory(dir) {
 scanDirectory('resources/js');
 
 // 3. Анализируем структуру FSD
-console.log('📦 ШАГ 3: Проверка структуры FSD...\n');
 
 const fsdStructure = {
   'shared': {
@@ -147,7 +143,7 @@ function checkComponent(basePath, component) {
     `${basePath}/${component}/index.ts`,
     `${basePath}/${component}/index.js`
   ];
-  
+
   const exists = possiblePaths.some(p => fs.existsSync(p));
   if (!exists) {
     missingComponents.push({
@@ -211,23 +207,16 @@ const report = {
 fs.writeFileSync('full-analysis-report.json', JSON.stringify(report, null, 2));
 
 // 6. Выводим результаты
-console.log('📊 РЕЗУЛЬТАТЫ АНАЛИЗА:');
-console.log('=' .repeat(60));
-console.log(`\n✅ Всего импортов: ${report.summary.totalImports}`);
-console.log(`❌ Недостающих импортов: ${report.summary.missingImports}`);
-console.log(`❌ Файлов с ошибками: ${report.summary.brokenFiles}`);
-console.log(`❌ Недостающих компонентов: ${report.summary.missingComponents}`);
 
-console.log('\n📝 НЕДОСТАЮЩИЕ КОМПОНЕНТЫ (топ 10):');
+);
+
+:');
 missingComponents.slice(0, 10).forEach(comp => {
-  console.log(`   - ${comp.name} -> ${comp.path}`);
+
 });
 
-console.log('\n📝 СЛОМАННЫЕ ИМПОРТЫ (топ 5):');
+:');
 brokenImports.slice(0, 5).forEach(broken => {
-  console.log(`   - ${broken.file}:`);
-  console.log(`     импортирует: ${broken.import}`);
+
 });
 
-console.log('\n✅ Полный отчет сохранен в full-analysis-report.json');
-console.log('\n🎯 СЛЕДУЮЩИЙ ШАГ: Создать ВСЕ недостающие компоненты одним скриптом');

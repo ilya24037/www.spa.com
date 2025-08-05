@@ -109,6 +109,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/src/shared/lib/logger'
 import { ref, onErrorCaptured } from 'vue'
 import type { ErrorBoundaryProps, ErrorBoundaryEmits, ErrorInfo } from './ErrorBoundary.types'
 
@@ -142,12 +143,12 @@ onErrorCaptured((err: Error, instance: any, info: string) => {
   
   // Логируем ошибку если включено
   if (props.logErrors) {
-    console.error('ErrorBoundary caught error:', {
+    logger.error('ErrorBoundary caught error:', undefined, { metadata: {
       message: err.message,
       stack: err.stack,
       component: info,
       timestamp: errorInfo.timestamp
-    })
+    } })
   }
   
   // Эмитим событие ошибки

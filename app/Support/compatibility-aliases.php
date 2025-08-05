@@ -8,7 +8,7 @@
  */
 
 // DTOs
-class_alias('App\Domain\User\DTOs\UserRegistrationDTO', 'App\DTOs\UserRegistrationDTO');
+class_alias('App\Domain\User\DTOs\RegisterUserDTO', 'App\DTOs\UserRegistrationDTO');
 class_alias('App\Domain\Booking\DTOs\CreateBookingDTO', 'App\DTOs\CreateBookingDTO');
 class_alias('App\Domain\Booking\DTOs\UpdateBookingDTO', 'App\DTOs\UpdateBookingDTO');
 class_alias('App\Domain\Master\DTOs\CreateMasterDTO', 'App\DTOs\CreateMasterDTO');
@@ -88,7 +88,7 @@ class_alias('App\Support\Helpers\VideoHelper', 'App\Helpers\VideoHelper');
 // Trait aliases
 class_alias('App\Support\Traits\Cacheable', 'App\Traits\Cacheable');
 class_alias('App\Support\Traits\HasUniqueSlug', 'App\Traits\HasUniqueSlug');
-class_alias('App\Support\Traits\HasUserProfile', 'App\Traits\HasUserProfile');
+// class_alias('App\Support\Traits\HasUserProfile', 'App\Traits\HasUserProfile'); // Removed during DDD refactoring
 class_alias('App\Support\Traits\HasUserRoles', 'App\Traits\HasUserRoles');
 
 // Request aliases

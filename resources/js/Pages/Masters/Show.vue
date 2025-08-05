@@ -23,6 +23,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/src/shared/lib/logger'
 import { onMounted } from 'vue'
 import MainLayout from '@/src/shared/layouts/MainLayout/MainLayout.vue'
 import MasterProfile from '@/src/widgets/master-profile/MasterProfile.vue'
@@ -57,13 +58,13 @@ const pageLoader = usePageLoading({
   autoStart: true,
   timeout: 12000,
   onStart: () => {
-    console.log(`Master profile loading started for ID: ${props.master?.id}`)
+    // Master profile loading started
   },
   onComplete: () => {
-    console.log(`Master profile loading completed for: ${props.master?.display_name || props.master?.name}`)
+    // Master profile loading completed
   },
   onError: (error) => {
-    console.error('Master profile loading error:', error)
+    logger.error('Master profile loading error:', error)
   }
 })
 

@@ -193,11 +193,7 @@ class MediaUploadController extends Controller
         ]);
 
         try {
-            foreach ($request->photos as $photoData) {
-                Photo::where('id', $photoData['id'])
-                    ->where('master_profile_id', $master->id)
-                    ->update(['sort_order' => $photoData['sort_order']]);
-            }
+            $this->mediaService->reorderPhotos($master, $request->photos);
 
             return response()->json([
                 'success' => true,
@@ -222,12 +218,7 @@ class MediaUploadController extends Controller
         }
 
         try {
-            // Убираем флаг is_main у всех фото мастера
-            Photo::where('master_profile_id', $photo->master_profile_id)
-                ->update(['is_main' => false]);
-
-            // Устанавливаем главное фото
-            $photo->update(['is_main' => true]);
+            $this->mediaService->setMainPhoto($photo->masterProfile, $photo->id);
 
             return response()->json([
                 'success' => true,

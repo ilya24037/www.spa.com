@@ -9,18 +9,18 @@ let createCount = 0;
 // Исправление путей в AdFormBasicInfo
 function fixAdFormBasicInfo() {
   const file = 'resources/js/src/entities/ad/ui/AdForm/components/AdFormBasicInfo.vue';
-  
+
   if (fs.existsSync(file)) {
     let content = fs.readFileSync(file, 'utf-8');
-    
+
     // Исправляем неправильные пути
     content = content.replace(
       /from ['"]\.\.\/modules\/BasicInfo\//g,
       'from \'./'
     );
-    
+
     fs.writeFileSync(file, content);
-    console.log(`✅ Fixed paths in AdFormBasicInfo.vue`);
+
     fixCount++;
   }
 }
@@ -38,10 +38,10 @@ function createAdFormComponents() {
     'AdFormLocation.vue',
     'AdFormPublish.vue'
   ];
-  
+
   components.forEach(comp => {
     const filePath = path.join(componentsDir, comp);
-    
+
     if (!fs.existsSync(filePath)) {
       const name = comp.replace('.vue', '');
       const content = `<template>
@@ -61,9 +61,9 @@ defineEmits<{
   'update:modelValue': [value: any]
 }>()
 </script>`;
-      
+
       fs.writeFileSync(filePath, content);
-      console.log(`✨ Created: ${comp}`);
+
       createCount++;
     }
   });
@@ -72,7 +72,7 @@ defineEmits<{
 // Создание layouts если нет
 function createLayouts() {
   const layoutsDir = 'resources/js/src/shared/layouts';
-  
+
   // ProfileLayout
   const profileLayoutPath = path.join(layoutsDir, 'ProfileLayout/ProfileLayout.vue');
   if (!fs.existsSync(profileLayoutPath)) {
@@ -88,10 +88,10 @@ function createLayouts() {
 <script setup lang="ts">
 // ProfileLayout
 </script>`);
-    console.log('✨ Created ProfileLayout');
+
     createCount++;
   }
-  
+
   // MainLayout
   const mainLayoutPath = path.join(layoutsDir, 'MainLayout/MainLayout.vue');
   if (!fs.existsSync(mainLayoutPath)) {
@@ -105,7 +105,7 @@ function createLayouts() {
 <script setup lang="ts">
 // MainLayout
 </script>`);
-    console.log('✨ Created MainLayout');
+
     createCount++;
   }
 }
@@ -122,14 +122,14 @@ function createStores() {
       name: 'AdStore'
     }
   ];
-  
+
   stores.forEach(({ path: storePath, name }) => {
     if (!fs.existsSync(storePath)) {
       const dir = path.dirname(storePath);
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
       }
-      
+
       fs.writeFileSync(storePath, `import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
@@ -137,7 +137,7 @@ export const use${name} = defineStore('${name.toLowerCase()}', () => {
   const items = ref([])
   const loading = ref(false)
   const currentItem = ref(null)
-  
+
   const fetchItems = async () => {
     loading.value = true
     try {
@@ -147,7 +147,7 @@ export const use${name} = defineStore('${name.toLowerCase()}', () => {
       loading.value = false
     }
   }
-  
+
   return {
     items,
     loading,
@@ -157,7 +157,7 @@ export const use${name} = defineStore('${name.toLowerCase()}', () => {
 })
 
 export default use${name}`);
-      console.log(`✨ Created ${name}`);
+
       createCount++;
     }
   });
@@ -168,11 +168,11 @@ function fixLayoutImports() {
   const files = execSync('find resources/js -name "*.vue" -o -name "*.ts" -o -name "*.js"', { encoding: 'utf-8' })
     .split('\n')
     .filter(f => f && fs.existsSync(f));
-  
+
   files.forEach(file => {
     let content = fs.readFileSync(file, 'utf-8');
     let modified = false;
-    
+
     // Исправление ProfileLayout
     if (content.includes("import { ProfileLayout }") || content.includes("import ProfileLayout")) {
       content = content.replace(
@@ -181,7 +181,7 @@ function fixLayoutImports() {
       );
       modified = true;
     }
-    
+
     // Исправление MainLayout
     if (content.includes("import { MainLayout }") || content.includes("import MainLayout")) {
       content = content.replace(
@@ -190,7 +190,7 @@ function fixLayoutImports() {
       );
       modified = true;
     }
-    
+
     if (modified) {
       fs.writeFileSync(file, content);
       fixCount++;
@@ -200,34 +200,29 @@ function fixLayoutImports() {
 
 // Главная функция
 function main() {
-  console.log('🔧 Финальное исправление всех ошибок...\n');
-  
+
   // 1. Исправляем AdFormBasicInfo
   fixAdFormBasicInfo();
-  
+
   // 2. Создаем недостающие компоненты AdForm
   createAdFormComponents();
-  
+
   // 3. Создаем layouts
   createLayouts();
-  
+
   // 4. Создаем stores
   createStores();
-  
+
   // 5. Исправляем импорты layouts
   fixLayoutImports();
-  
-  console.log(`\n📊 Итого:`);
-  console.log(`   Исправлено файлов: ${fixCount}`);
-  console.log(`   Создано компонентов: ${createCount}`);
-  
+
   // 6. Пробуем сборку
-  console.log('\n🏗️ Запускаю сборку...\n');
+
   try {
     execSync('npx vite build', { stdio: 'inherit' });
-    console.log('\n✅ СБОРКА УСПЕШНА!');
+
   } catch (error) {
-    console.log('\n⚠️ Сборка завершилась с ошибками.');
+
   }
 }
 

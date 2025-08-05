@@ -1,0 +1,257 @@
+<?php
+
+namespace Tests\Unit\Support\Repositories;
+
+use Tests\TestCase;
+use App\Support\Repositories\BaseRepository;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Mockery;
+
+class BaseRepositoryTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private $mockModel;
+    private $repository;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        
+        $this->mockModel = Mockery::mock(Model::class);
+        $this->repository = new TestRepository($this->mockModel);
+    }
+
+    protected function tearDown(): void
+    {
+        Mockery::close();
+        parent::tearDown();
+    }
+
+    /** @test */
+    public function it_can_find_a_record_by_id()
+    {
+        $id = 1;
+        $expectedModel = new TestModel(['id' => $id]);
+        
+        $this->mockModel
+            ->shouldReceive('find')
+            ->with($id)
+            ->once()
+            ->andReturn($expectedModel);
+
+        $result = $this->repository->find($id);
+
+        $this->assertEquals($expectedModel, $result);
+    }
+
+    /** @test */
+    public function it_returns_null_when_record_not_found()
+    {
+        $id = 999;
+        
+        $this->mockModel
+            ->shouldReceive('find')
+            ->with($id)
+            ->once()
+            ->andReturn(null);
+
+        $result = $this->repository->find($id);
+
+        $this->assertNull($result);
+    }
+
+    /** @test */
+    public function it_can_find_or_fail_a_record()
+    {
+        $id = 1;
+        $expectedModel = new TestModel(['id' => $id]);
+        
+        $this->mockModel
+            ->shouldReceive('findOrFail')
+            ->with($id)
+            ->once()
+            ->andReturn($expectedModel);
+
+        $result = $this->repository->findOrFail($id);
+
+        $this->assertEquals($expectedModel, $result);
+    }
+
+    /** @test */
+    public function it_can_get_all_records()
+    {
+        $expectedCollection = new Collection([
+            new TestModel(['id' => 1]),
+            new TestModel(['id' => 2])
+        ]);
+        
+        $this->mockModel
+            ->shouldReceive('all')
+            ->once()
+            ->andReturn($expectedCollection);
+
+        $result = $this->repository->all();
+
+        $this->assertEquals($expectedCollection, $result);
+    }
+
+    /** @test */
+    public function it_can_create_a_record()
+    {
+        $data = ['name' => 'Test Name', 'email' => 'test@example.com'];
+        $expectedModel = new TestModel($data);
+        
+        $this->mockModel
+            ->shouldReceive('create')
+            ->with($data)
+            ->once()
+            ->andReturn($expectedModel);
+
+        $result = $this->repository->create($data);
+
+        $this->assertEquals($expectedModel, $result);
+    }
+
+    /** @test */
+    public function it_can_update_a_record()
+    {
+        $id = 1;
+        $data = ['name' => 'Updated Name'];
+        $model = Mockery::mock(Model::class);
+        
+        $this->mockModel
+            ->shouldReceive('findOrFail')
+            ->with($id)
+            ->once()
+            ->andReturn($model);
+            
+        $model
+            ->shouldReceive('update')
+            ->with($data)
+            ->once()
+            ->andReturn(true);
+
+        $result = $this->repository->update($id, $data);
+
+        $this->assertTrue($result);
+    }
+
+    /** @test */
+    public function it_can_delete_a_record()
+    {
+        $id = 1;
+        $model = Mockery::mock(Model::class);
+        
+        $this->mockModel
+            ->shouldReceive('findOrFail')
+            ->with($id)
+            ->once()
+            ->andReturn($model);
+            
+        $model
+            ->shouldReceive('delete')
+            ->once()
+            ->andReturn(true);
+
+        $result = $this->repository->delete($id);
+
+        $this->assertTrue($result);
+    }
+
+    /** @test */
+    public function it_can_count_records()
+    {
+        $expectedCount = 5;
+        
+        $this->mockModel
+            ->shouldReceive('count')
+            ->once()
+            ->andReturn($expectedCount);
+
+        $result = $this->repository->count();
+
+        $this->assertEquals($expectedCount, $result);
+    }
+
+    /** @test */
+    public function it_can_check_if_record_exists()
+    {
+        $id = 1;
+        
+        $this->mockModel
+            ->shouldReceive('where')
+            ->with('id', $id)
+            ->once()
+            ->andReturnSelf();
+            
+        $this->mockModel
+            ->shouldReceive('exists')
+            ->once()
+            ->andReturn(true);
+
+        $result = $this->repository->exists($id);
+
+        $this->assertTrue($result);
+    }
+
+    /** @test */
+    public function it_can_find_records_by_field()
+    {
+        $field = 'status';
+        $value = 'active';
+        $expectedCollection = new Collection([new TestModel(['status' => 'active'])]);
+        
+        $this->mockModel
+            ->shouldReceive('where')
+            ->with($field, $value)
+            ->once()
+            ->andReturnSelf();
+            
+        $this->mockModel
+            ->shouldReceive('get')
+            ->once()
+            ->andReturn($expectedCollection);
+
+        $result = $this->repository->findBy($field, $value);
+
+        $this->assertEquals($expectedCollection, $result);
+    }
+
+    /** @test */
+    public function it_can_find_one_record_by_field()
+    {
+        $field = 'email';
+        $value = 'test@example.com';
+        $expectedModel = new TestModel(['email' => $value]);
+        
+        $this->mockModel
+            ->shouldReceive('where')
+            ->with($field, $value)
+            ->once()
+            ->andReturnSelf();
+            
+        $this->mockModel
+            ->shouldReceive('first')
+            ->once()
+            ->andReturn($expectedModel);
+
+        $result = $this->repository->findOneBy($field, $value);
+
+        $this->assertEquals($expectedModel, $result);
+    }
+}
+
+// Тестовый репозиторий для тестирования BaseRepository
+class TestRepository extends BaseRepository
+{
+    // Конкретная реализация для тестов
+}
+
+// Тестовая модель для тестов
+class TestModel extends Model
+{
+    protected $fillable = ['id', 'name', 'email', 'status'];
+}

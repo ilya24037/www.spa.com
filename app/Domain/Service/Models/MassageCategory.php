@@ -48,34 +48,6 @@ class MassageCategory extends Model
         'avg_price' => 'decimal:2',
     ];
 
-    /**
-     * Boot the model.
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        // Автоматически создаём slug
-        static::creating(function ($model) {
-            if (empty($model->slug)) {
-                $model->slug = Str::slug($model->name);
-            }
-        });
-
-        // Обновляем slug при изменении названия
-        static::updating(function ($model) {
-            if ($model->isDirty('name') && !$model->isDirty('slug')) {
-                $model->slug = Str::slug($model->name);
-            }
-        });
-
-        // При удалении категории обновляем счётчики родительской
-        static::deleted(function ($model) {
-            if ($model->parent) {
-                $model->parent->updateServicesCount();
-            }
-        });
-    }
 
     /**
      * Родительская категория

@@ -3,12 +3,10 @@
 namespace App\Application\Http\Controllers\Auth;
 
 use App\Application\Http\Controllers\Controller;
-use Illuminate\Auth\Events\PasswordReset;
+use App\Domain\User\Services\UserAuthService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -16,6 +14,12 @@ use Inertia\Response;
 
 class NewPasswordController extends Controller
 {
+    private UserAuthService $authService;
+    
+    public function __construct(UserAuthService $authService)
+    {
+        $this->authService = $authService;
+    }
     /**
      * Display the password reset view.
      */
@@ -40,30 +44,20 @@ class NewPasswordController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        // Here we will attempt to reset the user's password. If it is successful we
-        // will update the password on an actual user model and persist it to the
-        // database. Otherwise we will parse the error and return the response.
-        $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function ($user) use ($request) {
-                $user->forceFill([
-                    'password' => Hash::make($request->password),
-                    'remember_token' => Str::random(60),
-                ])->save();
-
-                event(new PasswordReset($user));
-            }
-        );
-
-        // If the password was successfully reset, we will redirect the user back to
-        // the application's home authenticated view. If there is an error we can
-        // redirect them back to where they came from with their error message.
-        if ($status == Password::PASSWORD_RESET) {
+        try {
+            // Используем сервис для сброса пароля согласно DDD
+            $status = $this->authService->resetPasswordWithToken(
+                $request->only('email', 'password', 'password_confirmation', 'token')
+            );
+            
             return redirect()->route('login')->with('status', __($status));
+            
+        } catch (ValidationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            throw ValidationException::withMessages([
+                'email' => ['Ошибка при сбросе пароля'],
+            ]);
         }
-
-        throw ValidationException::withMessages([
-            'email' => [trans($status)],
-        ]);
     }
 }

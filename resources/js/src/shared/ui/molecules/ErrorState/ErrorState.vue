@@ -123,6 +123,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/src/shared/lib/logger'
 import { computed } from 'vue'
 import type {
   ErrorStateProps,
@@ -239,9 +240,9 @@ const handleReport = async (): Promise<void> => {
     state.reportSent = true
     
     // В реальном приложении здесь был бы API вызов
-    console.log('Error reported:', props.error)
+    // Error reported
   } catch (err) {
-    console.error('Failed to report error:', err)
+    logger.error('Failed to report error:', err)
   }
 }
 </script>

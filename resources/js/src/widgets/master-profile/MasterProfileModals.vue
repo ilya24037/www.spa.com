@@ -145,6 +145,7 @@
 </template>
 
 <script setup>
+import { logger } from '@/src/shared/lib/logger'
 import { ref, computed } from 'vue'
 
 // 🎯 Стили согласно дизайн-системе
@@ -280,11 +281,7 @@ const submitReport = async () => {
     // Здесь бы был API вызов
     await new Promise(resolve => setTimeout(resolve, 1000))
     
-    console.log('Отправлена жалоба:', {
-      masterId: props.master.id,
-      reason: reportForm.value.reason,
-      comment: reportForm.value.comment
-    })
+    // Жалоба отправлена
     
     emit('report-sent')
     emit('close-report')
@@ -295,7 +292,7 @@ const submitReport = async () => {
       comment: ''
     }
   } catch (error) {
-    console.error('Ошибка при отправке жалобы:', error)
+    logger.error('Ошибка при отправке жалобы:', error)
   } finally {
     reportSubmitting.value = false
   }

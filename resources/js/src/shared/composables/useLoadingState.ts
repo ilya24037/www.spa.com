@@ -1,3 +1,5 @@
+import { logger } from '@/src/shared/lib/logger'
+
 import { ref, Ref } from 'vue'
 
 export interface LoadingState<T = any> {
@@ -29,7 +31,7 @@ export function useLoadingState<T = any>(initialData: T | null = null): LoadingS
       return result
     } catch (e) {
       error.value = e instanceof Error ? e : new Error(String(e))
-      console.error('[useLoadingState] Error:', e)
+      logger.error('[useLoadingState] Error:', e)
       return undefined
     } finally {
       isLoading.value = false

@@ -5,6 +5,7 @@ namespace App\Domain\Review\Models;
 use App\Enums\ReviewStatus;
 use App\Enums\ReviewType;
 use App\Enums\ReviewRating;
+use App\Support\Traits\JsonFieldsTrait;
 use App\Domain\User\Models\User;
 use App\Domain\Master\Models\MasterProfile;
 use App\Domain\Booking\Models\Booking;
@@ -21,7 +22,7 @@ use Carbon\Carbon;
  */
 class Review extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, JsonFieldsTrait;
 
     // Новые поля для расширенной функциональности
     protected $fillable = [
@@ -70,6 +71,16 @@ class Review extends Model
         'responded_at',
     ];
 
+    /**
+     * JSON поля для использования с JsonFieldsTrait
+     */
+    protected $jsonFields = [
+        'pros',
+        'cons',
+        'photos',
+        'metadata',
+    ];
+
     protected $casts = [
         // Новые енумы
         'type' => ReviewType::class,
@@ -77,10 +88,7 @@ class Review extends Model
         'rating' => ReviewRating::class,
         
         // Массивы
-        'pros' => 'array',
-        'cons' => 'array',
-        'photos' => 'array',
-        'metadata' => 'array',
+        // JSON поля обрабатываются через JsonFieldsTrait
         
         // Булевы
         'is_anonymous' => 'boolean',
@@ -110,35 +118,6 @@ class Review extends Model
         'reply_count' => 0,
     ];
 
-    protected static function boot()
-    {
-        parent::boot();
-        
-        static::creating(function ($review) {
-            // Устанавливаем user_id из client_id для совместимости
-            if (!$review->user_id && $review->client_id) {
-                $review->user_id = $review->client_id;
-            }
-            
-            // Устанавливаем полиморфную связь для мастера
-            if (!$review->reviewable_type && $review->master_profile_id) {
-                $review->reviewable_type = 'App\\Models\\MasterProfile';
-                $review->reviewable_id = $review->master_profile_id;
-            }
-        });
-        
-        static::created(function ($review) {
-            // Обновляем рейтинг мастера (legacy)
-            if ($review->masterProfile) {
-                $review->masterProfile->updateRating();
-            }
-            
-            // Обновляем рейтинг полиморфной сущности
-            if ($review->reviewable && method_exists($review->reviewable, 'updateRating')) {
-                $review->reviewable->updateRating();
-            }
-        });
-    }
 
     /**
      * Основной пользователь (новый подход)

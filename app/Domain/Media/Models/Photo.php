@@ -136,19 +136,4 @@ class Photo extends Model
         return $query->orderBy('sort_order')->orderBy('created_at');
     }
 
-    /**
-     * Удалить файлы при удалении записи
-     */
-    protected static function booted(): void
-    {
-        static::deleting(function (Photo $photo) {
-            $disk = Storage::disk('masters_private');
-            $folderName = $photo->masterProfile->folder_name;
-            
-            // Удаляем все размеры
-            $disk->delete("{$folderName}/photos/{$photo->filename}");
-            $disk->delete("{$folderName}/photos/{$photo->getMediumFilename()}");
-            $disk->delete("{$folderName}/photos/{$photo->getThumbFilename()}");
-        });
-    }
 }

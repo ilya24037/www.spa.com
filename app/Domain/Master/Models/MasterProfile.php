@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany, HasOne};
 use App\Domain\Master\Traits\HasSlug;
 use App\Domain\Master\Traits\GeneratesMetaTags;
+use App\Support\Traits\JsonFieldsTrait;
 
 /**
  * Основная модель профиля мастера
@@ -17,6 +18,7 @@ class MasterProfile extends Model
     use HasFactory;
     use HasSlug;
     use GeneratesMetaTags;
+    use JsonFieldsTrait;
 
     protected $slugField  = 'slug';
     protected $slugSource = 'display_name';
@@ -41,11 +43,18 @@ class MasterProfile extends Model
         'services', 'services_additional_info',
     ];
 
+    /**
+     * JSON поля для использования с JsonFieldsTrait
+     */
+    protected $jsonFields = [
+        'certificates',
+        'education',
+        'features',
+        'services'
+    ];
+
     protected $casts = [
-        'certificates'  => 'array',
-        'education'     => 'array',
-        'features'      => 'array',
-        'services'      => 'array',
+        // JSON поля обрабатываются через JsonFieldsTrait
         'show_contacts' => 'boolean',
         'home_service'  => 'boolean',
         'salon_service' => 'boolean',
@@ -175,16 +184,16 @@ class MasterProfile extends Model
      */
     public function updateRating(): void
     {
-        $avg = $this->reviews()
-            ->where('status', 'approved')
-            ->avg('rating_overall');
-
-        $this->update([
-            'rating'        => round($avg, 2),
-            'reviews_count' => $this->reviews()
-                                   ->where('status', 'approved')
-                                   ->count(),
-        ]);
+        // Используем интеграционные методы через пользователя
+        if ($this->user) {
+            $rating = $this->user->getAverageRating();
+            $reviewsCount = $this->user->getReceivedReviewsCount();
+            
+            $this->update([
+                'rating'        => round($rating, 2),
+                'reviews_count' => $reviewsCount,
+            ]);
+        }
     }
 
     /**

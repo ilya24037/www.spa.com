@@ -121,25 +121,4 @@ class BookingService extends Model
         return $query->orderBy('sort_order')->orderBy('start_offset_minutes');
     }
 
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function (BookingService $bookingService) {
-            if (!$bookingService->total_price && $bookingService->quantity && $bookingService->unit_price) {
-                $bookingService->total_price = $bookingService->quantity * $bookingService->unit_price;
-            }
-            
-            if (!$bookingService->sort_order) {
-                $maxSortOrder = self::where('booking_id', $bookingService->booking_id)->max('sort_order') ?? 0;
-                $bookingService->sort_order = $maxSortOrder + 1;
-            }
-        });
-
-        static::updating(function (BookingService $bookingService) {
-            if ($bookingService->isDirty(['quantity', 'unit_price'])) {
-                $bookingService->total_price = $bookingService->quantity * $bookingService->unit_price;
-            }
-        });
-    }
 }

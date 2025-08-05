@@ -18,14 +18,14 @@ const __dirname = path.dirname(__filename)
 // 🔧 КОНФИГУРАЦИЯ
 const CONFIG = {
   projectRoot: process.cwd(),
-  
+
   // Пути для анализа
   paths: {
     legacy: 'resources/js/Components',
     fsd: 'resources/js/src',
     pages: 'resources/js/Pages'
   },
-  
+
   // Игнорируемые файлы и папки
   ignore: [
     'node_modules',
@@ -35,10 +35,10 @@ const CONFIG = {
     '.nuxt',
     '.output'
   ],
-  
+
   // Расширения файлов для анализа
   extensions: ['.vue', '.js', '.ts', '.jsx', '.tsx'],
-  
+
   // Критичные компоненты (уже мигрированы)
   migratedComponents: [
     'MediaUploader',
@@ -79,22 +79,22 @@ const analysisResults = {
  */
 function getAllFiles(dir, files = []) {
   if (!fs.existsSync(dir)) return files
-  
+
   const items = fs.readdirSync(dir)
-  
+
   for (const item of items) {
     if (CONFIG.ignore.includes(item)) continue
-    
+
     const fullPath = path.join(dir, item)
     const stat = fs.statSync(fullPath)
-    
+
     if (stat.isDirectory()) {
       getAllFiles(fullPath, files)
     } else if (CONFIG.extensions.includes(path.extname(item))) {
       files.push(fullPath)
     }
   }
-  
+
   return files
 }
 
@@ -103,7 +103,7 @@ function getAllFiles(dir, files = []) {
  */
 function extractComponentName(filePath) {
   const basename = path.basename(filePath, path.extname(filePath))
-  
+
   // Убираем суффиксы типов
   return basename
     .replace(/\.(vue|js|ts|jsx|tsx)$/, '')
@@ -115,7 +115,7 @@ function extractComponentName(filePath) {
  */
 function findComponentUsages(componentName) {
   const usages = []
-  
+
   try {
     // Используем ripgrep для поиска импортов
     const grepCommand = `rg --type vue --type js --type ts -l "${componentName}" .`
@@ -124,13 +124,13 @@ function findComponentUsages(componentName) {
       encoding: 'utf8',
       stdio: 'pipe'
     })
-    
+
     const files = result.trim().split('\n').filter(Boolean)
-    
+
     for (const file of files) {
       if (fs.existsSync(file)) {
         const content = fs.readFileSync(file, 'utf8')
-        
+
         // Ищем различные варианты импортов
         const importPatterns = [
           new RegExp(`import.*${componentName}.*from`, 'gm'),
@@ -138,7 +138,7 @@ function findComponentUsages(componentName) {
           new RegExp(`<${componentName}[\\s>]`, 'gm'),
           new RegExp(`components:\\s*\\{[^}]*${componentName}`, 'gm')
         ]
-        
+
         for (const pattern of importPatterns) {
           const matches = content.match(pattern)
           if (matches) {
@@ -156,7 +156,7 @@ function findComponentUsages(componentName) {
     // Fallback: простой поиск по файлам
     console.warn(`⚠️  Ripgrep недоступен, используем fallback поиск для ${componentName}`)
   }
-  
+
   return usages
 }
 
@@ -164,17 +164,15 @@ function findComponentUsages(componentName) {
  * Анализ legacy компонентов
  */
 function analyzeLegacyComponents() {
-  console.log('🔍 Анализируем legacy компоненты...')
-  
   const legacyPath = path.join(CONFIG.projectRoot, CONFIG.paths.legacy)
   const legacyFiles = getAllFiles(legacyPath)
-  
+
   analysisResults.statistics.totalLegacyFiles = legacyFiles.length
-  
+
   for (const file of legacyFiles) {
     const componentName = extractComponentName(file)
     const relativePath = path.relative(CONFIG.projectRoot, file)
-    
+
     const component = {
       name: componentName,
       path: relativePath,
@@ -184,29 +182,26 @@ function analyzeLegacyComponents() {
       isTypeScript: file.endsWith('.ts') || file.endsWith('.tsx'),
       usages: findComponentUsages(componentName)
     }
-    
+
     analysisResults.legacyComponents.push(component)
     analysisResults.usageMap.set(componentName, component.usages)
   }
-  
-  console.log(`✅ Найдено ${legacyFiles.length} legacy компонентов`)
-}
+
+  }
 
 /**
  * Анализ FSD компонентов
  */
 function analyzeFsdComponents() {
-  console.log('🔍 Анализируем FSD компоненты...')
-  
   const fsdPath = path.join(CONFIG.projectRoot, CONFIG.paths.fsd)
   const fsdFiles = getAllFiles(fsdPath)
-  
+
   analysisResults.statistics.totalFsdFiles = fsdFiles.length
-  
+
   for (const file of fsdFiles) {
     const componentName = extractComponentName(file)
     const relativePath = path.relative(CONFIG.projectRoot, file)
-    
+
     const component = {
       name: componentName,
       path: relativePath,
@@ -217,12 +212,11 @@ function analyzeFsdComponents() {
       layer: getFsdLayer(relativePath),
       slice: getFsdSlice(relativePath)
     }
-    
+
     analysisResults.fsdComponents.push(component)
   }
-  
-  console.log(`✅ Найдено ${fsdFiles.length} FSD компонентов`)
-}
+
+  }
 
 /**
  * Определить FSD слой из пути
@@ -247,16 +241,14 @@ function getFsdSlice(filePath) {
  * Поиск дубликатов между legacy и FSD
  */
 function findDuplicates() {
-  console.log('🔍 Ищем дубликаты компонентов...')
-  
   const legacyNames = new Set(analysisResults.legacyComponents.map(c => c.name))
   const fsdNames = new Set(analysisResults.fsdComponents.map(c => c.name))
-  
+
   for (const legacyName of legacyNames) {
     if (fsdNames.has(legacyName) || CONFIG.migratedComponents.includes(legacyName)) {
       const legacyComponent = analysisResults.legacyComponents.find(c => c.name === legacyName)
       const fsdComponent = analysisResults.fsdComponents.find(c => c.name === legacyName)
-      
+
       const duplicate = {
         name: legacyName,
         legacy: legacyComponent,
@@ -265,29 +257,28 @@ function findDuplicates() {
         hasUsages: legacyComponent.usages.length > 0,
         riskLevel: calculateRiskLevel(legacyComponent)
       }
-      
+
       analysisResults.duplicates.push(duplicate)
     }
   }
-  
+
   analysisResults.statistics.duplicatesFound = analysisResults.duplicates.length
-  console.log(`✅ Найдено ${analysisResults.duplicates.length} дубликатов`)
-}
+  }
 
 /**
  * Расчет уровня риска удаления
  */
 function calculateRiskLevel(component) {
   let risk = 'low'
-  
+
   if (component.usages.length > 10) risk = 'high'
   else if (component.usages.length > 3) risk = 'medium'
-  
+
   // Дополнительные факторы риска
   if (component.name.toLowerCase().includes('modal')) risk = 'medium'
   if (component.name.toLowerCase().includes('form')) risk = 'high'
   if (component.size > 10000) risk = 'medium' // Большие файлы
-  
+
   return risk
 }
 
@@ -295,8 +286,6 @@ function calculateRiskLevel(component) {
  * Создание плана безопасного удаления
  */
 function createDeletionPlan() {
-  console.log('📋 Создаем план удаления...')
-  
   for (const duplicate of analysisResults.duplicates) {
     if (duplicate.riskLevel === 'low' && duplicate.isMigrated) {
       analysisResults.safeToDelete.push({
@@ -310,7 +299,7 @@ function createDeletionPlan() {
       })
     }
   }
-  
+
   analysisResults.statistics.safeDeletes = analysisResults.safeToDelete.length
   analysisResults.statistics.manualReviews = analysisResults.requiresManualReview.length
 }
@@ -328,7 +317,7 @@ function generateReport() {
       safeToDelete: analysisResults.statistics.safeDeletes,
       requiresManualReview: analysisResults.statistics.manualReviews
     },
-    
+
     // Безопасные для удаления
     safeToDelete: analysisResults.safeToDelete.map(item => ({
       name: item.name,
@@ -338,7 +327,7 @@ function generateReport() {
       usages: item.legacy.usages.length,
       size: `${(item.legacy.size / 1024).toFixed(1)}KB`
     })),
-    
+
     // Требуют ручной проверки
     manualReview: analysisResults.requiresManualReview.map(item => ({
       name: item.name,
@@ -351,7 +340,7 @@ function generateReport() {
       size: `${(item.legacy.size / 1024).toFixed(1)}KB`,
       lastModified: item.legacy.lastModified
     })),
-    
+
     // Детальная статистика
     detailedStats: {
       legacyBySize: analysisResults.legacyComponents
@@ -362,7 +351,7 @@ function generateReport() {
           path: c.path,
           size: `${(c.size / 1024).toFixed(1)}KB`
         })),
-      
+
       mostUsedComponents: analysisResults.legacyComponents
         .sort((a, b) => b.usages.length - a.usages.length)
         .slice(0, 10)
@@ -373,7 +362,7 @@ function generateReport() {
         }))
     }
   }
-  
+
   return report
 }
 
@@ -417,12 +406,12 @@ function createDeletionScript(report) {
     'echo "🟢 Удаляем безопасные файлы..."',
     ''
   ]
-  
+
   // Добавляем безопасные файлы
   for (const item of report.safeToDelete) {
     scriptLines.push(`safe_delete "${item.legacyPath}" "${item.reason}"`)
   }
-  
+
   scriptLines.push(
     '',
     '# ФАЙЛЫ ТРЕБУЮЩИЕ РУЧНОЙ ПРОВЕРКИ (закомментированы)',
@@ -430,13 +419,13 @@ function createDeletionScript(report) {
     'echo "⚠️  Следующие файлы требуют ручной проверки:"',
     ''
   )
-  
+
   // Добавляем файлы для ручной проверки (закомментированными)
   for (const item of report.manualReview) {
     scriptLines.push(`echo "❌ ПРОВЕРИТЬ: ${item.legacyPath} (${item.reason})"`)
     scriptLines.push(`# safe_delete "${item.legacyPath}" "${item.reason}"`)
   }
-  
+
   scriptLines.push(
     '',
     'echo ""',
@@ -445,61 +434,38 @@ function createDeletionScript(report) {
     'echo "📋 Проверьте файлы, отмеченные для ручной проверки"',
     ''
   )
-  
+
   return scriptLines.join('\n')
 }
 
 // 🚀 ОСНОВНАЯ ФУНКЦИЯ
 async function main() {
-  console.log('🚀 Запуск анализатора legacy компонентов...')
-  console.log(`📁 Проект: ${CONFIG.projectRoot}`)
-  console.log('')
-  
   try {
     // Анализируем компоненты
     analyzeLegacyComponents()
     analyzeFsdComponents()
-    
+
     // Ищем дубликаты
     findDuplicates()
-    
+
     // Создаем план удаления
     createDeletionPlan()
-    
+
     // Генерируем отчет
     const report = generateReport()
-    
+
     // Сохраняем отчет
     const reportPath = path.join(CONFIG.projectRoot, 'deletion-analysis-report.json')
     fs.writeFileSync(reportPath, JSON.stringify(report, null, 2))
-    
+
     // Создаем скрипт удаления
     const script = createDeletionScript(report)
     const scriptPath = path.join(CONFIG.projectRoot, 'safe-delete-legacy.sh')
     fs.writeFileSync(scriptPath, script)
     fs.chmodSync(scriptPath, '755')
-    
+
     // Выводим результаты
-    console.log('')
-    console.log('📊 РЕЗУЛЬТАТЫ АНАЛИЗА:')
-    console.log('=====================================')
-    console.log(`📁 Legacy компонентов: ${report.summary.totalLegacyComponents}`)
-    console.log(`🎯 FSD компонентов: ${report.summary.totalFsdComponents}`)
-    console.log(`🔄 Найдено дубликатов: ${report.summary.duplicatesFound}`)
-    console.log(`✅ Безопасно удалить: ${report.summary.safeToDelete}`)
-    console.log(`⚠️  Требует проверки: ${report.summary.requiresManualReview}`)
-    console.log('')
-    console.log('📄 СОЗДАННЫЕ ФАЙЛЫ:')
-    console.log(`📋 Отчет: ${reportPath}`)
-    console.log(`🔨 Скрипт удаления: ${scriptPath}`)
-    console.log('')
-    console.log('🎯 СЛЕДУЮЩИЕ ШАГИ:')
-    console.log('1. Проверьте отчет deletion-analysis-report.json')
-    console.log('2. Просмотрите файлы, требующие ручной проверки')
-    console.log('3. Запустите ./safe-delete-legacy.sh для удаления')
-    console.log('4. Проверьте работу приложения после удаления')
-    
-  } catch (error) {
+    } catch (error) {
     console.error('❌ Ошибка при анализе:', error.message)
     process.exit(1)
   }

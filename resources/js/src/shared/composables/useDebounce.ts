@@ -14,7 +14,7 @@ import { ref, customRef, Ref } from 'vue'
  */
 export function useDebounce<T>(value: import("vue").Ref<T>, delay = 300): import("vue").Ref<T> {
   let timeout: number
-  
+
   return customRef((track, trigger) => {
     return {
       get() {
@@ -37,8 +37,7 @@ export function useDebounce<T>(value: import("vue").Ref<T>, delay = 300): import
  * 
  * Использование:
  * const debouncedSearch = useDebounceFn((query: string) => {
- *   console.log('Searching:', query)
- * }, 500)
+ *   * }, 500)
  * 
  * // В template:
  * <input @input="debouncedSearch($event.target.value)">
@@ -48,12 +47,12 @@ export function useDebounceFn<T extends (...args: any[]) => any>(
   delay = 300
 ): (...args: Parameters<T>) => void {
   let timeout: number | null = null
-  
+
   return (...args: Parameters<T>) => {
     if (timeout) {
       clearTimeout(timeout)
     }
-    
+
     timeout = setTimeout(() => {
       fn(...args)
     }, delay)
@@ -65,8 +64,7 @@ export function useDebounceFn<T extends (...args: any[]) => any>(
  * 
  * Использование:
  * const throttledScroll = useThrottleFn(() => {
- *   console.log('Scrolling')
- * }, 100)
+ *   * }, 100)
  * 
  * window.addEventListener('scroll', throttledScroll)
  */
@@ -76,10 +74,10 @@ export function useThrottleFn<T extends (...args: any[]) => any>(
 ): (...args: Parameters<T>) => void {
   let lastCall = 0
   let timeout: number | null = null
-  
+
   return (...args: Parameters<T>) => {
     const now = Date.now()
-    
+
     if (now - lastCall >= delay) {
       fn(...args)
       lastCall = now
@@ -87,7 +85,7 @@ export function useThrottleFn<T extends (...args: any[]) => any>(
       if (timeout) {
         clearTimeout(timeout)
       }
-      
+
       timeout = setTimeout(() => {
         fn(...args)
         lastCall = Date.now()

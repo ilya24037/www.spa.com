@@ -5,17 +5,25 @@ namespace App\Domain\Ad\Repositories;
 use App\Domain\Ad\Models\Ad;
 use App\Domain\User\Models\User;
 use App\Enums\AdStatus;
+use App\Support\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Репозиторий для работы с объявлениями
+ * 
+ * @extends BaseRepository<Ad>
  */
-class AdRepository
+class AdRepository extends BaseRepository
 {
+    public function __construct(Ad $model)
+    {
+        parent::__construct($model);
+    }
     /**
      * Найти объявление по ID с загрузкой связей
+     * Переопределяем базовый метод
      */
     public function find(int $id, bool $withComponents = true): ?Ad
     {
@@ -43,9 +51,17 @@ class AdRepository
     }
 
     /**
-     * Обновить объявление
+     * Обновить объявление (переопределение базового метода)
      */
-    public function update(Ad $ad, array $data): Ad
+    public function update(int $id, array $data): bool
+    {
+        return parent::update($id, $data);
+    }
+
+    /**
+     * Обновить объявление по экземпляру модели
+     */
+    public function updateAd(Ad $ad, array $data): Ad
     {
         $ad->update($data);
         return $ad->fresh();
@@ -314,5 +330,60 @@ class AdRepository
         }
 
         return $query->orderBy('created_at', 'desc')->get();
+    }
+
+    /**
+     * Найти черновик пользователя по ID
+     */
+    public function findUserDraft(int $userId, int $adId): ?Ad
+    {
+        return Ad::where('id', $adId)
+            ->where('user_id', $userId)
+            ->where('status', 'draft')
+            ->first();
+    }
+
+    /**
+     * Получить статистику пользователя
+     */
+    public function getUserStats(int $userId): array
+    {
+        return [
+            'total' => Ad::where('user_id', $userId)->count(),
+            'active' => Ad::where('user_id', $userId)->where('status', AdStatus::ACTIVE)->count(),
+            'draft' => Ad::where('user_id', $userId)->where('status', AdStatus::DRAFT)->count(),
+            'archived' => Ad::where('user_id', $userId)->where('status', AdStatus::ARCHIVED)->count(),
+        ];
+    }
+
+    /**
+     * Найти активные объявления
+     */
+    public function findActive(int $limit = 20): array
+    {
+        return Ad::where('status', AdStatus::ACTIVE)
+            ->with(['user', 'pricing'])
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get()
+            ->toArray();
+    }
+
+    /**
+     * Найти объявления по фильтрам
+     */
+    public function findByFilters(array $filters): array
+    {
+        $query = Ad::with(['user', 'pricing']);
+        
+        if (isset($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+        
+        if (isset($filters['category'])) {
+            $query->where('category', $filters['category']);
+        }
+        
+        return $query->get()->toArray();
     }
 }

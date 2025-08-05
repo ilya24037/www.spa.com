@@ -4,21 +4,21 @@ const path = require('path')
 const replaceAlerts = (filePath) => {
   let content = fs.readFileSync(filePath, 'utf8')
   let modified = false
-  
+
   // Замены alert на toast (избегаем комментарии)
   const alertPattern = /(?<!\/\/.*?)alert\(['"`]([^'"`]+)['"`]\)/g
   const alertVariablePattern = /(?<!\/\/.*?)alert\(([^)]+)\)/g
-  
+
   if (content.match(alertPattern)) {
     content = content.replace(alertPattern, "toast.info('$1')")
     modified = true
   }
-  
+
   if (content.match(alertVariablePattern) && !content.includes('toast.info')) {
     content = content.replace(alertVariablePattern, "toast.info($1)")
     modified = true
   }
-  
+
   // Добавить импорт useToast если его нет и есть toast.
   if (content.includes('toast.') && !content.includes('useToast')) {
     const scriptMatch = content.match(/<script[^>]*>/i)
@@ -29,7 +29,7 @@ const replaceAlerts = (filePath) => {
       modified = true
     }
   }
-  
+
   if (modified) {
     fs.writeFileSync(filePath, content)
     return true
@@ -41,29 +41,26 @@ const replaceAlerts = (filePath) => {
 const processDirectory = (dir) => {
   const files = fs.readdirSync(dir)
   let processedCount = 0
-  
+
   files.forEach(file => {
     const filePath = path.join(dir, file)
     const stat = fs.statSync(filePath)
-    
+
     if (stat.isDirectory() && !file.includes('node_modules')) {
       processedCount += processDirectory(filePath)
     } else if (file.endsWith('.vue') || file.endsWith('.js')) {
       const content = fs.readFileSync(filePath, 'utf8')
       // Ищем alert( но не в комментариях
       if (content.includes('alert(') && !content.match(/^\s*\/\/.*alert\(/m)) {
-        console.log(`Checking for alerts in: ${filePath}`)
         if (replaceAlerts(filePath)) {
-          console.log(`✅ Replaced alerts in: ${filePath}`)
           processedCount++
         }
       }
     }
   })
-  
+
   return processedCount
 }
 
-console.log('🔍 Поиск и замена alert() на toast...')
+на toast...')
 const count = processDirectory('./resources/js')
-console.log(`✅ Alert replacement completed! Processed ${count} files.`)

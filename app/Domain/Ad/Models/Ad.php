@@ -5,6 +5,7 @@ namespace App\Domain\Ad\Models;
 use App\Enums\AdStatus;
 use App\Enums\PriceUnit;
 use App\Enums\WorkFormat;
+use App\Support\Traits\JsonFieldsTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Ad extends Model
 {
     use HasFactory;
+    use JsonFieldsTrait;
 
     protected $fillable = [
         'user_id',
@@ -77,17 +79,24 @@ class Ad extends Model
         'favorites_count'
     ];
 
+    /**
+     * JSON поля для использования с JsonFieldsTrait
+     */
+    protected $jsonFields = [
+        'clients',
+        'service_provider',
+        'features',
+        'services',
+        'schedule',
+        'service_location',
+        'outcall_locations',
+        'geo',
+        'photos',
+        'video'
+    ];
+
     protected $casts = [
-        'clients' => 'array',
-        'service_provider' => 'array',
-        'features' => 'array',
-        'services' => 'array',
-        'schedule' => 'array',
-        'service_location' => 'array',
-        'outcall_locations' => 'array',
-        'geo' => 'array',
-        'photos' => 'array',
-        'video' => 'array',
+        // JSON поля обрабатываются через JsonFieldsTrait
         'has_girlfriend' => 'boolean',
         'show_photos_in_gallery' => 'boolean',
         'allow_download_photos' => 'boolean',

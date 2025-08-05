@@ -18,16 +18,25 @@ class MasterMediaService
 {
     private ImageProcessor $imageProcessor;
     private VideoProcessor $videoProcessor;
-    private ThumbnailGenerator $thumbnailGenerator;
+    private ThumbnailService $thumbnailGenerator;
+    private \App\Domain\Media\Repositories\PhotoRepository $photoRepository;
+    private \App\Domain\Media\Repositories\VideoRepository $videoRepository;
+    private \App\Domain\Master\Repositories\MasterRepository $masterRepository;
 
     public function __construct(
         ImageProcessor $imageProcessor,
         VideoProcessor $videoProcessor,
-        ThumbnailGenerator $thumbnailGenerator
+        ThumbnailService $thumbnailGenerator,
+        \App\Domain\Media\Repositories\PhotoRepository $photoRepository,
+        \App\Domain\Media\Repositories\VideoRepository $videoRepository,
+        \App\Domain\Master\Repositories\MasterRepository $masterRepository
     ) {
         $this->imageProcessor = $imageProcessor;
         $this->videoProcessor = $videoProcessor;
         $this->thumbnailGenerator = $thumbnailGenerator;
+        $this->photoRepository = $photoRepository;
+        $this->videoRepository = $videoRepository;
+        $this->masterRepository = $masterRepository;
     }
 
     /**
@@ -73,8 +82,8 @@ class MasterMediaService
     {
         $avatarPath = $this->imageProcessor->processAvatar($file, $master);
         
-        // Обновляем путь к аватару в профиле
-        $master->update(['avatar' => $avatarPath]);
+        // Обновляем путь к аватару в профиле через репозиторий
+        $this->masterRepository->update($master, ['avatar' => $avatarPath]);
         
         return $avatarPath;
     }
@@ -100,11 +109,12 @@ class MasterMediaService
      */
     public function reorderPhotos(MasterProfile $master, array $photoIds): void
     {
+        $photoOrders = [];
         foreach ($photoIds as $order => $photoId) {
-            MasterPhoto::where('id', $photoId)
-                ->where('master_profile_id', $master->id)
-                ->update(['sort_order' => $order + 1]);
+            $photoOrders[$photoId] = $order + 1;
         }
+        
+        $this->photoRepository->updateMultipleSortOrders($photoOrders);
     }
 
     /**
@@ -112,14 +122,7 @@ class MasterMediaService
      */
     public function setMainPhoto(MasterProfile $master, int $photoId): void
     {
-        // Снимаем флаг главного со всех фото
-        MasterPhoto::where('master_profile_id', $master->id)
-            ->update(['is_main' => false]);
-        
-        // Устанавливаем новое главное фото
-        MasterPhoto::where('id', $photoId)
-            ->where('master_profile_id', $master->id)
-            ->update(['is_main' => true]);
+        $this->photoRepository->setAsMain($photoId, $master->id);
     }
 
     /**
@@ -127,12 +130,17 @@ class MasterMediaService
      */
     public function getMediaStats(MasterProfile $master): array
     {
+        $photosCount = $this->photoRepository->countByMasterProfileId($master->id);
+        $videosCount = $this->videoRepository->countByMasterProfileId($master->id);
+        
         return [
-            'photos_count' => $master->photos()->count(),
-            'videos_count' => $master->videos()->count(),
+            'photos_count' => $photosCount,
+            'videos_count' => $videosCount,
             'total_size' => $this->calculateTotalSize($master),
-            'approved_photos' => $master->photos()->where('is_approved', true)->count(),
-            'approved_videos' => $master->videos()->where('is_approved', true)->count(),
+            'approved_photos' => $this->photoRepository->findByMasterProfileId($master->id)
+                ->where('is_approved', true)->count(),
+            'approved_videos' => $this->videoRepository->findByMasterProfileId($master->id)
+                ->where('is_approved', true)->count(),
         ];
     }
 
@@ -141,8 +149,8 @@ class MasterMediaService
      */
     private function calculateTotalSize(MasterProfile $master): int
     {
-        $photosSize = $master->photos()->sum('file_size');
-        $videosSize = $master->videos()->sum('file_size');
+        $photosSize = $this->photoRepository->findByMasterProfileId($master->id)->sum('file_size');
+        $videosSize = $this->videoRepository->getTotalSizeByMasterProfileId($master->id);
         
         return $photosSize + $videosSize;
     }

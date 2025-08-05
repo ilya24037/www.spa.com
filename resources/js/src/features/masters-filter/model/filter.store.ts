@@ -1,3 +1,5 @@
+import { logger } from '@/src/shared/lib/logger'
+
 /**
  * Store для фильтрации мастеров
  * Реализует сложную логику фильтрации с поддержкой:
@@ -156,7 +158,7 @@ export const useFilterStore = defineStore('masters-filter', () => {
 
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Ошибка загрузки фильтров'
-      console.error('❌ Ошибка загрузки опций фильтров:', err)
+      logger.error('❌ Ошибка загрузки опций фильтров:', err)
     } finally {
       isLoading.value = false
     }
@@ -373,7 +375,7 @@ export const useFilterStore = defineStore('masters-filter', () => {
     try {
       localStorage.setItem('spa-masters-filters', JSON.stringify(filters.value))
     } catch (err) {
-      console.warn('Не удалось сохранить фильтры:', err)
+      logger.warn('Не удалось сохранить фильтры:', { metadata: { data: err } })
     }
   }
 
@@ -390,7 +392,7 @@ export const useFilterStore = defineStore('masters-filter', () => {
         }
       }
     } catch (err) {
-      console.warn('Не удалось загрузить сохраненные фильтры:', err)
+      logger.warn('Не удалось загрузить сохраненные фильтры:', { metadata: { data: err } })
     }
   }
 

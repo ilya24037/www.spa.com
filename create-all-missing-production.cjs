@@ -2,8 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 
-console.log('🚀 СОЗДАНИЕ ВСЕХ НЕДОСТАЮЩИХ КОМПОНЕНТОВ ПО CLAUDE.md\n');
-console.log('=' .repeat(60));
+);
 
 // Читаем отчет анализа
 const report = JSON.parse(fs.readFileSync('full-analysis-report.json', 'utf-8'));
@@ -98,18 +97,18 @@ const cardTemplate = `<template>
           class="w-full h-48 object-cover"
         />
       </div>
-      
+
       <div class="p-4 sm:p-6">
         <h3 v-if="title" class="text-lg font-semibold text-gray-900 mb-2">
           {{ title }}
         </h3>
-        
+
         <p v-if="description" class="text-gray-600 text-sm mb-4">
           {{ description }}
         </p>
-        
+
         <slot name="content" />
-        
+
         <div v-if="$slots.actions" class="mt-4 flex gap-2">
           <slot name="actions" />
         </div>
@@ -168,7 +167,7 @@ const modalTemplate = `<template>
       >
         <!-- Overlay -->
         <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" />
-        
+
         <!-- Modal -->
         <div class="flex min-h-full items-center justify-center p-4">
           <div
@@ -182,7 +181,7 @@ const modalTemplate = `<template>
                   {{ title }}
                 </h2>
               </slot>
-              
+
               <button
                 v-if="showClose"
                 @click="handleClose"
@@ -194,12 +193,12 @@ const modalTemplate = `<template>
                 </svg>
               </button>
             </header>
-            
+
             <!-- Body -->
             <main class="p-4 sm:p-6">
               <slot />
             </main>
-            
+
             <!-- Footer -->
             <footer v-if="$slots.footer" class="p-4 sm:p-6 border-t bg-gray-50">
               <slot name="footer" />
@@ -303,7 +302,7 @@ const components = {
   'resources/js/src/shared/ui/atoms/Icon/Icon.vue': iconTemplate,
   'resources/js/src/shared/ui/molecules/Card/Card.vue': cardTemplate,
   'resources/js/src/shared/ui/molecules/Modal/Modal.vue': modalTemplate,
-  
+
   // Остальные компоненты с базовым шаблоном по чек-листу
   'resources/js/src/shared/ui/organisms/Header/Header.vue': createBaseTemplate('Header', 'header'),
   'resources/js/src/shared/ui/organisms/Footer/Footer.vue': createBaseTemplate('Footer', 'footer'),
@@ -312,11 +311,11 @@ const components = {
   'resources/js/src/entities/user/ui/UserAvatar/UserAvatar.vue': createUserAvatarTemplate(),
   'resources/js/src/entities/service/ui/ServiceCard/ServiceCard.vue': createServiceCardTemplate(),
   'resources/js/src/entities/service/ui/ServiceList/ServiceList.vue': createListTemplate('ServiceList'),
-  
+
   // Stores
   'resources/js/src/entities/user/model/userStore.js': createStoreTemplate('user'),
   'resources/js/src/entities/service/model/serviceStore.js': createStoreTemplate('service'),
-  
+
   // Features
   'resources/js/src/features/masters-filter/ui/FilterPanel/FilterPanel.vue': createFilterPanelTemplate(),
   'resources/js/src/features/masters-filter/ui/FilterModal/FilterModal.vue': createFilterModalTemplate(),
@@ -324,7 +323,7 @@ const components = {
   'resources/js/src/features/auth/ui/RegisterForm/RegisterForm.vue': createAuthFormTemplate('Register'),
   'resources/js/src/features/map/ui/MapView/MapView.vue': createMapTemplate('MapView'),
   'resources/js/src/features/map/ui/MapMarkers/MapMarkers.vue': createMapTemplate('MapMarkers'),
-  
+
   // Widgets
   'resources/js/src/widgets/masters-catalog/MastersCatalog.vue': createCatalogTemplate(),
   'resources/js/src/widgets/master-profile/MasterProfile.vue': createMasterProfileTemplate()
@@ -338,12 +337,12 @@ function createBaseTemplate(name, tag = 'div') {
     <div v-if="loading" class="animate-pulse p-4">
       <div class="h-4 bg-gray-200 rounded w-1/2"></div>
     </div>
-    
+
     <!-- Error состояние - ЧЕК-ЛИСТ CLAUDE.md ✅ -->
     <div v-else-if="error" class="p-4 text-red-500">
       {{ error }}
     </div>
-    
+
     <!-- Content -->
     <div v-else class="p-4">
       <slot />
@@ -386,14 +385,14 @@ function createSidebarTemplate() {
               d="M6 18L18 6M6 6l12 12" />
       </svg>
     </button>
-    
+
     <!-- Overlay for mobile -->
     <div
       v-if="isOpen"
       @click="closeSidebar"
       class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
     />
-    
+
     <!-- Sidebar content -->
     <nav
       :class="navClasses"
@@ -460,7 +459,7 @@ function createUserProfileTemplate() {
         </div>
       </div>
     </div>
-    
+
     <!-- User data with v-if protection -->
     <div v-else-if="user" class="flex items-center space-x-4">
       <UserAvatar
@@ -474,7 +473,7 @@ function createUserProfileTemplate() {
         <p v-if="user.phone" class="text-gray-600">{{ user.phone }}</p>
       </div>
     </div>
-    
+
     <!-- Empty state -->
     <div v-else class="text-center py-8 text-gray-500">
       Информация о пользователе недоступна
@@ -521,7 +520,7 @@ function createUserAvatarTemplate() {
       @error="handleImageError"
       class="w-full h-full object-cover"
     />
-    
+
     <!-- Fallback: initials -->
     <span v-else class="font-semibold text-white">
       {{ initials }}
@@ -582,30 +581,30 @@ function createServiceCardTemplate() {
       <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
       <div class="h-4 bg-gray-200 rounded w-1/2"></div>
     </div>
-    
+
     <!-- Service content -->
     <div v-else-if="service">
       <h3 class="font-semibold text-gray-900 mb-2">
         {{ service.name || 'Услуга' }}
       </h3>
-      
+
       <p v-if="service.description" class="text-sm text-gray-600 mb-3">
         {{ service.description }}
       </p>
-      
+
       <div class="flex items-center justify-between">
         <span v-if="service.price" class="text-lg font-bold text-blue-600">
           {{ formatPrice(service.price) }}
         </span>
-        
+
         <span v-if="service.duration" class="text-sm text-gray-500">
           {{ service.duration }} мин
         </span>
       </div>
-      
+
       <slot name="actions" />
     </div>
-    
+
     <!-- Empty state -->
     <div v-else class="text-gray-500 text-center py-4">
       Данные недоступны
@@ -651,7 +650,7 @@ function createListTemplate(name) {
         <div class="h-32 bg-gray-200 rounded-lg"></div>
       </div>
     </div>
-    
+
     <!-- Error state -->
     <div v-else-if="error" class="text-center py-8">
       <p class="text-red-500 mb-4">{{ error }}</p>
@@ -659,13 +658,13 @@ function createListTemplate(name) {
         Попробовать снова
       </button>
     </div>
-    
+
     <!-- Empty state -->
     <div v-else-if="!items || items.length === 0" class="text-center py-12">
       <p class="text-gray-500 mb-4">{{ emptyMessage }}</p>
       <slot name="empty" />
     </div>
-    
+
     <!-- List -->
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <slot v-for="item in items" :key="item.id" name="item" :item="item">
@@ -674,7 +673,7 @@ function createListTemplate(name) {
         </div>
       </slot>
     </div>
-    
+
     <!-- Pagination -->
     <div v-if="showPagination && totalPages > 1" class="mt-8 flex justify-center">
       <slot name="pagination" />
@@ -717,16 +716,16 @@ export const use${name.charAt(0).toUpperCase() + name.slice(1)}Store = defineSto
   const currentItem = ref(null)
   const loading = ref(false)
   const error = ref(null)
-  
+
   // Getters
   const itemsCount = computed(() => items.value.length)
   const hasItems = computed(() => items.value.length > 0)
-  
+
   // Actions
   const fetchItems = async () => {
     loading.value = true
     error.value = null
-    
+
     try {
       // API call here
       // const response = await api.get${name.charAt(0).toUpperCase() + name.slice(1)}s()
@@ -739,11 +738,11 @@ export const use${name.charAt(0).toUpperCase() + name.slice(1)}Store = defineSto
       loading.value = false
     }
   }
-  
+
   const fetchItem = async (id) => {
     loading.value = true
     error.value = null
-    
+
     try {
       // API call here
       // const response = await api.get${name.charAt(0).toUpperCase() + name.slice(1)}(id)
@@ -756,11 +755,11 @@ export const use${name.charAt(0).toUpperCase() + name.slice(1)}Store = defineSto
       loading.value = false
     }
   }
-  
+
   const createItem = async (data) => {
     loading.value = true
     error.value = null
-    
+
     try {
       // API call here
       // const response = await api.create${name.charAt(0).toUpperCase() + name.slice(1)}(data)
@@ -775,11 +774,11 @@ export const use${name.charAt(0).toUpperCase() + name.slice(1)}Store = defineSto
       loading.value = false
     }
   }
-  
+
   const updateItem = async (id, data) => {
     loading.value = true
     error.value = null
-    
+
     try {
       // API call here
       // const response = await api.update${name.charAt(0).toUpperCase() + name.slice(1)}(id, data)
@@ -797,11 +796,11 @@ export const use${name.charAt(0).toUpperCase() + name.slice(1)}Store = defineSto
       loading.value = false
     }
   }
-  
+
   const deleteItem = async (id) => {
     loading.value = true
     error.value = null
-    
+
     try {
       // API call here
       // await api.delete${name.charAt(0).toUpperCase() + name.slice(1)}(id)
@@ -814,25 +813,25 @@ export const use${name.charAt(0).toUpperCase() + name.slice(1)}Store = defineSto
       loading.value = false
     }
   }
-  
+
   const reset = () => {
     items.value = []
     currentItem.value = null
     loading.value = false
     error.value = null
   }
-  
+
   return {
     // State
     items,
     currentItem,
     loading,
     error,
-    
+
     // Getters
     itemsCount,
     hasItems,
-    
+
     // Actions
     fetchItems,
     fetchItem,
@@ -850,12 +849,12 @@ function createFilterPanelTemplate() {
   return `<template>
   <div class="filter-panel bg-white rounded-lg shadow-sm p-4">
     <h3 class="text-lg font-semibold mb-4">Фильтры</h3>
-    
+
     <!-- Filters -->
     <div class="space-y-4">
       <slot />
     </div>
-    
+
     <!-- Actions -->
     <div class="mt-6 flex gap-2">
       <button
@@ -927,17 +926,17 @@ function createAuthFormTemplate(type) {
     <h2 class="text-2xl font-bold text-center mb-6">
       ${type === 'Login' ? 'Вход' : 'Регистрация'}
     </h2>
-    
+
     <!-- Error message -->
     <div v-if="error" class="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
       {{ error }}
     </div>
-    
+
     <!-- Form fields -->
     <div class="space-y-4">
       <slot />
     </div>
-    
+
     <!-- Submit button -->
     <button
       type="submit"
@@ -980,12 +979,12 @@ function createMapTemplate(name) {
         <p class="text-gray-600">Загрузка карты...</p>
       </div>
     </div>
-    
+
     <!-- Map placeholder -->
     <div v-else class="w-full h-full flex items-center justify-center">
       <p class="text-gray-500">Карта временно недоступна</p>
     </div>
-    
+
     <slot />
   </div>
 </template>
@@ -1012,14 +1011,14 @@ function createCatalogTemplate() {
     <div class="mb-6">
       <slot name="filters" />
     </div>
-    
+
     <!-- Loading -->
     <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div v-for="i in 6" :key="i" class="animate-pulse">
         <div class="h-64 bg-gray-200 rounded-lg"></div>
       </div>
     </div>
-    
+
     <!-- Error -->
     <div v-else-if="error" class="text-center py-12">
       <p class="text-red-500 mb-4">{{ error }}</p>
@@ -1027,20 +1026,20 @@ function createCatalogTemplate() {
         Попробовать снова
       </button>
     </div>
-    
+
     <!-- Empty -->
     <div v-else-if="!masters || masters.length === 0" class="text-center py-12">
       <p class="text-gray-500 text-lg mb-4">Мастера не найдены</p>
       <p class="text-gray-400">Попробуйте изменить параметры поиска</p>
     </div>
-    
+
     <!-- Grid -->
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <slot v-for="master in masters" :key="master.id" name="master" :master="master">
         <MasterCard :master="master" />
       </slot>
     </div>
-    
+
     <!-- Pagination -->
     <div v-if="showPagination" class="mt-8">
       <slot name="pagination" />
@@ -1082,7 +1081,7 @@ function createMasterProfileTemplate() {
         <div class="h-4 bg-gray-200 rounded w-1/2"></div>
       </div>
     </div>
-    
+
     <!-- Profile -->
     <div v-else-if="master">
       <!-- Header -->
@@ -1095,21 +1094,21 @@ function createMasterProfileTemplate() {
               class="w-32 h-32 rounded-full object-cover"
             />
           </div>
-          
+
           <div class="flex-1">
             <h1 class="text-2xl font-bold text-gray-900 mb-2">
               {{ master.name || 'Мастер' }}
             </h1>
-            
+
             <p v-if="master.description" class="text-gray-600 mb-4">
               {{ master.description }}
             </p>
-            
+
             <div class="flex flex-wrap gap-4">
               <span v-if="master.rating" class="flex items-center gap-1">
                 <StarRating :rating="master.rating" :show-text="true" />
               </span>
-              
+
               <span v-if="master.reviewsCount" class="text-gray-500">
                 {{ master.reviewsCount }} отзывов
               </span>
@@ -1117,7 +1116,7 @@ function createMasterProfileTemplate() {
           </div>
         </div>
       </div>
-      
+
       <!-- Content slots -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 space-y-6">
@@ -1125,14 +1124,14 @@ function createMasterProfileTemplate() {
           <slot name="gallery" />
           <slot name="reviews" />
         </div>
-        
+
         <div class="space-y-6">
           <slot name="booking" />
           <slot name="contacts" />
         </div>
       </div>
     </div>
-    
+
     <!-- Empty -->
     <div v-else class="text-center py-12">
       <p class="text-gray-500">Информация о мастере недоступна</p>
@@ -1165,31 +1164,22 @@ withDefaults(defineProps<Props>(), {
 }
 
 // Создаем все компоненты
-console.log('\n📦 Создание компонентов...\n');
 
 Object.entries(components).forEach(([filePath, template]) => {
   const dir = path.dirname(filePath);
-  
+
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
-  
+
   fs.writeFileSync(filePath, template);
   createdCount++;
-  console.log(`   ✅ ${path.basename(filePath)}`);
+  }`);
 });
 
-console.log('\n' + '=' .repeat(60));
-console.log(`✅ УСПЕШНО СОЗДАНО: ${createdCount} компонентов`);
-console.log('=' .repeat(60));
+);
 
-console.log('\n🎯 ВСЕ КОМПОНЕНТЫ СОЗДАНЫ ПО ЧЕК-ЛИСТУ CLAUDE.md:');
-console.log('   ✅ TypeScript типизация всех props и emits');
-console.log('   ✅ Default значения для всех опциональных props');
-console.log('   ✅ Обработка состояний: loading, error, empty');
-console.log('   ✅ v-if защита от undefined/null данных');
-console.log('   ✅ Мобильная адаптивность (sm:, md:, lg:)');
-console.log('   ✅ Семантическая верстка');
-console.log('   ✅ ARIA атрибуты для доступности');
+);
 
-console.log('\n🚀 СЛЕДУЮЩИЙ ШАГ: Запустить сборку проекта');
+');
+

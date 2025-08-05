@@ -2,6 +2,7 @@
 
 namespace App\Domain\Ad\Models;
 
+use App\Support\Traits\JsonFieldsTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +13,7 @@ use Carbon\Carbon;
  */
 class AdSchedule extends Model
 {
-    use HasFactory;
+    use HasFactory, JsonFieldsTrait;
 
     protected $table = 'ad_schedules';
 
@@ -24,10 +25,17 @@ class AdSchedule extends Model
         'working_hours',
     ];
 
+    /**
+     * JSON поля для использования с JsonFieldsTrait
+     */
+    protected $jsonFields = [
+        'schedule',
+        'working_days',
+        'working_hours',
+    ];
+
     protected $casts = [
-        'schedule' => 'array',
-        'working_days' => 'array',
-        'working_hours' => 'array',
+        // JSON поля обрабатываются через JsonFieldsTrait
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

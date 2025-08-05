@@ -22,7 +22,7 @@ componentsToCreate.forEach(compPath => {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-    
+
     fs.writeFileSync(compPath, `<template>
   <div class="sidebar-wrapper">
     <slot />
@@ -32,15 +32,15 @@ componentsToCreate.forEach(compPath => {
 <script setup lang="ts">
 // SidebarWrapper
 </script>`);
-    console.log(`✨ Created: ${compPath}`);
+
   }
 });
 
 files.forEach(file => {
   if (!fs.existsSync(file)) return;
-  
+
   let content = fs.readFileSync(file, 'utf-8');
-  
+
   // Исправляем импорты
   content = content.replace(
     /import\s+\{([^}]+)\}\s+from\s+['"]@\/src\/shared\/ui\/organisms['"]/g,
@@ -53,9 +53,8 @@ files.forEach(file => {
       return newImports.join('\n');
     }
   );
-  
+
   fs.writeFileSync(file, content);
-  console.log(`✅ Fixed: ${file}`);
+
 });
 
-console.log('\n✅ All imports fixed!');

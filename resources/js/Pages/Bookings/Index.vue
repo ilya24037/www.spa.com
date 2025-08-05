@@ -205,6 +205,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/src/shared/lib/logger'
 import { computed, onMounted, watch } from 'vue'
 import { router } from '@inertiajs/vue3'
 import BookingStatus from '@/src/entities/booking/ui/BookingStatus/BookingStatus.vue'
@@ -257,13 +258,13 @@ const pageLoader = usePageLoading({
   autoStart: true,
   timeout: 8000,
   onStart: () => {
-    console.log('Bookings page loading started')
+    // Bookings page loading started
   },
   onComplete: () => {
-    console.log('Bookings page loading completed')
+    // Bookings page loading completed
   },
   onError: (error) => {
-    console.error('Bookings page loading error:', error)
+    logger.error('Bookings page loading error:', error)
   }
 })
 

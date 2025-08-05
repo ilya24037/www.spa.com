@@ -2,6 +2,7 @@
 
 namespace App\Domain\User\Models;
 
+use App\Support\Traits\JsonFieldsTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -11,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class UserSettings extends Model
 {
+    use JsonFieldsTrait;
     protected $fillable = [
         'user_id',
         'locale',
@@ -24,13 +26,20 @@ class UserSettings extends Model
         'privacy_settings',
     ];
 
+    /**
+     * JSON поля для использования с JsonFieldsTrait
+     */
+    protected $jsonFields = [
+        'privacy_settings'
+    ];
+
     protected $casts = [
+        // JSON поля обрабатываются через JsonFieldsTrait
         'email_notifications' => 'boolean',
         'sms_notifications' => 'boolean',
         'push_notifications' => 'boolean',
         'marketing_emails' => 'boolean',
         'two_factor_enabled' => 'boolean',
-        'privacy_settings' => 'json',
     ];
 
     /**

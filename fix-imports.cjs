@@ -13,7 +13,7 @@ const importMappings = {
   '@/Components/Layout/ProfileLayout.vue': '@/src/shared/layouts/ProfileLayout/ProfileLayout.vue',
   '@/Components/Map/LeafletMap.vue': '@/src/features/map/ui/MapLegacy/LeafletMap.vue',
   '@/Components/Map/RealMap.vue': '@/Components/Map/RealMap.vue',
-  
+
   // Добавляем недостающие импорты
   '@/widgets/master-profile': '@/src/widgets/master-profile',  
   '../Cards/ItemImage.vue': './ItemImage.vue',
@@ -36,20 +36,19 @@ const typeImportFixes = {
 
 const fixImportsInFile = (filePath) => {
   if (!fs.existsSync(filePath)) return;
-  
+
   let content = fs.readFileSync(filePath, 'utf8')
   let modified = false
-  
+
   // Исправляем пути импортов
   Object.entries(importMappings).forEach(([oldPath, newPath]) => {
     const regex = new RegExp(oldPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')
     if (content.includes(oldPath)) {
       content = content.replace(regex, newPath)
       modified = true
-      console.log(`Fixed import in ${filePath}: ${oldPath} -> ${newPath}`)
-    }
+      }
   })
-  
+
   // Исправляем типы
   Object.entries(typeImportFixes).forEach(([oldType, newType]) => {
     if (content.includes(oldType)) {
@@ -57,20 +56,20 @@ const fixImportsInFile = (filePath) => {
       modified = true
     }
   })
-  
+
   // Удаляем неиспользуемые импорты
   const unusedImports = ['reactive', 'watch', 'ref', 'onMounted', 'beforeEach']
   unusedImports.forEach(importName => {
     // Проверяем что импорт есть, но не используется
     const importRegex = new RegExp(`import\\s*\\{[^}]*\\b${importName}\\b[^}]*\\}`, 'g')
     const usageRegex = new RegExp(`\\b${importName}\\s*\\(`, 'g')
-    
+
     if (importRegex.test(content) && !usageRegex.test(content)) {
       content = content.replace(new RegExp(`,?\\s*${importName}`, 'g'), '')
       modified = true
     }
   })
-  
+
   if (modified) {
     fs.writeFileSync(filePath, content)
   }
@@ -79,13 +78,13 @@ const fixImportsInFile = (filePath) => {
 // Обработать все файлы
 const processDirectory = (dir) => {
   if (!fs.existsSync(dir)) return;
-  
+
   const files = fs.readdirSync(dir)
-  
+
   files.forEach(file => {
     const filePath = path.join(dir, file)
     const stat = fs.statSync(filePath)
-    
+
     if (stat.isDirectory()) {
       processDirectory(filePath)
     } else if (file.endsWith('.vue') || file.endsWith('.js') || file.endsWith('.ts')) {
@@ -103,14 +102,14 @@ const createMissingComponents = () => {
     'resources/js/src/entities/ad/ui/AdCard/ItemActions.vue',
     'resources/js/src/features/gallery/ui/PhotoGalleryLegacy/PhotoGalleryLegacy.vue'
   ]
-  
+
   missingComponents.forEach(componentPath => {
     if (!fs.existsSync(componentPath)) {
       const dir = path.dirname(componentPath)
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true })
       }
-      
+
       const componentName = path.basename(componentPath, '.vue')
       const template = `<template>
   <div class="${componentName.toLowerCase()}">
@@ -125,14 +124,11 @@ defineProps<{
   [key: string]: any
 }>()
 </script>`
-      
+
       fs.writeFileSync(componentPath, template)
-      console.log(`✨ Created stub: ${componentPath}`)
-    }
+      }
   })
 }
-
-console.log('🔧 Исправление импортов...')
 
 // Создаем недостающие компоненты
 createMissingComponents()
@@ -140,4 +136,3 @@ createMissingComponents()
 // Исправляем импорты
 processDirectory('./resources/js')
 
-console.log('✅ Импорты исправлены!')

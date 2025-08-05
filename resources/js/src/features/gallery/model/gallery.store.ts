@@ -1,3 +1,5 @@
+import { logger } from '@/src/shared/lib/logger'
+
 /**
  * Store для галереи фотографий
  * Управляет просмотром фото в модальном окне
@@ -307,7 +309,7 @@ export const useGalleryStore = defineStore('gallery', () => {
           url: photoToShare.url
         })
       } catch (err) {
-        console.warn('Ошибка поделиться:', err)
+        logger.warn('Ошибка поделиться:', { metadata: { data: err } })
       }
     } else {
       // Fallback: копирование ссылки
@@ -315,7 +317,7 @@ export const useGalleryStore = defineStore('gallery', () => {
         await navigator.clipboard.writeText(photoToShare.url)
         // Можно добавить toast уведомление
       } catch (err) {
-        console.warn('Ошибка копирования:', err)
+        logger.warn('Ошибка копирования:', { metadata: { data: err } })
       }
     }
   }
@@ -337,7 +339,7 @@ export const useGalleryStore = defineStore('gallery', () => {
   function rotatePhoto(degrees: number = 90) {
     // Реализация поворота зависит от используемой библиотеки
     // Здесь заглушка для будущей реализации
-    console.log(`Поворот фото на ${degrees} градусов`)
+    // TODO: Реализовать поворот фото на ${degrees} градусов
   }
 
   // =================== АВТОПЛЕЙ ===================

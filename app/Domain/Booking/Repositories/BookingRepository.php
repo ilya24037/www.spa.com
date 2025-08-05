@@ -5,22 +5,37 @@ namespace App\Domain\Booking\Repositories;
 use App\Domain\Booking\Models\Booking;
 use App\Enums\BookingStatus;
 use App\Enums\BookingType;
+use App\Support\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
-class BookingRepository
+/**
+ * Репозиторий для работы с бронированиями
+ * 
+ * @extends BaseRepository<Booking>
+ */
+class BookingRepository extends BaseRepository
 {
-    public function __construct(
-        private Booking $model
-    ) {}
-
-    public function find(int $id): ?Booking
+    public function __construct(Booking $model)
     {
-        return $this->model->find($id);
+        parent::__construct($model);
     }
 
+    /**
+     * Найти бронирование по ID с загрузкой связей
+     * Переопределяем базовый метод
+     */
+    public function find(int $id): ?Booking
+    {
+        return $this->with(['client', 'master', 'service', 'payment'])->find($id);
+    }
+
+    /**
+     * Найти бронирование по ID или выбросить исключение
+     * Переопределяем базовый метод
+     */
     public function findOrFail(int $id): Booking
     {
         return $this->model->findOrFail($id);
@@ -29,6 +44,52 @@ class BookingRepository
     public function findByNumber(string $bookingNumber): ?Booking
     {
         return $this->model->where('booking_number', $bookingNumber)->first();
+    }
+
+    /**
+     * Получить бронирования пользователя с пагинацией
+     */
+    public function getBookingsForUser($user, int $perPage = 10)
+    {
+        return Booking::with(['masterProfile.user', 'service', 'client'])
+            ->where(function($query) use ($user) {
+                // Показываем бронирования где пользователь - клиент
+                $query->where('client_id', $user->id);
+                
+                // Или где пользователь - мастер
+                if ($user->masterProfile) {
+                    $query->orWhere('master_profile_id', $user->masterProfile->id);
+                }
+            })
+            ->orderBy('booking_date', 'desc')
+            ->orderBy('start_time', 'desc')
+            ->paginate($perPage);
+    }
+
+    /**
+     * Валидировать запрос на создание бронирования
+     */
+    public function validateBookingRequest(int $masterProfileId, int $serviceId): array
+    {
+        $masterProfile = \App\Domain\Master\Models\MasterProfile::with(['user', 'services', 'schedules'])
+            ->findOrFail($masterProfileId);
+            
+        $service = \App\Domain\Service\Models\Service::findOrFail($serviceId);
+        
+        // Проверяем, что услуга принадлежит мастеру
+        if (!$masterProfile->services->contains($service)) {
+            throw new \InvalidArgumentException('Выбранная услуга не доступна у этого мастера');
+        }
+
+        return compact('masterProfile', 'service');
+    }
+
+    /**
+     * Найти бронирование с загруженными связями
+     */
+    public function findWithRelations(int $bookingId): ?Booking
+    {
+        return Booking::with(['masterProfile.user', 'service', 'client'])->find($bookingId);
     }
 
     public function create(array $data): Booking

@@ -2,6 +2,7 @@
 
 namespace App\Domain\Ad\Models;
 
+use App\Support\Traits\JsonFieldsTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -11,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class AdMedia extends Model
 {
+    use JsonFieldsTrait;
     protected $table = 'ad_media';
 
     protected $fillable = [
@@ -22,9 +24,16 @@ class AdMedia extends Model
         'watermark_photos',
     ];
 
+    /**
+     * JSON поля для использования с JsonFieldsTrait
+     */
+    protected $jsonFields = [
+        'photos',
+        'video',
+    ];
+
     protected $casts = [
-        'photos' => 'array',
-        'video' => 'array',
+        // JSON поля обрабатываются через JsonFieldsTrait
         'show_photos_in_gallery' => 'boolean',
         'allow_download_photos' => 'boolean',
         'watermark_photos' => 'boolean',

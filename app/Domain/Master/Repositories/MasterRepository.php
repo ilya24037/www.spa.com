@@ -6,33 +6,30 @@ use App\Domain\Master\Models\MasterProfile;
 use App\Domain\User\Models\User;
 use App\Enums\MasterStatus;
 use App\Enums\MasterLevel;
+use App\Support\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 /**
  * Репозиторий для работы с мастерами
+ * 
+ * @extends BaseRepository<MasterProfile>
  */
-class MasterRepository
+class MasterRepository extends BaseRepository
 {
-    public function __construct(
-        private MasterProfile $model
-    ) {}
-
-    /**
-     * Создать профиль мастера
-     */
-    public function create(array $data): MasterProfile
+    public function __construct(MasterProfile $model)
     {
-        return $this->model->create($data);
+        parent::__construct($model);
     }
 
     /**
-     * Найти профиль по ID
+     * Найти профиль по ID с загрузкой связей
+     * Переопределяем базовый метод find
      */
-    public function findById(int $id): ?MasterProfile
+    public function find(int $id): ?MasterProfile
     {
-        return $this->model->with([
+        return $this->with([
             'user',
             'services',
             'photos',
@@ -40,6 +37,14 @@ class MasterRepository
             'reviews',
             'schedules'
         ])->find($id);
+    }
+    
+    /**
+     * Найти профиль по ID (алиас для обратной совместимости)
+     */
+    public function findById(int $id): ?MasterProfile
+    {
+        return $this->find($id);
     }
 
     /**
@@ -65,16 +70,36 @@ class MasterRepository
 
     /**
      * Обновить профиль
+     * Переопределяем базовый метод для совместимости
      */
-    public function update(MasterProfile $master, array $data): bool
+    public function update(int $id, array $data): bool
+    {
+        $master = $this->findOrFail($id);
+        return $master->update($data);
+    }
+    
+    /**
+     * Обновить профиль (старая сигнатура для обратной совместимости)
+     */
+    public function updateMaster(MasterProfile $master, array $data): bool
     {
         return $master->update($data);
     }
 
     /**
      * Удалить профиль
+     * Переопределяем базовый метод для совместимости
      */
-    public function delete(MasterProfile $master): bool
+    public function delete(int $id): bool
+    {
+        $master = $this->findOrFail($id);
+        return $master->delete();
+    }
+    
+    /**
+     * Удалить профиль (старая сигнатура для обратной совместимости)
+     */
+    public function deleteMaster(MasterProfile $master): bool
     {
         return $master->delete();
     }
@@ -212,8 +237,8 @@ class MasterRepository
                 ->where('status', 'completed')->count(),
             'total_revenue' => $master->bookings()
                 ->where('status', 'completed')->sum('total_price'),
-            'average_rating' => $master->reviews()->avg('rating') ?? 0,
-            'total_reviews' => $master->reviews()->count(),
+            'average_rating' => $master->user ? $master->user->getAverageRating() : 0,
+            'total_reviews' => $master->user ? $master->user->getReceivedReviewsCount() : 0,
             'profile_views' => $master->views_count,
             'repeat_clients' => $this->getRepeatClientsCount($masterId),
             'services_count' => $master->services()->count(),
@@ -234,8 +259,8 @@ class MasterRepository
      */
     public function updateRating(MasterProfile $master): void
     {
-        $avgRating = $master->reviews()->avg('rating') ?? 0;
-        $reviewsCount = $master->reviews()->count();
+        $avgRating = $master->user ? $master->user->getAverageRating() : 0;
+        $reviewsCount = $master->user ? $master->user->getReceivedReviewsCount() : 0;
         
         $master->update([
             'rating' => round($avgRating, 2),
@@ -427,5 +452,21 @@ class MasterRepository
                 $query->where('created_at', '>=', now()->subDays($days));
             })
             ->update(['status' => MasterStatus::INACTIVE]);
+    }
+
+    /**
+     * Найти мастера с отношениями
+     */
+    public function findWithRelations(int $id, array $relations = [])
+    {
+        return $this->model->with($relations)->findOrFail($id);
+    }
+
+    /**
+     * Найти мастера по display_name
+     */
+    public function findByDisplayName(string $displayName)
+    {
+        return $this->model->where('display_name', $displayName)->first();
     }
 }

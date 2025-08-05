@@ -1,3 +1,5 @@
+import { logger } from '@/src/shared/lib/logger'
+
 import { } from 'vue'
 import type { Ref } from 'vue'
 import { useToast } from './useToast'
@@ -136,7 +138,7 @@ export function useErrorHandler(showToast = true) {
    * Основной метод обработки ошибок
    */
   const handleError = (err: unknown, type?: ErrorType): void => {
-    console.error('[ErrorHandler]', err)
+    logger.error('[ErrorHandler]', err)
     
     const errorInfo: ErrorInfo = {
       type: type || detectErrorType(err),
@@ -158,7 +160,7 @@ export function useErrorHandler(showToast = true) {
 
     // Логирование в продакшене
     if (import.meta.env.PROD) {
-      console.error('Production error:', errorInfo)
+      logger.error('Production error:', errorInfo)
       // TODO: Отправка в Sentry или другой сервис
     }
   }

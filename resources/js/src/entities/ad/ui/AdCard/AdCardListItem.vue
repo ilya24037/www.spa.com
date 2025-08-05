@@ -117,6 +117,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/src/shared/lib/logger'
 import { computed } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { useToast } from '@/src/shared/composables/useToast'
@@ -305,13 +306,15 @@ const handleImageError = (): void => {
     imageError.value = true
     
     // Логируем ошибку для аналитики
-    console.warn(`Image load error for ad ${props.ad.id}:`, {
-      attemptedUrl: adPhoto.value,
-      adId: props.ad.id,
-      timestamp: new Date().toISOString()
+    logger.warn(`Image load error for ad ${props.ad.id}`, {
+      metadata: {
+        attemptedUrl: adPhoto.value,
+        adId: props.ad.id,
+        timestamp: new Date().toISOString()
+      }
     })
   } catch (error: unknown) {
-    console.error('Error in handleImageError:', error)
+    logger.error('Error in handleImageError:', error)
   }
 }
 
@@ -320,8 +323,7 @@ const openAd = (): void => {
     const url = `/ads/${props.ad.id}`
     router.visit(url)
     
-    // Логируем клик
-    console.log(`Opening ad ${props.ad.id}`)
+    // Открытие объявления
   } catch (error: unknown) {
     const adError: AdCardError = {
       type: 'navigation',
@@ -351,7 +353,7 @@ const toggleFavorite = async (): Promise<void> => {
         toast.success(currentState ? 'Удалено из избранного' : 'Добавлено в избранное')
       },
       onError: (errors) => {
-        console.error('Favorite toggle error:', errors)
+        logger.error('Favorite toggle error:', errors)
         toast.error('Ошибка при добавлении в избранное')
       }
     })
@@ -414,7 +416,7 @@ const openBooking = (): void => {
     const url = `/ads/${props.ad.id}?booking=true`
     router.visit(url)
     
-    console.log(`Opening booking for ad ${props.ad.id}`)
+    // Открытие бронирования
   } catch (error: unknown) {
     const adError: AdCardError = {
       type: 'booking',
@@ -432,12 +434,12 @@ const openBooking = (): void => {
 
 // Обработка ошибок
 const handleError = (error: AdCardError): void => {
-  console.error(`AdCardListItem Error [${error.type}]:`, {
+  logger.error('AdCardListItem Error [${error.type}]:', undefined, { metadata: {
     message: error.message,
     adId: error.adId,
     originalError: error.originalError,
     timestamp: new Date().toISOString()
-  })
+  } })
   
   toast.error(error.message)
 }

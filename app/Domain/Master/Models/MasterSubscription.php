@@ -2,6 +2,7 @@
 
 namespace App\Domain\Master\Models;
 
+use App\Support\Traits\JsonFieldsTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -37,7 +38,7 @@ use Carbon\Carbon;
  */
 class MasterSubscription extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, JsonFieldsTrait;
 
     protected $fillable = [
         'master_profile_id',
@@ -56,6 +57,13 @@ class MasterSubscription extends Model
         'cancellation_reason',
     ];
 
+    /**
+     * JSON поля для использования с JsonFieldsTrait
+     */
+    protected $jsonFields = [
+        'metadata',
+    ];
+
     protected $casts = [
         'plan' => SubscriptionPlan::class,
         'status' => SubscriptionStatus::class,
@@ -65,7 +73,7 @@ class MasterSubscription extends Model
         'end_date' => 'datetime',
         'trial_ends_at' => 'datetime',
         'auto_renew' => 'boolean',
-        'metadata' => 'array',
+        // JSON поля обрабатываются через JsonFieldsTrait
         'cancelled_at' => 'datetime',
     ];
 

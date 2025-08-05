@@ -1,3 +1,5 @@
+import { logger } from '@/src/shared/lib/logger'
+
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
@@ -24,7 +26,7 @@ export const useServiceStore = defineStore('service', () => {
       items.value = []
     } catch (err) {
       error.value = err.message || 'Ошибка загрузки'
-      console.error('Error fetching services:', err)
+      logger.error('Error fetching services:', err)
     } finally {
       loading.value = false
     }
@@ -41,7 +43,7 @@ export const useServiceStore = defineStore('service', () => {
       currentItem.value = null
     } catch (err) {
       error.value = err.message || 'Ошибка загрузки'
-      console.error('Error fetching service:', err)
+      logger.error('Error fetching service:', err)
     } finally {
       loading.value = false
     }
@@ -59,7 +61,7 @@ export const useServiceStore = defineStore('service', () => {
       return null
     } catch (err) {
       error.value = err.message || 'Ошибка создания'
-      console.error('Error creating service:', err)
+      logger.error('Error creating service:', err)
       throw err
     } finally {
       loading.value = false
@@ -81,7 +83,7 @@ export const useServiceStore = defineStore('service', () => {
       return null
     } catch (err) {
       error.value = err.message || 'Ошибка обновления'
-      console.error('Error updating service:', err)
+      logger.error('Error updating service:', err)
       throw err
     } finally {
       loading.value = false
@@ -98,7 +100,7 @@ export const useServiceStore = defineStore('service', () => {
       items.value = items.value.filter(item => item.id !== id)
     } catch (err) {
       error.value = err.message || 'Ошибка удаления'
-      console.error('Error deleting service:', err)
+      logger.error('Error deleting service:', err)
       throw err
     } finally {
       loading.value = false

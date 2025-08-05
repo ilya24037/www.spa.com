@@ -5,6 +5,7 @@ namespace App\Domain\User\Repositories;
 use App\Domain\User\Models\User;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
+use App\Support\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,43 +13,50 @@ use Carbon\Carbon;
 
 /**
  * Репозиторий для работы с пользователями
+ * 
+ * @extends BaseRepository<User>
  */
-class UserRepository
+class UserRepository extends BaseRepository
 {
     /**
+     * Конструктор репозитория пользователей
+     */
+    public function __construct(User $model)
+    {
+        parent::__construct($model);
+    }
+    /**
      * Найти пользователя по ID с загрузкой связей
+     * Переопределяем базовый метод для добавления загрузки связей
      */
     public function find(int $id, bool $withRelations = true): ?User
     {
-        $query = User::query();
-        
         if ($withRelations) {
-            $query->with(['profile', 'settings']);
+            return $this->with(['profile', 'settings'])->find($id);
         }
         
-        return $query->find($id);
+        return parent::find($id);
     }
 
     /**
      * Найти пользователя по ID или выбросить исключение
+     * Переопределяем базовый метод для добавления загрузки связей
      */
     public function findOrFail(int $id, bool $withRelations = true): User
     {
-        $query = User::query();
-        
         if ($withRelations) {
-            $query->with(['profile', 'settings']);
+            return $this->with(['profile', 'settings'])->findOrFail($id);
         }
         
-        return $query->findOrFail($id);
+        return parent::findOrFail($id);
     }
 
     /**
      * Найти пользователя по email
      */
-    public function findByEmail(string $email, bool $withRelations = false): ?User
+    public function findByEmail(string $email, bool $withRelations = true): ?User
     {
-        $query = User::where('email', $email);
+        $query = $this->model->where('email', $email);
         
         if ($withRelations) {
             $query->with(['profile', 'settings']);
@@ -158,15 +166,38 @@ class UserRepository
     }
 
     /**
-     * Получить активных пользователей
+     * Найти активных пользователей (согласно плану)
+     * ВНИМАНИЕ: Метод может вернуть большой объем данных - используйте с осторожностью
      */
-    public function getActive(int $limit = 50): Collection
+    public function findActive(int $limit = 1000): Collection
     {
-        return User::with(['profile'])
+        return $this->model->with(['profile', 'settings'])
             ->where('status', UserStatus::ACTIVE)
             ->orderBy('updated_at', 'desc')
             ->limit($limit)
             ->get();
+    }
+
+    /**
+     * Найти пользователей с профилем (согласно плану)  
+     * ВНИМАНИЕ: Метод может вернуть большой объем данных - используйте с осторожностью
+     */
+    public function findWithProfile(int $limit = 1000): Collection
+    {
+        return $this->model->with(['profile', 'settings'])
+            ->whereHas('profile')
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * Получить активных пользователей (устаревший метод, используйте findActive)
+     * @deprecated Используйте findActive() вместо этого метода
+     */
+    public function getActive(int $limit = 50): Collection
+    {
+        return $this->findActive($limit);
     }
 
     /**
@@ -294,21 +325,21 @@ class UserRepository
     }
 
     /**
-     * Обновить профиль пользователя
+     * Обновить профиль пользователя (теперь использует HasProfile трейт)
      */
     public function updateProfile(User $user, array $profileData): bool
     {
-        $profile = $user->getProfile();
-        return $profile->update($profileData);
+        // Используем валидированный метод из HasProfile трейта
+        return $user->updateProfile($profileData);
     }
 
     /**
-     * Обновить настройки пользователя
+     * Обновить настройки пользователя (теперь использует HasProfile трейт)
      */
     public function updateSettings(User $user, array $settingsData): bool
     {
-        $settings = $user->getSettings();
-        return $settings->update($settingsData);
+        // Используем валидированный метод из HasProfile трейта
+        return $user->updateSettings($settingsData);
     }
 
     /**

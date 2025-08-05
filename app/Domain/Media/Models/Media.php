@@ -4,6 +4,7 @@ namespace App\Domain\Media\Models;
 
 use App\Enums\MediaType;
 use App\Enums\MediaStatus;
+use App\Support\Traits\JsonFieldsTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\Storage;
 
 class Media extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, JsonFieldsTrait;
 
     protected $fillable = [
         'mediable_type',
@@ -33,11 +34,18 @@ class Media extends Model
         'expires_at',
     ];
 
+    /**
+     * JSON поля для использования с JsonFieldsTrait
+     */
+    protected $jsonFields = [
+        'metadata',
+        'conversions',
+    ];
+
     protected $casts = [
         'type' => MediaType::class,
         'status' => MediaStatus::class,
-        'metadata' => 'array',
-        'conversions' => 'array',
+        // JSON поля обрабатываются через JsonFieldsTrait
         'size' => 'integer',
         'sort_order' => 'integer',
         'expires_at' => 'datetime',
@@ -381,22 +389,4 @@ class Media extends Model
         });
     }
 
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::deleting(function (Media $media) {
-            if ($media->exists()) {
-                Storage::disk($media->disk)->delete($media->file_name);
-            }
-            
-            if ($media->conversions) {
-                foreach ($media->conversions as $conversion) {
-                    if (isset($conversion['file_name'])) {
-                        Storage::disk($media->disk)->delete($conversion['file_name']);
-                    }
-                }
-            }
-        });
-    }
 }

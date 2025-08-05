@@ -29,6 +29,7 @@
 </template>
 
 <script setup lang="ts">
+import { logger } from '@/src/shared/lib/logger'
 import { Head } from '@inertiajs/vue3'
 import { computed, onMounted } from 'vue'
 
@@ -61,13 +62,13 @@ const pageLoader = usePageLoading({
   autoStart: true,
   timeout: 10000,
   onStart: () => {
-    console.log('Home page loading started')
+    // Home page loading started
   },
   onComplete: () => {
-    console.log('Home page loading completed')
+    // Home page loading completed
   },
   onError: (error) => {
-    console.error('Home page loading error:', error)
+    logger.error('Home page loading error:', error)
   }
 })
 

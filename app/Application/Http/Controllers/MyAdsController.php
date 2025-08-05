@@ -2,13 +2,23 @@
 
 namespace App\Application\Http\Controllers;
 
+use App\Domain\Ad\Services\AdProfileService;
+use App\Domain\Ad\Services\AdService;
 use App\Domain\Ad\Models\Ad;
-use App\Enums\AdStatus;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class MyAdsController extends Controller
 {
+    private AdProfileService $adProfileService;
+    private AdService $adService;
+
+    public function __construct(AdProfileService $adProfileService, AdService $adService)
+    {
+        $this->adProfileService = $adProfileService;
+        $this->adService = $adService;
+    }
+
     /**
      * Отображение списка объявлений пользователя
      */
@@ -17,38 +27,24 @@ class MyAdsController extends Controller
         $tab = $request->get('tab', 'waiting');
         $user = $request->user();
         
-        // Базовый запрос для объявлений пользователя
-        $query = Ad::where('user_id', $user->id)
-                   ->orderBy('created_at', 'desc');
-        
-        // Фильтрация по статусу
-        switch ($tab) {
-            case 'waiting':
-                $query->waitingAction();
-                break;
-            case 'active':
-                $query->active();
-                break;
-            case 'drafts':
-                $query->drafts();
-                break;
-            case 'archived':
-                $query->archived();
-                break;
-        }
-        
-        $ads = $query->paginate(10);
-        
-        // Подсчет количества объявлений по статусам
-        $counts = [
-            'waiting' => Ad::where('user_id', $user->id)->waitingAction()->count(),
-            'active' => Ad::where('user_id', $user->id)->active()->count(),
-            'drafts' => Ad::where('user_id', $user->id)->drafts()->count(),
-            'archived' => Ad::where('user_id', $user->id)->archived()->count(),
+        // Маппинг табов на статусы
+        $statusMap = [
+            'waiting' => 'waiting_payment',
+            'active' => 'active', 
+            'drafts' => 'draft',
+            'archived' => 'archived'
         ];
         
+        $status = $statusMap[$tab] ?? 'waiting_payment';
+        
+        // Получаем объявления через сервис
+        $profiles = $this->adProfileService->getUserAdsByStatus($user, $status);
+        
+        // Получаем счетчики через сервис  
+        $counts = $this->adProfileService->getUserAdCounts($user);
+        
         return Inertia::render('Dashboard', [
-            'profiles' => $ads,
+            'profiles' => $profiles,
             'isMyAds' => true,
             'counts' => $counts,
             'currentTab' => $tab,
@@ -57,22 +53,18 @@ class MyAdsController extends Controller
     }
     
     /**
-     * Оплата объявления
+     * Оплата объявления  
      */
     public function pay(Ad $ad)
     {
         $this->authorize('update', $ad);
         
-        // Здесь будет логика оплаты
-        // Пока просто помечаем как оплаченное
-        $ad->update([
-            'status' => AdStatus::ACTIVE,
-            'is_paid' => true,
-            'paid_at' => now(),
-            'expires_at' => now()->addDays(30) // На 30 дней
-        ]);
-        
-        return back()->with('success', 'Объявление успешно оплачено');
+        try {
+            $this->adService->markAsPaid($ad);
+            return back()->with('success', 'Объявление успешно оплачено');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Ошибка при оплате: ' . $e->getMessage());
+        }
     }
     
     /**
@@ -82,11 +74,12 @@ class MyAdsController extends Controller
     {
         $this->authorize('update', $ad);
         
-        $ad->update([
-            'status' => AdStatus::ARCHIVED
-        ]);
-        
-        return back()->with('success', 'Объявление перемещено в архив');
+        try {
+            $this->adService->archive($ad);
+            return back()->with('success', 'Объявление перемещено в архив');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Ошибка при архивировании: ' . $e->getMessage());
+        }
     }
     
     /**
@@ -96,26 +89,20 @@ class MyAdsController extends Controller
     {
         $this->authorize('delete', $ad);
         
-        // Запоминаем статус для правильного перенаправления
-        $wasDraft = $ad->status === AdStatus::DRAFT;
-        
-        // ВАЖНО: Реально удаляем объявление из базы данных
-        $ad->delete();
-        
-        // Для AJAX запросов (Inertia.js) возвращаем redirect
-        if (request()->header('X-Inertia')) {
-            if ($wasDraft) {
-                return redirect()->route('profile.items.draft')->with('success', 'Черновик удален');
+        try {
+            $wasDraft = $ad->status === 'draft';
+            $this->adService->delete($ad);
+            
+            $message = $wasDraft ? 'Черновик удален' : 'Объявление удалено';
+            
+            if (request()->header('X-Inertia') && $wasDraft) {
+                return redirect()->route('profile.items.draft')->with('success', $message);
             }
-            return back()->with('success', 'Объявление удалено');
+            
+            return back()->with('success', $message);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Ошибка при удалении: ' . $e->getMessage());
         }
-        
-        // Для обычных запросов
-        if ($wasDraft) {
-            return redirect()->route('profile.items.draft')->with('success', 'Черновик удален');
-        }
-        
-        return back()->with('success', 'Объявление удалено');
     }
     
     /**
@@ -125,15 +112,14 @@ class MyAdsController extends Controller
     {
         $this->authorize('update', $ad);
         
-        if ($ad->status !== AdStatus::DRAFT) {
-            return back()->with('error', 'Только черновики можно опубликовать');
+        try {
+            $this->adService->publish($ad);
+            return back()->with('success', 'Объявление отправлено на модерацию');
+        } catch (\InvalidArgumentException $e) {
+            return back()->with('error', $e->getMessage());
+        } catch (\Exception $e) {
+            return back()->with('error', 'Ошибка при публикации: ' . $e->getMessage());
         }
-        
-        $ad->update([
-            'status' => AdStatus::WAITING_PAYMENT
-        ]);
-        
-        return back()->with('success', 'Объявление отправлено на модерацию');
     }
     
     /**
@@ -143,14 +129,11 @@ class MyAdsController extends Controller
     {
         $this->authorize('update', $ad);
         
-        if ($ad->status !== AdStatus::ARCHIVED) {
-            return back()->with('error', 'Только архивные объявления можно восстановить');
+        try {
+            $this->adService->restore($ad);
+            return back()->with('success', 'Объявление восстановлено в черновики');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Ошибка при восстановлении: ' . $e->getMessage());
         }
-        
-        $ad->update([
-            'status' => AdStatus::DRAFT
-        ]);
-        
-        return back()->with('success', 'Объявление восстановлено в черновики');
     }
 }

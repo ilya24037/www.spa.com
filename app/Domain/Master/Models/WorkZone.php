@@ -2,6 +2,7 @@
 
 namespace App\Domain\Master\Models;
 
+use App\Support\Traits\JsonFieldsTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Carbon\Carbon;
 
 class WorkZone extends Model
 {
-    use HasFactory;
+    use HasFactory, JsonFieldsTrait;
 
     protected $fillable = [
         'master_profile_id', 'city', 'district', 'metro_station',
@@ -18,10 +19,17 @@ class WorkZone extends Model
         'is_active', 'priority'
     ];
 
+    /**
+     * JSON поля для использования с JsonFieldsTrait
+     */
+    protected $jsonFields = [
+        'work_days',
+    ];
+
     protected $casts = [
         'work_from' => 'datetime:H:i',
         'work_to' => 'datetime:H:i',
-        'work_days' => 'array',
+        // JSON поля обрабатываются через JsonFieldsTrait
         'is_active' => 'boolean',
         'extra_charge' => 'decimal:2',
         'min_order_amount' => 'integer',

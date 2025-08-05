@@ -2,6 +2,7 @@
 
 namespace App\Domain\Master\Models;
 
+use App\Support\Traits\JsonFieldsTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Enums\SubscriptionPlan;
@@ -21,6 +22,7 @@ use App\Enums\SubscriptionStatus;
  */
 class SubscriptionHistory extends Model
 {
+    use JsonFieldsTrait;
     public $timestamps = false;
     
     protected $fillable = [
@@ -32,21 +34,20 @@ class SubscriptionHistory extends Model
         'metadata',
     ];
 
+    /**
+     * JSON поля для использования с JsonFieldsTrait
+     */
+    protected $jsonFields = [
+        'metadata',
+    ];
+
     protected $casts = [
         'plan' => SubscriptionPlan::class,
         'status' => SubscriptionStatus::class,
-        'metadata' => 'array',
+        // JSON поля обрабатываются через JsonFieldsTrait
         'created_at' => 'datetime',
     ];
 
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($model) {
-            $model->created_at = $model->created_at ?? now();
-        });
-    }
 
     /**
      * Подписка

@@ -174,10 +174,14 @@ import type {
   Booking,
   BookingSuccessError
 } from './BookingSuccessModal.types'
+import { useLogger } from '@/src/shared/composables/useLogger'
 
 // Props и emits с TypeScript типизацией
 const props = defineProps<BookingSuccessModalProps>()
 const emit = defineEmits<BookingSuccessModalEmits>()
+
+// Logger для компонента
+const logger = useLogger('BookingSuccessModal')
 
 // Безопасная обработка данных бронирования
 const safeBooking = computed<Booking | null>(() => {
@@ -185,7 +189,6 @@ const safeBooking = computed<Booking | null>(() => {
   
   // Проверяем обязательные поля
   if (!props.booking.id || !props.booking.master_name || !props.booking.service_name) {
-    console.warn('BookingSuccessModal: Missing required booking fields', props.booking)
     return null
   }
   
@@ -220,10 +223,6 @@ const formatDateTime = (booking: Booking): string => {
     const date = new Date(dateTimeString)
     
     if (isNaN(date.getTime())) {
-      console.warn('BookingSuccessModal: Invalid date format', {
-        booking_date: booking.booking_date,
-        booking_time: booking.booking_time
-      })
       return `${booking.booking_date} в ${booking.booking_time}`
     }
     
@@ -234,7 +233,10 @@ const formatDateTime = (booking: Booking): string => {
       message: 'Ошибка форматирования даты',
       originalError: error
     }
-    console.error('BookingSuccessModal formatDateTime error:', bookingError)
+    logger.error('Ошибка форматирования даты', bookingError, {
+      action: 'formatDateTime',
+      metadata: { booking_date: booking.booking_date, booking_time: booking.booking_time }
+    })
     return 'Ошибка отображения даты'
   }
 }
@@ -257,7 +259,10 @@ const formatPrice = (price: number): string => {
       message: 'Ошибка форматирования цены',
       originalError: error
     }
-    console.error('BookingSuccessModal formatPrice error:', bookingError)
+    logger.error('Ошибка форматирования цены', bookingError, {
+      action: 'formatPrice',
+      metadata: { price }
+    })
     return `${price} ₽`
   }
 }
@@ -267,48 +272,42 @@ const handleClose = (): void => {
   try {
     emit('close')
     
-    // Логируем событие для аналитики
-    console.log('BookingSuccessModal closed', {
-      bookingId: safeBooking.value?.id,
-      timestamp: new Date().toISOString()
-    })
+    // Событие закрытия модального окна
   } catch (error: unknown) {
     const bookingError: BookingSuccessError = {
       type: 'display',
       message: 'Ошибка при закрытии модального окна',
       originalError: error
     }
-    console.error('BookingSuccessModal handleClose error:', bookingError)
+    logger.error('Ошибка при закрытии модального окна', bookingError, {
+      action: 'handleClose'
+    })
   }
 }
 
 const handleViewDetails = (): void => {
   try {
     if (!safeBooking.value) {
-      console.warn('BookingSuccessModal: Cannot view details - no valid booking data')
       return
     }
     
-    // Логируем переход для аналитики
-    console.log('BookingSuccessModal view details clicked', {
-      bookingId: safeBooking.value.id,
-      url: detailsUrl.value,
-      timestamp: new Date().toISOString()
-    })
+    // Переход к деталям бронирования
   } catch (error: unknown) {
     const bookingError: BookingSuccessError = {
       type: 'navigation',
       message: 'Ошибка при переходе к деталям',
       originalError: error
     }
-    console.error('BookingSuccessModal handleViewDetails error:', bookingError)
+    logger.error('Ошибка при переходе к деталям', bookingError, {
+      action: 'handleViewDetails',
+      metadata: { bookingId: safeBooking.value?.id, url: detailsUrl.value }
+    })
   }
 }
 
 // Валидация данных бронирования при монтировании
 const validateBookingData = (): boolean => {
   if (!props.booking) {
-    console.error('BookingSuccessModal: No booking data provided')
     return false
   }
   
@@ -316,7 +315,6 @@ const validateBookingData = (): boolean => {
   const missingFields = requiredFields.filter(field => !props.booking[field])
   
   if (missingFields.length > 0) {
-    console.warn('BookingSuccessModal: Missing required fields:', missingFields)
     return false
   }
   

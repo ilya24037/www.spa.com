@@ -3,6 +3,7 @@
 namespace App\Domain\Ad\Models;
 
 use App\Enums\PriceUnit;
+use App\Support\Traits\JsonFieldsTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class AdPricing extends Model
 {
+    use JsonFieldsTrait;
     protected $table = 'ad_pricing';
 
     protected $fillable = [
@@ -28,10 +30,17 @@ class AdPricing extends Model
         'contacts_per_hour',
     ];
 
+    /**
+     * JSON поля для использования с JsonFieldsTrait
+     */
+    protected $jsonFields = [
+        'pricing_data',
+    ];
+
     protected $casts = [
         'price' => 'decimal:2',
         'is_starting_price' => 'boolean',
-        'pricing_data' => 'array',
+        // JSON поля обрабатываются через JsonFieldsTrait
         'discount' => 'integer',
         'new_client_discount' => 'integer',
         'prepayment_required' => 'boolean',

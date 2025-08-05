@@ -5,7 +5,7 @@ namespace App\Infrastructure\Media;
 use App\Domain\Media\Services\MasterMediaService;
 use App\Domain\Media\Services\ImageProcessor;
 use App\Domain\Media\Services\VideoProcessor;
-use App\Domain\Media\Services\ThumbnailGenerator;
+use App\Domain\Media\Services\ThumbnailService;
 use App\Domain\Media\Models\Photo;
 use App\Domain\Media\Models\Video;
 use App\Domain\Media\Models\Video as MasterVideo;
@@ -24,13 +24,20 @@ class MediaProcessingService
 
     public function __construct()
     {
-        $thumbnailGenerator = app(ThumbnailGenerator::class);
+        $thumbnailGenerator = app(ThumbnailService::class);
         $this->imageProcessor = app(ImageProcessor::class);
         $this->videoProcessor = app(VideoProcessor::class);
+        $photoRepository = app(\App\Domain\Media\Repositories\PhotoRepository::class);
+        $videoRepository = app(\App\Domain\Media\Repositories\VideoRepository::class);
+        $masterRepository = app(\App\Domain\Master\Repositories\MasterRepository::class);
+        
         $this->mediaService = new MasterMediaService(
             $this->imageProcessor,
             $this->videoProcessor,
-            $thumbnailGenerator
+            $thumbnailGenerator,
+            $photoRepository,
+            $videoRepository,
+            $masterRepository
         );
     }
 

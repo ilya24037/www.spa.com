@@ -3,13 +3,20 @@
 namespace App\Application\Http\Controllers\Auth;
 
 use App\Application\Http\Controllers\Controller;
+use App\Domain\User\Services\UserService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
 class PasswordController extends Controller
 {
+    private UserService $userService;
+
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
+    }
+
     /**
      * Update the user's password.
      */
@@ -20,10 +27,21 @@ class PasswordController extends Controller
             'password' => ['required', Password::defaults(), 'confirmed'],
         ]);
 
-        $request->user()->update([
-            'password' => Hash::make($validated['password']),
-        ]);
+        try {
+            $result = $this->userService->changePassword(
+                $request->user(),
+                $validated['current_password'],
+                $validated['password']
+            );
 
-        return back();
+            if ($result['success']) {
+                return back()->with('status', $result['message']);
+            } else {
+                return back()->withErrors(['current_password' => $result['error']]);
+            }
+
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Ошибка при изменении пароля']);
+        }
     }
 }

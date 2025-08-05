@@ -15,7 +15,8 @@ class NotificationService extends BaseNotificationService
      */
     public function sendPaymentSuccess(int $userId, array $paymentData): void
     {
-        $user = \App\Domain\User\Models\User::find($userId);
+        $userRepository = app(\App\Domain\User\Repositories\UserRepository::class);
+        $user = $userRepository->find($userId);
         if ($user) {
             $this->sendByTemplate($user, 'payment_success', $paymentData);
         }
@@ -26,7 +27,8 @@ class NotificationService extends BaseNotificationService
      */
     public function sendPaymentFailed(int $userId, array $paymentData): void
     {
-        $user = \App\Domain\User\Models\User::find($userId);
+        $userRepository = app(\App\Domain\User\Repositories\UserRepository::class);
+        $user = $userRepository->find($userId);
         if ($user) {
             $this->sendByTemplate($user, 'payment_failed', $paymentData);
         }
@@ -37,7 +39,8 @@ class NotificationService extends BaseNotificationService
      */
     public function sendRefundProcessed(int $userId, array $refundData): void
     {
-        $user = \App\Domain\User\Models\User::find($userId);
+        $userRepository = app(\App\Domain\User\Repositories\UserRepository::class);
+        $user = $userRepository->find($userId);
         if ($user) {
             $this->sendByTemplate($user, 'refund_processed', $refundData);
         }
@@ -48,7 +51,8 @@ class NotificationService extends BaseNotificationService
      */
     public function sendSubscriptionExpiring(int $userId, array $subscriptionData): void
     {
-        $user = \App\Domain\User\Models\User::find($userId);
+        $userRepository = app(\App\Domain\User\Repositories\UserRepository::class);
+        $user = $userRepository->find($userId);
         if ($user) {
             $this->sendByTemplate($user, 'subscription_expiring', $subscriptionData);
         }
@@ -59,7 +63,8 @@ class NotificationService extends BaseNotificationService
      */
     public function sendReceipt(int $userId, array $receiptData): void
     {
-        $user = \App\Domain\User\Models\User::find($userId);
+        $userRepository = app(\App\Domain\User\Repositories\UserRepository::class);
+        $user = $userRepository->find($userId);
         if ($user) {
             $this->sendByTemplate($user, 'payment_receipt', $receiptData);
         }

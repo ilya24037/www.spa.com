@@ -2,6 +2,7 @@
 
 namespace App\Domain\Service\Models;
 
+use App\Support\Traits\JsonFieldsTrait;
 use App\Domain\Master\Models\MasterProfile;
 use App\Domain\Booking\Models\Booking;
 use App\Domain\Review\Models\Review;
@@ -15,7 +16,7 @@ use Illuminate\Support\Str;
 
 class Service extends Model
 {
-    use HasFactory;
+    use HasFactory, JsonFieldsTrait;
 
     /**
      * The attributes that are mass assignable.
@@ -50,14 +51,21 @@ class Service extends Model
     ];
 
     /**
+     * JSON поля для использования с JsonFieldsTrait
+     */
+    protected $jsonFields = [
+        'included_services',
+        'contraindications',
+        'preparation',
+    ];
+
+    /**
      * The attributes that should be cast.
      */
     protected $casts = [
         'sale_until' => 'datetime',
         'is_complex' => 'boolean',
-        'included_services' => 'array',
-        'contraindications' => 'array',
-        'preparation' => 'array',
+        // JSON поля обрабатываются через JsonFieldsTrait
         'is_featured' => 'boolean',
         'is_new' => 'boolean',
         'instant_booking' => 'boolean',
@@ -67,33 +75,6 @@ class Service extends Model
         'rating' => 'decimal:2',
     ];
 
-    /**
-     * Boot the model.
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        // Автоматически создаём slug
-        static::creating(function ($model) {
-            if (empty($model->slug)) {
-                $masterSlug = $model->masterProfile->slug ?? 'master';
-                $model->slug = Str::slug($model->name . '-' . $masterSlug . '-' . Str::random(4));
-            }
-        });
-
-        // При создании/обновлении услуги обновляем счётчики категории
-        static::saved(function ($model) {
-            $model->category->updateServicesCount();
-            $model->category->updatePriceStats();
-        });
-
-        // При удалении услуги обновляем счётчики
-        static::deleted(function ($model) {
-            $model->category->updateServicesCount();
-            $model->category->updatePriceStats();
-        });
-    }
 
     /**
      * Мастер

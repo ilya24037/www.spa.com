@@ -95,18 +95,4 @@ class Video extends Model
         return sprintf('%02d:%02d', $minutes, $seconds);
     }
 
-    /**
-     * Удалить файлы при удалении записи
-     */
-    protected static function booted(): void
-    {
-        static::deleting(function (Video $video) {
-            $disk = Storage::disk('masters_private');
-            $folderName = $video->masterProfile->folder_name;
-            
-            // Удаляем видео и постер
-            $disk->delete("{$folderName}/video/{$video->filename}");
-            $disk->delete("{$folderName}/video/{$video->poster_filename}");
-        });
-    }
 }

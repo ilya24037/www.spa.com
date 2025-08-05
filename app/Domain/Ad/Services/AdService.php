@@ -41,7 +41,7 @@ class AdService
             $adData['user_id'] = $data['user_id'];
             $adData['status'] = 'draft'; // По умолчанию черновик
             
-            $ad = Ad::create($adData);
+            $ad = $this->adRepository->create($adData);
             
             // Создаем связанные компоненты
             $this->createAdComponents($ad, $data);
@@ -63,7 +63,7 @@ class AdService
             $adData['user_id'] = $user->id;
             $adData['status'] = 'draft'; // По умолчанию черновик
             
-            $ad = Ad::create($adData);
+            $ad = $this->adRepository->create($adData);
             
             // Создаем связанные компоненты
             $this->createAdComponents($ad, $data);
@@ -90,7 +90,7 @@ class AdService
             $adData['specialty'] = $adData['specialty'] ?? '';
             $adData['description'] = $adData['description'] ?? '';
             
-            $ad = Ad::create($adData);
+            $ad = $this->adRepository->create($adData);
             
             // Создаем связанные компоненты, если есть данные
             if (!empty($data)) {
@@ -118,7 +118,7 @@ class AdService
             $preparedData = $this->prepareMainAdData($data);
             
             // Обновляем объявление
-            $updated = $this->adRepository->update($ad, $preparedData);
+            $updated = $this->adRepository->updateAd($ad, $preparedData);
             
             // Обновляем связанные компоненты
             $this->updateAdComponents($ad, $data);
@@ -140,7 +140,7 @@ class AdService
                 throw new \InvalidArgumentException('Объявление не готово к публикации');
             }
             
-            $published = $this->adRepository->update($ad, [
+            $published = $this->adRepository->updateAd($ad, [
                 'status' => 'waiting_payment',
                 'published_at' => now()
             ]);
@@ -164,7 +164,7 @@ class AdService
             $preparedData['status'] = 'draft';
             
             // Обновляем объявление
-            $updated = $this->adRepository->update($ad, $preparedData);
+            $updated = $this->adRepository->updateAd($ad, $preparedData);
             
             // Обновляем связанные компоненты
             $this->updateAdComponents($ad, $data);
@@ -194,7 +194,7 @@ class AdService
      */
     public function archive(Ad $ad): Ad
     {
-        $archived = $this->adRepository->update($ad, ['status' => 'archived']);
+        $archived = $this->adRepository->updateAd($ad, ['status' => 'archived']);
         
         Log::info('Ad archived', ['ad_id' => $ad->id]);
         
@@ -206,7 +206,7 @@ class AdService
      */
     public function restore(Ad $ad): Ad
     {
-        $restored = $this->adRepository->update($ad, ['status' => 'draft']);
+        $restored = $this->adRepository->updateAd($ad, ['status' => 'draft']);
         
         Log::info('Ad restored', ['ad_id' => $ad->id]);
         
@@ -264,27 +264,16 @@ class AdService
         
 
         
-        // JSON поля в основной таблице
+        // JSON поля в основной таблице - теперь обрабатываются через JsonFieldsTrait
         $jsonFields = [
             'clients', 'service_location', 'outcall_locations', 'service_provider', 'features', 'services',
-            'schedule', 'geo', 'photos', 'video' // Добавлены поля медиа
+            'schedule', 'geo', 'photos', 'video'
         ];
         
         foreach ($jsonFields as $field) {
             if (isset($data[$field])) {
-                $prepared[$field] = is_array($data[$field]) 
-                    ? json_encode($data[$field]) 
-                    : $data[$field];
-                    
-                // ОТЛАДКА: Специально для photos
-                if ($field === 'photos') {
-                    \Log::info('AdService PHOTOS processing:', [
-                        'field' => $field,
-                        'original' => $data[$field],
-                        'prepared' => $prepared[$field],
-                        'is_array' => is_array($data[$field])
-                    ]);
-                }
+                // JsonFieldsTrait автоматически обработает массивы при сохранении
+                $prepared[$field] = $data[$field];
             }
         }
         
@@ -351,6 +340,121 @@ class AdService
         if (isset($data['photos']) && is_array($data['photos'])) {
             $this->adMediaService->syncPhotos($ad, $data['photos']);
         }
+    }
+    
+    /**
+     * Добавить услугу к объявлению используя JsonFieldsTrait
+     */
+    public function addService(Ad $ad, string $service): Ad
+    {
+        $ad->appendToJsonField('services', $service);
+        $ad->save();
+        
+        Log::info('Service added to ad', ['ad_id' => $ad->id, 'service' => $service]);
+        return $ad;
+    }
+    
+    /**
+     * Удалить услугу из объявления используя JsonFieldsTrait
+     */
+    public function removeService(Ad $ad, string $service): Ad
+    {
+        $ad->removeFromJsonField('services', $service);
+        $ad->save();
+        
+        Log::info('Service removed from ad', ['ad_id' => $ad->id, 'service' => $service]);
+        return $ad;
+    }
+    
+    /**
+     * Установить геолокацию объявления используя JsonFieldsTrait
+     */
+    public function setLocation(Ad $ad, float $lat, float $lng, ?string $address = null): Ad
+    {
+        $ad->setJsonFieldKey('geo', 'lat', $lat);
+        $ad->setJsonFieldKey('geo', 'lng', $lng);
+        
+        if ($address) {
+            $ad->setJsonFieldKey('geo', 'address', $address);
+        }
+        
+        $ad->save();
+        
+        Log::info('Location updated for ad', ['ad_id' => $ad->id, 'lat' => $lat, 'lng' => $lng]);
+        return $ad;
+    }
+    
+    /**
+     * Добавить фотографию к объявлению используя JsonFieldsTrait
+     */
+    public function addPhoto(Ad $ad, array $photoData): Ad
+    {
+        // Проверяем структуру фото
+        if (!isset($photoData['url']) || !isset($photoData['thumbnail'])) {
+            throw new \InvalidArgumentException('Photo data must contain url and thumbnail');
+        }
+        
+        $ad->appendToJsonField('photos', $photoData);
+        $ad->save();
+        
+        Log::info('Photo added to ad', ['ad_id' => $ad->id, 'photo_url' => $photoData['url']]);
+        return $ad;
+    }
+    
+    /**
+     * Обновить расписание объявления используя JsonFieldsTrait
+     */
+    public function updateSchedule(Ad $ad, array $scheduleData): Ad
+    {
+        $ad->mergeJsonField('schedule', $scheduleData);
+        $ad->save();
+        
+        Log::info('Schedule updated for ad', ['ad_id' => $ad->id]);
+        return $ad;
+    }
+    
+    /**
+     * Получить количество услуг в объявлении
+     */
+    public function getServicesCount(Ad $ad): int
+    {
+        $services = $ad->getJsonField('services', []);
+        return count($services);
+    }
+    
+    /**
+     * Проверить наличие услуги в объявлении
+     */
+    public function hasService(Ad $ad, string $service): bool
+    {
+        return $ad->hasInJsonField('services', $service);
+    }
+    
+    /**
+     * Получить координаты объявления
+     */
+    public function getCoordinates(Ad $ad): ?array
+    {
+        $lat = $ad->getJsonFieldKey('geo', 'lat');
+        $lng = $ad->getJsonFieldKey('geo', 'lng');
+        
+        if ($lat && $lng) {
+            return ['lat' => $lat, 'lng' => $lng];
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Очистить все фотографии объявления
+     */
+    public function clearPhotos(Ad $ad): Ad
+    {
+        $ad->clearJsonField('photos');
+        $ad->save();
+        
+        Log::info('Photos cleared for ad', ['ad_id' => $ad->id]);
+        return $ad;
     }
     
     /**
@@ -575,5 +679,116 @@ class AdService
     public function findByFilters(array $filters): array
     {
         return $this->adRepository->findByFilters($filters);
+    }
+
+    /**
+     * Найти существующий черновик пользователя
+     */
+    public function findExistingDraft(int $userId, ?int $adId = null): ?Ad
+    {
+        if (!$adId) {
+            return null;
+        }
+        
+        return $this->adRepository->findUserDraft($userId, $adId);
+    }
+
+    /**
+     * Удалить черновик
+     */
+    public function deleteDraft(Ad $ad): bool
+    {
+        // Проверяем, что это черновик
+        if ($ad->status !== 'draft') {
+            throw new \InvalidArgumentException('Можно удалять только черновики');
+        }
+        
+        return $this->delete($ad);
+    }
+
+    /**
+     * Проверить готовность черновика к публикации
+     */
+    public function validateDraftForPublication(Ad $ad): array
+    {
+        if ($ad->status !== 'draft') {
+            throw new \InvalidArgumentException('Опубликовать можно только черновик');
+        }
+        
+        if (!$ad->canBePublished()) {
+            return [
+                'ready' => false,
+                'missing_fields' => $ad->getMissingFieldsForPublication()
+            ];
+        }
+        
+        return ['ready' => true, 'missing_fields' => []];
+    }
+
+    /**
+     * Подготовить данные объявления для отображения
+     */
+    public function prepareAdDataForView(Ad $ad): array
+    {
+        $adData = $ad->toArray();
+        
+        $jsonFields = [
+            'clients', 'service_location', 'outcall_locations', 'service_provider', 
+            'is_starting_price', 'photos', 'video', 'features', 'pricing_data', 
+            'services', 'schedule', 'geo'
+        ];
+        
+        foreach ($jsonFields as $field) {
+            if (!isset($adData[$field]) || $adData[$field] === null) {
+                // Обеспечиваем что JSON поля всегда массивы/объекты, а не null
+                $adData[$field] = [];
+            }
+            // JsonFieldsTrait автоматически обработает кодирование/декодирование
+        }
+        
+        // Обработка скалярных полей - обеспечиваем что они не null
+        $scalarFields = [
+            'price_per_hour', 'outcall_price', 'express_price', 'price_two_hours', 
+            'price_night', 'min_duration', 'contacts_per_hour', 'age', 'height', 
+            'weight', 'breast_size', 'hair_color', 'eye_color', 'appearance', 
+            'nationality', 'work_format', 'experience', 'additional_features',
+            'description', 'price', 'price_unit'
+        ];
+        
+        foreach ($scalarFields as $field) {
+            if (!isset($adData[$field]) || $adData[$field] === null) {
+                $adData[$field] = '';
+            }
+        }
+        
+        // Обеспечиваем boolean поля
+        $adData['has_girlfriend'] = (bool) ($adData['has_girlfriend'] ?? false);
+        
+        return $adData;
+    }
+    
+    /**
+     * Проверить возможность редактирования объявления
+     */
+    public function canEdit(Ad $ad): bool
+    {
+        return $ad->status === 'draft' || $ad->status === 'pending';
+    }
+    
+    /**
+     * Пометить как оплаченное и активировать
+     */
+    public function markAsPaid(Ad $ad): Ad
+    {
+        $updated = $this->adRepository->updateAd($ad, [
+            'status' => 'active',
+            'is_paid' => true,
+            'paid_at' => now(),
+            'expires_at' => now()->addDays(30)
+        ]);
+        
+        Log::info('Ad marked as paid and activated', ['ad_id' => $ad->id]);
+        
+        return $updated;
     }
 }

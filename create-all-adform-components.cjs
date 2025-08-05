@@ -26,7 +26,7 @@ const components = [
 
 components.forEach(name => {
   const filePath = path.join(baseDir, `${name}.vue`);
-  
+
   if (!fs.existsSync(filePath)) {
     const content = `<template>
   <div class="${name.toLowerCase()}">
@@ -63,10 +63,9 @@ const localValue = computed({
   set: (value) => emit('update:modelValue', value)
 })
 </script>`;
-    
+
     fs.writeFileSync(filePath, content);
-    console.log(`✨ Created: ${name}`);
+
   }
 });
 
-console.log('\n✅ All AdForm components created!');

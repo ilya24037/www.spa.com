@@ -6,6 +6,7 @@ use App\Domain\Payment\Models\Payment;
 use App\Enums\PaymentStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentType;
+use App\Support\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -14,14 +15,14 @@ use Carbon\Carbon;
 
 /**
  * Репозиторий для работы с платежами
+ * 
+ * @extends BaseRepository<Payment>
  */
-class PaymentRepository
+class PaymentRepository extends BaseRepository
 {
-    protected Payment $model;
-
     public function __construct(Payment $model)
     {
-        $this->model = $model;
+        parent::__construct($model);
     }
 
     /**
@@ -64,16 +65,36 @@ class PaymentRepository
 
     /**
      * Обновить платеж
+     * Переопределяем базовый метод для совместимости
      */
-    public function update(Payment $payment, array $data): bool
+    public function update(int $id, array $data): bool
+    {
+        $payment = $this->findOrFail($id);
+        return $payment->update($data);
+    }
+    
+    /**
+     * Обновить платеж (старая сигнатура для обратной совместимости)
+     */
+    public function updatePayment(Payment $payment, array $data): bool
     {
         return $payment->update($data);
     }
 
     /**
      * Удалить платеж
+     * Переопределяем базовый метод для совместимости
      */
-    public function delete(Payment $payment): bool
+    public function delete(int $id): bool
+    {
+        $payment = $this->findOrFail($id);
+        return $payment->delete();
+    }
+    
+    /**
+     * Удалить платеж (старая сигнатура для обратной совместимости)
+     */
+    public function deletePayment(Payment $payment): bool
     {
         return $payment->delete();
     }

@@ -23,31 +23,22 @@ class MasterController extends Controller
      */
     public function show(string $slug, int $master)
     {
-        // 1. Загружаем профиль с нужными связями
-        $profile = MasterProfile::with([
-            'user',
-            'services.category',
-            'photos',
-            'reviews.user',
-            'workZones',
-            'schedules',
-        ])->findOrFail($master);
+        // 1. Загружаем профиль через сервис
+        $profile = $this->masterService->findWithRelations($master);
 
-        // 2. Чистый SEO-URL
-        if ($slug !== $profile->slug) {
+        // 2. Проверяем SEO-URL через сервис
+        if (!$this->masterService->isValidSlug($profile, $slug)) {
             return redirect()->route('masters.show', [
                 'slug'   => $profile->slug,
                 'master' => $profile->id,
             ], 301);
         }
 
-        // 3. Генерируем meta, если пусто
-        if (empty($profile->meta_title) || empty($profile->meta_description)) {
-            $profile->generateMetaTags()->save();
-        }
+        // 3. Обновляем meta через сервис
+        $this->masterService->ensureMetaTags($profile);
 
-        // 4. Счётчик просмотров
-        $profile->increment('views_count');
+        // 4. Увеличиваем счётчик просмотров через сервис
+        $this->masterService->incrementViews($profile);
 
         // 5. Собираем галерею
         $gallery = [];

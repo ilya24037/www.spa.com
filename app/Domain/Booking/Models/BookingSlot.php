@@ -284,32 +284,4 @@ class BookingSlot extends Model
         return $query->orderBy('start_time');
     }
 
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function (BookingSlot $slot) {
-            // Автоматически вычисляем продолжительность если не указана
-            if (!$slot->duration_minutes && $slot->start_time && $slot->end_time) {
-                $slot->duration_minutes = $slot->start_time->diffInMinutes($slot->end_time);
-            }
-            
-            // Автоматически вычисляем end_time если не указано
-            if (!$slot->end_time && $slot->start_time && $slot->duration_minutes) {
-                $slot->end_time = $slot->start_time->copy()->addMinutes($slot->duration_minutes);
-            }
-        });
-
-        static::updating(function (BookingSlot $slot) {
-            // Обновляем продолжительность при изменении времени
-            if ($slot->isDirty(['start_time', 'end_time']) && $slot->start_time && $slot->end_time) {
-                $slot->duration_minutes = $slot->start_time->diffInMinutes($slot->end_time);
-            }
-            
-            // Обновляем end_time при изменении продолжительности
-            if ($slot->isDirty(['start_time', 'duration_minutes']) && $slot->start_time && $slot->duration_minutes) {
-                $slot->end_time = $slot->start_time->copy()->addMinutes($slot->duration_minutes);
-            }
-        });
-    }
 }

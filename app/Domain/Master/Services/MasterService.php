@@ -424,7 +424,7 @@ class MasterService
      */
     protected function updateUserRole(int $userId): void
     {
-        $user = User::find($userId);
+        $user = $this->userRepository->find($userId);
         if ($user && !$user->hasRole('master')) {
             $user->assignRole('master');
         }
@@ -537,19 +537,77 @@ class MasterService
     public function runDailyTasks(): void
     {
         // Завершаем отпуска
-        MasterProfile::where('status', MasterStatus::VACATION)
-            ->where('vacation_until', '<=', now())
-            ->update(['status' => MasterStatus::ACTIVE]);
+        $this->repository->finishVacations();
 
         // Деактивируем неактивных мастеров
         $this->repository->deactivateInactiveMasters();
 
         // Обновляем уровни мастеров
-        MasterProfile::where('status', MasterStatus::ACTIVE)
-            ->chunk(100, function ($masters) {
-                foreach ($masters as $master) {
-                    $this->repository->updateLevel($master);
-                }
-            });
+        $this->repository->updateAllMasterLevels();
+    }
+
+    /**
+     * Получить доступные города
+     */
+    public function getAvailableCities(): array
+    {
+        return ['Москва', 'Санкт-Петербург', 'Екатеринбург', 'Казань', 'Новосибирск', 'Нижний Новгород'];
+    }
+
+    /**
+     * Найти мастера с отношениями
+     */
+    public function findWithRelations(int $id)
+    {
+        return $this->repository->findWithRelations($id, [
+            'user',
+            'services.category',
+            'photos',  
+            'reviews.user',
+            'workZones',
+            'schedules'
+        ]);
+    }
+
+    /**
+     * Проверить валидность slug
+     */
+    public function isValidSlug($profile, string $slug): bool
+    {
+        return $profile->slug === $slug;
+    }
+
+    /**
+     * Обеспечить наличие meta тегов
+     */
+    public function ensureMetaTags($profile): void
+    {
+        if (empty($profile->meta_title) || empty($profile->meta_description)) {
+            $profile->generateMetaTags()->save();
+        }
+    }
+
+    /**
+     * Увеличить счетчик просмотров
+     */
+    public function incrementViews($profile): void
+    {
+        $profile->increment('views_count');
+    }
+
+    /**
+     * Найти мастера по имени
+     */
+    public function findByDisplayName(string $displayName)
+    {
+        return $this->repository->findByDisplayName($displayName);
+    }
+
+    /**
+     * Обновить статус мастера
+     */
+    public function updateMasterStatus($profile, array $data): bool
+    {
+        return $profile->update($data);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Domain\Payment\Models;
 use App\Enums\PaymentStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentType;
+use App\Support\Traits\JsonFieldsTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,7 +22,7 @@ use App\Domain\Ad\Models\AdPlan;
  */
 class Payment extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, JsonFieldsTrait;
 
     protected $fillable = [
         'payment_number',
@@ -63,6 +64,15 @@ class Payment extends Model
         'expires_at'
     ];
 
+    /**
+     * JSON поля для использования с JsonFieldsTrait
+     */
+    protected $jsonFields = [
+        'external_data',
+        'gateway_response',
+        'metadata',
+    ];
+
     protected $casts = [
         'type' => PaymentType::class,
         'method' => PaymentMethod::class,
@@ -70,9 +80,7 @@ class Payment extends Model
         'amount' => 'decimal:2',
         'fee' => 'decimal:2',
         'total_amount' => 'decimal:2',
-        'external_data' => 'array',
-        'gateway_response' => 'array',
-        'metadata' => 'array',
+        // JSON поля обрабатываются через JsonFieldsTrait
         'processed_at' => 'datetime',
         'confirmed_at' => 'datetime',
         'failed_at' => 'datetime',
@@ -86,19 +94,6 @@ class Payment extends Model
         'expires_at' => 'datetime'
     ];
 
-    /**
-     * Генерация номера платежа при создании
-     */
-    protected static function boot()
-    {
-        parent::boot();
-        
-        static::creating(function ($payment) {
-            if (empty($payment->payment_number)) {
-                $payment->payment_number = static::generatePaymentNumber();
-            }
-        });
-    }
 
     /**
      * Пользователь, совершивший платеж

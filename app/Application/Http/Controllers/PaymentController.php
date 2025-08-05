@@ -3,20 +3,20 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domain\Ad\Models\Ad;
-use App\Domain\Ad\Models\AdPlan;
-use App\Domain\Payment\Models\Payment;
+use App\Domain\Ad\Services\AdService;
 use App\Domain\Payment\Services\PaymentService;
-use App\Domain\Payment\DTOs\CheckoutDTO;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class PaymentController extends Controller
 {
     protected PaymentService $paymentService;
+    protected AdService $adService;
 
-    public function __construct(PaymentService $paymentService)
+    public function __construct(PaymentService $paymentService, AdService $adService)
     {
         $this->paymentService = $paymentService;
+        $this->adService = $adService;
     }
     /**
      * Страница выбора тарифа для объявления
@@ -25,35 +25,26 @@ class PaymentController extends Controller
     {
         $this->authorize('update', $ad);
 
-        // Проверяем, что объявление ждет оплаты
-        if ($ad->status !== Ad::STATUS_WAITING_PAYMENT) {
+        // Проверяем через сервис возможность оплаты
+        if (!$this->paymentService->canPayForAd($ad)) {
             return redirect()->route('my-ads.index')
                 ->with('error', 'Это объявление не требует оплаты');
         }
 
-        // Получаем доступные тарифные планы
-        $plans = AdPlan::orderBy('sort_order')->get();
+        // Получаем доступные тарифные планы через сервис
+        $plans = $this->paymentService->getAvailablePlans();
+        $adData = $this->adService->prepareAdDataForView($ad);
 
         return Inertia::render('Payment/SelectPlan', [
             'ad' => [
-                'id' => $ad->id,
-                'title' => $ad->title,
-                'price' => $ad->price,
-                'formatted_price' => $ad->formatted_price,
-                'address' => $ad->address,
-                'created_at' => $ad->created_at->format('d.m.Y')
+                'id' => $adData['id'],
+                'title' => $adData['title'],
+                'price' => $adData['price'],
+                'formatted_price' => $adData['formatted_price'],
+                'address' => $adData['address'],
+                'created_at' => $adData['created_at']
             ],
-            'plans' => $plans->map(function ($plan) {
-                return [
-                    'id' => $plan->id,
-                    'name' => $plan->name,
-                    'days' => $plan->days,
-                    'price' => $plan->price,
-                    'formatted_price' => $plan->formatted_price,
-                    'description' => $plan->description,
-                    'is_popular' => $plan->is_popular
-                ];
-            })
+            'plans' => $plans
         ]);
     }
 
@@ -68,33 +59,14 @@ class PaymentController extends Controller
             'plan_id' => 'required|exists:ad_plans,id'
         ]);
 
-        $plan = AdPlan::findOrFail($validated['plan_id']);
-
         // Используем сервис для создания платежа
-        $payment = $this->paymentService->processAdPlanPayment(
+        $paymentData = $this->paymentService->processAdPlanPayment(
             $ad, 
-            $plan, 
-            auth()->id()
+            $validated['plan_id'], 
+            $request->user()->id
         );
 
-        return Inertia::render('Payment/Checkout', [
-            'payment' => [
-                'id' => $payment->id,
-                'payment_id' => $payment->payment_id,
-                'amount' => $payment->amount,
-                'formatted_amount' => $payment->formatted_amount,
-                'description' => $payment->description
-            ],
-            'ad' => [
-                'id' => $ad->id,
-                'title' => $ad->title
-            ],
-            'plan' => [
-                'id' => $plan->id,
-                'name' => $plan->name,
-                'days' => $plan->days
-            ]
-        ]);
+        return Inertia::render('Payment/Checkout', $paymentData);
     }
 
     /**

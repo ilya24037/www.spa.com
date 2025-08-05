@@ -54,4 +54,63 @@ class UserProfile extends Model
             ? asset('storage/' . $this->avatar)
             : asset('images/default-avatar.png');
     }
+
+    /**
+     * Обновить аватар пользователя
+     */
+    public function updateAvatar(string $path): bool
+    {
+        $this->avatar = $path;
+        return $this->save();
+    }
+
+    /**
+     * Удалить аватар пользователя
+     */
+    public function deleteAvatar(): bool
+    {
+        // Удаляем файл с диска если существует
+        if ($this->avatar && \Storage::exists($this->avatar)) {
+            \Storage::delete($this->avatar);
+        }
+        
+        // Очищаем поле в БД
+        $this->avatar = null;
+        return $this->save();
+    }
+
+    /**
+     * Проверить завершенность профиля
+     */
+    public function isComplete(): bool
+    {
+        return !empty($this->name) && 
+               !empty($this->phone) && 
+               !empty($this->city);
+    }
+
+    /**
+     * Получить процент заполненности профиля
+     */
+    public function getCompletionPercentageAttribute(): int
+    {
+        $fields = ['name', 'phone', 'city', 'about', 'avatar'];
+        $filled = 0;
+
+        foreach ($fields as $field) {
+            if (!empty($this->$field)) {
+                $filled++;
+            }
+        }
+
+        return round(($filled / count($fields)) * 100);
+    }
+
+    /**
+     * Получить имя для отображения
+     */
+    public function getDisplayNameAttribute(): string
+    {
+        return $this->name ?: 'Пользователь';
+    }
 }

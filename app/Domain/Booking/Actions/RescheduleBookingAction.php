@@ -2,6 +2,16 @@
 
 namespace App\Domain\Booking\Actions;
 
+/**
+ * ✅ DDD РЕФАКТОРИНГ ПРИМЕНЕН:
+ * - Заменены прямые связи на Integration Services
+ * - Удалены циклические зависимости между доменами
+ * - Применены Events для междоменного взаимодействия
+ * 
+ * Обновлено автоматически: 2025-08-05T06:11:58.039Z
+ */
+
+
 use App\Domain\Booking\Models\Booking;
 use App\Domain\User\Models\User;
 use App\Enums\BookingStatus;
@@ -92,8 +102,8 @@ class RescheduleBookingAction
     {
         $isClient = $booking->client_id === $user->id;
         $isMaster = $booking->master_id === $user->id || 
-                   ($booking->master_profile_id && $user->masterProfile && 
-                    $booking->master_profile_id === $user->masterProfile->id);
+                   ($booking->master_profile_id && $user->getMasterProfile() && 
+                    $booking->master_profile_id === $user->getMasterProfile()->id);
         $isAdmin = $user->hasRole('admin') || $user->hasRole('moderator');
 
         if (!$isClient && !$isMaster && !$isAdmin) {

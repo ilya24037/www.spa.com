@@ -13,6 +13,12 @@ use Inertia\Response;
 
 class AuthenticatedSessionController extends Controller
 {
+    private \App\Domain\User\Services\UserAuthService $authService;
+    
+    public function __construct(\App\Domain\User\Services\UserAuthService $authService)
+    {
+        $this->authService = $authService;
+    }
     /**
      * Display the login view.
      */
@@ -41,7 +47,8 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        Auth::guard('web')->logout();
+        // Используем сервис для выхода согласно DDD
+        $this->authService->logout($request->user());
 
         $request->session()->invalidate();
 
