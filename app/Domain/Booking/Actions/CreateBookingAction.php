@@ -5,7 +5,8 @@ namespace App\Domain\Booking\Actions;
 use App\Domain\Booking\DTOs\BookingData;
 use App\Domain\Booking\Repositories\BookingRepository;
 use App\Domain\Master\Repositories\MasterRepository;
-use App\Enums\BookingStatus;
+use App\Domain\Booking\Enums\BookingStatus;
+use App\Domain\Booking\Models\BookingHistory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -57,6 +58,9 @@ class CreateBookingAction
                 if (!empty($bookingData->serviceIds)) {
                     $this->bookingRepository->attachServices($booking->id, $bookingData->serviceIds);
                 }
+
+                // Логируем создание в историю
+                BookingHistory::logCreated($booking, $bookingData->clientId);
 
                 Log::info('Booking created', [
                     'booking_id' => $booking->id,

@@ -278,7 +278,7 @@
 import { ref, computed } from 'vue'
 import { useForm, router } from '@inertiajs/vue3'
 import { CameraIcon, XMarkIcon, ChatBubbleBottomCenterTextIcon } from '@heroicons/vue/24/outline'
-import StarRating from '@/Components/Common/StarRating.vue'
+import StarRating from '@/src/shared/ui/atoms/StarRating/StarRating.vue'
 import { formatDate } from '@/utils/helpers'
 
 const props = defineProps({
@@ -462,3 +462,4 @@ const openPhotoGallery = (photos, index) => {
     })
 }
 </script>
+

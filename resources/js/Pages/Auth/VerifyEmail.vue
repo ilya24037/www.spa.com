@@ -1,7 +1,7 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed } from 'vue'
-import AppLayout from '@/Layouts/AppLayout.vue'
-import PrimaryButton from '@/Components/UI/Forms/PrimaryButton.vue';
+import AppLayout from '@/src/shared/ui/layout/AppLayout/AppLayout.vue'
+import { PrimaryButton } from '@/src/shared/ui/atoms';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
 interface VerifyEmailProps {
@@ -59,3 +59,5 @@ const verificationLinkSent = computed((): boolean =>
         </form>
     </AppLayout>
 </template>
+
+

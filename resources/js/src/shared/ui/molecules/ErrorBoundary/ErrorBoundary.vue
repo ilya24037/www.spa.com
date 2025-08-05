@@ -417,4 +417,3 @@ const copyErrorDetails = async () => {
   }
 }
 </style>
-</script>

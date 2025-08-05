@@ -8,7 +8,7 @@ use App\Enums\MasterStatus;
 use App\Enums\MasterLevel;
 use App\Domain\Master\Repositories\MasterRepository;
 use App\Domain\User\Repositories\UserRepository;
-use App\Domain\Media\Services\MasterMediaService;
+// use App\Domain\Media\Services\MasterMediaService; // ВРЕМЕННО ОТКЛЮЧЕНО
 use App\Infrastructure\Notification\NotificationService;
 use App\Domain\Master\DTOs\CreateMasterDTO;
 use App\Domain\Master\DTOs\UpdateMasterDTO;
@@ -25,7 +25,7 @@ class MasterService
     public function __construct(
         private MasterRepository $repository,
         private UserRepository $userRepository,
-        private MasterMediaService $mediaService,
+        // private MasterMediaService $mediaService, // ВРЕМЕННО ОТКЛЮЧЕНО
         private NotificationService $notificationService
     ) {}
 

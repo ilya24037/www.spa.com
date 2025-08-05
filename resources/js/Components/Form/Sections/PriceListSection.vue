@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <PageSection title="Прайс-лист">
     <p class="section-description">
       Создайте подробный прайс-лист ваших услуг. Клиенты смогут увидеть все цены.
@@ -126,12 +126,12 @@
 </template>
 
 <script>
-import PageSection from '@/Components/Layout/PageSection.vue'
-import BaseInput from '@/Components/UI/BaseInput.vue'
-import BaseTextarea from '@/Components/UI/BaseTextarea.vue'
+import PageSection from '@/src/shared/ui/layout/PageSection/PageSection.vue'
+import BaseInput from '@/src/shared/ui/atoms/TextInput/TextInput.vue'
+import BaseTextarea from '@/src/shared/ui/atoms/Textarea/Textarea.vue'
 import CheckboxGroup from '@/Components/UI/CheckboxGroup.vue'
-import BaseSelect from '@/Components/UI/BaseSelect.vue'
-import PriceInput from '@/Components/Form/Controls/PriceInput.vue'
+import BaseSelect from '@/src/shared/ui/atoms/Select/Select.vue'
+import PriceInput from '@/src/shared/ui/atoms/PriceInput/PriceInput.vue'
 
 export default {
   name: 'PriceListSection',
@@ -341,3 +341,4 @@ export default {
   }
 }
 </style> 
+

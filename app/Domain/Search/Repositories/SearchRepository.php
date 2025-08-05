@@ -2,8 +2,8 @@
 
 namespace App\Domain\Search\Repositories;
 
-use App\Enums\SearchType;
-use App\Enums\SortBy;
+use App\Domain\Search\Enums\SearchType;
+use App\Domain\Search\Enums\SortBy;
 use App\Domain\Ad\Models\Ad;
 use App\Domain\User\Models\User;
 use App\Domain\Service\Models\Service;

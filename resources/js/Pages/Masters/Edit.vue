@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="py-8">
     <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
       <!-- Заголовок -->
@@ -187,7 +187,7 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { router } from '@inertiajs/vue3'
-import MediaUploader from '@/Components/MediaUpload/MediaUploader.vue'
+import MediaUploader from '@/src/features/media/ui/MediaUploader/MediaUploader.vue'
 import { useToast } from '@/src/shared/composables/useToast'
 
 // Toast для замены alert()
@@ -228,3 +228,4 @@ const updateProfile = async () => {
   }
 }
 </script> 
+

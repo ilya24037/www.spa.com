@@ -149,7 +149,18 @@
       "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" -l \"C:\\www.spa.com\\app\\Domain\\Booking\\Services\\BookingSlotService.php\")",
       "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" -l \"C:\\www.spa.com\\app\\Domain\\Booking\\Services\\AvailabilityService.php\")",
       "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" -l \"C:\\www.spa.com\\app\\Domain\\Booking\\Services\\SlotService.php\")",
-      "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" -l \"C:\\www.spa.com\\app\\Domain\\Booking\\Services\\BookingService.php\")"
+      "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" -l \"C:\\www.spa.com\\app\\Domain\\Booking\\Services\\BookingService.php\")",
+      "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" -l \"C:\\www.spa.com\\app\\Domain\\Booking\\Events\\BookingCreated.php\")",
+      "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" -l \"C:\\www.spa.com\\app\\Domain\\Booking\\Listeners\\SendBookingNotification.php\")",
+      "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" -l \"C:\\www.spa.com\\app\\Providers\\EventServiceProvider.php\")",
+      "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" -l \"C:\\www.spa.com\\app\\Domain\\Search\\Filters\\FilterInterface.php\")",
+      "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" -l \"C:\\www.spa.com\\app\\Domain\\Search\\Filters\\PriceFilter.php\")",
+      "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" -l \"C:\\www.spa.com\\app\\Domain\\Search\\Filters\\CategoryFilter.php\")",
+      "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" -l \"C:\\www.spa.com\\app\\Domain\\Search\\Sorters\\SorterInterface.php\")",
+      "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" -l \"C:\\www.spa.com\\app\\Domain\\Search\\Sorters\\RatingSorter.php\")",
+      "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" -l \"C:\\www.spa.com\\app\\Domain\\Search\\Sorters\\PriceSorter.php\")",
+      "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" -l \"C:\\www.spa.com\\app\\Domain\\Search\\Sorters\\DistanceSorter.php\")",
+      "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" -l \"C:\\www.spa.com\\app\\Domain\\Search\\Sorters\\PopularitySorter.php\")"
     ],
     "deny": []
   }

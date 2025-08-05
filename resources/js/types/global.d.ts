@@ -20,10 +20,16 @@ declare global {
 }
 
 // Переменные окружения
-interface ImportMetaEnv { readonly VITE_APP_NAME: string readonly VITE_APP_URL: string readonly VITE_PUSHER_APP_KEY?: string readonly VITE_PUSHER_APP_CLUSTER?: string readonly MODE: string
+interface ImportMetaEnv { 
+  readonly VITE_APP_NAME: string
+  readonly VITE_APP_URL: string
+  readonly VITE_PUSHER_APP_KEY?: string
+  readonly VITE_PUSHER_APP_CLUSTER?: string
+  readonly MODE: string
 }
 
-interface ImportMeta { readonly env: ImportMetaEnv
+interface ImportMeta { 
+  readonly env: ImportMetaEnv
 }
 
 // Vue компоненты

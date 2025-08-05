@@ -2,8 +2,8 @@
 
 namespace App\Domain\Search\Services;
 
-use App\Enums\SearchType;
-use App\Enums\SortBy;
+use App\Domain\Search\Enums\SearchType;
+use App\Domain\Search\Enums\SortBy;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 

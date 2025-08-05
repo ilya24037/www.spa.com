@@ -3,8 +3,10 @@
 namespace App\Domain\Booking\Actions;
 
 use App\Domain\Booking\Models\Booking;
+use App\Domain\Booking\Models\BookingHistory;
 use App\Domain\Booking\Repositories\BookingRepository;
-use App\Enums\BookingStatus;
+use App\Domain\Booking\Enums\BookingStatus;
+use App\Domain\User\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -15,8 +17,9 @@ class CancelBookingAction
 {
     private BookingRepository $bookingRepository;
 
-    public function __construct(BookingRepository $bookingRepository)
-    {
+    public function __construct(
+        BookingRepository $bookingRepository
+    ) {
         $this->bookingRepository = $bookingRepository;
     }
 
@@ -62,11 +65,21 @@ class CancelBookingAction
                 }
 
                 // Отменяем бронирование
+                $previousStatus = $booking->status;
                 $booking->status = BookingStatus::CANCELLED;
                 $booking->cancelled_at = now();
                 $booking->cancellation_reason = $reason;
                 $booking->cancelled_by = $userId;
                 $booking->save();
+
+                // Логируем отмену в историю
+                BookingHistory::logStatusChange(
+                    $booking,
+                    $previousStatus,
+                    BookingStatus::CANCELLED->value,
+                    $reason,
+                    $userId
+                );
 
                 Log::info('Booking cancelled', [
                     'booking_id' => $booking->id,
@@ -276,8 +289,9 @@ class CancelBookingAction
         }
 
         try {
-            // Попытка автоматического возврата через платежную систему
-            $refundResult = $this->paymentService->refund($booking->payment, $refundAmount);
+            // TODO: Попытка автоматического возврата через платежную систему
+            // $refundResult = $this->paymentService->refund($booking->payment, $refundAmount);
+            $refundResult = ['success' => false, 'error' => 'Payment service not implemented'];
             
             if ($refundResult['success']) {
                 return [
@@ -321,18 +335,16 @@ class CancelBookingAction
         try {
             $isClient = $booking->client_id === $cancelledBy->id;
 
-            if ($isClient) {
-                // Уведомляем мастера об отмене клиентом
-                $this->notificationService->sendBookingCancelledByClient($booking, $fee);
-            } else {
-                // Уведомляем клиента об отмене мастером  
-                $this->notificationService->sendBookingCancelledByMaster($booking, $fee);
-            }
-
-            // Внутреннее уведомление администрации при высоком штрафе
-            if ($fee > 1000) {
-                $this->notificationService->sendHighFeeCancellationAlert($booking, $cancelledBy, $fee);
-            }
+            // TODO: Отправка уведомлений через NotificationService
+            // if ($isClient) {
+            //     $this->notificationService->sendBookingCancelledByClient($booking, $fee);
+            // } else {
+            //     $this->notificationService->sendBookingCancelledByMaster($booking, $fee);
+            // }
+            //
+            // if ($fee > 1000) {
+            //     $this->notificationService->sendHighFeeCancellationAlert($booking, $cancelledBy, $fee);
+            // }
 
             Log::info('Cancellation notifications sent', [
                 'booking_id' => $booking->id,

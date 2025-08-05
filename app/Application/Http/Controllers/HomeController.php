@@ -12,41 +12,21 @@ use Inertia\Inertia;
 
 class HomeController extends Controller
 {
-    protected MasterService $masterService;
-    protected MasterRepository $masterRepository;
-
-    public function __construct(MasterService $masterService, MasterRepository $masterRepository)
+    // ВРЕМЕННО УБИРАЕМ ВСЕ ЗАВИСИМОСТИ
+    public function __construct()
     {
-        $this->masterService = $masterService;
-        $this->masterRepository = $masterRepository;
+        // Пустой конструктор
     }
     public function index(Request $request)
     {
-        // Получаем фильтры из запроса
-        $filters = $request->only([
-            'q', 'category', 'price_min', 'price_max', 
-            'rating', 'district', 'service_type', 'sort'
-        ]);
-
-        // Создаем DTO для фильтров
-        $filters['per_page'] = 12; // Устанавливаем количество элементов на главной
-        $filterDTO = MasterFilterDTO::fromArray($filters);
-
-        // Поиск мастеров через сервис
-        $masters = $this->masterService->search($filterDTO);
-
-        // Получаем данные для фильтров через репозиторий
-        $categories = $this->masterRepository->getActiveCategories();
-        $districts = $this->masterRepository->getAvailableDistricts();
-        $priceRange = $this->masterRepository->getPriceRange();
-
+        // ВРЕМЕННО УПРОЩЕННАЯ ВЕРСИЯ ДЛЯ ДИАГНОСТИКИ
         return Inertia::render('Home', [
-            'masters' => $masters->withQueryString(),
-            'filters' => $filters,
-            'categories' => $categories,
-            'districts' => $districts,
-            'priceRange' => $priceRange,
-            'currentCity' => 'Москва' // Или из настроек пользователя
+            'masters' => [],
+            'filters' => [],
+            'categories' => [],
+            'districts' => [],
+            'priceRange' => ['min' => 0, 'max' => 10000],
+            'currentCity' => 'Москва'
         ]);
     }
 }

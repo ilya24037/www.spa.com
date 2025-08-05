@@ -18,11 +18,13 @@
       <Breadcrumbs :items="breadcrumbs" class="mb-6" />
       
       <MastersCatalog 
-        :initial-masters="masters.data || []"
-        :current-city="currentCity"
+        :masters="masters.data || []"
         :available-categories="categories"
+        :loading="pageLoader.isLoading.value"
         @loading-start="handleCatalogLoading"
         @loading-complete="handleCatalogComplete"
+        @filters-apply="handleFiltersApply"
+        @filters-reset="handleFiltersReset"
       />
     </template>
   </MainLayout>
@@ -86,6 +88,18 @@ const handleCatalogLoading = (): void => {
 
 const handleCatalogComplete = (): void => {
   pageLoader.completeLoading()
+}
+
+// Обработчики фильтров
+const handleFiltersApply = (filters: any): void => {
+  logger.info('Применение фильтров:', filters)
+  // TODO: Здесь будет запрос к API с фильтрами
+  pageLoader.setProgress(30, 'Применяем фильтры...')
+}
+
+const handleFiltersReset = (): void => {
+  logger.info('Сброс фильтров')
+  // TODO: Здесь будет сброс фильтров и загрузка всех мастеров
 }
 
 // Завершаем загрузку при монтировании, если данные уже есть

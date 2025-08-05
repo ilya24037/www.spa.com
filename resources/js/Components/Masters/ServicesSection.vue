@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <AppLayout :title="`${master.user.name} - Мастер массажа`">
         <div class="min-h-screen bg-gray-50">
             <!-- Хлебные крошки -->
@@ -104,7 +104,7 @@
 <script setup>
 import { computed } from 'vue'
 import { Link } from '@inertiajs/vue3'
-import AppLayout from '@/Layouts/AppLayout.vue'
+import AppLayout from '@/src/shared/ui/layout/AppLayout/AppLayout.vue'
 import MasterGallery from '@/src/entities/master/ui/MasterGallery/MasterGallery.vue'
 import BookingWidget from '@/src/entities/booking/ui/BookingWidget/BookingWidget.vue'
 // ServicesSection - это текущий компонент, удаляем рекурсивный импорт
@@ -142,3 +142,4 @@ const masterImages = computed(() => {
     ]
 })
 </script>
+

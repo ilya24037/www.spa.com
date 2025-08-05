@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="parameters-section">
     <h2 class="form-group-title">Физические параметры</h2>
     <div class="parameters-fields">
@@ -179,7 +179,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import BaseInput from '@/Components/UI/BaseInput.vue'
+import BaseInput from '@/src/shared/ui/atoms/TextInput/TextInput.vue'
 
 const props = defineProps({
   age: { type: [String, Number], default: '' },
@@ -351,3 +351,4 @@ const emitAll = () => {
   background: #fff;
 }
 </style> 
+

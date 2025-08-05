@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <PageSection title="Фотографии и видео">
     <p class="section-description">
       Добавьте качественные фото и видео ваших работ. Это поможет привлечь больше клиентов.
@@ -54,9 +54,9 @@
 </template>
 
 <script>
-import PageSection from '@/Components/Layout/PageSection.vue'
-import PhotoUploader from '@/Components/Form/Upload/PhotoUploader.vue'
-import VideoUploader from '@/Components/Form/Upload/VideoUploader.vue'
+import PageSection from '@/src/shared/ui/layout/PageSection/PageSection.vue'
+import PhotoUploader from '@/src/features/media/ui/PhotoUploader/PhotoUploader.vue'
+import VideoUploader from '@/src/features/media/ui/VideoUploader/VideoUploader.vue'
 import CheckboxGroup from '@/Components/UI/CheckboxGroup.vue'
 
 export default {
@@ -147,3 +147,4 @@ export default {
   margin-bottom: 0;
 }
 </style> 
+

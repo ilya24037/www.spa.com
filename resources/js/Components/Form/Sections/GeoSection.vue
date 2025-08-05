@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="geo-section">
     <h2 class="form-group-title">География</h2>
     <BaseInput
@@ -12,7 +12,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import BaseInput from '@/Components/UI/BaseInput.vue'
+import BaseInput from '@/src/shared/ui/atoms/TextInput/TextInput.vue'
 
 const props = defineProps({
   geo: { type: String, default: '' },
@@ -44,3 +44,4 @@ const emitGeo = () => {
   margin-bottom: 16px; 
 }
 </style> 
+

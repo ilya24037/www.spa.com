@@ -7,6 +7,7 @@ use App\Domain\Booking\Actions\CompleteBookingAction;
 use App\Domain\Booking\Actions\ConfirmBookingAction;
 use App\Domain\Booking\Actions\CreateBookingAction;
 use App\Domain\Booking\Actions\RescheduleBookingAction;
+use App\Domain\Booking\Events\BookingCreated;
 use App\Domain\Booking\DTOs\BookingData;
 use App\Domain\Booking\Models\Booking;
 use App\Domain\Booking\Repositories\BookingRepository;
@@ -63,16 +64,8 @@ class BookingService
         $bookingData = BookingData::fromArray($data);
         $booking = $this->createBookingAction->execute($bookingData);
         
-        // Отправляем уведомление о создании бронирования
-        try {
-            $this->notificationService->sendBookingCreated($booking);
-        } catch (\Exception $e) {
-            // Логируем ошибку, но не прерываем процесс создания
-            \Log::error('Failed to send booking created notification', [
-                'booking_id' => $booking->id,
-                'error' => $e->getMessage()
-            ]);
-        }
+        // Запускаем событие о создании бронирования (вместо прямой отправки уведомлений)
+        BookingCreated::dispatch($booking);
         
         return $booking;
     }

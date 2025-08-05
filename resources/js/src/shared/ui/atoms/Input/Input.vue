@@ -132,7 +132,8 @@ export interface InputProps {
   maxlength?: number
   
   // Состояния
-  disabled?: boolean readonly?: boolean
+  disabled?: boolean,
+  readonly?: boolean
   loading?: boolean
   autofocus?: boolean
   

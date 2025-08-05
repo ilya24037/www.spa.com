@@ -139,8 +139,7 @@ import CatalogDropdown from './CatalogDropdown.vue'
 import CityModal from './CityModal.vue'
 import MobileMenu from './MobileMenu.vue'
 import UserMenu from './UserMenu.vue'
-import AuthModal from '@/Components/Auth/AuthModal.vue'
-import RegisterModal from '@/Components/Auth/RegisterModal.vue'
+import { AuthModal, RegisterModal } from '@/src/features/auth'
 
 // Данные страницы
 const page = usePage()

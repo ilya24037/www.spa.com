@@ -5,7 +5,7 @@ namespace App\Domain\Search\Services;
 use App\Domain\Ad\Models\Ad;
 use App\Domain\User\Models\User;
 use App\Domain\Service\Models\Service;
-use App\Enums\SortBy;
+use App\Domain\Search\Enums\SortBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;

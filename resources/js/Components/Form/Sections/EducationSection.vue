@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <PageSection title="Образование и сертификаты">
     <p class="section-description">
       Укажите ваше образование, курсы и сертификаты. Это повысит доверие клиентов.
@@ -174,12 +174,12 @@
 </template>
 
 <script>
-import PageSection from '@/Components/Layout/PageSection.vue'
-import BaseInput from '@/Components/UI/BaseInput.vue'
-import BaseTextarea from '@/Components/UI/BaseTextarea.vue'
-import BaseCheckbox from '@/Components/UI/BaseCheckbox.vue'
-import BaseSelect from '@/Components/UI/BaseSelect.vue'
-import PhotoUploader from '@/Components/Form/Upload/PhotoUploader.vue'
+import PageSection from '@/src/shared/ui/layout/PageSection/PageSection.vue'
+import BaseInput from '@/src/shared/ui/atoms/TextInput/TextInput.vue'
+import BaseTextarea from '@/src/shared/ui/atoms/Textarea/Textarea.vue'
+import BaseCheckbox from '@/src/shared/ui/atoms/Checkbox/Checkbox.vue'
+import BaseSelect from '@/src/shared/ui/atoms/Select/Select.vue'
+import PhotoUploader from '@/src/features/media/ui/PhotoUploader/PhotoUploader.vue'
 
 export default {
   name: 'EducationSection',
@@ -401,3 +401,4 @@ export default {
   }
 }
 </style> 
+

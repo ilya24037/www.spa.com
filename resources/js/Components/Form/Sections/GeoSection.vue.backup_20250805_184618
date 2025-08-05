@@ -1,0 +1,46 @@
+<template>
+  <div class="geo-section">
+    <h2 class="form-group-title">География</h2>
+    <BaseInput
+      v-model="localGeo"
+      type="text"
+      placeholder="Введите город, район или метро..."
+      @update:modelValue="emitGeo"
+    />
+  </div>
+</template>
+
+<script setup>
+import { ref, watch } from 'vue'
+import BaseInput from '@/Components/UI/BaseInput.vue'
+
+const props = defineProps({
+  geo: { type: String, default: '' },
+  errors: { type: Object, default: () => ({}) }
+})
+
+const emit = defineEmits(['update:geo'])
+
+const localGeo = ref(props.geo)
+
+watch(() => props.geo, val => { localGeo.value = val })
+
+const emitGeo = () => {
+  emit('update:geo', localGeo.value)
+}
+</script>
+
+<style scoped>
+.geo-section { 
+  background: white; 
+  border-radius: 8px; 
+  padding: 20px; 
+}
+
+.form-group-title { 
+  font-size: 18px; 
+  font-weight: 600; 
+  color: #333; 
+  margin-bottom: 16px; 
+}
+</style> 

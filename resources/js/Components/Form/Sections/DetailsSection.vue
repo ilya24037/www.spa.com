@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <PageSection title="Подробности">
     <BaseInput
       v-model="form.title"
@@ -70,11 +70,11 @@
 </template>
 
 <script>
-import PageSection from '@/Components/Layout/PageSection.vue'
-import BaseInput from '@/Components/UI/BaseInput.vue'
-import BaseSelect from '@/Components/UI/BaseSelect.vue'
+import PageSection from '@/src/shared/ui/layout/PageSection/PageSection.vue'
+import BaseInput from '@/src/shared/ui/atoms/TextInput/TextInput.vue'
+import BaseSelect from '@/src/shared/ui/atoms/Select/Select.vue'
 import CheckboxGroup from '@/Components/UI/CheckboxGroup.vue'
-import BaseRadio from '@/Components/UI/BaseRadio.vue'
+import BaseRadio from '@/src/shared/ui/atoms/Radio/Radio.vue'
 import {
   specialtyOptions,
   clientOptions,
@@ -115,3 +115,4 @@ export default {
   }
 }
 </script> 
+

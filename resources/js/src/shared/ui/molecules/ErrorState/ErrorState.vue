@@ -124,7 +124,7 @@
 
 <script setup lang="ts">
 import { logger } from '@/src/shared/lib/logger'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import type {
   ErrorStateProps,
   ErrorStateEmits,

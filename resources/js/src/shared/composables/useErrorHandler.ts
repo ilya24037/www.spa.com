@@ -1,6 +1,6 @@
 import { logger } from '@/src/shared/lib/logger'
 
-import { } from 'vue'
+import { ref } from 'vue'
 import type { Ref } from 'vue'
 import { useToast } from './useToast'
 import type {

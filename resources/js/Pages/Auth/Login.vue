@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Head, useForm } from '@inertiajs/vue3'
-import AuthModal from '@/Components/Auth/AuthModal.vue'
+import { AuthModal } from '@/src/features/auth/ui/AuthModal'
 
 interface LoginForm {
   email: string

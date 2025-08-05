@@ -120,7 +120,13 @@ Route::post('/masters/{master}/upload/photos/test', function(\Illuminate\Http\Re
     }
 })->name('master.upload.photos.test');
 
+// Поисковые маршруты
 Route::get('/search', [SearchController::class, 'index'])->name('search');
+Route::get('/search/ads', [SearchController::class, 'ads'])->name('search.ads');
+Route::get('/search/masters', [SearchController::class, 'masters'])->name('search.masters');
+Route::get('/search/services', [SearchController::class, 'services'])->name('search.services');
+Route::get('/search/global', [SearchController::class, 'global'])->name('search.global');
+Route::get('/search/advanced', [SearchController::class, 'advanced'])->name('search.advanced');
 
 /*  Карточка мастера  →   /masters/<slug>-<id>  */
 Route::get('/masters/{slug}-{master}', [MasterController::class, 'show'])
@@ -146,8 +152,13 @@ Route::prefix('api')->group(function () {
     /* публичные */
     Route::get('/masters', [MasterController::class, 'apiIndex']);
     Route::get('/masters/{master}', [MasterController::class, 'apiShow'])->whereNumber('master');
-    Route::get('/search', [SearchController::class, 'search']);
+    // Поисковые API маршруты
+    Route::get('/search/autocomplete', [SearchController::class, 'autocomplete']);
     Route::get('/search/suggestions', [SearchController::class, 'suggestions']);
+    Route::get('/search/quick', [SearchController::class, 'quick']);
+    Route::get('/search/similar/{id}', [SearchController::class, 'similar']);
+    Route::post('/search/geo', [SearchController::class, 'geo']);
+    Route::get('/search/export', [SearchController::class, 'export']);
 
     /* защищённые */
     Route::middleware('auth')->group(function () {
@@ -155,6 +166,10 @@ Route::prefix('api')->group(function () {
         Route::get('/favorites', [FavoriteController::class, 'apiIndex']);
         Route::post('/favorites/toggle', [FavoriteController::class, 'toggle']);
         Route::get('/bookings/available-slots', [BookingController::class, 'availableSlots']);
+        
+        // Статистика поиска (только для админов)
+        Route::get('/search/statistics', [SearchController::class, 'statistics'])
+            ->middleware('can:viewSearchStatistics');
     });
 });
 

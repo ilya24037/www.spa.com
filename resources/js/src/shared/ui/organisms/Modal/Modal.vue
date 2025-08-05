@@ -100,7 +100,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { computed, watch, onMounted, onUnmounted, nextTick, ref } from 'vue'
 import { Button } from '@/src/shared/ui/atoms/Button'
 import { useId } from '@/shared/composables'
 import type { ButtonVariant } from '@/src/shared/ui/atoms/Button'

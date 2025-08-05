@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="work-format-section">
     <h2 class="form-group-title">Формат работы</h2>
     <div class="work-format-fields">
@@ -25,7 +25,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import BaseCheckbox from '@/Components/UI/BaseCheckbox.vue'
+import BaseCheckbox from '@/src/shared/ui/atoms/Checkbox/Checkbox.vue'
 
 const props = defineProps({
   workFormat: { type: String, default: '' },
@@ -129,3 +129,4 @@ const emitHasGirlfriend = () => {
   }
 }
 </style> 
+

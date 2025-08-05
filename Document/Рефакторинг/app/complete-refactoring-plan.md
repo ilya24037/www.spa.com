@@ -1,4 +1,4 @@
-# 🚀 ПОЛНЫЙ ПЛАН РЕФАКТОРИНГА: ДЕТАЛИЗАЦИЯ ПО ДНЯМ
+﻿# 🚀 ПОЛНЫЙ ПЛАН РЕФАКТОРИНГА: ДЕТАЛИЗАЦИЯ ПО ДНЯМ
 
 ## 📊 ОБЩАЯ СТАТИСТИКА
 - **Длительность:** 20-25 рабочих дней
@@ -113,18 +113,20 @@
    app/Domain/Media/Models/Photo.php
    app/Domain/Media/Models/Video.php
    ```
+333
 
 3. **MediaRepository** (1 час)
    ```php
    app/Domain/Media/Repositories/MediaRepository.php
    ```
 
-4. **Обработчики загрузки** (2 часа)
+1) 4. **Обработчики загрузки** (2 часа)
    ```php
    app/Domain/Media/Handlers/UploadHandler.php
    app/Domain/Media/Handlers/OptimizationHandler.php
    ```
 
+222
 5. **CDN интеграция** (1 час)
    ```php
    app/Infrastructure/CDN/CDNService.php
@@ -141,6 +143,7 @@
 **Время:** 8 часов
 
 ### Задачи:
+111
 1. **Разделение модели Ad** (3 часа)
    ```php
    app/Domain/Ad/Models/Ad.php (основная)
@@ -150,6 +153,7 @@
    app/Domain/Ad/Models/AdSchedule.php
    ```
 
+111
 2. **Enums для Ad** (1 час)
    ```php
    app/Domain/Ad/Enums/AdStatus.php
@@ -157,6 +161,7 @@
    app/Domain/Ad/Enums/ServiceLocation.php
    ```
 
+222   проверок 2
 3. **AdRepository** (2 часа)
    ```php
    app/Domain/Ad/Repositories/AdRepository.php
@@ -164,6 +169,7 @@
    - findByUser()
    - findByFilters()
    ```
+111
 
 4. **Начало AdService** (2 часа)
    ```php
@@ -179,8 +185,8 @@
 
 ---
 
+222
 ## 🗓️ ДЕНЬ 5: Завершение модуля Ad
-**Время:** 8 часов
 
 ### Задачи:
 1. **AdService - продолжение** (2 часа)
@@ -189,6 +195,7 @@
    - archive()
    - moderate()
    ```
+222
 
 2. **AdModerationService** (2 часа)
    ```php
@@ -198,18 +205,20 @@
    - rejectAd()
    ```
 
+111
 3. **AdMediaService** (1 час)
    ```php
    app/Domain/Ad/Services/AdMediaService.php
    ```
 
+222
 4. **Actions для Ad** (2 часа)
    ```php
    app/Domain/Ad/Actions/PublishAdAction.php
    app/Domain/Ad/Actions/ArchiveAdAction.php
    app/Domain/Ad/Actions/ModerateAdAction.php
    ```
-
+333
 5. **Рефакторинг AdController** (1 час)
 
 ### Результат дня:
@@ -221,9 +230,10 @@
 
 # 📅 НЕДЕЛЯ 2: CORE МОДУЛИ И СЕРВИСЫ
 
-## 🗓️ ДЕНЬ 6: Модуль Master
+## ??️ ДЕНЬ 6: Модуль Master
 **Время:** 8 часов
 
+333
 ### Задачи:
 1. **Разделение MasterProfile** (3 часа)
    ```php
@@ -232,6 +242,7 @@
    app/Domain/Master/Models/MasterService.php
    app/Domain/Master/Models/MasterLocation.php
    ```
+111
 
 2. **MasterRepository** (2 часа)
    ```php
@@ -241,6 +252,7 @@
    - findByService()
    ```
 
+222
 3. **MasterService** (3 часа)
    ```php
    app/Domain/Master/Services/MasterService.php
@@ -258,6 +270,7 @@
 **Время:** 8 часов
 
 ### Задачи:
+111
 1. **Модели Booking** (2 часа)
    ```php
    app/Domain/Booking/Models/Booking.php
@@ -265,6 +278,7 @@
    app/Domain/Booking/Models/BookingHistory.php
    ```
 
+222
 2. **BookingService улучшение** (3 часа)
    ```php
    app/Domain/Booking/Services/BookingService.php
@@ -272,12 +286,14 @@
    app/Domain/Booking/Services/AvailabilityService.php
    ```
 
+111
 3. **Actions для Booking** (2 часа)
    ```php
    app/Domain/Booking/Actions/CreateBookingAction.php
    app/Domain/Booking/Actions/CancelBookingAction.php
    app/Domain/Booking/Actions/ConfirmBookingAction.php
    ```
+222
 
 4. **События и уведомления** (1 час)
    ```php
@@ -295,6 +311,7 @@
 ## 🗓️ ДЕНЬ 8: Модуль Search (Поиск)
 **Время:** 8 часов
 
+111
 ### Задачи:
 1. **SearchService архитектура** (3 часа)
    ```php
@@ -302,7 +319,7 @@
    app/Domain/Search/Engines/AdSearchEngine.php
    app/Domain/Search/Engines/MasterSearchEngine.php
    ```
-
+222
 2. **Фильтры и сортировка** (2 часа)
    ```php
    app/Domain/Search/Filters/LocationFilter.php
@@ -310,6 +327,7 @@
    app/Domain/Search/Filters/CategoryFilter.php
    app/Domain/Search/Sorters/RatingSorter.php
    ```
+111
 
 3. **Elasticsearch интеграция** (2 часа)
    ```php
@@ -317,6 +335,7 @@
    app/Infrastructure/Search/Indexers/AdIndexer.php
    ```
 
+222
 4. **SearchController рефакторинг** (1 час)
 
 ### Результат дня:
@@ -329,6 +348,7 @@
 ## 🗓️ ДЕНЬ 9: Модуль Payment (начало)
 **Время:** 8 часов
 
+3333
 ### Задачи:
 1. **Payment структура** (2 часа)
    ```php
@@ -337,6 +357,7 @@
    app/Domain/Payment/Models/Subscription.php
    ```
 
+111 Разом день
 2. **Gateway интерфейсы** (2 часа)
    ```php
    app/Domain/Payment/Contracts/PaymentGateway.php
@@ -349,6 +370,7 @@
    app/Domain/Payment/Services/PaymentService.php
    app/Domain/Payment/Services/SubscriptionService.php
    ```
+333
 
 4. **Webhook handlers** (1 час)
    ```php
@@ -361,7 +383,7 @@
 - Обработка webhook
 
 ---
-
+222 Разом день
 ## 🗓️ ДЕНЬ 10: Контроллеры и Request классы
 **Время:** 8 часов
 
@@ -393,6 +415,12 @@
 
 ---
 
+
+
+
+
+
+333 Разом день
 # 📅 НЕДЕЛЯ 3: РАСШИРЕННЫЕ МОДУЛИ И ОПТИМИЗАЦИЯ
 
 ## 🗓️ ДЕНЬ 11: Модуль Review (Отзывы)

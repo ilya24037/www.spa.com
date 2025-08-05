@@ -4,7 +4,7 @@ namespace App\Domain\Search\Services;
 
 use App\Domain\Ad\Models\Ad;
 use App\Domain\User\Models\User;
-use App\Enums\SortBy;
+use App\Domain\Search\Enums\SortBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;

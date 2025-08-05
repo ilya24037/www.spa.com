@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <!-- Динамический фон в зависимости от типа страницы -->
   <div :class="[
     'min-h-screen flex flex-col',
@@ -43,8 +43,8 @@ import { provide, computed } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 import Navbar from '@/Components/Header/Navbar.vue'
 import Footer from '@/Components/Footer/Footer.vue'
-import ErrorBoundary from '@/Components/Common/ErrorBoundary.vue'
-import ToastNotifications from '@/Components/Common/ToastNotifications.vue'
+import ErrorBoundary from '@/src/shared/ui/molecules/ErrorBoundary/ErrorBoundary.vue'
+import ToastNotifications from '@/src/shared/ui/molecules/ToastNotifications/ToastNotifications.vue'
 
 const page = usePage()
 
@@ -61,4 +61,6 @@ provide('canRegister', page.props.canRegister)
 // Provide для sticky top (высота шапки)
 provide('stickyTop', 112) // высота двухуровневой шапки
 </script>
+
+
 

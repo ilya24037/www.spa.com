@@ -61,10 +61,10 @@ class_alias('App\Infrastructure\Notification\LegacyNotificationService', 'App\Se
 class_alias('App\Infrastructure\Adapters\BookingServiceAdapter', 'App\Services\BookingServiceAdapter');
 
 // Search service aliases
-class_alias('App\Domain\Search\Services\AdSearchEngine', 'App\Services\Search\AdSearchEngine');
+class_alias('App\Domain\Search\Engines\AdSearchEngine', 'App\Services\Search\AdSearchEngine');
 class_alias('App\Domain\Search\Services\BaseSearchEngine', 'App\Services\Search\BaseSearchEngine');
 class_alias('App\Domain\Search\Services\GlobalSearchEngine', 'App\Services\Search\GlobalSearchEngine');
-class_alias('App\Domain\Search\Services\MasterSearchEngine', 'App\Services\Search\MasterSearchEngine');
+class_alias('App\Domain\Search\Engines\MasterSearchEngine', 'App\Services\Search\MasterSearchEngine');
 class_alias('App\Domain\Search\Services\RecommendationEngine', 'App\Services\Search\RecommendationEngine');
 class_alias('App\Domain\Search\Services\SearchEngineInterface', 'App\Services\Search\SearchEngineInterface');
 class_alias('App\Domain\Search\Services\SearchFilter', 'App\Services\Search\SearchFilter');

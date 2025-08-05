@@ -1,9 +1,6 @@
-<script setup lang="ts">
-import AppLayout from '@/Layouts/AppLayout.vue'
-import InputError from '@/Components/UI/Forms/InputError.vue'
-import InputLabel from '@/Components/UI/Forms/InputLabel.vue'
-import PrimaryButton from '@/Components/UI/Forms/PrimaryButton.vue'
-import TextInput from '@/Components/UI/Forms/TextInput.vue'
+﻿<script setup lang="ts">
+import AppLayout from '@/src/shared/ui/layout/AppLayout/AppLayout.vue'
+import { InputError, InputLabel, PrimaryButton, TextInput } from '@/src/shared/ui/atoms'
 import { Head, useForm } from '@inertiajs/vue3'
 
 interface ForgotPasswordProps {
@@ -70,3 +67,5 @@ const submit = (): void => {
         </form>
     </AppLayout>
 </template>
+
+

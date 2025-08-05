@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="contacts-section">
     <h2 class="form-group-title">Контакты</h2>
     <div class="contacts-fields">
@@ -46,7 +46,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import BaseInput from '@/Components/UI/BaseInput.vue'
+import BaseInput from '@/src/shared/ui/atoms/TextInput/TextInput.vue'
 
 const props = defineProps({
   phone: { type: String, default: '' },
@@ -131,3 +131,4 @@ const emitAll = () => {
   background: #fff;
 }
 </style> 
+

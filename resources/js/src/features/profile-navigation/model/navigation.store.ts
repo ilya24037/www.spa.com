@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 export type TabKey = 'waiting' | 'active' | 'completed' | 'drafts' | 'favorites' | 'settings'
 

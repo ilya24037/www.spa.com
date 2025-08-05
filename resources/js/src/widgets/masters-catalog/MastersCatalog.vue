@@ -2,7 +2,28 @@
   <div class="masters-catalog">
     <!-- Filters -->
     <div class="mb-6">
-      <slot name="filters" />
+      <slot name="filters">
+        <FilterPanel @apply="handleFiltersApply" @reset="handleFiltersReset">
+          <FilterCategory 
+            title="Категории услуг"
+            icon="🏷️"
+            :count="filterStore.filters.services.length"
+          >
+            <!-- Здесь будет содержимое фильтра категорий -->
+            <div class="space-y-2">
+              <label v-for="category in availableCategories" :key="category.id" class="flex items-center">
+                <input 
+                  type="checkbox" 
+                  :checked="isCategorySelected(category.id)"
+                  @change="handleCategoryChange(category.id, $event)"
+                  class="mr-2"
+                />
+                {{ category.name }}
+              </label>
+            </div>
+          </FilterCategory>
+        </FilterPanel>
+      </slot>
     </div>
     
     <!-- Loading -->
@@ -42,22 +63,56 @@
 
 <script setup lang="ts">
 import MasterCard from '@/src/entities/master/ui/MasterCard/MasterCard.vue'
+import { FilterPanel, FilterCategory } from '@/src/features/masters-filter'
+import { useFilterStore } from '@/src/features/masters-filter/model'
 
 interface Props {
   masters?: any[]
   loading?: boolean
   error?: string
   showPagination?: boolean
+  availableCategories?: any[]
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   masters: () => [],
   loading: false,
   error: '',
-  showPagination: false
+  showPagination: false,
+  availableCategories: () => []
 })
 
-defineEmits<{
+const emit = defineEmits<{
   retry: []
+  filtersApply: [filters: any]
+  filtersReset: []
 }>()
+
+// Store для фильтров
+const filterStore = useFilterStore()
+
+// Обработчики фильтров
+const handleFiltersApply = () => {
+  emit('filtersApply', filterStore.filters)
+}
+
+const handleFiltersReset = () => {
+  filterStore.resetFilters()
+  emit('filtersReset')
+}
+
+// Методы для работы с категориями
+const isCategorySelected = (categoryId: number): boolean => {
+  // Простая проверка - считаем что категория выбрана если есть хоть один сервис
+  return filterStore.filters.services.includes(categoryId)
+}
+
+const handleCategoryChange = (categoryId: number, event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (target.checked) {
+    filterStore.addServiceToFilter(categoryId)
+  } else {
+    filterStore.removeServiceFromFilter(categoryId)
+  }
+}
 </script>

@@ -61,12 +61,10 @@
       </li>
     </ol>
     
-    <!-- Схематическая разметка для SEO -->
-    <script 
-      v-if="enableJsonLd"
-      type="application/ld+json"
-      v-html="jsonLdSchema"
-    ></script>
+    <!-- Схематическая разметка для SEO - ВРЕМЕННО ОТКЛЮЧЕНО -->
+    <!-- <template v-if="enableJsonLd">
+      <script type="application/ld+json" v-html="jsonLdSchema"></script>
+    </template> -->
   </nav>
 </template>
 

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <PageSection title="География работы">
     <p class="section-description">
       Укажите, где вы работаете и куда готовы выезжать к клиентам.
@@ -93,13 +93,13 @@
 </template>
 
 <script>
-import PageSection from '@/Components/Layout/PageSection.vue'
-import GeoSuggest from '@/Components/Form/Geo/GeoSuggest.vue'
-import BaseRadio from '@/Components/UI/BaseRadio.vue'
+import PageSection from '@/src/shared/ui/layout/PageSection/PageSection.vue'
+import GeoSuggest from '@/src/features/geo/ui/GeoSuggest/GeoSuggest.vue'
+import BaseRadio from '@/src/shared/ui/atoms/Radio/Radio.vue'
 import CheckboxGroup from '@/Components/UI/CheckboxGroup.vue'
-import BaseSelect from '@/Components/UI/BaseSelect.vue'
-import PriceInput from '@/Components/Form/Controls/PriceInput.vue'
-import UniversalMap from '@/Components/Map/UniversalMap.vue'
+import BaseSelect from '@/src/shared/ui/atoms/Select/Select.vue'
+import PriceInput from '@/src/shared/ui/atoms/PriceInput/PriceInput.vue'
+import UniversalMap from '@/src/features/map/ui/UniversalMap/UniversalMap.vue'
 
 export default {
   name: 'GeographySection',
@@ -287,3 +287,4 @@ export default {
   border-color: #545b62;
 }
 </style> 
+

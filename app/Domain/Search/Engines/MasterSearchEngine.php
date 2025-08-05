@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Domain\Search\Services;
+namespace App\Domain\Search\Engines;
 
 use App\Domain\User\Models\User;
+use App\Domain\Search\Services\BaseSearchEngine;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="promo-section">
     <p class="section-description">Клиенты увидят информацию о скидках и подарках в объявлении.</p>
     <div class="promo-fields">
@@ -39,7 +39,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import BaseInput from '@/Components/UI/BaseInput.vue'
+import BaseInput from '@/src/shared/ui/atoms/TextInput/TextInput.vue'
 
 const props = defineProps({
   newClientDiscount: { type: String, default: '' },
@@ -286,3 +286,4 @@ const handleCursorPosition = (event) => {
     margin-bottom: 8px;
   }
 </style> 
+

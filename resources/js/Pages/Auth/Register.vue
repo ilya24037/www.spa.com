@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Head, useForm } from '@inertiajs/vue3'
-import RegisterModal from '@/Components/Auth/RegisterModal.vue'
+import { RegisterModal } from '@/src/features/auth/ui/RegisterModal'
 
 interface RegisterForm {
   name: string

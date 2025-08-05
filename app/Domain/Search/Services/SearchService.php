@@ -2,15 +2,17 @@
 
 namespace App\Domain\Search\Services;
 
-use App\Enums\SearchType;
-use App\Enums\SortBy;
+use App\Domain\Search\Enums\SearchType;
+use App\Domain\Search\Enums\SortBy;
 use App\Domain\Search\Repositories\SearchRepository;
-use App\Domain\Search\Services\AdSearchEngine;
-use App\Domain\Search\Services\MasterSearchEngine;
+use App\Domain\Search\Engines\AdSearchEngine;
+use App\Domain\Search\Engines\MasterSearchEngine;
 use App\Domain\Search\Services\ServiceSearchEngine;
 use App\Domain\Search\Services\GlobalSearchEngine;
 use App\Domain\Search\Services\RecommendationEngine;
 use App\Domain\Search\Services\SearchEngineInterface;
+use App\Domain\Search\Services\ElasticsearchSearchEngine;
+use App\Infrastructure\Search\ElasticsearchClient;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -28,7 +30,8 @@ class SearchService
         protected MasterSearchEngine $masterEngine,
         protected ServiceSearchEngine $serviceEngine,
         protected GlobalSearchEngine $globalEngine,
-        protected RecommendationEngine $recommendationEngine
+        protected RecommendationEngine $recommendationEngine,
+        protected ?ElasticsearchClient $elasticsearchClient = null
     ) {
         $this->initializeEngines();
     }
@@ -38,13 +41,28 @@ class SearchService
      */
     protected function initializeEngines(): void
     {
-        $this->engines = [
-            SearchType::ADS->value => $this->adEngine,
-            SearchType::MASTERS->value => $this->masterEngine,
-            SearchType::SERVICES->value => $this->serviceEngine,
-            SearchType::GLOBAL->value => $this->globalEngine,
-            SearchType::RECOMMENDATIONS->value => $this->recommendationEngine,
-        ];
+        // Проверяем, включен ли Elasticsearch
+        $useElasticsearch = config('elasticsearch.enabled', false) && $this->elasticsearchClient !== null;
+        
+        if ($useElasticsearch) {
+            // Используем Elasticsearch для основных типов поиска
+            $this->engines = [
+                SearchType::ADS->value => new ElasticsearchSearchEngine($this->elasticsearchClient, SearchType::ADS),
+                SearchType::MASTERS->value => new ElasticsearchSearchEngine($this->elasticsearchClient, SearchType::MASTERS),
+                SearchType::SERVICES->value => $this->serviceEngine, // Пока используем SQL
+                SearchType::GLOBAL->value => $this->globalEngine,
+                SearchType::RECOMMENDATIONS->value => $this->recommendationEngine,
+            ];
+        } else {
+            // Fallback на SQL движки
+            $this->engines = [
+                SearchType::ADS->value => $this->adEngine,
+                SearchType::MASTERS->value => $this->masterEngine,
+                SearchType::SERVICES->value => $this->serviceEngine,
+                SearchType::GLOBAL->value => $this->globalEngine,
+                SearchType::RECOMMENDATIONS->value => $this->recommendationEngine,
+            ];
+        }
     }
 
     /**

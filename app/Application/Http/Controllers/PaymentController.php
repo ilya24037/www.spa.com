@@ -4,62 +4,53 @@ namespace App\Application\Http\Controllers;
 
 use App\Domain\Ad\Models\Ad;
 use App\Domain\Ad\Services\AdService;
+use App\Domain\Payment\Models\Payment;
 use App\Domain\Payment\Services\PaymentService;
+use App\Domain\Payment\Services\PaymentAuthorizationService;
+use App\Domain\Payment\Services\PaymentDataProvider;
+use App\Domain\Payment\Services\PaymentCallbackService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
+/**
+ * Контроллер платежных операций
+ * Рефакторинг: 312 → ≤200 строк CLAUDE.md
+ */
 class PaymentController extends Controller
 {
-    protected PaymentService $paymentService;
-    protected AdService $adService;
+    public function __construct(
+        private PaymentService $paymentService,
+        private AdService $adService,
+        private PaymentAuthorizationService $authService,
+        private PaymentDataProvider $dataProvider,
+        private PaymentCallbackService $callbackService
+    ) {}
 
-    public function __construct(PaymentService $paymentService, AdService $adService)
-    {
-        $this->paymentService = $paymentService;
-        $this->adService = $adService;
-    }
-    /**
-     * Страница выбора тарифа для объявления
-     */
+    /** Страница выбора тарифа для объявления */
     public function selectPlan(Ad $ad)
     {
-        $this->authorize('update', $ad);
+        $this->authService->authorizeAdUpdate($ad, auth()->id());
 
-        // Проверяем через сервис возможность оплаты
         if (!$this->paymentService->canPayForAd($ad)) {
             return redirect()->route('my-ads.index')
                 ->with('error', 'Это объявление не требует оплаты');
         }
 
-        // Получаем доступные тарифные планы через сервис
-        $plans = $this->paymentService->getAvailablePlans();
-        $adData = $this->adService->prepareAdDataForView($ad);
-
         return Inertia::render('Payment/SelectPlan', [
-            'ad' => [
-                'id' => $adData['id'],
-                'title' => $adData['title'],
-                'price' => $adData['price'],
-                'formatted_price' => $adData['formatted_price'],
-                'address' => $adData['address'],
-                'created_at' => $adData['created_at']
-            ],
-            'plans' => $plans
+            'ad' => $this->dataProvider->prepareAdData($ad),
+            'plans' => $this->paymentService->getAvailablePlans()
         ]);
     }
 
-    /**
-     * Страница оплаты
-     */
+    /** Страница оплаты */
     public function checkout(Request $request, Ad $ad)
     {
-        $this->authorize('update', $ad);
+        $this->authService->authorizeAdUpdate($ad, auth()->id());
 
         $validated = $request->validate([
             'plan_id' => 'required|exists:ad_plans,id'
         ]);
 
-        // Используем сервис для создания платежа
         $paymentData = $this->paymentService->processAdPlanPayment(
             $ad, 
             $validated['plan_id'], 
@@ -69,18 +60,12 @@ class PaymentController extends Controller
         return Inertia::render('Payment/Checkout', $paymentData);
     }
 
-    /**
-     * Обработка платежа
-     */
+    /** Обработка платежа */
     public function process(Request $request, Payment $payment)
     {
-        // Проверяем, что платеж принадлежит текущему пользователю
-        if ($payment->user_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->authService->authorizePaymentOwnership($payment, auth()->id());
 
-        // Проверяем, что платеж еще не оплачен
-        if ($payment->isPaid()) {
+        if (!$this->authService->validatePaymentForProcessing($payment)) {
             return redirect()->route('payment.success', $payment);
         }
 
@@ -88,12 +73,8 @@ class PaymentController extends Controller
             'payment_method' => 'required|in:sbp,wallet,card'
         ]);
 
-        // Обновляем метод оплаты
-        $payment->update([
-            'payment_method' => $validated['payment_method']
-        ]);
+        $payment->update(['payment_method' => $validated['payment_method']]);
 
-        // Если выбран СБП, перенаправляем на страницу QR-кода
         if ($validated['payment_method'] === 'sbp') {
             return redirect()->route('payment.sbp-qr', [
                 'payment' => $payment->id,
@@ -101,96 +82,49 @@ class PaymentController extends Controller
             ]);
         }
 
-        // Для других методов - симуляция мгновенной оплаты и активация объявления
         $this->paymentService->activateAdAfterPayment($payment);
-
         return redirect()->route('payment.success', $payment);
     }
 
-    /**
-     * Страница QR-кода для СБП
-     */
+    /** Страница QR-кода для СБП */
     public function sbpQr(Payment $payment)
     {
-        // Проверяем, что платеж принадлежит текущему пользователю
-        if ($payment->user_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->authService->authorizePaymentOwnership($payment, auth()->id());
 
-        if ($payment->payment_method !== 'sbp') {
+        if (!$this->authService->validateSbpPayment($payment)) {
             return redirect()->route('payment.checkout', ['ad' => $payment->ad->id]);
         }
 
-        // Генерируем QR-код для СБП (в реальном приложении здесь будет интеграция с банком)
         $qrCode = $this->paymentService->generateSbpQrCode($payment);
 
         return Inertia::render('Payment/SbpQr', [
-            'payment' => [
-                'id' => $payment->id,
-                'amount' => $payment->amount,
-                'formatted_amount' => $payment->formatted_amount,
-                'status' => $payment->status
-            ],
-            'ad' => [
-                'id' => $payment->ad->id,
-                'title' => $payment->ad->title
-            ],
+            'payment' => $this->dataProvider->preparePaymentData($payment),
+            'ad' => $this->dataProvider->prepareAdData($payment->ad),
             'qrCode' => $qrCode
         ]);
     }
 
-    /**
-     * Проверка статуса платежа (для СБП)
-     */
+    /** Проверка статуса платежа (для СБП) */
     public function checkStatus(Payment $payment)
     {
-        // Проверяем, что платеж принадлежит текущему пользователю
-        if ($payment->user_id !== auth()->id()) {
-            abort(403);
-        }
-
-        // В реальном приложении здесь будет проверка статуса в банке
-        // Пока симулируем случайную успешную оплату
-        if (rand(1, 10) === 1) { // 10% шанс успешной оплаты
-            // Используем сервис для активации объявления
-            $this->paymentService->activateAdAfterPayment($payment);
-            
-            return response()->json(['status' => 'completed']);
-        }
-
-        return response()->json(['status' => 'pending']);
+        $this->authService->authorizePaymentOwnership($payment, auth()->id());
+        
+        $status = $this->callbackService->checkSbpPaymentStatus($payment);
+        return response()->json($status);
     }
 
-
-    /**
-     * Страница успешной оплаты
-     */
+    /** Страница успешной оплаты */
     public function success(Payment $payment)
     {
-        // Проверяем, что платеж принадлежит текущему пользователю
-        if ($payment->user_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->authService->authorizePaymentOwnership($payment, auth()->id());
 
         return Inertia::render('Payment/Success', [
-            'payment' => [
-                'id' => $payment->id,
-                'payment_id' => $payment->payment_id,
-                'amount' => $payment->amount,
-                'formatted_amount' => $payment->formatted_amount,
-                'paid_at' => $payment->paid_at->format('d.m.Y H:i')
-            ],
-            'ad' => [
-                'id' => $payment->ad->id,
-                'title' => $payment->ad->title,
-                'expires_at' => $payment->ad->expires_at->format('d.m.Y')
-            ]
+            'payment' => $this->dataProvider->preparePaymentData($payment),
+            'ad' => $this->dataProvider->prepareAdData($payment->ad)
         ]);
     }
 
-    /**
-     * История платежей пользователя
-     */
+    /** История платежей пользователя */
     public function history(Request $request)
     {
         $payments = Payment::where('user_id', auth()->id())
@@ -198,44 +132,21 @@ class PaymentController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
-        return Inertia::render('Payment/History', [
-            'payments' => $payments
-        ]);
+        return Inertia::render('Payment/History', ['payments' => $payments]);
     }
 
-    // ====== DigiSeller/WebMoney Integration ======
-
-    /**
-     * Страница пополнения баланса (как в DigiSeller)
-     */
+    /** Страница пополнения баланса */
     public function topUpBalance()
     {
-        $user = auth()->user();
-        $balance = $user->getBalance();
-
-        // Тарифы пополнения (как в DigiSeller)
-        $topUpPlans = [
-            ['amount' => 1000, 'price' => 950, 'discount' => 5],
-            ['amount' => 2000, 'price' => 1750, 'discount' => 12.5],
-            ['amount' => 5000, 'price' => 3750, 'discount' => 25],
-            ['amount' => 10000, 'price' => 7500, 'discount' => 25],
-            ['amount' => 15000, 'price' => 11000, 'discount' => 27]
-        ];
+        $balance = auth()->user()->getBalance();
 
         return Inertia::render('Payment/TopUpBalance', [
-            'balance' => [
-                'rub_balance' => $balance->rub_balance,
-                'formatted_balance' => $balance->formatted_balance,
-                'loyalty_level' => $balance->loyalty_level,
-                'loyalty_discount_percent' => $balance->loyalty_discount_percent
-            ],
-            'topUpPlans' => $topUpPlans
+            'balance' => $this->dataProvider->prepareBalanceData($balance),
+            'topUpPlans' => $this->dataProvider->getTopUpPlans()
         ]);
     }
 
-    /**
-     * Создать платеж для пополнения баланса
-     */
+    /** Создать платеж для пополнения баланса */
     public function createTopUpPayment(Request $request)
     {
         $validated = $request->validate([
@@ -243,70 +154,41 @@ class PaymentController extends Controller
             'payment_method' => 'required|in:webmoney,bank_card,bitcoin,ethereum,qiwi,yandex_money'
         ]);
 
-        // Используем сервис для создания платежа пополнения баланса
         $payment = $this->paymentService->createTopUpPayment(
             auth()->id(),
             $validated['amount'],
             $validated['payment_method']
         );
 
-        // Перенаправляем на соответствующий платёжный шлюз
         return $this->paymentService->redirectToPaymentGateway($payment);
     }
 
-    /**
-     * Обработка активационного кода (как в DigiSeller)
-     */
+    /** Обработка активационного кода */
     public function activateCode(Request $request)
     {
         $validated = $request->validate([
             'activation_code' => 'required|string|min:10|max:50'
         ]);
 
-        try {
-            $result = $this->paymentService->activateCode(
-                $validated['activation_code'],
-                auth()->id()
-            );
+        $result = $this->callbackService->processActivationCode(
+            $validated['activation_code'],
+            auth()->id()
+        );
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Баланс пополнен на ' . number_format($result['amount'], 0, ',', ' ') . ' ₽',
-                'new_balance' => $result['new_balance']
-            ]);
-            
-        } catch (\InvalidArgumentException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 422);
-            
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Ошибка при активации кода'
-            ], 500);
-        }
+        $statusCode = $result['status_code'] ?? 200;
+        unset($result['status_code']);
+
+        return response()->json($result, $statusCode);
     }
 
-    /**
-     * WebMoney callback обработчик
-     */
+    /** WebMoney callback обработчик */
     public function webmoneyCallback(Request $request)
     {
         try {
-            $this->paymentService->handleWebMoneyCallback($request->all());
-            return response('YES', 200);
-            
-        } catch (\InvalidArgumentException $e) {
-            \Log::warning('WebMoney callback: ' . $e->getMessage(), $request->all());
-            return response('NO', 400);
-            
+            $response = $this->callbackService->handleWebMoneyCallback($request->all());
+            return response($response, 200);
         } catch (\Exception $e) {
-            \Log::error('WebMoney callback error: ' . $e->getMessage(), $request->all());
-            return response('NO', 500);
+            return response('NO', $e instanceof \InvalidArgumentException ? 400 : 500);
         }
     }
-
-
 }

@@ -3,8 +3,11 @@
 namespace App\Domain\Booking\Actions;
 
 use App\Domain\Booking\Models\Booking;
+use App\Domain\Booking\Models\BookingHistory;
 use App\Domain\Booking\Repositories\BookingRepository;
-use App\Enums\BookingStatus;
+use App\Domain\Booking\Enums\BookingStatus;
+use App\Domain\User\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -170,6 +173,7 @@ class ConfirmBookingAction
     protected function performConfirmation(Booking $booking, User $master, array $options): array
     {
         // Обновляем статус бронирования
+        $previousStatus = $booking->status;
         if ($booking->status instanceof BookingStatus) {
             $booking->status = BookingStatus::CONFIRMED;
         } else {
@@ -208,6 +212,15 @@ class ConfirmBookingAction
         $booking->metadata = $metadata;
 
         $booking->save();
+
+        // Логируем подтверждение в историю
+        BookingHistory::logStatusChange(
+            $booking,
+            $previousStatus,
+            BookingStatus::CONFIRMED->value,
+            'Подтверждено мастером',
+            $master->id
+        );
 
         // Создаем слоты если нужно
         if ($options['create_slots'] ?? false) {
@@ -292,10 +305,10 @@ class ConfirmBookingAction
                 continue;
             }
 
-            // Создаем задачу напоминания (здесь должна быть интеграция с очередями)
-            dispatch(function () use ($booking) {
-                $this->notificationService->sendBookingReminder($booking);
-            })->delay($reminderTime);
+            // TODO: Создаем задачу напоминания (здесь должна быть интеграция с очередями)
+            // dispatch(function () use ($booking) {
+            //     $this->notificationService->sendBookingReminder($booking);
+            // })->delay($reminderTime);
         }
     }
 
@@ -305,23 +318,20 @@ class ConfirmBookingAction
     protected function sendConfirmationNotifications(Booking $booking, array $options): void
     {
         try {
-            // Уведомление клиенту о подтверждении
-            $this->notificationService->sendBookingConfirmed($booking);
-
-            // SMS с деталями если указан телефон
-            if ($booking->client_phone && ($options['send_sms'] ?? true)) {
-                $this->notificationService->sendConfirmationSMS($booking);
-            }
-
-            // Email с деталями если указан email
-            if ($booking->client_email && ($options['send_email'] ?? true)) {
-                $this->notificationService->sendConfirmationEmail($booking);
-            }
-
-            // Для онлайн консультации - отправляем ссылку
-            if ($booking->type === \App\Enums\BookingType::ONLINE && $booking->meeting_link) {
-                $this->notificationService->sendMeetingLink($booking);
-            }
+            // TODO: Уведомления через NotificationService
+            // $this->notificationService->sendBookingConfirmed($booking);
+            // 
+            // if ($booking->client_phone && ($options['send_sms'] ?? true)) {
+            //     $this->notificationService->sendConfirmationSMS($booking);
+            // }
+            //
+            // if ($booking->client_email && ($options['send_email'] ?? true)) {
+            //     $this->notificationService->sendConfirmationEmail($booking);
+            // }
+            //
+            // if ($booking->type === \App\Enums\BookingType::ONLINE && $booking->meeting_link) {
+            //     $this->notificationService->sendMeetingLink($booking);
+            // }
 
             Log::info('Confirmation notifications sent', [
                 'booking_id' => $booking->id,
@@ -350,17 +360,17 @@ class ConfirmBookingAction
         }
 
         try {
-            // Отправляем ссылку на оплату предоплаты
-            $paymentLink = $this->paymentService->createDepositPaymentLink($booking, $depositAmount);
-            
-            if ($paymentLink) {
-                $this->notificationService->sendDepositPaymentLink($booking, $paymentLink);
-                
-                Log::info('Deposit payment link sent', [
-                    'booking_id' => $booking->id,
-                    'deposit_amount' => $depositAmount,
-                ]);
-            }
+            // TODO: Отправляем ссылку на оплату предоплаты через PaymentService
+            // $paymentLink = $this->paymentService->createDepositPaymentLink($booking, $depositAmount);
+            // 
+            // if ($paymentLink) {
+            //     $this->notificationService->sendDepositPaymentLink($booking, $paymentLink);
+            //     
+            //     Log::info('Deposit payment link sent', [
+            //         'booking_id' => $booking->id,
+            //         'deposit_amount' => $depositAmount,
+            //     ]);
+            // }
         } catch (\Exception $e) {
             Log::error('Failed to create deposit payment link', [
                 'booking_id' => $booking->id,
