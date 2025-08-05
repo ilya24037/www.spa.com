@@ -431,7 +431,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { computed, watch, onMounted } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
 import type { AxiosResponse } from 'axios'

@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import AppLayout from '@/Layouts/AppLayout.vue'
 import InputError from '@/Components/UI/Forms/InputError.vue';
 import InputLabel from '@/Components/UI/Forms/InputLabel.vue';
@@ -6,11 +6,15 @@ import PrimaryButton from '@/Components/UI/Forms/PrimaryButton.vue';
 import TextInput from '@/Components/UI/Forms/TextInput.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 
-const form = useForm({
-    password: '',
-});
+interface ConfirmPasswordForm {
+  password: string
+}
 
-const submit = () => {
+const form = useForm<ConfirmPasswordForm>({
+  password: '',
+})
+
+const submit = (): void => {
     form.post(route('password.confirm'), {
         onFinish: () => form.reset(),
     });

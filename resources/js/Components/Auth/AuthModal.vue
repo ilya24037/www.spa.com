@@ -110,9 +110,9 @@
         <!-- Юридическая информация -->
         <p class="mt-4 text-xs text-gray-500 text-center">
           При регистрации и входе вы соглашаетесь с 
-          <a href="/terms" class="text-blue-600 hover:text-blue-500">условиями использования</a> 
+          <a h="/terms" class="text-blue-600 hover:text-blue-500">условиями использования</a> 
           и 
-          <a href="/privacy" class="text-blue-600 hover:text-blue-500">политикой конфиденциальности</a>.
+          <a h="/privacy" class="text-blue-600 hover:text-blue-500">политикой конфиденциальности</a>.
         </p>
       </div>
     </div>
@@ -120,7 +120,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { } from 'vue'
 import { Link, useForm } from '@inertiajs/vue3'
 
 const props = defineProps({

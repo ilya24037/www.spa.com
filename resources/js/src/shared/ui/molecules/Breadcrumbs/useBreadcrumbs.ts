@@ -5,7 +5,7 @@
  * const { breadcrumbs, addItem, updateItem, generateFromRoute } = useBreadcrumbs()
  */
 
-import { ref, computed, reactive } from 'vue'
+import { computed, reactive } from 'vue'
 import type { 
   BreadcrumbItem, 
   BreadcrumbsOptions, 
@@ -19,7 +19,7 @@ export function useBreadcrumbs(initialOptions?: BreadcrumbsOptions) {
     autoHome: true,
     maxTitleLength: 50,
     formatTitle: (title: string) => title,
-    generateHref: (route: any) => route.path || route.href || '',
+    generateH: (route: any) => route.path || route.h || '',
     ...initialOptions
   })
 
@@ -90,12 +90,12 @@ export function useBreadcrumbs(initialOptions?: BreadcrumbsOptions) {
   }
 
   /**
-   * Найти элемент по href или to
+   * Найти элемент по h или to
    */
-  const findItem = (href: string): BreadcrumbItem | undefined => {
+  const findItem = (h: string): BreadcrumbItem | undefined => {
     return items.value.find(item => 
-      item.href === href || 
-      (typeof item.to === 'string' && item.to === href)
+      item.href === h || 
+      (typeof item.to === 'string' && item.to === h)
     )
   }
 
@@ -123,7 +123,7 @@ export function useBreadcrumbs(initialOptions?: BreadcrumbsOptions) {
     if (options.autoHome) {
       breadcrumbs.push({
         title: 'Главная',
-        href: '/',
+        h: '/',
         isHome: true,
         icon: config?.icons?.['/']
       })
@@ -165,7 +165,7 @@ export function useBreadcrumbs(initialOptions?: BreadcrumbsOptions) {
       
       breadcrumbs.push({
         title: formatTitle(title),
-        href: options.generateHref({ path: currentPath }),
+        h: options.generateH({ path: currentPath }),
         to: currentPath,
         icon: config?.icons?.[currentPath],
         key: currentPath
@@ -299,7 +299,7 @@ export const breadcrumbUtils = {
       currentPath += `/${part}`
       breadcrumbs.push({
         title: titles?.[currentPath] || part.charAt(0).toUpperCase() + part.slice(1),
-        href: currentPath,
+        h: currentPath,
         key: currentPath
       })
     })
@@ -312,11 +312,11 @@ export const breadcrumbUtils = {
    */
   fromStrings: (paths: string[], baseUrl = ''): BreadcrumbItem[] => {
     return paths.map((path, index) => {
-      const href = baseUrl + '/' + paths.slice(0, index + 1).join('/')
+      const h = baseUrl + '/' + paths.slice(0, index + 1).join('/')
       return {
         title: path,
-        href,
-        key: href
+        h,
+        key: h
       }
     })
   },

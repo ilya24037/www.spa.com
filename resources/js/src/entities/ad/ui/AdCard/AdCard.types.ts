@@ -42,6 +42,7 @@ export interface AdCardEmits {
   contactRequested: [adId: number]
   bookingRequested: [adId: number]
   adOpened: [adId: number]
+  retryRequested: [adId: number]
 }
 
 // Состояние компонента

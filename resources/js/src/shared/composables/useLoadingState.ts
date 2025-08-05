@@ -1,9 +1,9 @@
 import { ref, Ref } from 'vue'
 
 export interface LoadingState<T = any> {
-  isLoading: Ref<boolean>
-  error: Ref<Error | null>
-  data: Ref<T | null>
+  isLoading: import("vue").Ref<boolean>
+  error: import("vue").Ref<Error | null>
+  data: import("vue").Ref<T | null>
   execute: (fn: () => Promise<T>) => Promise<T | undefined>
   reset: () => void
 }

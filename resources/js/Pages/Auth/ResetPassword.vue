@@ -1,33 +1,36 @@
-<script setup>
+<script setup lang="ts">
 import AppLayout from '@/Layouts/AppLayout.vue'
-import InputError from '@/Components/UI/Forms/InputError.vue';
-import InputLabel from '@/Components/UI/Forms/InputLabel.vue';
-import PrimaryButton from '@/Components/UI/Forms/PrimaryButton.vue';
-import TextInput from '@/Components/UI/Forms/TextInput.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import InputError from '@/Components/UI/Forms/InputError.vue'
+import InputLabel from '@/Components/UI/Forms/InputLabel.vue'
+import PrimaryButton from '@/Components/UI/Forms/PrimaryButton.vue'
+import TextInput from '@/Components/UI/Forms/TextInput.vue'
+import { Head, useForm } from '@inertiajs/vue3'
 
-const props = defineProps({
-    email: {
-        type: String,
-        required: true,
-    },
-    token: {
-        type: String,
-        required: true,
-    },
-});
+interface ResetPasswordProps {
+  email: string
+  token: string
+}
 
-const form = useForm({
-    token: props.token,
-    email: props.email,
-    password: '',
-    password_confirmation: '',
-});
+const props = defineProps<ResetPasswordProps>()
 
-const submit = () => {
-    form.post(route('password.store'), {
-        onFinish: () => form.reset('password', 'password_confirmation'),
-    });
+interface ResetPasswordForm {
+  token: string
+  email: string
+  password: string
+  password_confirmation: string
+}
+
+const form = useForm<ResetPasswordForm>({
+  token: props.token,
+  email: props.email,
+  password: '',
+  password_confirmation: '',
+})
+
+const submit = (): void => {
+  form.post(route('password.store'), {
+    onFinish: () => form.reset('password', 'password_confirmation'),
+  })
 };
 </script>
 

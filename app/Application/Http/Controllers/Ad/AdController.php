@@ -80,142 +80,41 @@ class AdController extends Controller
         }
     }
 
-    /**
-     * Сохранить черновик объявления
-     */
-    public function storeDraft(Request $request)
-    {
-        try {
-            // Получаем только разрешенные поля
-            $data = $request->only(self::ALLOWED_FIELDS);
-            
-            // ОТЛАДКА: Проверяем photos в контроллере
-            \Log::info('AdController::storeDraft - photos data:', [
-                'photos_in_request' => $request->photos,
-                'photos_in_data' => $data['photos'] ?? 'NOT IN DATA',
-                'all_data_keys' => array_keys($data)
-            ]);
-            
-            // Создаем объявление в статусе черновика
-            $ad = $this->adService->createDraft($data, Auth::user());
-            
-            // Для Inertia запросов возвращаем редирект на страницу черновиков
-            if ($request->header('X-Inertia')) {
-                return redirect()->route('my-ads.index', ['tab' => 'drafts'])
-                    ->with('success', 'Черновик сохранен');
-            }
-            
-            // Для обычных AJAX запросов возвращаем JSON
-            return response()->json([
-                'success' => true,
-                'message' => 'Черновик сохранен',
-                'id' => $ad->id,
-                'redirect' => route('my-ads.index', ['tab' => 'drafts'])
-            ]);
-            
-        } catch (\Exception $e) {
-            if ($request->header('X-Inertia')) {
-                return back()->withErrors(['error' => 'Ошибка при сохранении черновика: ' . $e->getMessage()]);
-            }
-            
-            return response()->json([
-                'success' => false,
-                'message' => 'Ошибка при сохранении черновика: ' . $e->getMessage()
-            ], 500);
-        }
-    }
 
-    /**
-     * Обновить черновик объявления
-     */
-    public function updateDraft(Request $request, Ad $ad)
-    {
-        try {
-            // Проверяем права доступа
-            $this->authorize('update', $ad);
-            
-            // Проверяем, что это черновик
-            if ($ad->status !== AdStatus::DRAFT) {
-                return back()->withErrors(['error' => 'Можно редактировать только черновики']);
-            }
-            
-            // ДЕТАЛЬНАЯ ОТЛАДКА запроса
-            \Log::info('AdController::updateDraft - REQUEST DEBUG:', [
-                'ad_id' => $ad->id,
-                'method' => $request->method(),
-                'content_type' => $request->header('Content-Type'),
-                'is_json' => $request->isJson(),
-                'all_input' => $request->all(),
-                'input_photos' => $request->input('photos'),
-                'has_photos_key' => $request->has('photos'),
-                'raw_content_length' => strlen($request->getContent()),
-                'raw_content_preview' => substr($request->getContent(), 0, 500)
-            ]);
-            
-            // Получаем только разрешенные поля
-            $data = $request->only(self::ALLOWED_FIELDS);
-            
-            // ОТЛАДКА: Проверяем photos в контроллере UPDATE
-            \Log::info('AdController::updateDraft - photos data:', [
-                'ad_id' => $ad->id,
-                'photos_in_request' => $request->photos,
-                'photos_in_data' => $data['photos'] ?? 'NOT IN DATA',
-                'all_data_keys' => array_keys($data)
-            ]);
-
-            
-            // Обновляем существующий черновик
-            $ad = $this->adService->updateDraft($ad, $data);
-            
-            // Для Inertia запросов возвращаем редирект на страницу черновиков
-            if ($request->header('X-Inertia')) {
-                return redirect()->route('my-ads.index', ['tab' => 'drafts'])
-                    ->with('success', 'Черновик обновлен');
-            }
-            
-            // Для обычных AJAX запросов возвращаем JSON
-            return response()->json([
-                'success' => true,
-                'message' => 'Черновик обновлен',
-                'id' => $ad->id,
-                'redirect' => route('my-ads.index', ['tab' => 'drafts'])
-            ]);
-            
-        } catch (\Exception $e) {
-            if ($request->header('X-Inertia')) {
-                return back()->withErrors(['error' => 'Ошибка при обновлении черновика: ' . $e->getMessage()]);
-            }
-            
-            return response()->json([
-                'success' => false,
-                'message' => 'Ошибка при обновлении черновика: ' . $e->getMessage()
-            ], 500);
-        }
-    }
 
     /**
      * Опубликовать объявление
      */
-    public function publish(Request $request)
+    public function publish(CreateAdRequest $request)
     {
-        $validator = $this->validateForPublication($request);
+        try {
+            $dto = CreateAdDTO::fromRequest($request->validated());
+            $dto->user_id = auth()->id();
+            
+            $ad = $this->adService->createFromDTO($dto);
+            $this->adService->publish($ad);
 
-        if ($validator->fails()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Объявление готово к публикации',
+                'id' => $ad->id,
+                'redirect' => route('select-plan', ['ad' => $ad->id])
+            ]);
+            
+        } catch (\InvalidArgumentException $e) {
             return response()->json([
                 'success' => false,
-                'errors' => $validator->errors(),
+                'errors' => ['validation' => [$e->getMessage()]],
                 'message' => 'Заполните все обязательные поля'
             ], 422);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => ['error' => [$e->getMessage()]],
+                'message' => 'Ошибка при создании объявления'
+            ], 500);
         }
-
-        $ad = $this->createOrUpdateAd($request);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Объявление готово к публикации',
-            'id' => $ad->id,
-            'redirect' => route('select-plan', ['ad' => $ad->id])
-        ]);
     }
 
     /**
@@ -274,110 +173,6 @@ class AdController extends Controller
         }
     }
 
-    /**
-     * Валидация для публикации
-     */
-    protected function validateForPublication(Request $request)
-    {
-        return Validator::make($request->only(self::ALLOWED_FIELDS), [
-            'category' => 'required|string',
-            'title' => 'required|string|max:255',
-            'specialty' => 'required|string',
-            'clients' => 'required|array|min:1',
-            'service_location' => 'required|array|min:1',
-            'work_format' => 'required|string',
-            'experience' => 'required|string',
-            'description' => 'required|string|min:50',
-            'price' => 'required|numeric|min:0',
-            'phone' => 'required|string',
-        ], [
-            'title.required' => 'Название объявления обязательно',
-            'specialty.required' => 'Специальность обязательна',
-            'clients.required' => 'Выберите категорию клиентов',
-            'service_location.required' => 'Укажите место оказания услуг',
-            'work_format.required' => 'Укажите формат работы',
-            'experience.required' => 'Укажите опыт работы',
-            'description.required' => 'Описание обязательно',
-            'description.min' => 'Описание должно содержать не менее 50 символов',
-            'price.required' => 'Укажите стоимость услуги',
-            'phone.required' => 'Укажите телефон для связи',
-        ]);
-    }
-
-    /**
-     * Создать или обновить объявление
-     */
-    protected function createOrUpdateAd(Request $request)
-    {
-        $data = $this->prepareAdDataForSave($request);
-        
-        return Ad::updateOrCreate(
-            [
-                'user_id' => auth()->id(),
-                'id' => $request->id ?? null
-            ],
-            $data
-        );
-    }
-
-    /**
-     * Подготовить данные для сохранения
-     */
-    protected function prepareAdDataForSave(Request $request): array
-    {
-        return [
-            'category' => $request->category,
-            'title' => $request->title,
-            'description' => $request->description ?: '',
-            'specialty' => $request->specialty,
-            'clients' => $this->encodeJson($request->clients, []),
-            'service_location' => $this->encodeJson($request->service_location, []),
-            'outcall_locations' => $this->encodeJson($request->outcall_locations, []),
-            'taxi_option' => $request->taxi_option,
-            'work_format' => $request->work_format,
-            'service_provider' => $this->encodeJson($request->service_provider, []),
-            'experience' => $request->experience,
-            'education_level' => $request->education_level,
-            'features' => $this->encodeJson($request->features, []),
-            'additional_features' => $request->additional_features,
-            'price' => $request->price,
-            'price_unit' => $request->price_unit ?: 'session',
-            'is_starting_price' => $this->encodeJson($request->is_starting_price, []),
-            'pricing_data' => $this->encodeJson($request->pricing_data),
-            'contacts_per_hour' => $request->contacts_per_hour,
-            
-            // Поля цены
-            'price_per_hour' => $request->price_per_hour,
-            'outcall_price' => $request->outcall_price,
-            'express_price' => $request->express_price,
-            'price_two_hours' => $request->price_two_hours,
-            'price_night' => $request->price_night,
-            'min_duration' => $request->min_duration,
-            'discount' => $request->discount,
-            'gift' => $request->gift,
-            'services' => $this->encodeJson($request->services, (object)[]),
-            'services_additional_info' => $request->services_additional_info,
-            'address' => $request->address,
-            'travel_area' => $request->travel_area,
-            'phone' => $request->phone,
-            'contact_method' => $request->contact_method ?: 'messages',
-            'age' => $request->age,
-            'height' => $request->height,
-            'weight' => $request->weight,
-            'breast_size' => $request->breast_size,
-            'hair_color' => $request->hair_color,
-            'eye_color' => $request->eye_color,
-            'appearance' => $request->appearance,
-            'nationality' => $request->nationality,
-            'has_girlfriend' => $request->boolean('has_girlfriend', false),
-            'photos' => $this->encodeJson($request->photos, []),
-            'video' => $request->video_id ? json_encode(['id' => $request->video_id]) : null,
-            'show_photos_in_gallery' => $request->boolean('show_photos_in_gallery', true),
-            'allow_download_photos' => $request->boolean('allow_download_photos', false),
-            'watermark_photos' => $request->boolean('watermark_photos', true),
-            'status' => 'waiting_payment'
-        ];
-    }
 
     /**
      * Подготовить данные объявления для отображения
@@ -438,24 +233,4 @@ class AdController extends Controller
         return is_array($data) ? json_encode($data) : json_encode([]);
     }
 
-    /**
-     * Показать черновик объявления
-     */
-    public function showDraft(Ad $ad)
-    {
-        // Проверяем права доступа
-        $this->authorize('view', $ad);
-        
-        // Проверяем, что это черновик
-        if ($ad->status !== AdStatus::DRAFT) {
-            return redirect()->route('ads.show', $ad->id);
-        }
-        
-        // Подготавливаем данные для отображения (используем тот же метод что и в edit)
-        $adData = $this->prepareAdData($ad);
-        
-        return inertia('Draft/Show', [
-            'ad' => $adData
-        ]);
-    }
 }

@@ -1,28 +1,12 @@
 <template>
-    <label :for="for" :class="classes">
-        <slot />
-    </label>
+  <label class="block text-sm font-medium text-gray-700">
+    <span v-if="value">{{ value }}</span>
+    <slot v-else />
+  </label>
 </template>
 
-<script setup>
-import { computed } from 'vue'
-
-const props = defineProps({
-    for: {
-        type: String,
-        default: ''
-    },
-    value: {
-        type: String,
-        default: ''
-    },
-    required: {
-        type: Boolean,
-        default: false
-    }
-})
-
-const classes = computed(() => {
-    return 'block font-medium text-sm text-gray-700'
-})
+<script setup lang="ts">
+defineProps<{
+  value?: string
+}>()
 </script>

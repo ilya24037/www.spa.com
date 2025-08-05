@@ -90,7 +90,7 @@
                 <div>
                   <h4 class="font-medium">{{ review.client_name }}</h4>
                   <div class="flex items-center gap-2 mt-1">
-                    <StarRating :rating="review.rating" :readonly="true" size="sm" />
+                    <StarRating :rating="review.rating" :Readonly="true" size="sm" />
                     <span class="text-sm text-gray-600">{{ formatDate(review.created_at) }}</span>
                   </div>
                   <p class="text-gray-700 mt-2">{{ review.comment }}</p>
@@ -161,11 +161,12 @@ import { ref, computed, onMounted } from 'vue'
 import { Head, router } from '@inertiajs/vue3'
 
 // 🎯 FSD Импорты
-import { ProfileLayout } from '@/src/shared'
-import { StarRating } from '@/src/shared'
-import { AdCardList, AdStatusFilter } from '@/src/entities/ad'
-import { BookingWidget } from '@/src/entities/booking' 
-import { MasterCardList } from '@/src/entities/master'
+import ProfileLayout from '@/src/shared/layouts/ProfileLayout/ProfileLayout.vue'
+import StarRating from '@/src/shared/ui/organisms/StarRating/StarRating.vue'
+import AdCardList from '@/src/entities/ad/ui/AdCardList/AdCardList.vue'
+import AdStatusFilter from '@/src/entities/ad/ui/AdStatusFilter/AdStatusFilter.vue'
+import BookingWidget from '@/src/entities/booking/ui/BookingWidget/BookingWidget.vue' 
+import MasterCardList from '@/src/entities/master/ui/MasterCardList/MasterCardList.vue'
 
 // Props из Inertia
 const props = defineProps({

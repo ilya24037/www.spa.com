@@ -83,7 +83,7 @@ const props = withDefaults(defineProps<ToastProps>(), {
 const emit = defineEmits<ToastEmits>()
 
 const visible = ref(false)
-let timeoutId: NodeJS.Timeout | null = null
+let timeoutId: number | null = null
 
 const positionClass = computed(() => {
   const classes = {

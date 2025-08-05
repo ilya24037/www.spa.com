@@ -1,4 +1,4 @@
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { router } from '@inertiajs/vue3'
 
 export interface PaginationOptions {

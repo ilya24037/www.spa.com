@@ -66,7 +66,7 @@
 import { ref } from 'vue'
 import { Head } from '@inertiajs/vue3'
 // 🎯 FSD Импорты
-import { AdCard } from '@/src/entities/ad'
+import AdCard from '@/src/entities/ad/ui/AdCard/AdCard.vue'
 
 const items = ref([])
 

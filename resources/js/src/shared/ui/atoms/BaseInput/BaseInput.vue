@@ -14,7 +14,7 @@
         :type="type"
         :placeholder="placeholder"
         :disabled="disabled"
-        :readonly="readonly"
+        :Readonly="Readonly"
         :maxlength="maxlength"
         :min="min"
         :max="max"
@@ -22,7 +22,7 @@
         class="base-input"
         :class="{
           'disabled': disabled,
-          'readonly': readonly,
+          'Readonly': readonly,
           'has-clear': clearable && inputValue,
           'has-prefix': prefix,
           'has-suffix': suffix
@@ -35,7 +35,7 @@
       
       <!-- Кнопка очистки -->
              <button
-         v-if="clearable && inputValue && !disabled && !readonly"
+         v-if="clearable && inputValue && !disabled && !Readonly"
          type="button"
          class="clear-button"
          @click="clearInput"
@@ -100,8 +100,7 @@ const props = defineProps({
   disabled: {
     type: Boolean,
     default: false
-  },
-  readonly: {
+  }, readonly: {
     type: Boolean,
     default: false
   },
@@ -288,7 +287,7 @@ defineExpose({
   color: #8c8c8c;
 }
 
-.base-input:hover:not(:disabled):not(:readonly) {
+.base-input:hover:not(:disabled):not(:Readonly) {
   border-color: #d0d0d0;
 }
 
@@ -304,7 +303,7 @@ defineExpose({
   color: #8c8c8c;
 }
 
-.base-input.readonly {
+.base-input.Readonly {
   cursor: default;
   background: #f9f9f9;
 }

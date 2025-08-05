@@ -27,8 +27,7 @@
             leave-to-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
             <div
-              v-show="show"
-              ref="modalRef"
+              v-show="show" ref="modalRef"
               class="modal-content"
               :class="[maxWidthClass, customClass]"
               role="dialog"
@@ -101,7 +100,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { Button } from '@/src/shared/ui/atoms/Button'
 import { useId } from '@/shared/composables'
 import type { ButtonVariant } from '@/src/shared/ui/atoms/Button'
@@ -224,7 +223,7 @@ const trapFocus = () => {
   if (!modalRef.value) return
   
   const focusableElements = modalRef.value.querySelectorAll(
-    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    'button, [h], input, select, textarea, [tabindex]:not([tabindex="-1"])'
   )
   
   const firstFocusable = focusableElements[0] as HTMLElement

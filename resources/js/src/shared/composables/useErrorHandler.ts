@@ -1,12 +1,10 @@
-import { ref } from 'vue'
+import { } from 'vue'
+import type { Ref } from 'vue'
 import { useToast } from './useToast'
-
-export interface ErrorDetails {
-  message: string
-  code?: string | number
-  field?: string
-  details?: Record<string, any>
-}
+import type {
+  ErrorInfo,
+  ErrorType
+} from '../ui/molecules/ErrorState/ErrorState.types'
 
 export interface ValidationErrors {
   [field: string]: string[]
@@ -14,109 +12,206 @@ export interface ValidationErrors {
 
 /**
  * Composable для централизованной обработки ошибок
- * 
- * Использование:
- * const { handleError, clearError, error } = useErrorHandler()
- * 
- * try {
- *   await api.call()
- * } catch (e) {
- *   handleError(e)
- * }
+ * Полностью совместим с ErrorState компонентом
  */
-export function useErrorHandler() {
-  const error = ref<ErrorDetails | null>(null)
+export function useErrorHandler(showToast = true) {
+  const error = ref<ErrorInfo | null>(null)
   const validationErrors = ref<ValidationErrors>({})
-  const toast = useToast()
+  const isRetrying = ref<boolean>(false)
+  const toast = showToast ? useToast() : null
   
-  const handleError = (err: unknown, showToast = true) => {
+  /**
+   * Определяет тип ошибки на основе кода или сообщения
+   */
+  const detectErrorType = (err: unknown): ErrorType => {
+    if (!err) return 'generic'
+
+    if (typeof err === 'object' && err !== null) {
+      const errorObj = err as any
+      
+      // HTTP статус коды
+      if (errorObj.status || errorObj.code) {
+        const code = errorObj.status || errorObj.code
+        
+        if (code === 401) return 'auth'
+        if (code === 403) return 'permission'
+        if (code === 404) return 'not_found'
+        if (code === 422) return 'validation'
+        if (code === 408 || code === 'ETIMEDOUT') return 'timeout'
+        if (code >= 500) return 'server'
+      }
+
+      // Проверяем по сообщению
+      const message = errorObj.message?.toLowerCase() || ''
+      
+      if (message.includes('network') || message.includes('fetch')) return 'network'
+      if (message.includes('timeout')) return 'timeout'
+      if (message.includes('validation') || message.includes('invalid')) return 'validation'
+      if (message.includes('permission') || message.includes('forbidden')) return 'permission'
+      if (message.includes('unauthorized') || message.includes('auth')) return 'auth'
+      if (message.includes('not found')) return 'not_found'
+      if (message.includes('payment')) return 'payment'
+      if (message.includes('booking')) return 'booking'
+      if (message.includes('upload') || message.includes('file')) return 'upload'
+      if (message.includes('server')) return 'server'
+    }
+
+    return 'generic'
+  }
+
+  /**
+   * Извлекает сообщение об ошибке
+   */
+  const extractErrorMessage = (err: unknown): string => {
+    if (!err) return 'Произошла неизвестная ошибка'
+    if (typeof err === 'string') return err
+
+    if (typeof err === 'object' && err !== null) {
+      const errorObj = err as any
+      
+      if (errorObj.message) return errorObj.message
+      if (errorObj.error?.message) return errorObj.error.message
+      if (errorObj.data?.message) return errorObj.data.message
+      if (errorObj.response?.data?.message) return errorObj.response.data.message
+      if (errorObj.statusText) return errorObj.statusText
+    }
+
+    return 'Произошла ошибка при выполнении операции'
+  }
+
+  /**
+   * Извлекает детали ошибки
+   */
+  const extractErrorDetails = (err: unknown): string | undefined => {
+    if (!err || typeof err !== 'object') return undefined
+
+    const errorObj = err as any
+    const details: string[] = []
+    
+    if (errorObj.details) {
+      details.push(errorObj.details)
+    }
+    
+    if (errorObj.response?.data?.errors) {
+      const errors = errorObj.response.data.errors
+      if (typeof errors === 'object') {
+        // Сохраняем в validationErrors для доступа через getValidationError
+        validationErrors.value = errors
+        
+        Object.entries(errors).forEach(([field, messages]) => {
+          if (Array.isArray(messages)) {
+            details.push(`${field}: ${messages.join(', ')}`)
+          }
+        })
+      }
+    } else if (errorObj.errors) {
+      // Laravel validation errors
+      validationErrors.value = errorObj.errors
+      Object.entries(errorObj.errors).forEach(([field, messages]) => {
+        if (Array.isArray(messages)) {
+          details.push(`${field}: ${messages.join(', ')}`)
+        }
+      })
+    }
+    
+    return details.length > 0 ? details.join('\n') : undefined
+  }
+
+  /**
+   * Извлекает код ошибки
+   */
+  const extractErrorCode = (err: unknown): string | number | undefined => {
+    if (!err || typeof err !== 'object') return undefined
+
+    const errorObj = err as any
+    
+    return errorObj.code || 
+           errorObj.status || 
+           errorObj.response?.status || 
+           errorObj.statusCode || 
+           undefined
+  }
+
+  /**
+   * Основной метод обработки ошибок
+   */
+  const handleError = (err: unknown, type?: ErrorType): void => {
     console.error('[ErrorHandler]', err)
     
-    // Обработка различных типов ошибок
-    if (err instanceof Error) {
-      error.value = {
-        message: err.message,
-        details: { stack: err.stack }
-      }
-      
-      if (showToast) {
-        toast.error(err.message)
-      }
-    } 
-    // Обработка ошибок от Laravel API
-    else if (typeof err === 'object' && err !== null) {
-      const apiError = err as any
-      
-      // Validation errors от Laravel
-      if (apiError.errors) {
-        validationErrors.value = apiError.errors
-        error.value = {
-          message: apiError.message || 'Ошибка валидации',
-          code: apiError.status || 422,
-          details: apiError.errors
-        }
-        
-        if (showToast) {
-          const firstError = Object.values(apiError.errors).flat()[0]
-          toast.error(firstError as string || 'Проверьте правильность заполнения формы')
-        }
-      }
-      // Обычная ошибка API
-      else {
-        error.value = {
-          message: apiError.message || 'Произошла ошибка',
-          code: apiError.status || apiError.code,
-          details: apiError
-        }
-        
-        if (showToast) {
-          toast.error(apiError.message || 'Произошла ошибка')
-        }
-      }
+    const errorInfo: ErrorInfo = {
+      type: type || detectErrorType(err),
+      message: extractErrorMessage(err),
+      details: extractErrorDetails(err),
+      code: extractErrorCode(err),
+      originalError: err,
+      timestamp: new Date(),
+      requestId: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
     }
-    // Строковая ошибка
-    else if (typeof err === 'string') {
-      error.value = { message: err }
-      
-      if (showToast) {
-        toast.error(err)
-      }
+
+    // Сохраняем ошибку
+    error.value = errorInfo
+
+    // Показываем toast если нужно
+    if (toast && showToast) {
+      toast.error(errorInfo.message)
     }
-    // Неизвестная ошибка
-    else {
-      error.value = { message: 'Произошла неизвестная ошибка' }
-      
-      if (showToast) {
-        toast.error('Произошла неизвестная ошибка')
-      }
-    }
-    
-    // Логирование в продакшене (можно отправить в Sentry)
+
+    // Логирование в продакшене
     if (import.meta.env.PROD) {
-      // TODO: Отправка в Sentry или другой сервис логирования
-      console.error('Production error:', error.value)
+      console.error('Production error:', errorInfo)
+      // TODO: Отправка в Sentry или другой сервис
     }
   }
   
-  const clearError = () => {
+  /**
+   * Очищает ошибку
+   */
+  const clearError = (): void => {
     error.value = null
     validationErrors.value = {}
+    isRetrying.value = false
   }
   
+  /**
+   * Проверяет наличие ошибки валидации для поля
+   */
   const hasValidationError = (field: string): boolean => {
     return field in validationErrors.value
   }
   
+  /**
+   * Получает текст ошибки валидации для поля
+   */
   const getValidationError = (field: string): string | null => {
     return validationErrors.value[field]?.[0] || null
   }
+
+  /**
+   * Повторяет операцию с обработкой ошибок
+   */
+  const retryOperation = async (operation: () => Promise<void>): Promise<void> => {
+    try {
+      isRetrying.value = true
+      clearError()
+      await operation()
+    } catch (retryError) {
+      handleError(retryError)
+    } finally {
+      isRetrying.value = false
+    }
+  }
   
   return {
+    // Состояние
     error,
     validationErrors,
+    isRetrying,
+    
+    // Методы
     handleError,
     clearError,
     hasValidationError,
-    getValidationError
+    getValidationError,
+    retryOperation
   }
 }

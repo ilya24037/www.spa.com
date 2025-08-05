@@ -2,12 +2,23 @@
   <Head title="Оплата услуг" />
   
   <div class="payment-page">
-    <!-- Логотип -->
-    <div class="logo">
-      <span class="logo-text">MASSAGIST</span>
-    </div>
+    <!-- Loading состояние -->
+    <PageLoader 
+      v-if="pageLoader.isLoading.value"
+      type="form"
+      :message="pageLoader.message.value"
+      :show-progress="false"
+      :skeleton-count="1"
+    />
+    
+    <!-- Основной контент -->
+    <template v-else>
+      <!-- Логотип -->
+      <div class="logo">
+        <span class="logo-text">MASSAGIST</span>
+      </div>
 
-    <div class="payment-container">
+      <div class="payment-container">
       <!-- Кнопка назад -->
       <Link 
         :href="route('payment.select-plan', { ad: ad.id })" 
@@ -89,24 +100,66 @@
         <Link href="#" class="security-link">Политика конфиденциальности</Link>
       </div>
     </div>
+    </template>
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue'
+<script setup lang="ts">
+import { onMounted } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
+import PageLoader from '@/src/shared/ui/organisms/PageLoader/PageLoader.vue'
+import { usePageLoading } from '@/src/shared/composables/usePageLoading'
 
-const props = defineProps({
-  payment: Object,
-  ad: Object,
-  plan: Object
+// Типизация props
+interface Payment {
+  id: number | string
+  formatted_amount: string
+  amount: number
+  [key: string]: any
+}
+
+interface Ad {
+  id: number | string
+  title?: string
+  [key: string]: any
+}
+
+interface Plan {
+  id: number | string
+  name: string
+  price: number
+  [key: string]: any
+}
+
+interface CheckoutProps {
+  payment: Payment
+  ad: Ad
+  plan: Plan
+}
+
+const props = defineProps<CheckoutProps>()
+
+// Управление загрузкой страницы
+const pageLoader = usePageLoading({
+  type: 'form',
+  autoStart: true,
+  timeout: 5000,
+  onStart: () => {
+    console.log(`Payment checkout loading started for payment: ${props.payment?.id}`)
+  },
+  onComplete: () => {
+    console.log(`Payment checkout loading completed for amount: ${props.payment?.formatted_amount}`)
+  },
+  onError: (error) => {
+    console.error('Payment checkout loading error:', error)
+  }
 })
 
-const paymentMethod = ref('sbp')
-const isProcessing = ref(false)
+const paymentMethod = ref<string>('sbp')
+const isProcessing = ref<boolean>(false)
 
-const processPayment = () => {
+const processPayment = (): void => {
   if (!paymentMethod.value || isProcessing.value) return
   
   isProcessing.value = true
@@ -119,6 +172,33 @@ const processPayment = () => {
     }
   })
 }
+
+// Инициализация при монтировании
+onMounted(() => {
+  // Проверяем наличие данных платежа
+  if (!props.payment || !props.payment.id) {
+    const noDataError = {
+      type: 'client' as const,
+      message: 'Данные платежа не найдены',
+      code: 404
+    }
+    pageLoader.errorLoading(noDataError)
+    return
+  }
+
+  // Быстрая загрузка формы оплаты
+  setTimeout(() => {
+    pageLoader.setProgress(50, 'Инициализируем способы оплаты...')
+  }, 100)
+
+  setTimeout(() => {
+    pageLoader.setProgress(80, 'Подготавливаем защищенную форму...')
+  }, 300)
+
+  setTimeout(() => {
+    pageLoader.completeLoading()
+  }, 600)
+})
 </script>
 
 <style scoped>

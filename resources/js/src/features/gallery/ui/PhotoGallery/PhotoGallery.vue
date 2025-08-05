@@ -73,19 +73,14 @@
     </div>
 
     <!-- Полноэкранный просмотр -->
-    <PhotoViewer
-      v-if="showViewer"
-      :photos="photos"
-      :current-index="currentIndex"
-      @close="closeFullscreen"
-      @change="setCurrentPhoto"
-    />
+    <PhotoViewer />
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
-import PhotoViewer from './PhotoViewer.vue'
+import PhotoViewer from '../PhotoViewer/PhotoViewer.vue'
+import { useGalleryStore } from '@/src/features/gallery/model/gallery.store'
 
 // 🎯 Стили согласно дизайн-системе
 const CONTAINER_CLASSES = 'space-y-4'
@@ -127,9 +122,11 @@ const props = defineProps({
 
 const emit = defineEmits(['photo-change'])
 
+// Store
+const galleryStore = useGalleryStore()
+
 // Состояние
 const currentIndex = ref(props.initialIndex)
-const showViewer = ref(false)
 
 // Вычисляемые свойства
 const currentPhoto = computed(() => 
@@ -164,11 +161,7 @@ const previousPhoto = () => {
 }
 
 const openFullscreen = () => {
-  showViewer.value = true
-}
-
-const closeFullscreen = () => {
-  showViewer.value = false
+  galleryStore.openGallery(props.photos, currentIndex.value)
 }
 
 const handleImageLoad = () => {

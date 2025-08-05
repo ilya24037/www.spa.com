@@ -1,6 +1,21 @@
 <!-- resources/js/src/entities/ad/ui/AdCard/AdCard.vue -->
 <template>
+  <!-- Error состояние -->
+  <ErrorState
+    v-if="errorState.error"
+    :error="errorState.error"
+    size="medium"
+    variant="card"
+    :retryable="true"
+    :dismissible="true"
+    @retry="handleRetry"
+    @dismiss="errorState.clearError"
+    class="h-full"
+  />
+  
+  <!-- Основная карточка -->
   <div 
+    v-else
     :class="CARD_CLASSES"
     role="article"
     :aria-label="`Объявление: ${props.ad.title || props.ad.name || props.ad.display_name}`"
@@ -188,6 +203,8 @@
 import { ref, computed, type Ref } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { useToast } from '@/src/shared/composables/useToast'
+import { useErrorHandler } from '@/src/shared/composables/useErrorHandler'
+import { ErrorState } from '@/src/shared/ui/molecules/ErrorState'
 import type { 
   AdCardProps, 
   AdCardEmits, 
@@ -197,7 +214,10 @@ import type {
   FavoriteToggleResponse 
 } from './AdCard.types'
 
-// Toast для замены alert()
+// Error handler (без toast - показываем через ErrorState)
+const errorState = useErrorHandler(false)
+
+// Toast только для успешных действий
 const toast = useToast()
 
 // Props
@@ -245,7 +265,7 @@ const BOOKING_BUTTON_CLASSES: string = 'flex-1 bg-blue-500 hover:bg-blue-600 tex
 const BOOKING_ICON_CLASSES: string = 'w-4 h-4'
 
 // Состояние
-const currentImage: Ref<number> = ref(0)
+const currentImage: import("vue").Ref<number> = ref(0)
 
 // Вычисляемые свойства
 const isFavorite = computed((): boolean => props.ad.is_favorite || false)
@@ -290,16 +310,17 @@ const handleMouseMove = (event: MouseMoveEvent): void => {
 
 const openAd = (): void => {
   try {
+    errorState.clearError()
     emit('adOpened', props.ad.id)
     router.visit(`/ads/${props.ad.id}`)
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
-    toast.error('Ошибка перехода: ' + errorMessage)
+    errorState.handleError(error, 'data_load')
   }
 }
 
 const toggleFavorite = async (): Promise<void> => {
   try {
+    errorState.clearError()
     const currentState = isFavorite.value
     emit('favoriteToggled', props.ad.id, !currentState)
     
@@ -312,17 +333,21 @@ const toggleFavorite = async (): Promise<void> => {
         toast.success(currentState ? 'Удалено из избранного' : 'Добавлено в избранное')
       },
       onError: (errors) => {
-        toast.error('Ошибка обновления избранного')
+        errorState.handleError({
+          message: 'Не удалось обновить избранное',
+          details: 'Проверьте подключение к интернету и попробуйте снова',
+          status: errors?.response?.status
+        }, 'data_load')
       }
     })
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
-    toast.error('Ошибка: ' + errorMessage)
+    errorState.handleError(error, 'data_load')
   }
 }
 
 const contactMaster = (): void => {
   try {
+    errorState.clearError()
     emit('contactRequested', props.ad.id)
     
     if (props.ad.phone && props.ad.show_contacts) {
@@ -332,19 +357,38 @@ const contactMaster = (): void => {
       toast.info('Контакты будут доступны после записи')
     }
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
-    toast.error('Ошибка связи: ' + errorMessage)
+    errorState.handleError(error, 'generic')
   }
 }
 
 const openBooking = (): void => {
   try {
+    errorState.clearError()
     emit('bookingRequested', props.ad.id)
     router.visit(`/ads/${props.ad.id}?booking=true`)
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
-    toast.error('Ошибка бронирования: ' + errorMessage)
+    errorState.handleError(error, 'booking')
   }
+}
+
+// Метод для повторной попытки после ошибки
+const handleRetry = async (): Promise<void> => {
+  errorState.clearError()
+  
+  // Проверяем, что данные объявления корректны
+  if (!props.ad || !props.ad.id) {
+    errorState.handleError({
+      message: 'Данные объявления не загружены',
+      details: 'Попробуйте обновить страницу'
+    }, 'data_load')
+    return
+  }
+  
+  // Пытаемся перезагрузить карточку
+  await errorState.retryOperation(async () => {
+    // Эмитируем событие для родительского компонента
+    emit('retryRequested', props.ad.id)
+  })
 }
 </script>
 

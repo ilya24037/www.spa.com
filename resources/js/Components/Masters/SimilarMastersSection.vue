@@ -104,7 +104,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Link, router } from '@inertiajs/vue3'
-import { MasterCard } from '@/src/entities/master'
+import MasterCard from '@/src/entities/master/ui/MasterCard/MasterCard.vue'
 
 const props = defineProps({
   masters: {

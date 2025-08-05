@@ -12,8 +12,8 @@ import { ref, customRef, Ref } from 'vue'
  *   searchAPI(value)
  * })
  */
-export function useDebounce<T>(value: Ref<T>, delay = 300): Ref<T> {
-  let timeout: NodeJS.Timeout
+export function useDebounce<T>(value: import("vue").Ref<T>, delay = 300): import("vue").Ref<T> {
+  let timeout: number
   
   return customRef((track, trigger) => {
     return {
@@ -47,7 +47,7 @@ export function useDebounceFn<T extends (...args: any[]) => any>(
   fn: T,
   delay = 300
 ): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout | null = null
+  let timeout: number | null = null
   
   return (...args: Parameters<T>) => {
     if (timeout) {
@@ -75,7 +75,7 @@ export function useThrottleFn<T extends (...args: any[]) => any>(
   delay = 300
 ): (...args: Parameters<T>) => void {
   let lastCall = 0
-  let timeout: NodeJS.Timeout | null = null
+  let timeout: number | null = null
   
   return (...args: Parameters<T>) => {
     const now = Date.now()

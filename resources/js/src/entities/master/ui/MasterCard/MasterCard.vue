@@ -1,6 +1,21 @@
 <!-- resources/js/src/entities/master/ui/MasterCard/MasterCard.vue -->
 <template>
+  <!-- Error состояние -->
+  <ErrorState
+    v-if="errorState.error"
+    :error="errorState.error"
+    size="medium"
+    variant="card"
+    :retryable="true"
+    :dismissible="true"
+    @retry="handleRetry"
+    @dismiss="errorState.clearError"
+    class="h-full"
+  />
+  
+  <!-- Основная карточка -->
   <article 
+    v-else
     :class="CARD_CLASSES"
     @click="goToProfile"
     role="button"
@@ -137,6 +152,8 @@
 import { ref, computed, type Ref } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { useToast } from '@/src/shared/composables/useToast'
+import { useErrorHandler } from '@/src/shared/composables/useErrorHandler'
+import { ErrorState } from '@/src/shared/ui/molecules/ErrorState'
 import type { 
   MasterCardProps, 
   MasterCardEmits, 
@@ -144,8 +161,12 @@ import type {
   MasterCardState,
   FavoriteToggleResponse 
 } from './MasterCard.types'
+import type { ErrorInfo } from '@/src/shared/ui/molecules/ErrorState/ErrorState.types'
 
-// Toast для замены alert()
+// Error handler (без toast - показываем через ErrorState)
+const errorState = useErrorHandler(false)
+
+// Toast только для успешных действий
 const toast = useToast()
 
 // Props
@@ -185,7 +206,7 @@ const BOOKING_BUTTON_CLASSES: string = 'flex-1 bg-blue-500 hover:bg-blue-600 tex
 const BOOKING_ICON_CLASSES: string = 'w-4 h-4'
 
 // Состояние
-const imageError: Ref<boolean> = ref(false)
+const imageError: import("vue").Ref<boolean> = ref(false)
 
 // Вычисляемые свойства
 const isFavorite = computed((): boolean => props.master.is_favorite || false)
@@ -224,16 +245,17 @@ const handleImageError = (): void => {
 
 const goToProfile = (): void => {
   try {
+    errorState.clearError()
     emit('profileVisited', props.master.id)
     router.visit(`/masters/${props.master.id}`)
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
-    toast.error('Ошибка перехода: ' + errorMessage)
+    errorState.handleError(error, 'data_load')
   }
 }
 
 const toggleFavorite = async (): Promise<void> => {
   try {
+    errorState.clearError()
     const currentState = isFavorite.value
     emit('favoriteToggled', props.master.id, !currentState)
     
@@ -246,17 +268,21 @@ const toggleFavorite = async (): Promise<void> => {
         toast.success(currentState ? 'Удалено из избранного' : 'Добавлено в избранное')
       },
       onError: (errors) => {
-        toast.error('Ошибка обновления избранного')
+        errorState.handleError({
+          message: 'Не удалось обновить избранное',
+          details: 'Проверьте подключение к интернету и попробуйте снова',
+          status: errors?.response?.status
+        }, 'data_load')
       }
     })
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
-    toast.error('Ошибка: ' + errorMessage)
+    errorState.handleError(error, 'data_load')
   }
 }
 
 const showPhone = (): void => {
   try {
+    errorState.clearError()
     emit('phoneRequested', props.master.id)
     
     if (props.master.phone && props.master.show_contacts) {
@@ -266,18 +292,40 @@ const showPhone = (): void => {
       toast.info('Телефон будет доступен после записи к мастеру')
     }
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
-    toast.error('Ошибка звонка: ' + errorMessage)
+    errorState.handleError(error, 'generic')
   }
 }
 
 const openBooking = (): void => {
   try {
+    errorState.clearError()
     emit('bookingRequested', props.master.id)
     router.visit(`/masters/${props.master.id}?booking=true`)
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
-    toast.error('Ошибка бронирования: ' + errorMessage)
+    errorState.handleError(error, 'booking')
   }
+}
+
+// Метод для повторной попытки после ошибки
+const handleRetry = async (): Promise<void> => {
+  errorState.clearError()
+  
+  // Проверяем, что данные мастера корректны
+  if (!props.master || !props.master.id) {
+    errorState.handleError({
+      message: 'Данные мастера не загружены',
+      details: 'Попробуйте обновить страницу'
+    }, 'data_load')
+    return
+  }
+  
+  // Пытаемся перезагрузить карточку
+  await errorState.retryOperation(async () => {
+    // Эмитируем событие для родительского компонента
+    emit('retryRequested', props.master.id)
+    
+    // В реальном приложении здесь был бы API вызов
+    // await api.getMaster(props.master.id)
+  })
 }
 </script>

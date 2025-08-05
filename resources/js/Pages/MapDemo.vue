@@ -143,7 +143,7 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { Head } from '@inertiajs/vue3'
-import LeafletMap from '@/Components/Map/LeafletMap.vue'
+import LeafletMap from '@/src/features/map/ui/MapLegacy/LeafletMap.vue'
 
 // Состояние
 const mapHeight = ref(500)

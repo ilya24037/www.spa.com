@@ -50,7 +50,7 @@
 import { ref, computed } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { CollectionIcon } from '@heroicons/vue/outline'
-import { AdCard } from '@/src/entities/ad'
+import AdCard from '@/src/entities/ad/ui/AdCard/AdCard.vue'
 
 // 🎯 Стили
 const CONTAINER_CLASSES = 'space-y-6'

@@ -455,6 +455,83 @@ class MasterService
     }
 
     /**
+     * Создать полный профиль мастера с услугами и фотографиями (для AddItemController)
+     */
+    public function createFullProfile(array $data): MasterProfile
+    {
+        return DB::transaction(function () use ($data) {
+            // Создаем основной профиль
+            $profile = $data['user']->masterProfiles()->create([
+                'display_name' => $data['display_name'],
+                'slug' => $this->generateUniqueSlug($data['display_name']),
+                'description' => $data['description'],
+                'age' => $data['age'] ?? null,
+                'experience_years' => $data['experience_years'] ?? null,
+                'city' => $data['city'],
+                'district' => $data['district'] ?? null,
+                'address' => $data['address'] ?? null,
+                'salon_name' => $data['salon_name'] ?? null,
+                'phone' => $data['phone'],
+                'whatsapp' => $data['whatsapp'] ?? null,
+                'telegram' => $data['telegram'] ?? null,
+                'price_from' => $data['price_from'],
+                'price_to' => $data['price_to'] ?? null,
+                'show_phone' => $data['show_phone'] ?? false,
+                'category_type' => $data['category_type'] ?? 'massage',
+                'is_adult_content' => $data['is_adult_content'] ?? false,
+                'status' => 'active',
+                'is_active' => true,
+            ]);
+
+            // Добавляем услуги
+            if (!empty($data['services'])) {
+                foreach ($data['services'] as $service) {
+                    $serviceData = [
+                        'name' => $service['name'],
+                        'price' => $service['price'],
+                        'duration_minutes' => $service['duration'],
+                        'description' => $service['description'] ?? null,
+                        'adult_content' => $data['is_adult_content'] ?? false,
+                    ];
+
+                    // Для массажа используем massage_category_id
+                    if ($data['category_type'] === 'massage' && isset($service['category_id'])) {
+                        $serviceData['massage_category_id'] = $service['category_id'];
+                    } else {
+                        // Для эротических услуг используем простой category_id
+                        $serviceData['category_id'] = $service['category_id'] ?? null;
+                    }
+
+                    $profile->services()->create($serviceData);
+                }
+            }
+
+            // Добавляем зоны работы
+            if (!empty($data['work_zones'])) {
+                foreach ($data['work_zones'] as $zone) {
+                    $profile->workZones()->create(['name' => $zone]);
+                }
+            }
+
+            // Загружаем фотографии
+            if (!empty($data['photos'])) {
+                foreach ($data['photos'] as $index => $photo) {
+                    $path = $photo->store('masters/photos', 'public');
+                    $profile->photos()->create([
+                        'path' => $path,
+                        'is_main' => $index === 0,
+                    ]);
+                }
+            }
+
+            // Обновляем роль пользователя
+            $this->updateUserRole($data['user']->id);
+
+            return $profile;
+        });
+    }
+
+    /**
      * Автоматические задачи
      */
     public function runDailyTasks(): void

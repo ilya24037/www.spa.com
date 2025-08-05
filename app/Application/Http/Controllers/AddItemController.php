@@ -10,9 +10,17 @@ use App\Domain\Master\Models\MasterProfile;
 use App\Domain\Service\Models\MassageCategory;
 use App\Domain\Service\Models\Service;
 use App\Domain\Master\Models\WorkZone;
+use App\Domain\Master\Services\MasterService;
 
 class AddItemController extends Controller
 {
+    protected MasterService $masterService;
+
+    public function __construct(MasterService $masterService)
+    {
+        $this->masterService = $masterService;
+    }
+
     /**
      * 🏠 Главная страница выбора категории (как у Avito)
      */
@@ -197,60 +205,32 @@ class AddItemController extends Controller
             'photos.*' => 'image|max:5120', // 5MB
         ]);
 
-        DB::transaction(function () use ($validated, $request) {
-            // Создаем профиль мастера
-            $profile = auth()->user()->masterProfiles()->create([
-                'display_name' => $validated['display_name'],
-                'slug' => Str::slug($validated['display_name']),
-                'description' => $validated['description'],
-                'age' => $validated['age'] ?? null,
-                'experience_years' => $validated['experience_years'] ?? null,
-                'city' => $validated['city'],
-                'district' => $validated['district'] ?? null,
-                'address' => $validated['address'] ?? null,
-                'salon_name' => $validated['salon_name'] ?? null,
-                'phone' => $validated['phone'],
-                'whatsapp' => $validated['whatsapp'] ?? null,
-                'telegram' => $validated['telegram'] ?? null,
-                'price_from' => $validated['price_from'],
-                'price_to' => $validated['price_to'] ?? null,
-                'show_phone' => $validated['show_phone'] ?? false,
-                'category_type' => 'massage', // 🔥 НОВОЕ: тип категории
-                'is_adult_content' => false,
-                'status' => 'active',
-                'is_active' => true,
-            ]);
+        // Подготавливаем данные для сервиса
+        $data = [
+            'user' => auth()->user(),
+            'display_name' => $validated['display_name'],
+            'description' => $validated['description'],
+            'age' => $validated['age'] ?? null,
+            'experience_years' => $validated['experience_years'] ?? null,
+            'city' => $validated['city'],
+            'district' => $validated['district'] ?? null,
+            'address' => $validated['address'] ?? null,
+            'salon_name' => $validated['salon_name'] ?? null,
+            'phone' => $validated['phone'],
+            'whatsapp' => $validated['whatsapp'] ?? null,
+            'telegram' => $validated['telegram'] ?? null,
+            'price_from' => $validated['price_from'],
+            'price_to' => $validated['price_to'] ?? null,
+            'show_phone' => $validated['show_phone'] ?? false,
+            'category_type' => 'massage',
+            'is_adult_content' => false,
+            'services' => $validated['services'],
+            'work_zones' => $validated['work_zones'] ?? [],
+            'photos' => $request->hasFile('photos') ? $request->file('photos') : []
+        ];
 
-            // Добавляем услуги
-            foreach ($validated['services'] as $service) {
-                $profile->services()->create([
-                    'massage_category_id' => $service['category_id'],
-                    'name' => $service['name'],
-                    'price' => $service['price'],
-                    'duration_minutes' => $service['duration'],
-                    'description' => $service['description'] ?? null,
-                    'adult_content' => false,
-                ]);
-            }
-
-            // Добавляем зоны работы
-            if (!empty($validated['work_zones'])) {
-                foreach ($validated['work_zones'] as $zone) {
-                    $profile->workZones()->create(['name' => $zone]);
-                }
-            }
-
-            // Загружаем фотографии
-            if ($request->hasFile('photos')) {
-                foreach ($request->file('photos') as $index => $photo) {
-                    $path = $photo->store('masters/photos', 'public');
-                    $profile->photos()->create([
-                        'path' => $path,
-                        'is_main' => $index === 0,
-                    ]);
-                }
-            }
-        });
+        // Используем сервис для создания профиля
+        $this->masterService->createFullProfile($data);
 
         return redirect()
             ->route('profile.dashboard')
@@ -320,60 +300,32 @@ class AddItemController extends Controller
             'photos.*' => 'image|max:5120', // 5MB
         ]);
 
-        DB::transaction(function () use ($validated, $request) {
-            // Создаем профиль мастера
-            $profile = auth()->user()->masterProfiles()->create([
-                'display_name' => $validated['display_name'],
-                'slug' => Str::slug($validated['display_name']),
-                'description' => $validated['description'],
-                'age' => $validated['age'],
-                'experience_years' => $validated['experience_years'] ?? null,
-                'city' => $validated['city'],
-                'district' => $validated['district'] ?? null,
-                'address' => $validated['address'] ?? null,
-                'salon_name' => $validated['salon_name'] ?? null,
-                'phone' => $validated['phone'],
-                'whatsapp' => $validated['whatsapp'] ?? null,
-                'telegram' => $validated['telegram'] ?? null,
-                'price_from' => $validated['price_from'],
-                'price_to' => $validated['price_to'] ?? null,
-                'show_phone' => $validated['show_phone'] ?? false,
-                'category_type' => 'erotic', // 🔥 НОВОЕ: тип категории
-                'is_adult_content' => true, // 🔥 ВАЖНО: эротический контент
-                'status' => 'active',
-                'is_active' => true,
-            ]);
+        // Подготавливаем данные для сервиса
+        $data = [
+            'user' => auth()->user(),
+            'display_name' => $validated['display_name'],
+            'description' => $validated['description'],
+            'age' => $validated['age'],
+            'experience_years' => $validated['experience_years'] ?? null,
+            'city' => $validated['city'],
+            'district' => $validated['district'] ?? null,
+            'address' => $validated['address'] ?? null,
+            'salon_name' => $validated['salon_name'] ?? null,
+            'phone' => $validated['phone'],
+            'whatsapp' => $validated['whatsapp'] ?? null,
+            'telegram' => $validated['telegram'] ?? null,
+            'price_from' => $validated['price_from'],
+            'price_to' => $validated['price_to'] ?? null,
+            'show_phone' => $validated['show_phone'] ?? false,
+            'category_type' => 'erotic',
+            'is_adult_content' => true,
+            'services' => $validated['services'],
+            'work_zones' => $validated['work_zones'] ?? [],
+            'photos' => $request->hasFile('photos') ? $request->file('photos') : []
+        ];
 
-            // Добавляем услуги
-            foreach ($validated['services'] as $service) {
-                $profile->services()->create([
-                    'name' => $service['name'],
-                    'price' => $service['price'],
-                    'duration_minutes' => $service['duration'],
-                    'description' => $service['description'] ?? null,
-                    'adult_content' => true, // 🔥 ВАЖНО: эротический контент
-                    'category_id' => $service['category_id'], // Используем простой ID
-                ]);
-            }
-
-            // Добавляем зоны работы
-            if (!empty($validated['work_zones'])) {
-                foreach ($validated['work_zones'] as $zone) {
-                    $profile->workZones()->create(['name' => $zone]);
-                }
-            }
-
-            // Загружаем фотографии
-            if ($request->hasFile('photos')) {
-                foreach ($request->file('photos') as $index => $photo) {
-                    $path = $photo->store('masters/photos', 'public');
-                    $profile->photos()->create([
-                        'path' => $path,
-                        'is_main' => $index === 0,
-                    ]);
-                }
-            }
-        });
+        // Используем сервис для создания профиля
+        $this->masterService->createFullProfile($data);
 
         return redirect()
             ->route('profile.dashboard')

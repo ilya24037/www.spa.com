@@ -1,0 +1,265 @@
+{
+  "timestamp": "2025-08-04T13:02:12.831Z",
+  "summary": {
+    "totalLegacyComponents": 100,
+    "totalFsdComponents": 279,
+    "duplicatesFound": 14,
+    "safeToDelete": 2,
+    "requiresManualReview": 12
+  },
+  "safeToDelete": [
+    {
+      "name": "BookingWidget",
+      "legacyPath": "resources\\js\\Components\\Features\\MasterShow\\components\\BookingWidget.vue",
+      "fsdPath": "resources\\js\\src\\entities\\booking\\ui\\BookingWidget\\BookingWidget.stories.ts",
+      "reason": "Мигрирован на FSD, низкий риск",
+      "usages": 0,
+      "size": "5.5KB"
+    },
+    {
+      "name": "MediaUploader",
+      "legacyPath": "resources\\js\\Components\\MediaUpload\\MediaUploader.stories.ts",
+      "reason": "Мигрирован на FSD, низкий риск",
+      "usages": 0,
+      "size": "5.4KB"
+    }
+  ],
+  "manualReview": [
+    {
+      "name": "BookingForm",
+      "legacyPath": "resources\\js\\Components\\Booking\\BookingForm.stories.ts",
+      "fsdPath": "resources\\js\\src\\features\\booking-form\\ui\\BookingForm\\BookingForm.vue",
+      "reason": "Требует проверки: high риск, 0 использований",
+      "riskLevel": "high",
+      "usages": 0,
+      "usageFiles": [],
+      "size": "7.8KB",
+      "lastModified": "2025-08-04T12:23:41.974Z"
+    },
+    {
+      "name": "BookingSuccessModal",
+      "legacyPath": "resources\\js\\Components\\Booking\\BookingSuccessModal.stories.ts",
+      "reason": "Требует проверки: medium риск, 0 использований",
+      "riskLevel": "medium",
+      "usages": 0,
+      "usageFiles": [],
+      "size": "11.5KB",
+      "lastModified": "2025-08-04T12:51:19.965Z"
+    },
+    {
+      "name": "Card",
+      "legacyPath": "resources\\js\\Components\\Cards\\Card.vue",
+      "fsdPath": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.stories.ts",
+      "reason": "Требует проверки: medium риск, 0 использований",
+      "riskLevel": "medium",
+      "usages": 0,
+      "usageFiles": [],
+      "size": "10.2KB",
+      "lastModified": "2025-08-04T12:29:18.033Z"
+    },
+    {
+      "name": "MasterInfo",
+      "legacyPath": "resources\\js\\Components\\Features\\MasterShow\\components\\MasterInfo.vue",
+      "fsdPath": "resources\\js\\src\\entities\\master\\ui\\MasterInfo\\MasterInfo.vue",
+      "reason": "Требует проверки: low риск, 0 использований",
+      "riskLevel": "low",
+      "usages": 0,
+      "usageFiles": [],
+      "size": "1.1KB",
+      "lastModified": "2025-08-04T12:29:18.040Z"
+    },
+    {
+      "name": "index",
+      "legacyPath": "resources\\js\\Components\\Features\\MasterShow\\index.vue",
+      "fsdPath": "resources\\js\\src\\entities\\ad\\index.js",
+      "reason": "Требует проверки: low риск, 0 использований",
+      "riskLevel": "low",
+      "usages": 0,
+      "usageFiles": [],
+      "size": "2.9KB",
+      "lastModified": "2025-08-04T12:29:18.044Z"
+    },
+    {
+      "name": "BookingModal",
+      "legacyPath": "resources\\js\\Components\\Modals\\BookingModal.vue",
+      "fsdPath": "resources\\js\\src\\entities\\booking\\ui\\BookingModal\\BookingModal.stories.ts",
+      "reason": "Требует проверки: medium риск, 0 использований",
+      "riskLevel": "medium",
+      "usages": 0,
+      "usageFiles": [],
+      "size": "3.7KB",
+      "lastModified": "2025-08-04T12:29:18.118Z"
+    },
+    {
+      "name": "PhoneModal",
+      "legacyPath": "resources\\js\\Components\\Modals\\PhoneModal.stories.ts",
+      "reason": "Требует проверки: medium риск, 0 использований",
+      "riskLevel": "medium",
+      "usages": 0,
+      "usageFiles": [],
+      "size": "12.6KB",
+      "lastModified": "2025-08-04T12:23:43.109Z"
+    },
+    {
+      "name": "InputError",
+      "legacyPath": "resources\\js\\Components\\UI\\Forms\\InputError.vue",
+      "fsdPath": "resources\\js\\src\\shared\\ui\\organisms\\Forms\\InputError.vue",
+      "reason": "Требует проверки: low риск, 0 использований",
+      "riskLevel": "low",
+      "usages": 0,
+      "usageFiles": [],
+      "size": "0.2KB",
+      "lastModified": "2025-08-04T12:23:43.186Z"
+    },
+    {
+      "name": "InputLabel",
+      "legacyPath": "resources\\js\\Components\\UI\\Forms\\InputLabel.vue",
+      "fsdPath": "resources\\js\\src\\shared\\ui\\organisms\\Forms\\InputLabel.vue",
+      "reason": "Требует проверки: low риск, 0 использований",
+      "riskLevel": "low",
+      "usages": 0,
+      "usageFiles": [],
+      "size": "0.5KB",
+      "lastModified": "2025-08-04T12:23:43.205Z"
+    },
+    {
+      "name": "PrimaryButton",
+      "legacyPath": "resources\\js\\Components\\UI\\Forms\\PrimaryButton.vue",
+      "fsdPath": "resources\\js\\src\\shared\\ui\\molecules\\Buttons\\PrimaryButton.vue",
+      "reason": "Требует проверки: low риск, 0 использований",
+      "riskLevel": "low",
+      "usages": 0,
+      "usageFiles": [],
+      "size": "0.8KB",
+      "lastModified": "2025-08-04T12:23:43.208Z"
+    },
+    {
+      "name": "SecondaryButton",
+      "legacyPath": "resources\\js\\Components\\UI\\Forms\\SecondaryButton.vue",
+      "fsdPath": "resources\\js\\src\\shared\\ui\\molecules\\Buttons\\SecondaryButton.vue",
+      "reason": "Требует проверки: low риск, 0 использований",
+      "riskLevel": "low",
+      "usages": 0,
+      "usageFiles": [],
+      "size": "0.8KB",
+      "lastModified": "2025-08-04T12:23:43.231Z"
+    },
+    {
+      "name": "TextInput",
+      "legacyPath": "resources\\js\\Components\\UI\\Forms\\TextInput.vue",
+      "fsdPath": "resources\\js\\src\\shared\\ui\\organisms\\Forms\\TextInput.vue",
+      "reason": "Требует проверки: low риск, 0 использований",
+      "riskLevel": "low",
+      "usages": 0,
+      "usageFiles": [],
+      "size": "1.4KB",
+      "lastModified": "2025-08-04T12:23:43.236Z"
+    }
+  ],
+  "detailedStats": {
+    "legacyBySize": [
+      {
+        "name": "BookingForm",
+        "path": "resources\\js\\Components\\Booking\\BookingForm.vue",
+        "size": "28.5KB"
+      },
+      {
+        "name": "PriceSection",
+        "path": "resources\\js\\Components\\Form\\Sections\\PriceSection.vue",
+        "size": "19.6KB"
+      },
+      {
+        "name": "ReviewsList",
+        "path": "resources\\js\\Components\\Reviews\\ReviewsList.vue",
+        "size": "18.2KB"
+      },
+      {
+        "name": "BookingSuccessModal",
+        "path": "resources\\js\\Components\\Booking\\BookingSuccessModal.test.ts",
+        "size": "16.9KB"
+      },
+      {
+        "name": "index",
+        "path": "resources\\js\\Components\\Features\\PhotoUploader\\index.vue",
+        "size": "16.2KB"
+      },
+      {
+        "name": "архив index",
+        "path": "resources\\js\\Components\\Features\\PhotoUploader\\архив index.vue",
+        "size": "15.9KB"
+      },
+      {
+        "name": "Footer",
+        "path": "resources\\js\\Components\\Footer\\Footer.vue",
+        "size": "15.3KB"
+      },
+      {
+        "name": "ReviewsSection",
+        "path": "resources\\js\\Components\\Masters\\ReviewsSection.vue",
+        "size": "14.8KB"
+      },
+      {
+        "name": "Calendar",
+        "path": "resources\\js\\Components\\Booking\\Calendar.vue",
+        "size": "14.8KB"
+      },
+      {
+        "name": "MediaUploader",
+        "path": "resources\\js\\Components\\MediaUpload\\MediaUploader.vue",
+        "size": "14.5KB"
+      }
+    ],
+    "mostUsedComponents": [
+      {
+        "name": "BookingForm",
+        "path": "resources\\js\\Components\\Booking\\BookingForm.vue",
+        "usages": 0
+      },
+      {
+        "name": "PriceSection",
+        "path": "resources\\js\\Components\\Form\\Sections\\PriceSection.vue",
+        "usages": 0
+      },
+      {
+        "name": "ReviewsList",
+        "path": "resources\\js\\Components\\Reviews\\ReviewsList.vue",
+        "usages": 0
+      },
+      {
+        "name": "BookingSuccessModal",
+        "path": "resources\\js\\Components\\Booking\\BookingSuccessModal.test.ts",
+        "usages": 0
+      },
+      {
+        "name": "index",
+        "path": "resources\\js\\Components\\Features\\PhotoUploader\\index.vue",
+        "usages": 0
+      },
+      {
+        "name": "архив index",
+        "path": "resources\\js\\Components\\Features\\PhotoUploader\\архив index.vue",
+        "usages": 0
+      },
+      {
+        "name": "Footer",
+        "path": "resources\\js\\Components\\Footer\\Footer.vue",
+        "usages": 0
+      },
+      {
+        "name": "ReviewsSection",
+        "path": "resources\\js\\Components\\Masters\\ReviewsSection.vue",
+        "usages": 0
+      },
+      {
+        "name": "Calendar",
+        "path": "resources\\js\\Components\\Booking\\Calendar.vue",
+        "usages": 0
+      },
+      {
+        "name": "MediaUploader",
+        "path": "resources\\js\\Components\\MediaUpload\\MediaUploader.vue",
+        "usages": 0
+      }
+    ]
+  }
+}

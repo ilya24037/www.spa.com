@@ -28,7 +28,7 @@
         :name="name"
         :placeholder="placeholder"
         :disabled="disabled"
-        :readonly="readonly"
+        :Readonly="Readonly"
         :required="required"
         :autofocus="autofocus"
         :autocomplete="autocomplete"
@@ -66,7 +66,7 @@
 
       <!-- Clear button -->
       <button
-        v-if="clearable && localValue && !disabled && !readonly"
+        v-if="clearable && localValue && !disabled && !Readonly"
         type="button"
         class="input-clear"
         aria-label="Очистить поле"
@@ -132,8 +132,7 @@ export interface InputProps {
   maxlength?: number
   
   // Состояния
-  disabled?: boolean
-  readonly?: boolean
+  disabled?: boolean readonly?: boolean
   loading?: boolean
   autofocus?: boolean
   

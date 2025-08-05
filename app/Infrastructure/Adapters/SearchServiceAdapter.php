@@ -2,126 +2,176 @@
 
 namespace App\Infrastructure\Adapters;
 
-// use App\Services\SearchService as LegacySearchService; // Legacy service removed
-use App\Domain\Search\SearchEngine as ModernSearchEngine;
-use App\Domain\Search\DTOs\SearchQueryDTO;
+use App\Domain\Search\Services\SearchService as ModernSearchService;
+use App\Domain\Search\DTOs\SearchData;
+use App\Domain\Search\DTOs\SearchResultData;
+use App\Enums\SearchType;
+use App\Enums\SortBy;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Throwable;
 
 /**
- * Адаптер для миграции с legacy SearchService на модульный SearchEngine
+ * Адаптер для поисковой системы
+ * Использует современную архитектуру Domain/Search
+ * Обеспечивает обратную совместимость со старыми методами
  */
 class SearchServiceAdapter
 {
-    private ?LegacySearchService $legacyService;
-    private ModernSearchEngine $modernEngine;
-    private bool $useModern;
+    private ModernSearchService $searchService;
+    private bool $enableLogging;
 
-    public function __construct(
-        ?LegacySearchService $legacyService,
-        ModernSearchEngine $modernEngine
-    ) {
-        $this->legacyService = $legacyService;
-        $this->modernEngine = $modernEngine;
-        $this->useModern = config('features.use_modern_search', false);
+    public function __construct(ModernSearchService $searchService)
+    {
+        $this->searchService = $searchService;
+        $this->enableLogging = config('search.enable_logging', false);
     }
 
     /**
-     * Глобальный поиск (старый метод)
+     * Глобальный поиск
      */
     public function search(string $query, array $options = []): array
     {
-        if ($this->useModern) {
-            try {
-                $dto = $this->convertToSearchDTO($query, $options);
-                $results = $this->modernEngine->search($dto);
-                
-                // Конвертируем результаты в старый формат
-                return $this->convertToLegacyFormat($results);
-            } catch (Throwable $e) {
-                Log::error('Modern search failed, falling back to legacy', [
-                    'error' => $e->getMessage(),
-                    'query' => $query
+        try {
+            $searchData = $this->createSearchData($query, $options);
+            // SearchService принимает отдельные параметры, не DTO
+            $results = $this->searchService->search(
+                $searchData->query,
+                $searchData->type,
+                $searchData->filters,
+                $searchData->sortBy,
+                $searchData->page,
+                $searchData->perPage,
+                $searchData->location
+            );
+            
+            if ($this->enableLogging) {
+                Log::info('Search performed', [
+                    'query' => $query,
+                    'options' => $options,
+                    'results_count' => $results->total()
                 ]);
-                
-                if ($this->legacyService) {
-                    return $this->legacyService->search($query, $options);
-                }
-                
-                throw $e;
             }
+            
+            return $this->formatPaginatorResults($results);
+        } catch (Throwable $e) {
+            Log::error('Search failed', [
+                'error' => $e->getMessage(),
+                'query' => $query,
+                'options' => $options
+            ]);
+            
+            return $this->emptyResults();
         }
-
-        if ($this->legacyService) {
-            return $this->legacyService->search($query, $options);
-        }
-
-        // Если legacy сервис не доступен, используем modern
-        $dto = $this->convertToSearchDTO($query, $options);
-        $results = $this->modernEngine->search($dto);
-        return $this->convertToLegacyFormat($results);
     }
 
     /**
-     * Поиск мастеров (старый метод)
+     * Поиск мастеров
      */
     public function searchMasters(string $query, array $filters = []): array
     {
-        if ($this->useModern) {
-            try {
-                $results = $this->modernEngine->searchByType('masters', $query, $filters);
-                return $this->formatMasterResults($results);
-            } catch (Throwable $e) {
-                Log::error('Modern master search failed', [
-                    'error' => $e->getMessage(),
-                    'query' => $query
+        try {
+            $searchData = new SearchData(
+                query: $query,
+                type: SearchType::MASTERS,
+                filters: $filters,
+                sortBy: isset($filters['sort']) ? SortBy::from($filters['sort']) : SortBy::RELEVANCE,
+                sortOrder: $filters['sort_order'] ?? 'desc',
+                page: isset($filters['page']) ? (int)$filters['page'] : 1,
+                perPage: isset($filters['limit']) ? (int)$filters['limit'] : 20,
+                location: $filters['location'] ?? null,
+                radius: $filters['radius'] ?? null,
+                priceRange: $filters['price_range'] ?? null,
+                categories: $filters['categories'] ?? null,
+                withPhotos: $filters['with_photos'] ?? null,
+                verified: $filters['verified'] ?? null,
+                metadata: $filters['metadata'] ?? []
+            );
+            
+            // SearchService принимает отдельные параметры, не DTO
+            $results = $this->searchService->search(
+                $searchData->query,
+                $searchData->type,
+                $searchData->filters,
+                $searchData->sortBy,
+                $searchData->page,
+                $searchData->perPage,
+                $searchData->location
+            );
+            
+            if ($this->enableLogging) {
+                Log::info('Master search performed', [
+                    'query' => $query,
+                    'filters' => $filters,
+                    'results_count' => $results->total()
                 ]);
-                
-                if ($this->legacyService) {
-                    return $this->legacyService->searchMasters($query, $filters);
-                }
-                
-                throw $e;
             }
+            
+            return $this->formatPaginatorToArray($results);
+        } catch (Throwable $e) {
+            Log::error('Master search failed', [
+                'error' => $e->getMessage(),
+                'query' => $query,
+                'filters' => $filters
+            ]);
+            
+            return [];
         }
-
-        if ($this->legacyService) {
-            return $this->legacyService->searchMasters($query, $filters);
-        }
-
-        $results = $this->modernEngine->searchByType('masters', $query, $filters);
-        return $this->formatMasterResults($results);
     }
 
     /**
-     * Поиск услуг (старый метод)
+     * Поиск услуг
      */
     public function searchServices(string $query, array $filters = []): array
     {
-        if ($this->useModern) {
-            try {
-                $results = $this->modernEngine->searchByType('services', $query, $filters);
-                return $this->formatServiceResults($results);
-            } catch (Throwable $e) {
-                Log::error('Modern service search failed', [
-                    'error' => $e->getMessage(),
-                    'query' => $query
+        try {
+            $searchData = new SearchData(
+                query: $query,
+                type: SearchType::SERVICES,
+                filters: $filters,
+                sortBy: isset($filters['sort']) ? SortBy::from($filters['sort']) : SortBy::RELEVANCE,
+                sortOrder: $filters['sort_order'] ?? 'desc',
+                page: isset($filters['page']) ? (int)$filters['page'] : 1,
+                perPage: isset($filters['limit']) ? (int)$filters['limit'] : 20,
+                location: $filters['location'] ?? null,
+                radius: $filters['radius'] ?? null,
+                priceRange: $filters['price_range'] ?? null,
+                categories: $filters['categories'] ?? null,
+                withPhotos: $filters['with_photos'] ?? null,
+                verified: $filters['verified'] ?? null,
+                metadata: $filters['metadata'] ?? []
+            );
+            
+            // SearchService принимает отдельные параметры, не DTO
+            $results = $this->searchService->search(
+                $searchData->query,
+                $searchData->type,
+                $searchData->filters,
+                $searchData->sortBy,
+                $searchData->page,
+                $searchData->perPage,
+                $searchData->location
+            );
+            
+            if ($this->enableLogging) {
+                Log::info('Service search performed', [
+                    'query' => $query,
+                    'filters' => $filters,
+                    'results_count' => $results->total()
                 ]);
-                
-                if ($this->legacyService) {
-                    return $this->legacyService->searchServices($query, $filters);
-                }
-                
-                throw $e;
             }
+            
+            return $this->formatPaginatorToArray($results);
+        } catch (Throwable $e) {
+            Log::error('Service search failed', [
+                'error' => $e->getMessage(),
+                'query' => $query,
+                'filters' => $filters
+            ]);
+            
+            return [];
         }
-
-        if ($this->legacyService) {
-            return $this->legacyService->searchServices($query, $filters);
-        }
-
-        $results = $this->modernEngine->searchByType('services', $query, $filters);
-        return $this->formatServiceResults($results);
     }
 
     /**
@@ -129,28 +179,21 @@ class SearchServiceAdapter
      */
     public function getSuggestions(string $query, int $limit = 5): array
     {
-        if ($this->useModern) {
-            try {
-                return $this->modernEngine->suggest($query, $limit);
-            } catch (Throwable $e) {
-                Log::error('Modern suggestions failed', [
-                    'error' => $e->getMessage(),
-                    'query' => $query
-                ]);
-                
-                if ($this->legacyService) {
-                    return $this->legacyService->getSuggestions($query, $limit);
-                }
-                
-                return [];
-            }
+        try {
+            // Используем правильный метод getSearchSuggestions
+            return $this->searchService->getSearchSuggestions(
+                $query,
+                SearchType::ALL,
+                $limit
+            );
+        } catch (Throwable $e) {
+            Log::error('Get suggestions failed', [
+                'error' => $e->getMessage(),
+                'query' => $query
+            ]);
+            
+            return [];
         }
-
-        if ($this->legacyService) {
-            return $this->legacyService->getSuggestions($query, $limit);
-        }
-
-        return $this->modernEngine->suggest($query, $limit);
     }
 
     /**
@@ -158,185 +201,135 @@ class SearchServiceAdapter
      */
     public function getPopularSearches(int $limit = 10): array
     {
-        if ($this->useModern) {
-            try {
-                return $this->modernEngine->getPopularSearches($limit);
-            } catch (Throwable $e) {
-                Log::error('Modern popular searches failed', [
-                    'error' => $e->getMessage()
-                ]);
-                
-                if ($this->legacyService) {
-                    return $this->legacyService->getPopularSearches($limit);
-                }
-                
-                return [];
-            }
+        try {
+            // Используем правильный метод getPopularQueries
+            return $this->searchService->getPopularQueries(
+                SearchType::ALL,
+                $limit
+            );
+        } catch (Throwable $e) {
+            Log::error('Get popular searches failed', [
+                'error' => $e->getMessage()
+            ]);
+            
+            return [];
         }
-
-        if ($this->legacyService) {
-            return $this->legacyService->getPopularSearches($limit);
-        }
-
-        return $this->modernEngine->getPopularSearches($limit);
     }
 
     /**
-     * Индексировать модель
+     * Индексировать модель (заглушка для обратной совместимости)
+     * @deprecated Используйте события моделей для автоматической индексации
      */
-    public function indexModel($model): bool
+    public function indexModel(Model $model): bool
     {
-        if ($this->useModern) {
-            try {
-                return $this->modernEngine->index($model);
-            } catch (Throwable $e) {
-                Log::error('Modern indexing failed', [
-                    'error' => $e->getMessage(),
-                    'model' => get_class($model),
-                    'id' => $model->getKey()
-                ]);
-                
-                if ($this->legacyService && method_exists($this->legacyService, 'indexModel')) {
-                    return $this->legacyService->indexModel($model);
-                }
-                
-                return false;
-            }
+        if ($this->enableLogging) {
+            Log::warning('SearchServiceAdapter::indexModel is deprecated. Use model events for indexing.', [
+                'model' => get_class($model),
+                'id' => $model->getKey()
+            ]);
         }
-
-        if ($this->legacyService && method_exists($this->legacyService, 'indexModel')) {
-            return $this->legacyService->indexModel($model);
-        }
-
-        return $this->modernEngine->index($model);
+        
+        // Возвращаем true для обратной совместимости
+        return true;
     }
 
     /**
-     * Удалить из индекса
+     * Удалить из индекса (заглушка для обратной совместимости)
+     * @deprecated Используйте события моделей для автоматического удаления из индекса
      */
-    public function removeFromIndex($model): bool
+    public function removeFromIndex(Model $model): bool
     {
-        if ($this->useModern) {
-            try {
-                return $this->modernEngine->remove($model);
-            } catch (Throwable $e) {
-                Log::error('Modern index removal failed', [
-                    'error' => $e->getMessage(),
-                    'model' => get_class($model),
-                    'id' => $model->getKey()
-                ]);
-                
-                if ($this->legacyService && method_exists($this->legacyService, 'removeFromIndex')) {
-                    return $this->legacyService->removeFromIndex($model);
-                }
-                
-                return false;
-            }
+        if ($this->enableLogging) {
+            Log::warning('SearchServiceAdapter::removeFromIndex is deprecated. Use model events for index removal.', [
+                'model' => get_class($model),
+                'id' => $model->getKey()
+            ]);
         }
-
-        if ($this->legacyService && method_exists($this->legacyService, 'removeFromIndex')) {
-            return $this->legacyService->removeFromIndex($model);
-        }
-
-        return $this->modernEngine->remove($model);
+        
+        // Возвращаем true для обратной совместимости
+        return true;
     }
 
     /**
-     * Конвертировать параметры в SearchQueryDTO
+     * Создать SearchData из параметров
      */
-    private function convertToSearchDTO(string $query, array $options): SearchQueryDTO
+    private function createSearchData(string $query, array $options): SearchData
     {
-        return new SearchQueryDTO(
+        $type = isset($options['type']) 
+            ? SearchType::from($options['type']) 
+            : SearchType::ALL;
+            
+        $sortBy = isset($options['sort']) 
+            ? SortBy::from($options['sort']) 
+            : SortBy::RELEVANCE;
+        
+        return new SearchData(
             query: $query,
-            types: $options['types'] ?? ['masters', 'services'],
+            type: $type,
             filters: $options['filters'] ?? [],
-            limit: $options['limit'] ?? 20,
-            offset: $options['offset'] ?? 0,
-            sort: $options['sort'] ?? 'relevance',
-            order: $options['order'] ?? 'desc'
+            sortBy: $sortBy,
+            sortOrder: $options['sort_order'] ?? 'desc',
+            page: isset($options['page']) ? (int)$options['page'] : 1,
+            perPage: isset($options['limit']) ? (int)$options['limit'] : 20,
+            location: $options['location'] ?? null,
+            radius: $options['radius'] ?? null,
+            priceRange: $options['price_range'] ?? null,
+            categories: $options['categories'] ?? null,
+            withPhotos: $options['with_photos'] ?? null,
+            verified: $options['verified'] ?? null,
+            metadata: $options['metadata'] ?? []
         );
     }
 
     /**
-     * Конвертировать результаты в старый формат
+     * Форматировать результаты пагинатора для обратной совместимости
      */
-    private function convertToLegacyFormat(array $results): array
+    private function formatPaginatorResults(LengthAwarePaginator $paginator): array
     {
-        $legacyResults = [
-            'masters' => [],
-            'services' => [],
-            'total' => 0
+        return [
+            'items' => $paginator->items(),
+            'total' => $paginator->total(),
+            'per_page' => $paginator->perPage(),
+            'current_page' => $paginator->currentPage(),
+            'last_page' => $paginator->lastPage(),
+            'from' => $paginator->firstItem(),
+            'to' => $paginator->lastItem(),
+            'path' => $paginator->path(),
+            'links' => $paginator->linkCollection()->toArray()
         ];
-
-        foreach ($results as $type => $items) {
-            if ($type === 'masters' || $type === 'services') {
-                $legacyResults[$type] = array_map(function ($item) {
-                    return [
-                        'id' => $item->id,
-                        'title' => $item->title,
-                        'description' => $item->description,
-                        'url' => $item->url,
-                        'score' => $item->score,
-                        'highlight' => $item->highlight ?? null
-                    ];
-                }, $items);
-                
-                $legacyResults['total'] += count($items);
-            }
-        }
-
-        return $legacyResults;
     }
 
     /**
-     * Форматировать результаты мастеров
+     * Форматировать пагинатор в простой массив
      */
-    private function formatMasterResults(array $results): array
+    private function formatPaginatorToArray(LengthAwarePaginator $paginator): array
     {
-        return array_map(function ($result) {
-            return [
-                'id' => $result->id,
-                'name' => $result->title,
-                'description' => $result->description,
-                'url' => $result->url,
-                'rating' => $result->metadata['rating'] ?? 0,
-                'reviews_count' => $result->metadata['reviews_count'] ?? 0,
-                'city' => $result->metadata['city'] ?? null,
-                'services' => $result->metadata['services'] ?? [],
-                'photo' => $result->metadata['photo'] ?? null
-            ];
-        }, $results);
+        return $paginator->toArray()['data'] ?? [];
     }
 
     /**
-     * Форматировать результаты услуг
+     * Вернуть пустые результаты
      */
-    private function formatServiceResults(array $results): array
+    private function emptyResults(): array
     {
-        return array_map(function ($result) {
-            return [
-                'id' => $result->id,
-                'name' => $result->title,
-                'description' => $result->description,
-                'category' => $result->metadata['category'] ?? null,
-                'price_from' => $result->metadata['price_from'] ?? null,
-                'duration' => $result->metadata['duration'] ?? null,
-                'masters_count' => $result->metadata['masters_count'] ?? 0
-            ];
-        }, $results);
+        return [
+            'items' => [],
+            'total' => 0,
+            'facets' => []
+        ];
     }
 
     /**
-     * Проксирование неопределенных методов
+     * Проксирование неопределенных методов для обратной совместимости
      */
     public function __call($method, $arguments)
     {
-        Log::warning("SearchServiceAdapter: Undefined method called: {$method}");
-        
-        if ($this->legacyService && method_exists($this->legacyService, $method)) {
-            return $this->legacyService->$method(...$arguments);
+        if (method_exists($this->searchService, $method)) {
+            Log::warning("SearchServiceAdapter: Proxying to SearchService::{$method}");
+            return $this->searchService->$method(...$arguments);
         }
         
+        Log::error("SearchServiceAdapter: Undefined method called: {$method}");
         throw new \BadMethodCallException("Method {$method} does not exist");
     }
 }

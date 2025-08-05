@@ -2,7 +2,17 @@
   <Head title="Редактирование объявления" />
   
   <div class="min-h-screen bg-gray-50">
-    <div class="max-w-4xl mx-auto py-6 lg:py-8">
+    <!-- Loading состояние -->
+    <PageLoader 
+      v-if="pageLoader.isLoading.value"
+      type="form"
+      :message="pageLoader.message.value"
+      :show-progress="false"
+      :skeleton-count="1"
+    />
+    
+    <!-- Основной контент -->
+    <div v-else class="max-w-4xl mx-auto py-6 lg:py-8">
       <!-- Хлебные крошки в стиле Avito -->
       <nav class="flex items-center mb-6" aria-label="Breadcrumb">
         <button 
@@ -53,6 +63,8 @@
             :ad-id="ad.id"
             :initial-data="ad"
             @success="handleSuccess"
+            @form-loading="handleFormLoading"
+            @data-loaded="handleDataLoaded"
           />
         </div>
       </div>
@@ -60,27 +72,100 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
-// 🎯 FSD Импорты
-import { AdForm } from '@/src/entities/ad'
 import { onMounted } from 'vue'
 
-const props = defineProps({
-  ad: {
-    type: Object,
-    required: true
+// 🎯 FSD Импорты
+import AdForm from '@/src/entities/ad/ui/AdForm/AdForm.vue'
+import PageLoader from '@/src/shared/ui/organisms/PageLoader/PageLoader.vue'
+import { usePageLoading } from '@/src/shared/composables/usePageLoading'
+
+// Типизация объявления
+interface Ad {
+  id: number | string
+  title?: string
+  name?: string
+  description?: string
+  category?: string
+  price?: number
+  location?: string
+  photos?: any[]
+  services?: any[]
+  [key: string]: any
+}
+
+interface EditAdProps {
+  ad: Ad
+}
+
+const props = defineProps<EditAdProps>()
+
+// Управление загрузкой страницы
+const pageLoader = usePageLoading({
+  type: 'form',
+  autoStart: true,
+  timeout: 10000,
+  onStart: () => {
+    console.log(`EditAd loading started for ID: ${props.ad?.id}`)
+  },
+  onComplete: () => {
+    console.log(`EditAd loading completed for: ${props.ad?.title || props.ad?.name}`)
+  },
+  onError: (error) => {
+    console.error('EditAd loading error:', error)
   }
 })
 
+// Обработчики загрузки формы
+const handleFormLoading = (): void => {
+  pageLoader.setProgress(50, 'Подготавливаем форму редактирования...')
+}
+
+const handleDataLoaded = (): void => {
+  pageLoader.setProgress(90, 'Загружаем данные объявления...')
+  setTimeout(() => {
+    pageLoader.completeLoading()
+  }, 300)
+}
+
+// Навигация
+const goBack = (): void => {
+  router.visit('/profile/items/active/all')
+}
+
+const handleSuccess = (): void => {
+  router.visit('/profile/items/active/all')
+}
+
+// Инициализация при монтировании
 onMounted(() => {
+  // Проверяем наличие данных объявления
+  if (!props.ad || !props.ad.id) {
+    const noDataError = {
+      type: 'client' as const,
+      message: 'Данные объявления не найдены',
+      code: 404
+    }
+    pageLoader.errorLoading(noDataError)
+    return
+  }
+
+  // Поэтапная загрузка для лучшего UX
+  setTimeout(() => {
+    pageLoader.setProgress(30, 'Инициализируем редактор...')
+  }, 200)
+
+  setTimeout(() => {
+    pageLoader.setProgress(60, 'Загружаем данные формы...')
+  }, 600)
+
+  setTimeout(() => {
+    pageLoader.setProgress(85, 'Подготавливаем интерфейс...')
+  }, 1000)
+
+  setTimeout(() => {
+    pageLoader.completeLoading()
+  }, 1400)
 })
-
-const goBack = () => {
-  router.visit('/profile/items/active/all')
-}
-
-const handleSuccess = () => {
-  router.visit('/profile/items/active/all')
-}
 </script> 

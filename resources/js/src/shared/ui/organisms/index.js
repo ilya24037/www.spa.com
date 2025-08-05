@@ -1,5 +1,0 @@
-// Organisms - complex UI components
-export * from './Modal'
-export * from './Cards'
-export * from './Forms'
-export * from './ConfirmModal'

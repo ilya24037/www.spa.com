@@ -142,6 +142,7 @@ onErrorCaptured((err: Error, instance: any, info: string) => {
   
   // Логируем ошибку если включено
   if (props.logErrors) {
+    console.error('ErrorBoundary caught error:', {
       message: err.message,
       stack: err.stack,
       component: info,

@@ -7,6 +7,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed, nextTick } from 'vue'
 import type { Photo, GalleryState, GalleryOptions } from './types'
+import { DEFAULT_GALLERY_OPTIONS } from './types'
 
 export const useGalleryStore = defineStore('gallery', () => {
   
@@ -22,19 +23,7 @@ export const useGalleryStore = defineStore('gallery', () => {
   const error = ref<string | null>(null)
   
   // Опции галереи
-  const options = ref<GalleryOptions>({
-    showThumbnails: true,
-    showControls: true,
-    showCounter: true,
-    autoplay: false,
-    autoplayInterval: 3000,
-    enableZoom: true,
-    maxZoom: 3,
-    enableFullscreen: true,
-    enableKeyboard: true,
-    closeOnOutsideClick: true,
-    loop: true
-  })
+  const options = ref<GalleryOptions>({ ...DEFAULT_GALLERY_OPTIONS })
 
   // =================== ВЫЧИСЛЯЕМЫЕ ===================
   
@@ -399,6 +388,12 @@ export const useGalleryStore = defineStore('gallery', () => {
     hasNext,
     photoCounter,
     preloadIndices,
+    
+    // Алиасы для совместимости с PhotoViewer
+    isViewerOpen: isOpen,
+    currentImage: currentPhoto,
+    images: photos,
+    hasPrev: hasPrevious,
 
     // Действия
     openGallery,
@@ -414,6 +409,11 @@ export const useGalleryStore = defineStore('gallery', () => {
     exitFullscreen,
     updateOptions,
     preloadPhotos,
+    
+    // Алиасы для совместимости с PhotoViewer
+    closeViewer: closeGallery,
+    nextImage: goToNext,
+    prevImage: goToPrevious,
 
     // Жесты и управление
     handleSwipeLeft,

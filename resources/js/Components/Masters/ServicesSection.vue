@@ -105,8 +105,8 @@
 import { computed } from 'vue'
 import { Link } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
-import { MasterGallery } from '@/src/entities/master'
-import { BookingWidget } from '@/src/entities/booking'
+import MasterGallery from '@/src/entities/master/ui/MasterGallery/MasterGallery.vue'
+import BookingWidget from '@/src/entities/booking/ui/BookingWidget/BookingWidget.vue'
 // ServicesSection - это текущий компонент, удаляем рекурсивный импорт
 import ReviewsSection from '@/Components/Masters/ReviewsSection.vue'
 import SimilarMastersSection from '@/Components/Masters/SimilarMastersSection.vue'

@@ -13,12 +13,13 @@ import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import type { 
   FilterState, 
-  ServiceFilter, 
   LocationFilter, 
   PriceRange,
   WorkingHoursFilter,
   Master,
-  FilterOptions
+  FilterOptions,
+  ServiceLocationType,
+  SortingType
 } from '../model/types'
 
 export const useFilterStore = defineStore('masters-filter', () => {
@@ -211,7 +212,7 @@ export const useFilterStore = defineStore('masters-filter', () => {
   }
 
   // 🏠 Установить тип размещения
-  function setServiceLocationFilter(locations: string[]) {
+  function setServiceLocationFilter(locations: ServiceLocationType[]) {
     filters.value.serviceLocation = [...locations]
   }
 
@@ -229,7 +230,7 @@ export const useFilterStore = defineStore('masters-filter', () => {
   }
 
   // 🔄 Установить сортировку
-  function setSorting(sorting: string) {
+  function setSorting(sorting: SortingType) {
     filters.value.sorting = sorting
   }
 

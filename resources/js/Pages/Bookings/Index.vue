@@ -1,14 +1,25 @@
 ﻿<template>
   <div class="py-6 lg:py-8">
-    <!-- Заголовок страницы -->
-    <div class="mb-6">
-      <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
-        Мои записи
-      </h1>
-      <p class="text-gray-600">
-        Управление вашими записями к мастерам
-      </p>
-    </div>
+    <!-- Loading состояние -->
+    <PageLoader 
+      v-if="pageLoader.isLoading.value"
+      type="content"
+      :message="pageLoader.message.value"
+      :show-progress="false"
+      :skeleton-count="4"
+    />
+    
+    <!-- Основной контент -->
+    <div v-else>
+      <!-- Заголовок страницы -->
+      <div class="mb-6">
+        <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
+          Мои записи
+        </h1>
+        <p class="text-gray-600">
+          Управление вашими записями к мастерам
+        </p>
+      </div>
 
     <!-- Фильтры и статистика -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -150,6 +161,7 @@
         </div>
       </div>
     </div>
+  </div>
 
     <!-- Модальное окно переноса записи -->
     <div v-if="showRescheduleModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -192,24 +204,66 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+<script setup lang="ts">
+import { computed, onMounted, watch } from 'vue'
 import { router } from '@inertiajs/vue3'
-import { BookingStatus, BookingCalendar, useBookingStore } from '@/src/entities/booking'
+import BookingStatus from '@/src/entities/booking/ui/BookingStatus/BookingStatus.vue'
+import BookingCalendar from '@/src/entities/booking/ui/BookingCalendar/BookingCalendar.vue'
+import { useBookingStore } from '@/src/entities/booking/model/bookingStore'
 import { useToast } from '@/src/shared/composables/useToast'
+import PageLoader from '@/src/shared/ui/organisms/PageLoader/PageLoader.vue'
+import { usePageLoading } from '@/src/shared/composables/usePageLoading'
+
+// Типизация данных
+interface BookingData {
+  id: number | string
+  status: string
+  masterId?: number
+  service?: any
+  startTime?: string
+  cancellationReason?: string
+  [key: string]: any
+}
+
+interface BookingPagination {
+  data: BookingData[]
+  current_page: number
+  last_page: number
+  per_page: number
+  total: number
+  from: number
+  to: number
+  prev_page_url?: string
+  next_page_url?: string
+  meta?: any
+}
+
+interface BookingsIndexProps {
+  bookings: BookingPagination
+  isMaster?: boolean
+}
 
 // Toast для замены alert()
 const toast = useToast()
 
-// Props от Inertia
-const props = defineProps({
-  bookings: {
-    type: Object,
-    required: true
+// Props от Inertia с типизацией
+const props = withDefaults(defineProps<BookingsIndexProps>(), {
+  isMaster: false
+})
+
+// Управление загрузкой страницы
+const pageLoader = usePageLoading({
+  type: 'content',
+  autoStart: true,
+  timeout: 8000,
+  onStart: () => {
+    console.log('Bookings page loading started')
   },
-  isMaster: {
-    type: Boolean,
-    default: false
+  onComplete: () => {
+    console.log('Bookings page loading completed')
+  },
+  onError: (error) => {
+    console.error('Bookings page loading error:', error)
   }
 })
 
@@ -217,16 +271,16 @@ const props = defineProps({
 const bookingStore = useBookingStore()
 
 // Состояние компонента
-const activeTab = ref('all')
-const loading = ref(false)
-const showRescheduleModal = ref(false)
-const rescheduleBooking = ref(null)
-const newDateTime = ref(null)
-const rescheduling = ref(false)
+const activeTab = ref<string>('all')
+const loading = ref<boolean>(false)
+const showRescheduleModal = ref<boolean>(false)
+const rescheduleBooking = ref<BookingData | null>(null)
+const newDateTime = ref<string | null>(null)
+const rescheduling = ref<boolean>(false)
 
 // Данные
-const allBookings = ref(props.bookings.data || [])
-const pagination = ref(props.bookings.meta || props.bookings)
+const allBookings = ref<BookingData[]>(props.bookings.data || [])
+const pagination = ref<BookingPagination | any>(props.bookings.meta || props.bookings)
 
 // Вычисляемые свойства
 const userRole = computed(() => props.isMaster ? 'master' : 'client')
@@ -379,6 +433,34 @@ const confirmReschedule = async () => {
 
 // Инициализация
 onMounted(() => {
+  // Проверяем наличие данных
+  if (!props.bookings?.data) {
+    const noDataError = {
+      type: 'client' as const,
+      message: 'Данные записей не найдены',
+      code: 404
+    }
+    pageLoader.errorLoading(noDataError)
+    return
+  }
+
+  // Поэтапная загрузка данных
+  setTimeout(() => {
+    pageLoader.setProgress(30, 'Загружаем записи...')
+  }, 200)
+
+  setTimeout(() => {
+    pageLoader.setProgress(60, 'Обрабатываем статистику...')
+  }, 600)
+
+  setTimeout(() => {
+    pageLoader.setProgress(85, 'Подготавливаем интерфейс...')
+  }, 1000)
+
+  setTimeout(() => {
+    pageLoader.completeLoading()
+  }, 1400)
+
   // Устанавливаем активную вкладку из URL параметра если есть
   const urlParams = new URLSearchParams(window.location.search)
   const tabParam = urlParams.get('tab')

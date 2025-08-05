@@ -90,12 +90,12 @@ const props = defineProps({
   variant: {
     type: String,
     default: 'primary',
-    validator: (value) => Object.keys(VARIANTS).includes(value)
+    validator: (value) => ['primary', 'secondary', 'danger', 'success', 'warning'].includes(value)
   },
   size: {
     type: String,
     default: 'medium',
-    validator: (value) => Object.keys(SIZES).includes(value)
+    validator: (value) => ['small', 'medium', 'large'].includes(value)
   },
   type: {
     type: String,

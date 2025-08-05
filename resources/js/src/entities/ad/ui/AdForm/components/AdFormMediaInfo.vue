@@ -21,7 +21,7 @@
 
 <script setup>
 // Модули медиа
-import AdFormMediaUpload from '../modules/Media/AdFormMediaUpload.vue'
+import AdFormMediaUpload from './AdFormMediaUpload.vue'
 
 // 🎯 Стили согласно дизайн-системе
 const SECTION_CLASSES = 'space-y-6'

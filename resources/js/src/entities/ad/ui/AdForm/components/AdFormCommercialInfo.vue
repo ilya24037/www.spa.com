@@ -25,11 +25,11 @@
 
 <script setup>
 // Модули коммерческой информации
-import AdFormPrice from '../modules/Commercial/AdFormPrice.vue'
-import AdFormPromo from '../modules/Commercial/AdFormPromo.vue'
-import AdFormServices from '../modules/Commercial/AdFormServices.vue'
-import AdFormSchedule from '../modules/Commercial/AdFormSchedule.vue'
-import AdFormPayment from '../modules/Commercial/AdFormPayment.vue'
+import AdFormPrice from './AdFormPrice.vue'
+import AdFormPromo from './AdFormPromo.vue'
+import AdFormServices from './AdFormServices.vue'
+import AdFormSchedule from './AdFormSchedule.vue'
+import AdFormPayment from './AdFormPayment.vue'
 
 // 🎯 Стили согласно дизайн-системе
 const SECTION_CLASSES = 'space-y-6'

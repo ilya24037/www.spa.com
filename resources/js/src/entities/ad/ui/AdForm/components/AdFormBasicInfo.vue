@@ -22,10 +22,10 @@
 
 <script setup>
 // Модули базовой информации
-import AdFormWorkFormat from '../modules/BasicInfo/AdFormWorkFormat.vue'
-import AdFormServiceProvider from '../modules/BasicInfo/AdFormServiceProvider.vue'
-import AdFormClientsType from '../modules/BasicInfo/AdFormClientsType.vue'
-import AdFormDescription from '../modules/BasicInfo/AdFormDescription.vue'
+import AdFormWorkFormat from './AdFormWorkFormat.vue'
+import AdFormServiceProvider from './AdFormServiceProvider.vue'
+import AdFormClientsType from './AdFormClientsType.vue'
+import AdFormDescription from './AdFormDescription.vue'
 
 // 🎯 Стили согласно дизайн-системе
 const SECTION_CLASSES = 'space-y-6'

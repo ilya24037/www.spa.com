@@ -1,6 +1,0 @@
-// Atoms - basic UI components
-export * from './BaseInput'
-export * from './BaseCheckbox'
-export * from './BaseTextarea'
-export * from './BaseRadio'
-export * from './BaseSelect'

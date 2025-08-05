@@ -1,5 +1,19 @@
 <template>
-  <div class="booking-form">
+  <!-- Error состояние -->
+  <ErrorState
+    v-if="errorState.error"
+    :error="errorState.error"
+    size="medium"
+    variant="card"
+    :retryable="true"
+    :dismissible="true"
+    @retry="handleRetry"
+    @dismiss="errorState.clearError"
+    class="mb-6"
+  />
+  
+  <!-- Основная форма -->
+  <div v-else class="booking-form">
     <!-- Заголовок -->
     <div class="mb-6">
       <h3 class="text-lg font-semibold text-gray-900 mb-2">
@@ -197,28 +211,46 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import dayjs from 'dayjs'
 import 'dayjs/locale/ru'
+import { useErrorHandler } from '@/src/shared/composables/useErrorHandler'
+import { ErrorState } from '@/src/shared/ui/molecules/ErrorState'
 
 // Настройка dayjs
 dayjs.locale('ru')
 
-// Props
-const props = defineProps({
-  bookingInfo: {
-    type: Object,
-    default: null
-  },
-  loading: {
-    type: Boolean,
-    default: false
-  }
+// Error handler (без toast - показываем через ErrorState)
+const errorState = useErrorHandler(false)
+
+// Props типизация
+interface BookingFormProps {
+  bookingInfo?: {
+    datetime: string
+    service?: {
+      name: string
+      duration?: number
+      price?: number
+    }
+  } | null
+  loading?: boolean
+}
+
+const props = withDefaults(defineProps<BookingFormProps>(), {
+  bookingInfo: null,
+  loading: false
 })
 
-// Events
-const emit = defineEmits(['submit', 'cancel', 'form-change'])
+// Events типизация
+interface BookingFormEmits {
+  submit: [bookingData: any]
+  cancel: []
+  'form-change': [data: { isValid: boolean; formData: any }]
+  retryRequested: []
+}
+
+const emit = defineEmits<BookingFormEmits>()
 
 // Состояние формы
 const form = ref({
@@ -241,125 +273,181 @@ const isValid = computed(() => {
 })
 
 // Методы валидации
-const validateField = (fieldName) => {
-  errors.value = { ...errors.value }
-  delete errors.value[fieldName]
+type ValidateFieldName = 'clientName' | 'clientPhone' | 'clientEmail' | 'dataProcessingConsent'
 
-  switch (fieldName) {
-    case 'clientName':
-      if (!form.value.clientName.trim()) {
-        errors.value.clientName = 'Укажите ваше имя'
-      } else if (form.value.clientName.trim().length < 2) {
-        errors.value.clientName = 'Имя должно содержать минимум 2 символа'
-      }
-      break
+const validateField = (fieldName: ValidateFieldName): void => {
+  try {
+    errors.value = { ...errors.value }
+    delete errors.value[fieldName]
 
-    case 'clientPhone':
-      const phoneRegex = /^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/
-      if (!form.value.clientPhone.trim()) {
-        errors.value.clientPhone = 'Укажите номер телефона'
-      } else if (!phoneRegex.test(form.value.clientPhone)) {
-        errors.value.clientPhone = 'Некорректный формат телефона'
-      }
-      break
-
-    case 'clientEmail':
-      if (form.value.clientEmail.trim()) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-        if (!emailRegex.test(form.value.clientEmail)) {
-          errors.value.clientEmail = 'Некорректный формат email'
+    switch (fieldName) {
+      case 'clientName':
+        if (!form.value.clientName.trim()) {
+          errors.value.clientName = 'Укажите ваше имя'
+        } else if (form.value.clientName.trim().length < 2) {
+          errors.value.clientName = 'Имя должно содержать минимум 2 символа'
         }
-      }
-      break
+        break
 
-    case 'dataProcessingConsent':
-      if (!form.value.dataProcessingConsent) {
-        errors.value.dataProcessingConsent = 'Необходимо согласие на обработку данных'
-      }
-      break
+      case 'clientPhone':
+        const phoneRegex = /^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/
+        if (!form.value.clientPhone.trim()) {
+          errors.value.clientPhone = 'Укажите номер телефона'
+        } else if (!phoneRegex.test(form.value.clientPhone)) {
+          errors.value.clientPhone = 'Некорректный формат телефона'
+        }
+        break
+
+      case 'clientEmail':
+        if (form.value.clientEmail.trim()) {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+          if (!emailRegex.test(form.value.clientEmail)) {
+            errors.value.clientEmail = 'Некорректный формат email'
+          }
+        }
+        break
+
+      case 'dataProcessingConsent':
+        if (!form.value.dataProcessingConsent) {
+          errors.value.dataProcessingConsent = 'Необходимо согласие на обработку данных'
+        }
+        break
+    }
+  } catch (error: unknown) {
+    errorState.handleError({
+      message: 'Ошибка валидации поля',
+      details: `Не удается проверить поле ${fieldName}`
+    }, 'validation')
   }
 }
 
-const validateForm = () => {
-  validateField('clientName')
-  validateField('clientPhone')
-  validateField('clientEmail')
-  
-  if (!form.value.dataProcessingConsent) {
-    errors.value.dataProcessingConsent = 'Необходимо согласие на обработку данных'
-  }
+const validateForm = (): boolean => {
+  try {
+    validateField('clientName')
+    validateField('clientPhone')
+    validateField('clientEmail')
+    
+    if (!form.value.dataProcessingConsent) {
+      errors.value.dataProcessingConsent = 'Необходимо согласие на обработку данных'
+    }
 
-  return Object.keys(errors.value).length === 0
+    return Object.keys(errors.value).length === 0
+  } catch (error: unknown) {
+    errorState.handleError({
+      message: 'Ошибка валидации формы',
+      details: 'Не удается проверить корректность данных'
+    }, 'validation')
+    return false
+  }
 }
 
 // Методы форматирования
-const formatPhone = (event) => {
-  let value = event.target.value.replace(/\D/g, '')
-  
-  if (value.startsWith('8')) {
-    value = '7' + value.slice(1)
+const formatPhone = (event: Event): void => {
+  try {
+    const target = event.target as HTMLInputElement
+    let value = target.value.replace(/\D/g, '')
+    
+    if (value.startsWith('8')) {
+      value = '7' + value.slice(1)
+    }
+    
+    if (!value.startsWith('7')) {
+      value = '7' + value
+    }
+    
+    if (value.length > 11) {
+      value = value.slice(0, 11)
+    }
+    
+    let formatted = '+7'
+    if (value.length > 1) {
+      formatted += ' (' + value.slice(1, 4)
+    }
+    if (value.length > 4) {
+      formatted += ') ' + value.slice(4, 7)
+    }
+    if (value.length > 7) {
+      formatted += '-' + value.slice(7, 9)
+    }
+    if (value.length > 9) {
+      formatted += '-' + value.slice(9, 11)
+    }
+    
+    form.value.clientPhone = formatted
+  } catch (error: unknown) {
+    errorState.handleError({
+      message: 'Ошибка форматирования телефона',
+      details: 'Введите корректный номер телефона'
+    }, 'validation')
   }
-  
-  if (!value.startsWith('7')) {
-    value = '7' + value
-  }
-  
-  if (value.length > 11) {
-    value = value.slice(0, 11)
-  }
-  
-  let formatted = '+7'
-  if (value.length > 1) {
-    formatted += ' (' + value.slice(1, 4)
-  }
-  if (value.length > 4) {
-    formatted += ') ' + value.slice(4, 7)
-  }
-  if (value.length > 7) {
-    formatted += '-' + value.slice(7, 9)
-  }
-  if (value.length > 9) {
-    formatted += '-' + value.slice(9, 11)
-  }
-  
-  form.value.clientPhone = formatted
 }
 
-const formatDateTime = (datetime) => {
-  return dayjs(datetime).format('DD MMMM YYYY в HH:mm')
+const formatDateTime = (datetime: string): string => {
+  try {
+    return dayjs(datetime).format('DD MMMM YYYY в HH:mm')
+  } catch (error: unknown) {
+    return 'Некорректная дата'
+  }
 }
 
-const formatPrice = (price) => {
-  return new Intl.NumberFormat('ru-RU').format(price)
+const formatPrice = (price: number | undefined): string => {
+  try {
+    if (!price) return '0'
+    return new Intl.NumberFormat('ru-RU').format(price)
+  } catch (error: unknown) {
+    return '0'
+  }
 }
 
 // Обработчики событий
 const handleSubmit = () => {
+  try {
+    errorState.clearError()
+    formError.value = null
+    
+    if (!validateForm()) {
+      formError.value = 'Проверьте правильность заполнения формы'
+      return
+    }
+
+    if (!props.bookingInfo) {
+      formError.value = 'Сначала выберите дату и время записи'
+      return
+    }
+
+    // Подготавливаем данные для отправки
+    const bookingData = {
+      ...props.bookingInfo,
+      client: {
+        name: form.value.clientName.trim(),
+        phone: form.value.clientPhone,
+        email: form.value.clientEmail.trim() || null
+      },
+      notes: form.value.notes.trim() || null,
+      dataProcessingConsent: form.value.dataProcessingConsent
+    }
+
+    emit('submit', bookingData)
+  } catch (error: unknown) {
+    errorState.handleError({
+      message: 'Ошибка при отправке формы',
+      details: 'Проверьте правильность заполнения всех полей'
+    }, 'validation')
+  }
+}
+
+// Метод для повторной попытки после ошибки
+const handleRetry = async (): Promise<void> => {
+  errorState.clearError()
   formError.value = null
   
-  if (!validateForm()) {
-    formError.value = 'Проверьте правильность заполнения формы'
-    return
-  }
-
-  if (!props.bookingInfo) {
-    formError.value = 'Сначала выберите дату и время записи'
-    return
-  }
-
-  // Подготавливаем данные для отправки
-  const bookingData = {
-    ...props.bookingInfo,
-    client: {
-      name: form.value.clientName.trim(),
-      phone: form.value.clientPhone,
-      email: form.value.clientEmail.trim() || null
-    },
-    notes: form.value.notes.trim() || null,
-    dataProcessingConsent: form.value.dataProcessingConsent
-  }
-
-  emit('submit', bookingData)
+  // Очищаем ошибки валидации
+  errors.value = {}
+  
+  // Эмитируем событие для родительского компонента
+  await errorState.retryOperation(async () => {
+    emit('retryRequested')
+  })
 }
 
 // Наблюдатели

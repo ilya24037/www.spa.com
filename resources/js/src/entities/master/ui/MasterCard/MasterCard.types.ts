@@ -39,6 +39,7 @@ export interface MasterCardEmits {
   phoneRequested: [masterId: number]
   bookingRequested: [masterId: number]
   profileVisited: [masterId: number]
+  retryRequested: [masterId: number]
 }
 
 // CSS классы типизированы для лучшей поддержки в IDE

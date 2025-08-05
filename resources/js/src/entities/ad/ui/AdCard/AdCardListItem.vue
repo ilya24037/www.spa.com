@@ -48,8 +48,8 @@
           <!-- Цена -->
           <div :class="PRICE_CONTAINER_CLASSES">
             <div :class="PRICE_WRAPPER_CLASSES">
-              <span :class="PRICE_CLASSES">{{ formatPrice(ad.price || ad.price_from) }} ₽</span>
-              <span v-if="ad.old_price" :class="OLD_PRICE_CLASSES">{{ formatPrice(ad.old_price) }} ₽</span>
+              <span :class="PRICE_CLASSES" data-testid="price">{{ formattedPrice }} ₽</span>
+              <span v-if="formattedOldPrice" :class="OLD_PRICE_CLASSES" data-testid="old-price">{{ formattedOldPrice }} ₽</span>
             </div>
             <div :class="PRICE_UNIT_CLASSES">за час</div>
           </div>
@@ -57,8 +57,8 @@
 
         <!-- Описание -->
         <div :class="DESCRIPTION_CONTAINER_CLASSES">
-          <p :class="DESCRIPTION_CLASSES">
-            {{ getDescription() }}
+          <p :class="DESCRIPTION_CLASSES" data-testid="description">
+            {{ adDescription }}
           </p>
         </div>
 
@@ -66,10 +66,11 @@
         <div :class="SERVICES_CONTAINER_CLASSES">
           <span
             v-for="(service, index) in displayServices"
-            :key="service.id || index"
+            :key="getServiceKey(service, index)"
             :class="SERVICE_TAG_CLASSES"
+            data-testid="service-tag"
           >
-            {{ service.name || service }}
+            {{ getServiceName(service) }}
           </span>
           <span
             v-if="hasMoreServices"
@@ -115,132 +116,344 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed } from 'vue'
+<script setup lang="ts">
+import { computed } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { useToast } from '@/src/shared/composables/useToast'
+import type {
+  AdCardListItemProps,
+  Ad,
+  AdImage,
+  AdPhoto,
+  AdService,
+  AdCardListItemState,
+  AdCardError,
+  StyleConstants,
+  FavoriteToggleResponse
+} from './AdCardListItem.types'
+
+// Props с TypeScript типизацией
+const props = defineProps<AdCardListItemProps>()
 
 // Toast для замены alert()
 const toast = useToast()
 
-// 🎯 Стили согласно дизайн-системе
-const CARD_CLASSES = 'bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 cursor-pointer'
-const CONTAINER_CLASSES = 'flex gap-4'
-const PHOTO_CONTAINER_CLASSES = 'w-32 h-32 flex-shrink-0 relative'
-const PHOTO_CLASSES = 'w-full h-full object-cover rounded-lg'
-const BADGES_CONTAINER_CLASSES = 'absolute top-1 left-1 flex flex-col gap-0.5'
-const PREMIUM_BADGE_CLASSES = 'bg-[#7000ff] text-white px-1.5 py-0.5 rounded text-xs font-medium'
-const DISCOUNT_BADGE_CLASSES = 'bg-[#f91155] text-white px-1.5 py-0.5 rounded text-xs font-medium'
-const INFO_CONTAINER_CLASSES = 'flex-1 min-w-0'
-const INFO_HEADER_CLASSES = 'flex items-start justify-between mb-2'
-const TITLE_CLASSES = 'font-semibold text-lg line-clamp-1'
-const METADATA_CONTAINER_CLASSES = 'flex items-center gap-4 mt-1'
-const RATING_WRAPPER_CLASSES = 'flex items-center gap-1'
-const STAR_ICON_CLASSES = 'w-4 h-4 text-yellow-400'
-const RATING_VALUE_CLASSES = 'text-sm font-medium'
-const RATING_COUNT_CLASSES = 'text-sm text-gray-500'
-const LOCATION_WRAPPER_CLASSES = 'flex items-center gap-1 text-sm text-gray-500'
-const LOCATION_ICON_CLASSES = 'w-3 h-3'
-const PRICE_CONTAINER_CLASSES = 'text-right'
-const PRICE_WRAPPER_CLASSES = 'flex items-baseline gap-2 justify-end'
-const PRICE_CLASSES = 'font-bold text-xl'
-const OLD_PRICE_CLASSES = 'text-sm line-through text-gray-400'
-const PRICE_UNIT_CLASSES = 'text-sm text-gray-500'
-const DESCRIPTION_CONTAINER_CLASSES = 'mb-3'
-const DESCRIPTION_CLASSES = 'text-sm text-gray-600 line-clamp-2'
-const SERVICES_CONTAINER_CLASSES = 'flex flex-wrap gap-1 mb-3'
-const SERVICE_TAG_CLASSES = 'text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded'
-const MORE_SERVICES_CLASSES = 'text-xs text-gray-500 px-2 py-1'
-const ACTIONS_CONTAINER_CLASSES = 'flex items-center gap-2'
-const CONTACT_BUTTON_CLASSES = 'flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-1'
-const CONTACT_ICON_CLASSES = 'w-4 h-4'
-const BOOKING_BUTTON_CLASSES = 'flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-1'
-const BOOKING_ICON_CLASSES = 'w-4 h-4'
-const FAVORITE_BUTTON_CLASSES = 'p-2 text-gray-400 hover:text-red-500 transition-colors'
-const FAVORITE_ICON_CLASSES = 'w-5 h-5'
+// 🎯 Стили согласно дизайн-системе (с типизацией)
+const styleConstants: StyleConstants = {
+  CARD_CLASSES: 'bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 cursor-pointer',
+  CONTAINER_CLASSES: 'flex gap-4',
+  PHOTO_CONTAINER_CLASSES: 'w-32 h-32 flex-shrink-0 relative',
+  PHOTO_CLASSES: 'w-full h-full object-cover rounded-lg',
+  BADGES_CONTAINER_CLASSES: 'absolute top-1 left-1 flex flex-col gap-0.5',
+  PREMIUM_BADGE_CLASSES: 'bg-[#7000ff] text-white px-1.5 py-0.5 rounded text-xs font-medium',
+  DISCOUNT_BADGE_CLASSES: 'bg-[#f91155] text-white px-1.5 py-0.5 rounded text-xs font-medium',
+  INFO_CONTAINER_CLASSES: 'flex-1 min-w-0',
+  INFO_HEADER_CLASSES: 'flex items-start justify-between mb-2',
+  TITLE_CLASSES: 'font-semibold text-lg line-clamp-1',
+  METADATA_CONTAINER_CLASSES: 'flex items-center gap-4 mt-1',
+  RATING_WRAPPER_CLASSES: 'flex items-center gap-1',
+  STAR_ICON_CLASSES: 'w-4 h-4 text-yellow-400',
+  RATING_VALUE_CLASSES: 'text-sm font-medium',
+  RATING_COUNT_CLASSES: 'text-sm text-gray-500',
+  LOCATION_WRAPPER_CLASSES: 'flex items-center gap-1 text-sm text-gray-500',
+  LOCATION_ICON_CLASSES: 'w-3 h-3',
+  PRICE_CONTAINER_CLASSES: 'text-right',
+  PRICE_WRAPPER_CLASSES: 'flex items-baseline gap-2 justify-end',
+  PRICE_CLASSES: 'font-bold text-xl',
+  OLD_PRICE_CLASSES: 'text-sm line-through text-gray-400',
+  PRICE_UNIT_CLASSES: 'text-sm text-gray-500',
+  DESCRIPTION_CONTAINER_CLASSES: 'mb-3',
+  DESCRIPTION_CLASSES: 'text-sm text-gray-600 line-clamp-2',
+  SERVICES_CONTAINER_CLASSES: 'flex flex-wrap gap-1 mb-3',
+  SERVICE_TAG_CLASSES: 'text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded',
+  MORE_SERVICES_CLASSES: 'text-xs text-gray-500 px-2 py-1',
+  ACTIONS_CONTAINER_CLASSES: 'flex items-center gap-2',
+  CONTACT_BUTTON_CLASSES: 'flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-1',
+  CONTACT_ICON_CLASSES: 'w-4 h-4',
+  BOOKING_BUTTON_CLASSES: 'flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-1',
+  BOOKING_ICON_CLASSES: 'w-4 h-4',
+  FAVORITE_BUTTON_CLASSES: 'p-2 text-gray-400 hover:text-red-500 transition-colors',
+  FAVORITE_ICON_CLASSES: 'w-5 h-5'
+}
 
-const props = defineProps({
-  ad: {
-    type: Object,
-    required: true
-  }
+// Извлекаем константы для использования в темплейте
+const {
+  CARD_CLASSES,
+  CONTAINER_CLASSES,
+  PHOTO_CONTAINER_CLASSES,
+  PHOTO_CLASSES,
+  BADGES_CONTAINER_CLASSES,
+  PREMIUM_BADGE_CLASSES,
+  DISCOUNT_BADGE_CLASSES,
+  INFO_CONTAINER_CLASSES,
+  INFO_HEADER_CLASSES,
+  TITLE_CLASSES,
+  METADATA_CONTAINER_CLASSES,
+  RATING_WRAPPER_CLASSES,
+  STAR_ICON_CLASSES,
+  RATING_VALUE_CLASSES,
+  RATING_COUNT_CLASSES,
+  LOCATION_WRAPPER_CLASSES,
+  LOCATION_ICON_CLASSES,
+  PRICE_CONTAINER_CLASSES,
+  PRICE_WRAPPER_CLASSES,
+  PRICE_CLASSES,
+  OLD_PRICE_CLASSES,
+  PRICE_UNIT_CLASSES,
+  DESCRIPTION_CONTAINER_CLASSES,
+  DESCRIPTION_CLASSES,
+  SERVICES_CONTAINER_CLASSES,
+  SERVICE_TAG_CLASSES,
+  MORE_SERVICES_CLASSES,
+  ACTIONS_CONTAINER_CLASSES,
+  CONTACT_BUTTON_CLASSES,
+  CONTACT_ICON_CLASSES,
+  BOOKING_BUTTON_CLASSES,
+  BOOKING_ICON_CLASSES,
+  FAVORITE_BUTTON_CLASSES,
+  FAVORITE_ICON_CLASSES
+} = styleConstants
+
+// Состояние компонента
+const state = ref<AdCardListItemState>({
+  imageError: false,
+  isProcessingFavorite: false,
+  isContactingMaster: false,
+  isOpeningBooking: false
 })
 
-// Состояние
-const imageError = ref(false)
+// Отдельные для удобства
+const imageError = computed<boolean>({
+  get: () => state.value.imageError,
+  set: (value: boolean) => { state.value.imageError = value }
+})
 
-// Вычисляемые свойства
-const isFavorite = computed(() => props.ad.is_favorite || false)
+// Вычисляемые свойства с типизацией
+const isFavorite = computed<boolean>(() => 
+  Boolean(props.ad.is_favorite)
+)
 
-const adPhoto = computed(() => {
+const adPhoto = computed<string>(() => {
   if (imageError.value) {
     return '/images/placeholders/master-1.jpg'
   }
   
-  if (props.ad.images && props.ad.images.length > 0) {
+  // Проверяем images
+  if (props.ad.images && Array.isArray(props.ad.images) && props.ad.images.length > 0) {
     const firstImage = props.ad.images[0]
-    return firstImage.url || firstImage.path || firstImage
+    if (typeof firstImage === 'object' && firstImage) {
+      return firstImage.url || firstImage.path || '/images/placeholders/master-1.jpg'
+    }
+    return String(firstImage) || '/images/placeholders/master-1.jpg'
   }
   
-  if (props.ad.photos && props.ad.photos.length > 0) {
+  // Проверяем photos
+  if (props.ad.photos && Array.isArray(props.ad.photos) && props.ad.photos.length > 0) {
     const firstPhoto = props.ad.photos[0]
-    return firstPhoto.url || firstPhoto.path || firstPhoto
+    if (typeof firstPhoto === 'object' && firstPhoto) {
+      return firstPhoto.url || firstPhoto.path || '/images/placeholders/master-1.jpg'
+    }
+    return String(firstPhoto) || '/images/placeholders/master-1.jpg'
   }
   
+  // Остальные варианты
   return props.ad.avatar || 
          props.ad.main_photo || 
          '/images/placeholders/master-1.jpg'
 })
 
-const displayServices = computed(() => {
+const displayServices = computed<AdService[]>(() => {
   if (!props.ad.services || !Array.isArray(props.ad.services)) {
     return []
   }
   return props.ad.services.slice(0, 3)
 })
 
-const hasMoreServices = computed(() => {
-  return props.ad.services && props.ad.services.length > 3
+const hasMoreServices = computed<boolean>(() => {
+  return Boolean(props.ad.services && props.ad.services.length > 3)
 })
 
-// Методы
-const formatPrice = (price) => {
-  if (!price) return '2000'
+const formattedPrice = computed<string>(() => {
+  const price = props.ad.price || props.ad.price_from
+  return formatPrice(price)
+})
+
+const formattedOldPrice = computed<string | undefined>(() => {
+  return props.ad.old_price ? formatPrice(props.ad.old_price) : undefined
+})
+
+const adDescription = computed<string>(() => {
+  return getDescription()
+})
+
+// Методы с типизацией
+const formatPrice = (price?: number): string => {
+  if (!price || typeof price !== 'number') {
+    return '2 000'
+  }
   return new Intl.NumberFormat('ru-RU').format(price)
 }
 
-const getDescription = () => {
+const getDescription = (): string => {
   return props.ad.description || 
          props.ad.specialty || 
          'Профессиональный массаж и SPA услуги'
 }
 
-const handleImageError = () => {
-  imageError.value = true
-}
-
-const openAd = () => {
-  router.visit(`/ads/${props.ad.id}`)
-}
-
-const toggleFavorite = () => {
-  router.post('/api/favorites/toggle', {
-    ad_id: props.ad.id
-  }, {
-    preserveState: true,
-    preserveScroll: true
-  })
-}
-
-const contactMaster = () => {
-  if (props.ad.phone && props.ad.show_contacts) {
-    window.location.href = `tel:${props.ad.phone.replace(/\D/g, '')}`
-  } else {
-    toast.info('Контакты будут доступны после записи')
+const handleImageError = (): void => {
+  try {
+    imageError.value = true
+    
+    // Логируем ошибку для аналитики
+    console.warn(`Image load error for ad ${props.ad.id}:`, {
+      attemptedUrl: adPhoto.value,
+      adId: props.ad.id,
+      timestamp: new Date().toISOString()
+    })
+  } catch (error: unknown) {
+    console.error('Error in handleImageError:', error)
   }
 }
 
-const openBooking = () => {
-  router.visit(`/ads/${props.ad.id}?booking=true`)
+const openAd = (): void => {
+  try {
+    const url = `/ads/${props.ad.id}`
+    router.visit(url)
+    
+    // Логируем клик
+    console.log(`Opening ad ${props.ad.id}`)
+  } catch (error: unknown) {
+    const adError: AdCardError = {
+      type: 'navigation',
+      message: 'Ошибка при открытии объявления',
+      adId: props.ad.id,
+      originalError: error
+    }
+    handleError(adError)
+  }
+}
+
+const toggleFavorite = async (): Promise<void> => {
+  if (state.value.isProcessingFavorite) {
+    return
+  }
+  
+  try {
+    state.value.isProcessingFavorite = true
+    
+    await router.post('/api/favorites/toggle', {
+      ad_id: props.ad.id
+    }, {
+      preserveState: true,
+      preserveScroll: true,
+      onSuccess: (response) => {
+        const currentState = isFavorite.value
+        toast.success(currentState ? 'Удалено из избранного' : 'Добавлено в избранное')
+      },
+      onError: (errors) => {
+        console.error('Favorite toggle error:', errors)
+        toast.error('Ошибка при добавлении в избранное')
+      }
+    })
+  } catch (error: unknown) {
+    const adError: AdCardError = {
+      type: 'favorite_toggle',
+      message: 'Ошибка при добавлении в избранное',
+      adId: props.ad.id,
+      originalError: error
+    }
+    handleError(adError)
+  } finally {
+    state.value.isProcessingFavorite = false
+  }
+}
+
+const contactMaster = (): void => {
+  if (state.value.isContactingMaster) {
+    return
+  }
+  
+  try {
+    state.value.isContactingMaster = true
+    
+    if (props.ad.phone && props.ad.show_contacts) {
+      const cleanPhone = props.ad.phone.replace(/\D/g, '')
+      
+      if (cleanPhone.length >= 10) {
+        window.location.href = `tel:${cleanPhone}`
+        toast.info('Открываю приложение для звонка...')
+      } else {
+        toast.error('Некорректный номер телефона')
+      }
+    } else {
+      toast.info('Контакты будут доступны после записи')
+    }
+  } catch (error: unknown) {
+    const adError: AdCardError = {
+      type: 'contact',
+      message: 'Ошибка при обращении к мастеру',
+      adId: props.ad.id,
+      originalError: error
+    }
+    handleError(adError)
+  } finally {
+    setTimeout(() => {
+      state.value.isContactingMaster = false
+    }, 1000)
+  }
+}
+
+const openBooking = (): void => {
+  if (state.value.isOpeningBooking) {
+    return
+  }
+  
+  try {
+    state.value.isOpeningBooking = true
+    
+    const url = `/ads/${props.ad.id}?booking=true`
+    router.visit(url)
+    
+    console.log(`Opening booking for ad ${props.ad.id}`)
+  } catch (error: unknown) {
+    const adError: AdCardError = {
+      type: 'booking',
+      message: 'Ошибка при открытии бронирования',
+      adId: props.ad.id,
+      originalError: error
+    }
+    handleError(adError)
+  } finally {
+    setTimeout(() => {
+      state.value.isOpeningBooking = false
+    }, 500)
+  }
+}
+
+// Обработка ошибок
+const handleError = (error: AdCardError): void => {
+  console.error(`AdCardListItem Error [${error.type}]:`, {
+    message: error.message,
+    adId: error.adId,
+    originalError: error.originalError,
+    timestamp: new Date().toISOString()
+  })
+  
+  toast.error(error.message)
+}
+
+// Вспомогательные методы
+const getServiceName = (service: AdService | string): string => {
+  if (typeof service === 'string') {
+    return service
+  }
+  return service.name || 'Услуга'
+}
+
+const getServiceKey = (service: AdService | string, index: number): string | number => {
+  if (typeof service === 'object' && service.id) {
+    return service.id
+  }
+  return index
 }
 </script>

@@ -1,12 +1,6 @@
-import { ref } from 'vue'
+// useId.ts - Generate unique IDs
+let counter = 0
 
-let idCounter = 0
-
-/**
- * Генерирует уникальный ID для элементов формы
- * Важно для доступности (ARIA)
- */
-export function useId(prefix = 'id'): string {
-  const id = ref(`${prefix}-${++idCounter}-${Math.random().toString(36).substr(2, 9)}`)
-  return id.value
+export function useId(prefix = 'id') {
+  return `${prefix}-${++counter}-${Date.now()}`
 }

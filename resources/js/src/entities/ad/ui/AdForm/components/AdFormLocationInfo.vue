@@ -19,9 +19,9 @@
 
 <script setup>
 // Модули локации и контактов
-import AdFormServiceLocation from '../modules/Location/AdFormServiceLocation.vue'
-import AdFormGeography from '../modules/Location/AdFormGeography.vue'
-import AdFormContacts from '../modules/Location/AdFormContacts.vue'
+import AdFormServiceLocation from './AdFormServiceLocation.vue'
+import AdFormGeography from './AdFormGeography.vue'
+import AdFormContacts from './AdFormContacts.vue'
 
 // 🎯 Стили согласно дизайн-системе
 const SECTION_CLASSES = 'space-y-6'

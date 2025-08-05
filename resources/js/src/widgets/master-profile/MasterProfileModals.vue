@@ -22,8 +22,7 @@
           <div :class="URL_INPUT_CONTAINER_CLASSES">
             <input
               ref="urlInput"
-              :value="masterUrl"
-              readonly
+              :value="masterUrl" readonly
               :class="URL_INPUT_CLASSES"
             >
             <button
@@ -281,6 +280,7 @@ const submitReport = async () => {
     // Здесь бы был API вызов
     await new Promise(resolve => setTimeout(resolve, 1000))
     
+    console.log('Отправлена жалоба:', {
       masterId: props.master.id,
       reason: reportForm.value.reason,
       comment: reportForm.value.comment
@@ -295,6 +295,7 @@ const submitReport = async () => {
       comment: ''
     }
   } catch (error) {
+    console.error('Ошибка при отправке жалобы:', error)
   } finally {
     reportSubmitting.value = false
   }

@@ -1,0 +1,1 @@
+export { default as MasterProfile } from './MasterProfile.vue'

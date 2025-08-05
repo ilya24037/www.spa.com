@@ -1,24 +1,28 @@
-<script setup>
+<script setup lang="ts">
 import AppLayout from '@/Layouts/AppLayout.vue'
-import InputError from '@/Components/UI/Forms/InputError.vue';
-import InputLabel from '@/Components/UI/Forms/InputLabel.vue';
-import PrimaryButton from '@/Components/UI/Forms/PrimaryButton.vue';
-import TextInput from '@/Components/UI/Forms/TextInput.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import InputError from '@/Components/UI/Forms/InputError.vue'
+import InputLabel from '@/Components/UI/Forms/InputLabel.vue'
+import PrimaryButton from '@/Components/UI/Forms/PrimaryButton.vue'
+import TextInput from '@/Components/UI/Forms/TextInput.vue'
+import { Head, useForm } from '@inertiajs/vue3'
 
-defineProps({
-    status: {
-        type: String,
-    },
-});
+interface ForgotPasswordProps {
+  status?: string
+}
 
-const form = useForm({
-    email: '',
-});
+defineProps<ForgotPasswordProps>()
 
-const submit = () => {
-    form.post(route('password.email'));
-};
+interface ForgotPasswordForm {
+  email: string
+}
+
+const form = useForm<ForgotPasswordForm>({
+  email: '',
+})
+
+const submit = (): void => {
+  form.post(route('password.email'))
+}
 </script>
 
 <template>

@@ -1,0 +1,946 @@
+{
+  "timestamp": "2025-08-04T13:08:15.144Z",
+  "summary": {
+    "totalComponents": 211,
+    "legacyComponents": 88,
+    "fsdComponents": 123,
+    "duplicatesFound": 17,
+    "similarFound": 876
+  },
+  "statistics": {
+    "legacy": {
+      "count": 88,
+      "totalLines": 16941,
+      "averageLines": 193,
+      "averageComplexity": 8
+    },
+    "fsd": {
+      "count": 123,
+      "totalLines": 20774,
+      "averageLines": 169,
+      "averageComplexity": 9
+    }
+  },
+  "duplicates": [
+    {
+      "name": "BookingForm",
+      "count": 2,
+      "locations": [
+        {
+          "path": "resources\\js\\Components\\Booking\\BookingForm.vue",
+          "lines": 746,
+          "type": "legacy"
+        },
+        {
+          "path": "resources\\js\\src\\features\\booking-form\\ui\\BookingForm\\BookingForm.vue",
+          "lines": 417,
+          "type": "fsd"
+        }
+      ]
+    },
+    {
+      "name": "Card",
+      "count": 2,
+      "locations": [
+        {
+          "path": "resources\\js\\Components\\Cards\\Card.vue",
+          "lines": 281,
+          "type": "legacy"
+        },
+        {
+          "path": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue",
+          "lines": 236,
+          "type": "fsd"
+        }
+      ]
+    },
+    {
+      "name": "BookingWidget",
+      "count": 2,
+      "locations": [
+        {
+          "path": "resources\\js\\Components\\Features\\MasterShow\\components\\BookingWidget.vue",
+          "lines": 162,
+          "type": "legacy"
+        },
+        {
+          "path": "resources\\js\\src\\entities\\booking\\ui\\BookingWidget\\BookingWidget.vue",
+          "lines": 398,
+          "type": "fsd"
+        }
+      ]
+    },
+    {
+      "name": "MasterInfo",
+      "count": 2,
+      "locations": [
+        {
+          "path": "resources\\js\\Components\\Features\\MasterShow\\components\\MasterInfo.vue",
+          "lines": 37,
+          "type": "legacy"
+        },
+        {
+          "path": "resources\\js\\src\\entities\\master\\ui\\MasterInfo\\MasterInfo.vue",
+          "lines": 266,
+          "type": "fsd"
+        }
+      ]
+    },
+    {
+      "name": "ReviewsList",
+      "count": 2,
+      "locations": [
+        {
+          "path": "resources\\js\\Components\\Features\\MasterShow\\components\\ReviewsList.vue",
+          "lines": 44,
+          "type": "legacy"
+        },
+        {
+          "path": "resources\\js\\Components\\Reviews\\ReviewsList.vue",
+          "lines": 464,
+          "type": "legacy"
+        }
+      ]
+    },
+    {
+      "name": "index",
+      "count": 9,
+      "locations": [
+        {
+          "path": "resources\\js\\Components\\Features\\MasterShow\\index.vue",
+          "lines": 88,
+          "type": "legacy"
+        },
+        {
+          "path": "resources\\js\\Components\\Features\\PhotoUploader\\index.vue",
+          "lines": 633,
+          "type": "legacy"
+        },
+        {
+          "path": "resources\\js\\Components\\Features\\Services\\index.vue",
+          "lines": 462,
+          "type": "legacy"
+        },
+        {
+          "path": "resources\\js\\Components\\Masters\\MasterDescription\\index.vue",
+          "lines": 71,
+          "type": "legacy"
+        },
+        {
+          "path": "resources\\js\\Components\\Masters\\MasterDetails\\index.vue",
+          "lines": 277,
+          "type": "legacy"
+        },
+        {
+          "path": "resources\\js\\Components\\Masters\\MasterHeader\\index.vue",
+          "lines": 102,
+          "type": "legacy"
+        },
+        {
+          "path": "resources\\js\\Components\\Media\\MediaGallery\\index.vue",
+          "lines": 148,
+          "type": "legacy"
+        },
+        {
+          "path": "resources\\js\\Components\\Media\\MediaUploader\\index.vue",
+          "lines": 49,
+          "type": "legacy"
+        },
+        {
+          "path": "resources\\js\\src\\entities\\booking\\ui\\BookingWidget\\index.vue",
+          "lines": 60,
+          "type": "fsd"
+        }
+      ]
+    },
+    {
+      "name": "VideoUploader",
+      "count": 2,
+      "locations": [
+        {
+          "path": "resources\\js\\Components\\Features\\PhotoUploader\\VideoUploader.vue",
+          "lines": 396,
+          "type": "legacy"
+        },
+        {
+          "path": "resources\\js\\Components\\Form\\Upload\\VideoUploader.vue",
+          "lines": 411,
+          "type": "legacy"
+        }
+      ]
+    },
+    {
+      "name": "PhotoUploader",
+      "count": 2,
+      "locations": [
+        {
+          "path": "resources\\js\\Components\\Form\\Upload\\PhotoUploader.vue",
+          "lines": 467,
+          "type": "legacy"
+        },
+        {
+          "path": "resources\\js\\Components\\Media\\MediaUploader\\PhotoUploader.vue",
+          "lines": 117,
+          "type": "legacy"
+        }
+      ]
+    },
+    {
+      "name": "BookingModal",
+      "count": 2,
+      "locations": [
+        {
+          "path": "resources\\js\\Components\\Modals\\BookingModal.vue",
+          "lines": 130,
+          "type": "legacy"
+        },
+        {
+          "path": "resources\\js\\src\\entities\\booking\\ui\\BookingModal\\BookingModal.vue",
+          "lines": 712,
+          "type": "fsd"
+        }
+      ]
+    },
+    {
+      "name": "InputError",
+      "count": 2,
+      "locations": [
+        {
+          "path": "resources\\js\\Components\\UI\\Forms\\InputError.vue",
+          "lines": 14,
+          "type": "legacy"
+        },
+        {
+          "path": "resources\\js\\src\\shared\\ui\\organisms\\Forms\\InputError.vue",
+          "lines": 14,
+          "type": "fsd"
+        }
+      ]
+    },
+    {
+      "name": "InputLabel",
+      "count": 2,
+      "locations": [
+        {
+          "path": "resources\\js\\Components\\UI\\Forms\\InputLabel.vue",
+          "lines": 28,
+          "type": "legacy"
+        },
+        {
+          "path": "resources\\js\\src\\shared\\ui\\organisms\\Forms\\InputLabel.vue",
+          "lines": 12,
+          "type": "fsd"
+        }
+      ]
+    },
+    {
+      "name": "PrimaryButton",
+      "count": 2,
+      "locations": [
+        {
+          "path": "resources\\js\\Components\\UI\\Forms\\PrimaryButton.vue",
+          "lines": 31,
+          "type": "legacy"
+        },
+        {
+          "path": "resources\\js\\src\\shared\\ui\\molecules\\Buttons\\PrimaryButton.vue",
+          "lines": 20,
+          "type": "fsd"
+        }
+      ]
+    },
+    {
+      "name": "SecondaryButton",
+      "count": 2,
+      "locations": [
+        {
+          "path": "resources\\js\\Components\\UI\\Forms\\SecondaryButton.vue",
+          "lines": 31,
+          "type": "legacy"
+        },
+        {
+          "path": "resources\\js\\src\\shared\\ui\\molecules\\Buttons\\SecondaryButton.vue",
+          "lines": 8,
+          "type": "fsd"
+        }
+      ]
+    },
+    {
+      "name": "TextInput",
+      "count": 2,
+      "locations": [
+        {
+          "path": "resources\\js\\Components\\UI\\Forms\\TextInput.vue",
+          "lines": 57,
+          "type": "legacy"
+        },
+        {
+          "path": "resources\\js\\src\\shared\\ui\\organisms\\Forms\\TextInput.vue",
+          "lines": 23,
+          "type": "fsd"
+        }
+      ]
+    },
+    {
+      "name": "PhotoGallery",
+      "count": 2,
+      "locations": [
+        {
+          "path": "resources\\js\\src\\features\\gallery\\ui\\PhotoGallery\\PhotoGallery.vue",
+          "lines": 185,
+          "type": "fsd"
+        },
+        {
+          "path": "resources\\js\\src\\features\\gallery\\ui\\PhotoGalleryLegacy\\PhotoGallery.vue",
+          "lines": 371,
+          "type": "fsd"
+        }
+      ]
+    },
+    {
+      "name": "MapMarker",
+      "count": 2,
+      "locations": [
+        {
+          "path": "resources\\js\\src\\features\\map\\ui\\MapLegacy\\MapMarker.vue",
+          "lines": 1,
+          "type": "fsd"
+        },
+        {
+          "path": "resources\\js\\src\\features\\map\\ui\\MapMarker\\MapMarker.vue",
+          "lines": 103,
+          "type": "fsd"
+        }
+      ]
+    },
+    {
+      "name": "UniversalMap",
+      "count": 2,
+      "locations": [
+        {
+          "path": "resources\\js\\src\\features\\map\\ui\\MapLegacy\\UniversalMap.vue",
+          "lines": 400,
+          "type": "fsd"
+        },
+        {
+          "path": "resources\\js\\src\\features\\map\\ui\\UniversalMap\\UniversalMap.vue",
+          "lines": 260,
+          "type": "fsd"
+        }
+      ]
+    }
+  ],
+  "similar": [
+    {
+      "component1": {
+        "name": "AuthModal",
+        "path": "resources\\js\\Components\\Auth\\AuthModal.vue"
+      },
+      "component2": {
+        "name": "Card",
+        "path": "resources\\js\\Components\\Cards\\Card.vue"
+      },
+      "similarity": 100
+    },
+    {
+      "component1": {
+        "name": "AuthModal",
+        "path": "resources\\js\\Components\\Auth\\AuthModal.vue"
+      },
+      "component2": {
+        "name": "AuthBlock",
+        "path": "resources\\js\\Components\\Header\\AuthBlock.vue"
+      },
+      "similarity": 89
+    },
+    {
+      "component1": {
+        "name": "AuthModal",
+        "path": "resources\\js\\Components\\Auth\\AuthModal.vue"
+      },
+      "component2": {
+        "name": "CityModal",
+        "path": "resources\\js\\Components\\Header\\CityModal.vue"
+      },
+      "similarity": 96
+    },
+    {
+      "component1": {
+        "name": "AuthModal",
+        "path": "resources\\js\\Components\\Auth\\AuthModal.vue"
+      },
+      "component2": {
+        "name": "AdCard",
+        "path": "resources\\js\\src\\entities\\ad\\ui\\AdCard\\AdCard.vue"
+      },
+      "similarity": 100
+    },
+    {
+      "component1": {
+        "name": "AuthModal",
+        "path": "resources\\js\\Components\\Auth\\AuthModal.vue"
+      },
+      "component2": {
+        "name": "AdForm",
+        "path": "resources\\js\\src\\entities\\ad\\ui\\AdForm\\AdForm.vue"
+      },
+      "similarity": 95
+    },
+    {
+      "component1": {
+        "name": "AuthModal",
+        "path": "resources\\js\\Components\\Auth\\AuthModal.vue"
+      },
+      "component2": {
+        "name": "Card",
+        "path": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      "similarity": 100
+    },
+    {
+      "component1": {
+        "name": "AuthModal",
+        "path": "resources\\js\\Components\\Auth\\AuthModal.vue"
+      },
+      "component2": {
+        "name": "Modal",
+        "path": "resources\\js\\src\\shared\\ui\\organisms\\Modal\\Modal.vue"
+      },
+      "similarity": 100
+    },
+    {
+      "component1": {
+        "name": "RegisterModal",
+        "path": "resources\\js\\Components\\Auth\\RegisterModal.vue"
+      },
+      "component2": {
+        "name": "Card",
+        "path": "resources\\js\\Components\\Cards\\Card.vue"
+      },
+      "similarity": 100
+    },
+    {
+      "component1": {
+        "name": "RegisterModal",
+        "path": "resources\\js\\Components\\Auth\\RegisterModal.vue"
+      },
+      "component2": {
+        "name": "Card",
+        "path": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      "similarity": 98
+    },
+    {
+      "component1": {
+        "name": "RegisterModal",
+        "path": "resources\\js\\Components\\Auth\\RegisterModal.vue"
+      },
+      "component2": {
+        "name": "Modal",
+        "path": "resources\\js\\src\\shared\\ui\\organisms\\Modal\\Modal.vue"
+      },
+      "similarity": 100
+    },
+    {
+      "component1": {
+        "name": "BookingForm",
+        "path": "resources\\js\\Components\\Booking\\BookingForm.vue"
+      },
+      "component2": {
+        "name": "BookingSuccessModal",
+        "path": "resources\\js\\Components\\Booking\\BookingSuccessModal.vue"
+      },
+      "similarity": 100
+    },
+    {
+      "component1": {
+        "name": "BookingForm",
+        "path": "resources\\js\\Components\\Booking\\BookingForm.vue"
+      },
+      "component2": {
+        "name": "Card",
+        "path": "resources\\js\\Components\\Cards\\Card.vue"
+      },
+      "similarity": 100
+    },
+    {
+      "component1": {
+        "name": "BookingForm",
+        "path": "resources\\js\\Components\\Booking\\BookingForm.vue"
+      },
+      "component2": {
+        "name": "BookingWidget",
+        "path": "resources\\js\\Components\\Features\\MasterShow\\components\\BookingWidget.vue"
+      },
+      "similarity": 100
+    },
+    {
+      "component1": {
+        "name": "BookingForm",
+        "path": "resources\\js\\Components\\Booking\\BookingForm.vue"
+      },
+      "component2": {
+        "name": "BookingModal",
+        "path": "resources\\js\\Components\\Modals\\BookingModal.vue"
+      },
+      "similarity": 100
+    },
+    {
+      "component1": {
+        "name": "BookingForm",
+        "path": "resources\\js\\Components\\Booking\\BookingForm.vue"
+      },
+      "component2": {
+        "name": "BookingCalendar",
+        "path": "resources\\js\\src\\entities\\booking\\ui\\BookingCalendar\\BookingCalendar.vue"
+      },
+      "similarity": 100
+    },
+    {
+      "component1": {
+        "name": "BookingForm",
+        "path": "resources\\js\\Components\\Booking\\BookingForm.vue"
+      },
+      "component2": {
+        "name": "BookingModal",
+        "path": "resources\\js\\src\\entities\\booking\\ui\\BookingModal\\BookingModal.vue"
+      },
+      "similarity": 93
+    },
+    {
+      "component1": {
+        "name": "BookingForm",
+        "path": "resources\\js\\Components\\Booking\\BookingForm.vue"
+      },
+      "component2": {
+        "name": "BookingStatus",
+        "path": "resources\\js\\src\\entities\\booking\\ui\\BookingStatus\\BookingStatus.vue"
+      },
+      "similarity": 100
+    },
+    {
+      "component1": {
+        "name": "BookingForm",
+        "path": "resources\\js\\Components\\Booking\\BookingForm.vue"
+      },
+      "component2": {
+        "name": "BookingActions",
+        "path": "resources\\js\\src\\entities\\booking\\ui\\BookingWidget\\BookingActions.vue"
+      },
+      "similarity": 100
+    },
+    {
+      "component1": {
+        "name": "BookingForm",
+        "path": "resources\\js\\Components\\Booking\\BookingForm.vue"
+      },
+      "component2": {
+        "name": "BookingWidget",
+        "path": "resources\\js\\src\\entities\\booking\\ui\\BookingWidget\\BookingWidget.vue"
+      },
+      "similarity": 100
+    },
+    {
+      "component1": {
+        "name": "BookingForm",
+        "path": "resources\\js\\Components\\Booking\\BookingForm.vue"
+      },
+      "component2": {
+        "name": "BookingForm",
+        "path": "resources\\js\\src\\features\\booking-form\\ui\\BookingForm\\BookingForm.vue"
+      },
+      "similarity": 91
+    }
+  ],
+  "migrationProgress": {
+    "completed": [
+      {
+        "legacy": "resources\\js\\Components\\Auth\\AuthModal.vue",
+        "fsd": "resources\\js\\src\\entities\\ad\\ui\\AdCard\\AdCard.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Auth\\RegisterModal.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Booking\\BookingForm.vue",
+        "fsd": "resources\\js\\src\\entities\\booking\\ui\\BookingCalendar\\BookingCalendar.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Booking\\BookingSuccessModal.vue",
+        "fsd": "resources\\js\\src\\entities\\booking\\ui\\BookingModal\\BookingModal.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Booking\\Calendar.vue",
+        "fsd": "resources\\js\\src\\entities\\booking\\ui\\BookingCalendar\\BookingCalendar.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Cards\\Card.vue",
+        "fsd": "resources\\js\\src\\entities\\ad\\ui\\AdCard\\AdCard.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Cards\\ItemActions.vue",
+        "fsd": "resources\\js\\src\\entities\\ad\\ui\\AdCard\\ItemCard.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Cards\\ItemActionsDropdown.vue",
+        "fsd": "resources\\js\\src\\entities\\ad\\ui\\AdCard\\ItemCard.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Cards\\ItemContent.vue",
+        "fsd": "resources\\js\\src\\entities\\ad\\ui\\AdCard\\ItemCard.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Cards\\ItemImage.vue",
+        "fsd": "resources\\js\\src\\entities\\ad\\ui\\AdCard\\ItemCard.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Cards\\ItemStats.vue",
+        "fsd": "resources\\js\\src\\entities\\ad\\ui\\AdCard\\ItemCard.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Cards\\ListCard.vue",
+        "fsd": "resources\\js\\src\\entities\\ad\\ui\\AdCard\\AdCardListItem.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Cards\\ServiceCard.vue",
+        "fsd": "resources\\js\\src\\entities\\master\\ui\\MasterServices\\MasterServices.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Features\\MasterShow\\components\\BookingWidget.vue",
+        "fsd": "resources\\js\\src\\entities\\booking\\ui\\BookingModal\\BookingModal.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Features\\MasterShow\\components\\MasterInfo.vue",
+        "fsd": "resources\\js\\src\\entities\\master\\ui\\MasterCard\\MasterCard.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Features\\MasterShow\\components\\ReviewsList.vue",
+        "fsd": "resources\\js\\src\\entities\\master\\ui\\MasterReviews\\MasterReviews.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Features\\MasterShow\\components\\ServicesList.vue",
+        "fsd": "resources\\js\\src\\entities\\master\\ui\\MasterServices\\MasterServices.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Features\\MasterShow\\index.vue",
+        "fsd": "resources\\js\\src\\entities\\booking\\ui\\BookingWidget\\index.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Features\\PhotoUploader\\index.vue",
+        "fsd": "resources\\js\\src\\entities\\booking\\ui\\BookingWidget\\index.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Features\\PhotoUploader\\VideoUploader.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Features\\PhotoUploader\\архив index.vue",
+        "fsd": "resources\\js\\src\\entities\\booking\\ui\\BookingWidget\\index.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Features\\Services\\components\\ServiceCategory.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Features\\Services\\components\\ServiceItem.vue",
+        "fsd": "resources\\js\\src\\entities\\master\\ui\\MasterServices\\MasterServices.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Features\\Services\\index.vue",
+        "fsd": "resources\\js\\src\\entities\\booking\\ui\\BookingWidget\\index.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Footer\\Footer.vue",
+        "fsd": "resources\\js\\src\\entities\\master\\ui\\MasterCard\\MasterCard.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Form\\Controls\\PriceInput.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\atoms\\Input\\Input.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Form\\Geo\\GeoSuggest.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Form\\Sections\\ClientsSection.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Form\\Sections\\ContactsSection.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Form\\Sections\\DescriptionSection.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Form\\Sections\\DetailsSection.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Form\\Sections\\EducationSection.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Form\\Sections\\ExperienceSection.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Form\\Sections\\FeaturesSection.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Form\\Sections\\GeographySection.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Form\\Sections\\GeoSection.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Form\\Sections\\LocationSection.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Form\\Sections\\MediaSection.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Form\\Sections\\ParametersSection.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Form\\Sections\\PhotosSection.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Form\\Sections\\PriceListSection.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Form\\Sections\\PriceSection.vue",
+        "fsd": "resources\\js\\src\\shared\\layouts\\components\\PageSection.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Form\\Sections\\PromoSection.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Form\\Sections\\ScheduleSection.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Form\\Sections\\ServiceProviderSection.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Form\\Sections\\SpecialtySection.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Form\\Sections\\TitleSection.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Form\\Sections\\VideosSection.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Form\\Sections\\WorkFormatSection.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Form\\Upload\\PhotoUploader.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Form\\Upload\\VideoUploader.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Header\\AuthBlock.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Header\\CatalogDropdown.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\molecules\\Navigation\\Dropdown.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Header\\CityModal.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Header\\CitySelector.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Header\\CompareButton.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\atoms\\Button\\Button.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Header\\FavoritesButton.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\atoms\\Button\\Button.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Header\\Logo.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\molecules\\ApplicationLogo\\ApplicationLogo.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Header\\MobileMenu.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Header\\Navbar.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Header\\QuickLinks.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Header\\SearchBar.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Header\\UserMenu.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Icons\\TelegramIcon.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Icons\\WhatsAppIcon.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Masters\\MasterContactInfo.vue",
+        "fsd": "resources\\js\\src\\entities\\master\\ui\\MasterCard\\MasterCard.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Masters\\MasterDescription\\index.vue",
+        "fsd": "resources\\js\\src\\entities\\booking\\ui\\BookingWidget\\index.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Masters\\MasterDetails\\index.vue",
+        "fsd": "resources\\js\\src\\entities\\booking\\ui\\BookingWidget\\index.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Masters\\MasterDetails\\InfoBlock.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Masters\\MasterHeader\\index.vue",
+        "fsd": "resources\\js\\src\\entities\\booking\\ui\\BookingWidget\\index.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Masters\\MasterHeader\\QuickStats.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Masters\\ReviewsSection.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Masters\\ServicesSection.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Masters\\SimilarMastersSection.vue",
+        "fsd": "resources\\js\\src\\entities\\master\\ui\\MasterCard\\MasterCard.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Media\\MediaGallery\\index.vue",
+        "fsd": "resources\\js\\src\\entities\\booking\\ui\\BookingWidget\\index.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Media\\MediaGallery\\PrivacyGallery.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Media\\MediaUploader\\index.vue",
+        "fsd": "resources\\js\\src\\entities\\booking\\ui\\BookingWidget\\index.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Media\\MediaUploader\\PhotoUploader.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\MediaUpload\\MediaUploader.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\MetaTags.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Modals\\BookingModal.vue",
+        "fsd": "resources\\js\\src\\entities\\booking\\ui\\BookingCalendar\\BookingCalendar.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Modals\\PhoneModal.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\organisms\\Cards\\Card.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\Reviews\\ReviewsList.vue",
+        "fsd": "resources\\js\\src\\entities\\master\\ui\\MasterReviews\\MasterReviews.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\UI\\Forms\\InputError.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\atoms\\Input\\Input.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\UI\\Forms\\InputLabel.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\atoms\\Input\\Input.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\UI\\Forms\\PrimaryButton.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\atoms\\Button\\Button.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\UI\\Forms\\SecondaryButton.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\atoms\\Button\\Button.vue"
+      },
+      {
+        "legacy": "resources\\js\\Components\\UI\\Forms\\TextInput.vue",
+        "fsd": "resources\\js\\src\\shared\\ui\\atoms\\Input\\Input.vue"
+      }
+    ],
+    "inProgress": [],
+    "pending": []
+  },
+  "recommendations": [
+    {
+      "type": "critical",
+      "message": "Компонент \"index\" имеет 9 копий. Требуется объединение.",
+      "action": "merge"
+    },
+    {
+      "type": "refactoring",
+      "message": "40 компонентов имеют высокую сложность и требуют рефакторинга",
+      "components": [
+        {
+          "name": "BookingForm",
+          "complexity": 41
+        },
+        {
+          "name": "Calendar",
+          "complexity": 30
+        },
+        {
+          "name": "Card",
+          "complexity": 24
+        },
+        {
+          "name": "ItemImage",
+          "complexity": 16
+        },
+        {
+          "name": "index",
+          "complexity": 28
+        }
+      ]
+    }
+  ]
+}

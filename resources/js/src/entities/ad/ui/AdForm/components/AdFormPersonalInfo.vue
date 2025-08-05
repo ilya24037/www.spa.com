@@ -16,8 +16,8 @@
 
 <script setup>
 // Модули персональной информации
-import AdFormParameters from '../modules/PersonalInfo/AdFormParameters.vue'
-import AdFormFeatures from '../modules/PersonalInfo/AdFormFeatures.vue'
+import AdFormParameters from './AdFormParameters.vue'
+import AdFormFeatures from './AdFormFeatures.vue'
 
 // 🎯 Стили согласно дизайн-системе
 const SECTION_CLASSES = 'space-y-6'

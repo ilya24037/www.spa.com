@@ -1,4 +1,4 @@
-import { ref, reactive, computed } from 'vue'
+import { computed } from 'vue'
 import { useErrorHandler } from './useErrorHandler'
 import { useAsyncAction } from './useAsyncAction'
 
@@ -39,9 +39,9 @@ export function useForm<T extends Record<string, any>>(options: FormOptions<T>) 
   const { initialValues, validate, onSubmit } = options
   
   // Состояние формы
-  const values = reactive<T>({ ...initialValues })
-  const touched = reactive<Record<string, boolean>>({})
-  const errors = reactive<Record<string, string>>({})
+  const values = ref<T>({ ...initialValues })
+  const touched =<Record<string, boolean>>({})
+  const errors =<Record<string, string>>({})
   
   // Async action для submit
   const { execute, loading } = useAsyncAction()

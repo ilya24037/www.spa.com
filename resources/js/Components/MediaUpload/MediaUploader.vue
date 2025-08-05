@@ -161,8 +161,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, type Ref } from 'vue'
-import { router } from '@inertiajs/vue3'
+import { ref, type Ref } from 'vue'
 import { useToast } from '@/src/shared/composables/useToast'
 import type { 
   MediaUploaderProps, 
@@ -184,10 +183,10 @@ const props = withDefaults(defineProps<MediaUploaderProps>(), {
 const emit = defineEmits<MediaUploaderEmits>()
 
 // Состояние
-const photos: Ref<Photo[]> = ref([...props.initialPhotos])
-const video: Ref<Video | null> = ref(props.initialVideo)
-const avatarUrl: Ref<string> = ref(`/masters/${props.masterId}/avatar`)
-const uploading: Ref<UploadingState> = ref({
+const photos: import("vue").Ref<Photo[]> = ref([...props.initialPhotos])
+const video: import("vue").Ref<Video | null> = ref(props.initialVideo)
+const avatarUrl: import("vue").Ref<string> = ref(`/masters/${props.masterId}/avatar`)
+const uploading: import("vue").Ref<UploadingState> = ref({
   avatar: false,
   photos: false,
   video: false

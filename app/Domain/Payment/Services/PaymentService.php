@@ -5,6 +5,9 @@ namespace App\Domain\Payment\Services;
 use App\Domain\Payment\Models\Payment;
 use App\Domain\User\Models\User;
 use App\Domain\Payment\Repositories\PaymentRepository;
+use App\Domain\Payment\DTOs\CheckoutDTO;
+use App\Domain\Ad\Models\Ad;
+use App\Domain\Ad\Models\AdPlan;
 use App\Enums\PaymentStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentType;
@@ -594,5 +597,140 @@ class PaymentService
     public function getStatistics(array $filters = []): array
     {
         return $this->repository->getStatistics($filters);
+    }
+
+    /**
+     * Создать платеж для оплаты объявления
+     * Используется в PaymentController для рефакторинга
+     */
+    public function createCheckoutPayment(CheckoutDTO $dto): Payment
+    {
+        return DB::transaction(function () use ($dto) {
+            // Создаем платеж
+            $payment = Payment::create([
+                'user_id' => $dto->userId,
+                'ad_id' => $dto->adId,
+                'ad_plan_id' => $dto->planId,
+                'payment_id' => $dto->paymentId,
+                'amount' => $dto->amount,
+                'currency' => $dto->currency,
+                'status' => 'pending',
+                'description' => $dto->description,
+                'metadata' => $dto->metadata
+            ]);
+
+            // Логируем создание
+            Log::info('Checkout payment created', [
+                'payment_id' => $payment->id,
+                'ad_id' => $dto->adId,
+                'plan_id' => $dto->planId,
+                'amount' => $dto->amount
+            ]);
+
+            return $payment;
+        });
+    }
+
+    /**
+     * Процессинг оплаты тарифного плана
+     */
+    public function processAdPlanPayment(Ad $ad, AdPlan $plan, int $userId): Payment
+    {
+        $dto = new CheckoutDTO(
+            userId: $userId,
+            adId: $ad->id,
+            planId: $plan->id,
+            paymentId: Payment::generatePaymentId(),
+            amount: $plan->price,
+            currency: 'RUB',
+            description: 'Публикация объявления на ' . $plan->days . ' дней',
+            metadata: [
+                'ad_title' => $ad->title,
+                'plan_name' => $plan->name,
+                'plan_days' => $plan->days
+            ]
+        );
+
+        return $this->createCheckoutPayment($dto);
+    }
+
+    /**
+     * Активировать объявление после успешной оплаты
+     */
+    public function activateAdAfterPayment(Payment $payment): bool
+    {
+        if (!$payment->ad || !$payment->adPlan) {
+            return false;
+        }
+
+        return DB::transaction(function () use ($payment) {
+            // Обновляем статус платежа
+            $payment->update([
+                'status' => 'completed',
+                'paid_at' => now()
+            ]);
+
+            // Активируем объявление
+            $ad = $payment->ad;
+            $plan = $payment->adPlan;
+            
+            $ad->update([
+                'status' => Ad::STATUS_ACTIVE,
+                'is_paid' => true,
+                'paid_at' => now(),
+                'expires_at' => now()->addDays($plan->days)
+            ]);
+
+            Log::info('Ad activated after payment', [
+                'payment_id' => $payment->id,
+                'ad_id' => $ad->id,
+                'plan_id' => $plan->id
+            ]);
+
+            return true;
+        });
+    }
+
+    /**
+     * Создать платеж для пополнения баланса
+     */
+    public function createTopUpPayment(int $userId, float $amount, string $paymentMethod): Payment
+    {
+        return DB::transaction(function () use ($userId, $amount, $paymentMethod) {
+            // Получаем пользователя и его баланс
+            $user = User::findOrFail($userId);
+            $balance = $user->getBalance();
+
+            // Рассчитываем скидку
+            $discount = $balance->getDiscountForAmount($amount);
+
+            // Создаем платеж
+            $payment = Payment::create([
+                'user_id' => $userId,
+                'payment_id' => Payment::generatePaymentId(),
+                'amount' => $amount,
+                'discount_amount' => $discount['amount'],
+                'discount_percent' => $discount['percent'],
+                'final_amount' => $discount['final_amount'],
+                'currency' => 'RUB',
+                'status' => 'pending',
+                'payment_method' => $paymentMethod,
+                'purchase_type' => 'balance_top_up',
+                'description' => 'Пополнение баланса',
+                'metadata' => [
+                    'original_amount' => $amount,
+                    'discount_applied' => $discount['percent']
+                ]
+            ]);
+
+            Log::info('Top-up payment created', [
+                'payment_id' => $payment->id,
+                'user_id' => $userId,
+                'amount' => $amount,
+                'final_amount' => $discount['final_amount']
+            ]);
+
+            return $payment;
+        });
     }
 }

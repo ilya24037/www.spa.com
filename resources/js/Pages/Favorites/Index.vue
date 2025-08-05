@@ -4,19 +4,29 @@
     
     <!-- Обертка с правильными отступами как в Dashboard -->
     <div class="py-6 lg:py-8">
+        <!-- Loading состояние -->
+        <PageLoader 
+            v-if="pageLoader.isLoading.value"
+            type="catalog"
+            :message="pageLoader.message.value"
+            :show-progress="false"
+            :skeleton-count="3"
+        />
         
-        <!-- Основной контент с гэпом между блоками -->
-        <div class="flex gap-6">
-            
-            <!-- Боковая панель -->
-            <ProfileSidebar 
-                :counts="counts"
-                :user-stats="userStats"
-            />
-            
-            <!-- Основной контент -->
-            <main class="flex-1">
-                <ContentCard title="Избранные мастера">
+        <!-- Основной контент -->
+        <template v-else>
+            <!-- Основной контент с гэпом между блоками -->
+            <div class="flex gap-6">
+                
+                <!-- Боковая панель -->
+                <ProfileSidebar 
+                    :counts="counts"
+                    :user-stats="userStats"
+                />
+                
+                <!-- Основной контент -->
+                <main class="flex-1">
+                    <ContentCard title="Избранные мастера">
                     <div v-if="favorites.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <MasterCard 
                             v-for="master in favorites"
@@ -40,30 +50,103 @@
                 </ContentCard>
             </main>
         </div>
+        </template>
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { Head } from '@inertiajs/vue3'
-// 🎯 FSD Импорты
-import { ProfileSidebar, ContentCard } from '@/src/shared'
-import { MasterCard } from '@/src/entities/master'
+import { onMounted } from 'vue'
 
-// Props
-defineProps({
-    favorites: {
-        type: Array,
-        default: () => []
-    },
-    counts: {
-        type: Object,
-        default: () => ({})
-    },
-    userStats: {
-        type: Object,
-        default: () => ({})
-    }
+// 🎯 FSD Импорты
+import ProfileSidebar from '@/src/shared/ui/organisms/ProfileSidebar/ProfileSidebar.vue'
+import ContentCard from '@/src/shared/ui/organisms/ContentCard/ContentCard.vue'
+import MasterCard from '@/src/entities/master/ui/MasterCard/MasterCard.vue'
+import PageLoader from '@/src/shared/ui/organisms/PageLoader/PageLoader.vue'
+import { usePageLoading } from '@/src/shared/composables/usePageLoading'
+
+// Типизация данных
+interface Master {
+  id: number | string
+  name: string
+  display_name?: string
+  avatar?: string
+  specialty?: string
+  rating?: number
+  [key: string]: any
+}
+
+interface UserStats {
+  views: number
+  calls: number
+  bookings: number
+  revenue: number
+}
+
+interface Counts {
+  ads: number
+  bookings: number
+  reviews: number
+  favorites: number
+  [key: string]: number
+}
+
+interface FavoritesIndexProps {
+  favorites: Master[]
+  counts: Counts
+  userStats: UserStats
+}
+
+// Props с типизацией
+const props = withDefaults(defineProps<FavoritesIndexProps>(), {
+  favorites: () => [],
+  counts: () => ({
+    ads: 0,
+    bookings: 0,
+    reviews: 0,
+    favorites: 0
+  }),
+  userStats: () => ({
+    views: 0,
+    calls: 0,
+    bookings: 0,
+    revenue: 0
+  })
 })
 
-// Больше нет локального состояния - все в ProfileSidebar
+// Управление загрузкой страницы
+const pageLoader = usePageLoading({
+  type: 'catalog',
+  autoStart: true,
+  timeout: 8000,
+  onStart: () => {
+    console.log('Favorites page loading started')
+  },
+  onComplete: () => {
+    console.log('Favorites page loading completed')
+  },
+  onError: (error) => {
+    console.error('Favorites page loading error:', error)
+  }
+})
+
+// Инициализация при монтировании
+onMounted(() => {
+  // Поэтапная загрузка для лучшего UX
+  setTimeout(() => {
+    pageLoader.setProgress(40, 'Загружаем избранных мастеров...')
+  }, 300)
+
+  setTimeout(() => {
+    pageLoader.setProgress(70, 'Обрабатываем статистику...')
+  }, 700)
+
+  setTimeout(() => {
+    pageLoader.setProgress(90, 'Подготавливаем интерфейс...')
+  }, 1100)
+
+  setTimeout(() => {
+    pageLoader.completeLoading()
+  }, 1500)
+})
 </script>

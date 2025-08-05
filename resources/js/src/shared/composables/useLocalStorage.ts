@@ -1,4 +1,4 @@
-import { ref, watch, Ref } from 'vue'
+import { watch, Ref } from 'vue'
 
 /**
  * Composable для работы с localStorage с реактивностью
@@ -17,7 +17,7 @@ export function useLocalStorage<T>(
     serializer?: (value: T) => string
     deserializer?: (value: string) => T
   }
-): Ref<T> {
+): import("vue").Ref<T> {
   const serializer = options?.serializer || JSON.stringify
   const deserializer = options?.deserializer || JSON.parse
   
@@ -81,7 +81,7 @@ export function useSessionStorage<T>(
     serializer?: (value: T) => string
     deserializer?: (value: string) => T
   }
-): Ref<T> {
+): import("vue").Ref<T> {
   const serializer = options?.serializer || JSON.stringify
   const deserializer = options?.deserializer || JSON.parse
   

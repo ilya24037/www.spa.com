@@ -6,7 +6,7 @@
  * showToast('success', 'Сохранено!', { duration: 3000 })
  */
 
-import { ref, reactive } from 'vue'
+import { ref, readonly } from 'vue'
 import type { ToastType, ToastOptions } from './Toast.types'
 
 interface ToastItem {

@@ -111,9 +111,9 @@ export function useMedia() {
   }
 
   return {
-    uploading: readonly(uploading),
-    uploadProgress: readonly(uploadProgress),
-    uploadError: readonly(uploadError),
+    uploading: Readonly(uploading),
+    uploadProgress: Readonly(uploadProgress),
+    uploadError: Readonly(uploadError),
     uploadPhotos,
     uploadVideo,
     deleteMedia

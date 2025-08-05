@@ -248,7 +248,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 // 🎯 FSD Импорты
-import { ContentCard } from '@/src/shared'
+import { ContentCard } from '@/src/shared/ui/organisms'
 
 const props = defineProps({
   reviews: {

@@ -5,7 +5,7 @@
  * const { cardState, toggleLoading, toggleDisabled } = useCard()
  */
 
-import { ref, computed, reactive } from 'vue'
+import { computed } from 'vue'
 import type { CardVariant, CardSize, CardOptions } from './Card.types'
 
 export interface CardState {
@@ -17,7 +17,7 @@ export interface CardState {
 }
 
 export function useCard(initialOptions?: CardOptions) {
-  const state = reactive<CardState>({
+  const state = ref<CardState>({
     loading: false,
     disabled: false,
     variant: initialOptions?.variant ?? 'default',
@@ -133,8 +133,8 @@ export function useCard(initialOptions?: CardOptions) {
  * Композабл для коллекции карточек
  */
 export function useCardCollection<T = any>(items: T[] = []) {
-  const selectedIds = ref<Set<string | number>>(new Set())
-  const loadingIds = ref<Set<string | number>>(new Set())
+  const selectedIds =<Set<string | number>>(new Set())
+  const loadingIds =<Set<string | number>>(new Set())
 
   /**
    * Выбрать/снять выбор карточки

@@ -1,24 +1,24 @@
-<script setup>
-import { computed } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import PrimaryButton from '@/Components/UI/Forms/PrimaryButton.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
-const props = defineProps({
-    status: {
-        type: String,
-    },
-});
+interface VerifyEmailProps {
+  status?: string
+}
 
-const form = useForm({});
+const props = defineProps<VerifyEmailProps>()
 
-const submit = () => {
+const form = useForm({})
+
+const submit = (): void => {
     form.post(route('verification.send'));
 };
 
-const verificationLinkSent = computed(
-    () => props.status === 'verification-link-sent',
-);
+const verificationLinkSent = computed((): boolean => 
+  props.status === 'verification-link-sent'
+)
 </script>
 
 <template>

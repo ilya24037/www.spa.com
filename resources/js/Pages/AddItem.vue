@@ -47,8 +47,9 @@
 import { Head, router } from '@inertiajs/vue3'
 
 // 🎯 FSD Импорты
-import { Breadcrumbs, BackButton } from '@/src/shared'
-import { AdForm } from '@/src/entities/ad'
+import Breadcrumbs from '@/src/shared/ui/molecules/Breadcrumbs/Breadcrumbs.vue'
+import BackButton from '@/src/shared/ui/atoms/BackButton/BackButton.vue'
+import AdForm from '@/src/entities/ad/ui/AdForm/AdForm.vue'
 
 // Категории (только эротический массаж)
 const categories = [

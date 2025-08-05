@@ -213,9 +213,9 @@ import { ref } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import { MapPinIcon, PhoneIcon } from '@heroicons/vue/24/outline'
 import ConfirmModal from '@/Components/UI/ConfirmModal.vue'
-import { PhotoGallery } from '@/src/features/gallery'
+import PhotoGallery from '@/src/features/gallery/ui/PhotoGallery/PhotoGallery.vue'
 // 🎯 FSD Импорты
-import { Breadcrumbs } from '@/src/shared'
+import Breadcrumbs from '@/src/shared/ui/molecules/Breadcrumbs/Breadcrumbs.vue'
 import { useToast } from '@/src/shared/composables/useToast'
 
 // Toast для замены alert()

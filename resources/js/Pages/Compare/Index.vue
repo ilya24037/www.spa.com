@@ -73,7 +73,8 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3'
 // 🎯 FSD Импорты
-import { ProfileSidebar, ContentCard } from '@/src/shared'
+import ProfileSidebar from '@/src/shared/ui/organisms/ProfileSidebar/ProfileSidebar.vue'
+import ContentCard from '@/src/shared/ui/organisms/ContentCard/ContentCard.vue'
 
 defineProps({
     compareList: {

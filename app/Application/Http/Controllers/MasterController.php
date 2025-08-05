@@ -3,12 +3,21 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domain\Master\Models\MasterProfile;
+use App\Domain\Master\Services\MasterService;
+use App\Domain\Master\DTOs\UpdateMasterDTO;
+use App\Application\Http\Requests\UpdateMasterRequest;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Support\Helpers\ImageHelper;
 
 class MasterController extends Controller
 {
+    protected MasterService $masterService;
+
+    public function __construct(MasterService $masterService)
+    {
+        $this->masterService = $masterService;
+    }
     /**
      * Публичная карточка мастера
      */
@@ -77,9 +86,7 @@ class MasterController extends Controller
 
         // 6. Проверяем «Избранное»
         $isFavorite = auth()->check()
-            ? auth()->user()->favorites()
-                ->where('master_profile_id', $profile->id)
-                ->exists()
+            ? $this->masterService->isFavorite($profile->id, auth()->id())
             : false;
 
         // 7. Диапазон цен
@@ -248,66 +255,19 @@ class MasterController extends Controller
     /**
      * Обновление профиля мастера
      */
-    public function update(Request $request, MasterProfile $master)
+    public function update(UpdateMasterRequest $request, MasterProfile $master)
     {
-        // Проверяем права доступа
-        if (auth()->id() !== $master->user_id) {
-            abort(403, 'Нет доступа к редактированию этого профиля');
+        $this->authorize('update', $master);
+
+        try {
+            $dto = UpdateMasterDTO::fromRequest($request->validated());
+            $this->masterService->updateProfile($master->id, $dto);
+            
+            return redirect()->back()->with('success', 'Профиль обновлен успешно!');
+            
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Ошибка при обновлении профиля: ' . $e->getMessage()]);
         }
-
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'specialization' => 'nullable|string|max:255',
-            'description' => 'nullable|string|max:2000',
-            'experience_years' => 'nullable|integer|min:0|max:50',
-            'hourly_rate' => 'nullable|integer|min:0',
-            'city' => 'nullable|string|max:255',
-            // Физические параметры
-            'age' => 'nullable|integer|min:18|max:65',
-            'height' => 'nullable|integer|min:140|max:200',
-            'weight' => 'nullable|integer|min:40|max:120',
-            'breast_size' => 'nullable|integer|min:1|max:7',
-                         // Параметры внешности
-             'hair_color' => 'nullable|string|max:50',
-             'eye_color' => 'nullable|string|max:50',
-             'nationality' => 'nullable|string|max:50',
-             // Особенности мастера
-             'features' => 'nullable|array',
-             'medical_certificate' => 'nullable|in:yes,no',
-             'works_during_period' => 'nullable|in:yes,no',
-             'additional_features' => 'nullable|string|max:1000',
-             // Модульные услуги
-             'services' => 'nullable|array',
-             'services_additional_info' => 'nullable|string|max:2000',
-         ]);
-
-        $master->update([
-            'display_name' => $validated['name'],
-            'specialization' => $validated['specialization'],
-            'bio' => $validated['description'],
-            'experience_years' => $validated['experience_years'],
-            'hourly_rate' => $validated['hourly_rate'],
-            'city' => $validated['city'],
-            // Физические параметры
-            'age' => $validated['age'],
-            'height' => $validated['height'],
-            'weight' => $validated['weight'],
-            'breast_size' => $validated['breast_size'],
-                         // Параметры внешности
-             'hair_color' => $validated['hair_color'],
-             'eye_color' => $validated['eye_color'],
-             'nationality' => $validated['nationality'],
-             // Особенности мастера
-             'features' => $validated['features'],
-             'medical_certificate' => $validated['medical_certificate'],
-             'works_during_period' => $validated['works_during_period'],
-             'additional_features' => $validated['additional_features'],
-             // Модульные услуги
-             'services' => $validated['services'],
-             'services_additional_info' => $validated['services_additional_info'],
-         ]);
-
-        return redirect()->back()->with('success', 'Профиль обновлен успешно!');
     }
 
     /**
@@ -315,23 +275,6 @@ class MasterController extends Controller
      */
     protected function getSimilarMasters(MasterProfile $profile): array
     {
-        return MasterProfile::query()
-            ->where('city', $profile->city)
-            ->where('status', 'active')
-            ->where('id', '!=', $profile->id)
-            ->take(5)
-            ->get()
-            ->map(fn($m) => [
-                'id'          => $m->id,
-                'name'        => $m->display_name,
-                'slug'        => $m->slug,
-                'avatar'      => $m->avatar_url,
-                'rating'      => (float)$m->rating,
-                'city'        => $m->city,
-                'price_from'  => $m->services && $m->services->count() > 0 
-                    ? $m->services->min('price') 
-                    : 0,
-            ])
-            ->toArray();
+        return $this->masterService->getSimilarMasters($profile->id, $profile->city, 5);
     }
 }

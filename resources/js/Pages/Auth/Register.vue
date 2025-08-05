@@ -1,27 +1,34 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
-import { Head, Link, useForm } from '@inertiajs/vue3'
+import { Head, useForm } from '@inertiajs/vue3'
 import RegisterModal from '@/Components/Auth/RegisterModal.vue'
 
-const form = useForm({
-    name: '',
-    email: '',
-    password: '',
-    password_confirmation: '',
-});
+interface RegisterForm {
+  name: string
+  email: string
+  password: string
+  password_confirmation: string
+}
 
-const showModal = ref(true)
+const form = useForm<RegisterForm>({
+  name: '',
+  email: '',
+  password: '',
+  password_confirmation: '',
+})
 
-const submit = () => {
-    form.post(route('register'), {
-        onFinish: () => form.reset('password', 'password_confirmation'),
-    });
-};
+const showModal = ref<boolean>(true)
 
-const closeModal = () => {
-    showModal.value = false
-    // Перенаправляем на главную страницу
-    window.location.href = '/'
+const submit = (): void => {
+  form.post(route('register'), {
+    onFinish: () => form.reset('password', 'password_confirmation'),
+  })
+}
+
+const closeModal = (): void => {
+  showModal.value = false
+  // Перенаправляем на главную страницу
+  window.location.href = '/'
 }
 </script>
 

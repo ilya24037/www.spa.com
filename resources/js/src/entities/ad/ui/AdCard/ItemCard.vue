@@ -75,11 +75,11 @@
 <script setup lang="ts">
 import { ref, computed, type Ref } from 'vue'
 import { router } from '@inertiajs/vue3'
-import ItemImage from '../Cards/ItemImage.vue'
-import ItemContent from '../Cards/ItemContent.vue'
-import ItemStats from '../Cards/ItemStats.vue'
-import ItemActions from '../Cards/ItemActions.vue'
-import ConfirmModal from '../UI/ConfirmModal.vue'
+import ItemImage from './ItemImage.vue'
+import ItemContent from './ItemContent.vue'
+import ItemStats from './ItemStats.vue'
+import ItemActions from './ItemActions.vue'
+import ConfirmModal from '@/src/shared/ui/organisms/Modal/Modal.vue'
 import { Link } from '@inertiajs/vue3'
 import { useToast } from '@/src/shared/composables/useToast'
 import type { 
@@ -101,7 +101,7 @@ const props = defineProps<ItemCardProps>()
 const emit = defineEmits<ItemCardEmits>()
 
 // Состояние компонента
-const showDeleteModal: Ref<boolean> = ref(false)
+const showDeleteModal: import("vue").Ref<boolean> = ref(false)
 
 // Вычисляемые свойства
 const itemUrl = computed((): string => {

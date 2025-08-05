@@ -1,0 +1,219 @@
+{
+  "timestamp": "2025-08-04T13:10:27.653Z",
+  "summary": {
+    "totalToDelete": 18,
+    "safeToDelete": 18,
+    "requiresReview": 9,
+    "mustKeep": 0
+  },
+  "categories": {
+    "duplicates": {
+      "description": "Компоненты полностью мигрированные на FSD",
+      "files": [
+        {
+          "path": "resources\\js\\Components\\Booking\\BookingForm.vue",
+          "reason": "Мигрирован в FSD как BookingForm",
+          "lines": 746
+        },
+        {
+          "path": "resources\\js\\Components\\Cards\\Card.vue",
+          "reason": "Мигрирован в FSD как Card",
+          "lines": 281
+        },
+        {
+          "path": "resources\\js\\Components\\Features\\MasterShow\\components\\BookingWidget.vue",
+          "reason": "Мигрирован в FSD как BookingWidget",
+          "lines": 162
+        },
+        {
+          "path": "resources\\js\\Components\\Features\\MasterShow\\components\\MasterInfo.vue",
+          "reason": "Мигрирован в FSD как MasterInfo",
+          "lines": 37
+        },
+        {
+          "path": "resources\\js\\Components\\Features\\MasterShow\\index.vue",
+          "reason": "Мигрирован в FSD как index",
+          "lines": 88
+        },
+        {
+          "path": "resources\\js\\Components\\Features\\PhotoUploader\\index.vue",
+          "reason": "Мигрирован в FSD как index",
+          "lines": 633
+        },
+        {
+          "path": "resources\\js\\Components\\Features\\Services\\index.vue",
+          "reason": "Мигрирован в FSD как index",
+          "lines": 462
+        },
+        {
+          "path": "resources\\js\\Components\\Masters\\MasterDescription\\index.vue",
+          "reason": "Мигрирован в FSD как index",
+          "lines": 71
+        },
+        {
+          "path": "resources\\js\\Components\\Masters\\MasterDetails\\index.vue",
+          "reason": "Мигрирован в FSD как index",
+          "lines": 277
+        },
+        {
+          "path": "resources\\js\\Components\\Masters\\MasterHeader\\index.vue",
+          "reason": "Мигрирован в FSD как index",
+          "lines": 102
+        },
+        {
+          "path": "resources\\js\\Components\\Media\\MediaGallery\\index.vue",
+          "reason": "Мигрирован в FSD как index",
+          "lines": 148
+        },
+        {
+          "path": "resources\\js\\Components\\Media\\MediaUploader\\index.vue",
+          "reason": "Мигрирован в FSD как index",
+          "lines": 49
+        },
+        {
+          "path": "resources\\js\\Components\\Modals\\BookingModal.vue",
+          "reason": "Мигрирован в FSD как BookingModal",
+          "lines": 130
+        },
+        {
+          "path": "resources\\js\\Components\\UI\\Forms\\InputError.vue",
+          "reason": "Мигрирован в FSD как InputError",
+          "lines": 14
+        },
+        {
+          "path": "resources\\js\\Components\\UI\\Forms\\InputLabel.vue",
+          "reason": "Мигрирован в FSD как InputLabel",
+          "lines": 28
+        },
+        {
+          "path": "resources\\js\\Components\\UI\\Forms\\PrimaryButton.vue",
+          "reason": "Мигрирован в FSD как PrimaryButton",
+          "lines": 31
+        },
+        {
+          "path": "resources\\js\\Components\\UI\\Forms\\SecondaryButton.vue",
+          "reason": "Мигрирован в FSD как SecondaryButton",
+          "lines": 31
+        },
+        {
+          "path": "resources\\js\\Components\\UI\\Forms\\TextInput.vue",
+          "reason": "Мигрирован в FSD как TextInput",
+          "lines": 57
+        }
+      ],
+      "status": "safe"
+    },
+    "obsolete": {
+      "description": "Устаревшие компоненты не используемые в проекте",
+      "files": [],
+      "status": "safe"
+    },
+    "migrated": {
+      "description": "Компоненты успешно перенесенные в FSD структуру",
+      "files": [],
+      "status": "safe"
+    },
+    "review": {
+      "description": "Требуют ручной проверки перед удалением",
+      "files": [
+        {
+          "path": "resources\\js\\Components\\Form\\Controls\\PriceInput.vue",
+          "reason": "Не найдено использований, требует проверки",
+          "size": 4481
+        },
+        {
+          "path": "resources\\js\\Components\\Form\\Geo\\GeoSuggest.vue",
+          "reason": "Не найдено использований, требует проверки",
+          "size": 11343
+        },
+        {
+          "path": "resources\\js\\Components\\Form\\Sections\\DetailsSection.vue",
+          "reason": "Не найдено использований, требует проверки",
+          "size": 3438
+        },
+        {
+          "path": "resources\\js\\Components\\Form\\Sections\\EducationSection.vue",
+          "reason": "Не найдено использований, требует проверки",
+          "size": 10754
+        },
+        {
+          "path": "resources\\js\\Components\\Form\\Sections\\GeographySection.vue",
+          "reason": "Не найдено использований, требует проверки",
+          "size": 7842
+        },
+        {
+          "path": "resources\\js\\Components\\Form\\Sections\\MediaSection.vue",
+          "reason": "Не найдено использований, требует проверки",
+          "size": 3976
+        },
+        {
+          "path": "resources\\js\\Components\\Form\\Sections\\PriceListSection.vue",
+          "reason": "Не найдено использований, требует проверки",
+          "size": 8479
+        },
+        {
+          "path": "resources\\js\\Components\\Form\\Upload\\PhotoUploader.vue",
+          "reason": "Не найдено использований, требует проверки",
+          "size": 9783
+        },
+        {
+          "path": "resources\\js\\Components\\Form\\Upload\\VideoUploader.vue",
+          "reason": "Не найдено использований, требует проверки",
+          "size": 8271
+        }
+      ],
+      "status": "review"
+    },
+    "keep": {
+      "description": "Должны быть сохранены (активно используются)",
+      "files": [],
+      "status": "keep"
+    }
+  },
+  "commands": {
+    "windows": [
+      "del /F \"resources\\js\\Components\\Booking\\BookingForm.vue\"",
+      "del /F \"resources\\js\\Components\\Cards\\Card.vue\"",
+      "del /F \"resources\\js\\Components\\Features\\MasterShow\\components\\BookingWidget.vue\"",
+      "del /F \"resources\\js\\Components\\Features\\MasterShow\\components\\MasterInfo.vue\"",
+      "del /F \"resources\\js\\Components\\Features\\MasterShow\\index.vue\"",
+      "del /F \"resources\\js\\Components\\Features\\PhotoUploader\\index.vue\"",
+      "del /F \"resources\\js\\Components\\Features\\Services\\index.vue\"",
+      "del /F \"resources\\js\\Components\\Masters\\MasterDescription\\index.vue\"",
+      "del /F \"resources\\js\\Components\\Masters\\MasterDetails\\index.vue\"",
+      "del /F \"resources\\js\\Components\\Masters\\MasterHeader\\index.vue\"",
+      "del /F \"resources\\js\\Components\\Media\\MediaGallery\\index.vue\"",
+      "del /F \"resources\\js\\Components\\Media\\MediaUploader\\index.vue\"",
+      "del /F \"resources\\js\\Components\\Modals\\BookingModal.vue\"",
+      "del /F \"resources\\js\\Components\\UI\\Forms\\InputError.vue\"",
+      "del /F \"resources\\js\\Components\\UI\\Forms\\InputLabel.vue\"",
+      "del /F \"resources\\js\\Components\\UI\\Forms\\PrimaryButton.vue\"",
+      "del /F \"resources\\js\\Components\\UI\\Forms\\SecondaryButton.vue\"",
+      "del /F \"resources\\js\\Components\\UI\\Forms\\TextInput.vue\"",
+      ":: Удаление пустых директорий",
+      "for /f \"delims=\" %d in ('dir /s /b /ad resources\\js\\Components ^| sort /r') do rd \"%d\" 2>nul"
+    ],
+    "unix": [
+      "rm -f \"resources\\js\\Components\\Booking\\BookingForm.vue\"",
+      "rm -f \"resources\\js\\Components\\Cards\\Card.vue\"",
+      "rm -f \"resources\\js\\Components\\Features\\MasterShow\\components\\BookingWidget.vue\"",
+      "rm -f \"resources\\js\\Components\\Features\\MasterShow\\components\\MasterInfo.vue\"",
+      "rm -f \"resources\\js\\Components\\Features\\MasterShow\\index.vue\"",
+      "rm -f \"resources\\js\\Components\\Features\\PhotoUploader\\index.vue\"",
+      "rm -f \"resources\\js\\Components\\Features\\Services\\index.vue\"",
+      "rm -f \"resources\\js\\Components\\Masters\\MasterDescription\\index.vue\"",
+      "rm -f \"resources\\js\\Components\\Masters\\MasterDetails\\index.vue\"",
+      "rm -f \"resources\\js\\Components\\Masters\\MasterHeader\\index.vue\"",
+      "rm -f \"resources\\js\\Components\\Media\\MediaGallery\\index.vue\"",
+      "rm -f \"resources\\js\\Components\\Media\\MediaUploader\\index.vue\"",
+      "rm -f \"resources\\js\\Components\\Modals\\BookingModal.vue\"",
+      "rm -f \"resources\\js\\Components\\UI\\Forms\\InputError.vue\"",
+      "rm -f \"resources\\js\\Components\\UI\\Forms\\InputLabel.vue\"",
+      "rm -f \"resources\\js\\Components\\UI\\Forms\\PrimaryButton.vue\"",
+      "rm -f \"resources\\js\\Components\\UI\\Forms\\SecondaryButton.vue\"",
+      "rm -f \"resources\\js\\Components\\UI\\Forms\\TextInput.vue\"",
+      "# Удаление пустых директорий",
+      "find resources/js/Components -type d -empty -delete"
+    ]
+  }
+}

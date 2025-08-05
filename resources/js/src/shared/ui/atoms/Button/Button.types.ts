@@ -1,5 +1,5 @@
 import type { Component } from 'vue'
-import type { RouteLocationRaw } from 'vue-router'
+import type { RouteLocationRaw } from '@vue/router'
 
 export type ButtonVariant = 
   | 'primary' 

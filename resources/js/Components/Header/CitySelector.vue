@@ -15,7 +15,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { } from 'vue'
 
 defineProps({
   currentCity: {
