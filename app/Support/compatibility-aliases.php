@@ -92,10 +92,10 @@ class_alias('App\Support\Traits\HasUniqueSlug', 'App\Traits\HasUniqueSlug');
 class_alias('App\Support\Traits\HasUserRoles', 'App\Traits\HasUserRoles');
 
 // Request aliases
-class_alias('App\Application\Http\Requests\CreateAdRequest', 'App\Http\Requests\CreateAdRequest');
+class_alias('App\Application\Http\Requests\Ad\CreateAdRequest', 'App\Http\Requests\CreateAdRequest');
 class_alias('App\Application\Http\Requests\SaveAdDraftRequest', 'App\Http\Requests\SaveAdDraftRequest');
-class_alias('App\Application\Http\Requests\StoreBookingRequest', 'App\Http\Requests\StoreBookingRequest');
-class_alias('App\Application\Http\Requests\UpdateAdRequest', 'App\Http\Requests\UpdateAdRequest');
+class_alias('App\Application\Http\Requests\Booking\CreateBookingRequest', 'App\Http\Requests\StoreBookingRequest');
+class_alias('App\Application\Http\Requests\Ad\UpdateAdRequest', 'App\Http\Requests\UpdateAdRequest');
 class_alias('App\Application\Http\Requests\ProfileUpdateRequest', 'App\Http\Requests\ProfileUpdateRequest');
 class_alias('App\Application\Http\Requests\Auth\LoginRequest', 'App\Http\Requests\Auth\LoginRequest');
 

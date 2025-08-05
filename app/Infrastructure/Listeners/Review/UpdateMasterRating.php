@@ -3,7 +3,8 @@
 namespace App\Infrastructure\Listeners\Review;
 
 use App\Domain\Review\Events\ReviewCreated;
-use App\Domain\Master\Services\MasterRatingService;
+use App\Domain\Review\Services\RatingCalculator;
+use App\Domain\Master\Models\MasterProfile;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
@@ -16,11 +17,11 @@ class UpdateMasterRating implements ShouldQueue
 {
     use InteractsWithQueue;
 
-    private MasterRatingService $ratingService;
+    private RatingCalculator $ratingCalculator;
 
-    public function __construct(MasterRatingService $ratingService)
+    public function __construct(RatingCalculator $ratingCalculator)
     {
-        $this->ratingService = $ratingService;
+        $this->ratingCalculator = $ratingCalculator;
     }
 
     /**
@@ -29,26 +30,39 @@ class UpdateMasterRating implements ShouldQueue
     public function handle(ReviewCreated $event): void
     {
         try {
-            // Проверяем, является ли пользователь мастером
-            $user = \App\Domain\User\Models\User::find($event->reviewedId);
+            $review = \App\Domain\Review\Models\Review::find($event->reviewId);
             
-            if (!$user || !$user->isMaster()) {
+            if (!$review) {
+                Log::warning('Review not found for rating update', [
+                    'review_id' => $event->reviewId,
+                ]);
                 return;
             }
 
-            // Обновляем рейтинг через специализированный сервис
-            $this->ratingService->recalculateRating($event->reviewedId);
+            // Проверяем, касается ли отзыв мастера
+            if ($review->reviewable_type !== MasterProfile::class) {
+                return; // Отзыв не о мастере
+            }
+
+            // Обновляем рейтинг мастера через RatingCalculator
+            $stats = $this->ratingCalculator->recalculateMasterRating($review->reviewable_id);
 
             Log::info('Master rating updated after review', [
-                'user_id' => $event->reviewedId,
+                'master_profile_id' => $review->reviewable_id,
                 'review_id' => $event->reviewId,
+                'new_rating' => $stats['average_rating'],
+                'total_reviews' => $stats['total_reviews'],
             ]);
 
         } catch (\Exception $e) {
             Log::error('Failed to update master rating', [
-                'event' => $event->toArray(),
+                'review_id' => $event->reviewId ?? null,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
+            
+            // Повторяем попытку для критических ошибок
+            throw $e;
         }
     }
 

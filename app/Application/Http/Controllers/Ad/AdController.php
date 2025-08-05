@@ -3,8 +3,8 @@
 namespace App\Application\Http\Controllers\Ad;
 
 use App\Application\Http\Controllers\Controller;
-use App\Application\Http\Requests\CreateAdRequest;
-use App\Application\Http\Requests\UpdateAdRequest;
+use App\Application\Http\Requests\Ad\CreateAdRequest;
+use App\Application\Http\Requests\Ad\UpdateAdRequest;
 use App\Domain\Ad\Services\AdService;
 use App\Domain\Ad\Models\Ad;
 use App\Domain\Ad\DTOs\CreateAdDTO;

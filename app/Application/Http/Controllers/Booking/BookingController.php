@@ -3,7 +3,7 @@
 namespace App\Application\Http\Controllers\Booking;
 
 use App\Application\Http\Controllers\Controller;
-use App\Application\Http\Requests\StoreBookingRequest;
+use App\Application\Http\Requests\Booking\CreateBookingRequest;
 use App\Domain\Booking\Models\Booking;
 use App\Domain\Master\Models\MasterProfile;
 use App\Domain\Service\Models\Service;
@@ -78,7 +78,7 @@ class BookingController extends Controller
     /**
      * Сохранение бронирования
      */
-    public function store(StoreBookingRequest $request)
+    public function store(CreateBookingRequest $request)
     {
         try {
             // Создаем бронирование через сервис
