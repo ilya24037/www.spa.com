@@ -64,6 +64,12 @@ class BookingSlot extends Model
         return $this->morphTo(__FUNCTION__, 'resource_type', 'resource_id');
     }
 
+    // История изменений слота (через основное бронирование)
+    public function getHistoryAttribute()
+    {
+        return $this->booking?->history?->where('metadata.slot_id', $this->id);
+    }
+
     // Accessors
     public function getFormattedDurationAttribute(): string
     {

@@ -4,7 +4,7 @@ namespace App\Domain\Ad\Services;
 
 use App\Domain\Ad\Models\Ad;
 use App\Domain\Ad\Repositories\AdRepository;
-use App\Enums\AdStatus;
+use App\Domain\Ad\Enums\AdStatus;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;

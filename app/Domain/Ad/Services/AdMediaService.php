@@ -3,38 +3,39 @@
 namespace App\Domain\Ad\Services;
 
 use App\Domain\Ad\Models\Ad;
-use App\Domain\Media\Services\MasterMediaService;
+use App\Domain\Ad\Models\AdMedia;
+use App\Domain\Media\Services\MediaService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 /**
- * Адаптер для работы с медиа объявлений
- * Использует универсальный MediaService для обработки файлов
- * Сохраняет данные в JSON поля таблицы ads
+ * Сервис для работы с медиа объявлений
+ * Использует новую архитектуру с отдельной таблицей AdMedia
+ * Координирует работу с MediaService для обработки файлов
  */
 class AdMediaService
 {
-    private MasterMediaService $mediaService;
+    private MediaService $mediaService;
     
     // Лимиты для объявлений
     private const MAX_PHOTOS = 10;
     private const MAX_VIDEOS = 1;
 
-    public function __construct(MasterMediaService $mediaService)
+    public function __construct(MediaService $mediaService)
     {
         $this->mediaService = $mediaService;
     }
 
     /**
      * Обработать и добавить фото к объявлению
-     * Фото сохраняются в JSON поле photos таблицы ads
+     * Фото сохраняются в отдельной таблице AdMedia
      */
     public function addPhoto(Ad $ad, UploadedFile $file): array
     {
         try {
             // Проверяем лимит
-            $currentPhotos = $ad->photos ?? [];
+            $currentPhotos = $this->getAdMedia($ad)->photos ?? [];
             if (count($currentPhotos) >= self::MAX_PHOTOS) {
                 throw new \InvalidArgumentException('Максимальное количество фото: ' . self::MAX_PHOTOS);
             }
@@ -46,8 +47,8 @@ class AdMediaService
             $photos = $currentPhotos;
             $photos[] = $photoData;
             
-            // Сохраняем в базу
-            $ad->update(['photos' => $photos]);
+            // Сохраняем в таблицу AdMedia
+            $this->updateAdMedia($ad, ['photos' => $photos]);
             
             Log::info('Photo added to ad', [
                 'ad_id' => $ad->id,
@@ -94,15 +95,15 @@ class AdMediaService
             }
         }
         
-        // Перезагружаем объявление для получения всех фото
-        $ad->refresh();
+        // Перезагружаем медиа объявления
+        $adMedia = $this->getAdMedia($ad);
         
         return [
             'success' => $successCount > 0,
             'added' => $successCount,
             'total' => count($files),
             'results' => $results,
-            'photos' => $ad->photos ?? [] // Возвращаем все фото объявления
+            'photos' => $adMedia->photos ?? [] // Возвращаем все фото объявления
         ];
     }
 
@@ -112,7 +113,8 @@ class AdMediaService
     public function removePhoto(Ad $ad, string $photoId): bool
     {
         try {
-            $photos = $ad->photos ?? [];
+            $adMedia = $this->getAdMedia($ad);
+            $photos = $adMedia->photos ?? [];
             $photoToDelete = null;
             $newPhotos = [];
             
@@ -132,8 +134,8 @@ class AdMediaService
             // Удаляем файлы из хранилища
             $this->mediaService->deletePhotoFromStorage($photoToDelete);
             
-            // Обновляем в базе
-            $ad->update(['photos' => $newPhotos]);
+            // Обновляем в таблице AdMedia
+            $this->updateAdMedia($ad, ['photos' => $newPhotos]);
             
             Log::info('Photo removed from ad', [
                 'ad_id' => $ad->id,
@@ -160,7 +162,8 @@ class AdMediaService
     public function reorderPhotos(Ad $ad, array $photoIds): bool
     {
         try {
-            $photos = $ad->photos ?? [];
+            $adMedia = $this->getAdMedia($ad);
+            $photos = $adMedia->photos ?? [];
             $reorderedPhotos = [];
             
             // Переупорядочиваем согласно новому порядку
@@ -180,8 +183,8 @@ class AdMediaService
                 }
             }
             
-            // Сохраняем
-            $ad->update(['photos' => $reorderedPhotos]);
+            // Сохраняем в AdMedia
+            $this->updateAdMedia($ad, ['photos' => $reorderedPhotos]);
             
             return true;
             
@@ -212,7 +215,7 @@ class AdMediaService
                 'uploaded_at' => now()->toIso8601String()
             ];
             
-            $ad->update(['video' => $videoData]);
+            $this->updateAdMedia($ad, ['video' => $videoData]);
             
             return [
                 'success' => true,
@@ -241,7 +244,7 @@ class AdMediaService
         try {
             // TODO: Удалить файлы видео из хранилища
             
-            $ad->update(['video' => null]);
+            $this->updateAdMedia($ad, ['video' => null]);
             
             Log::info('Video removed from ad', ['ad_id' => $ad->id]);
             
@@ -262,8 +265,9 @@ class AdMediaService
      */
     public function getMediaStats(Ad $ad): array
     {
-        $photos = $ad->photos ?? [];
-        $video = $ad->video;
+        $adMedia = $this->getAdMedia($ad);
+        $photos = $adMedia->photos ?? [];
+        $video = $adMedia->video;
         
         return [
             'photos_count' => count($photos),
@@ -285,12 +289,35 @@ class AdMediaService
             return is_array($photo) && isset($photo['id']);
         });
         
-        // Сохраняем
-        $ad->update(['photos' => array_values($validPhotos)]);
+        // Сохраняем в таблицу AdMedia
+        $this->updateAdMedia($ad, ['photos' => array_values($validPhotos)]);
         
         Log::info('Photos synced for ad', [
             'ad_id' => $ad->id,
             'photos_count' => count($validPhotos)
         ]);
+    }
+
+    /**
+     * Получить или создать AdMedia для объявления
+     */
+    private function getAdMedia(Ad $ad): AdMedia
+    {
+        return $ad->media ?? $ad->media()->create([
+            'photos' => [],
+            'video' => null,
+            'show_photos_in_gallery' => true,
+            'allow_download_photos' => false,
+            'watermark_photos' => true,
+        ]);
+    }
+
+    /**
+     * Обновить AdMedia объявления
+     */
+    private function updateAdMedia(Ad $ad, array $data): void
+    {
+        $adMedia = $this->getAdMedia($ad);
+        $adMedia->update($data);
     }
 }

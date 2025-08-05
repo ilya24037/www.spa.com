@@ -4,7 +4,7 @@ namespace App\Domain\Ad\Actions;
 
 use App\Domain\Ad\Models\Ad;
 use App\Domain\Ad\Repositories\AdRepository;
-use App\Enums\AdStatus;
+use App\Domain\Ad\Enums\AdStatus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -47,9 +47,11 @@ class PublishAdAction
                     ];
                 }
 
-                // Обновляем статус
-                $ad->status = AdStatus::WAITING_PAYMENT;
-                $ad->save();
+                // Обновляем статус через репозиторий
+                $this->adRepository->updateAd($ad, [
+                    'status' => AdStatus::WAITING_PAYMENT->value,
+                    'published_at' => now()
+                ]);
 
                 Log::info('Ad marked for payment', [
                     'ad_id' => $ad->id,
@@ -81,8 +83,8 @@ class PublishAdAction
     private function canPublish(Ad $ad): bool
     {
         return in_array($ad->status, [
-            AdStatus::DRAFT,
-            AdStatus::ARCHIVED,
+            AdStatus::DRAFT->value,
+            AdStatus::ARCHIVED->value,
         ]);
     }
 

@@ -4,7 +4,7 @@ namespace App\Domain\Ad\Actions;
 
 use App\Domain\Ad\Models\Ad;
 use App\Domain\Ad\Repositories\AdRepository;
-use App\Enums\AdStatus;
+use App\Domain\Ad\Enums\AdStatus;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -36,23 +36,25 @@ class ArchiveAdAction
             }
 
             // Проверяем статус
-            if ($ad->status === AdStatus::ARCHIVED) {
+            if ($ad->status === AdStatus::ARCHIVED->value) {
                 return [
                     'success' => false,
                     'message' => 'Объявление уже в архиве',
                 ];
             }
 
-            if (!in_array($ad->status, [AdStatus::ACTIVE, AdStatus::DRAFT])) {
+            if (!in_array($ad->status, [AdStatus::ACTIVE->value, AdStatus::DRAFT->value])) {
                 return [
                     'success' => false,
                     'message' => 'Невозможно архивировать объявление в текущем статусе',
                 ];
             }
 
-            // Архивируем
-            $ad->status = AdStatus::ARCHIVED;
-            $ad->save();
+            // Архивируем через репозиторий
+            $this->adRepository->updateAd($ad, [
+                'status' => AdStatus::ARCHIVED->value,
+                'archived_at' => now()
+            ]);
 
             Log::info('Ad archived', [
                 'ad_id' => $ad->id,

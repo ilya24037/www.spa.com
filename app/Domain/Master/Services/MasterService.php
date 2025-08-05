@@ -7,6 +7,7 @@ use App\Domain\User\Models\User;
 use App\Enums\MasterStatus;
 use App\Enums\MasterLevel;
 use App\Domain\Master\Repositories\MasterRepository;
+use App\Domain\User\Repositories\UserRepository;
 use App\Domain\Media\Services\MasterMediaService;
 use App\Infrastructure\Notification\NotificationService;
 use App\Domain\Master\DTOs\CreateMasterDTO;
@@ -23,6 +24,7 @@ class MasterService
 {
     public function __construct(
         private MasterRepository $repository,
+        private UserRepository $userRepository,
         private MasterMediaService $mediaService,
         private NotificationService $notificationService
     ) {}
@@ -49,8 +51,8 @@ class MasterService
                 'home_service' => $dto->home_service,
                 'salon_service' => $dto->salon_service,
                 'salon_address' => $dto->salon_address,
-                'status' => MasterStatus::DRAFT,
-                'level' => MasterLevel::BEGINNER,
+                'status' => MasterStatus::DRAFT->value,
+                'level' => MasterLevel::BEGINNER->value,
                 'age' => $dto->age,
                 'features' => $dto->features,
                 'services' => $dto->services,
@@ -97,7 +99,7 @@ class MasterService
             // Обновляем аватар
             if ($dto->avatar) {
                 $avatar = $this->mediaService->uploadAvatar($dto->avatar, $profile);
-                $profile->update(['avatar' => $avatar->path]);
+                $this->repository->update($profile, ['avatar' => $avatar->path]);
             }
 
             // Обновляем уровень
@@ -125,7 +127,7 @@ class MasterService
             throw new \Exception('Профиль не готов к активации. Заполните все обязательные поля.');
         }
 
-        $profile->update(['status' => MasterStatus::PENDING]);
+        $this->repository->update($profile, ['status' => MasterStatus::PENDING->value]);
 
         // Отправляем на модерацию
         $this->notificationService->sendProfileForModeration($profile);
@@ -144,12 +146,12 @@ class MasterService
             throw new \Exception('Профиль мастера не найден');
         }
 
-        if ($profile->status !== MasterStatus::PENDING) {
+        if ($profile->status !== MasterStatus::PENDING->value) {
             throw new \Exception('Профиль не находится на модерации');
         }
 
-        $profile->update([
-            'status' => MasterStatus::ACTIVE,
+        $this->repository->update($profile, [
+            'status' => MasterStatus::ACTIVE->value,
             'is_verified' => true,
             'verified_at' => now(),
             'verified_by' => $moderator->id,
@@ -172,12 +174,12 @@ class MasterService
             throw new \Exception('Профиль мастера не найден');
         }
 
-        if ($profile->status !== MasterStatus::PENDING) {
+        if ($profile->status !== MasterStatus::PENDING->value) {
             throw new \Exception('Профиль не находится на модерации');
         }
 
-        $profile->update([
-            'status' => MasterStatus::DRAFT,
+        $this->repository->update($profile, [
+            'status' => MasterStatus::DRAFT->value,
             'moderation_notes' => $reason,
             'moderated_by' => $moderator->id,
             'moderated_at' => now(),
@@ -200,8 +202,8 @@ class MasterService
             throw new \Exception('Профиль мастера не найден');
         }
 
-        $profile->update([
-            'status' => MasterStatus::INACTIVE,
+        $this->repository->update($profile, [
+            'status' => MasterStatus::INACTIVE->value,
             'deactivation_reason' => $reason,
             'deactivated_at' => now(),
         ]);
@@ -223,8 +225,8 @@ class MasterService
             throw new \Exception('Профиль мастера не найден');
         }
 
-        $profile->update([
-            'status' => MasterStatus::BLOCKED,
+        $this->repository->update($profile, [
+            'status' => MasterStatus::BLOCKED->value,
             'block_reason' => $reason,
             'blocked_by' => $admin->id,
             'blocked_at' => now(),
@@ -250,12 +252,12 @@ class MasterService
             throw new \Exception('Профиль мастера не найден');
         }
 
-        if (!$profile->status->canTransitionTo(MasterStatus::VACATION)) {
-            throw new \Exception('Невозможно установить отпуск в текущем статусе');
+        if ($profile->status === MasterStatus::BLOCKED->value) {
+            throw new \Exception('Невозможно установить отпуск для заблокированного профиля');
         }
 
-        $profile->update([
-            'status' => MasterStatus::VACATION,
+        $this->repository->update($profile, [
+            'status' => MasterStatus::VACATION->value,
             'vacation_until' => $until,
             'vacation_message' => $message,
         ]);
@@ -274,12 +276,12 @@ class MasterService
             throw new \Exception('Профиль мастера не найден');
         }
 
-        if ($profile->status !== MasterStatus::VACATION) {
+        if ($profile->status !== MasterStatus::VACATION->value) {
             throw new \Exception('Мастер не находится в отпуске');
         }
 
-        $profile->update([
-            'status' => MasterStatus::ACTIVE,
+        $this->repository->update($profile, [
+            'status' => MasterStatus::ACTIVE->value,
             'vacation_until' => null,
             'vacation_message' => null,
         ]);
@@ -360,7 +362,7 @@ class MasterService
             throw new \Exception('Профиль мастера не найден');
         }
 
-        $profile->update([
+        $this->repository->update($profile, [
             'is_premium' => true,
             'premium_until' => $until,
         ]);
@@ -609,5 +611,28 @@ class MasterService
     public function updateMasterStatus($profile, array $data): bool
     {
         return $profile->update($data);
+    }
+
+    /**
+     * Обновить рейтинг мастера на основе отзывов
+     */
+    public function updateRating(MasterProfile $master): bool
+    {
+        try {
+            if (!$master->user) {
+                return false;
+            }
+
+            $rating = $master->user->getAverageRating();
+            $reviewsCount = $master->user->getReceivedReviewsCount();
+            
+            return $master->update([
+                'rating'        => round($rating, 2),
+                'reviews_count' => $reviewsCount,
+            ]);
+
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 }

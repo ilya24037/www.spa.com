@@ -3,6 +3,7 @@
 namespace App\Domain\Media\Models;
 
 use App\Domain\Master\Models\MasterProfile;
+use App\Domain\Media\Traits\MediaTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +11,7 @@ use Illuminate\Support\Facades\Storage;
 
 class Photo extends Model
 {
-    use HasFactory;
+    use HasFactory, MediaTrait;
 
     protected $table = 'master_photos'; // Для совместимости с существующей БД
 
@@ -44,32 +45,35 @@ class Photo extends Model
     }
 
     /**
-     * Получить URL оригинального изображения
+     * Получить URL оригинального изображения (legacy метод - используйте getUrl())
+     * @deprecated Используйте getUrl() из MediaTrait
      */
     public function getOriginalUrlAttribute(): string
     {
-        $folderName = $this->masterProfile->folder_name;
-        return route('master.photo', ['master' => $folderName, 'filename' => $this->filename]);
+        return $this->getUrl();
     }
 
     /**
-     * Получить URL среднего размера
+     * Получить URL среднего размера (legacy метод)
+     * @deprecated Используйте getMediumUrl() из MediaTrait
      */
     public function getMediumUrlAttribute(): string
     {
-        $folderName = $this->masterProfile->folder_name;
-        $mediumFilename = $this->getMediumFilename();
-        return route('master.photo', ['master' => $folderName, 'filename' => $mediumFilename]);
+        if (method_exists($this, 'masterProfile') && $this->masterProfile) {
+            $folderName = $this->masterProfile->folder_name;
+            $mediumFilename = $this->getMediumFilename();
+            return route('master.photo', ['master' => $folderName, 'filename' => $mediumFilename]);
+        }
+        return '';
     }
 
     /**
-     * Получить URL миниатюры
+     * Получить URL миниатюры (legacy метод - используйте getThumbUrl())
+     * @deprecated Используйте getThumbUrl() из MediaTrait
      */
     public function getThumbUrlAttribute(): string
     {
-        $folderName = $this->masterProfile->folder_name;
-        $thumbFilename = $this->getThumbFilename();
-        return route('master.photo', ['master' => $folderName, 'filename' => $thumbFilename]);
+        return $this->getThumbUrl() ?? '';
     }
 
     /**
@@ -106,18 +110,12 @@ class Photo extends Model
     }
 
     /**
-     * Получить размер файла в человекочитаемом формате
+     * Получить размер файла в человекочитаемом формате (legacy метод)
+     * @deprecated Используйте getFormattedFileSize() из MediaTrait
      */
     public function getFormattedFileSizeAttribute(): string
     {
-        $bytes = $this->file_size;
-        $units = ['B', 'KB', 'MB', 'GB'];
-        
-        for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
-            $bytes /= 1024;
-        }
-        
-        return round($bytes, 2) . ' ' . $units[$i];
+        return $this->getFormattedFileSize();
     }
 
     /**
@@ -134,6 +132,74 @@ class Photo extends Model
     public function scopeOrdered($query)
     {
         return $query->orderBy('sort_order')->orderBy('created_at');
+    }
+
+    // ===============================
+    // УНИФИЦИРОВАННЫЕ МЕТОДЫ ДОСТУПА К ДАННЫМ
+    // ===============================
+
+    /**
+     * Получить ширину изображения (унифицированный доступ)
+     */
+    public function getWidth(): ?int
+    {
+        return $this->getMetadataValue('width', $this->attributes['width'] ?? null);
+    }
+
+    /**
+     * Получить высоту изображения (унифицированный доступ)
+     */
+    public function getHeight(): ?int
+    {
+        return $this->getMetadataValue('height', $this->attributes['height'] ?? null);
+    }
+
+    /**
+     * Получить MIME тип (унифицированный доступ)
+     */
+    public function getMimeType(): ?string
+    {
+        return $this->getMetadataValue('mime_type', $this->attributes['mime_type'] ?? null);
+    }
+
+    /**
+     * Проверить, является ли главным фото (унифицированный доступ)
+     */
+    public function isMain(): bool
+    {
+        return (bool) $this->getMetadataValue('is_main', $this->attributes['is_main'] ?? false);
+    }
+
+    /**
+     * Проверить, одобрено ли фото (унифицированный доступ)
+     */
+    public function isApproved(): bool
+    {
+        return (bool) $this->getMetadataValue('is_approved', $this->attributes['is_approved'] ?? false);
+    }
+
+    /**
+     * Установить как главное фото (унифицированный метод)
+     */
+    public function setAsMain(bool $isMain = true): void
+    {
+        $this->setMetadataValue('is_main', $isMain);
+        if (isset($this->attributes['is_main'])) {
+            $this->attributes['is_main'] = $isMain;
+        }
+        $this->save();
+    }
+
+    /**
+     * Установить статус одобрения (унифицированный метод)
+     */
+    public function setApproved(bool $approved = true): void
+    {
+        $this->setMetadataValue('is_approved', $approved);
+        if (isset($this->attributes['is_approved'])) {
+            $this->attributes['is_approved'] = $approved;
+        }
+        $this->save();
     }
 
 }

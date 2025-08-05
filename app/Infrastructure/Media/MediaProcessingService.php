@@ -2,7 +2,7 @@
 
 namespace App\Infrastructure\Media;
 
-use App\Domain\Media\Services\MasterMediaService;
+use App\Domain\Media\Services\MediaService;
 use App\Domain\Media\Services\ImageProcessor;
 use App\Domain\Media\Services\VideoProcessor;
 use App\Domain\Media\Services\ThumbnailService;
@@ -18,7 +18,7 @@ use Illuminate\Http\UploadedFile;
  */
 class MediaProcessingService
 {
-    private MasterMediaService $mediaService;
+    private MediaService $mediaService;
     private ImageProcessor $imageProcessor;
     private VideoProcessor $videoProcessor;
 
@@ -31,7 +31,7 @@ class MediaProcessingService
         $videoRepository = app(\App\Domain\Media\Repositories\VideoRepository::class);
         $masterRepository = app(\App\Domain\Master\Repositories\MasterRepository::class);
         
-        $this->mediaService = new MasterMediaService(
+        $this->mediaService = new MediaService(
             $this->imageProcessor,
             $this->videoProcessor,
             $thumbnailGenerator,

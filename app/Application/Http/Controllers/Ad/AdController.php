@@ -8,7 +8,7 @@ use App\Application\Http\Requests\UpdateAdRequest;
 use App\Domain\Ad\Services\AdService;
 use App\Domain\Ad\Models\Ad;
 use App\Domain\Ad\DTOs\CreateAdDTO;
-use App\Enums\AdStatus;
+use App\Domain\Ad\Enums\AdStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -40,35 +40,56 @@ class AdController extends Controller
      */
     public function store(CreateAdRequest $request)
     {
-        try {
-            // Создаем DTO из валидированных данных запроса
-            $validatedData = $request->validated();
-            $validatedData['user_id'] = $request->user()->id;
-            
-            $dto = CreateAdDTO::fromRequest($validatedData);
-            $ad = $this->adService->createFromDTO($dto);
-            
-            // Пытаемся сразу опубликовать
-            $this->adService->publish($ad);
-            
+        $result = $this->createAdFromRequest($request);
+        
+        if ($result['success']) {
             return redirect()->route('dashboard')
                 ->with('success', 'Объявление успешно создано и опубликовано!');
-            
-        } catch (\InvalidArgumentException $e) {
-            return redirect()->route('dashboard')
-                ->with('warning', 'Объявление сохранено как черновик. ' . $e->getMessage());
-            
-        } catch (\Exception $e) {
-            return back()->withErrors(['error' => 'Ошибка при создании объявления: ' . $e->getMessage()]);
         }
+        
+        if ($result['is_draft']) {
+            return redirect()->route('dashboard')
+                ->with('warning', 'Объявление сохранено как черновик. ' . $result['message']);
+        }
+        
+        return back()->withErrors(['error' => $result['message']]);
     }
 
-
-
     /**
-     * Опубликовать объявление
+     * Опубликовать объявление (AJAX)
      */
     public function publish(CreateAdRequest $request)
+    {
+        $result = $this->createAdFromRequest($request);
+        
+        if ($result['success']) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Объявление готово к публикации',
+                'id' => $result['ad']->id,
+                'redirect' => route('select-plan', ['ad' => $result['ad']->id])
+            ]);
+        }
+        
+        if ($result['is_draft']) {
+            return response()->json([
+                'success' => false,
+                'errors' => ['validation' => [$result['message']]],
+                'message' => 'Заполните все обязательные поля'
+            ], 422);
+        }
+        
+        return response()->json([
+            'success' => false,
+            'errors' => ['error' => [$result['message']]],
+            'message' => 'Ошибка при создании объявления'
+        ], 500);
+    }
+
+    /**
+     * Общая логика создания объявления (DRY принцип)
+     */
+    private function createAdFromRequest(CreateAdRequest $request): array
     {
         try {
             $validatedData = $request->validated();
@@ -77,27 +98,22 @@ class AdController extends Controller
             $dto = CreateAdDTO::fromRequest($validatedData);
             $ad = $this->adService->createFromDTO($dto);
             $this->adService->publish($ad);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Объявление готово к публикации',
-                'id' => $ad->id,
-                'redirect' => route('select-plan', ['ad' => $ad->id])
-            ]);
+            
+            return ['success' => true, 'ad' => $ad];
             
         } catch (\InvalidArgumentException $e) {
-            return response()->json([
-                'success' => false,
-                'errors' => ['validation' => [$e->getMessage()]],
-                'message' => 'Заполните все обязательные поля'
-            ], 422);
+            return [
+                'success' => false, 
+                'is_draft' => true, 
+                'message' => $e->getMessage()
+            ];
             
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'errors' => ['error' => [$e->getMessage()]],
-                'message' => 'Ошибка при создании объявления'
-            ], 500);
+            return [
+                'success' => false, 
+                'is_draft' => false, 
+                'message' => 'Ошибка при создании объявления: ' . $e->getMessage()
+            ];
         }
     }
 

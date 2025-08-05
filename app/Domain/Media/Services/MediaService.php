@@ -3,252 +3,237 @@
 namespace App\Domain\Media\Services;
 
 use App\Domain\Master\Models\MasterProfile;
-use App\Support\Services\BaseService;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Response as ResponseFacade;
-use App\Domain\Media\Repositories\PhotoRepository;
-use App\Domain\Media\Repositories\VideoRepository;
+use App\Domain\Media\Models\Photo as MasterPhoto;
+use App\Domain\Media\Models\Video as MasterVideo;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 /**
- * Сервис для работы с медиафайлами
+ * MediaService - координатор медиа операций (согласно плану рефакторинга)
+ * Координирует работу ImageProcessor, VideoProcessor, ThumbnailService
  */
-class MediaService extends BaseService
+class MediaService
 {
-    private PhotoRepository $photoRepository;
-    private VideoRepository $videoRepository;
-    
+    private ImageProcessor $imageProcessor;
+    private VideoProcessor $videoProcessor;
+    private ThumbnailService $thumbnailGenerator;
+    private \App\Domain\Media\Repositories\PhotoRepository $photoRepository;
+    private \App\Domain\Media\Repositories\VideoRepository $videoRepository;
+    private \App\Domain\Master\Repositories\MasterRepository $masterRepository;
+
     public function __construct(
-        PhotoRepository $photoRepository,
-        VideoRepository $videoRepository
+        ImageProcessor $imageProcessor,
+        VideoProcessor $videoProcessor,
+        ThumbnailService $thumbnailGenerator,
+        \App\Domain\Media\Repositories\PhotoRepository $photoRepository,
+        \App\Domain\Media\Repositories\VideoRepository $videoRepository,
+        \App\Domain\Master\Repositories\MasterRepository $masterRepository
     ) {
+        $this->imageProcessor = $imageProcessor;
+        $this->videoProcessor = $videoProcessor;
+        $this->thumbnailGenerator = $thumbnailGenerator;
         $this->photoRepository = $photoRepository;
         $this->videoRepository = $videoRepository;
-    }
-    /**
-     * Получить файл фото мастера
-     */
-    public function getMasterPhoto(MasterProfile $master, string $filename): Response
-    {
-        $photo = $this->photoRepository->findByFilename($filename, $master->id);
-        
-        if (!$photo) {
-            abort(404);
-        }
-        
-        $path = storage_path('app/public/masters/' . $master->id . '/photos/' . $filename);
-        
-        if (!file_exists($path)) {
-            abort(404);
-        }
-        
-        return ResponseFacade::file($path);
+        $this->masterRepository = $masterRepository;
     }
 
     /**
-     * Получить файл видео мастера
+     * Загрузить фотографии мастера
      */
-    public function getMasterVideo(MasterProfile $master, string $filename): Response
+    public function uploadPhotos(MasterProfile $master, array $files): array
     {
-        $video = $this->videoRepository->findByFilename($filename, $master->id);
+        $uploadedPhotos = [];
         
-        if (!$video) {
-            abort(404);
-        }
-        
-        $path = storage_path('app/public/masters/' . $master->id . '/videos/' . $filename);
-        
-        if (!file_exists($path)) {
-            abort(404);
-        }
-        
-        return ResponseFacade::file($path);
-    }
-
-    /**
-     * Получить постер видео
-     */
-    public function getVideoPoster(MasterProfile $master, string $filename): Response
-    {
-        $posterFilename = str_replace('.mp4', '.jpg', $filename);
-        $path = storage_path('app/public/masters/' . $master->id . '/videos/posters/' . $posterFilename);
-        
-        if (!file_exists($path)) {
-            // Возвращаем дефолтный постер
-            $defaultPath = public_path('images/video-placeholder.jpg');
-            if (file_exists($defaultPath)) {
-                return ResponseFacade::file($defaultPath);
+        DB::beginTransaction();
+        try {
+            foreach ($files as $index => $file) {
+                $photoNumber = $index + 1;
+                $uploadedPhotos[] = $this->imageProcessor->processPhoto($file, $master, $photoNumber);
             }
-            abort(404);
-        }
-        
-        return ResponseFacade::file($path);
-    }
-
-    /**
-     * Получить аватар мастера
-     */
-    public function getMasterAvatar(MasterProfile $master): Response
-    {
-        if (!$master->avatar) {
-            // Возвращаем дефолтный аватар
-            $defaultPath = public_path('images/default-avatar.jpg');
-            if (file_exists($defaultPath)) {
-                return ResponseFacade::file($defaultPath);
-            }
-            abort(404);
-        }
-        
-        $path = storage_path('app/public/' . $master->avatar);
-        
-        if (!file_exists($path)) {
-            abort(404);
-        }
-        
-        return ResponseFacade::file($path);
-    }
-
-    /**
-     * Получить миниатюру аватара мастера
-     */
-    public function getMasterAvatarThumb(MasterProfile $master): Response
-    {
-        if (!$master->avatar) {
-            $defaultPath = public_path('images/default-avatar-thumb.jpg');
-            if (file_exists($defaultPath)) {
-                return ResponseFacade::file($defaultPath);
-            }
-            abort(404);
-        }
-        
-        // Генерируем путь к миниатюре
-        $thumbPath = str_replace('.jpg', '_thumb.jpg', $master->avatar);
-        $path = storage_path('app/public/' . $thumbPath);
-        
-        if (!file_exists($path)) {
-            // Возвращаем оригинал если миниатюры нет
-            $originalPath = storage_path('app/public/' . $master->avatar);
-            if (file_exists($originalPath)) {
-                return ResponseFacade::file($originalPath);
-            }
-            abort(404);
-        }
-        
-        return ResponseFacade::file($path);
-    }
-
-    /**
-     * Очистить фотографии мастера с удалением файлов
-     */
-    public function clearMasterPhotos($master): void
-    {
-        $photos = $this->photoRepository->findByMasterProfileId($master->id);
-        foreach ($photos as $photo) {
-            // Используем метод deletePhoto который удаляет файлы
-            $this->photoRepository->deletePhoto($photo->id, $master->id);
-        }
-    }
-
-    /**
-     * Удалить фотографию с файлами
-     */
-    public function deletePhotoFiles(int $photoId, MasterProfile $master): bool
-    {
-        return $this->photoRepository->deletePhoto($photoId, $master->id);
-    }
-
-    /**
-     * Удалить видео с файлами
-     */
-    public function deleteVideo(int $videoId, MasterProfile $master): bool
-    {
-        return $this->videoRepository->deleteVideo($videoId, $master->id);
-    }
-
-    /**
-     * Очистить все видео мастера с удалением файлов
-     */
-    public function clearMasterVideos(MasterProfile $master): void
-    {
-        $videos = $this->videoRepository->findByMasterProfileId($master->id);
-        foreach ($videos as $video) {
-            $this->videoRepository->deleteVideo($video->id, $master->id);
-        }
-    }
-
-    /**
-     * Добавить тестовые фотографии
-     */
-    public function addTestPhotos($master, array $photos): array
-    {
-        $addedPhotos = [];
-        
-        foreach ($photos as $photo) {
-            $createdPhoto = $this->photoRepository->createPhoto([
-                'master_profile_id' => $master->id,
-                'filename' => basename($photo['path']),
-                'mime_type' => 'image/jpeg',
-                'file_size' => 0,
-                'width' => 800,
-                'height' => 600,
-                'is_main' => $photo['is_main'],
-                'sort_order' => $photo['order'],
-                'is_approved' => true
-            ]);
             
-            $addedPhotos[] = $createdPhoto;
+            DB::commit();
+            return $uploadedPhotos;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            // Удаляем загруженные файлы при ошибке
+            foreach ($uploadedPhotos as $photo) {
+                $this->deletePhoto($photo);
+            }
+            
+            throw $e;
         }
-        
-        return $addedPhotos;
     }
 
     /**
-     * Добавить локальные фотографии
+     * Загрузить видео мастера
      */
-    public function addLocalPhotos($master, array $localPhotos): array
+    public function uploadVideo(MasterProfile $master, UploadedFile $file): MasterVideo
     {
-        $addedPhotos = [];
+        return $this->videoProcessor->processVideo($file, $master);
+    }
+
+    /**
+     * Загрузить аватар мастера
+     */
+    public function uploadAvatar(MasterProfile $master, UploadedFile $file): string
+    {
+        $avatarPath = $this->imageProcessor->processAvatar($file, $master);
         
-        foreach ($localPhotos as $index => $photoPath) {
-            if (file_exists(public_path($photoPath))) {
-                $photo = $this->photoRepository->createPhoto([
-                    'master_profile_id' => $master->id,
-                    'filename' => basename($photoPath),
-                    'mime_type' => 'image/jpeg',
-                    'file_size' => filesize(public_path($photoPath)),
-                    'width' => 800,
-                    'height' => 600,
-                    'is_main' => $index === 0,
-                    'sort_order' => $index + 1,
-                    'is_approved' => true
-                ]);
-                
-                $addedPhotos[] = [
-                    'id' => $photo->id,
-                    'url' => asset($photoPath),
-                    'path' => $photoPath,
-                ];
-            } else {
-                $photo = $this->photoRepository->createPhoto([
-                    'master_profile_id' => $master->id,
-                    'filename' => 'no-photo.jpg',
-                    'mime_type' => 'image/jpeg',
-                    'file_size' => 0,
-                    'width' => 800,
-                    'height' => 600,
-                    'is_main' => $index === 0,
-                    'sort_order' => $index + 1,
-                    'is_approved' => true
-                ]);
-                
-                $addedPhotos[] = [
-                    'id' => $photo->id,
-                    'url' => asset('images/no-photo.jpg'),
-                    'path' => 'images/no-photo.jpg',
-                    'note' => "Файл $photoPath не найден, использован placeholder"
-                ];
+        // Обновляем путь к аватару в профиле через репозиторий
+        $this->masterRepository->update($master, ['avatar' => $avatarPath]);
+        
+        return $avatarPath;
+    }
+
+    /**
+     * Удалить фотографию
+     */
+    public function deletePhoto(MasterPhoto $photo): void
+    {
+        $this->imageProcessor->deletePhoto($photo);
+    }
+
+    /**
+     * Удалить видео
+     */
+    public function deleteVideo(MasterVideo $video): void
+    {
+        $this->videoProcessor->deleteVideo($video);
+    }
+
+    /**
+     * Переупорядочить фотографии
+     */
+    public function reorderPhotos(MasterProfile $master, array $photoIds): void
+    {
+        $photoOrders = [];
+        foreach ($photoIds as $order => $photoId) {
+            $photoOrders[$photoId] = $order + 1;
+        }
+        
+        $this->photoRepository->updateMultipleSortOrders($photoOrders);
+    }
+
+    /**
+     * Установить главное фото
+     */
+    public function setMainPhoto(MasterProfile $master, int $photoId): void
+    {
+        $this->photoRepository->setAsMain($photoId, $master->id);
+    }
+
+    /**
+     * Получить статистику медиа мастера
+     */
+    public function getMediaStats(MasterProfile $master): array
+    {
+        $photosCount = $this->photoRepository->countByMasterProfileId($master->id);
+        $videosCount = $this->videoRepository->countByMasterProfileId($master->id);
+        
+        return [
+            'photos_count' => $photosCount,
+            'videos_count' => $videosCount,
+            'total_size' => $this->calculateTotalSize($master),
+            'approved_photos' => $this->photoRepository->findByMasterProfileId($master->id)
+                ->where('is_approved', true)->count(),
+            'approved_videos' => $this->videoRepository->findByMasterProfileId($master->id)
+                ->where('is_approved', true)->count(),
+        ];
+    }
+
+    /**
+     * Вычислить общий размер медиа файлов
+     */
+    private function calculateTotalSize(MasterProfile $master): int
+    {
+        $photosSize = $this->photoRepository->findByMasterProfileId($master->id)->sum('file_size');
+        $videosSize = $this->videoRepository->getTotalSizeByMasterProfileId($master->id);
+        
+        return $photosSize + $videosSize;
+    }
+
+    /**
+     * Универсальный метод для обработки фото (для объявлений)
+     * Возвращает массив с данными о фото для сохранения в JSON
+     */
+    public function processPhotoForStorage(UploadedFile $file, string $context = 'ad'): array
+    {
+        // Валидация
+        $this->imageProcessor->validatePhotoFilePublic($file);
+        
+        // Генерация уникального имени
+        $filename = $this->generateUniqueFilename($file);
+        
+        // Обработка и сохранение разных размеров
+        $paths = $this->imageProcessor->processAndSaveMultipleSizes($file, $filename, $context);
+        
+        // Возвращаем данные для сохранения в JSON поле
+        return [
+            'id' => Str::uuid()->toString(),
+            'filename' => $filename,
+            'paths' => $paths,
+            'preview' => Storage::url($paths['medium'] ?? $paths['original']),
+            'size' => $file->getSize(),
+            'mime_type' => $file->getMimeType(),
+            'original_name' => $file->getClientOriginalName(),
+            'uploaded_at' => now()->toIso8601String()
+        ];
+    }
+
+    /**
+     * Обработать несколько фото для хранения в JSON
+     */
+    public function processMultiplePhotosForStorage(array $files, string $context = 'ad'): array
+    {
+        $processedPhotos = [];
+        
+        foreach ($files as $file) {
+            if ($file instanceof UploadedFile) {
+                $processedPhotos[] = $this->processPhotoForStorage($file, $context);
             }
         }
         
-        return $addedPhotos;
+        return $processedPhotos;
+    }
+
+    /**
+     * Удалить фото из хранилища по данным из JSON
+     */
+    public function deletePhotoFromStorage(array $photoData): void
+    {
+        if (isset($photoData['paths']) && is_array($photoData['paths'])) {
+            foreach ($photoData['paths'] as $path) {
+                Storage::delete($path);
+            }
+        }
+    }
+
+    /**
+     * Генерация уникального имени файла
+     */
+    private function generateUniqueFilename(UploadedFile $file): string
+    {
+        $extension = $file->getClientOriginalExtension();
+        return Str::uuid() . '_' . time() . '.' . $extension;
+    }
+
+    /**
+     * Проверить лимиты медиа
+     */
+    public function checkMediaLimits(MasterProfile $master, string $type = 'photo'): bool
+    {
+        $limits = [
+            'photo' => 10,
+            'video' => 3,
+        ];
+        
+        $count = $type === 'photo' 
+            ? $master->photos()->count()
+            : $master->videos()->count();
+            
+        return $count < ($limits[$type] ?? 0);
     }
 }

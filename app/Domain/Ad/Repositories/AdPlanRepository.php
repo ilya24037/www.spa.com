@@ -3,7 +3,7 @@
 namespace App\Domain\Ad\Repositories;
 
 use App\Domain\Ad\Models\AdPlan;
-use App\Support\Repositories\BaseRepository;
+use App\Domain\Common\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Collection;
 
 /**

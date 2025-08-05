@@ -2,7 +2,7 @@
 
 namespace App\Domain\Ad\Models;
 
-use App\Enums\AdStatus;
+use App\Domain\Ad\Enums\AdStatus;
 use App\Enums\PriceUnit;
 use App\Enums\WorkFormat;
 use App\Support\Traits\JsonFieldsTrait;

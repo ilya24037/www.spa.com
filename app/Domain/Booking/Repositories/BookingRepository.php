@@ -5,7 +5,7 @@ namespace App\Domain\Booking\Repositories;
 use App\Domain\Booking\Models\Booking;
 use App\Enums\BookingStatus;
 use App\Enums\BookingType;
-use App\Support\Repositories\BaseRepository;
+use App\Domain\Common\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -18,9 +18,17 @@ use Carbon\Carbon;
  */
 class BookingRepository extends BaseRepository
 {
-    public function __construct(Booking $model)
+    /**
+     * Получить класс модели
+     */
+    protected function getModelClass(): string
     {
-        parent::__construct($model);
+        return Booking::class;
+    }
+
+    public function __construct()
+    {
+        parent::__construct();
     }
 
     /**
@@ -165,7 +173,7 @@ class BookingRepository extends BaseRepository
         return $query->with(['client', 'master', 'service'])->paginate($perPage);
     }
 
-    protected function applyFilters($query, array $filters)
+    protected function applyFilters($query, array $filters = [])
     {
         if (isset($filters['status'])) {
             if ($filters['status'] instanceof BookingStatus) {

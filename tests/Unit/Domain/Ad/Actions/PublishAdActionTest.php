@@ -6,7 +6,7 @@ use Tests\TestCase;
 use App\Domain\Ad\Actions\PublishAdAction;
 use App\Domain\Ad\Repositories\AdRepository;
 use App\Domain\Ad\Models\Ad;
-use App\Enums\AdStatus;
+use App\Domain\Ad\Enums\AdStatus;
 use Mockery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 

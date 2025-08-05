@@ -29,8 +29,8 @@ class HomeController extends Controller
         ]);
 
         // Создаем DTO для фильтров
+        $filters['per_page'] = 12; // Устанавливаем количество элементов на главной
         $filterDTO = MasterFilterDTO::fromArray($filters);
-        $filterDTO->per_page = 12;
 
         // Поиск мастеров через сервис
         $masters = $this->masterService->search($filterDTO);

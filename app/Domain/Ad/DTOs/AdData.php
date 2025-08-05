@@ -2,7 +2,7 @@
 
 namespace App\Domain\Ad\DTOs;
 
-use App\Enums\AdStatus;
+use App\Domain\Ad\Enums\AdStatus;
 use App\Enums\WorkFormat;
 use Illuminate\Support\Collection;
 

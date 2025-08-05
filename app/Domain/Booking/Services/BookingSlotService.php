@@ -7,6 +7,8 @@ use App\Domain\Service\Models\Service;
 use App\Domain\Booking\Models\BookingSlot;
 use App\Enums\BookingType;
 use App\Domain\Booking\Repositories\BookingRepository;
+use App\Domain\User\Repositories\UserRepository;
+// use App\Domain\Service\Repositories\ServiceRepository;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -17,7 +19,9 @@ use Illuminate\Support\Collection;
 class BookingSlotService
 {
     public function __construct(
-        private BookingRepository $bookingRepository
+        private BookingRepository $bookingRepository,
+        private UserRepository $userRepository,
+        // private ServiceRepository $serviceRepository
     ) {}
 
     /**
@@ -29,8 +33,13 @@ class BookingSlotService
         ?BookingType $type = null,
         int $days = 14
     ): array {
-        $master = User::with('masterProfile.schedules')->findOrFail($masterId);
-        $service = Service::findOrFail($serviceId);
+        $master = $this->userRepository->findWithRelations($masterId, ['masterProfile.schedules']);
+        // $service = $this->serviceRepository->findById($serviceId);
+        $service = \App\Domain\Service\Models\Service::find($serviceId); // Временно
+        
+        if (!$master || !$service) {
+            return [];
+        }
         
         if (!$master->masterProfile) {
             return [];
@@ -136,8 +145,9 @@ class BookingSlotService
         ?Carbon $preferredTime = null,
         ?BookingType $type = null
     ): ?array {
-        $master = User::find($masterId);
-        $service = Service::find($serviceId);
+        $master = $this->userRepository->findById($masterId);
+        // $service = $this->serviceRepository->findById($serviceId);
+        $service = \App\Domain\Service\Models\Service::find($serviceId); // Временно
         
         if (!$master || !$service) {
             return null;
@@ -293,8 +303,8 @@ class BookingSlotService
     {
         $booking = $this->bookingRepository->findOrFail($bookingId);
         
-        // Удаляем старые слоты
-        BookingSlot::where('booking_id', $booking->id)->delete();
+        // Удаляем старые слоты через модель (допустимо для связанных записей)
+        $booking->slots()->delete();
         
         // Создаем новый основной слот
         $this->createBookingSlots($bookingId, [[

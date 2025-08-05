@@ -6,7 +6,7 @@ use App\Domain\Payment\Models\Payment;
 use App\Enums\PaymentStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentType;
-use App\Support\Repositories\BaseRepository;
+use App\Domain\Common\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -20,9 +20,17 @@ use Carbon\Carbon;
  */
 class PaymentRepository extends BaseRepository
 {
-    public function __construct(Payment $model)
+    /**
+     * Получить класс модели
+     */
+    protected function getModelClass(): string
     {
-        parent::__construct($model);
+        return Payment::class;
+    }
+
+    public function __construct()
+    {
+        parent::__construct();
     }
 
     /**
@@ -453,7 +461,7 @@ class PaymentRepository extends BaseRepository
     /**
      * Применить фильтры к запросу
      */
-    protected function applyFilters(Builder $query, array $filters): void
+    protected function applyFilters($query, array $filters = [])
     {
         if (!empty($filters['status'])) {
             $query->where('status', $filters['status']);

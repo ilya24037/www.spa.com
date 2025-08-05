@@ -3,7 +3,7 @@
 namespace App\Domain\Ad\Actions;
 
 use App\Domain\Ad\Repositories\AdRepository;
-use App\Enums\AdStatus;
+use App\Domain\Ad\Enums\AdStatus;
 use Illuminate\Support\Facades\Cache;
 
 /**

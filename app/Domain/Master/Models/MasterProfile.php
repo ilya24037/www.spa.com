@@ -8,11 +8,6 @@ use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany, HasOne};
 use App\Domain\Master\Traits\HasSlug;
 use App\Domain\Master\Traits\GeneratesMetaTags;
 use App\Support\Traits\JsonFieldsTrait;
-
-/**
- * Основная модель профиля мастера
- * Содержит только базовую информацию и отношения
- */
 class MasterProfile extends Model
 {
     use HasFactory;
@@ -27,8 +22,6 @@ class MasterProfile extends Model
         'user_id', 'display_name', 'slug', 'bio', 'avatar',
         'phone', 'whatsapp', 'telegram', 'show_contacts',
         'experience_years', 'certificates', 'education',
-        'city', 'district', 'metro_station',
-        'home_service', 'salon_service', 'salon_address',
         'rating', 'reviews_count', 'completed_bookings',
         'views_count', 'status', 'is_verified',
         'is_premium', 'premium_until',
@@ -38,115 +31,80 @@ class MasterProfile extends Model
         // Параметры внешности
         'hair_color', 'eye_color', 'nationality',
         // Особенности мастера
-        'features', 'medical_certificate', 'works_during_period', 'additional_features',
-        // Модульные услуги
-        'services', 'services_additional_info',
+        'features', 'medical_certificate', 'works_during_period', 'additional_features'
     ];
 
-    /**
-     * JSON поля для использования с JsonFieldsTrait
-     */
     protected $jsonFields = [
         'certificates',
         'education',
-        'features',
-        'services'
+        'features'
     ];
 
     protected $casts = [
         // JSON поля обрабатываются через JsonFieldsTrait
         'show_contacts' => 'boolean',
-        'home_service'  => 'boolean',
-        'salon_service' => 'boolean',
         'is_verified'   => 'boolean',
         'is_premium'    => 'boolean',
         'premium_until' => 'datetime',
         'rating'        => 'decimal:2',
     ];
 
-    /**
-     * Связь с пользователем
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(\App\Domain\User\Models\User::class);
     }
 
-    /**
-     * Связь с услугами мастера
-     */
-    public function services(): HasMany
+    public function masterServices(): HasMany
     {
-        return $this->hasMany(\App\Domain\Service\Models\Service::class);
+        return $this->hasMany(\App\Domain\Master\Models\MasterService::class);
     }
 
-    /**
-     * Активные услуги
-     */
-    public function activeServices(): HasMany
+    public function activeMasterServices(): HasMany
     {
-        return $this->services()->where('status', 'active');
+        return $this->masterServices()->active()->ordered();
     }
 
-    /**
-     * Фотографии мастера
-     */
+    public function locations(): HasMany
+    {
+        return $this->hasMany(\App\Domain\Master\Models\MasterLocation::class);
+    }
+
+    public function activeLocations(): HasMany
+    {
+        return $this->locations()->active()->ordered();
+    }
+
+    public function primaryLocation(): HasOne
+    {
+        return $this->hasOne(\App\Domain\Master\Models\MasterLocation::class)
+                    ->where('is_primary', true);
+    }
+
     public function photos(): HasMany
     {
         return $this->hasMany(\App\Domain\Media\Models\Photo::class, 'master_profile_id');
     }
 
-    /**
-     * Видео мастера
-     */
     public function videos(): HasMany
     {
         return $this->hasMany(\App\Domain\Media\Models\Video::class, 'master_profile_id');
     }
 
-    /**
-     * Расписание мастера
-     */
     public function schedules(): HasMany
     {
-        return $this->hasMany(\App\Domain\Master\Models\MasterSchedule::class);
+        return $this->hasMany(\App\Domain\Master\Models\Schedule::class);
     }
 
-    /**
-     * Зоны обслуживания
-     */
     public function workZones(): HasMany
     {
         return $this->hasMany(\App\Domain\Master\Models\WorkZone::class);
     }
 
-    /**
-     * Бронирования
-     */
-    public function bookings(): HasMany
-    {
-        return $this->hasMany(\App\Domain\Booking\Models\Booking::class);
-    }
-
-    /**
-     * Отзывы
-     */
-    public function reviews(): HasMany
-    {
-        return $this->hasMany(\App\Domain\Review\Models\Review::class);
-    }
-
-    /**
-     * Подписки мастера
-     */
     public function subscriptions(): HasMany
     {
         return $this->hasMany(\App\Domain\Master\Models\MasterSubscription::class);
     }
 
-    /**
-     * Активная подписка
-     */
     public function activeSubscription(): HasOne
     {
         return $this->hasOne(\App\Domain\Master\Models\MasterSubscription::class)
@@ -155,94 +113,43 @@ class MasterProfile extends Model
             ->latestOfMany();
     }
 
-    /**
-     * Проверка премиум статуса
-     */
     public function isPremium(): bool
     {
         return $this->is_premium && $this->premium_until?->isFuture();
     }
 
-    /**
-     * Проверка активности профиля
-     */
     public function isActive(): bool
     {
         return $this->status === 'active';
     }
 
-    /**
-     * Увеличить счетчик просмотров
-     */
     public function incrementViews(): void
     {
         $this->increment('views_count');
     }
 
-    /**
-     * Обновить рейтинг на основе отзывов
-     */
-    public function updateRating(): void
-    {
-        // Используем интеграционные методы через пользователя
-        if ($this->user) {
-            $rating = $this->user->getAverageRating();
-            $reviewsCount = $this->user->getReceivedReviewsCount();
-            
-            $this->update([
-                'rating'        => round($rating, 2),
-                'reviews_count' => $reviewsCount,
-            ]);
-        }
-    }
 
-    /**
-     * Проверить доступность мастера сейчас
-     */
     public function isAvailableNow(): bool
     {
-        // Базовая логика: мастер доступен если профиль активен
-        // В будущем можно расширить проверкой расписания
         return $this->isActive();
     }
 
-    /**
-     * Получить URL аватара
-     */
     public function getAvatarUrlAttribute(): ?string
     {
-        if (!$this->avatar) {
-            return null;
-        }
-
-        // Если avatar уже полный URL
-        if (filter_var($this->avatar, FILTER_VALIDATE_URL)) {
-            return $this->avatar;
-        }
-
-        // Иначе считаем что это путь относительно storage
-        return asset('storage/' . $this->avatar);
+        return $this->avatar 
+            ? (filter_var($this->avatar, FILTER_VALIDATE_URL) ? $this->avatar : asset('storage/' . $this->avatar))
+            : null;
     }
 
-    /**
-     * Получить минимальную цену услуг
-     */
     public function getPriceFromAttribute(): ?float
     {
-        return $this->services()->min('price');
+        return $this->activeMasterServices()->min('price');
     }
 
-    /**
-     * Получить максимальную цену услуг
-     */
     public function getPriceToAttribute(): ?float
     {
-        return $this->services()->max('price');
+        return $this->activeMasterServices()->max('price');
     }
-
-    /**
-     * Scopes
-     */
     public function scopeActive($q)
     {
         return $q->where('status', 'active');
@@ -261,11 +168,15 @@ class MasterProfile extends Model
 
     public function scopeInCity($q, $city)
     {
-        return $q->where('city', $city);
+        return $q->whereHas('activeLocations', function($query) use ($city) {
+            $query->where('city', $city);
+        });
     }
 
     public function scopeInDistrict($q, $district)
     {
-        return $q->where('district', $district);
+        return $q->whereHas('activeLocations', function($query) use ($district) {
+            $query->where('district', $district);
+        });
     }
 }

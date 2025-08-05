@@ -6,7 +6,7 @@ use App\Domain\Master\Models\MasterProfile;
 use App\Domain\User\Models\User;
 use App\Enums\MasterStatus;
 use App\Enums\MasterLevel;
-use App\Support\Repositories\BaseRepository;
+use App\Domain\Common\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -18,9 +18,17 @@ use Illuminate\Support\Facades\DB;
  */
 class MasterRepository extends BaseRepository
 {
-    public function __construct(MasterProfile $model)
+    /**
+     * Получить класс модели
+     */
+    protected function getModelClass(): string
     {
-        parent::__construct($model);
+        return MasterProfile::class;
+    }
+
+    public function __construct()
+    {
+        parent::__construct();
     }
 
     /**
@@ -287,7 +295,7 @@ class MasterRepository extends BaseRepository
     /**
      * Применить фильтры к запросу
      */
-    protected function applyFilters($query, array $filters)
+    protected function applyFilters($query, array $filters = [])
     {
         // Статус
         if (isset($filters['status'])) {
@@ -468,5 +476,75 @@ class MasterRepository extends BaseRepository
     public function findByDisplayName(string $displayName)
     {
         return $this->model->where('display_name', $displayName)->first();
+    }
+
+    /**
+     * Получить активные категории
+     */
+    public function getActiveCategories(): Collection
+    {
+        return $this->model->select('category')
+            ->where('status', MasterStatus::ACTIVE)
+            ->whereNotNull('category')
+            ->distinct()
+            ->pluck('category')
+            ->filter()
+            ->values();
+    }
+
+    /**
+     * Получить доступные районы
+     */
+    public function getAvailableDistricts(): Collection
+    {
+        return $this->model->select('district')
+            ->where('status', MasterStatus::ACTIVE)
+            ->whereNotNull('district')
+            ->distinct()
+            ->pluck('district')
+            ->filter()
+            ->values();
+    }
+
+    /**
+     * Получить диапазон цен
+     */
+    public function getPriceRange(): array
+    {
+        $prices = $this->model->where('status', MasterStatus::ACTIVE)
+            ->whereNotNull('price_from')
+            ->whereNotNull('price_to');
+
+        return [
+            'min' => $prices->min('price_from'),
+            'max' => $prices->max('price_to'),
+        ];
+    }
+
+    /**
+     * Найти активных мастеров (алиас для getActive)
+     * Требуется планом рефакторинга DDD
+     */
+    public function findActive(array $filters = []): Collection
+    {
+        return $this->getActive($filters);
+    }
+
+    /**
+     * Найти мастеров по местоположению (алиас для getMastersByCity)
+     * Требуется планом рефакторинга DDD
+     */
+    public function findByLocation(string $city, array $filters = []): Collection
+    {
+        return $this->getMastersByCity($city, $filters);
+    }
+
+    /**
+     * Найти мастеров по типу услуги (алиас для getMastersByService)
+     * Требуется планом рефакторинга DDD
+     */
+    public function findByService(int $serviceId, array $filters = []): Collection
+    {
+        return $this->getMastersByService($serviceId, $filters);
     }
 }

@@ -5,7 +5,7 @@ namespace App\Domain\User\Repositories;
 use App\Domain\User\Models\User;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
-use App\Support\Repositories\BaseRepository;
+use App\Domain\Common\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -19,20 +19,28 @@ use Carbon\Carbon;
 class UserRepository extends BaseRepository
 {
     /**
+     * Получить класс модели
+     */
+    protected function getModelClass(): string
+    {
+        return User::class;
+    }
+
+    /**
      * Конструктор репозитория пользователей
      */
-    public function __construct(User $model)
+    public function __construct()
     {
-        parent::__construct($model);
+        parent::__construct();
     }
     /**
      * Найти пользователя по ID с загрузкой связей
      * Переопределяем базовый метод для добавления загрузки связей
      */
-    public function find(int $id, bool $withRelations = true): ?User
+    public function findWithRelations(int $id, bool $withRelations = true): ?User
     {
         if ($withRelations) {
-            return $this->with(['profile', 'settings'])->find($id);
+            return $this->model->with(['profile', 'settings'])->find($id);
         }
         
         return parent::find($id);
@@ -313,7 +321,7 @@ class UserRepository extends BaseRepository
     /**
      * Создать пользователя с профилем
      */
-    public function create(array $userData): User
+    public function createUser(array $userData): User
     {
         return User::create([
             'email' => $userData['email'],

@@ -17,6 +17,13 @@ class AppServiceProvider extends ServiceProvider
             \App\Domain\Media\Services\MediaService::class,
             \App\Domain\Media\Services\MasterMediaService::class
         );
+
+        // ВРЕМЕННО ОТКЛЮЧЕНО - MediaRepository рефакторинг
+        // $this->app->singleton(\App\Domain\Media\Repositories\MediaRepository::class);
+        // $this->app->bind(
+        //     \App\Support\Contracts\MediaRepositoryInterface::class,
+        //     \App\Domain\Media\Repositories\MediaRepository::class
+        // );
     }
 
     /**

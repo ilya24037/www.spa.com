@@ -5,7 +5,9 @@ namespace App\Domain\Booking\Services;
 use App\Domain\Booking\Models\Booking;
 use App\Domain\Booking\Repositories\BookingRepository;
 use App\Domain\Master\Models\MasterProfile;
+use App\Domain\Master\Repositories\MasterRepository;
 use App\Domain\Service\Models\Service;
+// use App\Domain\Service\Repositories\ServiceRepository;
 use App\Enums\BookingStatus;
 use App\Enums\BookingType;
 use Carbon\Carbon;
@@ -19,7 +21,8 @@ class AvailabilityService
 {
     public function __construct(
         private BookingRepository $bookingRepository,
-        private BookingSlotService $slotService
+        private MasterRepository $masterRepository
+        // private ServiceRepository $serviceRepository
     ) {}
 
     /**
@@ -31,19 +34,24 @@ class AvailabilityService
         string $time, 
         int $serviceId
     ): void {
-        $service = Service::findOrFail($serviceId);
+        // $service = $this->serviceRepository->findById($serviceId);
+        $service = Service::find($serviceId); // Временно через модель
+        if (!$service) {
+            throw new \Exception('Услуга не найдена');
+        }
+        
         $startTime = Carbon::parse($time);
         $endTime = $startTime->copy()->addMinutes($service->duration_minutes ?? 60);
 
-        // Проверяем пересечения с другими бронированиями
-        $conflict = Booking::where('master_profile_id', $masterProfileId)
-            ->where('booking_date', $date)
-            ->whereIn('status', [BookingStatus::PENDING, BookingStatus::CONFIRMED])
-            ->where(function($query) use ($startTime, $endTime) {
-                $query->whereTime('start_time', '<', $endTime->format('H:i:s'))
-                      ->whereTime('end_time', '>', $startTime->format('H:i:s'));
-            })
-            ->exists();
+        // Проверяем пересечения с другими бронированиями через репозиторий
+        $dateTime = Carbon::parse($date . ' ' . $time);
+        $conflicts = $this->bookingRepository->findOverlapping(
+            $dateTime, 
+            $dateTime->copy()->addMinutes($service->duration_minutes ?? 60), 
+            $masterProfileId
+        );
+        
+        $conflict = $conflicts->isNotEmpty();
 
         if ($conflict) {
             throw new \Exception('Выбранное время уже занято');
@@ -177,8 +185,8 @@ class AvailabilityService
             return false;
         }
 
-        // Проверяем расписание мастера
-        $master = MasterProfile::find($masterId);
+        // Проверяем расписание мастера через репозиторий
+        $master = $this->masterRepository->findById($masterId);
         if (!$master) {
             return false;
         }

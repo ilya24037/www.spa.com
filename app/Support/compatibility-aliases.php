@@ -19,13 +19,13 @@ class_alias('App\Domain\Payment\DTOs\ProcessPaymentDTO', 'App\DTOs\ProcessPaymen
 class_alias('App\Domain\Review\DTOs\CreateReviewDTO', 'App\DTOs\CreateReviewDTO');
 class_alias('App\Domain\Notification\DTOs\SendNotificationDTO', 'App\DTOs\SendNotificationDTO');
 
-// Repositories
-class_alias('App\Domain\User\Repositories\UserRepository', 'App\Repositories\UserRepository');
-class_alias('App\Domain\Booking\Repositories\BookingRepository', 'App\Repositories\BookingRepository');
-class_alias('App\Domain\Master\Repositories\MasterRepository', 'App\Repositories\MasterRepository');
-class_alias('App\Domain\Payment\Repositories\PaymentRepository', 'App\Repositories\PaymentRepository');
-class_alias('App\Domain\Review\Repositories\ReviewRepository', 'App\Repositories\ReviewRepository');
-class_alias('App\Domain\Notification\Repositories\NotificationRepository', 'App\Repositories\NotificationRepository');
+// Repositories - ВРЕМЕННО ОТКЛЮЧЕНЫ
+// class_alias('App\Domain\User\Repositories\UserRepository', 'App\Repositories\UserRepository');
+// class_alias('App\Domain\Booking\Repositories\BookingRepository', 'App\Repositories\BookingRepository');
+// class_alias('App\Domain\Master\Repositories\MasterRepository', 'App\Repositories\MasterRepository');
+// class_alias('App\Domain\Payment\Repositories\PaymentRepository', 'App\Repositories\PaymentRepository');
+// class_alias('App\Domain\Review\Repositories\ReviewRepository', 'App\Repositories\ReviewRepository');
+// class_alias('App\Domain\Notification\Repositories\NotificationRepository', 'App\Repositories\NotificationRepository');
 
 // Actions
 class_alias('App\Domain\Booking\Actions\CreateBookingAction', 'App\Actions\CreateBookingAction');

@@ -169,7 +169,7 @@ class BookingService
     public function rescheduleBooking(
         Booking $booking, 
         Carbon $newStartTime, 
-        int $newDuration = null
+        ?int $newDuration = null
     ): Booking {
         // Проверка возможности переноса
         if (!$this->availabilityService->canRescheduleBooking($booking)) {
@@ -345,11 +345,11 @@ class BookingService
         return [
             'total' => (clone $query)->where('created_at', '>=', $startDate)->count(),
             'completed' => (clone $query)->where('created_at', '>=', $startDate)
-                ->where('status', 'completed')->count(),
+                ->where('status', BookingStatus::COMPLETED->value)->count(),
             'cancelled' => (clone $query)->where('created_at', '>=', $startDate)
-                ->where('status', 'cancelled')->count(),
+                ->where('status', BookingStatus::CANCELLED->value)->count(),
             'revenue' => (clone $query)->where('created_at', '>=', $startDate)
-                ->where('status', 'completed')->sum('total_price'),
+                ->where('status', BookingStatus::COMPLETED->value)->sum('total_price'),
         ];
     }
 
@@ -417,7 +417,7 @@ class BookingService
     {
         $tomorrow = Carbon::tomorrow();
         $bookings = $this->bookingRepository->query()
-            ->where('status', 'confirmed')
+            ->where('status', BookingStatus::CONFIRMED->value)
             ->whereDate('start_time', $tomorrow->toDateString())
             ->whereNull('reminder_sent_at')
             ->get();
@@ -427,9 +427,10 @@ class BookingService
             try {
                 $this->sendBookingReminder($booking);
                 
-                // Отмечаем, что напоминание отправлено
-                $booking->reminder_sent_at = now();
-                $booking->save();
+                // Отмечаем, что напоминание отправлено через репозиторий
+                $this->bookingRepository->update($booking, [
+                    'reminder_sent_at' => now()
+                ]);
                 
                 $sentCount++;
             } catch (\Exception $e) {

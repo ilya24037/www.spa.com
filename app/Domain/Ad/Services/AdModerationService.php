@@ -3,7 +3,7 @@
 namespace App\Domain\Ad\Services;
 
 use App\Domain\Ad\Models\Ad;
-use App\Enums\AdStatus;
+use App\Domain\Ad\Enums\AdStatus;
 use App\Domain\Ad\Repositories\AdRepository;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Collection;
@@ -45,8 +45,9 @@ class AdModerationService
 
             if ($checkResult['approved']) {
                 // Автоматическое одобрение
-                $ad->status = AdStatus::ACTIVE;
-                $ad->save();
+                $this->adRepository->updateAd($ad, [
+                    'status' => AdStatus::ACTIVE->value
+                ]);
 
                 Log::info('Ad auto-approved', ['ad_id' => $ad->id]);
 
@@ -57,8 +58,9 @@ class AdModerationService
                 ];
             } else {
                 // Отправка на ручную модерацию
-                $ad->status = AdStatus::WAITING_PAYMENT; // Временно используем этот статус
-                $ad->save();
+                $this->adRepository->updateAd($ad, [
+                    'status' => AdStatus::WAITING_PAYMENT->value
+                ]);
 
                 Log::info('Ad sent for manual moderation', [
                     'ad_id' => $ad->id,
@@ -89,11 +91,15 @@ class AdModerationService
     /**
      * Одобрить объявление
      */
-    public function approve(Ad $ad, ?string $moderatorNote = null): bool
+    public function approveAd(Ad $ad, ?string $moderatorNote = null): bool
     {
         try {
-            $ad->status = AdStatus::ACTIVE;
-            $ad->published_at = now();
+            $updateData = [
+                'status' => AdStatus::ACTIVE->value,
+                'published_at' => now()
+            ];
+            
+            $this->adRepository->updateAd($ad, $updateData);
             
             if ($moderatorNote) {
                 // Можно добавить поле для заметок модератора
@@ -102,8 +108,6 @@ class AdModerationService
                     'note' => $moderatorNote
                 ]);
             }
-            
-            $ad->save();
 
             Log::info('Ad approved by moderator', ['ad_id' => $ad->id]);
 
@@ -125,11 +129,13 @@ class AdModerationService
     /**
      * Отклонить объявление
      */
-    public function reject(Ad $ad, string $reason): bool
+    public function rejectAd(Ad $ad, string $reason): bool
     {
         try {
-            $ad->status = AdStatus::REJECTED;
-            $ad->save();
+            $this->adRepository->updateAd($ad, [
+                'status' => AdStatus::REJECTED->value,
+                'moderation_reason' => $reason
+            ]);
 
             Log::info('Ad rejected by moderator', [
                 'ad_id' => $ad->id,
@@ -157,8 +163,10 @@ class AdModerationService
     public function block(Ad $ad, string $reason): bool
     {
         try {
-            $ad->status = AdStatus::BLOCKED;
-            $ad->save();
+            $this->adRepository->updateAd($ad, [
+                'status' => AdStatus::BLOCKED->value,
+                'moderation_reason' => $reason
+            ]);
 
             Log::warning('Ad blocked', [
                 'ad_id' => $ad->id,
@@ -225,7 +233,7 @@ class AdModerationService
     /**
      * Проверка контента на нарушения
      */
-    private function checkContent(Ad $ad): array
+    public function checkContent(Ad $ad): array
     {
         $issues = [];
         $content = $ad->content;
@@ -363,13 +371,13 @@ class AdModerationService
     {
         return [
             'pending' => $this->adRepository->getPendingModeration()->total(),
-            'approved_today' => Ad::where('status', AdStatus::ACTIVE)
+            'approved_today' => Ad::where('status', AdStatus::ACTIVE->value)
                 ->whereDate('updated_at', today())
                 ->count(),
-            'rejected_today' => Ad::where('status', AdStatus::REJECTED)
+            'rejected_today' => Ad::where('status', AdStatus::REJECTED->value)
                 ->whereDate('updated_at', today())
                 ->count(),
-            'blocked_today' => Ad::where('status', AdStatus::BLOCKED)
+            'blocked_today' => Ad::where('status', AdStatus::BLOCKED->value)
                 ->whereDate('updated_at', today())
                 ->count(),
         ];
@@ -381,7 +389,7 @@ class AdModerationService
     public function getAdsForModeration(int $limit = 10): Collection
     {
         return Ad::with(['content', 'pricing', 'media', 'user'])
-            ->where('status', AdStatus::WAITING_PAYMENT)
+            ->where('status', AdStatus::WAITING_PAYMENT->value)
             ->orderBy('created_at', 'asc')
             ->limit($limit)
             ->get();

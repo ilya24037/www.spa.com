@@ -5,27 +5,19 @@ namespace App\Support\Repositories;
 use App\Support\Contracts\RepositoryInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Log;
 
 /**
- * Базовый репозиторий с общей логикой
+ * Базовый репозиторий для всех репозиториев проекта
+ * Реализует стандартные CRUD операции согласно CLAUDE.md
  * 
  * @template T of Model
- * @implements RepositoryInterface<T>
  */
 abstract class BaseRepository implements RepositoryInterface
 {
-    /**
-     * @var T
-     */
     protected Model $model;
 
-    /**
-     * Конструктор базового репозитория
-     * 
-     * @param T $model
-     */
     public function __construct(Model $model)
     {
         $this->model = $model;
@@ -33,136 +25,220 @@ abstract class BaseRepository implements RepositoryInterface
 
     /**
      * Найти запись по ID
-     * 
-     * @return T|null
      */
     public function find(int $id): ?Model
     {
-        return $this->model->find($id);
+        try {
+            return $this->model->find($id);
+        } catch (\Exception $e) {
+            Log::error('Failed to find record', [
+                'model' => get_class($this->model),
+                'id' => $id,
+                'error' => $e->getMessage()
+            ]);
+            return null;
+        }
     }
 
     /**
      * Найти запись по ID или выбросить исключение
-     * 
-     * @return T
      */
     public function findOrFail(int $id): Model
     {
-        return $this->model->findOrFail($id);
-    }
-
-    /**
-     * Получить все записи
-     * 
-     * @return Collection<int, T>
-     */
-    public function all(): Collection
-    {
-        return $this->model->all();
+        try {
+            return $this->model->findOrFail($id);
+        } catch (\Exception $e) {
+            Log::error('Record not found', [
+                'model' => get_class($this->model),
+                'id' => $id,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
     }
 
     /**
      * Создать новую запись
-     * 
-     * @return T
      */
     public function create(array $data): Model
     {
-        return $this->model->create($data);
+        try {
+            $record = $this->model->create($data);
+            
+            Log::info('Record created successfully', [
+                'model' => get_class($this->model),
+                'id' => $record->id,
+                'data_keys' => array_keys($data)
+            ]);
+            
+            return $record;
+        } catch (\Exception $e) {
+            Log::error('Failed to create record', [
+                'model' => get_class($this->model),
+                'data' => $data,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
     }
 
     /**
-     * Обновить запись
+     * Обновить запись по ID
      */
     public function update(int $id, array $data): bool
     {
-        $record = $this->findOrFail($id);
-        return $record->update($data);
+        try {
+            $updated = $this->model->where('id', $id)->update($data);
+            
+            if ($updated) {
+                Log::info('Record updated successfully', [
+                    'model' => get_class($this->model),
+                    'id' => $id,
+                    'updated_fields' => array_keys($data)
+                ]);
+            }
+            
+            return (bool) $updated;
+        } catch (\Exception $e) {
+            Log::error('Failed to update record', [
+                'model' => get_class($this->model),
+                'id' => $id,
+                'data' => $data,
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        }
     }
 
     /**
-     * Удалить запись
+     * Удалить запись по ID
      */
     public function delete(int $id): bool
     {
-        $record = $this->findOrFail($id);
-        return $record->delete();
-    }
-
-    /**
-     * Получить записи с пагинацией
-     */
-    public function paginate(int $perPage = 15): LengthAwarePaginator
-    {
-        return $this->model->paginate($perPage);
-    }
-
-    /**
-     * Найти записи по условию
-     */
-    public function findBy(string $field, $value): Collection
-    {
-        return $this->model->where($field, $value)->get();
-    }
-
-    /**
-     * Найти первую запись по условию
-     */
-    public function findOneBy(string $field, $value): ?Model
-    {
-        return $this->model->where($field, $value)->first();
-    }
-
-    /**
-     * Проверить существование записи
-     */
-    public function exists(int $id): bool
-    {
-        return $this->model->where('id', $id)->exists();
-    }
-
-    /**
-     * Получить количество записей
-     */
-    public function count(): int
-    {
-        return $this->model->count();
-    }
-
-    /**
-     * Получить записи с условием where
-     */
-    public function where(string $field, $operator, $value = null): Collection
-    {
-        // Если передано только 2 аргумента, используем '=' как оператор
-        if (func_num_args() === 2) {
-            return $this->model->where($field, '=', $operator)->get();
+        try {
+            $record = $this->find($id);
+            if (!$record) {
+                return false;
+            }
+            
+            $deleted = $record->delete();
+            
+            if ($deleted) {
+                Log::info('Record deleted successfully', [
+                    'model' => get_class($this->model),
+                    'id' => $id
+                ]);
+            }
+            
+            return $deleted;
+        } catch (\Exception $e) {
+            Log::error('Failed to delete record', [
+                'model' => get_class($this->model),
+                'id' => $id,
+                'error' => $e->getMessage()
+            ]);
+            return false;
         }
-        
-        return $this->model->where($field, $operator, $value)->get();
     }
 
     /**
-     * Обновить или создать запись
+     * Получить все записи
      */
-    public function updateOrCreate(array $attributes, array $values = []): Model
+    public function all(): Collection
     {
-        return $this->model->updateOrCreate($attributes, $values);
+        try {
+            return $this->model->all();
+        } catch (\Exception $e) {
+            Log::error('Failed to fetch all records', [
+                'model' => get_class($this->model),
+                'error' => $e->getMessage()
+            ]);
+            return new Collection();
+        }
     }
 
     /**
-     * Начать новый запрос
+     * Базовый поиск с пагинацией
+     * Наследники должны переопределить этот метод
      */
-    protected function newQuery()
+    public function search(array $filters = [], int $perPage = 15): LengthAwarePaginator
+    {
+        try {
+            $query = $this->model->newQuery();
+            
+            // Базовая сортировка
+            $sortBy = $filters['sort_by'] ?? 'created_at';
+            $sortOrder = $filters['sort_order'] ?? 'desc';
+            
+            $query->orderBy($sortBy, $sortOrder);
+            
+            return $query->paginate($perPage);
+        } catch (\Exception $e) {
+            Log::error('Search failed', [
+                'model' => get_class($this->model),
+                'filters' => $filters,
+                'error' => $e->getMessage()
+            ]);
+            
+            // Возвращаем пустую пагинацию в случае ошибки
+            return $this->model->newQuery()->paginate(0);
+        }
+    }
+
+    /**
+     * Получить модель репозитория
+     */
+    public function getModel(): Model
+    {
+        return $this->model;
+    }
+
+    /**
+     * Получить новый query builder
+     */
+    protected function query()
     {
         return $this->model->newQuery();
     }
 
     /**
-     * Загрузить связи
+     * Выполнить операцию в транзакции
      */
-    protected function with(array $relations)
+    protected function transaction(callable $callback)
     {
-        return $this->model->with($relations);
+        try {
+            return \DB::transaction($callback);
+        } catch (\Exception $e) {
+            Log::error('Transaction failed', [
+                'model' => get_class($this->model),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Безопасное применение фильтров
+     */
+    protected function applyFilters($query, array $filters): \Illuminate\Database\Eloquent\Builder
+    {
+        foreach ($filters as $key => $value) {
+            if ($value === null || $value === '') {
+                continue;
+            }
+            
+            // Игнорируем системные параметры
+            if (in_array($key, ['sort_by', 'sort_order', 'per_page'])) {
+                continue;
+            }
+            
+            // Применяем фильтр только если колонка существует
+            if ($this->model->getConnection()->getSchemaBuilder()->hasColumn($this->model->getTable(), $key)) {
+                $query->where($key, $value);
+            }
+        }
+        
+        return $query;
     }
 }

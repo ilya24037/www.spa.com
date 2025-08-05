@@ -5,6 +5,7 @@ namespace App\Domain\Media\Models;
 use App\Enums\MediaType;
 use App\Enums\MediaStatus;
 use App\Support\Traits\JsonFieldsTrait;
+use App\Domain\Media\Traits\MediaTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,7 +14,7 @@ use Illuminate\Support\Facades\Storage;
 
 class Media extends Model
 {
-    use HasFactory, SoftDeletes, JsonFieldsTrait;
+    use HasFactory, SoftDeletes, JsonFieldsTrait, MediaTrait;
 
     protected $fillable = [
         'mediable_type',
@@ -387,6 +388,53 @@ class Media extends Model
             $query->whereNull('expires_at')
                   ->orWhere('expires_at', '>', now());
         });
+    }
+
+    // ===============================
+    // БАЗОВЫЕ МЕТОДЫ (Media как центральная модель)
+    // ===============================
+
+    /**
+     * Создать Photo через центральную Media модель
+     */
+    public static function createPhoto(array $data): \App\Domain\Media\Models\Photo
+    {
+        $photo = new \App\Domain\Media\Models\Photo($data);
+        $photo->save();
+        return $photo;
+    }
+
+    /**
+     * Создать Video через центральную Media модель  
+     */
+    public static function createVideo(array $data): \App\Domain\Media\Models\Video
+    {
+        $video = new \App\Domain\Media\Models\Video($data);
+        $video->save();
+        return $video;
+    }
+
+    /**
+     * Получить все медиафайлы для сущности через базовую модель
+     */
+    public static function getMediaForEntity(string $entityType, int $entityId): \Illuminate\Support\Collection
+    {
+        $collection = collect();
+        
+        // Из новой таблицы media
+        $mediaFiles = static::where('mediable_type', $entityType)
+            ->where('mediable_id', $entityId)
+            ->get();
+        $collection = $collection->merge($mediaFiles);
+
+        // Из legacy таблиц (если нужно)
+        if ($entityType === 'App\\Domain\\Master\\Models\\MasterProfile') {
+            $photos = \App\Domain\Media\Models\Photo::where('master_profile_id', $entityId)->get();
+            $videos = \App\Domain\Media\Models\Video::where('master_profile_id', $entityId)->get();
+            $collection = $collection->merge($photos)->merge($videos);
+        }
+
+        return $collection->sortBy('sort_order');
     }
 
 }

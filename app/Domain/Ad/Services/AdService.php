@@ -9,6 +9,7 @@ use App\Domain\Ad\Repositories\AdRepository;
 use App\Domain\Ad\Services\AdMediaService;
 use App\Domain\Ad\DTOs\CreateAdDTO;
 use App\Domain\User\Models\User;
+use App\Domain\Ad\Enums\AdStatus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -39,7 +40,7 @@ class AdService
             // Создаем основное объявление
             $adData = $this->prepareMainAdData($data);
             $adData['user_id'] = $data['user_id'];
-            $adData['status'] = 'draft'; // По умолчанию черновик
+            $adData['status'] = AdStatus::DRAFT->value; // По умолчанию черновик
             
             $ad = $this->adRepository->create($adData);
             
@@ -61,7 +62,7 @@ class AdService
             // Создаем основное объявление
             $adData = $this->prepareMainAdData($data);
             $adData['user_id'] = $user->id;
-            $adData['status'] = 'draft'; // По умолчанию черновик
+            $adData['status'] = AdStatus::DRAFT->value; // По умолчанию черновик
             
             $ad = $this->adRepository->create($adData);
             
@@ -83,7 +84,7 @@ class AdService
             // Создаем основное объявление в статусе черновика
             $adData = $this->prepareMainAdData($data);
             $adData['user_id'] = $user->id;
-            $adData['status'] = 'draft';
+            $adData['status'] = AdStatus::DRAFT->value;
             
             // Устанавливаем пустые значения для обязательных полей
             $adData['title'] = $adData['title'] ?? '';
@@ -141,7 +142,7 @@ class AdService
             }
             
             $published = $this->adRepository->updateAd($ad, [
-                'status' => 'waiting_payment',
+                'status' => AdStatus::WAITING_PAYMENT->value,
                 'published_at' => now()
             ]);
             
@@ -161,7 +162,7 @@ class AdService
             $preparedData = $this->prepareMainAdData($data);
             
             // Сохраняем статус черновика
-            $preparedData['status'] = 'draft';
+            $preparedData['status'] = AdStatus::DRAFT->value;
             
             // Обновляем объявление
             $updated = $this->adRepository->updateAd($ad, $preparedData);
@@ -194,7 +195,7 @@ class AdService
      */
     public function archive(Ad $ad): Ad
     {
-        $archived = $this->adRepository->updateAd($ad, ['status' => 'archived']);
+        $archived = $this->adRepository->updateAd($ad, ['status' => AdStatus::ARCHIVED->value]);
         
         Log::info('Ad archived', ['ad_id' => $ad->id]);
         
@@ -202,11 +203,45 @@ class AdService
     }
     
     /**
+     * Модерировать объявление
+     */
+    public function moderate(Ad $ad, bool $approved, ?string $reason = null): Ad
+    {
+        return DB::transaction(function () use ($ad, $approved, $reason) {
+            // Проверяем, что объявление в состоянии ожидания модерации
+            if ($ad->status !== AdStatus::WAITING_PAYMENT->value) {
+                throw new \InvalidArgumentException('Модерировать можно только объявления в статусе "ждет оплаты"');
+            }
+            
+            $updateData = [
+                'moderated_at' => now(),
+                'moderation_reason' => $reason
+            ];
+            
+            if ($approved) {
+                $updateData['status'] = AdStatus::ACTIVE->value;
+                $updateData['expires_at'] = now()->addDays(30);
+                
+                Log::info('Ad approved during moderation', ['ad_id' => $ad->id]);
+            } else {
+                $updateData['status'] = AdStatus::REJECTED->value;
+                
+                Log::info('Ad rejected during moderation', [
+                    'ad_id' => $ad->id, 
+                    'reason' => $reason
+                ]);
+            }
+            
+            return $this->adRepository->updateAd($ad, $updateData);
+        });
+    }
+    
+    /**
      * Восстановить объявление из архива
      */
     public function restore(Ad $ad): Ad
     {
-        $restored = $this->adRepository->updateAd($ad, ['status' => 'draft']);
+        $restored = $this->adRepository->updateAd($ad, ['status' => AdStatus::DRAFT->value]);
         
         Log::info('Ad restored', ['ad_id' => $ad->id]);
         
@@ -293,20 +328,24 @@ class AdService
      */
     private function createAdComponents(Ad $ad, array $data): void
     {
-        // Создаем контент - закомментировано, т.к. контент хранится в основной таблице
-        // $this->createAdContent($ad, $data);
+        // Создаем контент в отдельной таблице AdContent
+        $this->createAdContent($ad, $data);
         
-        // Создаем цены
+        // Создаем цены в отдельной таблице AdPricing
         $this->createAdPricing($ad, $data);
         
-        // Создаем расписание - закомментировано, т.к. расписание хранится в основной таблице
-        // $this->createAdSchedule($ad, $data);
+        // Создаем расписание в отдельной таблице AdSchedule
+        $this->createAdSchedule($ad, $data);
         
-        // Медиа теперь хранится в основной таблице ads через prepareMainAdData
-        // Но если есть фото, синхронизируем их через AdMediaService для валидации
+        // Создаем локацию в отдельной таблице AdLocation
+        $this->createAdLocation($ad, $data);
+        
+        // Медиа обрабатываем через AdMediaService
         if (isset($data['photos']) && is_array($data['photos'])) {
             $this->adMediaService->syncPhotos($ad, $data['photos']);
         }
+        
+        Log::info('Ad components created', ['ad_id' => $ad->id]);
     }
     
     /**
@@ -314,32 +353,40 @@ class AdService
      */
     private function updateAdComponents(Ad $ad, array $data): void
     {
-        // Обновляем контент - закомментировано, т.к. контент хранится в основной таблице
-        // if ($ad->content) {
-        //     $this->updateAdContent($ad->content, $data);
-        // } else {
-        //     $this->createAdContent($ad, $data);
-        // }
+        // Обновляем контент в отдельной таблице AdContent
+        if ($ad->content) {
+            $this->updateAdContent($ad->content, $data);
+        } else {
+            $this->createAdContent($ad, $data);
+        }
         
-        // Обновляем цены
+        // Обновляем цены в отдельной таблице AdPricing
         if ($ad->pricing) {
             $this->updateAdPricing($ad->pricing, $data);
         } else {
             $this->createAdPricing($ad, $data);
         }
         
-        // Обновляем расписание - закомментировано, т.к. расписание хранится в основной таблице
-        // if ($ad->schedule) {
-        //     $this->updateAdSchedule($ad->schedule, $data);
-        // } else {
-        //     $this->createAdSchedule($ad, $data);
-        // }
+        // Обновляем расписание в отдельной таблице AdSchedule
+        if ($ad->schedule) {
+            $this->updateAdSchedule($ad->schedule, $data);
+        } else {
+            $this->createAdSchedule($ad, $data);
+        }
         
-        // Медиа теперь хранится в основной таблице ads через prepareMainAdData
-        // Но если есть фото, синхронизируем их через AdMediaService для валидации
+        // Обновляем локацию в отдельной таблице AdLocation
+        if ($ad->location) {
+            $this->updateAdLocation($ad->location, $data);
+        } else {
+            $this->createAdLocation($ad, $data);
+        }
+        
+        // Медиа обрабатываем через AdMediaService
         if (isset($data['photos']) && is_array($data['photos'])) {
             $this->adMediaService->syncPhotos($ad, $data['photos']);
         }
+        
+        Log::info('Ad components updated', ['ad_id' => $ad->id]);
     }
     
     /**
@@ -699,7 +746,7 @@ class AdService
     public function deleteDraft(Ad $ad): bool
     {
         // Проверяем, что это черновик
-        if ($ad->status !== 'draft') {
+        if ($ad->status !== AdStatus::DRAFT->value) {
             throw new \InvalidArgumentException('Можно удалять только черновики');
         }
         
@@ -711,7 +758,7 @@ class AdService
      */
     public function validateDraftForPublication(Ad $ad): array
     {
-        if ($ad->status !== 'draft') {
+        if ($ad->status !== AdStatus::DRAFT->value) {
             throw new \InvalidArgumentException('Опубликовать можно только черновик');
         }
         
@@ -772,7 +819,7 @@ class AdService
      */
     public function canEdit(Ad $ad): bool
     {
-        return $ad->status === 'draft' || $ad->status === 'pending';
+        return $ad->status === AdStatus::DRAFT->value || $ad->status === 'pending';
     }
     
     /**
@@ -781,7 +828,7 @@ class AdService
     public function markAsPaid(Ad $ad): Ad
     {
         $updated = $this->adRepository->updateAd($ad, [
-            'status' => 'active',
+            'status' => AdStatus::ACTIVE->value,
             'is_paid' => true,
             'paid_at' => now(),
             'expires_at' => now()->addDays(30)
@@ -790,5 +837,48 @@ class AdService
         Log::info('Ad marked as paid and activated', ['ad_id' => $ad->id]);
         
         return $updated;
+    }
+
+    /**
+     * Создать локацию объявления
+     */
+    private function createAdLocation(Ad $ad, array $data): void
+    {
+        $locationData = [
+            'ad_id' => $ad->id,
+            'work_format' => $data['work_format'] ?? null,
+            'service_location' => $data['service_location'] ?? null,
+            'outcall_locations' => $data['outcall_locations'] ?? null,
+            'taxi_option' => $data['taxi_option'] ?? false,
+            'address' => $data['address'] ?? null,
+            'travel_area' => $data['travel_area'] ?? null,
+            'phone' => $data['phone'] ?? null,
+            'contact_method' => $data['contact_method'] ?? 'phone',
+        ];
+
+        $ad->location()->create($locationData);
+    }
+
+    /**
+     * Обновить локацию объявления
+     */
+    private function updateAdLocation($location, array $data): void
+    {
+        $locationData = [];
+
+        $locationFields = [
+            'work_format', 'service_location', 'outcall_locations', 'taxi_option',
+            'address', 'travel_area', 'phone', 'contact_method'
+        ];
+        
+        foreach ($locationFields as $field) {
+            if (isset($data[$field])) {
+                $locationData[$field] = $data[$field];
+            }
+        }
+
+        if (!empty($locationData)) {
+            $location->update($locationData);
+        }
     }
 }

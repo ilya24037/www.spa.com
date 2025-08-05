@@ -6,7 +6,7 @@ use Tests\TestCase;
 use App\Domain\Ad\Services\AdService;
 use App\Domain\Ad\DTOs\AdData;
 use App\Domain\User\Models\User;
-use App\Enums\AdStatus;
+use App\Domain\Ad\Enums\AdStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class AdServiceTest extends TestCase

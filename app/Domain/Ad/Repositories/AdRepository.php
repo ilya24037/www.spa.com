@@ -4,8 +4,8 @@ namespace App\Domain\Ad\Repositories;
 
 use App\Domain\Ad\Models\Ad;
 use App\Domain\User\Models\User;
-use App\Enums\AdStatus;
-use App\Support\Repositories\BaseRepository;
+use App\Domain\Ad\Enums\AdStatus;
+use App\Domain\Common\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -359,31 +359,19 @@ class AdRepository extends BaseRepository
     /**
      * Найти активные объявления
      */
-    public function findActive(int $limit = 20): array
+    public function findActive(int $perPage = 15): LengthAwarePaginator
     {
         return Ad::where('status', AdStatus::ACTIVE)
-            ->with(['user', 'pricing'])
+            ->with(['content', 'pricing', 'media', 'user'])
             ->orderBy('created_at', 'desc')
-            ->limit($limit)
-            ->get()
-            ->toArray();
+            ->paginate($perPage);
     }
 
     /**
      * Найти объявления по фильтрам
      */
-    public function findByFilters(array $filters): array
+    public function findByFilters(array $filters, int $perPage = 15): LengthAwarePaginator
     {
-        $query = Ad::with(['user', 'pricing']);
-        
-        if (isset($filters['status'])) {
-            $query->where('status', $filters['status']);
-        }
-        
-        if (isset($filters['category'])) {
-            $query->where('category', $filters['category']);
-        }
-        
-        return $query->get()->toArray();
+        return $this->search($filters, $perPage);
     }
 }

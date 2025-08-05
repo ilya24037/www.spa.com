@@ -2,8 +2,8 @@
 
 namespace App\Domain\Booking\Models;
 
-use App\Enums\BookingStatus;
-use App\Enums\BookingType;
+use App\Domain\Booking\Enums\BookingStatus;
+use App\Domain\Booking\Enums\BookingType;
 use App\Support\Traits\JsonFieldsTrait;
 use App\Domain\User\Models\User;
 use App\Domain\Master\Models\MasterProfile;
@@ -208,6 +208,14 @@ class Booking extends Model
     public function cancelledBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'cancelled_by');
+    }
+
+    /**
+     * История изменений бронирования
+     */
+    public function history(): HasMany
+    {
+        return $this->hasMany(BookingHistory::class)->latest();
     }
 
     // =================== МЕТОДЫ ===================
