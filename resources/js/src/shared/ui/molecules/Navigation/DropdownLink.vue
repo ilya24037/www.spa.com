@@ -1,12 +1,12 @@
-<script setup>
+<script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 
-defineProps({
-    href: {
-        type: String,
-        required: true,
-    },
-});
+// TypeScript интерфейс для props
+interface DropdownLinkProps {
+  href: string
+}
+
+defineProps<DropdownLinkProps>();
 </script>
 
 <template>

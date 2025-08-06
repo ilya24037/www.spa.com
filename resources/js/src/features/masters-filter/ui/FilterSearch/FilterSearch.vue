@@ -8,14 +8,14 @@
       </svg>
       <input
         :value="value"
-        @input="$emit('update', $event.target.value)"
+        @input="emit('update', ($event.target as HTMLInputElement).value)"
         type="text"
         :placeholder="placeholder"
         :class="INPUT_CLASSES"
       >
       <button
         v-if="value"
-        @click="$emit('update', '')"
+        @click="emit('update', '')"
         :class="CLEAR_BUTTON_CLASSES"
       >
         <svg :class="CLEAR_ICON_CLASSES" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -26,7 +26,23 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+// TypeScript интерфейсы
+interface FilterSearchProps {
+  value?: string
+  placeholder?: string
+}
+
+const props = withDefaults(defineProps<FilterSearchProps>(), {
+  value: '',
+  placeholder: 'Поиск мастеров...'
+});
+
+// TypeScript типизация emits
+const emit = defineEmits<{
+  update: [value: string]
+}>()
+
 // 🎯 Стили согласно дизайн-системе
 const CONTAINER_CLASSES = 'space-y-2'
 const LABEL_CLASSES = 'text-sm font-medium text-gray-700'
@@ -35,17 +51,4 @@ const SEARCH_ICON_CLASSES = 'absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 te
 const INPUT_CLASSES = 'w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
 const CLEAR_BUTTON_CLASSES = 'absolute right-3 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-100 rounded'
 const CLEAR_ICON_CLASSES = 'w-4 h-4 text-gray-400 hover:text-gray-600'
-
-const props = defineProps({
-  value: {
-    type: String,
-    default: ''
-  },
-  placeholder: {
-    type: String,
-    default: 'Поиск мастеров...'
-  }
-})
-
-defineEmits(['update'])
 </script>

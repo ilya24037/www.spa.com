@@ -1,51 +1,54 @@
-<script setup>
+<script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 
-const props = defineProps({
-    align: {
-        type: String,
-        default: 'right',
-    },
-    width: {
-        type: String,
-        default: '48',
-    },
-    contentClasses: {
-        type: String,
-        default: 'py-1 bg-white',
-    },
-    open: {
-        type: Boolean,
-        default: false
-    }
+// TypeScript интерфейс для props
+interface DropdownProps {
+  align?: 'left' | 'right' | 'center'
+  width?: string
+  contentClasses?: string
+  open?: boolean
+}
+
+const props = withDefaults(defineProps<DropdownProps>(), {
+  align: 'right',
+  width: '48',
+  contentClasses: 'py-1 bg-white',
+  open: false
 });
 
-const closeOnEscape = (e) => {
+// Reactive состояние
+const open = ref<boolean>(false);
+
+// Обработчик закрытия по Escape
+const closeOnEscape = (e: KeyboardEvent): void => {
     if (open.value && e.key === 'Escape') {
         open.value = false;
     }
 };
 
+// Lifecycle hooks
 onMounted(() => document.addEventListener('keydown', closeOnEscape));
 onUnmounted(() => document.removeEventListener('keydown', closeOnEscape));
 
-const widthClass = computed(() => {
-    return {
+// Computed свойства с типизацией
+const widthClass = computed((): string => {
+    const widthMap: Record<string, string> = {
         48: 'w-48',
-    }[props.width.toString()];
+    };
+    return widthMap[props.width] || 'w-48';
 });
 
-const alignmentClasses = computed(() => {
-    if (props.align === 'left') {
-        return 'ltr:origin-top-left rtl:origin-top-right start-0';
-    } else if (props.align === 'right') {
-        return 'ltr:origin-top-right rtl:origin-top-left end-0';
-    } else {
-        return 'origin-top';
+const alignmentClasses = computed((): string => {
+    switch (props.align) {
+        case 'left':
+            return 'ltr:origin-top-left rtl:origin-top-right start-0';
+        case 'right':
+            return 'ltr:origin-top-right rtl:origin-top-left end-0';
+        case 'center':
+        default:
+            return 'origin-top';
     }
 });
-
-const open = ref(false);
 </script>
 
 <template>

@@ -39,9 +39,26 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import MasterCard from './MasterCard.vue'
 import MasterCardListItem from './MasterCardListItem.vue'
+
+// 🎯 TypeScript интерфейсы
+interface Master {
+  id: number
+  name: string
+  [key: string]: any // Для дополнительных свойств мастера
+}
+
+interface MasterCardListProps {
+  masters?: Master[]
+  viewMode?: 'grid' | 'list'
+}
+
+const props = withDefaults(defineProps<MasterCardListProps>(), {
+  masters: () => [],
+  viewMode: 'grid'
+});
 
 // 🎯 Стили согласно дизайн-системе
 const GRID_CLASSES = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
@@ -50,16 +67,4 @@ const EMPTY_STATE_CLASSES = 'text-center py-12'
 const EMPTY_ICON_CLASSES = 'w-16 h-16 mx-auto text-gray-400 mb-4'
 const EMPTY_TEXT_CLASSES = 'text-gray-500'
 const EMPTY_SUBTITLE_CLASSES = 'text-sm text-gray-400 mt-2'
-
-defineProps({
-  masters: {
-    type: Array,
-    default: () => []
-  },
-  viewMode: {
-    type: String,
-    default: 'grid',
-    validator: (value) => ['grid', 'list'].includes(value)
-  }
-})
 </script>

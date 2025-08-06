@@ -37,28 +37,27 @@
   </div>
 </template>
 
-<script setup>
-// Props (ТОЛЬКО Boolean)
-const props = defineProps({
-  modelValue: {
-    type: Boolean,
-    default: false
-  },
-  label: {
-    type: String,
-    default: ''
-  },
-  disabled: {
-    type: Boolean,
-    default: false
-  }
-})
+<script setup lang="ts">
+// TypeScript интерфейсы
+interface BaseCheckboxProps {
+  modelValue?: boolean
+  label?: string
+  disabled?: boolean
+}
 
-// Events
-const emit = defineEmits(['update:modelValue'])
+const props = withDefaults(defineProps<BaseCheckboxProps>(), {
+  modelValue: false,
+  label: '',
+  disabled: false
+});
+
+// TypeScript типизация emits
+const emit = defineEmits<{
+  'update:modelValue': [value: boolean]
+}>();
 
 // Methods
-const toggle = (event) => {
+const toggle = (event: MouseEvent): void => {
   if (props.disabled) return
   
   event.preventDefault()

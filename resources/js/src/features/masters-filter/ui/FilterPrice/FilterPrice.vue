@@ -8,7 +8,7 @@
         <label :class="LABEL_CLASSES">От</label>
         <input
           :value="from"
-          @input="$emit('update:from', Number($event.target.value) || null)"
+          @input="emit('update:from', Number(($event.target as HTMLInputElement).value) || null)"
           type="number"
           min="0"
           placeholder="0"
@@ -21,7 +21,7 @@
         <label :class="LABEL_CLASSES">До</label>
         <input
           :value="to"
-          @input="$emit('update:to', Number($event.target.value) || null)"
+          @input="emit('update:to', Number(($event.target as HTMLInputElement).value) || null)"
           type="number"
           min="0"
           placeholder="10000"
@@ -58,7 +58,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 
 // 🎯 Стили согласно дизайн-системе
@@ -77,21 +77,31 @@ const SELECTION_DISPLAY_CLASSES = 'flex items-center justify-between p-2 bg-blue
 const SELECTION_TEXT_CLASSES = 'text-sm text-blue-700 font-medium'
 const CLEAR_SELECTION_BUTTON_CLASSES = 'text-blue-600 hover:text-blue-800 font-medium'
 
-const props = defineProps({
-  from: {
-    type: Number,
-    default: null
-  },
-  to: {
-    type: Number,
-    default: null
-  }
-})
+// TypeScript интерфейсы
+interface FilterPriceProps {
+  from?: number | null
+  to?: number | null
+}
 
-const emit = defineEmits(['update:from', 'update:to'])
+interface PriceRange {
+  label: string
+  from: number | null
+  to: number | null
+}
+
+const props = withDefaults(defineProps<FilterPriceProps>(), {
+  from: null,
+  to: null
+});
+
+// TypeScript типизация emits
+const emit = defineEmits<{
+  'update:from': [value: number | null]
+  'update:to': [value: number | null]
+}>()
 
 // Предустановленные диапазоны цен
-const priceRanges = [
+const priceRanges: PriceRange[] = [
   { label: 'До 2000', from: null, to: 2000 },
   { label: '2000-3000', from: 2000, to: 3000 },
   { label: '3000-5000', from: 3000, to: 5000 },
@@ -114,7 +124,7 @@ const formatPriceRange = computed(() => {
 })
 
 // Методы
-const getQuickButtonClasses = (range) => {
+const getQuickButtonClasses = (range: PriceRange): string => {
   const isActive = props.from === range.from && props.to === range.to
   
   return [
@@ -123,12 +133,12 @@ const getQuickButtonClasses = (range) => {
   ].join(' ')
 }
 
-const selectRange = (range) => {
+const selectRange = (range: PriceRange): void => {
   emit('update:from', range.from)
   emit('update:to', range.to)
 }
 
-const clearSelection = () => {
+const clearSelection = (): void => {
   emit('update:from', null)
   emit('update:to', null)
 }
