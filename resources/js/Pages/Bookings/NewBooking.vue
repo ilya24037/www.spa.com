@@ -318,7 +318,9 @@
         </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { route } from 'ziggy-js'
+
 import { ref, computed, onMounted } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import { StarIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/solid'
@@ -429,9 +431,9 @@ const submit = () => {
 
 // РџСЂРё РјРѕРЅС‚РёСЂРѕРІР°РЅРёРё СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј РґР°РЅРЅС‹Рµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РµСЃР»Рё РµСЃС‚СЊ
 onMounted(() => {
-    if (window.auth?.user) {
-        form.client_name = window.auth.user.name || ''
-        form.client_phone = window.auth.user.phone || ''
+    if ((window as any).auth?.user) {
+        form.client_name = (window as any).auth.user.name || ''
+        form.client_phone = (window as any).auth.user.phone || ''
     }
 })
 </script>

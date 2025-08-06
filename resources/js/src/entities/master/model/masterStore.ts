@@ -206,7 +206,7 @@ export const useMasterStore = defineStore('master', () => {
    * Р—Р°РіСЂСѓР·РёС‚СЊ РјР°СЃС‚РµСЂРѕРІ
    */
   const fetchMasters = async (params: any = {}) => {
-    loading?.value = true
+    loading.value = true
     
     try {
       const queryParams = {
@@ -224,13 +224,13 @@ export const useMasterStore = defineStore('master', () => {
       
       // РћР±РЅРѕРІР»СЏРµРј СЃРїРёСЃРѕРє РјР°СЃС‚РµСЂРѕРІ
       if (params?.append) {
-        masters?.value.push(...response?.data)
+        masters.value.push(...response?.data)
       } else {
-        masters?.value = response?.data
+        masters.value = response?.data
       }
       
       // РћР±РЅРѕРІР»СЏРµРј РїР°РіРёРЅР°С†РёСЋ
-      Object?.assign(pagination, {
+      Object.assign(pagination, {
         current_page: response?.current_page,
         last_page: response?.last_page,
         per_page: response?.per_page,
@@ -241,7 +241,7 @@ export const useMasterStore = defineStore('master', () => {
     } catch (error: any) {
       throw error
     } finally {
-      loading?.value = false
+      loading.value = false
     }
   }
   
@@ -249,26 +249,26 @@ export const useMasterStore = defineStore('master', () => {
    * Р—Р°РіСЂСѓР·РёС‚СЊ РјР°СЃС‚РµСЂР° РїРѕ ID
    */
   const fetchMaster = async (id: number | string) => {
-    loading?.value = true
+    loading.value = true
     
     try {
       const response = await masterApi?.getMaster(id)
       
-      currentMaster?.value = response
+      currentMaster.value = response
       
       // Р”РѕР±Р°РІР»СЏРµРј РІ СЃРїРёСЃРѕРє РµСЃР»Рё РµРіРѕ С‚Р°Рј РЅРµС‚
       const existingIndex = masters?.value.findIndex(master => master?.id === id)
       if (existingIndex >= 0) {
-        masters?.value[existingIndex] = response
+        masters.value[existingIndex] = response
       } else {
-        masters?.value.unshift(response)
+        masters.value.unshift(response)
       }
       
       return response
     } catch (error: any) {
       throw error
     } finally {
-      loading?.value = false
+      loading.value = false
     }
   }
   
@@ -276,7 +276,7 @@ export const useMasterStore = defineStore('master', () => {
    * РџРѕРёСЃРє РјР°СЃС‚РµСЂРѕРІ
    */
   const searchMasters = async (query: string, additionalFilters: any = {}) => {
-    loading?.value = true
+    loading.value = true
     
     try {
       const response = await masterApi?.searchMasters(query, {
@@ -284,10 +284,10 @@ export const useMasterStore = defineStore('master', () => {
         ...additionalFilters
       })
       
-      masters?.value = response?.data
+      masters.value = response?.data
       
       // РћР±РЅРѕРІР»СЏРµРј РїР°РіРёРЅР°С†РёСЋ
-      Object?.assign(pagination, {
+      Object.assign(pagination, {
         current_page: response?.current_page || 1,
         last_page: response?.last_page || 1,
         per_page: response?.per_page || 12,
@@ -298,7 +298,7 @@ export const useMasterStore = defineStore('master', () => {
     } catch (error: any) {
       throw error
     } finally {
-      loading?.value = false
+      loading.value = false
     }
   }
   
@@ -306,22 +306,22 @@ export const useMasterStore = defineStore('master', () => {
    * Р—Р°РіСЂСѓР·РёС‚СЊ РѕС‚Р·С‹РІС‹ РјР°СЃС‚РµСЂР°
    */
   const fetchMasterReviews = async (masterId: number, params: any = {}) => {
-    loadingReviews?.value = true
+    loadingReviews.value = true
     
     try {
       const response = await masterApi?.getMasterReviews(masterId, params)
       
       if (params?.append) {
-        currentMasterReviews?.value.push(...response?.data)
+        currentMasterReviews.value.push(...response?.data)
       } else {
-        currentMasterReviews?.value = response?.data
+        currentMasterReviews.value = response?.data
       }
       
       return response
     } catch (error: any) {
       throw error
     } finally {
-      loadingReviews?.value = false
+      loadingReviews.value = false
     }
   }
   
@@ -331,7 +331,7 @@ export const useMasterStore = defineStore('master', () => {
   const fetchSimilarMasters = async (masterId: number, params: any = {}) => {
     try {
       const response = await masterApi?.getSimilarMasters(masterId, params)
-      similarMasters?.value = response?.data
+      similarMasters.value = response?.data
       return response
     } catch (error: any) {
       throw error
@@ -360,7 +360,7 @@ export const useMasterStore = defineStore('master', () => {
         master?.is_favorite = true
         
         // Р”РѕР±Р°РІР»СЏРµРј РІ РёР·Р±СЂР°РЅРЅС‹Рµ
-        favoriteMasters?.value.unshift(master)
+        favoriteMasters.value.unshift(master)
       }
       
       return master?.is_favorite
@@ -373,16 +373,16 @@ export const useMasterStore = defineStore('master', () => {
    * Р—Р°РіСЂСѓР·РёС‚СЊ РёР·Р±СЂР°РЅРЅС‹С… РјР°СЃС‚РµСЂРѕРІ
    */
   const fetchFavorites = async () => {
-    loading?.value = true
+    loading.value = true
     
     try {
       const response = await masterApi?.getFavorites()
-      favoriteMasters?.value = response?.data
+      favoriteMasters.value = response?.data
       return response
     } catch (error: any) {
       throw error
     } finally {
-      loading?.value = false
+      loading.value = false
     }
   }
   
@@ -396,7 +396,7 @@ export const useMasterStore = defineStore('master', () => {
       // РћР±РЅРѕРІР»СЏРµРј Р»РѕРєР°Р»СЊРЅРѕ
       const master = masters?.value.find(m => m?.id === masterId) || currentMaster?.value
       if (master && master?.views_count) {
-        master?.views_count++
+        master.views_count++
       }
     } catch (error: any) {
       // РќРµ РїРѕРєР°Р·С‹РІР°РµРј РѕС€РёР±РєСѓ РїРѕР»СЊР·РѕРІР°С‚РµР»СЋ РґР»СЏ РїСЂРѕСЃРјРѕС‚СЂРѕРІ
@@ -407,7 +407,7 @@ export const useMasterStore = defineStore('master', () => {
    * РЈСЃС‚Р°РЅРѕРІРёС‚СЊ С„РёР»СЊС‚СЂС‹
    */
   const setFilters = (newFilters: any) => {
-    Object?.assign(filters, newFilters)
+    Object.assign(filters, newFilters)
     pagination?.current_page = 1 // РЎР±СЂР°СЃС‹РІР°РµРј РЅР° РїРµСЂРІСѓСЋ СЃС‚СЂР°РЅРёС†Сѓ
   }
   
@@ -431,7 +431,7 @@ export const useMasterStore = defineStore('master', () => {
    * РЈСЃС‚Р°РЅРѕРІРёС‚СЊ РїРѕРёСЃРєРѕРІС‹Р№ Р·Р°РїСЂРѕСЃ
    */
   const setSearchQuery = (query: any) => {
-    searchQuery?.value = query
+    searchQuery.value = query
     pagination?.current_page = 1 // РЎР±СЂР°СЃС‹РІР°РµРј РЅР° РїРµСЂРІСѓСЋ СЃС‚СЂР°РЅРёС†Сѓ
   }
   
@@ -441,7 +441,7 @@ export const useMasterStore = defineStore('master', () => {
   const loadMoreMasters = async () => {
     if (!hasMorePages?.value || loading?.value) return
     
-    pagination?.current_page++
+    pagination.current_page++
     return await fetchMasters({ append: true })
   }
   
@@ -449,18 +449,18 @@ export const useMasterStore = defineStore('master', () => {
    * РЎР±СЂРѕСЃ СЃРѕСЃС‚РѕСЏРЅРёСЏ
    */
   const reset = () => {
-    masters?.value = []
-    currentMaster?.value = null
-    favoriteMasters?.value = []
-    similarMasters?.value = []
-    currentMasterReviews?.value = []
-    searchQuery?.value = ''
-    loading?.value = false
-    loadingReviews?.value = false
+    masters.value = []
+    currentMaster.value = null
+    favoriteMasters.value = []
+    similarMasters.value = []
+    currentMasterReviews.value = []
+    searchQuery.value = ''
+    loading.value = false
+    loadingReviews.value = false
     
     clearFilters()
     
-    Object?.assign(pagination, {
+    Object.assign(pagination, {
       current_page: 1,
       last_page: 1,
       per_page: 12,

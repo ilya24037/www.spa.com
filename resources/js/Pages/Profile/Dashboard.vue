@@ -156,7 +156,7 @@
   </ProfileLayout>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { Head, router } from '@inertiajs/vue3'
 
@@ -228,9 +228,9 @@ const handleTabChange = (tab) => {
   loadTabData(tab)
   
   // Обновляем URL без перезагрузки
-  const url = new URL(window.location)
+  const url = new URL((window as any).location)
   url.searchParams.set('tab', tab)
-  window.history.replaceState({}, '', url)
+  (window as any).history.replaceState({}, '', url)
 }
 
 const loadTabData = async (tab) => {
@@ -330,7 +330,7 @@ const editAd = (ad) => {
 }
 
 const deleteAd = (ad) => {
-  if (confirm('Вы уверены, что хотите удалить объявление?')) {
+  if ((window as any).confirm('Вы уверены, что хотите удалить объявление?')) {
     // API вызов для удаления
   }
 }
@@ -343,7 +343,7 @@ const confirmBooking = (booking) => {
 }
 
 const cancelBooking = (booking) => {
-  if (confirm('Вы уверены, что хотите отменить запись?')) {
+  if ((window as any).confirm('Вы уверены, что хотите отменить запись?')) {
   }
 }
 

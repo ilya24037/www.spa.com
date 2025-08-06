@@ -4,6 +4,6 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import TestEncodingComponent from '@/test-encoding.vue'
 </script>

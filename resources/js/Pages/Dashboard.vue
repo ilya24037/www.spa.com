@@ -57,7 +57,7 @@ interface DashboardProps {
 }
 
 // Props РёР· Inertia СЃ С‚РёРїРёР·Р°С†РёРµР№
-const _props = withDefaults(defineProps<DashboardProps>(), {
+const _props: any = withDefaults(defineProps<DashboardProps>(), {
   ads: () => [],
   counts: () => ({
     ads: 0,

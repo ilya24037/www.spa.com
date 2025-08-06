@@ -3,47 +3,43 @@
 namespace App\Domain\Search\Services;
 
 use App\Domain\Search\Enums\SearchType;
-use App\Domain\Search\Enums\SortBy;
 
 /**
- * Класс для работы с фильтрами поиска
+ * Класс для работы с фильтрами поиска - координатор
  */
 class SearchFilter
 {
     protected array $filters = [];
     protected SearchType $searchType;
 
-    public function __construct(SearchType $searchType, array $filters = [])
-    {
+    private SearchFilterValidator $validator;
+    private SearchFilterPersonalizationService $personalizationService;
+    private SearchFilterFormatterService $formatterService;
+    private SearchFilterSerializerService $serializerService;
+
+    public function __construct(
+        SearchType $searchType, 
+        array $filters = [],
+        ?SearchFilterValidator $validator = null,
+        ?SearchFilterPersonalizationService $personalizationService = null,
+        ?SearchFilterFormatterService $formatterService = null,
+        ?SearchFilterSerializerService $serializerService = null
+    ) {
         $this->searchType = $searchType;
-        $this->filters = $this->validateFilters($filters);
+        $this->validator = $validator ?? app(SearchFilterValidator::class);
+        $this->personalizationService = $personalizationService ?? app(SearchFilterPersonalizationService::class);
+        $this->formatterService = $formatterService ?? app(SearchFilterFormatterService::class);
+        $this->serializerService = $serializerService ?? app(SearchFilterSerializerService::class);
+        
+        $this->filters = $this->validator->validateFilters($searchType, $filters);
     }
 
     /**
-     * Создать из массива
+     * Получить тип поиска
      */
-    public static function fromArray(SearchType $searchType, array $filters = []): self
+    public function getSearchType(): SearchType
     {
-        return new self($searchType, $filters);
-    }
-
-    /**
-     * Создать из запроса
-     */
-    public static function fromRequest(SearchType $searchType, ?\Illuminate\Http\Request $request = null): self
-    {
-        $request = $request ?? request();
-        
-        $filters = [];
-        $availableFilters = $searchType->getAvailableFilters();
-        
-        foreach (array_keys($availableFilters) as $filterKey) {
-            if ($request->has($filterKey)) {
-                $filters[$filterKey] = $request->input($filterKey);
-            }
-        }
-        
-        return new self($searchType, $filters);
+        return $this->searchType;
     }
 
     /**
@@ -131,7 +127,7 @@ class SearchFilter
      */
     public function merge(array $otherFilters): self
     {
-        $this->filters = array_merge($this->filters, $this->validateFilters($otherFilters));
+        $this->filters = array_merge($this->filters, $this->validator->validateFilters($this->searchType, $otherFilters));
         return $this;
     }
 
@@ -140,17 +136,7 @@ class SearchFilter
      */
     public function toUrlParams(): array
     {
-        $params = [];
-        
-        foreach ($this->getActiveFilters() as $key => $value) {
-            if (is_array($value)) {
-                $params[$key] = implode(',', $value);
-            } else {
-                $params[$key] = $value;
-            }
-        }
-        
-        return $params;
+        return $this->formatterService->toUrlParams($this->getActiveFilters());
     }
 
     /**
@@ -158,7 +144,7 @@ class SearchFilter
      */
     public function toQueryString(): string
     {
-        return http_build_query($this->toUrlParams());
+        return $this->formatterService->toQueryString($this->getActiveFilters());
     }
 
     /**
@@ -166,7 +152,7 @@ class SearchFilter
      */
     public function getHash(): string
     {
-        return md5(serialize($this->getActiveFilters()));
+        return $this->serializerService->getHash($this->getActiveFilters());
     }
 
     /**
@@ -174,7 +160,7 @@ class SearchFilter
      */
     public function applyDefaults(): self
     {
-        $defaults = $this->getDefaultFilters();
+        $defaults = $this->validator->getDefaultFilters($this->searchType);
         
         foreach ($defaults as $key => $value) {
             if (!$this->has($key)) {
@@ -196,7 +182,7 @@ class SearchFilter
             return $this;
         }
         
-        $personalizedFilters = $this->getPersonalizedFilters($userId);
+        $personalizedFilters = $this->personalizationService->getPersonalizedFilters($userId, $this->searchType);
         
         foreach ($personalizedFilters as $key => $value) {
             if (!$this->has($key)) {
@@ -212,15 +198,7 @@ class SearchFilter
      */
     public function getDescription(): array
     {
-        $descriptions = [];
-        $availableFilters = $this->searchType->getAvailableFilters();
-        
-        foreach ($this->getActiveFilters() as $key => $value) {
-            $filterName = $availableFilters[$key] ?? $key;
-            $descriptions[] = $this->formatFilterDescription($filterName, $value);
-        }
-        
-        return $descriptions;
+        return $this->formatterService->getDescription($this->searchType, $this->getActiveFilters());
     }
 
     /**
@@ -228,16 +206,7 @@ class SearchFilter
      */
     public function getBreadcrumbs(): array
     {
-        $breadcrumbs = [];
-        
-        foreach ($this->getDescription() as $description) {
-            $breadcrumbs[] = [
-                'text' => $description,
-                'removable' => true,
-            ];
-        }
-        
-        return $breadcrumbs;
+        return $this->formatterService->getBreadcrumbs($this->searchType, $this->getActiveFilters());
     }
 
     /**
@@ -245,11 +214,7 @@ class SearchFilter
      */
     public function toJson(): string
     {
-        return json_encode([
-            'search_type' => $this->searchType->value,
-            'filters' => $this->getActiveFilters(),
-            'description' => $this->getDescription(),
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        return $this->serializerService->toJson($this->searchType, $this->getActiveFilters(), $this->getDescription());
     }
 
     /**
@@ -268,132 +233,11 @@ class SearchFilter
     }
 
     /**
-     * Валидация фильтров
-     */
-    protected function validateFilters(array $filters): array
-    {
-        $validated = [];
-        $availableFilters = array_keys($this->searchType->getAvailableFilters());
-        
-        foreach ($filters as $key => $value) {
-            if (in_array($key, $availableFilters) && $this->isValidFilter($key, $value)) {
-                $validated[$key] = $this->normalizeFilterValue($key, $value);
-            }
-        }
-        
-        return $validated;
-    }
-
-    /**
-     * Проверить валидность фильтра
+     * Проверить валидность фильтра (делегируем в validator)
      */
     protected function isValidFilter(string $key, $value): bool
     {
-        if ($value === null || $value === '' || $value === []) {
-            return false;
-        }
-        
-        return match($key) {
-            'price_range' => $this->validatePriceRange($value),
-            'rating' => is_numeric($value) && $value >= 0 && $value <= 5,
-            'experience' => is_numeric($value) && $value >= 0,
-            'city' => is_string($value) && mb_strlen($value) >= 2,
-            'specialty' => is_string($value) && mb_strlen($value) >= 2,
-            'availability' => is_bool($value) || in_array($value, ['true', 'false', '1', '0']),
-            'verified' => is_bool($value) || in_array($value, ['true', 'false', '1', '0']),
-            default => true,
-        };
-    }
-
-    /**
-     * Нормализовать значение фильтра
-     */
-    protected function normalizeFilterValue(string $key, $value)
-    {
-        return match($key) {
-            'availability', 'verified' => (bool) $value,
-            'rating', 'experience' => (float) $value,
-            'price_range' => $this->normalizePriceRange($value),
-            default => $value,
-        };
-    }
-
-    /**
-     * Валидация ценового диапазона
-     */
-    protected function validatePriceRange($value): bool
-    {
-        if (is_array($value) && count($value) === 2) {
-            return is_numeric($value[0]) && is_numeric($value[1]) && $value[0] <= $value[1];
-        }
-        
-        if (is_string($value) && str_contains($value, '-')) {
-            $parts = explode('-', $value);
-            return count($parts) === 2 && is_numeric($parts[0]) && is_numeric($parts[1]);
-        }
-        
-        return false;
-    }
-
-    /**
-     * Нормализация ценового диапазона
-     */
-    protected function normalizePriceRange($value): array
-    {
-        if (is_array($value)) {
-            return [(int) $value[0], (int) $value[1]];
-        }
-        
-        $parts = explode('-', $value);
-        return [(int) $parts[0], (int) $parts[1]];
-    }
-
-    /**
-     * Получить фильтры по умолчанию
-     */
-    protected function getDefaultFilters(): array
-    {
-        return match($this->searchType) {
-            SearchType::ADS => [
-                'availability' => true,
-            ],
-            SearchType::MASTERS => [
-                'rating' => 3.0,
-            ],
-            SearchType::SERVICES => [],
-            default => [],
-        };
-    }
-
-    /**
-     * Получить персонализированные фильтры
-     */
-    protected function getPersonalizedFilters(int $userId): array
-    {
-        // Здесь должна быть логика получения предпочтений пользователя
-        // Пока возвращаем пустой массив
-        return [];
-    }
-
-    /**
-     * Форматировать описание фильтра
-     */
-    protected function formatFilterDescription(string $filterName, $value): string
-    {
-        if (is_array($value)) {
-            if (count($value) === 2 && is_numeric($value[0]) && is_numeric($value[1])) {
-                // Ценовой диапазон
-                return "{$filterName}: от {$value[0]} до {$value[1]} руб.";
-            } else {
-                return "{$filterName}: " . implode(', ', $value);
-            }
-        }
-        
-        if (is_bool($value)) {
-            return $value ? $filterName : "Не {$filterName}";
-        }
-        
-        return "{$filterName}: {$value}";
+        return $this->validator->isValidFilter($this->searchType, $key, $value);
     }
 
     /**
@@ -409,12 +253,7 @@ class SearchFilter
      */
     public function toArray(): array
     {
-        return [
-            'search_type' => $this->searchType->value,
-            'filters' => $this->filters,
-            'active_filters' => $this->getActiveFilters(),
-            'active_count' => $this->getActiveFiltersCount(),
-        ];
+        return $this->serializerService->toArray($this->searchType, $this->filters, $this->getActiveFilters(), $this->getActiveFiltersCount());
     }
 
     /**

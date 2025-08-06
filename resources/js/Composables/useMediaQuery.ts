@@ -10,7 +10,7 @@ export function useMediaQuery(query: string): Ref<boolean> {
 
   onMounted(() => {
     if (typeof window !== 'undefined' && 'matchMedia' in window) {
-      mediaQuery = window.matchMedia(query)
+      mediaQuery = (window as any).matchMedia(query)
       updateMatches()
       
       // Используем addEventListener для поддержки старых браузеров

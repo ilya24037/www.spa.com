@@ -73,7 +73,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
 import { Head, Link, usePage } from '@inertiajs/vue3'
 // 🎯 FSD Импорты

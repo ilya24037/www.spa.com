@@ -252,7 +252,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
 import { Head, Link } from '@inertiajs/vue3'
 import { usePage } from '@inertiajs/vue3'

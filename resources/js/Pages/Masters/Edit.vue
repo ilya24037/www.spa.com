@@ -184,13 +184,13 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { router } from '@inertiajs/vue3'
 import MediaUploader from '@/src/entities/ad/ui/AdForm/components/AdFormMediaUpload.vue'
 import { useToast } from '@/src/shared/composables/useToast'
 
-// Toast для замены alert()
+// Toast для замены (window as any).alert()
 const toast = useToast()
 
 const props = defineProps({

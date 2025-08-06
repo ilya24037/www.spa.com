@@ -341,7 +341,9 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { route } from 'ziggy-js'
+
 import { ref, computed } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import Modal from '@/src/shared/ui/organisms/Modal/Modal.vue'
@@ -502,7 +504,7 @@ const confirmBooking = () => {
 }
 
 const completeBooking = () => {
-    if (confirm('Отметить услугу как выполненную?')) {
+    if ((window as any).confirm('Отметить услугу как выполненную?')) {
         router.post(route('bookings.complete', props.booking.id), {}, {
             preserveScroll: true
         })

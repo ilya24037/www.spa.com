@@ -1,4 +1,6 @@
-<script setup>
+<script setup lang="ts">
+import { route } from 'ziggy-js'
+
 import DangerButton from '@/src/shared/ui/molecules/Buttons/DangerButton.vue';
 import Modal from '@/src/shared/ui/organisms/Modal/Modal.vue';
 import { InputError, InputLabel, SecondaryButton, TextInput } from '@/src/shared/ui/atoms';

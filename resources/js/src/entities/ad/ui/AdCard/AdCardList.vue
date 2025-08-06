@@ -39,7 +39,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import AdCard from './AdCard.vue'
 import AdCardListItem from './AdCardListItem.vue'
 

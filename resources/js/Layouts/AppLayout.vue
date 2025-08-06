@@ -38,7 +38,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { provide, computed } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 import { Header as Navbar } from '@/src/shared/ui/organisms/Header'
@@ -54,7 +54,7 @@ const footerConfig = defaultFooterConfig
 
 // Определяем, является ли это страницей авторизации
 const isAuthPage = computed(() => {
-  return window.isAuthPage || false
+  return (window as any).isAuthPage || false
 })
 
 // Глобальные данные

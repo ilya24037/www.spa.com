@@ -14,7 +14,7 @@ export function useLockScroll(): UseLockScrollReturn {
     if (isLocked.value) return
     
     // Сохраняем текущую позицию скролла
-    scrollPosition.value = window.pageYOffset || document.documentElement.scrollTop
+    scrollPosition.value = (window as any).pageYOffset || document.documentElement.scrollTop
     
     // Блокируем скролл
     document.body.style.overflow = 'hidden'
@@ -35,7 +35,7 @@ export function useLockScroll(): UseLockScrollReturn {
     document.body.style.width = ''
     
     // Возвращаем позицию скролла
-    window.scrollTo(0, scrollPosition.value)
+    (window as any).scrollTo(0, scrollPosition.value)
     
     isLocked.value = false
   }

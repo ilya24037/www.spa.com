@@ -5,6 +5,6 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 // Минимальный layout только для авторизации
 </script> 

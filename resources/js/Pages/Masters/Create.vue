@@ -124,7 +124,9 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { route } from 'ziggy-js'
+
 import { Head, Link, useForm } from '@inertiajs/vue3'
 
 const form = useForm({

@@ -61,7 +61,7 @@ export function useForm(
     if (options?.onValidate) {
       const result = await options?.onValidate(formData?.value)
       if (result?.errors[fieldName]) {
-        formErrors?.value[fieldName] = result?.errors[fieldName]
+        formErrors.value[fieldName] = result?.errors[fieldName]
       } else {
         delete formErrors?.value[fieldName]
       }
@@ -71,11 +71,11 @@ export function useForm(
   // Методы
   const updateField = (fieldName: string, value: any) => {
     const oldValue = formData?.value[fieldName]
-    formData?.value[fieldName] = value
+    formData.value[fieldName] = value
 
     // Отмечаем поле как dirty
     if (oldValue !== value) {
-      dirtyFields?.value[fieldName] = true
+      dirtyFields.value[fieldName] = true
     }
 
     // Валидация при изменении
@@ -90,7 +90,7 @@ export function useForm(
   }
 
   const touchField = (fieldName: string) => {
-    touchedFields?.value[fieldName] = true
+    touchedFields.value[fieldName] = true
 
     // Валидация при потере фокуса
     if (validationConfig?.value.validateOnBlur) {
@@ -101,7 +101,7 @@ export function useForm(
   }
 
   const updateErrors = (errors: FormErrors) => {
-    formErrors?.value = { ...errors }
+    formErrors.value = { ...errors }
   }
 
   const validateField = async (fieldName: string): Promise<boolean> => {
@@ -111,7 +111,7 @@ export function useForm(
       const result = await options?.onValidate(formData?.value)
       
       if (result?.errors[fieldName]) {
-        formErrors?.value[fieldName] = result?.errors[fieldName]
+        formErrors.value[fieldName] = result?.errors[fieldName]
         return false
       } else {
         delete formErrors?.value[fieldName]
@@ -128,7 +128,7 @@ export function useForm(
 
     try {
       const result = await options?.onValidate(formData?.value)
-      formErrors?.value = result?.errors
+      formErrors.value = result?.errors
       return result?.valid
     } catch (error) {
       console?.error('Form validation error:', error)
@@ -137,19 +137,19 @@ export function useForm(
   }
 
   const resetForm = () => {
-    formData?.value = { ...initialData }
-    formErrors?.value = {}
-    touchedFields?.value = {}
-    dirtyFields?.value = {}
-    hasSubmitted?.value = false
-    isSubmitting?.value = false
+    formData.value = { ...initialData }
+    formErrors.value = {}
+    touchedFields.value = {}
+    dirtyFields.value = {}
+    hasSubmitted.value = false
+    isSubmitting.value = false
   }
 
   const submitForm = async (): Promise<void> => {
     if (isSubmitting?.value) return
 
-    isSubmitting?.value = true
-    hasSubmitted?.value = true
+    isSubmitting.value = true
+    hasSubmitted.value = true
 
     try {
       // Валидация перед отправкой
@@ -168,7 +168,7 @@ export function useForm(
       console?.error('Form submission error:', error)
       throw error
     } finally {
-      isSubmitting?.value = false
+      isSubmitting.value = false
     }
   }
 
@@ -224,7 +224,7 @@ export function useForm(
       const savedData = localStorage?.getItem(options?.autoSave.key)
       if (savedData) {
         const parsedData = JSON?.parse(savedData)
-        formData?.value = { ...initialData, ...parsedData }
+        formData.value = { ...initialData, ...parsedData }
       }
     } catch (error) {
       console?.warn('Failed to restore auto-saved data:', error)
@@ -254,7 +254,7 @@ export function useDynamicField<T = any>(
   itemTemplate: () => T
 ) {
   const addItem = (): void => {
-    modelValue?.value.push(itemTemplate())
+    modelValue.value.push(itemTemplate())
   }
 
   const removeItem = (index: number): void => {

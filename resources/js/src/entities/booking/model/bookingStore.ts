@@ -102,7 +102,7 @@ export const useBookingStore = defineStore('booking', () => {
    * Инициализация формы бронирования
    */
   const initializeBookingForm = (master: any, service: any = null) => {
-    bookingForm?.value = {
+    bookingForm.value = {
       masterId: master?.id,
       serviceId: service?.id || null,
       date: null,
@@ -115,7 +115,7 @@ export const useBookingStore = defineStore('booking', () => {
       duration: service?.duration || 60
     }
     
-    error?.value = null
+    error.value = null
   }
 
   /**
@@ -124,15 +124,15 @@ export const useBookingStore = defineStore('booking', () => {
   const updateDateTime = (date: any, time: any) => {
     bookingForm?.value.date = date
     bookingForm?.value.time = time
-    selectedDate?.value = date
-    selectedTime?.value = time
+    selectedDate.value = date
+    selectedTime.value = time
   }
 
   /**
    * Обновление данных клиента
    */
   const updateClientData = (clientData: any) => {
-    Object?.assign(bookingForm?.value, {
+    Object.assign(bookingForm?.value, {
       clientName: clientData?.name,
       clientPhone: clientData?.phone,
       clientEmail: clientData?.email || '',
@@ -144,8 +144,8 @@ export const useBookingStore = defineStore('booking', () => {
    * Загрузка расписания мастера
    */
   const loadMasterSchedule = async (masterId: number, startDate: string, endDate: string) => {
-    loading?.value = true
-    error?.value = null
+    loading.value = true
+    error.value = null
 
     try {
       // Имитация API вызова
@@ -168,14 +168,14 @@ export const useBookingStore = defineStore('booking', () => {
         currentDate = currentDate?.add(1, 'day')
       }
       
-      masterSchedule?.value = schedule
+      masterSchedule.value = schedule
       return schedule
 
     } catch (err) {
-      error?.value = 'Ошибка загрузки расписания мастера'
+      error.value = 'Ошибка загрузки расписания мастера'
       throw err
     } finally {
-      loading?.value = false
+      loading.value = false
     }
   }
 
@@ -183,21 +183,21 @@ export const useBookingStore = defineStore('booking', () => {
    * Загрузка доступных временных слотов для даты
    */
   const loadTimeSlots = async (masterId: number, date: string) => {
-    loading?.value = true
+    loading.value = true
     
     try {
       // Имитация API вызова
       await new Promise(resolve => setTimeout(resolve, 300))
       
       const slots = generateTimeSlots(dayjs(date))
-      availableTimeSlots?.value = slots
+      availableTimeSlots.value = slots
       return slots
 
     } catch (err) {
-      error?.value = 'Ошибка загрузки временных слотов'
+      error.value = 'Ошибка загрузки временных слотов'
       throw err
     } finally {
-      loading?.value = false
+      loading.value = false
     }
   }
 
@@ -209,8 +209,8 @@ export const useBookingStore = defineStore('booking', () => {
       throw new Error('Форма заполнена некорректно')
     }
 
-    loading?.value = true
-    error?.value = null
+    loading.value = true
+    error.value = null
 
     try {
       // Подготовка данных для API
@@ -249,8 +249,8 @@ export const useBookingStore = defineStore('booking', () => {
       }
 
       // Добавляем в список бронирований
-      bookings?.value.unshift(newBooking)
-      currentBooking?.value = newBooking
+      bookings.value.unshift(newBooking)
+      currentBooking.value = newBooking
 
       // Очищаем форму
       resetBookingForm()
@@ -258,10 +258,10 @@ export const useBookingStore = defineStore('booking', () => {
       return newBooking
 
     } catch (err) {
-      error?.value = (err as Error).message || 'Ошибка создания бронирования'
+      error.value = (err as Error).message || 'Ошибка создания бронирования'
       throw err
     } finally {
-      loading?.value = false
+      loading.value = false
     }
   }
 
@@ -269,8 +269,8 @@ export const useBookingStore = defineStore('booking', () => {
    * Загрузка списка бронирований пользователя
    */
   const loadUserBookings = async (userId: number) => {
-    loading?.value = true
-    error?.value = null
+    loading.value = true
+    error.value = null
 
     try {
       // Имитация API вызова
@@ -278,15 +278,15 @@ export const useBookingStore = defineStore('booking', () => {
       
       // Генерируем тестовые бронирования
       const mockBookings = generateMockBookings(userId)
-      bookings?.value = mockBookings
+      bookings.value = mockBookings
       
       return mockBookings
 
     } catch (err) {
-      error?.value = 'Ошибка загрузки бронирований'
+      error.value = 'Ошибка загрузки бронирований'
       throw err
     } finally {
-      loading?.value = false
+      loading.value = false
     }
   }
 
@@ -294,8 +294,8 @@ export const useBookingStore = defineStore('booking', () => {
    * Отмена бронирования
    */
   const cancelBooking = async (bookingId: number, reason: string | null = null) => {
-    loading?.value = true
-    error?.value = null
+    loading.value = true
+    error.value = null
 
     try {
       // Имитация API вызова
@@ -312,10 +312,10 @@ export const useBookingStore = defineStore('booking', () => {
       return true
 
     } catch (err) {
-      error?.value = 'Ошибка отмены бронирования'
+      error.value = 'Ошибка отмены бронирования'
       throw err
     } finally {
-      loading?.value = false
+      loading.value = false
     }
   }
 
@@ -323,7 +323,7 @@ export const useBookingStore = defineStore('booking', () => {
    * Сброс формы бронирования
    */
   const resetBookingForm = () => {
-    bookingForm?.value = {
+    bookingForm.value = {
       masterId: null,
       serviceId: null,
       date: null,
@@ -336,19 +336,19 @@ export const useBookingStore = defineStore('booking', () => {
       duration: 0
     }
     
-    selectedDate?.value = null
-    selectedTime?.value = null
-    availableTimeSlots?.value = []
-    error?.value = null
+    selectedDate.value = null
+    selectedTime.value = null
+    availableTimeSlots.value = []
+    error.value = null
   }
 
   /**
    * Очистка состояния
    */
   const clearState = () => {
-    bookings?.value = []
-    currentBooking?.value = null
-    masterSchedule?.value = []
+    bookings.value = []
+    currentBooking.value = null
+    masterSchedule.value = []
     resetBookingForm()
   }
 

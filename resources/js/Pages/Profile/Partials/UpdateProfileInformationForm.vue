@@ -1,4 +1,6 @@
-<script setup>
+<script setup lang="ts">
+import { route } from 'ziggy-js'
+
 import { InputError, InputLabel, PrimaryButton, TextInput } from '@/src/shared/ui/atoms';
 import { Link, useForm, usePage } from '@inertiajs/vue3';
 

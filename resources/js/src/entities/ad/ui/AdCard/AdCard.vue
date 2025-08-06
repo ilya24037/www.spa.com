@@ -352,7 +352,7 @@ const contactMaster = (): void => {
     
     if (_props?.ad.phone && _props?.ad.show_contacts) {
       const cleanPhone = _props?.ad.phone?.replace(/\D/g, '')
-      window?.location.href = `tel:${cleanPhone}`
+      window?.(window as any).location.href = `tel:${cleanPhone}`
     } else {
       toast?.info('РљРѕРЅС‚Р°РєС‚С‹ Р±СѓРґСѓС‚ РґРѕСЃС‚СѓРїРЅС‹ РїРѕСЃР»Рµ Р·Р°РїРёСЃРё')
     }

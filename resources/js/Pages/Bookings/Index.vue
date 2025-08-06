@@ -205,6 +205,8 @@
 </template>
 
 <script setup lang="ts">
+import { route } from 'ziggy-js'
+
 import { logger } from '@/src/shared/lib/logger'
 import { computed, onMounted, watch, ref } from 'vue'
 import { router } from '@inertiajs/vue3'
@@ -244,11 +246,11 @@ interface BookingsIndexProps {
   isMaster?: boolean
 }
 
-// Toast для замены alert()
+// Toast для замены (window as any).alert()
 const toast = useToast()
 
 // Props от Inertia с типизацией
-const _props = withDefaults(defineProps<BookingsIndexProps>(), {
+const _props: any = withDefaults(defineProps<BookingsIndexProps>(), {
   isMaster: false
 })
 
@@ -388,7 +390,7 @@ const handleRescheduleBooking = (bookingId: any) => {
 }
 
 const handleCompleteBooking = async (bookingId: any) => {
-  if (!confirm('Отметить запись как завершенную?')) return
+  if (!(window as any).confirm('Отметить запись как завершенную?')) return
   
   try {
     // API вызов для завершения записи
@@ -463,7 +465,7 @@ onMounted(() => {
   }, 1400)
 
   // Устанавливаем активную вкладку из URL параметра если есть
-  const urlParams = new URLSearchParams(window.location.search)
+  const urlParams = new URLSearchParams((window as any).location.search)
   const tabParam = urlParams.get('tab')
   if (tabParam && tabs.value.some(t => t.key === tabParam)) {
     activeTab.value = tabParam
@@ -473,9 +475,9 @@ onMounted(() => {
 // Наблюдатели
 watch(activeTab, (newTab) => {
   // Обновляем URL при смене вкладки
-  const url = new URL(window.location.href)
+  const url = new URL((window as any).(window as any).location.href)
   url.searchParams.set('tab', newTab)
-  window.history.replaceState({}, '', url)
+  (window as any).history.replaceState({}, '', url)
 })
 </script>
 

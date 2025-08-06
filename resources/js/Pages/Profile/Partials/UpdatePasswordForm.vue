@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { InputError, InputLabel, PrimaryButton, TextInput } from '@/src/shared/ui/atoms';
 import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';

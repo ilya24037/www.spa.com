@@ -140,7 +140,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { Head } from '@inertiajs/vue3'
 import LeafletMap from '@/src/features/map/ui/MapLegacy/LeafletMap.vue'

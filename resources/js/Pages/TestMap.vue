@@ -36,7 +36,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { Head } from '@inertiajs/vue3'
 import RealMap from '@/src/features/map/ui/MapLegacy/RealMap.vue'

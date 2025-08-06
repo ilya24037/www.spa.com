@@ -208,7 +208,9 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { route } from 'ziggy-js'
+
 import { ref } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import { MapPinIcon, PhoneIcon } from '@heroicons/vue/24/outline'
@@ -218,11 +220,11 @@ import PhotoGallery from '@/src/features/gallery/ui/PhotoGallery/PhotoGallery.vu
 import Breadcrumbs from '@/src/shared/ui/molecules/Breadcrumbs/Breadcrumbs.vue'
 import { useToast } from '@/src/shared/composables/useToast'
 
-// Toast РґР»СЏ Р·Р°РјРµРЅС‹ alert()
+// Toast РґР»СЏ Р·Р°РјРµРЅС‹ (window as any).alert()
 const toast = useToast()
 
-// РРјРїРѕСЂС‚РёСЂСѓРµРј route РёР· window.route (Ziggy)
-const route = window.route || ((name, params) => {
+// РРјРїРѕСЂС‚РёСЂСѓРµРј route РёР· (window as any).route (Ziggy)
+const route = (window as any).route || ((name, params) => {
   // Fallback РґР»СЏ СЂРѕСѓС‚РѕРІ
   if (name === 'my-ads.destroy' && params) {
     return `/my-ads/${params}`
@@ -297,7 +299,7 @@ const getDayName = (dayOfWeek) => {
 
 const showPhone = () => {
   if (props.ad.phone) {
-    window.location.href = `tel:${props.ad.phone.replace(/\D/g, '')}`
+    (window as any).(window as any).location.href = `tel:${props.ad.phone.replace(/\D/g, '')}`
   } else {
     toast.info('РўРµР»РµС„РѕРЅ Р±СѓРґРµС‚ РґРѕСЃС‚СѓРїРµРЅ РїРѕСЃР»Рµ РїСѓР±Р»РёРєР°С†РёРё РѕР±СЉСЏРІР»РµРЅРёСЏ')
   }

@@ -195,13 +195,13 @@ export const useAdStore = defineStore('ad', () => {
       
       // Обновляем список объявлений
       if (params?.append) {
-        ads?.value.push(...response?.data)
+        ads.value.push(...response?.data)
       } else {
-        ads?.value = response?.data
+        ads.value = response?.data
       }
       
       // Обновляем пагинацию
-      Object?.assign(pagination, {
+      Object.assign(pagination, {
         current_page: response?.current_page,
         last_page: response?.last_page,
         per_page: response?.per_page,
@@ -212,7 +212,7 @@ export const useAdStore = defineStore('ad', () => {
     } catch (error) {
       throw error
     } finally {
-      loading?.value = false
+      loading.value = false
     }
   }
   
@@ -226,21 +226,21 @@ export const useAdStore = defineStore('ad', () => {
       const response = await adApi?.getAd(id)
       const processedData = adApi?.processServerData(response)
       
-      currentAd?.value = processedData
+      currentAd.value = processedData
       
       // Добавляем в список если его там нет
       const existingIndex = ads?.value.findIndex(ad => ad?.id === id)
       if (existingIndex >= 0) {
-        ads?.value[existingIndex] = processedData
+        ads.value[existingIndex] = processedData
       } else {
-        ads?.value.unshift(processedData)
+        ads.value.unshift(processedData)
       }
       
       return processedData
     } catch (error) {
       throw error
     } finally {
-      loading?.value = false
+      loading.value = false
     }
   }
   
@@ -248,25 +248,25 @@ export const useAdStore = defineStore('ad', () => {
    * Создать объявление
    */
   const createAd = async (data: any) => {
-    saving?.value = true
+    saving.value = true
     
     try {
       const response = await adApi?.createAd(data)
       const newAd = adApi?.processServerData(response)
       
       // Добавляем в начало списка
-      ads?.value.unshift(newAd)
+      ads.value.unshift(newAd)
       
       // Обновляем статистику
-      userStats?.total++
-      if (newAd?.status === 'draft') userStats?.draft++
-      if (newAd?.status === 'active') userStats?.active++
+      userStats.total++
+      if (newAd?.status === 'draft') userStats.draft++
+      if (newAd?.status === 'active') userStats.active++
       
       return newAd
     } catch (error) {
       throw error
     } finally {
-      saving?.value = false
+      saving.value = false
     }
   }
   
@@ -274,7 +274,7 @@ export const useAdStore = defineStore('ad', () => {
    * Обновить объявление
    */
   const updateAd = async (id: any, data: any) => {
-    saving?.value = true
+    saving.value = true
     
     try {
       const response = await adApi?.updateAd(id, data)
@@ -283,19 +283,19 @@ export const useAdStore = defineStore('ad', () => {
       // Обновляем в списке
       const index = ads?.value.findIndex(ad => ad?.id === id)
       if (index >= 0) {
-        ads?.value[index] = updatedAd
+        ads.value[index] = updatedAd
       }
       
       // Обновляем текущее объявление
       if (currentAd?.value && currentAd?.value.id === id) {
-        currentAd?.value = updatedAd
+        currentAd.value = updatedAd
       }
       
       return updatedAd
     } catch (error) {
       throw error
     } finally {
-      saving?.value = false
+      saving.value = false
     }
   }
   
@@ -303,7 +303,7 @@ export const useAdStore = defineStore('ad', () => {
    * Удалить объявление
    */
   const deleteAd = async (id: any) => {
-    saving?.value = true
+    saving.value = true
     
     try {
       await adApi?.deleteAd(id)
@@ -315,21 +315,21 @@ export const useAdStore = defineStore('ad', () => {
         ads?.value.splice(index, 1)
         
         // Обновляем статистику
-        userStats?.total--
-        if (deletedAd?.status === 'draft') userStats?.draft--
-        if (deletedAd?.status === 'active') userStats?.active--
-        if (deletedAd?.status === 'archived') userStats?.archived--
+        userStats.total--
+        if (deletedAd?.status === 'draft') userStats.draft--
+        if (deletedAd?.status === 'active') userStats.active--
+        if (deletedAd?.status === 'archived') userStats.archived--
       }
       
       // Очищаем текущее объявление если оно удалено
       if (currentAd?.value && currentAd?.value.id === id) {
-        currentAd?.value = null
+        currentAd.value = null
       }
       
     } catch (error) {
       throw error
     } finally {
-      saving?.value = false
+      saving.value = false
     }
   }
   
@@ -337,7 +337,7 @@ export const useAdStore = defineStore('ad', () => {
    * Изменить статус объявления
    */
   const changeAdStatus = async (id: any, status: any) => {
-    saving?.value = true
+    saving.value = true
     
     try {
       await adApi?.changeStatus(id, status)
@@ -349,20 +349,20 @@ export const useAdStore = defineStore('ad', () => {
         ads?.value[index].status = status
         
         // Обновляем статистику
-        if (oldStatus === 'draft') userStats?.draft--
-        if (oldStatus === 'active') userStats?.active--
-        if (oldStatus === 'archived') userStats?.archived--
+        if (oldStatus === 'draft') userStats.draft--
+        if (oldStatus === 'active') userStats.active--
+        if (oldStatus === 'archived') userStats.archived--
         
-        if (status === 'draft') userStats?.draft++
-        if (status === 'active') userStats?.active++
-        if (status === 'archived') userStats?.archived++
+        if (status === 'draft') userStats.draft++
+        if (status === 'active') userStats.active++
+        if (status === 'archived') userStats.archived++
       }
       
       return ads?.value[index]
     } catch (error) {
       throw error
     } finally {
-      saving?.value = false
+      saving.value = false
     }
   }
   
@@ -388,7 +388,7 @@ export const useAdStore = defineStore('ad', () => {
         ad?.is_favorite = true
         
         // Добавляем в избранные
-        favoriteAds?.value.unshift(ad)
+        favoriteAds.value.unshift(ad)
       }
       
       return ad?.is_favorite
@@ -405,12 +405,12 @@ export const useAdStore = defineStore('ad', () => {
     
     try {
       const response = await adApi?.getFavorites()
-      favoriteAds?.value = response?.data
+      favoriteAds.value = response?.data
       return response
     } catch (error) {
       throw error
     } finally {
-      loading?.value = false
+      loading.value = false
     }
   }
   
@@ -420,7 +420,7 @@ export const useAdStore = defineStore('ad', () => {
   const fetchUserStats = async () => {
     try {
       const response = await adApi?.getUserAdStats()
-      Object?.assign(userStats, response)
+      Object.assign(userStats, response)
       return response
     } catch (error) {
       throw error
@@ -431,7 +431,7 @@ export const useAdStore = defineStore('ad', () => {
    * Установить фильтры
    */
   const setFilters = (newFilters: any) => {
-    Object?.assign(filters, newFilters)
+    Object.assign(filters, newFilters)
     pagination?.current_page = 1 // Сбрасываем на первую страницу
   }
   
@@ -451,7 +451,7 @@ export const useAdStore = defineStore('ad', () => {
    * Установить поисковый запрос
    */
   const setSearchQuery = (query: any) => {
-    searchQuery?.value = query
+    searchQuery.value = query
     pagination?.current_page = 1 // Сбрасываем на первую страницу
   }
   
@@ -461,7 +461,7 @@ export const useAdStore = defineStore('ad', () => {
   const loadMoreAds = async () => {
     if (!hasMorePages?.value || loading?.value) return
     
-    pagination?.current_page++
+    pagination.current_page++
     return await fetchAds({ append: true })
   }
   
@@ -469,23 +469,23 @@ export const useAdStore = defineStore('ad', () => {
    * Сброс состояния
    */
   const reset = () => {
-    ads?.value = []
-    currentAd?.value = null
-    favoriteAds?.value = []
-    searchQuery?.value = ''
-    loading?.value = false
-    saving?.value = false
+    ads.value = []
+    currentAd.value = null
+    favoriteAds.value = []
+    searchQuery.value = ''
+    loading.value = false
+    saving.value = false
     
     clearFilters()
     
-    Object?.assign(pagination, {
+    Object.assign(pagination, {
       current_page: 1,
       last_page: 1,
       per_page: 12,
       total: 0
     })
     
-    Object?.assign(userStats, {
+    Object.assign(userStats, {
       total: 0,
       active: 0,
       draft: 0,
