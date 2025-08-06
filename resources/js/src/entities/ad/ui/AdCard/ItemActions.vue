@@ -32,14 +32,14 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import ItemActionsDropdown from './ItemActionsDropdown.vue'
 
-const props = defineProps({
+const _props = defineProps({
   item: {
     type: Object,
     required: true
   }
 })
 
-const emit = defineEmits([
+const _emit = defineEmits([
   'pay',
   'promote', 
   'edit',

@@ -106,7 +106,8 @@ class BookingBulkOperationsService
     private function autoCompleteBooking(Booking $booking): array
     {
         try {
-            $this->completeAction->execute($booking, $booking->master, [
+            $completeAction = app(\App\Domain\Booking\Actions\CompleteBookingAction::class);
+            $completeAction->execute($booking, $booking->master, [
                 'auto_complete' => true,
                 'completion_notes' => 'Автоматическое завершение просроченного бронирования',
                 'request_review' => false,

@@ -88,12 +88,11 @@ import SkeletonStats from './skeletons/SkeletonStats.vue'
 import type {
   PageLoaderProps,
   PageLoaderEmits,
-  PageLoaderType,
   PageTypeConfigs
 } from './PageLoader.types'
 
 // Props СЃ TypeScript С‚РёРїРёР·Р°С†РёРµР№
-const props = withDefaults(defineProps<PageLoaderProps>(), {
+const _props = withDefaults(defineProps<PageLoaderProps>(), {
   type: 'default',
   message: '',
   showSkeletons: true,

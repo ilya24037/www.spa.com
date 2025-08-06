@@ -62,7 +62,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-const props = defineProps({
+const _props = defineProps({
   item: {
     type: Object,
     required: true

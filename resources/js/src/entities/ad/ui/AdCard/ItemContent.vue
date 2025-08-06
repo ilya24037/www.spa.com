@@ -54,7 +54,7 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps({
+const _props = defineProps({
   item: {
     type: Object,
     required: true

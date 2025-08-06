@@ -31,7 +31,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
-const props = defineProps({
+const _props = defineProps({
   item: {
     type: Object,
     required: true
@@ -51,7 +51,7 @@ const processedPhotos = computed(() => {
   const photos = []
   
   if (props.item.photos && props.item.photos.length) {
-    props.item.photos.forEach((photo, index) => {
+    props.item.photos.forEach((photo: any, index: any) => {
       let photoUrl = null
       
       if (typeof photo === 'string') {
@@ -118,7 +118,7 @@ const stopImagePreview = () => {
   currentPhotoIndex.value = 0 // Р’РѕР·РІСЂР°С‰Р°РµРјСЃСЏ Рє РїРµСЂРІРѕРјСѓ С„РѕС‚Рѕ
 }
 
-const handleMouseMove = (event) => {
+const handleMouseMove = (_event) => {
   if (!isHovering.value || processedPhotos.value.length <= 1) return
   
   const rect = event.currentTarget.getBoundingClientRect()
@@ -134,7 +134,7 @@ const handleMouseMove = (event) => {
   }
 }
 
-const handleImageError = (event) => {
+const handleImageError = (_event) => {
   
   // Р•СЃР»Рё СЌС‚Рѕ СѓР¶Рµ fallback РёР·РѕР±СЂР°Р¶РµРЅРёРµ, РїРѕРєР°Р·С‹РІР°РµРј placeholder
   if (event.target.src.includes('demo-')) {

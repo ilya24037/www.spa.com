@@ -122,19 +122,13 @@ import { ref, computed, withDefaults } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { useToast } from '@/src/shared/composables/useToast'
 import type {
-  AdCardListItemProps,
-  Ad,
-  AdImage,
-  AdPhoto,
-  AdService,
+  AdCardListItemProps,AdService,
   AdCardListItemState,
   AdCardError,
-  StyleConstants,
-  FavoriteToggleResponse
-} from './AdCardListItem.types'
+  StyleConstants,} from './AdCardListItem.types'
 
 // Props СЃ TypeScript С‚РёРїРёР·Р°С†РёРµР№
-const props = withDefaults(defineProps<AdCardListItemProps>(), {})
+const _props = withDefaults(defineProps<AdCardListItemProps>(), {})
 
 // Toast РґР»СЏ Р·Р°РјРµРЅС‹ alert()
 const toast = useToast()
@@ -348,7 +342,7 @@ const toggleFavorite = async (): Promise<void> => {
     }, {
       preserveState: true,
       preserveScroll: true,
-      onSuccess: (response) => {
+      onSuccess: (_response) => {
         const currentState = isFavorite.value
         toast.success(currentState ? 'РЈРґР°Р»РµРЅРѕ РёР· РёР·Р±СЂР°РЅРЅРѕРіРѕ' : 'Р”РѕР±Р°РІР»РµРЅРѕ РІ РёР·Р±СЂР°РЅРЅРѕРµ')
       },

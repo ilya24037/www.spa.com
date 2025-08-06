@@ -4,7 +4,7 @@
  */
 
 import { defineStore } from 'pinia'
-import { ref, reactive, computed, type Ref, type ComputedRef } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { adApi } from '../api/adApi'
 
 // TypeScript интерфейсы
@@ -59,13 +59,13 @@ export const useAdStore = defineStore('ad', () => {
   // === СОСТОЯНИЕ ===
   
   // Список объявлений
-  const ads: Ref<Ad[]> = ref([])
+  const ads = ref<Ad[]>([])
   
   // Текущее объявление
-  const currentAd: Ref<Ad | null> = ref(null)
+  const currentAd = ref<Ad | null>(null)
   
   // Избранные объявления
-  const favoriteAds: Ref<Ad[]> = ref([])
+  const favoriteAds = ref<Ad[]>([])
   
   // Фильтры и поиск
   const filters = reactive<AdFilters>({
@@ -79,11 +79,11 @@ export const useAdStore = defineStore('ad', () => {
   })
   
   // Поисковый запрос
-  const searchQuery: Ref<string> = ref('')
+  const searchQuery = ref<string>('')
   
   // Состояние загрузки
-  const loading: Ref<boolean> = ref(false)
-  const saving: Ref<boolean> = ref(false)
+  const loading = ref<boolean>(false)
+  const saving = ref<boolean>(false)
   
   // Пагинация
   const pagination = reactive<AdPagination>({
@@ -109,7 +109,7 @@ export const useAdStore = defineStore('ad', () => {
   /**
    * Отфильтрованные объявления
    */
-  const filteredAds: ComputedRef<Ad[]> = computed(() => {
+  const filteredAds = computed<Ad[]>(() => {
     let result = ads.value
     
     // Фильтр по статусу
@@ -124,11 +124,11 @@ export const useAdStore = defineStore('ad', () => {
     
     // Фильтр по цене
     if (filters.priceFrom) {
-      result = result.filter(ad => (ad.price || 0) >= filters.priceFrom!)
+      result = result.filter(ad => (ad.price || 0) >= filters.priceFrom || 0)
     }
     
     if (filters.priceTo) {
-      result = result.filter(ad => (ad.price || 0) <= filters.priceTo!)
+      result = result.filter(ad => (ad.price || 0) <= filters.priceTo || Infinity)
     }
     
     // Поиск по тексту

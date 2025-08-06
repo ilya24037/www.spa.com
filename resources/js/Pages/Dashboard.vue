@@ -1,4 +1,4 @@
-<!-- resources/js/Pages/Dashboard.vue - FSD Refactored СЃ Loading СЃРѕСЃС‚РѕСЏРЅРёСЏРјРё -->
+<!-- resources/js/Pages/Dashboard.vue - FSDactored СЃ Loading СЃРѕСЃС‚РѕСЏРЅРёСЏРјРё -->
 <template>
   <ProfileLayout>
     <!-- Loading СЃРѕСЃС‚РѕСЏРЅРёРµ -->

@@ -133,7 +133,7 @@ interface Props {
 }
 
 // Default значения
-const props = withDefaults(defineProps<Props>(), {
+const _props = withDefaults(defineProps<Props>(), {
   loading: false,
   error: '',
   currentCity: 'Москва',

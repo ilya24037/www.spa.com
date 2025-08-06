@@ -67,11 +67,8 @@ export interface ApiError {
 }
 
 // Типы для событий
-export interface ClickEvent extends Event {
-  target: EventTarget | null
-  currentTarget: EventTarget | null
-  stopPropagation?: () => void
-  preventDefault?: () => void
+export interface ClickEvent extends Omit<Event, 'preventDefault'> {
+  preventDefault: () => void
 }
 
 // Роуты для действий

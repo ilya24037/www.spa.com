@@ -40,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps({
+const _props = defineProps({
   showDropdown: {
     type: Boolean,
     default: false
@@ -71,7 +71,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits([
+const _emit = defineEmits([
   'toggle',
   'pay',
   'promote', 

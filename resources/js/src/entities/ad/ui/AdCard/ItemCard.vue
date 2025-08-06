@@ -73,7 +73,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, withDefaults, type Ref } from 'vue'
+import { ref, computed, withDefaults, type} from 'vue'
 import { router } from '@inertiajs/vue3'
 import ItemImage from './ItemImage.vue'
 import ItemContent from './ItemContent.vue'
@@ -84,24 +84,21 @@ import { Link } from '@inertiajs/vue3'
 import { useToast } from '@/src/shared/composables/useToast'
 import type { 
   ItemCardProps, 
-  ItemCardEmits, 
-  ItemCardState,
-  ClickEvent,
-  ItemActionResponse,
-  ApiError 
+  ItemCardEmits,
+  ClickEvent
 } from './ItemCard.types'
 
 // Toast РґР»СЏ Р·Р°РјРµРЅС‹ alert()
 const toast = useToast()
 
 // Props
-const props = withDefaults(defineProps<ItemCardProps>(), {})
+const _props = withDefaults(defineProps<ItemCardProps>(), {})
 
 // Emits  
-const emit = defineEmits<ItemCardEmits>()
+const _emit = defineEmits<ItemCardEmits>()
 
 // РЎРѕСЃС‚РѕСЏРЅРёРµ РєРѕРјРїРѕРЅРµРЅС‚Р°
-const showDeleteModal: import("vue").Ref<boolean> = ref(false)
+const showDeleteModal = ref<boolean>(false)
 
 // Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const itemUrl = computed((): string => {
@@ -219,7 +216,7 @@ const deleteItem = async (): Promise<void> => {
       preserveState: false,
       onStart: () => {
       },
-      onSuccess: (page) => {
+      onSuccess: (_page) => {
         
         // Р­РјРёС‚РёРј СЃРѕР±С‹С‚РёРµ РґР»СЏ РѕР±РЅРѕРІР»РµРЅРёСЏ СЃРїРёСЃРєР°
         emit('item-deleted', props.item.id)
