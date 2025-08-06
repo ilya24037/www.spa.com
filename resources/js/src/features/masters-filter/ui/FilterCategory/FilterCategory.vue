@@ -1,11 +1,11 @@
 <!--
-  Категория фильтра с коллапсом
-  Обертка для группировки связанных фильтров
-  Поддерживает состояние active и счетчик выбранных элементов
+  РљР°С‚РµРіРѕСЂРёСЏ С„РёР»СЊС‚СЂР° СЃ РєРѕР»Р»Р°РїСЃРѕРј
+  РћР±РµСЂС‚РєР° РґР»СЏ РіСЂСѓРїРїРёСЂРѕРІРєРё СЃРІСЏР·Р°РЅРЅС‹С… С„РёР»СЊС‚СЂРѕРІ
+  РџРѕРґРґРµСЂР¶РёРІР°РµС‚ СЃРѕСЃС‚РѕСЏРЅРёРµ active Рё СЃС‡РµС‚С‡РёРє РІС‹Р±СЂР°РЅРЅС‹С… СЌР»РµРјРµРЅС‚РѕРІ
 -->
 <template>
   <div class="border-b border-gray-200 last:border-b-0">
-    <!-- Заголовок категории -->
+    <!-- Р—Р°РіРѕР»РѕРІРѕРє РєР°С‚РµРіРѕСЂРёРё -->
     <button
       @click="toggleExpanded"
       class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
@@ -13,11 +13,11 @@
         active ? 'bg-blue-50' : ''
       ]"
     >
-      <!-- Иконка и название -->
+      <!-- РРєРѕРЅРєР° Рё РЅР°Р·РІР°РЅРёРµ -->
       <div class="flex items-center gap-3">
         <span class="text-lg">{{ icon }}</span>
         <span class="font-medium text-gray-900">{{ title }}</span>
-        <!-- Счетчик активных фильтров -->
+        <!-- РЎС‡РµС‚С‡РёРє Р°РєС‚РёРІРЅС‹С… С„РёР»СЊС‚СЂРѕРІ -->
         <span 
           v-if="count && count > 0"
           class="px-2 py-1 text-xs font-medium text-white bg-blue-600 rounded-full"
@@ -26,15 +26,15 @@
         </span>
       </div>
 
-      <!-- Кнопка сворачивания -->
+      <!-- РљРЅРѕРїРєР° СЃРІРѕСЂР°С‡РёРІР°РЅРёСЏ -->
       <div class="flex items-center gap-2">
-        <!-- Индикатор активности -->
+        <!-- РРЅРґРёРєР°С‚РѕСЂ Р°РєС‚РёРІРЅРѕСЃС‚Рё -->
         <div
           v-if="active"
           class="w-2 h-2 bg-blue-600 rounded-full"
         />
         
-        <!-- Стрелка -->
+        <!-- РЎС‚СЂРµР»РєР° -->
         <svg
           class="w-5 h-5 text-gray-400 transition-transform"
           :class="[
@@ -54,7 +54,7 @@
       </div>
     </button>
 
-    <!-- Контент категории -->
+    <!-- РљРѕРЅС‚РµРЅС‚ РєР°С‚РµРіРѕСЂРёРё -->
     <Transition name="collapse">
       <div 
         v-if="isExpanded"
@@ -68,7 +68,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { FilterCategoryProps } from '../../model/types'
+// import type { FilterCategoryProps } from '../../model/types'
 
 // =================== PROPS ===================
 
@@ -86,11 +86,11 @@ const props = withDefaults(defineProps<Props>(), {
   defaultExpanded: true
 })
 
-// =================== СОСТОЯНИЕ ===================
+// =================== РЎРћРЎРўРћРЇРќРР• ===================
 
 const isExpanded = ref(props.defaultExpanded)
 
-// =================== МЕТОДЫ ===================
+// =================== РњР•РўРћР”Р« ===================
 
 const toggleExpanded = () => {
   isExpanded.value = !isExpanded.value
@@ -98,7 +98,7 @@ const toggleExpanded = () => {
 </script>
 
 <style scoped>
-/* Анимация сворачивания/разворачивания */
+/* РђРЅРёРјР°С†РёСЏ СЃРІРѕСЂР°С‡РёРІР°РЅРёСЏ/СЂР°Р·РІРѕСЂР°С‡РёРІР°РЅРёСЏ */
 .collapse-enter-active,
 .collapse-leave-active {
   transition: all 0.3s ease-out;

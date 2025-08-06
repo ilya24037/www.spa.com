@@ -23,20 +23,16 @@ createInertiaApp({
             import.meta.glob('./Pages/**/*.vue'),
         );
 
-        if (!page.default.layout) {
-            const AppLayout = await import('./Layouts/AppLayout.vue');
-            
-            // Определяем, является ли страница страницей авторизации
-            // Теперь страницы авторизации показывают навигацию, так как используют модальные окна
-            const isAuthPage = false; // Отключаем скрытие навигации для авторизации
-            
-            // Сохраняем информацию о типе страницы в глобальной переменной
-            window.isAuthPage = isAuthPage;
-            
-            // Применяем базовый AppLayout
-            page.default.layout = AppLayout.default;
+        // Применяем AppLayout только к страницам, которые его уже не имеют
+        // Исключаем TestEncoding и страницы с явным AppLayout
+        const pagesWithoutLayout = ['Home', 'TestEncoding'];
+        
+        if (pagesWithoutLayout.includes(name.split('/').pop())) {
+            // Импортируем AppLayout динамически
+            const AppLayout = (await import('./Layouts/AppLayout.vue')).default;
+            page.default.layout = AppLayout;
         }
-
+        
         return page;
     },
     setup({ el, App, props, plugin }) {

@@ -1,8 +1,8 @@
 <template>
-  <Head title="Оплата услуг" />
+  <Head title="РћРїР»Р°С‚Р° СѓСЃР»СѓРі" />
   
   <div class="payment-page">
-    <!-- Loading состояние -->
+    <!-- Loading СЃРѕСЃС‚РѕСЏРЅРёРµ -->
     <PageLoader 
       v-if="pageLoader.isLoading.value"
       type="form"
@@ -11,31 +11,31 @@
       :skeleton-count="1"
     />
     
-    <!-- Основной контент -->
+    <!-- РћСЃРЅРѕРІРЅРѕР№ РєРѕРЅС‚РµРЅС‚ -->
     <template v-else>
-      <!-- Логотип -->
+      <!-- Р›РѕРіРѕС‚РёРї -->
       <div class="logo">
         <span class="logo-text">MASSAGIST</span>
       </div>
 
       <div class="payment-container">
-      <!-- Кнопка назад -->
+      <!-- РљРЅРѕРїРєР° РЅР°Р·Р°Рґ -->
       <Link 
         :href="route('payment.select-plan', { ad: ad.id })" 
         class="back-link"
       >
-        ← Назад
+        в†ђ РќР°Р·Р°Рґ
       </Link>
 
-      <!-- Заголовок и сумма -->
+      <!-- Р—Р°РіРѕР»РѕРІРѕРє Рё СЃСѓРјРјР° -->
       <div class="payment-header">
-        <h1 class="payment-title">Оплата услуг</h1>
+        <h1 class="payment-title">РћРїР»Р°С‚Р° СѓСЃР»СѓРі</h1>
         <div class="payment-amount">{{ payment.formatted_amount }}</div>
       </div>
 
-      <!-- Выбор способа оплаты -->
+      <!-- Р’С‹Р±РѕСЂ СЃРїРѕСЃРѕР±Р° РѕРїР»Р°С‚С‹ -->
       <div class="payment-methods">
-        <!-- СБП -->
+        <!-- РЎР‘Рџ -->
         <div 
           class="payment-method"
           :class="{ 'payment-method--active': paymentMethod === 'sbp' }"
@@ -48,10 +48,10 @@
               <path d="M2 12L12 17L22 12" stroke="#8B5CF6" stroke-width="2"/>
             </svg>
           </div>
-          <span class="payment-method__text">СБП</span>
+          <span class="payment-method__text">РЎР‘Рџ</span>
         </div>
 
-        <!-- Кошелёк -->
+        <!-- РљРѕС€РµР»С‘Рє -->
         <div 
           class="payment-method"
           :class="{ 'payment-method--active': paymentMethod === 'wallet' }"
@@ -62,10 +62,10 @@
               <path d="M3 10H21M7 15H9M15 15H17M3 6H21C22.1046 6 23 6.89543 23 8V18C23 19.1046 22.1046 20 21 20H3C1.89543 20 1 19.1046 1 18V8C1 6.89543 1.89543 6 3 6Z" stroke="#3B82F6" stroke-width="2"/>
             </svg>
           </div>
-          <span class="payment-method__text">Кошелёк</span>
+          <span class="payment-method__text">РљРѕС€РµР»С‘Рє</span>
         </div>
 
-        <!-- Новая карта -->
+        <!-- РќРѕРІР°СЏ РєР°СЂС‚Р° -->
         <div 
           class="payment-method"
           :class="{ 'payment-method--active': paymentMethod === 'card' }"
@@ -76,28 +76,28 @@
               <path d="M12 5V19M5 12H19" stroke="#6B7280" stroke-width="2"/>
             </svg>
           </div>
-          <span class="payment-method__text">Новая карта</span>
+          <span class="payment-method__text">РќРѕРІР°СЏ РєР°СЂС‚Р°</span>
         </div>
       </div>
 
-      <!-- Инструкция -->
+      <!-- РРЅСЃС‚СЂСѓРєС†РёСЏ -->
       <div class="payment-instruction">
-        Дальше будет QR для оплаты
+        Р”Р°Р»СЊС€Рµ Р±СѓРґРµС‚ QR РґР»СЏ РѕРїР»Р°С‚С‹
       </div>
 
-      <!-- Кнопка оплаты -->
+      <!-- РљРЅРѕРїРєР° РѕРїР»Р°С‚С‹ -->
       <button 
         @click="processPayment"
         :disabled="!paymentMethod || isProcessing"
         class="payment-button"
       >
-        {{ isProcessing ? 'Обработка...' : 'Перейти к оплате' }}
+        {{ isProcessing ? 'РћР±СЂР°Р±РѕС‚РєР°...' : 'РџРµСЂРµР№С‚Рё Рє РѕРїР»Р°С‚Рµ' }}
       </button>
 
-      <!-- Политика безопасности -->
+      <!-- РџРѕР»РёС‚РёРєР° Р±РµР·РѕРїР°СЃРЅРѕСЃС‚Рё -->
       <div class="security-info">
-        Интернет-платежи защищены сертификатом SSL и протоколом 3D Secure. 
-        <Link href="#" class="security-link">Политика конфиденциальности</Link>
+        РРЅС‚РµСЂРЅРµС‚-РїР»Р°С‚РµР¶Рё Р·Р°С‰РёС‰РµРЅС‹ СЃРµСЂС‚РёС„РёРєР°С‚РѕРј SSL Рё РїСЂРѕС‚РѕРєРѕР»РѕРј 3D Secure. 
+        <Link href="#" class="security-link">РџРѕР»РёС‚РёРєР° РєРѕРЅС„РёРґРµРЅС†РёР°Р»СЊРЅРѕСЃС‚Рё</Link>
       </div>
     </div>
     </template>
@@ -106,13 +106,13 @@
 
 <script setup lang="ts">
 import { logger } from '@/src/shared/lib/logger'
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 import PageLoader from '@/src/shared/ui/organisms/PageLoader/PageLoader.vue'
 import { usePageLoading } from '@/src/shared/composables/usePageLoading'
 
-// Типизация props
+// РўРёРїРёР·Р°С†РёСЏ props
 interface Payment {
   id: number | string
   formatted_amount: string
@@ -141,7 +141,7 @@ interface CheckoutProps {
 
 const props = defineProps<CheckoutProps>()
 
-// Управление загрузкой страницы
+// РЈРїСЂР°РІР»РµРЅРёРµ Р·Р°РіСЂСѓР·РєРѕР№ СЃС‚СЂР°РЅРёС†С‹
 const pageLoader = usePageLoading({
   type: 'form',
   autoStart: true,
@@ -174,26 +174,26 @@ const processPayment = (): void => {
   })
 }
 
-// Инициализация при монтировании
+// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РїСЂРё РјРѕРЅС‚РёСЂРѕРІР°РЅРёРё
 onMounted(() => {
-  // Проверяем наличие данных платежа
+  // РџСЂРѕРІРµСЂСЏРµРј РЅР°Р»РёС‡РёРµ РґР°РЅРЅС‹С… РїР»Р°С‚РµР¶Р°
   if (!props.payment || !props.payment.id) {
     const noDataError = {
       type: 'client' as const,
-      message: 'Данные платежа не найдены',
+      message: 'Р”Р°РЅРЅС‹Рµ РїР»Р°С‚РµР¶Р° РЅРµ РЅР°Р№РґРµРЅС‹',
       code: 404
     }
     pageLoader.errorLoading(noDataError)
     return
   }
 
-  // Быстрая загрузка формы оплаты
+  // Р‘С‹СЃС‚СЂР°СЏ Р·Р°РіСЂСѓР·РєР° С„РѕСЂРјС‹ РѕРїР»Р°С‚С‹
   setTimeout(() => {
-    pageLoader.setProgress(50, 'Инициализируем способы оплаты...')
+    pageLoader.setProgress(50, 'РРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј СЃРїРѕСЃРѕР±С‹ РѕРїР»Р°С‚С‹...')
   }, 100)
 
   setTimeout(() => {
-    pageLoader.setProgress(80, 'Подготавливаем защищенную форму...')
+    pageLoader.setProgress(80, 'РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј Р·Р°С‰РёС‰РµРЅРЅСѓСЋ С„РѕСЂРјСѓ...')
   }, 300)
 
   setTimeout(() => {
@@ -360,7 +360,7 @@ onMounted(() => {
   text-decoration: none;
 }
 
-/* Адаптивность */
+/* РђРґР°РїС‚РёРІРЅРѕСЃС‚СЊ */
 @media (max-width: 640px) {
   .payment-container {
     padding: 20px;

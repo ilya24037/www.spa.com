@@ -1,4 +1,4 @@
-﻿<!-- resources/js/src/shared/layouts/ProfileLayout/ProfileSidebar.vue -->
+<!-- resources/js/src/shared/layouts/ProfileLayout/ProfileSidebar.vue -->
 <template>
     <div class="space-y-6">
         <!-- Профильная карточка -->
@@ -111,3 +111,5 @@ const getTabClasses = (tabKey) => {
         : 'text-gray-700 hover:bg-gray-50'
 }
 </script>
+
+

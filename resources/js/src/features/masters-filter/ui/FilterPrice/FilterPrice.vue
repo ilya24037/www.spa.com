@@ -1,11 +1,11 @@
 <!-- resources/js/src/features/masters-filter/ui/FilterPrice/FilterPrice.vue -->
 <template>
   <div :class="CONTAINER_CLASSES">
-    <h4 :class="TITLE_CLASSES">Стоимость</h4>
+    <h4 :class="TITLE_CLASSES">РЎС‚РѕРёРјРѕСЃС‚СЊ</h4>
     
     <div :class="INPUTS_CONTAINER_CLASSES">
       <div :class="INPUT_GROUP_CLASSES">
-        <label :class="LABEL_CLASSES">От</label>
+        <label :class="LABEL_CLASSES">РћС‚</label>
         <input
           :value="from"
           @input="emit('update:from', Number(($event.target as HTMLInputElement).value) || null)"
@@ -14,11 +14,11 @@
           placeholder="0"
           :class="INPUT_CLASSES"
         >
-        <span :class="CURRENCY_CLASSES">₽</span>
+        <span :class="CURRENCY_CLASSES">в‚Ѕ</span>
       </div>
       
       <div :class="INPUT_GROUP_CLASSES">
-        <label :class="LABEL_CLASSES">До</label>
+        <label :class="LABEL_CLASSES">Р”Рѕ</label>
         <input
           :value="to"
           @input="emit('update:to', Number(($event.target as HTMLInputElement).value) || null)"
@@ -27,11 +27,11 @@
           placeholder="10000"
           :class="INPUT_CLASSES"
         >
-        <span :class="CURRENCY_CLASSES">₽</span>
+        <span :class="CURRENCY_CLASSES">в‚Ѕ</span>
       </div>
     </div>
 
-    <!-- Быстрые кнопки -->
+    <!-- Р‘С‹СЃС‚СЂС‹Рµ РєРЅРѕРїРєРё -->
     <div :class="QUICK_BUTTONS_CONTAINER_CLASSES">
       <button
         v-for="range in priceRanges"
@@ -43,7 +43,7 @@
       </button>
     </div>
 
-    <!-- Показать текущий диапазон -->
+    <!-- РџРѕРєР°Р·Р°С‚СЊ С‚РµРєСѓС‰РёР№ РґРёР°РїР°Р·РѕРЅ -->
     <div v-if="hasSelection" :class="SELECTION_DISPLAY_CLASSES">
       <span :class="SELECTION_TEXT_CLASSES">
         {{ formatPriceRange }}
@@ -52,7 +52,7 @@
         @click="clearSelection"
         :class="CLEAR_SELECTION_BUTTON_CLASSES"
       >
-        ✕
+        вњ•
       </button>
     </div>
   </div>
@@ -61,7 +61,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-// 🎯 Стили согласно дизайн-системе
+// рџЋЇ РЎС‚РёР»Рё СЃРѕРіР»Р°СЃРЅРѕ РґРёР·Р°Р№РЅ-СЃРёСЃС‚РµРјРµ
 const CONTAINER_CLASSES = 'space-y-3'
 const TITLE_CLASSES = 'font-medium text-gray-900'
 const INPUTS_CONTAINER_CLASSES = 'grid grid-cols-2 gap-3'
@@ -77,7 +77,7 @@ const SELECTION_DISPLAY_CLASSES = 'flex items-center justify-between p-2 bg-blue
 const SELECTION_TEXT_CLASSES = 'text-sm text-blue-700 font-medium'
 const CLEAR_SELECTION_BUTTON_CLASSES = 'text-blue-600 hover:text-blue-800 font-medium'
 
-// TypeScript интерфейсы
+// TypeScript РёРЅС‚РµСЂС„РµР№СЃС‹
 interface FilterPriceProps {
   from?: number | null
   to?: number | null
@@ -94,36 +94,36 @@ const props = withDefaults(defineProps<FilterPriceProps>(), {
   to: null
 });
 
-// TypeScript типизация emits
+// TypeScript С‚РёРїРёР·Р°С†РёСЏ emits
 const emit = defineEmits<{
   'update:from': [value: number | null]
   'update:to': [value: number | null]
 }>()
 
-// Предустановленные диапазоны цен
+// РџСЂРµРґСѓСЃС‚Р°РЅРѕРІР»РµРЅРЅС‹Рµ РґРёР°РїР°Р·РѕРЅС‹ С†РµРЅ
 const priceRanges: PriceRange[] = [
-  { label: 'До 2000', from: null, to: 2000 },
+  { label: 'Р”Рѕ 2000', from: null, to: 2000 },
   { label: '2000-3000', from: 2000, to: 3000 },
   { label: '3000-5000', from: 3000, to: 5000 },
   { label: '5000-8000', from: 5000, to: 8000 },
-  { label: 'От 8000', from: 8000, to: null }
+  { label: 'РћС‚ 8000', from: 8000, to: null }
 ]
 
-// Вычисляемые свойства
+// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const hasSelection = computed(() => props.from !== null || props.to !== null)
 
 const formatPriceRange = computed(() => {
   if (props.from && props.to) {
-    return `${props.from.toLocaleString()} - ${props.to.toLocaleString()} ₽`
+    return `${props.from.toLocaleString()} - ${props.to.toLocaleString()} в‚Ѕ`
   } else if (props.from) {
-    return `От ${props.from.toLocaleString()} ₽`
+    return `РћС‚ ${props.from.toLocaleString()} в‚Ѕ`
   } else if (props.to) {
-    return `До ${props.to.toLocaleString()} ₽`
+    return `Р”Рѕ ${props.to.toLocaleString()} в‚Ѕ`
   }
   return ''
 })
 
-// Методы
+// РњРµС‚РѕРґС‹
 const getQuickButtonClasses = (range: PriceRange): string => {
   const isActive = props.from === range.from && props.to === range.to
   
@@ -143,3 +143,4 @@ const clearSelection = (): void => {
   emit('update:to', null)
 }
 </script>
+

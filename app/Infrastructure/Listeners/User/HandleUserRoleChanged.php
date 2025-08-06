@@ -4,41 +4,42 @@ namespace App\Infrastructure\Listeners\User;
 
 use App\Domain\User\Events\UserRoleChanged;
 use App\Domain\User\Repositories\UserRepository;
-use App\Domain\User\Services\UserService;
-use App\Infrastructure\Services\EmailService;
-use App\Infrastructure\Services\PermissionService;
+use App\Infrastructure\Listeners\User\Handlers\RoleChangeValidator;
+use App\Infrastructure\Listeners\User\Handlers\PermissionManager;
+use App\Infrastructure\Listeners\User\Handlers\RoleActionHandler;
+use App\Infrastructure\Listeners\User\Handlers\RoleChangeNotifier;
+use App\Infrastructure\Listeners\User\Handlers\RoleChangeLogger;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Exception;
 
 /**
- * Обработчик изменения роли пользователя
- * 
- * ФУНКЦИИ:
- * - Обновление прав доступа
- * - Создание мастер-профиля при назначении роли мастера
- * - Отправка уведомлений о смене роли
- * - Настройка специфичных для роли настроек
- * - Логирование изменений прав
+ * Упрощенный обработчик изменения роли пользователя
+ * Делегирует работу специализированным обработчикам
  */
 class HandleUserRoleChanged
 {
     private UserRepository $userRepository;
-    private UserService $userService;
-    private EmailService $emailService;
-    private PermissionService $permissionService;
+    private RoleChangeValidator $validator;
+    private PermissionManager $permissionManager;
+    private RoleActionHandler $actionHandler;
+    private RoleChangeNotifier $notifier;
+    private RoleChangeLogger $logger;
 
     public function __construct(
         UserRepository $userRepository,
-        UserService $userService,
-        EmailService $emailService,
-        PermissionService $permissionService
+        RoleChangeValidator $validator,
+        PermissionManager $permissionManager,
+        RoleActionHandler $actionHandler,
+        RoleChangeNotifier $notifier,
+        RoleChangeLogger $logger
     ) {
         $this->userRepository = $userRepository;
-        $this->userService = $userService;
-        $this->emailService = $emailService;
-        $this->permissionService = $permissionService;
+        $this->validator = $validator;
+        $this->permissionManager = $permissionManager;
+        $this->actionHandler = $actionHandler;
+        $this->notifier = $notifier;
+        $this->logger = $logger;
     }
 
     /**
@@ -55,484 +56,105 @@ class HandleUserRoleChanged
                 }
 
                 // 2. Валидируем смену роли
-                $this->validateRoleChange($user, $event->oldRole, $event->newRole);
+                $this->validator->validateRoleChange($user, $event->oldRole, $event->newRole);
 
                 // 3. Обновляем права доступа
-                $this->updateUserPermissions($user, $event);
+                $this->permissionManager->updateUserPermissions($user, $event->newRole);
 
                 // 4. Выполняем действия специфичные для новой роли
-                $this->handleRoleSpecificActions($user, $event);
+                $this->actionHandler->handleRoleSpecificActions($user, $event);
 
                 // 5. Обновляем профиль пользователя
-                $this->updateUserProfile($user, $event);
+                $this->actionHandler->updateUserProfile($user, $event);
 
                 // 6. Настраиваем специфичные для роли настройки
-                $this->setupRoleSpecificSettings($user, $event);
+                $this->actionHandler->setupRoleSpecificSettings($user, $event);
 
                 // 7. Создаем запись об изменении роли
-                $this->logRoleChange($user, $event);
+                $this->logger->logRoleChange($user, $event);
 
                 // 8. Отправляем уведомления
-                $this->sendRoleChangeNotifications($user, $event);
-
-                Log::info('User role changed successfully', [
-                    'user_id' => $event->userId,
-                    'old_role' => $event->oldRole,
-                    'new_role' => $event->newRole,
-                    'changed_by' => $event->changedBy,
-                    'reason' => $event->reason,
-                ]);
+                $this->notifier->sendRoleChangeNotifications($user, $event);
 
             } catch (Exception $e) {
-                Log::error('Failed to handle UserRoleChanged event', [
-                    'user_id' => $event->userId,
-                    'old_role' => $event->oldRole,
-                    'new_role' => $event->newRole,
-                    'error' => $e->getMessage(),
-                ]);
-
+                $this->logger->logError($event, $e);
                 throw $e;
             }
         });
     }
 
     /**
-     * Валидировать смену роли
+     * Проверить возможность изменения роли
      */
-    private function validateRoleChange($user, string $oldRole, string $newRole): void
-    {
-        // Проверяем, что роль действительно изменилась
-        if ($user->role->value === $newRole) {
-            throw new Exception("Роль уже установлена в {$newRole}");
-        }
-
-        // Проверяем допустимые переходы ролей
-        $allowedTransitions = $this->getAllowedRoleTransitions();
-        
-        if (!isset($allowedTransitions[$oldRole]) || 
-            !in_array($newRole, $allowedTransitions[$oldRole])) {
-            throw new Exception("Недопустимый переход роли с {$oldRole} на {$newRole}");
-        }
-
-        // Проверяем специальные условия для роли мастера
-        if ($newRole === 'master') {
-            $this->validateMasterRoleRequirements($user);
-        }
-    }
-
-    /**
-     * Получить допустимые переходы ролей
-     */
-    private function getAllowedRoleTransitions(): array
-    {
-        return [
-            'client' => ['master', 'admin'], // Клиент может стать мастером или админом
-            'master' => ['client', 'admin'], // Мастер может вернуться к клиенту или стать админом
-            'admin' => ['client', 'master'], // Админ может стать кем угодно
-            'moderator' => ['client', 'master', 'admin'], // Модератор может стать кем угодно
-            'support' => ['client'], // Поддержка может стать только клиентом
-        ];
-    }
-
-    /**
-     * Валидировать требования для роли мастера
-     */
-    private function validateMasterRoleRequirements($user): void
-    {
-        $profile = $user->getProfile();
-        
-        // Проверяем обязательные поля для мастера
-        if (!$profile) {
-            throw new Exception("Для назначения роли мастера необходимо заполнить профиль");
-        }
-
-        if (empty($profile->phone)) {
-            throw new Exception("Для роли мастера необходимо указать номер телефона");
-        }
-
-        if (empty($profile->name)) {
-            throw new Exception("Для роли мастера необходимо указать имя");
-        }
-
-        // Проверяем подтверждение email
-        if (!$user->hasVerifiedEmail()) {
-            throw new Exception("Для роли мастера необходимо подтвердить email");
-        }
-
-        // Проверяем возраст (должен быть 18+)
-        if ($profile->birth_date) {
-            $age = now()->diffInYears($profile->birth_date);
-            if ($age < 18) {
-                throw new Exception("Для роли мастера необходимо быть старше 18 лет");
-            }
-        }
-    }
-
-    /**
-     * Обновить права доступа пользователя
-     */
-    private function updateUserPermissions($user, UserRoleChanged $event): void
-    {
-        // Удаляем старые права
-        $this->permissionService->revokeAllPermissions($user);
-
-        // Назначаем права для новой роли
-        $permissions = $this->getPermissionsForRole($event->newRole);
-        $this->permissionService->grantPermissions($user, $permissions);
-
-        Log::info('User permissions updated', [
-            'user_id' => $user->id,
-            'new_role' => $event->newRole,
-            'permissions_count' => count($permissions),
-        ]);
-    }
-
-    /**
-     * Получить права для роли
-     */
-    private function getPermissionsForRole(string $role): array
-    {
-        $permissions = [
-            'client' => [
-                'bookings:create',
-                'bookings:view_own',
-                'bookings:cancel_own',
-                'reviews:create',
-                'profile:update_own',
-                'favorites:manage',
-            ],
-            
-            'master' => [
-                'bookings:create',
-                'bookings:view_own',
-                'bookings:cancel_own',
-                'bookings:manage_assigned',
-                'master_profile:manage_own',
-                'calendar:manage_own',
-                'reviews:view_own',
-                'earnings:view_own',
-                'services:manage_own',
-            ],
-            
-            'admin' => [
-                'users:*',
-                'bookings:*',
-                'masters:*',
-                'reviews:*',
-                'analytics:*',
-                'system:*',
-            ],
-            
-            'moderator' => [
-                'users:view',
-                'users:moderate',
-                'masters:moderate',
-                'reviews:moderate',
-                'content:moderate',
-            ],
-            
-            'support' => [
-                'users:view',
-                'bookings:view',
-                'support:handle_tickets',
-            ],
-        ];
-
-        return $permissions[$role] ?? [];
-    }
-
-    /**
-     * Выполнить действия специфичные для роли
-     */
-    private function handleRoleSpecificActions($user, UserRoleChanged $event): void
-    {
-        switch ($event->newRole) {
-            case 'master':
-                $this->handleMasterRoleAssignment($user, $event);
-                break;
-
-            case 'client':
-                $this->handleClientRoleAssignment($user, $event);
-                break;
-
-            case 'admin':
-                $this->handleAdminRoleAssignment($user, $event);
-                break;
-
-            case 'moderator':
-                $this->handleModeratorRoleAssignment($user, $event);
-                break;
-        }
-    }
-
-    /**
-     * Обработать назначение роли мастера
-     */
-    private function handleMasterRoleAssignment($user, UserRoleChanged $event): void
-    {
-        // Создаем мастер-профиль через событие если его еще нет
-        if (!$user->getMasterProfile()) {
-            $profile = $user->getProfile();
-            
-            // Отправляем событие создания мастер-профиля
-            event(new \App\Domain\Master\Events\MasterProfileCreated(
-                userId: $user->id,
-                masterProfileId: 0, // Будет установлено в обработчике
-                profileData: [
-                    'name' => $profile?->name ?? 'Мастер',
-                    'city' => $profile?->city ?? 'Москва',
-                    'phone' => $profile?->phone,
-                    'bio' => 'Новый мастер на платформе',
-                    'services' => [],
-                    'experience' => 0,
-                ]
-            ));
-        }
-
-        // Добавляем в группу мастеров для уведомлений
-        $this->userRepository->addToGroup($user->id, 'masters');
-
-        // Устанавливаем статус "новый мастер" на 30 дней
-        $this->userRepository->addUserTag($user->id, 'new_master', now()->addDays(30));
-    }
-
-    /**
-     * Обработать назначение роли клиента
-     */
-    private function handleClientRoleAssignment($user, UserRoleChanged $event): void
-    {
-        // Если пользователь был мастером, деактивируем его профиль
-        if ($event->oldRole === 'master') {
-            $masterProfile = $user->getMasterProfile();
-            if ($masterProfile) {
-                // Отправляем событие деактивации мастер-профиля
-                event(new \App\Domain\Master\Events\MasterStatusChanged(
-                    masterProfileId: $masterProfile->id,
-                    userId: $user->id,
-                    oldStatus: $masterProfile->status,
-                    newStatus: 'inactive',
-                    changedBy: $event->changedBy,
-                    reason: 'Роль изменена на клиента',
-                    changedAt: now()
-                ));
-            }
-        }
-
-        // Добавляем в группу клиентов
-        $this->userRepository->addToGroup($user->id, 'clients');
-    }
-
-    /**
-     * Обработать назначение роли админа
-     */
-    private function handleAdminRoleAssignment($user, UserRoleChanged $event): void
-    {
-        // Добавляем в группу администраторов
-        $this->userRepository->addToGroup($user->id, 'admins');
-
-        // Включаем двухфакторную аутентификацию по умолчанию
-        $this->userRepository->updateSettings($user->id, [
-            'two_factor_enabled' => true,
-            'session_timeout' => 3600, // 1 час для админов
-        ]);
-
-        // Логируем назначение админа для аудита
-        Log::warning('Admin role assigned', [
-            'user_id' => $user->id,
-            'assigned_by' => $event->changedBy,
-            'reason' => $event->reason,
-        ]);
-    }
-
-    /**
-     * Обработать назначение роли модератора
-     */
-    private function handleModeratorRoleAssignment($user, UserRoleChanged $event): void
-    {
-        // Добавляем в группу модераторов
-        $this->userRepository->addToGroup($user->id, 'moderators');
-
-        // Создаем рабочую область модератора
-        $this->userRepository->createModeratorWorkspace($user->id);
-    }
-
-    /**
-     * Обновить профиль пользователя
-     */
-    private function updateUserProfile($user, UserRoleChanged $event): void
-    {
-        $profile = $user->getProfile();
-        if (!$profile) {
-            return;
-        }
-
-        // Обновляем поля специфичные для роли
-        $profileUpdates = [];
-
-        if ($event->newRole === 'master') {
-            $profileUpdates['is_master'] = true;
-            $profileUpdates['master_since'] = now();
-        } elseif ($event->oldRole === 'master') {
-            $profileUpdates['is_master'] = false;
-        }
-
-        if ($event->newRole === 'admin') {
-            $profileUpdates['is_admin'] = true;
-            $profileUpdates['admin_since'] = now();
-        } elseif ($event->oldRole === 'admin') {
-            $profileUpdates['is_admin'] = false;
-        }
-
-        if (!empty($profileUpdates)) {
-            $profile->update($profileUpdates);
-        }
-    }
-
-    /**
-     * Настроить специфичные для роли настройки
-     */
-    private function setupRoleSpecificSettings($user, UserRoleChanged $event): void
-    {
-        $roleSettings = $this->getRoleSpecificSettings($event->newRole);
-        
-        if (!empty($roleSettings)) {
-            $this->userRepository->updateSettings($user->id, $roleSettings);
-        }
-    }
-
-    /**
-     * Получить специфичные для роли настройки
-     */
-    private function getRoleSpecificSettings(string $role): array
-    {
-        $settings = [
-            'master' => [
-                'booking_notifications' => true,
-                'client_message_notifications' => true,
-                'earnings_notifications' => true,
-                'review_notifications' => true,
-            ],
-            
-            'admin' => [
-                'system_notifications' => true,
-                'security_alerts' => true,
-                'user_activity_reports' => true,
-                'session_timeout' => 3600,
-            ],
-            
-            'moderator' => [
-                'moderation_notifications' => true,
-                'content_reports' => true,
-                'user_reports' => true,
-            ],
-        ];
-
-        return $settings[$role] ?? [];
-    }
-
-    /**
-     * Логировать изменение роли
-     */
-    private function logRoleChange($user, UserRoleChanged $event): void
-    {
-        $this->userRepository->createRoleChangeRecord([
-            'user_id' => $user->id,
-            'old_role' => $event->oldRole,
-            'new_role' => $event->newRole,
-            'changed_by' => $event->changedBy,
-            'reason' => $event->reason,
-            'changed_at' => $event->changedAt,
-            'ip_address' => $event->ipAddress ?? null,
-            'user_agent' => $event->userAgent ?? null,
-        ]);
-    }
-
-    /**
-     * Отправить уведомления об изменении роли
-     */
-    private function sendRoleChangeNotifications($user, UserRoleChanged $event): void
+    public function canChangeRole($user, string $newRole): bool
     {
         try {
-            // Уведомление пользователю
-            $this->emailService->sendRoleChangeNotification($user->email, [
-                'user_name' => $user->getProfile()?->name ?? 'Пользователь',
-                'old_role' => $this->getRoleDisplayName($event->oldRole),
-                'new_role' => $this->getRoleDisplayName($event->newRole),
-                'changed_at' => $event->changedAt->format('d.m.Y H:i'),
-                'reason' => $event->reason,
-                'new_permissions' => $this->getPermissionDescriptions($event->newRole),
-            ]);
-
-            // Специальные уведомления для определенных ролей
-            if ($event->newRole === 'master') {
-                $this->emailService->sendMasterWelcomeEmail($user->email, [
-                    'user_name' => $user->getProfile()?->name,
-                    'guide_url' => url('/master/guide'),
-                    'support_email' => config('mail.support_email'),
-                ]);
-            }
-
-            // Уведомления администраторам о важных изменениях ролей
-            if (in_array($event->newRole, ['admin', 'moderator'])) {
-                $this->emailService->sendAdminRoleChangeAlert([
-                    'user_id' => $user->id,
-                    'user_email' => $user->email,
-                    'new_role' => $event->newRole,
-                    'changed_by' => $event->changedBy,
-                    'reason' => $event->reason,
-                ]);
-            }
-
+            $currentRole = $user->role->value;
+            $this->validator->validateRoleChange($user, $currentRole, $newRole);
+            return true;
         } catch (Exception $e) {
-            Log::warning('Failed to send role change notifications', [
-                'user_id' => $user->id,
-                'new_role' => $event->newRole,
-                'error' => $e->getMessage(),
-            ]);
+            return false;
         }
     }
 
     /**
-     * Получить отображаемое имя роли
+     * Получить недостающие требования для роли
      */
-    private function getRoleDisplayName(string $role): string
+    public function getMissingRequirements($user, string $role): array
     {
-        $names = [
-            'client' => 'Клиент',
-            'master' => 'Мастер',
-            'admin' => 'Администратор',
-            'moderator' => 'Модератор',
-            'support' => 'Поддержка',
-        ];
-
-        return $names[$role] ?? $role;
+        return $this->validator->getMissingRequirements($role, $user);
     }
 
     /**
-     * Получить описания прав для роли
+     * Получить доступные роли для пользователя
      */
-    private function getPermissionDescriptions(string $role): array
+    public function getAvailableRoles($user): array
     {
-        $descriptions = [
-            'client' => [
-                'Создание и управление бронированиями',
-                'Написание отзывов',
-                'Управление избранными мастерами',
-            ],
-            'master' => [
-                'Создание и управление профилем мастера',
-                'Управление календарем и услугами',
-                'Просмотр заработка и статистики',
-                'Работа с клиентскими бронированиями',
-            ],
-            'admin' => [
-                'Полный доступ к системе',
-                'Управление пользователями',
-                'Просмотр аналитики и отчетов',
-            ],
-        ];
+        $currentRole = $user->role->value;
+        $allowedTransitions = $this->validator->getAllowedRoleTransitions();
+        
+        return $allowedTransitions[$currentRole] ?? [];
+    }
 
-        return $descriptions[$role] ?? [];
+    /**
+     * Получить описание разрешений для роли
+     */
+    public function getRolePermissionDescriptions(string $role): array
+    {
+        return $this->permissionManager->getPermissionDescriptions($role);
+    }
+
+    /**
+     * Получить историю изменений ролей пользователя
+     */
+    public function getRoleHistory($userId): array
+    {
+        return $this->logger->getRoleChangeHistory($userId);
+    }
+
+    /**
+     * Получить статистику изменений ролей
+     */
+    public function getRoleChangeStatistics(): array
+    {
+        return $this->logger->getRoleChangeStatistics();
+    }
+
+    /**
+     * Отправить деактивацию роли (для дополнительной безопасности)
+     */
+    public function deactivateRole($user, string $role, string $reason): void
+    {
+        $this->notifier->sendRoleDeactivationNotification($user, $role, $reason);
+        
+        $this->logger->logRoleChange($user, new UserRoleChanged(
+            userId: $user->id,
+            oldRole: $role,
+            newRole: 'client', // Деактивация всегда возвращает к роли клиента
+            changedBy: 'system',
+            reason: $reason,
+            changedAt: now()
+        ));
     }
 
     /**

@@ -6,7 +6,7 @@
     :aria-label="ariaLabel"
     role="status"
   >
-    <!-- Shimmer анимация -->
+    <!-- Shimmer Р°РЅРёРјР°С†РёСЏ -->
     <div v-if="animated" class="skeleton-shimmer" />
   </div>
 </template>
@@ -49,7 +49,7 @@ const customStyles = computed(() => {
 })
 
 const ariaLabel = computed(() => 
-  props.ariaLabel || `Загрузка ${props.variant === 'text' ? 'текста' : 'контента'}...`
+  props.ariaLabel || `Р—Р°РіСЂСѓР·РєР° ${props.variant === 'text' ? 'С‚РµРєСЃС‚Р°' : 'РєРѕРЅС‚РµРЅС‚Р°'}...`
 )
 </script>
 
@@ -61,7 +61,7 @@ const ariaLabel = computed(() =>
   display: block;
 }
 
-/* Варианты скелетонов */
+/* Р’Р°СЂРёР°РЅС‚С‹ СЃРєРµР»РµС‚РѕРЅРѕРІ */
 .skeleton--text {
   height: 1em;
   margin-bottom: 0.5em;
@@ -112,7 +112,7 @@ const ariaLabel = computed(() =>
   border-radius: 12px;
 }
 
-/* Размеры */
+/* Р Р°Р·РјРµСЂС‹ */
 .skeleton--small.skeleton--text {
   height: 0.75em;
 }
@@ -149,7 +149,7 @@ const ariaLabel = computed(() =>
   height: 56px;
 }
 
-/* Анимация */
+/* РђРЅРёРјР°С†РёСЏ */
 .skeleton--animated {
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 200% 100%;
@@ -189,7 +189,7 @@ const ariaLabel = computed(() =>
   }
 }
 
-/* Темная тема */
+/* РўРµРјРЅР°СЏ С‚РµРјР° */
 @media (prefers-color-scheme: dark) {
   .skeleton {
     background: #2a2a2a;
@@ -210,7 +210,7 @@ const ariaLabel = computed(() =>
   }
 }
 
-/* Адаптивность */
+/* РђРґР°РїС‚РёРІРЅРѕСЃС‚СЊ */
 @media (max-width: 768px) {
   .skeleton--image {
     height: 150px;
@@ -226,7 +226,7 @@ const ariaLabel = computed(() =>
   }
 }
 
-/* Для снижения анимации при настройках доступности */
+/* Р”Р»СЏ СЃРЅРёР¶РµРЅРёСЏ Р°РЅРёРјР°С†РёРё РїСЂРё РЅР°СЃС‚СЂРѕР№РєР°С… РґРѕСЃС‚СѓРїРЅРѕСЃС‚Рё */
 @media (prefers-reduced-motion: reduce) {
   .skeleton--animated {
     animation: none;

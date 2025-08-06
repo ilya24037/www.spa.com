@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 
-// TypeScript интерфейс для props
+// TypeScript РёРЅС‚РµСЂС„РµР№СЃ РґР»СЏ props
 interface DropdownProps {
   align?: 'left' | 'right' | 'center'
   width?: string
@@ -16,10 +16,10 @@ const props = withDefaults(defineProps<DropdownProps>(), {
   open: false
 });
 
-// Reactive состояние
+// Reactive СЃРѕСЃС‚РѕСЏРЅРёРµ
 const open = ref<boolean>(false);
 
-// Обработчик закрытия по Escape
+// РћР±СЂР°Р±РѕС‚С‡РёРє Р·Р°РєСЂС‹С‚РёСЏ РїРѕ Escape
 const closeOnEscape = (e: KeyboardEvent): void => {
     if (open.value && e.key === 'Escape') {
         open.value = false;
@@ -30,7 +30,7 @@ const closeOnEscape = (e: KeyboardEvent): void => {
 onMounted(() => document.addEventListener('keydown', closeOnEscape));
 onUnmounted(() => document.removeEventListener('keydown', closeOnEscape));
 
-// Computed свойства с типизацией
+// Computed СЃРІРѕР№СЃС‚РІР° СЃ С‚РёРїРёР·Р°С†РёРµР№
 const widthClass = computed((): string => {
     const widthMap: Record<string, string> = {
         48: 'w-48',
@@ -89,3 +89,4 @@ const alignmentClasses = computed((): string => {
         </Transition>
     </div>
 </template>
+

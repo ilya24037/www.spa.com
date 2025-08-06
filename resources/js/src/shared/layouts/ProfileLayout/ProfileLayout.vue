@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <!-- ProfileLayout: Layout для личного кабинета -->
   <div class="min-h-screen bg-gray-50">
     <div class="max-w-7xl mx-auto p-6">
@@ -58,3 +58,5 @@ const handleTabChange = (tab) => {
 <style scoped>
 /* ProfileLayout стили */
 </style>
+
+

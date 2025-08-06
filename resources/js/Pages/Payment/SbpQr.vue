@@ -1,42 +1,42 @@
 <template>
-  <Head title="Оплата по СБП" />
+  <Head title="РћРїР»Р°С‚Р° РїРѕ РЎР‘Рџ" />
   
   <div class="payment-page">
-    <!-- Логотип -->
+    <!-- Р›РѕРіРѕС‚РёРї -->
     <div class="logo">
       <span class="logo-text">MASSAGIST</span>
     </div>
 
     <div class="payment-container">
-      <!-- Кнопка назад -->
+      <!-- РљРЅРѕРїРєР° РЅР°Р·Р°Рґ -->
       <Link 
         :href="route('payment.checkout', { ad: ad.id })" 
         class="back-link"
       >
-        ← Назад
+        в†ђ РќР°Р·Р°Рґ
       </Link>
 
-      <!-- Заголовок и сумма -->
+      <!-- Р—Р°РіРѕР»РѕРІРѕРє Рё СЃСѓРјРјР° -->
       <div class="payment-header">
-        <h1 class="payment-title">Оплата услуг</h1>
+        <h1 class="payment-title">РћРїР»Р°С‚Р° СѓСЃР»СѓРі</h1>
         <div class="payment-amount">{{ payment.formatted_amount }}</div>
       </div>
 
-      <!-- QR-код блок -->
+      <!-- QR-РєРѕРґ Р±Р»РѕРє -->
       <div class="qr-payment-box">
         <div class="qr-content">
           <div class="qr-text">
-            <h2 class="qr-title">Подтвердите платёж по СБП</h2>
+            <h2 class="qr-title">РџРѕРґС‚РІРµСЂРґРёС‚Рµ РїР»Р°С‚С‘Р¶ РїРѕ РЎР‘Рџ</h2>
             <p class="qr-instruction">
-              Для этого отсканируйте QR-код камерой или в приложении банка
+              Р”Р»СЏ СЌС‚РѕРіРѕ РѕС‚СЃРєР°РЅРёСЂСѓР№С‚Рµ QR-РєРѕРґ РєР°РјРµСЂРѕР№ РёР»Рё РІ РїСЂРёР»РѕР¶РµРЅРёРё Р±Р°РЅРєР°
             </p>
           </div>
           
           <div class="qr-code">
-            <!-- QR-код -->
+            <!-- QR-РєРѕРґ -->
             <div class="qr-code__image">
               <svg width="200" height="200" viewBox="0 0 200 200" fill="none">
-                <!-- Простой QR-код (в реальном приложении здесь будет генерироваться настоящий QR) -->
+                <!-- РџСЂРѕСЃС‚РѕР№ QR-РєРѕРґ (РІ СЂРµР°Р»СЊРЅРѕРј РїСЂРёР»РѕР¶РµРЅРёРё Р·РґРµСЃСЊ Р±СѓРґРµС‚ РіРµРЅРµСЂРёСЂРѕРІР°С‚СЊСЃСЏ РЅР°СЃС‚РѕСЏС‰РёР№ QR) -->
                 <rect width="200" height="200" fill="white"/>
                 <rect x="10" y="10" width="180" height="180" fill="black"/>
                 <rect x="20" y="20" width="160" height="160" fill="white"/>
@@ -48,7 +48,7 @@
                 <rect x="80" y="80" width="40" height="40" fill="white"/>
                 <rect x="90" y="90" width="20" height="20" fill="black"/>
                 
-                <!-- Логотип в центре -->
+                <!-- Р›РѕРіРѕС‚РёРї РІ С†РµРЅС‚СЂРµ -->
                 <circle cx="100" cy="100" r="15" fill="white"/>
                 <circle cx="100" cy="100" r="12" fill="#4285F4"/>
                 <circle cx="100" cy="100" r="8" fill="#34A853"/>
@@ -60,36 +60,36 @@
         </div>
       </div>
 
-      <!-- Информация о статусе -->
+      <!-- РРЅС„РѕСЂРјР°С†РёСЏ Рѕ СЃС‚Р°С‚СѓСЃРµ -->
       <div class="payment-status">
         <div class="status-indicator">
           <div class="status-dot"></div>
-          <span class="status-text">Ожидание оплаты...</span>
+          <span class="status-text">РћР¶РёРґР°РЅРёРµ РѕРїР»Р°С‚С‹...</span>
         </div>
       </div>
 
-      <!-- Кнопки действий -->
+      <!-- РљРЅРѕРїРєРё РґРµР№СЃС‚РІРёР№ -->
       <div class="payment-actions">
         <button 
           @click="checkPaymentStatus"
           :disabled="isChecking"
           class="check-button"
         >
-          {{ isChecking ? 'Проверяем...' : 'Проверить оплату' }}
+          {{ isChecking ? 'РџСЂРѕРІРµСЂСЏРµРј...' : 'РџСЂРѕРІРµСЂРёС‚СЊ РѕРїР»Р°С‚Сѓ' }}
         </button>
         
         <button 
           @click="cancelPayment"
           class="cancel-button"
         >
-          Отменить
+          РћС‚РјРµРЅРёС‚СЊ
         </button>
       </div>
 
-      <!-- Информация о СБП -->
+      <!-- РРЅС„РѕСЂРјР°С†РёСЏ Рѕ РЎР‘Рџ -->
       <div class="sbp-info">
         <p class="sbp-text">
-          СБП — Система быстрых платежей. Оплата происходит мгновенно через ваш банк.
+          РЎР‘Рџ вЂ” РЎРёСЃС‚РµРјР° Р±С‹СЃС‚СЂС‹С… РїР»Р°С‚РµР¶РµР№. РћРїР»Р°С‚Р° РїСЂРѕРёСЃС…РѕРґРёС‚ РјРіРЅРѕРІРµРЅРЅРѕ С‡РµСЂРµР· РІР°С€ Р±Р°РЅРє.
         </p>
       </div>
     </div>
@@ -110,11 +110,11 @@ const props = defineProps({
 const isChecking = ref(false)
 const paymentStatus = ref('pending')
 
-// Автоматическая проверка статуса каждые 5 секунд
+// РђРІС‚РѕРјР°С‚РёС‡РµСЃРєР°СЏ РїСЂРѕРІРµСЂРєР° СЃС‚Р°С‚СѓСЃР° РєР°Р¶РґС‹Рµ 5 СЃРµРєСѓРЅРґ
 let statusInterval = null
 
 onMounted(() => {
-  // Запускаем автоматическую проверку
+  // Р—Р°РїСѓСЃРєР°РµРј Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєСѓСЋ РїСЂРѕРІРµСЂРєСѓ
   statusInterval = setInterval(checkPaymentStatus, 5000)
 })
 
@@ -124,7 +124,7 @@ const checkPaymentStatus = async () => {
   isChecking.value = true
   
   try {
-    // Запрос к нашему API для проверки статуса
+    // Р—Р°РїСЂРѕСЃ Рє РЅР°С€РµРјСѓ API РґР»СЏ РїСЂРѕРІРµСЂРєРё СЃС‚Р°С‚СѓСЃР°
     const response = await fetch(route('payment.check-status', { payment: props.payment.id }))
     const data = await response.json()
     
@@ -132,7 +132,7 @@ const checkPaymentStatus = async () => {
       paymentStatus.value = 'completed'
       clearInterval(statusInterval)
       
-      // Перенаправляем на страницу успеха
+      // РџРµСЂРµРЅР°РїСЂР°РІР»СЏРµРј РЅР° СЃС‚СЂР°РЅРёС†Сѓ СѓСЃРїРµС…Р°
       router.visit(route('payment.success', { payment: props.payment.id }))
     }
   } catch (error) {
@@ -146,7 +146,7 @@ const cancelPayment = () => {
   router.visit(route('payment.checkout', { ad: props.ad.id }))
 }
 
-// Очищаем интервал при размонтировании
+// РћС‡РёС‰Р°РµРј РёРЅС‚РµСЂРІР°Р» РїСЂРё СЂР°Р·РјРѕРЅС‚РёСЂРѕРІР°РЅРёРё
 onUnmounted(() => {
   if (statusInterval) {
     clearInterval(statusInterval)
@@ -351,7 +351,7 @@ onUnmounted(() => {
   }
 }
 
-/* Адаптивность */
+/* РђРґР°РїС‚РёРІРЅРѕСЃС‚СЊ */
 @media (max-width: 640px) {
   .payment-container {
     padding: 20px;

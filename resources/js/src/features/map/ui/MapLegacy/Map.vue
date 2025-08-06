@@ -1,9 +1,9 @@
 <template>
   <div class="w-full h-full min-h-[200px] bg-gray-100 rounded-lg flex items-center justify-center relative overflow-hidden">
-    <!-- Заглушка карты -->
+    <!-- Р—Р°РіР»СѓС€РєР° РєР°СЂС‚С‹ -->
     <div class="absolute inset-0 bg-gradient-to-br from-blue-50 to-blue-100"></div>
     
-    <!-- Контент карты -->
+    <!-- РљРѕРЅС‚РµРЅС‚ РєР°СЂС‚С‹ -->
     <div class="relative z-10 text-center">
       <svg class="mx-auto h-12 w-12 text-blue-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -11,11 +11,11 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
             d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
       </svg>
-      <h3 class="text-lg font-medium text-gray-800 mb-2">Карта мастеров</h3>
-      <p class="text-sm text-gray-600">{{ cards.length }} мастеров в Москве</p>
+      <h3 class="text-lg font-medium text-gray-800 mb-2">РљР°СЂС‚Р° РјР°СЃС‚РµСЂРѕРІ</h3>
+      <p class="text-sm text-gray-600">{{ cards.length }} РјР°СЃС‚РµСЂРѕРІ РІ РњРѕСЃРєРІРµ</p>
     </div>
     
-    <!-- Имитация маркеров на карте -->
+    <!-- РРјРёС‚Р°С†РёСЏ РјР°СЂРєРµСЂРѕРІ РЅР° РєР°СЂС‚Рµ -->
     <div class="absolute inset-0 pointer-events-none">
       <div 
         v-for="(card, index) in cards.slice(0, 6)" 
@@ -29,7 +29,7 @@
       </div>
     </div>
     
-    <!-- Кнопка центрирования -->
+    <!-- РљРЅРѕРїРєР° С†РµРЅС‚СЂРёСЂРѕРІР°РЅРёСЏ -->
     <button class="absolute bottom-4 right-4 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow">
       <svg class="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -51,7 +51,7 @@ const props = defineProps({
   }
 })
 
-// Генерируем случайные позиции для маркеров
+// Р“РµРЅРµСЂРёСЂСѓРµРј СЃР»СѓС‡Р°Р№РЅС‹Рµ РїРѕР·РёС†РёРё РґР»СЏ РјР°СЂРєРµСЂРѕРІ
 const getMarkerPosition = (index) => {
   const positions = [
     { top: '25%', left: '30%' },

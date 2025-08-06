@@ -1,4 +1,4 @@
-import { ref, customRef, Ref } from 'vue'
+import { customRef } from 'vue'
 
 /**
  * Создаёт debounced версию значения

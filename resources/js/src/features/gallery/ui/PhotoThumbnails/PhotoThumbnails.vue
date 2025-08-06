@@ -5,11 +5,11 @@
       :key="image.id"
       @click="openViewer(index)"
       class="aspect-square rounded-lg overflow-hidden bg-gray-200 hover:opacity-80 transition-opacity"
-      :aria-label="`Открыть изображение ${index + 1}`"
+      :aria-label="`РћС‚РєСЂС‹С‚СЊ РёР·РѕР±СЂР°Р¶РµРЅРёРµ ${index + 1}`"
     >
       <img
         :src="image.thumbnail || image.url"
-        :alt="image.alt || `Изображение ${index + 1}`"
+        :alt="image.alt || `РР·РѕР±СЂР°Р¶РµРЅРёРµ ${index + 1}`"
         class="w-full h-full object-cover"
         loading="lazy"
       >

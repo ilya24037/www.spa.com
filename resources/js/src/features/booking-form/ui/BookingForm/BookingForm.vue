@@ -1,5 +1,5 @@
 <template>
-  <!-- Error состояние -->
+  <!-- Error СЃРѕСЃС‚РѕСЏРЅРёРµ -->
   <ErrorState
     v-if="errorState.error"
     :error="errorState.error"
@@ -12,31 +12,31 @@
     class="mb-6"
   />
   
-  <!-- Основная форма -->
+  <!-- РћСЃРЅРѕРІРЅР°СЏ С„РѕСЂРјР° -->
   <div v-else class="booking-form">
-    <!-- Заголовок -->
+    <!-- Р—Р°РіРѕР»РѕРІРѕРє -->
     <div class="mb-6">
       <h3 class="text-lg font-semibold text-gray-900 mb-2">
-        Данные для записи
+        Р”Р°РЅРЅС‹Рµ РґР»СЏ Р·Р°РїРёСЃРё
       </h3>
       <p class="text-sm text-gray-600">
-        Укажите ваши контактные данные для подтверждения записи
+        РЈРєР°Р¶РёС‚Рµ РІР°С€Рё РєРѕРЅС‚Р°РєС‚РЅС‹Рµ РґР°РЅРЅС‹Рµ РґР»СЏ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ Р·Р°РїРёСЃРё
       </p>
     </div>
 
-    <!-- Форма -->
+    <!-- Р¤РѕСЂРјР° -->
     <form @submit.prevent="handleSubmit" class="space-y-6">
       
-      <!-- Имя клиента -->
+      <!-- РРјСЏ РєР»РёРµРЅС‚Р° -->
       <div>
         <label for="clientName" class="block text-sm font-medium text-gray-700 mb-2">
-          Ваше имя <span class="text-red-500">*</span>
+          Р’Р°С€Рµ РёРјСЏ <span class="text-red-500">*</span>
         </label>
         <input
           id="clientName"
           v-model="form.clientName"
           type="text"
-          placeholder="Введите ваше имя"
+          placeholder="Р’РІРµРґРёС‚Рµ РІР°С€Рµ РёРјСЏ"
           :class="[
             'w-full px-3 py-2 border rounded-lg text-sm transition-colors',
             errors.clientName 
@@ -50,10 +50,10 @@
         </p>
       </div>
 
-      <!-- Телефон -->
+      <!-- РўРµР»РµС„РѕРЅ -->
       <div>
         <label for="clientPhone" class="block text-sm font-medium text-gray-700 mb-2">
-          Номер телефона <span class="text-red-500">*</span>
+          РќРѕРјРµСЂ С‚РµР»РµС„РѕРЅР° <span class="text-red-500">*</span>
         </label>
         <input
           id="clientPhone"
@@ -73,14 +73,14 @@
           {{ errors.clientPhone }}
         </p>
         <p class="mt-1 text-xs text-gray-500">
-          На этот номер придет SMS с подтверждением записи
+          РќР° СЌС‚РѕС‚ РЅРѕРјРµСЂ РїСЂРёРґРµС‚ SMS СЃ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёРµРј Р·Р°РїРёСЃРё
         </p>
       </div>
 
-      <!-- Email (опционально) -->
+      <!-- Email (РѕРїС†РёРѕРЅР°Р»СЊРЅРѕ) -->
       <div>
         <label for="clientEmail" class="block text-sm font-medium text-gray-700 mb-2">
-          Email (необязательно)
+          Email (РЅРµРѕР±СЏР·Р°С‚РµР»СЊРЅРѕ)
         </label>
         <input
           id="clientEmail"
@@ -100,25 +100,25 @@
         </p>
       </div>
 
-      <!-- Комментарий к записи -->
+      <!-- РљРѕРјРјРµРЅС‚Р°СЂРёР№ Рє Р·Р°РїРёСЃРё -->
       <div>
         <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">
-          Комментарий к записи
+          РљРѕРјРјРµРЅС‚Р°СЂРёР№ Рє Р·Р°РїРёСЃРё
         </label>
         <textarea
           id="notes"
           v-model="form.notes"
           rows="3"
-          placeholder="Дополнительные пожелания или вопросы..."
+          placeholder="Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РїРѕР¶РµР»Р°РЅРёСЏ РёР»Рё РІРѕРїСЂРѕСЃС‹..."
           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 transition-colors resize-none"
           maxlength="500"
         ></textarea>
         <p class="mt-1 text-xs text-gray-500">
-          {{ form.notes.length }}/500 символов
+          {{ form.notes.length }}/500 СЃРёРјРІРѕР»РѕРІ
         </p>
       </div>
 
-      <!-- Согласие на обработку данных -->
+      <!-- РЎРѕРіР»Р°СЃРёРµ РЅР° РѕР±СЂР°Р±РѕС‚РєСѓ РґР°РЅРЅС‹С… -->
       <div class="flex items-start">
         <input
           id="dataProcessingConsent"
@@ -130,9 +130,9 @@
           ]"
         />
         <label for="dataProcessingConsent" class="ml-2 text-sm text-gray-700">
-          Я согласен на 
+          РЇ СЃРѕРіР»Р°СЃРµРЅ РЅР° 
           <a href="/privacy" target="_blank" class="text-blue-600 hover:text-blue-800 underline">
-            обработку персональных данных
+            РѕР±СЂР°Р±РѕС‚РєСѓ РїРµСЂСЃРѕРЅР°Р»СЊРЅС‹С… РґР°РЅРЅС‹С…
           </a>
           <span class="text-red-500">*</span>
         </label>
@@ -141,39 +141,39 @@
         {{ errors.dataProcessingConsent }}
       </p>
 
-      <!-- Информация о записи -->
+      <!-- РРЅС„РѕСЂРјР°С†РёСЏ Рѕ Р·Р°РїРёСЃРё -->
       <div v-if="bookingInfo" class="bg-gray-50 rounded-lg p-4">
-        <h4 class="text-sm font-medium text-gray-900 mb-3">Детали записи:</h4>
+        <h4 class="text-sm font-medium text-gray-900 mb-3">Р”РµС‚Р°Р»Рё Р·Р°РїРёСЃРё:</h4>
         <div class="space-y-2 text-sm text-gray-700">
           <div class="flex justify-between">
-            <span>Дата и время:</span>
+            <span>Р”Р°С‚Р° Рё РІСЂРµРјСЏ:</span>
             <span class="font-medium">{{ formatDateTime(bookingInfo.datetime) }}</span>
           </div>
           <div v-if="bookingInfo.service" class="flex justify-between">
-            <span>Услуга:</span>
+            <span>РЈСЃР»СѓРіР°:</span>
             <span class="font-medium">{{ bookingInfo.service.name }}</span>
           </div>
           <div v-if="bookingInfo.service?.duration" class="flex justify-between">
-            <span>Продолжительность:</span>
-            <span class="font-medium">{{ bookingInfo.service.duration }} мин</span>
+            <span>РџСЂРѕРґРѕР»Р¶РёС‚РµР»СЊРЅРѕСЃС‚СЊ:</span>
+            <span class="font-medium">{{ bookingInfo.service.duration }} РјРёРЅ</span>
           </div>
           <div v-if="bookingInfo.service?.price" class="flex justify-between items-center">
-            <span>Стоимость:</span>
+            <span>РЎС‚РѕРёРјРѕСЃС‚СЊ:</span>
             <span class="font-semibold text-lg text-green-600">
-              {{ formatPrice(bookingInfo.service.price) }} ₽
+              {{ formatPrice(bookingInfo.service.price) }} в‚Ѕ
             </span>
           </div>
         </div>
       </div>
 
-      <!-- Кнопки действий -->
+      <!-- РљРЅРѕРїРєРё РґРµР№СЃС‚РІРёР№ -->
       <div class="flex flex-col sm:flex-row gap-3">
         <button
           type="button"
           @click="$emit('cancel')"
           class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
         >
-          Отменить
+          РћС‚РјРµРЅРёС‚СЊ
         </button>
         
         <button
@@ -190,11 +190,11 @@
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          {{ loading ? 'Создание записи...' : 'Записаться' }}
+          {{ loading ? 'РЎРѕР·РґР°РЅРёРµ Р·Р°РїРёСЃРё...' : 'Р—Р°РїРёСЃР°С‚СЊСЃСЏ' }}
         </button>
       </div>
 
-      <!-- Ошибки формы -->
+      <!-- РћС€РёР±РєРё С„РѕСЂРјС‹ -->
       <div v-if="formError" class="bg-red-50 border border-red-200 rounded-lg p-4">
         <div class="flex">
           <div class="flex-shrink-0">
@@ -218,13 +218,13 @@ import 'dayjs/locale/ru'
 import { useErrorHandler } from '@/src/shared/composables/useErrorHandler'
 import { ErrorState } from '@/src/shared/ui/molecules/ErrorState'
 
-// Настройка dayjs
+// РќР°СЃС‚СЂРѕР№РєР° dayjs
 dayjs.locale('ru')
 
-// Error handler (без toast - показываем через ErrorState)
+// Error handler (Р±РµР· toast - РїРѕРєР°Р·С‹РІР°РµРј С‡РµСЂРµР· ErrorState)
 const errorState = useErrorHandler(false)
 
-// Props типизация
+// Props С‚РёРїРёР·Р°С†РёСЏ
 interface BookingFormProps {
   bookingInfo?: {
     datetime: string
@@ -242,7 +242,7 @@ const props = withDefaults(defineProps<BookingFormProps>(), {
   loading: false
 })
 
-// Events типизация
+// Events С‚РёРїРёР·Р°С†РёСЏ
 interface BookingFormEmits {
   submit: [bookingData: any]
   cancel: []
@@ -252,7 +252,7 @@ interface BookingFormEmits {
 
 const emit = defineEmits<BookingFormEmits>()
 
-// Состояние формы
+// РЎРѕСЃС‚РѕСЏРЅРёРµ С„РѕСЂРјС‹
 const form = ref({
   clientName: '',
   clientPhone: '',
@@ -264,7 +264,7 @@ const form = ref({
 const errors = ref({})
 const formError = ref(null)
 
-// Вычисляемые свойства
+// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const isValid = computed(() => {
   return form.value.clientName.trim() !== '' &&
          form.value.clientPhone.trim() !== '' &&
@@ -272,7 +272,7 @@ const isValid = computed(() => {
          Object.keys(errors.value).length === 0
 })
 
-// Методы валидации
+// РњРµС‚РѕРґС‹ РІР°Р»РёРґР°С†РёРё
 type ValidateFieldName = 'clientName' | 'clientPhone' | 'clientEmail' | 'dataProcessingConsent'
 
 const validateField = (fieldName: ValidateFieldName): void => {
@@ -283,18 +283,18 @@ const validateField = (fieldName: ValidateFieldName): void => {
     switch (fieldName) {
       case 'clientName':
         if (!form.value.clientName.trim()) {
-          errors.value.clientName = 'Укажите ваше имя'
+          errors.value.clientName = 'РЈРєР°Р¶РёС‚Рµ РІР°С€Рµ РёРјСЏ'
         } else if (form.value.clientName.trim().length < 2) {
-          errors.value.clientName = 'Имя должно содержать минимум 2 символа'
+          errors.value.clientName = 'РРјСЏ РґРѕР»Р¶РЅРѕ СЃРѕРґРµСЂР¶Р°С‚СЊ РјРёРЅРёРјСѓРј 2 СЃРёРјРІРѕР»Р°'
         }
         break
 
       case 'clientPhone':
         const phoneRegex = /^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/
         if (!form.value.clientPhone.trim()) {
-          errors.value.clientPhone = 'Укажите номер телефона'
+          errors.value.clientPhone = 'РЈРєР°Р¶РёС‚Рµ РЅРѕРјРµСЂ С‚РµР»РµС„РѕРЅР°'
         } else if (!phoneRegex.test(form.value.clientPhone)) {
-          errors.value.clientPhone = 'Некорректный формат телефона'
+          errors.value.clientPhone = 'РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ С„РѕСЂРјР°С‚ С‚РµР»РµС„РѕРЅР°'
         }
         break
 
@@ -302,21 +302,21 @@ const validateField = (fieldName: ValidateFieldName): void => {
         if (form.value.clientEmail.trim()) {
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
           if (!emailRegex.test(form.value.clientEmail)) {
-            errors.value.clientEmail = 'Некорректный формат email'
+            errors.value.clientEmail = 'РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ С„РѕСЂРјР°С‚ email'
           }
         }
         break
 
       case 'dataProcessingConsent':
         if (!form.value.dataProcessingConsent) {
-          errors.value.dataProcessingConsent = 'Необходимо согласие на обработку данных'
+          errors.value.dataProcessingConsent = 'РќРµРѕР±С…РѕРґРёРјРѕ СЃРѕРіР»Р°СЃРёРµ РЅР° РѕР±СЂР°Р±РѕС‚РєСѓ РґР°РЅРЅС‹С…'
         }
         break
     }
   } catch (error: unknown) {
     errorState.handleError({
-      message: 'Ошибка валидации поля',
-      details: `Не удается проверить поле ${fieldName}`
+      message: 'РћС€РёР±РєР° РІР°Р»РёРґР°С†РёРё РїРѕР»СЏ',
+      details: `РќРµ СѓРґР°РµС‚СЃСЏ РїСЂРѕРІРµСЂРёС‚СЊ РїРѕР»Рµ ${fieldName}`
     }, 'validation')
   }
 }
@@ -328,20 +328,20 @@ const validateForm = (): boolean => {
     validateField('clientEmail')
     
     if (!form.value.dataProcessingConsent) {
-      errors.value.dataProcessingConsent = 'Необходимо согласие на обработку данных'
+      errors.value.dataProcessingConsent = 'РќРµРѕР±С…РѕРґРёРјРѕ СЃРѕРіР»Р°СЃРёРµ РЅР° РѕР±СЂР°Р±РѕС‚РєСѓ РґР°РЅРЅС‹С…'
     }
 
     return Object.keys(errors.value).length === 0
   } catch (error: unknown) {
     errorState.handleError({
-      message: 'Ошибка валидации формы',
-      details: 'Не удается проверить корректность данных'
+      message: 'РћС€РёР±РєР° РІР°Р»РёРґР°С†РёРё С„РѕСЂРјС‹',
+      details: 'РќРµ СѓРґР°РµС‚СЃСЏ РїСЂРѕРІРµСЂРёС‚СЊ РєРѕСЂСЂРµРєС‚РЅРѕСЃС‚СЊ РґР°РЅРЅС‹С…'
     }, 'validation')
     return false
   }
 }
 
-// Методы форматирования
+// РњРµС‚РѕРґС‹ С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёСЏ
 const formatPhone = (event: Event): void => {
   try {
     const target = event.target as HTMLInputElement
@@ -376,17 +376,17 @@ const formatPhone = (event: Event): void => {
     form.value.clientPhone = formatted
   } catch (error: unknown) {
     errorState.handleError({
-      message: 'Ошибка форматирования телефона',
-      details: 'Введите корректный номер телефона'
+      message: 'РћС€РёР±РєР° С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёСЏ С‚РµР»РµС„РѕРЅР°',
+      details: 'Р’РІРµРґРёС‚Рµ РєРѕСЂСЂРµРєС‚РЅС‹Р№ РЅРѕРјРµСЂ С‚РµР»РµС„РѕРЅР°'
     }, 'validation')
   }
 }
 
 const formatDateTime = (datetime: string): string => {
   try {
-    return dayjs(datetime).format('DD MMMM YYYY в HH:mm')
+    return dayjs(datetime).format('DD MMMM YYYY РІ HH:mm')
   } catch (error: unknown) {
-    return 'Некорректная дата'
+    return 'РќРµРєРѕСЂСЂРµРєС‚РЅР°СЏ РґР°С‚Р°'
   }
 }
 
@@ -399,23 +399,23 @@ const formatPrice = (price: number | undefined): string => {
   }
 }
 
-// Обработчики событий
+// РћР±СЂР°Р±РѕС‚С‡РёРєРё СЃРѕР±С‹С‚РёР№
 const handleSubmit = () => {
   try {
     errorState.clearError()
     formError.value = null
     
     if (!validateForm()) {
-      formError.value = 'Проверьте правильность заполнения формы'
+      formError.value = 'РџСЂРѕРІРµСЂСЊС‚Рµ РїСЂР°РІРёР»СЊРЅРѕСЃС‚СЊ Р·Р°РїРѕР»РЅРµРЅРёСЏ С„РѕСЂРјС‹'
       return
     }
 
     if (!props.bookingInfo) {
-      formError.value = 'Сначала выберите дату и время записи'
+      formError.value = 'РЎРЅР°С‡Р°Р»Р° РІС‹Р±РµСЂРёС‚Рµ РґР°С‚Сѓ Рё РІСЂРµРјСЏ Р·Р°РїРёСЃРё'
       return
     }
 
-    // Подготавливаем данные для отправки
+    // РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј РґР°РЅРЅС‹Рµ РґР»СЏ РѕС‚РїСЂР°РІРєРё
     const bookingData = {
       ...props.bookingInfo,
       client: {
@@ -430,27 +430,27 @@ const handleSubmit = () => {
     emit('submit', bookingData)
   } catch (error: unknown) {
     errorState.handleError({
-      message: 'Ошибка при отправке формы',
-      details: 'Проверьте правильность заполнения всех полей'
+      message: 'РћС€РёР±РєР° РїСЂРё РѕС‚РїСЂР°РІРєРµ С„РѕСЂРјС‹',
+      details: 'РџСЂРѕРІРµСЂСЊС‚Рµ РїСЂР°РІРёР»СЊРЅРѕСЃС‚СЊ Р·Р°РїРѕР»РЅРµРЅРёСЏ РІСЃРµС… РїРѕР»РµР№'
     }, 'validation')
   }
 }
 
-// Метод для повторной попытки после ошибки
+// РњРµС‚РѕРґ РґР»СЏ РїРѕРІС‚РѕСЂРЅРѕР№ РїРѕРїС‹С‚РєРё РїРѕСЃР»Рµ РѕС€РёР±РєРё
 const handleRetry = async (): Promise<void> => {
   errorState.clearError()
   formError.value = null
   
-  // Очищаем ошибки валидации
+  // РћС‡РёС‰Р°РµРј РѕС€РёР±РєРё РІР°Р»РёРґР°С†РёРё
   errors.value = {}
   
-  // Эмитируем событие для родительского компонента
+  // Р­РјРёС‚РёСЂСѓРµРј СЃРѕР±С‹С‚РёРµ РґР»СЏ СЂРѕРґРёС‚РµР»СЊСЃРєРѕРіРѕ РєРѕРјРїРѕРЅРµРЅС‚Р°
   await errorState.retryOperation(async () => {
     emit('retryRequested')
   })
 }
 
-// Наблюдатели
+// РќР°Р±Р»СЋРґР°С‚РµР»Рё
 watch(form, () => {
   emit('form-change', {
     isValid: isValid.value,
@@ -470,18 +470,18 @@ watch(() => form.value.dataProcessingConsent, (newValue) => {
   @apply max-w-full;
 }
 
-/* Анимация для полей с ошибками */
+/* РђРЅРёРјР°С†РёСЏ РґР»СЏ РїРѕР»РµР№ СЃ РѕС€РёР±РєР°РјРё */
 .booking-form input.border-red-300,
 .booking-form textarea.border-red-300 {
   @apply animate-pulse;
 }
 
-/* Стилизация чекбокса */
+/* РЎС‚РёР»РёР·Р°С†РёСЏ С‡РµРєР±РѕРєСЃР° */
 input[type="checkbox"]:checked {
   background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='m13.854 3.646-7.5 7.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6 10.293l7.146-7.147a.5.5 0 0 1 .708.708z'/%3e%3c/svg%3e");
 }
 
-/* Анимация загрузки */
+/* РђРЅРёРјР°С†РёСЏ Р·Р°РіСЂСѓР·РєРё */
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -503,3 +503,4 @@ input[type="checkbox"]:checked {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 </style>
+

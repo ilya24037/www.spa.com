@@ -1,6 +1,6 @@
 /**
- * Универсальный logger для приложения
- * Обеспечивает единообразное логирование с поддержкой различных уровней и окружений
+ * РЈРЅРёРІРµСЂСЃР°Р»СЊРЅС‹Р№ logger РґР»СЏ РїСЂРёР»РѕР¶РµРЅРёСЏ
+ * РћР±РµСЃРїРµС‡РёРІР°РµС‚ РµРґРёРЅРѕРѕР±СЂР°Р·РЅРѕРµ Р»РѕРіРёСЂРѕРІР°РЅРёРµ СЃ РїРѕРґРґРµСЂР¶РєРѕР№ СЂР°Р·Р»РёС‡РЅС‹С… СѓСЂРѕРІРЅРµР№ Рё РѕРєСЂСѓР¶РµРЅРёР№
  */
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'fatal';
@@ -34,8 +34,8 @@ class Logger {
 
   constructor(config: Partial<LoggerConfig> = {}) {
     this.config = {
-      enabled: import.meta.env.PROD, // В production логирование включено
-      level: import.meta.env.DEV ? 'debug' : 'warn', // В dev режиме больше логов
+      enabled: import.meta.env.PROD, // Р’ production Р»РѕРіРёСЂРѕРІР°РЅРёРµ РІРєР»СЋС‡РµРЅРѕ
+      level: import.meta.env.DEV ? 'debug' : 'warn', // Р’ dev СЂРµР¶РёРјРµ Р±РѕР»СЊС€Рµ Р»РѕРіРѕРІ
       prefix: '[SPA]',
       sendToServer: import.meta.env.PROD,
       serverEndpoint: '/api/logs',
@@ -46,7 +46,7 @@ class Logger {
   }
 
   /**
-   * Проверка, нужно ли логировать сообщение данного уровня
+   * РџСЂРѕРІРµСЂРєР°, РЅСѓР¶РЅРѕ Р»Рё Р»РѕРіРёСЂРѕРІР°С‚СЊ СЃРѕРѕР±С‰РµРЅРёРµ РґР°РЅРЅРѕРіРѕ СѓСЂРѕРІРЅСЏ
    */
   private shouldLog(level: LogLevel): boolean {
     if (!this.config.enabled) return false;
@@ -54,7 +54,7 @@ class Logger {
   }
 
   /**
-   * Форматирование сообщения для вывода
+   * Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ СЃРѕРѕР±С‰РµРЅРёСЏ РґР»СЏ РІС‹РІРѕРґР°
    */
   private formatMessage(level: LogLevel, message: string, context?: LogContext): string {
     const parts: string[] = [];
@@ -79,17 +79,17 @@ class Logger {
   }
 
   /**
-   * Получение стека вызовов
+   * РџРѕР»СѓС‡РµРЅРёРµ СЃС‚РµРєР° РІС‹Р·РѕРІРѕРІ
    */
   private getStackTrace(): string {
     const error = new Error();
     const stack = error.stack || '';
-    // Убираем первые строки стека, относящиеся к самому logger
+    // РЈР±РёСЂР°РµРј РїРµСЂРІС‹Рµ СЃС‚СЂРѕРєРё СЃС‚РµРєР°, РѕС‚РЅРѕСЃСЏС‰РёРµСЃСЏ Рє СЃР°РјРѕРјСѓ logger
     return stack.split('\n').slice(3).join('\n');
   }
 
   /**
-   * Отправка логов на сервер
+   * РћС‚РїСЂР°РІРєР° Р»РѕРіРѕРІ РЅР° СЃРµСЂРІРµСЂ
    */
   private async sendToServer(
     level: LogLevel,
@@ -114,16 +114,16 @@ class Logger {
         url: window.location.href
       };
 
-      // Используем sendBeacon для надежной отправки
+      // РСЃРїРѕР»СЊР·СѓРµРј sendBeacon РґР»СЏ РЅР°РґРµР¶РЅРѕР№ РѕС‚РїСЂР°РІРєРё
       const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
       navigator.sendBeacon(this.config.serverEndpoint, blob);
     } catch (err) {
-      // Не логируем ошибки отправки, чтобы избежать рекурсии
+      // РќРµ Р»РѕРіРёСЂСѓРµРј РѕС€РёР±РєРё РѕС‚РїСЂР°РІРєРё, С‡С‚РѕР±С‹ РёР·Р±РµР¶Р°С‚СЊ СЂРµРєСѓСЂСЃРёРё
     }
   }
 
   /**
-   * Базовый метод логирования
+   * Р‘Р°Р·РѕРІС‹Р№ РјРµС‚РѕРґ Р»РѕРіРёСЂРѕРІР°РЅРёСЏ
    */
   private log(
     level: LogLevel,
@@ -135,61 +135,61 @@ class Logger {
 
     const formattedMessage = this.formatMessage(level, message, context);
 
-    // Определяем метод консоли для вывода
+    // РћРїСЂРµРґРµР»СЏРµРј РјРµС‚РѕРґ РєРѕРЅСЃРѕР»Рё РґР»СЏ РІС‹РІРѕРґР°
     const consoleMethod = level === 'debug' ? 'log' : level;
     
-    // Выводим в консоль в dev режиме
+    // Р’С‹РІРѕРґРёРј РІ РєРѕРЅСЃРѕР»СЊ РІ dev СЂРµР¶РёРјРµ
     if (import.meta.env.DEV) {
-      console[consoleMethod](formattedMessage, ...args);
+      (console as any)[consoleMethod](formattedMessage, ...args);
       
       if (this.config.includeStackTrace && (level === 'error' || level === 'fatal')) {
-        console[consoleMethod]('Stack trace:', this.getStackTrace());
+        (console as any)[consoleMethod]('Stack trace:', this.getStackTrace());
       }
     }
 
-    // Отправляем на сервер в production
+    // РћС‚РїСЂР°РІР»СЏРµРј РЅР° СЃРµСЂРІРµСЂ РІ production
     if (level === 'error' || level === 'fatal') {
       this.sendToServer(level, message, context, args[0]);
     }
   }
 
   /**
-   * Debug уровень - подробная информация для отладки
+   * Debug СѓСЂРѕРІРµРЅСЊ - РїРѕРґСЂРѕР±РЅР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ РґР»СЏ РѕС‚Р»Р°РґРєРё
    */
   debug(message: string, context?: LogContext, ...args: any[]): void {
     this.log('debug', message, context, ...args);
   }
 
   /**
-   * Info уровень - общая информация о работе приложения
+   * Info СѓСЂРѕРІРµРЅСЊ - РѕР±С‰Р°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ Рѕ СЂР°Р±РѕС‚Рµ РїСЂРёР»РѕР¶РµРЅРёСЏ
    */
   info(message: string, context?: LogContext, ...args: any[]): void {
     this.log('info', message, context, ...args);
   }
 
   /**
-   * Warn уровень - предупреждения о потенциальных проблемах
+   * Warn СѓСЂРѕРІРµРЅСЊ - РїСЂРµРґСѓРїСЂРµР¶РґРµРЅРёСЏ Рѕ РїРѕС‚РµРЅС†РёР°Р»СЊРЅС‹С… РїСЂРѕР±Р»РµРјР°С…
    */
   warn(message: string, context?: LogContext, ...args: any[]): void {
     this.log('warn', message, context, ...args);
   }
 
   /**
-   * Error уровень - ошибки, которые не прерывают работу
+   * Error СѓСЂРѕРІРµРЅСЊ - РѕС€РёР±РєРё, РєРѕС‚РѕСЂС‹Рµ РЅРµ РїСЂРµСЂС‹РІР°СЋС‚ СЂР°Р±РѕС‚Сѓ
    */
   error(message: string, error?: Error | any, context?: LogContext): void {
     this.log('error', message, context, error);
   }
 
   /**
-   * Fatal уровень - критические ошибки, прерывающие работу
+   * Fatal СѓСЂРѕРІРµРЅСЊ - РєСЂРёС‚РёС‡РµСЃРєРёРµ РѕС€РёР±РєРё, РїСЂРµСЂС‹РІР°СЋС‰РёРµ СЂР°Р±РѕС‚Сѓ
    */
   fatal(message: string, error?: Error | any, context?: LogContext): void {
     this.log('fatal', message, context, error);
   }
 
   /**
-   * Создание дочернего logger с контекстом
+   * РЎРѕР·РґР°РЅРёРµ РґРѕС‡РµСЂРЅРµРіРѕ logger СЃ РєРѕРЅС‚РµРєСЃС‚РѕРј
    */
   createChild(context: LogContext): Logger {
     return new Logger({
@@ -199,20 +199,20 @@ class Logger {
   }
 
   /**
-   * Обновление конфигурации logger
+   * РћР±РЅРѕРІР»РµРЅРёРµ РєРѕРЅС„РёРіСѓСЂР°С†РёРё logger
    */
   updateConfig(config: Partial<LoggerConfig>): void {
     this.config = { ...this.config, ...config };
   }
 }
 
-// Создаем глобальный экземпляр logger
+// РЎРѕР·РґР°РµРј РіР»РѕР±Р°Р»СЊРЅС‹Р№ СЌРєР·РµРјРїР»СЏСЂ logger
 export const logger = new Logger();
 
-// Экспортируем класс для создания кастомных logger'ов
+// Р­РєСЃРїРѕСЂС‚РёСЂСѓРµРј РєР»Р°СЃСЃ РґР»СЏ СЃРѕР·РґР°РЅРёСЏ РєР°СЃС‚РѕРјРЅС‹С… logger'РѕРІ
 export { Logger };
 
-// Удобные алиасы для быстрого доступа
+// РЈРґРѕР±РЅС‹Рµ Р°Р»РёР°СЃС‹ РґР»СЏ Р±С‹СЃС‚СЂРѕРіРѕ РґРѕСЃС‚СѓРїР°
 export const logDebug = logger.debug.bind(logger);
 export const logInfo = logger.info.bind(logger);
 export const logWarn = logger.warn.bind(logger);

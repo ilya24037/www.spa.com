@@ -1,19 +1,19 @@
 <template>
   <div class="booking-widget">
-    <!-- Заголовок виджета -->
+    <!-- Р—Р°РіРѕР»РѕРІРѕРє РІРёРґР¶РµС‚Р° -->
     <div class="mb-6">
       <h2 class="text-xl font-bold text-gray-900 mb-2">
-        Записаться к мастеру
+        Р—Р°РїРёСЃР°С‚СЊСЃСЏ Рє РјР°СЃС‚РµСЂСѓ
       </h2>
       <p class="text-sm text-gray-600">
-        Выберите удобное время и оставьте заявку
+        Р’С‹Р±РµСЂРёС‚Рµ СѓРґРѕР±РЅРѕРµ РІСЂРµРјСЏ Рё РѕСЃС‚Р°РІСЊС‚Рµ Р·Р°СЏРІРєСѓ
       </p>
     </div>
 
-    <!-- Индикатор этапов -->
+    <!-- РРЅРґРёРєР°С‚РѕСЂ СЌС‚Р°РїРѕРІ -->
     <div class="mb-6">
       <div class="flex items-center">
-        <!-- Этап 1: Выбор времени -->
+        <!-- Р­С‚Р°Рї 1: Р’С‹Р±РѕСЂ РІСЂРµРјРµРЅРё -->
         <div class="flex items-center">
           <div :class="[
             'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium',
@@ -25,17 +25,17 @@
             'ml-2 text-sm font-medium',
             currentStep >= 1 ? 'text-blue-600' : 'text-gray-500'
           ]">
-            Время
+            Р’СЂРµРјСЏ
           </span>
         </div>
 
-        <!-- Разделитель -->
+        <!-- Р Р°Р·РґРµР»РёС‚РµР»СЊ -->
         <div :class="[
           'flex-1 h-0.5 mx-4',
           currentStep >= 2 ? 'bg-blue-600' : 'bg-gray-200'
         ]"></div>
 
-        <!-- Этап 2: Заполнение формы -->
+        <!-- Р­С‚Р°Рї 2: Р—Р°РїРѕР»РЅРµРЅРёРµ С„РѕСЂРјС‹ -->
         <div class="flex items-center">
           <div :class="[
             'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium',
@@ -47,38 +47,38 @@
             'ml-2 text-sm font-medium',
             currentStep >= 2 ? 'text-blue-600' : 'text-gray-500'
           ]">
-            Данные
+            Р”Р°РЅРЅС‹Рµ
           </span>
         </div>
 
-        <!-- Разделитель -->
+        <!-- Р Р°Р·РґРµР»РёС‚РµР»СЊ -->
         <div :class="[
           'flex-1 h-0.5 mx-4',
           currentStep >= 3 ? 'bg-blue-600' : 'bg-gray-200'
         ]"></div>
 
-        <!-- Этап 3: Подтверждение -->
+        <!-- Р­С‚Р°Рї 3: РџРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ -->
         <div class="flex items-center">
           <div :class="[
             'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium',
             currentStep >= 3 ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-600'
           ]">
-            ✓
+            вњ“
           </div>
           <span :class="[
             'ml-2 text-sm font-medium',
             currentStep >= 3 ? 'text-green-600' : 'text-gray-500'
           ]">
-            Готово
+            Р“РѕС‚РѕРІРѕ
           </span>
         </div>
       </div>
     </div>
 
-    <!-- Содержимое этапов -->
+    <!-- РЎРѕРґРµСЂР¶РёРјРѕРµ СЌС‚Р°РїРѕРІ -->
     <div class="min-h-[400px]">
       
-      <!-- Этап 1: Выбор времени -->
+      <!-- Р­С‚Р°Рї 1: Р’С‹Р±РѕСЂ РІСЂРµРјРµРЅРё -->
       <div v-if="currentStep === 1" class="animate-fade-in">
         <BookingCalendar
           :master-id="master.id"
@@ -91,12 +91,12 @@
             @click="nextStep"
             class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium"
           >
-            Продолжить к заполнению данных
+            РџСЂРѕРґРѕР»Р¶РёС‚СЊ Рє Р·Р°РїРѕР»РЅРµРЅРёСЋ РґР°РЅРЅС‹С…
           </button>
         </div>
       </div>
 
-      <!-- Этап 2: Заполнение формы -->
+      <!-- Р­С‚Р°Рї 2: Р—Р°РїРѕР»РЅРµРЅРёРµ С„РѕСЂРјС‹ -->
       <div v-else-if="currentStep === 2" class="animate-fade-in">
         <BookingForm
           :booking-info="bookingData"
@@ -106,103 +106,103 @@
         />
       </div>
 
-      <!-- Этап 3: Успешное создание -->
+      <!-- Р­С‚Р°Рї 3: РЈСЃРїРµС€РЅРѕРµ СЃРѕР·РґР°РЅРёРµ -->
       <div v-else-if="currentStep === 3" class="animate-fade-in">
         <div class="text-center py-8">
-          <!-- Иконка успеха -->
+          <!-- РРєРѕРЅРєР° СѓСЃРїРµС…Р° -->
           <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
             <svg class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
           </div>
 
-          <!-- Сообщение об успехе -->
+          <!-- РЎРѕРѕР±С‰РµРЅРёРµ РѕР± СѓСЃРїРµС…Рµ -->
           <h3 class="text-lg font-semibold text-gray-900 mb-2">
-            Запись успешно создана!
+            Р—Р°РїРёСЃСЊ СѓСЃРїРµС€РЅРѕ СЃРѕР·РґР°РЅР°!
           </h3>
           <p class="text-sm text-gray-600 mb-6">
-            Мастер получил уведомление о вашей записи и свяжется с вами для подтверждения
+            РњР°СЃС‚РµСЂ РїРѕР»СѓС‡РёР» СѓРІРµРґРѕРјР»РµРЅРёРµ Рѕ РІР°С€РµР№ Р·Р°РїРёСЃРё Рё СЃРІСЏР¶РµС‚СЃСЏ СЃ РІР°РјРё РґР»СЏ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ
           </p>
 
-          <!-- Детали записи -->
+          <!-- Р”РµС‚Р°Р»Рё Р·Р°РїРёСЃРё -->
           <div class="bg-green-50 rounded-lg p-4 mb-6 text-left">
-            <h4 class="font-medium text-gray-900 mb-3">Детали записи:</h4>
+            <h4 class="font-medium text-gray-900 mb-3">Р”РµС‚Р°Р»Рё Р·Р°РїРёСЃРё:</h4>
             <div class="space-y-2 text-sm text-gray-700">
               <div class="flex justify-between">
-                <span>Номер записи:</span>
+                <span>РќРѕРјРµСЂ Р·Р°РїРёСЃРё:</span>
                 <span class="font-medium">{{ createdBooking.bookingNumber }}</span>
               </div>
               <div class="flex justify-between">
-                <span>Дата и время:</span>
+                <span>Р”Р°С‚Р° Рё РІСЂРµРјСЏ:</span>
                 <span class="font-medium">{{ formatDateTime(bookingData.datetime) }}</span>
               </div>
               <div v-if="selectedService" class="flex justify-between">
-                <span>Услуга:</span>
+                <span>РЈСЃР»СѓРіР°:</span>
                 <span class="font-medium">{{ selectedService.name }}</span>
               </div>
               <div class="flex justify-between">
-                <span>Мастер:</span>
+                <span>РњР°СЃС‚РµСЂ:</span>
                 <span class="font-medium">{{ master.name }}</span>
               </div>
             </div>
           </div>
 
-          <!-- Действия -->
+          <!-- Р”РµР№СЃС‚РІРёСЏ -->
           <div class="space-y-3">
             <button
               @click="reset"
               class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium"
             >
-              Записаться еще раз
+              Р—Р°РїРёСЃР°С‚СЊСЃСЏ РµС‰Рµ СЂР°Р·
             </button>
             <button
               @click="$emit('close')"
               class="w-full text-gray-600 py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              Закрыть
+              Р—Р°РєСЂС‹С‚СЊ
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Ошибка создания записи -->
+      <!-- РћС€РёР±РєР° СЃРѕР·РґР°РЅРёСЏ Р·Р°РїРёСЃРё -->
       <div v-else-if="currentStep === 'error'" class="animate-fade-in">
         <div class="text-center py-8">
-          <!-- Иконка ошибки -->
+          <!-- РРєРѕРЅРєР° РѕС€РёР±РєРё -->
           <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
             <svg class="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
 
-          <!-- Сообщение об ошибке -->
+          <!-- РЎРѕРѕР±С‰РµРЅРёРµ РѕР± РѕС€РёР±РєРµ -->
           <h3 class="text-lg font-semibold text-gray-900 mb-2">
-            Ошибка при создании записи
+            РћС€РёР±РєР° РїСЂРё СЃРѕР·РґР°РЅРёРё Р·Р°РїРёСЃРё
           </h3>
           <p class="text-sm text-gray-600 mb-6">
-            {{ errorMessage || 'Произошла ошибка. Попробуйте еще раз.' }}
+            {{ errorMessage || 'РџСЂРѕРёР·РѕС€Р»Р° РѕС€РёР±РєР°. РџРѕРїСЂРѕР±СѓР№С‚Рµ РµС‰Рµ СЂР°Р·.' }}
           </p>
 
-          <!-- Действия -->
+          <!-- Р”РµР№СЃС‚РІРёСЏ -->
           <div class="space-y-3">
             <button
               @click="currentStep = 2"
               class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium"
             >
-              Попробовать еще раз
+              РџРѕРїСЂРѕР±РѕРІР°С‚СЊ РµС‰Рµ СЂР°Р·
             </button>
             <button
               @click="reset"
               class="w-full text-gray-600 py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              Начать сначала
+              РќР°С‡Р°С‚СЊ СЃРЅР°С‡Р°Р»Р°
             </button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Навигация (только для первых двух этапов) -->
+    <!-- РќР°РІРёРіР°С†РёСЏ (С‚РѕР»СЊРєРѕ РґР»СЏ РїРµСЂРІС‹С… РґРІСѓС… СЌС‚Р°РїРѕРІ) -->
     <div v-if="currentStep <= 2 && currentStep !== 'error'" class="mt-6 flex justify-between">
       <button
         v-if="currentStep > 1"
@@ -212,12 +212,12 @@
         <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
-        Назад
+        РќР°Р·Р°Рґ
       </button>
       <div v-else></div>
 
       <div class="text-sm text-gray-500">
-        Этап {{ currentStep }} из 2
+        Р­С‚Р°Рї {{ currentStep }} РёР· 2
       </div>
     </div>
   </div>
@@ -230,7 +230,7 @@ import 'dayjs/locale/ru'
 import BookingCalendar from '@/src/entities/booking/ui/BookingCalendar/BookingCalendar.vue'
 import BookingForm from '@/src/features/booking-form/ui/BookingForm/BookingForm.vue'
 
-// Настройка dayjs
+// РќР°СЃС‚СЂРѕР№РєР° dayjs
 dayjs.locale('ru')
 
 // Props
@@ -252,7 +252,7 @@ const props = defineProps({
 // Events
 const emit = defineEmits(['booking-created', 'close'])
 
-// Состояние компонента
+// РЎРѕСЃС‚РѕСЏРЅРёРµ РєРѕРјРїРѕРЅРµРЅС‚Р°
 const currentStep = ref(1)
 const bookingData = ref({
   date: null,
@@ -264,7 +264,7 @@ const createdBooking = ref(null)
 const submitting = ref(false)
 const errorMessage = ref(null)
 
-// Методы навигации
+// РњРµС‚РѕРґС‹ РЅР°РІРёРіР°С†РёРё
 const nextStep = () => {
   if (currentStep.value < 3) {
     currentStep.value++
@@ -290,7 +290,7 @@ const reset = () => {
   errorMessage.value = null
 }
 
-// Обработчики событий
+// РћР±СЂР°Р±РѕС‚С‡РёРєРё СЃРѕР±С‹С‚РёР№
 const handleTimeSelection = (selection) => {
   bookingData.value = {
     ...selection,
@@ -303,19 +303,19 @@ const handleFormSubmit = async (formData) => {
   errorMessage.value = null
 
   try {
-    // Имитация API вызова - замените на реальный API
+    // РРјРёС‚Р°С†РёСЏ API РІС‹Р·РѕРІР° - Р·Р°РјРµРЅРёС‚Рµ РЅР° СЂРµР°Р»СЊРЅС‹Р№ API
     await new Promise((resolve, reject) => {
       setTimeout(() => {
-        // Случайно имитируем ошибку для демонстрации
+        // РЎР»СѓС‡Р°Р№РЅРѕ РёРјРёС‚РёСЂСѓРµРј РѕС€РёР±РєСѓ РґР»СЏ РґРµРјРѕРЅСЃС‚СЂР°С†РёРё
         if (Math.random() > 0.8) {
-          reject(new Error('Время уже занято. Выберите другое время.'))
+          reject(new Error('Р’СЂРµРјСЏ СѓР¶Рµ Р·Р°РЅСЏС‚Рѕ. Р’С‹Р±РµСЂРёС‚Рµ РґСЂСѓРіРѕРµ РІСЂРµРјСЏ.'))
         } else {
           resolve()
         }
       }, 2000)
     })
 
-    // Успешное создание записи
+    // РЈСЃРїРµС€РЅРѕРµ СЃРѕР·РґР°РЅРёРµ Р·Р°РїРёСЃРё
     createdBooking.value = {
       id: Date.now(),
       bookingNumber: `BK-${Date.now().toString().slice(-6)}`,
@@ -333,23 +333,23 @@ const handleFormSubmit = async (formData) => {
   }
 }
 
-// Вспомогательные методы
+// Р’СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅС‹Рµ РјРµС‚РѕРґС‹
 const formatDateTime = (datetime) => {
-  return dayjs(datetime).format('DD MMMM YYYY в HH:mm')
+  return dayjs(datetime).format('DD MMMM YYYY РІ HH:mm')
 }
 
-// Наблюдатели
+// РќР°Р±Р»СЋРґР°С‚РµР»Рё
 watch(() => props.isOpen, (isOpen) => {
   if (!isOpen) {
-    // Сброс состояния при закрытии
+    // РЎР±СЂРѕСЃ СЃРѕСЃС‚РѕСЏРЅРёСЏ РїСЂРё Р·Р°РєСЂС‹С‚РёРё
     setTimeout(() => {
       reset()
-    }, 300) // Задержка для плавного закрытия
+    }, 300) // Р—Р°РґРµСЂР¶РєР° РґР»СЏ РїР»Р°РІРЅРѕРіРѕ Р·Р°РєСЂС‹С‚РёСЏ
   }
 })
 
 watch(() => props.selectedService, (newService) => {
-  // Обновляем услугу в данных бронирования
+  // РћР±РЅРѕРІР»СЏРµРј СѓСЃР»СѓРіСѓ РІ РґР°РЅРЅС‹С… Р±СЂРѕРЅРёСЂРѕРІР°РЅРёСЏ
   if (bookingData.value.service !== newService) {
     bookingData.value.service = newService
   }
@@ -361,7 +361,7 @@ watch(() => props.selectedService, (newService) => {
   @apply max-w-full;
 }
 
-/* Анимации переходов между этапами */
+/* РђРЅРёРјР°С†РёРё РїРµСЂРµС…РѕРґРѕРІ РјРµР¶РґСѓ СЌС‚Р°РїР°РјРё */
 .animate-fade-in {
   animation: fadeIn 0.3s ease-in-out;
 }
@@ -377,13 +377,13 @@ watch(() => props.selectedService, (newService) => {
   }
 }
 
-/* Плавные переходы для индикатора этапов */
+/* РџР»Р°РІРЅС‹Рµ РїРµСЂРµС…РѕРґС‹ РґР»СЏ РёРЅРґРёРєР°С‚РѕСЂР° СЌС‚Р°РїРѕРІ */
 .booking-widget div[class*="bg-blue-600"],
 .booking-widget div[class*="bg-green-600"] {
   transition: all 0.3s ease-in-out;
 }
 
-/* Стилизация кнопок */
+/* РЎС‚РёР»РёР·Р°С†РёСЏ РєРЅРѕРїРѕРє */
 .booking-widget button {
   transition: all 0.2s ease-in-out;
 }
@@ -396,3 +396,4 @@ watch(() => props.selectedService, (newService) => {
   transform: translateY(0);
 }
 </style>
+

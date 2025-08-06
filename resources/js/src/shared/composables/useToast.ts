@@ -284,7 +284,7 @@ export function useToast() {
  * Композабл для работы с промисами и Toast (старый API)
  */
 export function useToastPromise() {
-  const { showLoading, updateToast, removeToast } = useToast()
+  const { showLoading, updateToast } = useToast()
   
   const promise = async <T>(
     promiseFn: () => Promise<T>,

@@ -10,7 +10,7 @@
         :key="getItemKey(item, index)" 
         :class="itemClasses"
       >
-        <!-- Иконка (если есть) -->
+        <!-- РРєРѕРЅРєР° (РµСЃР»Рё РµСЃС‚СЊ) -->
         <component
           v-if="item.icon && showIcons"
           :is="item.icon"
@@ -18,7 +18,7 @@
           aria-hidden="true"
         />
         
-        <!-- Ссылка (не последний элемент) -->
+        <!-- РЎСЃС‹Р»РєР° (РЅРµ РїРѕСЃР»РµРґРЅРёР№ СЌР»РµРјРµРЅС‚) -->
         <component
           v-if="index < safeItems.length - 1"
           :is="item.to ? 'router-link' : 'a'"
@@ -29,7 +29,7 @@
           {{ item.title }}
         </component>
         
-        <!-- Текущий элемент (последний) -->
+        <!-- РўРµРєСѓС‰РёР№ СЌР»РµРјРµРЅС‚ (РїРѕСЃР»РµРґРЅРёР№) -->
         <span 
           v-else 
           :class="currentClasses"
@@ -38,7 +38,7 @@
           {{ item.title }}
         </span>
         
-        <!-- Разделитель -->
+        <!-- Р Р°Р·РґРµР»РёС‚РµР»СЊ -->
         <component
           v-if="index < safeItems.length - 1"
           :is="separatorIcon || 'svg'"
@@ -61,7 +61,7 @@
       </li>
     </ol>
     
-    <!-- Схематическая разметка для SEO - ВРЕМЕННО ОТКЛЮЧЕНО -->
+    <!-- РЎС…РµРјР°С‚РёС‡РµСЃРєР°СЏ СЂР°Р·РјРµС‚РєР° РґР»СЏ SEO - Р’Р Р•РњР•РќРќРћ РћРўРљР›Р®Р§Р•РќРћ -->
     <!-- <template v-if="enableJsonLd">
       <script type="application/ld+json" v-html="jsonLdSchema"></script>
     </template> -->
@@ -79,37 +79,37 @@ const props = withDefaults(defineProps<BreadcrumbsProps>(), {
   showHome: false,
   maxItems: 0,
   enableJsonLd: false,
-  ariaLabel: 'Навигационная цепочка'
+  ariaLabel: 'РќР°РІРёРіР°С†РёРѕРЅРЅР°СЏ С†РµРїРѕС‡РєР°'
 })
 
 const emit = defineEmits<BreadcrumbsEmits>()
 
-// Безопасный массив элементов
+// Р‘РµР·РѕРїР°СЃРЅС‹Р№ РјР°СЃСЃРёРІ СЌР»РµРјРµРЅС‚РѕРІ
 const safeItems = computed(() => {
   if (!Array.isArray(props.items)) return []
   
   let items = [...props.items]
   
-  // Добавляем домашнюю страницу если нужно
+  // Р”РѕР±Р°РІР»СЏРµРј РґРѕРјР°С€РЅСЋСЋ СЃС‚СЂР°РЅРёС†Сѓ РµСЃР»Рё РЅСѓР¶РЅРѕ
   if (props.showHome && !items.some(item => item.isHome)) {
     items.unshift({
-      title: 'Главная',
+      title: 'Р“Р»Р°РІРЅР°СЏ',
       href: '/',
       isHome: true
     })
   }
   
-  // Ограничиваем количество элементов
+  // РћРіСЂР°РЅРёС‡РёРІР°РµРј РєРѕР»РёС‡РµСЃС‚РІРѕ СЌР»РµРјРµРЅС‚РѕРІ
   if (props.maxItems > 0 && items.length > props.maxItems) {
     const first = items[0]
-    const last = items.slice(-2) // Последние 2 элемента
-    items = [first, { title: '...', href: '', isEllipsis: true }, ...last]
+    const last = items.slice(-2) // РџРѕСЃР»РµРґРЅРёРµ 2 СЌР»РµРјРµРЅС‚Р°
+    if (first) items = [first, { title: '...', href: '', isEllipsis: true }, ...last]
   }
   
   return items
 })
 
-// Вычисляемые классы
+// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ РєР»Р°СЃСЃС‹
 const containerClasses = computed(() => [
   'breadcrumbs',
   `breadcrumbs--${props.size}`,
@@ -140,7 +140,7 @@ const separatorClasses = computed(() => [
   'breadcrumbs__separator'
 ])
 
-// Методы
+// РњРµС‚РѕРґС‹
 const getItemKey = (item: BreadcrumbItem, index: number): string => {
   return item.key || item.href || `breadcrumb-${index}`
 }
@@ -170,7 +170,7 @@ const getSeparatorPath = (): string => {
   return separatorPaths[props.separator] || separatorPaths.chevron
 }
 
-// JSON-LD схема для SEO
+// JSON-LD СЃС…РµРјР° РґР»СЏ SEO
 const jsonLdSchema = computed(() => {
   if (!props.enableJsonLd) return ''
   
@@ -264,7 +264,7 @@ const jsonLdSchema = computed(() => {
   flex-shrink: 0;
 }
 
-/* Адаптивность */
+/* РђРґР°РїС‚РёРІРЅРѕСЃС‚СЊ */
 @media (max-width: 768px) {
   .breadcrumbs {
     font-size: 0.75rem;
@@ -289,7 +289,7 @@ const jsonLdSchema = computed(() => {
   }
 }
 
-/* Темная тема */
+/* РўРµРјРЅР°СЏ С‚РµРјР° */
 @media (prefers-color-scheme: dark) {
   .breadcrumbs {
     color: #9ca3af;
@@ -309,7 +309,7 @@ const jsonLdSchema = computed(() => {
   }
 }
 
-/* Состояния печати */
+/* РЎРѕСЃС‚РѕСЏРЅРёСЏ РїРµС‡Р°С‚Рё */
 @media print {
   .breadcrumbs__link {
     text-decoration: underline;
@@ -326,3 +326,4 @@ const jsonLdSchema = computed(() => {
   }
 }
 </style>
+

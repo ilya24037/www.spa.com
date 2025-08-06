@@ -2,12 +2,11 @@
 // Feature-Sliced Design exports
 
 // === NEW FSD API ===
-export { PhotoGallery } from './ui/PhotoGallery/PhotoGallery.vue'
+export { default as PhotoGallery } from './ui/PhotoGallery/PhotoGallery.vue'
 export { PhotoViewer } from './ui/PhotoViewer'
 export { PhotoThumbnails } from './ui/PhotoThumbnails'
 
-// === LEGACY API ===
-export { PhotoGalleryLegacy } from './ui/PhotoGallery/PhotoGallery.vueLegacy'
+// Legacy PhotoGallery component removed during cleanup
 
 // === STORE ===
 export { useGalleryStore } from './model/gallery.store'

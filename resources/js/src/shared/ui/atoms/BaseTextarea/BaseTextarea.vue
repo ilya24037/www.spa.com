@@ -1,4 +1,4 @@
-<!-- Базовый textarea в стиле Авито -->
+<!-- Р‘Р°Р·РѕРІС‹Р№ textarea РІ СЃС‚РёР»Рµ РђРІРёС‚Рѕ -->
 <template>
   <div class="textarea-container">
     <label v-if="label" class="textarea-label">{{ label }}</label>
@@ -25,13 +25,13 @@
       ></textarea>
     </div>
     
-    <!-- Ошибка -->
+    <!-- РћС€РёР±РєР° -->
     <div v-if="error" class="textarea-error">{{ error }}</div>
     
-    <!-- Подсказка -->
+    <!-- РџРѕРґСЃРєР°Р·РєР° -->
     <div v-if="hint && !error" class="textarea-hint">{{ hint }}</div>
     
-    <!-- Счетчик символов -->
+    <!-- РЎС‡РµС‚С‡РёРє СЃРёРјРІРѕР»РѕРІ -->
     <div v-if="maxlength && showCounter" class="textarea-counter">
       {{ textareaValue.length }}/{{ maxlength }}
     </div>
@@ -140,7 +140,7 @@ defineExpose({
 </script>
 
 <style scoped>
-/* Контейнер */
+/* РљРѕРЅС‚РµР№РЅРµСЂ */
 .textarea-container {
   display: flex;
   flex-direction: column;
@@ -148,7 +148,7 @@ defineExpose({
   width: 100%;
 }
 
-/* Лейбл */
+/* Р›РµР№Р±Р» */
 .textarea-label {
   font-size: 14px;
   font-weight: 500;
@@ -156,7 +156,7 @@ defineExpose({
   line-height: 1.2;
 }
 
-/* Обертка textarea */
+/* РћР±РµСЂС‚РєР° textarea */
 .textarea-wrapper {
   position: relative;
   display: flex;
@@ -167,7 +167,7 @@ defineExpose({
   border-color: #ff4d4f;
 }
 
-/* Базовый textarea */
+/* Р‘Р°Р·РѕРІС‹Р№ textarea */
 .base-textarea {
   width: 100%;
   min-height: 80px;
@@ -218,7 +218,7 @@ defineExpose({
   font-size: 16px;
 }
 
-/* Состояние ошибки */
+/* РЎРѕСЃС‚РѕСЏРЅРёРµ РѕС€РёР±РєРё */
 .textarea-wrapper.has-error .base-textarea {
   border-color: #ff4d4f;
 }
@@ -228,7 +228,7 @@ defineExpose({
   box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.1);
 }
 
-/* Сообщение об ошибке */
+/* РЎРѕРѕР±С‰РµРЅРёРµ РѕР± РѕС€РёР±РєРµ */
 .textarea-error {
   font-size: 13px;
   color: #ff4d4f;
@@ -236,7 +236,7 @@ defineExpose({
   margin-top: 2px;
 }
 
-/* Подсказка */
+/* РџРѕРґСЃРєР°Р·РєР° */
 .textarea-hint {
   font-size: 13px;
   color: #666666;
@@ -244,7 +244,7 @@ defineExpose({
   margin-top: 2px;
 }
 
-/* Счетчик символов */
+/* РЎС‡РµС‚С‡РёРє СЃРёРјРІРѕР»РѕРІ */
 .textarea-counter {
   font-size: 12px;
   color: #999999;
@@ -252,14 +252,14 @@ defineExpose({
   margin-top: 4px;
 }
 
-/* Адаптивность */
+/* РђРґР°РїС‚РёРІРЅРѕСЃС‚СЊ */
 @media (max-width: 768px) {
   .base-textarea {
-    font-size: 16px; /* Предотвращает зум на iOS */
+    font-size: 16px; /* РџСЂРµРґРѕС‚РІСЂР°С‰Р°РµС‚ Р·СѓРј РЅР° iOS */
   }
 }
 
-/* Темная тема (опционально) */
+/* РўРµРјРЅР°СЏ С‚РµРјР° (РѕРїС†РёРѕРЅР°Р»СЊРЅРѕ) */
 @media (prefers-color-scheme: dark) {
   .textarea-label {
     color: #e1e5ea;
@@ -300,3 +300,4 @@ defineExpose({
   }
 }
 </style> 
+

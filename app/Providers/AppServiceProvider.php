@@ -37,6 +37,12 @@ class AppServiceProvider extends ServiceProvider
 
         // Регистрация Search сервисов
         $this->registerSearchServices();
+        
+        // Регистрация Analytics сервисов
+        $this->registerAnalyticsServices();
+        
+        // Регистрация Cache декораторов
+        $this->registerCacheDecorators();
     }
 
     /**
@@ -65,6 +71,67 @@ class AppServiceProvider extends ServiceProvider
                 $app->make(\App\Domain\Search\Services\RecommendationEngine::class)
             );
         });
+    }
+
+    /**
+     * Регистрация Analytics сервисов
+     */
+    protected function registerAnalyticsServices(): void
+    {
+        // TODO: Реализовать Analytics сервисы
+        // Analytics Repository
+        // $this->app->singleton(\App\Domain\Analytics\Repositories\AnalyticsRepository::class);
+
+        // Analytics Service Interface and Implementation
+        // $this->app->bind(
+        //     \App\Domain\Analytics\Contracts\AnalyticsServiceInterface::class,
+        //     \App\Domain\Analytics\Services\AnalyticsService::class
+        // );
+
+        // Report Service Interface and Implementation
+        // $this->app->bind(
+        //     \App\Domain\Analytics\Contracts\ReportServiceInterface::class,
+        //     \App\Domain\Analytics\Services\ReportService::class
+        // );
+    }
+
+    /**
+     * Регистрация кеширующих декораторов
+     */
+    protected function registerCacheDecorators(): void
+    {
+        // Проверяем, включено ли кеширование
+        if (config('cache.default') === 'redis' || config('cache.default') === 'database') {
+            // Сначала регистрируем оригинальные репозитории как отдельные сервисы
+            $this->app->singleton('ad.repository.original', function ($app) {
+                return new \App\Domain\Ad\Repositories\AdRepository(
+                    new \App\Domain\Ad\Models\Ad()
+                );
+            });
+            
+            $this->app->singleton('master.repository.original', function ($app) {
+                return new \App\Domain\Master\Repositories\MasterRepository(
+                    new \App\Domain\Master\Models\MasterProfile()
+                );
+            });
+
+            // Теперь регистрируем декорированные версии
+            $this->app->singleton(\App\Domain\Ad\Repositories\AdRepository::class, function ($app) {
+                return new \App\Infrastructure\Cache\Decorators\CachedAdRepository(
+                    $app->make('ad.repository.original'),
+                    $app->make(\App\Infrastructure\Cache\CacheService::class),
+                    $app->make(\App\Infrastructure\Cache\Strategies\AdCacheStrategy::class)
+                );
+            });
+
+            $this->app->singleton(\App\Domain\Master\Repositories\MasterRepository::class, function ($app) {
+                return new \App\Infrastructure\Cache\Decorators\CachedMasterRepository(
+                    $app->make('master.repository.original'),
+                    $app->make(\App\Infrastructure\Cache\CacheService::class),
+                    $app->make(\App\Infrastructure\Cache\Strategies\MasterCacheStrategy::class)
+                );
+            });
+        }
     }
 
     /**

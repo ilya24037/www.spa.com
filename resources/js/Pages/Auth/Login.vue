@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Head, useForm } from '@inertiajs/vue3'
+import { route } from 'ziggy-js'
 import { AuthModal } from '@/src/features/auth/ui/AuthModal'
 
 interface LoginForm {
@@ -17,23 +18,23 @@ const form = useForm<LoginForm>({
 
 const showModal = ref<boolean>(true)
 
-const submit = (): void => {
-  form.post(route('login'), {
-    onFinish: () => form.reset('password'),
-  })
-}
+// const submit = (): void => {
+//   form.post(route('login'), {
+//     onFinish: () => form.reset('password'),
+//   })
+// }
 
 const closeModal = (): void => {
   showModal.value = false
-  // Перенаправляем на главную страницу
+  // РџРµСЂРµРЅР°РїСЂР°РІР»СЏРµРј РЅР° РіР»Р°РІРЅСѓСЋ СЃС‚СЂР°РЅРёС†Сѓ
   window.location.href = '/'
 }
 </script>
 
 <template>
-    <Head title="Вход" />
+    <Head title="Р’С…РѕРґ" />
 
-    <!-- Модальное окно авторизации -->
+    <!-- РњРѕРґР°Р»СЊРЅРѕРµ РѕРєРЅРѕ Р°РІС‚РѕСЂРёР·Р°С†РёРё -->
     <AuthModal 
         :show="showModal" 
         @close="closeModal"

@@ -1,4 +1,4 @@
-<!-- Группа чекбоксов для множественного выбора (как на Авито) -->
+<!-- Р“СЂСѓРїРїР° С‡РµРєР±РѕРєСЃРѕРІ РґР»СЏ РјРЅРѕР¶РµСЃС‚РІРµРЅРЅРѕРіРѕ РІС‹Р±РѕСЂР° (РєР°Рє РЅР° РђРІРёС‚Рѕ) -->
 <template>
   <div class="checkbox-group" :class="`direction-${direction}`">
     <div 
@@ -66,19 +66,19 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-// Инициализация массива (из ClientsSection)
+// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РјР°СЃСЃРёРІР° (РёР· ClientsSection)
 const initializeValue = () => {
   if (!Array.isArray(props.modelValue)) {
     emit('update:modelValue', [])
   }
 }
 
-// Проверяем выбран ли элемент
+// РџСЂРѕРІРµСЂСЏРµРј РІС‹Р±СЂР°РЅ Р»Рё СЌР»РµРјРµРЅС‚
 const isSelected = (value) => {
   return props.modelValue.includes(value)
 }
 
-// Переключаем выбор элемента (из ClientsSection)
+// РџРµСЂРµРєР»СЋС‡Р°РµРј РІС‹Р±РѕСЂ СЌР»РµРјРµРЅС‚Р° (РёР· ClientsSection)
 const toggleOption = (value) => {
   if (props.disabled) return
   
@@ -94,7 +94,7 @@ const toggleOption = (value) => {
   emit('update:modelValue', currentValue)
 }
 
-// Инициализация только один раз
+// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ С‚РѕР»СЊРєРѕ РѕРґРёРЅ СЂР°Р·
 initializeValue()
 </script>
 
@@ -127,7 +127,7 @@ initializeValue()
   opacity: 0.8;
 }
 
-/* ОБЩИЕ СТИЛИ ЧЕКБОКСОВ (как в BaseCheckbox) */
+/* РћР‘Р©РР• РЎРўРР›Р Р§Р•РљР‘РћРљРЎРћР’ (РєР°Рє РІ BaseCheckbox) */
 .custom-checkbox {
   width: 20px;
   height: 20px;
@@ -198,3 +198,4 @@ initializeValue()
   cursor: not-allowed;
 }
 </style> 
+

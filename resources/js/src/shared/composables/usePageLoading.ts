@@ -1,6 +1,6 @@
 // usePageLoading.ts
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import type { Ref } from 'vue'
+// import type { Ref } from 'vue'
 import type {
   UsePageLoadingOptions,
   UsePageLoadingReturn,

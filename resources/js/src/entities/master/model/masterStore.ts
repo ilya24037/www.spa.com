@@ -1,13 +1,13 @@
 /**
- * Основной store для управления мастерами
- * Pinia store для entities/master (FSD архитектура)
+ * РћСЃРЅРѕРІРЅРѕР№ store РґР»СЏ СѓРїСЂР°РІР»РµРЅРёСЏ РјР°СЃС‚РµСЂР°РјРё
+ * Pinia store РґР»СЏ entities/master (FSD Р°СЂС…РёС‚РµРєС‚СѓСЂР°)
  */
 
 import { defineStore } from 'pinia'
 import { ref, reactive, computed, type Ref, type ComputedRef } from 'vue'
 import { masterApi } from '../api/masterApi'
 
-// TypeScript интерфейсы
+// TypeScript РёРЅС‚РµСЂС„РµР№СЃС‹
 interface Master {
   id: number
   name: string
@@ -47,21 +47,21 @@ interface MasterFilters {
 }
 
 export const useMasterStore = defineStore('master', () => {
-  // === СОСТОЯНИЕ ===
+  // === РЎРћРЎРўРћРЇРќРР• ===
   
-  // Список мастеров
+  // РЎРїРёСЃРѕРє РјР°СЃС‚РµСЂРѕРІ
   const masters: Ref<Master[]> = ref([])
   
-  // Текущий мастер
+  // РўРµРєСѓС‰РёР№ РјР°СЃС‚РµСЂ
   const currentMaster: Ref<Master | null> = ref(null)
   
-  // Избранные мастера
+  // РР·Р±СЂР°РЅРЅС‹Рµ РјР°СЃС‚РµСЂР°
   const favoriteMasters: Ref<Master[]> = ref([])
   
-  // Похожие мастера
+  // РџРѕС…РѕР¶РёРµ РјР°СЃС‚РµСЂР°
   const similarMasters: Ref<Master[]> = ref([])
   
-  // Фильтры
+  // Р¤РёР»СЊС‚СЂС‹
   const filters = reactive<MasterFilters>({
     city: null,
     district: null,
@@ -79,14 +79,14 @@ export const useMasterStore = defineStore('master', () => {
     sortOrder: 'desc'
   })
   
-  // Поисковый запрос
+  // РџРѕРёСЃРєРѕРІС‹Р№ Р·Р°РїСЂРѕСЃ
   const searchQuery: Ref<string> = ref('')
   
-  // Состояние загрузки
+  // РЎРѕСЃС‚РѕСЏРЅРёРµ Р·Р°РіСЂСѓР·РєРё
   const loading: Ref<boolean> = ref(false)
   const loadingReviews: Ref<boolean> = ref(false)
   
-  // Пагинация
+  // РџР°РіРёРЅР°С†РёСЏ
   const pagination = reactive({
     current_page: 1,
     last_page: 1,
@@ -94,33 +94,33 @@ export const useMasterStore = defineStore('master', () => {
     total: 0
   })
   
-  // Отзывы текущего мастера
+  // РћС‚Р·С‹РІС‹ С‚РµРєСѓС‰РµРіРѕ РјР°СЃС‚РµСЂР°
   const currentMasterReviews = ref([])
   
-  // === ВЫЧИСЛЯЕМЫЕ СВОЙСТВА ===
+  // === Р’Р«Р§РРЎР›РЇР•РњР«Р• РЎР’РћР™РЎРўР’Рђ ===
   
   /**
-   * Отфильтрованные мастера
+   * РћС‚С„РёР»СЊС‚СЂРѕРІР°РЅРЅС‹Рµ РјР°СЃС‚РµСЂР°
    */
   const filteredMasters = computed(() => {
     let result = masters.value
     
-    // Фильтр по городу
+    // Р¤РёР»СЊС‚СЂ РїРѕ РіРѕСЂРѕРґСѓ
     if (filters.city) {
       result = result.filter(master => master.city === filters.city)
     }
     
-    // Фильтр по району
+    // Р¤РёР»СЊС‚СЂ РїРѕ СЂР°Р№РѕРЅСѓ
     if (filters.district) {
       result = result.filter(master => master.district === filters.district)
     }
     
-    // Фильтр по категории
+    // Р¤РёР»СЊС‚СЂ РїРѕ РєР°С‚РµРіРѕСЂРёРё
     if (filters.category) {
       result = result.filter(master => master.category === filters.category)
     }
     
-    // Фильтр по цене
+    // Р¤РёР»СЊС‚СЂ РїРѕ С†РµРЅРµ
     if (filters.priceFrom) {
       result = result.filter(master => (master.price_from || 0) >= filters.priceFrom)
     }
@@ -129,27 +129,27 @@ export const useMasterStore = defineStore('master', () => {
       result = result.filter(master => (master.price_from || 0) <= filters.priceTo)
     }
     
-    // Фильтр по рейтингу
+    // Р¤РёР»СЊС‚СЂ РїРѕ СЂРµР№С‚РёРЅРіСѓ
     if (filters.rating) {
       result = result.filter(master => (master.rating || 0) >= filters.rating)
     }
     
-    // Фильтр по верификации
+    // Р¤РёР»СЊС‚СЂ РїРѕ РІРµСЂРёС„РёРєР°С†РёРё
     if (filters.verified) {
       result = result.filter(master => master.is_verified)
     }
     
-    // Фильтр по премиум
+    // Р¤РёР»СЊС‚СЂ РїРѕ РїСЂРµРјРёСѓРј
     if (filters.premium) {
       result = result.filter(master => master.is_premium)
     }
     
-    // Фильтр по онлайн статусу
+    // Р¤РёР»СЊС‚СЂ РїРѕ РѕРЅР»Р°Р№РЅ СЃС‚Р°С‚СѓСЃСѓ
     if (filters.online) {
       result = result.filter(master => master.is_online || master.is_available_now)
     }
     
-    // Поиск по тексту
+    // РџРѕРёСЃРє РїРѕ С‚РµРєСЃС‚Сѓ
     if (searchQuery.value) {
       const query = searchQuery.value.toLowerCase()
       result = result.filter(master => 
@@ -164,7 +164,7 @@ export const useMasterStore = defineStore('master', () => {
   })
   
   /**
-   * Популярные мастера
+   * РџРѕРїСѓР»СЏСЂРЅС‹Рµ РјР°СЃС‚РµСЂР°
    */
   const popularMasters = computed(() => 
     masters.value
@@ -173,37 +173,37 @@ export const useMasterStore = defineStore('master', () => {
   )
   
   /**
-   * Премиум мастера
+   * РџСЂРµРјРёСѓРј РјР°СЃС‚РµСЂР°
    */
   const premiumMasters = computed(() => 
     masters.value.filter(master => master.is_premium)
   )
   
   /**
-   * Проверенные мастера
+   * РџСЂРѕРІРµСЂРµРЅРЅС‹Рµ РјР°СЃС‚РµСЂР°
    */
   const verifiedMasters = computed(() => 
     masters.value.filter(master => master.is_verified)
   )
   
   /**
-   * Онлайн мастера
+   * РћРЅР»Р°Р№РЅ РјР°СЃС‚РµСЂР°
    */
   const onlineMasters = computed(() => 
     masters.value.filter(master => master.is_online || master.is_available_now)
   )
   
   /**
-   * Есть ли еще страницы для загрузки
+   * Р•СЃС‚СЊ Р»Рё РµС‰Рµ СЃС‚СЂР°РЅРёС†С‹ РґР»СЏ Р·Р°РіСЂСѓР·РєРё
    */
   const hasMorePages = computed(() => 
     pagination.current_page < pagination.last_page
   )
   
-  // === ДЕЙСТВИЯ ===
+  // === Р”Р•Р™РЎРўР’РРЇ ===
   
   /**
-   * Загрузить мастеров
+   * Р—Р°РіСЂСѓР·РёС‚СЊ РјР°СЃС‚РµСЂРѕРІ
    */
   const fetchMasters = async (params = {}) => {
     loading.value = true
@@ -222,14 +222,14 @@ export const useMasterStore = defineStore('master', () => {
       
       const response = await masterApi.getMasters(queryParams)
       
-      // Обновляем список мастеров
+      // РћР±РЅРѕРІР»СЏРµРј СЃРїРёСЃРѕРє РјР°СЃС‚РµСЂРѕРІ
       if (params.append) {
         masters.value.push(...response.data)
       } else {
         masters.value = response.data
       }
       
-      // Обновляем пагинацию
+      // РћР±РЅРѕРІР»СЏРµРј РїР°РіРёРЅР°С†РёСЋ
       Object.assign(pagination, {
         current_page: response.current_page,
         last_page: response.last_page,
@@ -246,9 +246,9 @@ export const useMasterStore = defineStore('master', () => {
   }
   
   /**
-   * Загрузить мастера по ID
+   * Р—Р°РіСЂСѓР·РёС‚СЊ РјР°СЃС‚РµСЂР° РїРѕ ID
    */
-  const fetchMaster = async (id) => {
+  const fetchMaster = async (id: any) => {
     loading.value = true
     
     try {
@@ -256,7 +256,7 @@ export const useMasterStore = defineStore('master', () => {
       
       currentMaster.value = response
       
-      // Добавляем в список если его там нет
+      // Р”РѕР±Р°РІР»СЏРµРј РІ СЃРїРёСЃРѕРє РµСЃР»Рё РµРіРѕ С‚Р°Рј РЅРµС‚
       const existingIndex = masters.value.findIndex(master => master.id === id)
       if (existingIndex >= 0) {
         masters.value[existingIndex] = response
@@ -273,7 +273,7 @@ export const useMasterStore = defineStore('master', () => {
   }
   
   /**
-   * Поиск мастеров
+   * РџРѕРёСЃРє РјР°СЃС‚РµСЂРѕРІ
    */
   const searchMasters = async (query, additionalFilters = {}) => {
     loading.value = true
@@ -286,7 +286,7 @@ export const useMasterStore = defineStore('master', () => {
       
       masters.value = response.data
       
-      // Обновляем пагинацию
+      // РћР±РЅРѕРІР»СЏРµРј РїР°РіРёРЅР°С†РёСЋ
       Object.assign(pagination, {
         current_page: response.current_page || 1,
         last_page: response.last_page || 1,
@@ -303,7 +303,7 @@ export const useMasterStore = defineStore('master', () => {
   }
   
   /**
-   * Загрузить отзывы мастера
+   * Р—Р°РіСЂСѓР·РёС‚СЊ РѕС‚Р·С‹РІС‹ РјР°СЃС‚РµСЂР°
    */
   const fetchMasterReviews = async (masterId, params = {}) => {
     loadingReviews.value = true
@@ -326,7 +326,7 @@ export const useMasterStore = defineStore('master', () => {
   }
   
   /**
-   * Загрузить похожих мастеров
+   * Р—Р°РіСЂСѓР·РёС‚СЊ РїРѕС…РѕР¶РёС… РјР°СЃС‚РµСЂРѕРІ
    */
   const fetchSimilarMasters = async (masterId, params = {}) => {
     try {
@@ -339,9 +339,9 @@ export const useMasterStore = defineStore('master', () => {
   }
   
   /**
-   * Добавить/удалить из избранного
+   * Р”РѕР±Р°РІРёС‚СЊ/СѓРґР°Р»РёС‚СЊ РёР· РёР·Р±СЂР°РЅРЅРѕРіРѕ
    */
-  const toggleFavorite = async (masterId) => {
+  const toggleFavorite = async (masterId: any) => {
     try {
       const master = masters.value.find(m => m.id === masterId) || currentMaster.value
       if (!master) return
@@ -350,7 +350,7 @@ export const useMasterStore = defineStore('master', () => {
         await masterApi.removeFromFavorites(masterId)
         master.is_favorite = false
         
-        // Удаляем из избранных
+        // РЈРґР°Р»СЏРµРј РёР· РёР·Р±СЂР°РЅРЅС‹С…
         const favIndex = favoriteMasters.value.findIndex(fav => fav.id === masterId)
         if (favIndex >= 0) {
           favoriteMasters.value.splice(favIndex, 1)
@@ -359,7 +359,7 @@ export const useMasterStore = defineStore('master', () => {
         await masterApi.addToFavorites(masterId)
         master.is_favorite = true
         
-        // Добавляем в избранные
+        // Р”РѕР±Р°РІР»СЏРµРј РІ РёР·Р±СЂР°РЅРЅС‹Рµ
         favoriteMasters.value.unshift(master)
       }
       
@@ -370,7 +370,7 @@ export const useMasterStore = defineStore('master', () => {
   }
   
   /**
-   * Загрузить избранных мастеров
+   * Р—Р°РіСЂСѓР·РёС‚СЊ РёР·Р±СЂР°РЅРЅС‹С… РјР°СЃС‚РµСЂРѕРІ
    */
   const fetchFavorites = async () => {
     loading.value = true
@@ -387,32 +387,32 @@ export const useMasterStore = defineStore('master', () => {
   }
   
   /**
-   * Увеличить просмотры
+   * РЈРІРµР»РёС‡РёС‚СЊ РїСЂРѕСЃРјРѕС‚СЂС‹
    */
-  const incrementViews = async (masterId) => {
+  const incrementViews = async (masterId: any) => {
     try {
       await masterApi.incrementViews(masterId)
       
-      // Обновляем локально
+      // РћР±РЅРѕРІР»СЏРµРј Р»РѕРєР°Р»СЊРЅРѕ
       const master = masters.value.find(m => m.id === masterId) || currentMaster.value
       if (master && master.views_count) {
         master.views_count++
       }
     } catch (error) {
-      // Не показываем ошибку пользователю для просмотров
+      // РќРµ РїРѕРєР°Р·С‹РІР°РµРј РѕС€РёР±РєСѓ РїРѕР»СЊР·РѕРІР°С‚РµР»СЋ РґР»СЏ РїСЂРѕСЃРјРѕС‚СЂРѕРІ
     }
   }
   
   /**
-   * Установить фильтры
+   * РЈСЃС‚Р°РЅРѕРІРёС‚СЊ С„РёР»СЊС‚СЂС‹
    */
-  const setFilters = (newFilters) => {
+  const setFilters = (newFilters: any) => {
     Object.assign(filters, newFilters)
-    pagination.current_page = 1 // Сбрасываем на первую страницу
+    pagination.current_page = 1 // РЎР±СЂР°СЃС‹РІР°РµРј РЅР° РїРµСЂРІСѓСЋ СЃС‚СЂР°РЅРёС†Сѓ
   }
   
   /**
-   * Очистить фильтры
+   * РћС‡РёСЃС‚РёС‚СЊ С„РёР»СЊС‚СЂС‹
    */
   const clearFilters = () => {
     Object.keys(filters).forEach(key => {
@@ -428,15 +428,15 @@ export const useMasterStore = defineStore('master', () => {
   }
   
   /**
-   * Установить поисковый запрос
+   * РЈСЃС‚Р°РЅРѕРІРёС‚СЊ РїРѕРёСЃРєРѕРІС‹Р№ Р·Р°РїСЂРѕСЃ
    */
-  const setSearchQuery = (query) => {
+  const setSearchQuery = (query: any) => {
     searchQuery.value = query
-    pagination.current_page = 1 // Сбрасываем на первую страницу
+    pagination.current_page = 1 // РЎР±СЂР°СЃС‹РІР°РµРј РЅР° РїРµСЂРІСѓСЋ СЃС‚СЂР°РЅРёС†Сѓ
   }
   
   /**
-   * Загрузить следующую страницу
+   * Р—Р°РіСЂСѓР·РёС‚СЊ СЃР»РµРґСѓСЋС‰СѓСЋ СЃС‚СЂР°РЅРёС†Сѓ
    */
   const loadMoreMasters = async () => {
     if (!hasMorePages.value || loading.value) return
@@ -446,7 +446,7 @@ export const useMasterStore = defineStore('master', () => {
   }
   
   /**
-   * Сброс состояния
+   * РЎР±СЂРѕСЃ СЃРѕСЃС‚РѕСЏРЅРёСЏ
    */
   const reset = () => {
     masters.value = []
@@ -468,9 +468,9 @@ export const useMasterStore = defineStore('master', () => {
     })
   }
   
-  // Возвращаем публичный API
+  // Р’РѕР·РІСЂР°С‰Р°РµРј РїСѓР±Р»РёС‡РЅС‹Р№ API
   return {
-    // Состояние
+    // РЎРѕСЃС‚РѕСЏРЅРёРµ
     masters,
     currentMaster,
     favoriteMasters,
@@ -482,7 +482,7 @@ export const useMasterStore = defineStore('master', () => {
     loadingReviews,
     pagination,
     
-    // Вычисляемые свойства
+    // Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
     filteredMasters,
     popularMasters,
     premiumMasters,
@@ -490,7 +490,7 @@ export const useMasterStore = defineStore('master', () => {
     onlineMasters,
     hasMorePages,
     
-    // Действия
+    // Р”РµР№СЃС‚РІРёСЏ
     fetchMasters,
     fetchMaster,
     searchMasters,

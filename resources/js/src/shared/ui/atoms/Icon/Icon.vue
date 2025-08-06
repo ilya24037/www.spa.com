@@ -9,7 +9,7 @@
     :aria-label="ariaLabel"
     role="img"
   >
-    <!-- Защита от undefined -->
+    <!-- Р—Р°С‰РёС‚Р° РѕС‚ undefined -->
     <use v-if="iconPath" :href="iconPath" />
     <path v-else d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z" />
   </svg>
@@ -18,7 +18,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-// TypeScript типизация props - ЧЕК-ЛИСТ CLAUDE.md ✅
+// TypeScript С‚РёРїРёР·Р°С†РёСЏ props - Р§Р•Рљ-Р›РРЎРў CLAUDE.md вњ…
 interface Props {
   name?: string
   size?: number | string
@@ -27,7 +27,7 @@ interface Props {
   ariaLabel?: string
 }
 
-// Default значения для всех опциональных props - ЧЕК-ЛИСТ CLAUDE.md ✅
+// Default Р·РЅР°С‡РµРЅРёСЏ РґР»СЏ РІСЃРµС… РѕРїС†РёРѕРЅР°Р»СЊРЅС‹С… props - Р§Р•Рљ-Р›РРЎРў CLAUDE.md вњ…
 const props = withDefaults(defineProps<Props>(), {
   size: 24,
   color: 'currentColor',
@@ -35,7 +35,7 @@ const props = withDefaults(defineProps<Props>(), {
   ariaLabel: 'Icon'
 })
 
-// Computed для защиты от undefined - ЧЕК-ЛИСТ CLAUDE.md ✅
+// Computed РґР»СЏ Р·Р°С‰РёС‚С‹ РѕС‚ undefined - Р§Р•Рљ-Р›РРЎРў CLAUDE.md вњ…
 const iconClasses = computed(() => [
   'inline-block',
   props.className

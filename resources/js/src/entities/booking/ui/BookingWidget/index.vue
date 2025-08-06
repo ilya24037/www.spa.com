@@ -1,20 +1,20 @@
 <!-- resources/js/Components/Masters/BookingWidget/index.vue -->
 <template>
   <div class="booking-widget p-6">
-    <!-- Блок с ценой -->
+    <!-- Р‘Р»РѕРє СЃ С†РµРЅРѕР№ -->
     <div class="mb-6">
       <div class="flex items-baseline justify-between mb-2">
         <span class="text-3xl font-bold text-gray-900">
-          от {{ formatPrice(master.price_from) }} ₽
+          РѕС‚ {{ formatPrice(master.price_from) }} в‚Ѕ
         </span>
-        <span class="text-gray-500 text-sm">за сеанс</span>
+        <span class="text-gray-500 text-sm">Р·Р° СЃРµР°РЅСЃ</span>
       </div>
       <div v-if="master.price_to" class="text-sm text-gray-600">
-        до {{ formatPrice(master.price_to) }} ₽
+        РґРѕ {{ formatPrice(master.price_to) }} в‚Ѕ
       </div>
     </div>
     
-    <!-- Кнопки действий -->
+    <!-- РљРЅРѕРїРєРё РґРµР№СЃС‚РІРёР№ -->
     <BookingActions
       :phone="master.phone"
       :whatsapp="master.whatsapp"
@@ -25,7 +25,7 @@
       class="mb-6"
     />
     
-    <!-- График работы -->
+    <!-- Р“СЂР°С„РёРє СЂР°Р±РѕС‚С‹ -->
     <WorkSchedule 
       :schedule="master.schedule"
       :schedule-description="master.schedule_description"
@@ -58,3 +58,4 @@ const formatPrice = (price) => {
 const handleCall = () => {
 }
 </script>
+

@@ -8,7 +8,7 @@ import { logger } from '@/src/shared/lib/logger'
 
 import { defineStore } from 'pinia'
 import { ref, computed, nextTick } from 'vue'
-import type { Photo, GalleryState, GalleryOptions } from './types'
+import type { Photo, GalleryOptions } from './types'
 import { DEFAULT_GALLERY_OPTIONS } from './types'
 
 export const useGalleryStore = defineStore('gallery', () => {
@@ -336,7 +336,7 @@ export const useGalleryStore = defineStore('gallery', () => {
   }
 
   // 🔄 Повернуть фото (если поддерживается)
-  function rotatePhoto(degrees: number = 90) {
+  function rotatePhoto(_degrees: number = 90) {
     // Реализация поворота зависит от используемой библиотеки
     // Здесь заглушка для будущей реализации
     // TODO: Реализовать поворот фото на ${degrees} градусов

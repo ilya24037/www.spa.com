@@ -1,17 +1,17 @@
 <!-- resources/js/Components/Filters/LocationFilter.vue -->
 <template>
   <div>
-    <h4 class="text-sm font-medium mb-2">Город</h4>
+    <h4 class="text-sm font-medium mb-2">Р“РѕСЂРѕРґ</h4>
 
-    <!-- Поле поиска -->
+    <!-- РџРѕР»Рµ РїРѕРёСЃРєР° -->
     <input
       v-model="search"
       type="text"
-      placeholder="Найти город…"
+      placeholder="РќР°Р№С‚Рё РіРѕСЂРѕРґвЂ¦"
       class="mb-2 w-full border rounded px-2 py-1 text-sm"
     />
 
-    <!-- Список городов -->
+    <!-- РЎРїРёСЃРѕРє РіРѕСЂРѕРґРѕРІ -->
     <div class="max-h-60 overflow-y-auto pr-1 space-y-1">
       <label
         v-for="city in filteredCities"
@@ -28,13 +28,13 @@
       </label>
     </div>
 
-    <!-- Кнопка сброса -->
+    <!-- РљРЅРѕРїРєР° СЃР±СЂРѕСЃР° -->
     <button
       v-if="model"
       @click="clear"
       class="mt-2 text-sm text-blue-600 hover:underline"
     >
-      Сбросить город
+      РЎР±СЂРѕСЃРёС‚СЊ РіРѕСЂРѕРґ
     </button>
   </div>
 </template>
@@ -44,8 +44,8 @@ import { computed, ref, watch } from 'vue'
 
 /**
  * Props
- * - modelValue: string | null  (выбранный город)
- * - cities: string[]            (список доступных городов)
+ * - modelValue: string | null  (РІС‹Р±СЂР°РЅРЅС‹Р№ РіРѕСЂРѕРґ)
+ * - cities: string[]            (СЃРїРёСЃРѕРє РґРѕСЃС‚СѓРїРЅС‹С… РіРѕСЂРѕРґРѕРІ)
  */
 const props = withDefaults(defineProps<{
   modelValue?: string | null
@@ -53,8 +53,8 @@ const props = withDefaults(defineProps<{
 }>(), {
   modelValue: null,
   cities: () => [
-    'Москва', 'Санкт‑Петербург', 'Новосибирск', 'Екатеринбург', 'Нижний Новгород',
-    'Казань', 'Челябинск', 'Самара', 'Уфа', 'Ростов‑на‑Дону',
+    'РњРѕСЃРєРІР°', 'РЎР°РЅРєС‚вЂ‘РџРµС‚РµСЂР±СѓСЂРі', 'РќРѕРІРѕСЃРёР±РёСЂСЃРє', 'Р•РєР°С‚РµСЂРёРЅР±СѓСЂРі', 'РќРёР¶РЅРёР№ РќРѕРІРіРѕСЂРѕРґ',
+    'РљР°Р·Р°РЅСЊ', 'Р§РµР»СЏР±РёРЅСЃРє', 'РЎР°РјР°СЂР°', 'РЈС„Р°', 'Р РѕСЃС‚РѕРІвЂ‘РЅР°вЂ‘Р”РѕРЅСѓ',
   ],
 })
 
@@ -62,16 +62,16 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: string | null): void
 }>()
 
-// локальное состояние
+// Р»РѕРєР°Р»СЊРЅРѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ
 const search = ref('')
 
-// 2‑way binding через computed
+// 2вЂ‘way binding С‡РµСЂРµР· computed
 const model = computed({
   get: () => props.modelValue,
   set: (val) => emit('update:modelValue', val),
 })
 
-// фильтрация по поиску (регистр неважен)
+// С„РёР»СЊС‚СЂР°С†РёСЏ РїРѕ РїРѕРёСЃРєСѓ (СЂРµРіРёСЃС‚СЂ РЅРµРІР°Р¶РµРЅ)
 const filteredCities = computed(() => {
   if (!search.value) return props.cities
   const q = search.value.toLowerCase()
@@ -83,12 +83,12 @@ function clear() {
   search.value = ''
 }
 
-// очистить строку поиска, когда выбран новый город
+// РѕС‡РёСЃС‚РёС‚СЊ СЃС‚СЂРѕРєСѓ РїРѕРёСЃРєР°, РєРѕРіРґР° РІС‹Р±СЂР°РЅ РЅРѕРІС‹Р№ РіРѕСЂРѕРґ
 watch(model, () => (search.value = ''))
 </script>
 
 <style scoped>
-/* тонкий скроллбар */
+/* С‚РѕРЅРєРёР№ СЃРєСЂРѕР»Р»Р±Р°СЂ */
 .max-h-60::-webkit-scrollbar {
   width: 6px;
 }
@@ -97,3 +97,5 @@ watch(model, () => (search.value = ''))
   border-radius: 3px;
 }
 </style>
+
+

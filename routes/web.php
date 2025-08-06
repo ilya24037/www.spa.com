@@ -27,6 +27,11 @@ use Inertia\Inertia;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+// Тестовая страница для проверки кодировки
+Route::get('/test-encoding', function() {
+    return Inertia::render('TestEncoding');
+})->name('test.encoding');
+
 // CSRF токен для AJAX запросов
 Route::get('/csrf-token', function() {
     return response()->json(['token' => csrf_token()]);

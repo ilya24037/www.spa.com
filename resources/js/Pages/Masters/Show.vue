@@ -1,7 +1,7 @@
-<!-- resources/js/Pages/Masters/Show.vue - FSD Refactored с Loading состояниями -->
+<!-- resources/js/Pages/Masters/Show.vue - FSD Refactored СЃ Loading СЃРѕСЃС‚РѕСЏРЅРёСЏРјРё -->
 <template>
   <MainLayout>
-    <!-- Loading состояние -->
+    <!-- Loading СЃРѕСЃС‚РѕСЏРЅРёРµ -->
     <PageLoader 
       v-if="pageLoader.isLoading.value"
       type="profile"
@@ -10,7 +10,7 @@
       :skeleton-count="1"
     />
     
-    <!-- Основной контент -->
+    <!-- РћСЃРЅРѕРІРЅРѕР№ РєРѕРЅС‚РµРЅС‚ -->
     <MasterProfile 
       v-else
       :master="master" 
@@ -30,7 +30,7 @@ import MasterProfile from '@/src/widgets/master-profile/MasterProfile.vue'
 import PageLoader from '@/src/shared/ui/organisms/PageLoader/PageLoader.vue'
 import { usePageLoading } from '@/src/shared/composables/usePageLoading'
 
-// Типизация props
+// РўРёРїРёР·Р°С†РёСЏ props
 interface Master {
   id: number
   name: string
@@ -52,7 +52,7 @@ interface MasterProfileProps {
 
 const props = defineProps<MasterProfileProps>()
 
-// Управление загрузкой страницы
+// РЈРїСЂР°РІР»РµРЅРёРµ Р·Р°РіСЂСѓР·РєРѕР№ СЃС‚СЂР°РЅРёС†С‹
 const pageLoader = usePageLoading({
   type: 'profile',
   autoStart: true,
@@ -68,64 +68,64 @@ const pageLoader = usePageLoading({
   }
 })
 
-// Обработчики загрузки разных секций профиля
+// РћР±СЂР°Р±РѕС‚С‡РёРєРё Р·Р°РіСЂСѓР·РєРё СЂР°Р·РЅС‹С… СЃРµРєС†РёР№ РїСЂРѕС„РёР»СЏ
 const handleProfileLoading = (): void => {
-  pageLoader.setProgress(25, 'Загружаем информацию о мастере...')
+  pageLoader.setProgress(25, 'Р—Р°РіСЂСѓР¶Р°РµРј РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РјР°СЃС‚РµСЂРµ...')
 }
 
 const handleGalleryLoading = (): void => {
-  pageLoader.setProgress(50, 'Загружаем галерею работ...')
+  pageLoader.setProgress(50, 'Р—Р°РіСЂСѓР¶Р°РµРј РіР°Р»РµСЂРµСЋ СЂР°Р±РѕС‚...')
 }
 
 const handleReviewsLoading = (): void => {
-  pageLoader.setProgress(75, 'Загружаем отзывы...')
+  pageLoader.setProgress(75, 'Р—Р°РіСЂСѓР¶Р°РµРј РѕС‚Р·С‹РІС‹...')
 }
 
 const handleContentLoaded = (): void => {
-  pageLoader.setProgress(95, 'Финализация профиля...')
+  pageLoader.setProgress(95, 'Р¤РёРЅР°Р»РёР·Р°С†РёСЏ РїСЂРѕС„РёР»СЏ...')
   setTimeout(() => {
     pageLoader.completeLoading()
   }, 300)
 }
 
-// Логика загрузки при монтировании
+// Р›РѕРіРёРєР° Р·Р°РіСЂСѓР·РєРё РїСЂРё РјРѕРЅС‚РёСЂРѕРІР°РЅРёРё
 onMounted(() => {
-  // Проверяем наличие базовых данных мастера
+  // РџСЂРѕРІРµСЂСЏРµРј РЅР°Р»РёС‡РёРµ Р±Р°Р·РѕРІС‹С… РґР°РЅРЅС‹С… РјР°СЃС‚РµСЂР°
   if (!props.master || !props.master.id) {
     const noDataError = {
       type: 'client' as const,
-      message: 'Данные мастера не найдены',
+      message: 'Р”Р°РЅРЅС‹Рµ РјР°СЃС‚РµСЂР° РЅРµ РЅР°Р№РґРµРЅС‹',
       code: 404
     }
     pageLoader.errorLoading(noDataError)
     return
   }
 
-  // Поэтапная загрузка разных секций
+  // РџРѕСЌС‚Р°РїРЅР°СЏ Р·Р°РіСЂСѓР·РєР° СЂР°Р·РЅС‹С… СЃРµРєС†РёР№
   setTimeout(() => {
-    pageLoader.setProgress(20, 'Обрабатываем данные профиля...')
+    pageLoader.setProgress(20, 'РћР±СЂР°Р±Р°С‚С‹РІР°РµРј РґР°РЅРЅС‹Рµ РїСЂРѕС„РёР»СЏ...')
   }, 400)
 
   setTimeout(() => {
-    // Проверяем наличие фотографий
+    // РџСЂРѕРІРµСЂСЏРµРј РЅР°Р»РёС‡РёРµ С„РѕС‚РѕРіСЂР°С„РёР№
     if (props.master.photos && props.master.photos.length > 0) {
-      pageLoader.setProgress(45, 'Загружаем фотографии...')
+      pageLoader.setProgress(45, 'Р—Р°РіСЂСѓР¶Р°РµРј С„РѕС‚РѕРіСЂР°С„РёРё...')
     } else {
-      pageLoader.setProgress(45, 'Подготавливаем профиль...')
+      pageLoader.setProgress(45, 'РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј РїСЂРѕС„РёР»СЊ...')
     }
   }, 800)
 
   setTimeout(() => {
-    // Проверяем наличие отзывов
+    // РџСЂРѕРІРµСЂСЏРµРј РЅР°Р»РёС‡РёРµ РѕС‚Р·С‹РІРѕРІ
     if (props.master.reviews_count && props.master.reviews_count > 0) {
-      pageLoader.setProgress(70, 'Загружаем отзывы клиентов...')
+      pageLoader.setProgress(70, 'Р—Р°РіСЂСѓР¶Р°РµРј РѕС‚Р·С‹РІС‹ РєР»РёРµРЅС‚РѕРІ...')
     } else {
-      pageLoader.setProgress(70, 'Обрабатываем услуги...')
+      pageLoader.setProgress(70, 'РћР±СЂР°Р±Р°С‚С‹РІР°РµРј СѓСЃР»СѓРіРё...')
     }
   }, 1200)
 
   setTimeout(() => {
-    pageLoader.setProgress(90, 'Подготавливаем к отображению...')
+    pageLoader.setProgress(90, 'РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј Рє РѕС‚РѕР±СЂР°Р¶РµРЅРёСЋ...')
   }, 1600)
 
   setTimeout(() => {
@@ -135,7 +135,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Стили страницы мастера с анимациями */
+/* РЎС‚РёР»Рё СЃС‚СЂР°РЅРёС†С‹ РјР°СЃС‚РµСЂР° СЃ Р°РЅРёРјР°С†РёСЏРјРё */
 .master-profile-enter-active,
 .master-profile-leave-active {
   transition: all 0.4s ease;
@@ -151,7 +151,7 @@ onMounted(() => {
   transform: translateY(-30px);
 }
 
-/* Специальная анимация для профиля */
+/* РЎРїРµС†РёР°Р»СЊРЅР°СЏ Р°РЅРёРјР°С†РёСЏ РґР»СЏ РїСЂРѕС„РёР»СЏ */
 .profile-fade-enter-active {
   transition: opacity 0.6s ease, transform 0.6s ease;
 }

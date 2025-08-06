@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <Head title="Тест карты" />
     
     <div class="py-6 lg:py-8">
@@ -39,7 +39,7 @@
 <script setup>
 import { ref } from 'vue'
 import { Head } from '@inertiajs/vue3'
-import RealMap from '@/src/features/map/ui/RealMap/RealMap.vue'
+import RealMap from '@/src/features/map/ui/MapLegacy/RealMap.vue'
 import LeafletMap from '@/src/features/map/ui/MapLegacy/LeafletMap.vue'
 
 const selectedMaster = ref(null)

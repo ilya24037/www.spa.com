@@ -1,12 +1,12 @@
 <!-- resources/js/Components/Filters/Filters.vue -->
 <template>
   <div class="space-y-6">
-    <!-- Цена -->
+    <!-- Р¦РµРЅР° -->
     <div>
-      <h4 class="font-medium mb-3">Стоимость</h4>
+      <h4 class="font-medium mb-3">РЎС‚РѕРёРјРѕСЃС‚СЊ</h4>
       <div class="space-y-3">
         <div>
-          <label class="text-sm text-gray-600">От</label>
+          <label class="text-sm text-gray-600">РћС‚</label>
           <input 
             v-model.number="localFilters.price_from"
             type="number"
@@ -16,7 +16,7 @@
           >
         </div>
         <div>
-          <label class="text-sm text-gray-600">До</label>
+          <label class="text-sm text-gray-600">Р”Рѕ</label>
           <input 
             v-model.number="localFilters.price_to"
             type="number"
@@ -28,9 +28,9 @@
       </div>
     </div>
 
-    <!-- Категории услуг -->
+    <!-- РљР°С‚РµРіРѕСЂРёРё СѓСЃР»СѓРі -->
     <div>
-      <h4 class="font-medium mb-3">Вид массажа</h4>
+      <h4 class="font-medium mb-3">Р’РёРґ РјР°СЃСЃР°Р¶Р°</h4>
       <div class="space-y-2">
         <label 
           v-for="category in categories"
@@ -50,9 +50,9 @@
       </div>
     </div>
 
-    <!-- Дополнительные параметры -->
+    <!-- Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹ -->
     <div>
-      <h4 class="font-medium mb-3">Дополнительно</h4>
+      <h4 class="font-medium mb-3">Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕ</h4>
       <div class="space-y-2">
         <label class="flex items-center cursor-pointer">
           <input 
@@ -61,7 +61,7 @@
             @change="updateFilter('home_service', localFilters.home_service)"
             class="mr-2 rounded text-blue-600 focus:ring-blue-500"
           >
-          <span class="text-sm">Выезд на дом</span>
+          <span class="text-sm">Р’С‹РµР·Рґ РЅР° РґРѕРј</span>
         </label>
         
         <label class="flex items-center cursor-pointer">
@@ -71,7 +71,7 @@
             @change="updateFilter('online_booking', localFilters.online_booking)"
             class="mr-2 rounded text-blue-600 focus:ring-blue-500"
           >
-          <span class="text-sm">Онлайн-запись</span>
+          <span class="text-sm">РћРЅР»Р°Р№РЅ-Р·Р°РїРёСЃСЊ</span>
         </label>
         
         <label class="flex items-center cursor-pointer">
@@ -81,14 +81,14 @@
             @change="updateFilter('certificates', localFilters.certificates)"
             class="mr-2 rounded text-blue-600 focus:ring-blue-500"
           >
-          <span class="text-sm">Есть сертификаты</span>
+          <span class="text-sm">Р•СЃС‚СЊ СЃРµСЂС‚РёС„РёРєР°С‚С‹</span>
         </label>
       </div>
     </div>
 
-    <!-- Рейтинг -->
+    <!-- Р РµР№С‚РёРЅРі -->
     <div>
-      <h4 class="font-medium mb-3">Рейтинг</h4>
+      <h4 class="font-medium mb-3">Р РµР№С‚РёРЅРі</h4>
       <div class="space-y-2">
         <label 
           v-for="rating in [4, 3, 2]"
@@ -113,7 +113,7 @@
             >
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
             </svg>
-            <span class="ml-1 text-sm">и выше</span>
+            <span class="ml-1 text-sm">Рё РІС‹С€Рµ</span>
           </div>
         </label>
       </div>
@@ -132,7 +132,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update'])
 
-// Локальная копия фильтров
+// Р›РѕРєР°Р»СЊРЅР°СЏ РєРѕРїРёСЏ С„РёР»СЊС‚СЂРѕРІ
 const localFilters = ref({
   price_from: props.filters?.price_from || null,
   price_to: props.filters?.price_to || null,
@@ -143,13 +143,14 @@ const localFilters = ref({
   min_rating: props.filters?.min_rating || null
 })
 
-// Обновление фильтра
+// РћР±РЅРѕРІР»РµРЅРёРµ С„РёР»СЊС‚СЂР°
 const updateFilter = (key, value) => {
   emit('update', { [key]: value })
 }
 
-// Синхронизация с пропсами
+// РЎРёРЅС…СЂРѕРЅРёР·Р°С†РёСЏ СЃ РїСЂРѕРїСЃР°РјРё
 watch(() => props.filters, (newFilters) => {
   localFilters.value = { ...localFilters.value, ...newFilters }
 }, { deep: true })
 </script>
+

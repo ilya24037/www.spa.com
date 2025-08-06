@@ -1,22 +1,22 @@
 <template>
   <div class="form-field" :class="{ 'has-error': hasError }">
-    <!-- Лейбл поля -->
+    <!-- Р›РµР№Р±Р» РїРѕР»СЏ -->
     <label v-if="label" class="form-field-label" :for="fieldId">
       {{ label }}
       <span v-if="required" class="required-marker">*</span>
     </label>
 
-    <!-- Подсказка к полю -->
+    <!-- РџРѕРґСЃРєР°Р·РєР° Рє РїРѕР»СЋ -->
     <div v-if="hint && !hasError" class="form-field-hint">
       {{ hint }}
     </div>
 
-    <!-- Поле ввода -->
+    <!-- РџРѕР»Рµ РІРІРѕРґР° -->
     <div class="form-field-input">
       <slot />
     </div>
 
-    <!-- Ошибка поля -->
+    <!-- РћС€РёР±РєР° РїРѕР»СЏ -->
     <div v-if="hasError" class="form-field-error">
       {{ error }}
     </div>
@@ -85,7 +85,7 @@ const hasError = computed(() => Boolean(props.error))
 }
 
 .form-field-input {
-  /* Контейнер для поля ввода */
+  /* РљРѕРЅС‚РµР№РЅРµСЂ РґР»СЏ РїРѕР»СЏ РІРІРѕРґР° */
 }
 
 .form-field-error {
@@ -95,7 +95,7 @@ const hasError = computed(() => Boolean(props.error))
   margin-top: 8px;
 }
 
-/* Базовые стили для полей ввода внутри компонента */
+/* Р‘Р°Р·РѕРІС‹Рµ СЃС‚РёР»Рё РґР»СЏ РїРѕР»РµР№ РІРІРѕРґР° РІРЅСѓС‚СЂРё РєРѕРјРїРѕРЅРµРЅС‚Р° */
 .form-field-input input,
 .form-field-input textarea,
 .form-field-input select {

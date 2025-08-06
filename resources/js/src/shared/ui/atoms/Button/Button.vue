@@ -51,41 +51,41 @@
 import { computed, type Component } from 'vue'
 import { Link } from '@inertiajs/vue3'
 
-// TypeScript типы для props
+// TypeScript С‚РёРїС‹ РґР»СЏ props
 export interface ButtonProps {
-  // Внешний вид
+  // Р’РЅРµС€РЅРёР№ РІРёРґ
   variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'warning' | 'ghost' | 'link'
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   fullWidth?: boolean
   rounded?: boolean | 'sm' | 'md' | 'lg' | 'full'
   
-  // Состояния
+  // РЎРѕСЃС‚РѕСЏРЅРёСЏ
   loading?: boolean
   loadingText?: string
   disabled?: boolean
   
-  // Содержимое
+  // РЎРѕРґРµСЂР¶РёРјРѕРµ
   text?: string
   iconLeft?: Component | string
   iconRight?: Component | string
   
-  // Действия
+  // Р”РµР№СЃС‚РІРёСЏ
   type?: 'button' | 'submit' | 'reset'
   href?: string
   to?: string | object
   
-  // Доступность
+  // Р”РѕСЃС‚СѓРїРЅРѕСЃС‚СЊ
   ariaLabel?: string
 }
 
-// Props с дефолтными значениями
+// Props СЃ РґРµС„РѕР»С‚РЅС‹РјРё Р·РЅР°С‡РµРЅРёСЏРјРё
 const props = withDefaults(defineProps<ButtonProps>(), {
   variant: 'primary',
   size: 'md',
   fullWidth: false,
   rounded: 'md',
   loading: false,
-  loadingText: 'Загрузка...',
+  loadingText: 'Р—Р°РіСЂСѓР·РєР°...',
   disabled: false,
   type: 'button'
 })
@@ -95,14 +95,14 @@ const emit = defineEmits<{
   click: [event: MouseEvent]
 }>()
 
-// Computed для определения тега компонента
+// Computed РґР»СЏ РѕРїСЂРµРґРµР»РµРЅРёСЏ С‚РµРіР° РєРѕРјРїРѕРЅРµРЅС‚Р°
 const componentTag = computed(() => {
   if (props.href) return 'a'
   if (props.to) return Link
   return 'button'
 })
 
-// Классы для кнопки
+// РљР»Р°СЃСЃС‹ РґР»СЏ РєРЅРѕРїРєРё
 const buttonClasses = computed(() => {
   const classes = [
     'button',
@@ -120,7 +120,7 @@ const buttonClasses = computed(() => {
   return classes
 })
 
-// Обработчик клика
+// РћР±СЂР°Р±РѕС‚С‡РёРє РєР»РёРєР°
 const handleClick = (event: MouseEvent) => {
   if (props.disabled || props.loading) {
     event.preventDefault()
@@ -133,7 +133,7 @@ const handleClick = (event: MouseEvent) => {
 </script>
 
 <style scoped>
-/* Базовые стили кнопки */
+/* Р‘Р°Р·РѕРІС‹Рµ СЃС‚РёР»Рё РєРЅРѕРїРєРё */
 .button {
   @apply inline-flex items-center justify-center gap-2;
   @apply font-medium transition-all duration-200;
@@ -143,7 +143,7 @@ const handleClick = (event: MouseEvent) => {
   text-decoration: none;
 }
 
-/* Размеры */
+/* Р Р°Р·РјРµСЂС‹ */
 .button--xs {
   @apply px-2.5 py-1 text-xs;
 }
@@ -164,7 +164,7 @@ const handleClick = (event: MouseEvent) => {
   @apply px-8 py-4 text-lg;
 }
 
-/* Варианты */
+/* Р’Р°СЂРёР°РЅС‚С‹ */
 .button--primary {
   @apply bg-blue-600 text-white hover:bg-blue-700;
   @apply focus:ring-blue-500;
@@ -207,7 +207,7 @@ const handleClick = (event: MouseEvent) => {
   @apply disabled:text-gray-400 disabled:no-underline;
 }
 
-/* Скругление */
+/* РЎРєСЂСѓРіР»РµРЅРёРµ */
 .button--rounded-sm {
   @apply rounded-sm;
 }
@@ -228,7 +228,7 @@ const handleClick = (event: MouseEvent) => {
   @apply rounded;
 }
 
-/* Состояния */
+/* РЎРѕСЃС‚РѕСЏРЅРёСЏ */
 .button--full-width {
   @apply w-full;
 }
@@ -241,7 +241,7 @@ const handleClick = (event: MouseEvent) => {
   @apply opacity-50 cursor-not-allowed;
 }
 
-/* Спиннер */
+/* РЎРїРёРЅРЅРµСЂ */
 .button-spinner {
   @apply w-4 h-4;
 }
@@ -250,13 +250,13 @@ const handleClick = (event: MouseEvent) => {
   @apply w-full h-full;
 }
 
-/* Иконки */
+/* РРєРѕРЅРєРё */
 .button-icon-left,
 .button-icon-right {
   @apply w-5 h-5 flex-shrink-0;
 }
 
-/* Адаптивность */
+/* РђРґР°РїС‚РёРІРЅРѕСЃС‚СЊ */
 @media (max-width: 640px) {
   .button--lg,
   .button--xl {
@@ -264,3 +264,4 @@ const handleClick = (event: MouseEvent) => {
   }
 }
 </style>
+

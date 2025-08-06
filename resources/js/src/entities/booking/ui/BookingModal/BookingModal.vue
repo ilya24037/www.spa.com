@@ -28,13 +28,13 @@
                             class="text-lg font-semibold"
                             data-testid="booking-modal-title"
                         >
-                            Запись к мастеру
+                            Р—Р°РїРёСЃСЊ Рє РјР°СЃС‚РµСЂСѓ
                         </h3>
                         <button 
                             @click="closeModal"
                             class="p-2 hover:bg-gray-100 rounded-lg"
                             data-testid="booking-modal-close"
-                            aria-label="Закрыть модальное окно"
+                            aria-label="Р—Р°РєСЂС‹С‚СЊ РјРѕРґР°Р»СЊРЅРѕРµ РѕРєРЅРѕ"
                         >
                             <XMarkIcon class="w-5 h-5" aria-hidden="true" />
                         </button>
@@ -47,7 +47,7 @@
                         data-testid="booking-form"
                         novalidate
                     >
-                        <!-- Общая ошибка -->
+                        <!-- РћР±С‰Р°СЏ РѕС€РёР±РєР° -->
                         <div 
                             v-if="formErrors.general"
                             class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg"
@@ -58,14 +58,14 @@
                                 {{ formErrors.general }}
                             </p>
                         </div>
-                        <!-- Мастер -->
+                        <!-- РњР°СЃС‚РµСЂ -->
                         <div 
                             class="flex items-center gap-4 mb-6 p-4 bg-gray-50 rounded-lg"
                             data-testid="master-info"
                         >
                             <img 
                                 :src="master.avatar || '/images/no-avatar.jpg'"
-                                :alt="`Аватар ${master.display_name}`"
+                                :alt="`РђРІР°С‚Р°СЂ ${master.display_name}`"
                                 class="w-16 h-16 rounded-full object-cover"
                                 data-testid="master-avatar"
                                 @error="$event.target.src = '/images/no-avatar.jpg'"
@@ -86,13 +86,13 @@
                             </div>
                         </div>
 
-                        <!-- Выбор услуги -->
+                        <!-- Р’С‹Р±РѕСЂ СѓСЃР»СѓРіРё -->
                         <div class="mb-6">
                             <label 
                                 for="service-select"
                                 class="block text-sm font-medium text-gray-700 mb-2"
                             >
-                                Выберите услугу *
+                                Р’С‹Р±РµСЂРёС‚Рµ СѓСЃР»СѓРіСѓ *
                             </label>
                             <select 
                                 id="service-select"
@@ -103,13 +103,13 @@
                                 required
                                 aria-describedby="service-error"
                             >
-                                <option value="">Выберите услугу</option>
+                                <option value="">Р’С‹Р±РµСЂРёС‚Рµ СѓСЃР»СѓРіСѓ</option>
                                 <option 
                                     v-for="service in master.services"
                                     :key="service.id"
                                     :value="service.id"
                                 >
-                                    {{ service.name }} - {{ service.price }}₽ ({{ service.duration }} мин)
+                                    {{ service.name }} - {{ service.price }}в‚Ѕ ({{ service.duration }} РјРёРЅ)
                                 </option>
                             </select>
                             <p 
@@ -123,14 +123,14 @@
                             </p>
                         </div>
 
-                        <!-- Дата и время -->
+                        <!-- Р”Р°С‚Р° Рё РІСЂРµРјСЏ -->
                         <div class="grid grid-cols-2 gap-4 mb-6">
                             <div>
                                 <label 
                                     for="booking-date"
                                     class="block text-sm font-medium text-gray-700 mb-2"
                                 >
-                                    Дата *
+                                    Р”Р°С‚Р° *
                                 </label>
                                 <VueDatePicker 
                                     id="booking-date"
@@ -139,7 +139,7 @@
                                     :disabled-dates="state.disabledDates"
                                     locale="ru"
                                     format="dd.MM.yyyy"
-                                    placeholder="Выберите дату"
+                                    placeholder="Р’С‹Р±РµСЂРёС‚Рµ РґР°С‚Сѓ"
                                     :enable-time-picker="false"
                                     data-testid="date-picker"
                                     :class="{ 'border-red-500': formErrors.booking_date }"
@@ -162,7 +162,7 @@
                                     for="time-select"
                                     class="block text-sm font-medium text-gray-700 mb-2"
                                 >
-                                    Время *
+                                    Р’СЂРµРјСЏ *
                                 </label>
                                 <select 
                                     id="time-select"
@@ -175,7 +175,7 @@
                                     aria-describedby="time-error"
                                 >
                                     <option value="">
-                                        {{ state.loadingSlots ? 'Загрузка...' : 'Выберите время' }}
+                                        {{ state.loadingSlots ? 'Р—Р°РіСЂСѓР·РєР°...' : 'Р’С‹Р±РµСЂРёС‚Рµ РІСЂРµРјСЏ' }}
                                     </option>
                                     <option 
                                         v-for="slot in state.availableSlots"
@@ -197,10 +197,10 @@
                             </div>
                         </div>
 
-                        <!-- Тип услуги -->
+                        <!-- РўРёРї СѓСЃР»СѓРіРё -->
                         <div class="mb-6">
                             <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Где провести сеанс?
+                                Р“РґРµ РїСЂРѕРІРµСЃС‚Рё СЃРµР°РЅСЃ?
                             </label>
                             <div class="grid grid-cols-2 gap-4">
                                 <label 
@@ -215,8 +215,8 @@
                                         class="sr-only"
                                     >
                                     <div>
-                                        <p class="font-medium">Выезд на дом</p>
-                                        <p class="text-sm text-gray-600">+500₽ к стоимости</p>
+                                        <p class="font-medium">Р’С‹РµР·Рґ РЅР° РґРѕРј</p>
+                                        <p class="text-sm text-gray-600">+500в‚Ѕ Рє СЃС‚РѕРёРјРѕСЃС‚Рё</p>
                                     </div>
                                 </label>
                                 
@@ -232,35 +232,35 @@
                                         class="sr-only"
                                     >
                                     <div>
-                                        <p class="font-medium">В салоне</p>
+                                        <p class="font-medium">Р’ СЃР°Р»РѕРЅРµ</p>
                                         <p class="text-sm text-gray-600">{{ master.salon_address }}</p>
                                     </div>
                                 </label>
                             </div>
                         </div>
 
-                        <!-- Адрес (для выезда) -->
+                        <!-- РђРґСЂРµСЃ (РґР»СЏ РІС‹РµР·РґР°) -->
                         <div v-if="form.is_home_service" class="mb-6">
                             <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Адрес *
+                                РђРґСЂРµСЃ *
                             </label>
                             <input 
                                 v-model="form.address"
                                 type="text"
                                 class="w-full border-gray-300 rounded-lg"
-                                placeholder="Улица, дом, квартира"
+                                placeholder="РЈР»РёС†Р°, РґРѕРј, РєРІР°СЂС‚РёСЂР°"
                                 required
                             >
                         </div>
 
-                        <!-- Контактные данные -->
+                        <!-- РљРѕРЅС‚Р°РєС‚РЅС‹Рµ РґР°РЅРЅС‹Рµ -->
                         <div class="grid grid-cols-2 gap-4 mb-6">
                             <div>
                                 <label 
                                     for="client-name"
                                     class="block text-sm font-medium text-gray-700 mb-2"
                                 >
-                                    Ваше имя *
+                                    Р’Р°С€Рµ РёРјСЏ *
                                 </label>
                                 <input 
                                     id="client-name"
@@ -269,7 +269,7 @@
                                     class="w-full border-gray-300 rounded-lg"
                                     :class="{ 'border-red-500': formErrors.client_name }"
                                     data-testid="client-name-input"
-                                    placeholder="Введите ваше имя"
+                                    placeholder="Р’РІРµРґРёС‚Рµ РІР°С€Рµ РёРјСЏ"
                                     required
                                     aria-describedby="name-error"
                                     minlength="2"
@@ -291,7 +291,7 @@
                                     for="client-phone"
                                     class="block text-sm font-medium text-gray-700 mb-2"
                                 >
-                                    Телефон *
+                                    РўРµР»РµС„РѕРЅ *
                                 </label>
                                 <vue-tel-input
                                     id="client-phone"
@@ -325,27 +325,27 @@
                                 v-model="form.client_email"
                                 type="email"
                                 class="w-full border-gray-300 rounded-lg"
-                                placeholder="Для отправки подтверждения"
+                                placeholder="Р”Р»СЏ РѕС‚РїСЂР°РІРєРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ"
                             >
                         </div>
 
-                        <!-- Комментарий -->
+                        <!-- РљРѕРјРјРµРЅС‚Р°СЂРёР№ -->
                         <div class="mb-6">
                             <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Пожелания
+                                РџРѕР¶РµР»Р°РЅРёСЏ
                             </label>
                             <textarea 
                                 v-model="form.client_comment"
                                 rows="3"
                                 class="w-full border-gray-300 rounded-lg"
-                                placeholder="Особые пожелания или вопросы"
+                                placeholder="РћСЃРѕР±С‹Рµ РїРѕР¶РµР»Р°РЅРёСЏ РёР»Рё РІРѕРїСЂРѕСЃС‹"
                             ></textarea>
                         </div>
 
-                        <!-- Способ оплаты -->
+                        <!-- РЎРїРѕСЃРѕР± РѕРїР»Р°С‚С‹ -->
                         <div class="mb-6">
                             <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Способ оплаты
+                                РЎРїРѕСЃРѕР± РѕРїР»Р°С‚С‹
                             </label>
                             <div class="grid grid-cols-3 gap-3">
                                 <label 
@@ -365,52 +365,52 @@
                             </div>
                         </div>
 
-                        <!-- Итого -->
+                        <!-- РС‚РѕРіРѕ -->
                         <div 
                             class="bg-gray-50 rounded-lg p-4 mb-6"
                             data-testid="price-summary"
                             role="region"
-                            aria-label="Сводка по стоимости"
+                            aria-label="РЎРІРѕРґРєР° РїРѕ СЃС‚РѕРёРјРѕСЃС‚Рё"
                         >
                             <div class="flex justify-between text-sm mb-2">
-                                <span>Услуга:</span>
-                                <span data-testid="service-price">{{ selectedServicePrice }}₽</span>
+                                <span>РЈСЃР»СѓРіР°:</span>
+                                <span data-testid="service-price">{{ selectedServicePrice }}в‚Ѕ</span>
                             </div>
                             <div 
                                 v-if="form.is_home_service" 
                                 class="flex justify-between text-sm mb-2"
                             >
-                                <span>Выезд:</span>
-                                <span data-testid="home-service-fee">{{ homeServiceFee }}₽</span>
+                                <span>Р’С‹РµР·Рґ:</span>
+                                <span data-testid="home-service-fee">{{ homeServiceFee }}в‚Ѕ</span>
                             </div>
                             <div class="flex justify-between font-medium text-lg border-t pt-2">
-                                <span>Итого:</span>
+                                <span>РС‚РѕРіРѕ:</span>
                                 <span 
                                     data-testid="total-price"
                                     class="text-indigo-600 font-bold"
                                 >
-                                    {{ totalPrice }}₽
+                                    {{ totalPrice }}в‚Ѕ
                                 </span>
                             </div>
                         </div>
 
-                        <!-- Кнопки -->
+                        <!-- РљРЅРѕРїРєРё -->
                         <div class="flex gap-3" data-testid="form-actions">
                             <button 
                                 type="submit"
                                 :disabled="state.loading || !isFormValid"
                                 class="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 data-testid="submit-button"
-                                :aria-label="state.loading ? 'Отправка формы' : 'Отправить заявку на бронирование'"
+                                :aria-label="state.loading ? 'РћС‚РїСЂР°РІРєР° С„РѕСЂРјС‹' : 'РћС‚РїСЂР°РІРёС‚СЊ Р·Р°СЏРІРєСѓ РЅР° Р±СЂРѕРЅРёСЂРѕРІР°РЅРёРµ'"
                             >
                                 <span v-if="state.loading" class="flex items-center justify-center gap-2">
                                     <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
-                                    Отправка...
+                                    РћС‚РїСЂР°РІРєР°...
                                 </span>
-                                <span v-else>Записаться</span>
+                                <span v-else>Р—Р°РїРёСЃР°С‚СЊСЃСЏ</span>
                             </button>
                             <button 
                                 type="button"
@@ -418,9 +418,9 @@
                                 class="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                                 data-testid="cancel-button"
                                 :disabled="state.loading"
-                                aria-label="Отменить бронирование"
+                                aria-label="РћС‚РјРµРЅРёС‚СЊ Р±СЂРѕРЅРёСЂРѕРІР°РЅРёРµ"
                             >
-                                Отмена
+                                РћС‚РјРµРЅР°
                             </button>
                         </div>
                     </form>
@@ -431,7 +431,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
 import type { AxiosResponse } from 'axios'
@@ -450,14 +450,14 @@ import type {
   BookingFormErrors
 } from './BookingModal.types'
 
-// Props и emits с TypeScript типизацией
+// Props Рё emits СЃ TypeScript С‚РёРїРёР·Р°С†РёРµР№
 const props = defineProps<BookingModalProps>()
 const emit = defineEmits<BookingModalEmits>()
 
-// Toast для замены alert()
+// Toast РґР»СЏ Р·Р°РјРµРЅС‹ alert()
 const toast = useToast()
 
-// Форма бронирования с типизацией
+// Р¤РѕСЂРјР° Р±СЂРѕРЅРёСЂРѕРІР°РЅРёСЏ СЃ С‚РёРїРёР·Р°С†РёРµР№
 const form = ref<BookingFormData>({
   master_profile_id: props.master.id,
   service_id: props.service?.id || '',
@@ -472,7 +472,7 @@ const form = ref<BookingFormData>({
   payment_method: 'cash'
 })
 
-// Состояние компонента
+// РЎРѕСЃС‚РѕСЏРЅРёРµ РєРѕРјРїРѕРЅРµРЅС‚Р°
 const state = ref<BookingModalState>({
   loading: false,
   loadingSlots: false,
@@ -480,17 +480,17 @@ const state = ref<BookingModalState>({
   disabledDates: []
 })
 
-// Ошибки валидации
+// РћС€РёР±РєРё РІР°Р»РёРґР°С†РёРё
 const formErrors = ref<BookingFormErrors>({})
 
-// Методы оплаты
+// РњРµС‚РѕРґС‹ РѕРїР»Р°С‚С‹
 const paymentMethods: PaymentMethodOption[] = [
-  { value: 'cash', label: 'Наличные' },
-  { value: 'card', label: 'Картой' },
-  { value: 'online', label: 'Онлайн' }
+  { value: 'cash', label: 'РќР°Р»РёС‡РЅС‹Рµ' },
+  { value: 'card', label: 'РљР°СЂС‚РѕР№' },
+  { value: 'online', label: 'РћРЅР»Р°Р№РЅ' }
 ]
 
-// Computed свойства для расчета стоимости
+// Computed СЃРІРѕР№СЃС‚РІР° РґР»СЏ СЂР°СЃС‡РµС‚Р° СЃС‚РѕРёРјРѕСЃС‚Рё
 const selectedServicePrice = computed<number>(() => {
   if (!form.value.service_id) return 0
   const serviceId = typeof form.value.service_id === 'string' 
@@ -514,7 +514,7 @@ const priceCalculation = computed<PriceCalculation>(() => ({
   totalPrice: totalPrice.value
 }))
 
-// Валидация формы
+// Р’Р°Р»РёРґР°С†РёСЏ С„РѕСЂРјС‹
 const isFormValid = computed<boolean>(() => {
   const validation: BookingFormValidation = {
     service_id: !!form.value.service_id,
@@ -528,49 +528,49 @@ const isFormValid = computed<boolean>(() => {
   return Object.values(validation).every(Boolean)
 })
 
-// Очистка ошибок
+// РћС‡РёСЃС‚РєР° РѕС€РёР±РѕРє
 const clearErrors = (): void => {
   formErrors.value = {}
 }
 
-// Валидация полей
+// Р’Р°Р»РёРґР°С†РёСЏ РїРѕР»РµР№
 const validateForm = (): boolean => {
   clearErrors()
   const errors: BookingFormErrors = {}
   
   if (!form.value.service_id) {
-    errors.service_id = 'Выберите услугу'
+    errors.service_id = 'Р’С‹Р±РµСЂРёС‚Рµ СѓСЃР»СѓРіСѓ'
   }
   
   if (!form.value.booking_date) {
-    errors.booking_date = 'Выберите дату'
+    errors.booking_date = 'Р’С‹Р±РµСЂРёС‚Рµ РґР°С‚Сѓ'
   }
   
   if (!form.value.start_time) {
-    errors.start_time = 'Выберите время'
+    errors.start_time = 'Р’С‹Р±РµСЂРёС‚Рµ РІСЂРµРјСЏ'
   }
   
   if (form.value.client_name.trim().length < 2) {
-    errors.client_name = 'Имя должно содержать минимум 2 символа'
+    errors.client_name = 'РРјСЏ РґРѕР»Р¶РЅРѕ СЃРѕРґРµСЂР¶Р°С‚СЊ РјРёРЅРёРјСѓРј 2 СЃРёРјРІРѕР»Р°'
   }
   
   if (form.value.client_phone.length < 10) {
-    errors.client_phone = 'Некорректный номер телефона'
+    errors.client_phone = 'РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РЅРѕРјРµСЂ С‚РµР»РµС„РѕРЅР°'
   }
   
   if (form.value.is_home_service && form.value.address.trim().length < 5) {
-    errors.address = 'Укажите полный адрес'
+    errors.address = 'РЈРєР°Р¶РёС‚Рµ РїРѕР»РЅС‹Р№ Р°РґСЂРµСЃ'
   }
   
   if (form.value.client_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.client_email)) {
-    errors.client_email = 'Некорректный email'
+    errors.client_email = 'РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ email'
   }
   
   formErrors.value = errors
   return Object.keys(errors).length === 0
 }
 
-// Загрузка доступных слотов
+// Р—Р°РіСЂСѓР·РєР° РґРѕСЃС‚СѓРїРЅС‹С… СЃР»РѕС‚РѕРІ
 const fetchAvailableSlots = async (): Promise<void> => {
   if (!form.value.booking_date || !form.value.service_id) return
   
@@ -593,13 +593,13 @@ const fetchAvailableSlots = async (): Promise<void> => {
     }
     
     if (state.value.availableSlots.length === 0) {
-      toast.info('На выбранную дату нет свободного времени')
+      toast.info('РќР° РІС‹Р±СЂР°РЅРЅСѓСЋ РґР°С‚Сѓ РЅРµС‚ СЃРІРѕР±РѕРґРЅРѕРіРѕ РІСЂРµРјРµРЅРё')
     }
     
   } catch (error: unknown) {
     const bookingError: BookingModalError = {
       type: 'slots',
-      message: 'Ошибка загрузки доступного времени',
+      message: 'РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё РґРѕСЃС‚СѓРїРЅРѕРіРѕ РІСЂРµРјРµРЅРё',
       originalError: error
     }
     toast.error(bookingError.message)
@@ -609,10 +609,10 @@ const fetchAvailableSlots = async (): Promise<void> => {
   }
 }
 
-// Отправка формы бронирования
+// РћС‚РїСЂР°РІРєР° С„РѕСЂРјС‹ Р±СЂРѕРЅРёСЂРѕРІР°РЅРёСЏ
 const submitBooking = async (): Promise<void> => {
   if (!validateForm()) {
-    toast.error('Пожалуйста, исправьте ошибки в форме')
+    toast.error('РџРѕР¶Р°Р»СѓР№СЃС‚Р°, РёСЃРїСЂР°РІСЊС‚Рµ РѕС€РёР±РєРё РІ С„РѕСЂРјРµ')
     return
   }
   
@@ -622,7 +622,7 @@ const submitBooking = async (): Promise<void> => {
   try {
     await router.post('/bookings', form.value, {
       onSuccess: () => {
-        toast.success('Заявка отправлена! Ожидайте подтверждения мастера.')
+        toast.success('Р—Р°СЏРІРєР° РѕС‚РїСЂР°РІР»РµРЅР°! РћР¶РёРґР°Р№С‚Рµ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ РјР°СЃС‚РµСЂР°.')
         emit('success', form.value)
         emit('close')
       },
@@ -636,13 +636,13 @@ const submitBooking = async (): Promise<void> => {
           })
         }
         
-        toast.error('Ошибка при создании записи')
+        toast.error('РћС€РёР±РєР° РїСЂРё СЃРѕР·РґР°РЅРёРё Р·Р°РїРёСЃРё')
       }
     })
   } catch (error: unknown) {
     const bookingError: BookingModalError = {
       type: 'api',
-      message: 'Ошибка сети. Попробуйте позже.',
+      message: 'РћС€РёР±РєР° СЃРµС‚Рё. РџРѕРїСЂРѕР±СѓР№С‚Рµ РїРѕР·Р¶Рµ.',
       originalError: error
     }
     toast.error(bookingError.message)
@@ -652,26 +652,26 @@ const submitBooking = async (): Promise<void> => {
   }
 }
 
-// Закрытие модального окна
+// Р—Р°РєСЂС‹С‚РёРµ РјРѕРґР°Р»СЊРЅРѕРіРѕ РѕРєРЅР°
 const closeModal = (): void => {
   emit('close')
 }
 
-// Обработка клика по оверлею
+// РћР±СЂР°Р±РѕС‚РєР° РєР»РёРєР° РїРѕ РѕРІРµСЂР»РµСЋ
 const handleOverlayClick = (event: MouseEvent): void => {
   if (event.target === event.currentTarget) {
     closeModal()
   }
 }
 
-// Обработка Escape клавиши
+// РћР±СЂР°Р±РѕС‚РєР° Escape РєР»Р°РІРёС€Рё
 const handleKeydown = (event: KeyboardEvent): void => {
   if (event.key === 'Escape') {
     closeModal()
   }
 }
 
-// Смена типа услуги (дом/салон)
+// РЎРјРµРЅР° С‚РёРїР° СѓСЃР»СѓРіРё (РґРѕРј/СЃР°Р»РѕРЅ)
 const handleServiceTypeChange = (): void => {
   if (!form.value.is_home_service) {
     form.value.address = ''
@@ -679,7 +679,7 @@ const handleServiceTypeChange = (): void => {
   }
 }
 
-// Загружаем слоты при изменении даты
+// Р—Р°РіСЂСѓР¶Р°РµРј СЃР»РѕС‚С‹ РїСЂРё РёР·РјРµРЅРµРЅРёРё РґР°С‚С‹
 watch(() => form.value.booking_date, (newDate) => {
   form.value.start_time = ''
   state.value.availableSlots = []
@@ -689,7 +689,7 @@ watch(() => form.value.booking_date, (newDate) => {
   }
 })
 
-// Перезагрузка слотов при смене услуги
+// РџРµСЂРµР·Р°РіСЂСѓР·РєР° СЃР»РѕС‚РѕРІ РїСЂРё СЃРјРµРЅРµ СѓСЃР»СѓРіРё
 watch(() => form.value.service_id, () => {
   form.value.start_time = ''
   state.value.availableSlots = []
@@ -699,14 +699,15 @@ watch(() => form.value.service_id, () => {
   }
 })
 
-// Отслеживание смены типа услуги
+// РћС‚СЃР»РµР¶РёРІР°РЅРёРµ СЃРјРµРЅС‹ С‚РёРїР° СѓСЃР»СѓРіРё
 watch(() => form.value.is_home_service, handleServiceTypeChange)
 
-// Инициализация компонента
+// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РєРѕРјРїРѕРЅРµРЅС‚Р°
 onMounted(() => {
-  // Если передана услуга, сразу устанавливаем её
+  // Р•СЃР»Рё РїРµСЂРµРґР°РЅР° СѓСЃР»СѓРіР°, СЃСЂР°Р·Сѓ СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј РµС‘
   if (props.service) {
     form.value.service_id = props.service.id
   }
 })
 </script>
+

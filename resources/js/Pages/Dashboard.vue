@@ -1,7 +1,7 @@
-<!-- resources/js/Pages/Dashboard.vue - FSD Refactored с Loading состояниями -->
+<!-- resources/js/Pages/Dashboard.vue - FSD Refactored СЃ Loading СЃРѕСЃС‚РѕСЏРЅРёСЏРјРё -->
 <template>
   <ProfileLayout>
-    <!-- Loading состояние -->
+    <!-- Loading СЃРѕСЃС‚РѕСЏРЅРёРµ -->
     <PageLoader 
       v-if="pageLoader.isLoading.value"
       type="dashboard"
@@ -11,7 +11,7 @@
       :skeleton-count="4"
     />
     
-    <!-- Основной контент -->
+    <!-- РћСЃРЅРѕРІРЅРѕР№ РєРѕРЅС‚РµРЅС‚ -->
     <ProfileDashboard 
       v-else
       :ads="ads"
@@ -31,7 +31,7 @@ import { ProfileDashboard } from '@/src/widgets/profile-dashboard'
 import PageLoader from '@/src/shared/ui/organisms/PageLoader/PageLoader.vue'
 import { usePageLoading } from '@/src/shared/composables/usePageLoading'
 
-// Типизация props
+// РўРёРїРёР·Р°С†РёСЏ props
 interface DashboardCounts {
   ads: number
   bookings: number
@@ -56,7 +56,7 @@ interface DashboardProps {
   userStats: UserStats
 }
 
-// Props из Inertia с типизацией
+// Props РёР· Inertia СЃ С‚РёРїРёР·Р°С†РёРµР№
 const props = withDefaults(defineProps<DashboardProps>(), {
   ads: () => [],
   counts: () => ({
@@ -77,7 +77,7 @@ const props = withDefaults(defineProps<DashboardProps>(), {
   })
 })
 
-// Управление загрузкой страницы
+// РЈРїСЂР°РІР»РµРЅРёРµ Р·Р°РіСЂСѓР·РєРѕР№ СЃС‚СЂР°РЅРёС†С‹
 const pageLoader = usePageLoading({
   type: 'dashboard',
   autoStart: true,
@@ -94,35 +94,35 @@ const pageLoader = usePageLoading({
   }
 })
 
-// Обработчики загрузки данных
+// РћР±СЂР°Р±РѕС‚С‡РёРєРё Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
 const handleStatsLoading = (): void => {
-  pageLoader.setProgress(60, 'Загружаем статистику...')
+  pageLoader.setProgress(60, 'Р—Р°РіСЂСѓР¶Р°РµРј СЃС‚Р°С‚РёСЃС‚РёРєСѓ...')
 }
 
 const handleDataLoaded = (): void => {
-  pageLoader.setProgress(90, 'Финализация данных...')
+  pageLoader.setProgress(90, 'Р¤РёРЅР°Р»РёР·Р°С†РёСЏ РґР°РЅРЅС‹С…...')
   setTimeout(() => {
     pageLoader.completeLoading()
   }, 500)
 }
 
-// Логика загрузки при монтировании
+// Р›РѕРіРёРєР° Р·Р°РіСЂСѓР·РєРё РїСЂРё РјРѕРЅС‚РёСЂРѕРІР°РЅРёРё
 onMounted(() => {
-  // Поэтапная загрузка для лучшего UX
+  // РџРѕСЌС‚Р°РїРЅР°СЏ Р·Р°РіСЂСѓР·РєР° РґР»СЏ Р»СѓС‡С€РµРіРѕ UX
   setTimeout(() => {
-    pageLoader.setProgress(20, 'Загружаем счетчики...')
+    pageLoader.setProgress(20, 'Р—Р°РіСЂСѓР¶Р°РµРј СЃС‡РµС‚С‡РёРєРё...')
   }, 300)
 
   setTimeout(() => {
-    pageLoader.setProgress(40, 'Загружаем объявления...')
+    pageLoader.setProgress(40, 'Р—Р°РіСЂСѓР¶Р°РµРј РѕР±СЉСЏРІР»РµРЅРёСЏ...')
   }, 800)
 
   setTimeout(() => {
-    pageLoader.setProgress(70, 'Обрабатываем статистику...')
+    pageLoader.setProgress(70, 'РћР±СЂР°Р±Р°С‚С‹РІР°РµРј СЃС‚Р°С‚РёСЃС‚РёРєСѓ...')
   }, 1200)
 
   setTimeout(() => {
-    pageLoader.setProgress(90, 'Подготавливаем интерфейс...')
+    pageLoader.setProgress(90, 'РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј РёРЅС‚РµСЂС„РµР№СЃ...')
   }, 1600)
 
   setTimeout(() => {
@@ -132,7 +132,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Плавные переходы между состояниями */
+/* РџР»Р°РІРЅС‹Рµ РїРµСЂРµС…РѕРґС‹ РјРµР¶РґСѓ СЃРѕСЃС‚РѕСЏРЅРёСЏРјРё */
 .dashboard-transition-enter-active,
 .dashboard-transition-leave-active {
   transition: all 0.3s ease;

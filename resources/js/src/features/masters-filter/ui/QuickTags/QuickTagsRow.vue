@@ -1,17 +1,17 @@
 <!-- resources/js/Components/Filters/ServiceFilter.vue (fixed) -->
 <template>
   <div>
-    <h4 class="text-sm font-medium mb-2">Услуга</h4>
+    <h4 class="text-sm font-medium mb-2">РЈСЃР»СѓРіР°</h4>
 
-    <!-- Поиск по списку -->
+    <!-- РџРѕРёСЃРє РїРѕ СЃРїРёСЃРєСѓ -->
     <input
       v-model="search"
       type="text"
-      placeholder="Найти услугу…"
+      placeholder="РќР°Р№С‚Рё СѓСЃР»СѓРіСѓвЂ¦"
       class="mb-2 w-full border rounded px-2 py-1 text-sm"
     />
 
-    <!-- Список чекбоксов -->
+    <!-- РЎРїРёСЃРѕРє С‡РµРєР±РѕРєСЃРѕРІ -->
     <div class="max-h-60 overflow-y-auto pr-1 space-y-1">
       <label
         v-for="opt in filteredOptions"
@@ -33,23 +33,23 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 
-/* ─── props & emits ─── */
+/* в”Ђв”Ђв”Ђ props & emits в”Ђв”Ђв”Ђ */
 const emit = defineEmits(['update:modelValue'])
 const props = defineProps({
-  /** Выбранные услуги */
+  /** Р’С‹Р±СЂР°РЅРЅС‹Рµ СѓСЃР»СѓРіРё */
   modelValue: { type: Array, default: () => [] },
-  /** Массив { value, label } всех доступных услуг */
+  /** РњР°СЃСЃРёРІ { value, label } РІСЃРµС… РґРѕСЃС‚СѓРїРЅС‹С… СѓСЃР»СѓРі */
   options:    { type: Array, default: () => [] },
 })
 
-/* ─── локальное состояние ─── */
+/* в”Ђв”Ђв”Ђ Р»РѕРєР°Р»СЊРЅРѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ в”Ђв”Ђв”Ђ */
 const search        = ref('')
-// всегда массив, даже если сверху пришёл null/undefined
+// РІСЃРµРіРґР° РјР°СЃСЃРёРІ, РґР°Р¶Рµ РµСЃР»Рё СЃРІРµСЂС…Сѓ РїСЂРёС€С‘Р» null/undefined
 const localSelected = ref(Array.isArray(props.modelValue) ? [...props.modelValue] : [])
 
-/* синхронизация вниз → вверх */
+/* СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёСЏ РІРЅРёР· в†’ РІРІРµСЂС… */
 watch(localSelected, v => emit('update:modelValue', v))
-/* и наоборот (если родитель сбросил фильтр) */
+/* Рё РЅР°РѕР±РѕСЂРѕС‚ (РµСЃР»Рё СЂРѕРґРёС‚РµР»СЊ СЃР±СЂРѕСЃРёР» С„РёР»СЊС‚СЂ) */
 watch(
   () => props.modelValue,
   v => {
@@ -58,7 +58,7 @@ watch(
   },
 )
 
-/* ─── поиск по списку ─── */
+/* в”Ђв”Ђв”Ђ РїРѕРёСЃРє РїРѕ СЃРїРёСЃРєСѓ в”Ђв”Ђв”Ђ */
 const filteredOptions = computed(() => {
   const q = search.value.trim().toLowerCase()
   return q
@@ -66,3 +66,5 @@ const filteredOptions = computed(() => {
     : props.options
 })
 </script>
+
+

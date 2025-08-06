@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Head, useForm } from '@inertiajs/vue3'
+import { route } from 'ziggy-js'
 import { RegisterModal } from '@/src/features/auth/ui/RegisterModal'
 
 interface RegisterForm {
@@ -19,23 +20,23 @@ const form = useForm<RegisterForm>({
 
 const showModal = ref<boolean>(true)
 
-const submit = (): void => {
-  form.post(route('register'), {
-    onFinish: () => form.reset('password', 'password_confirmation'),
-  })
-}
+// const submit = (): void => {
+//   form.post(route('register'), {
+//     onFinish: () => form.reset('password', 'password_confirmation'),
+//   })
+// }
 
 const closeModal = (): void => {
   showModal.value = false
-  // Перенаправляем на главную страницу
+  // РџРµСЂРµРЅР°РїСЂР°РІР»СЏРµРј РЅР° РіР»Р°РІРЅСѓСЋ СЃС‚СЂР°РЅРёС†Сѓ
   window.location.href = '/'
 }
 </script>
 
 <template>
-    <Head title="Регистрация" />
+    <Head title="Р РµРіРёСЃС‚СЂР°С†РёСЏ" />
 
-    <!-- Модальное окно регистрации -->
+    <!-- РњРѕРґР°Р»СЊРЅРѕРµ РѕРєРЅРѕ СЂРµРіРёСЃС‚СЂР°С†РёРё -->
     <RegisterModal 
         :show="showModal" 
         @close="closeModal"

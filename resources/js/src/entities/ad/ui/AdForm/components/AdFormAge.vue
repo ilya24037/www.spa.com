@@ -21,7 +21,7 @@ const props = withDefaults(defineProps<{
   placeholder?: string
 }>(), {
   label: 'Age',
-  placeholder: 'Введите значение'
+  placeholder: 'Р’РІРµРґРёС‚Рµ Р·РЅР°С‡РµРЅРёРµ'
 })
 
 const emit = defineEmits<{
@@ -33,3 +33,4 @@ const localValue = computed({
   set: (value) => emit('update:modelValue', value)
 })
 </script>
+

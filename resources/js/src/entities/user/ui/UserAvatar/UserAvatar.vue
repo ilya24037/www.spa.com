@@ -48,7 +48,7 @@ const initials = computed(() => {
   if (!props.name) return '?'
   const names = props.name.trim().split(' ')
   if (names.length >= 2) {
-    return names[0][0] + names[names.length - 1][0]
+    return (names[0]?.[0] || '') + (names[names.length - 1]?.[0] || '')
   }
   return props.name.substring(0, 2).toUpperCase()
 })

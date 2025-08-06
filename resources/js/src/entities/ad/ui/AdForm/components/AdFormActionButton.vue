@@ -28,14 +28,14 @@
       />
     </svg>
     
-    <!-- Иконка -->
+    <!-- РРєРѕРЅРєР° -->
     <component 
       v-else-if="icon" 
       :is="icon" 
       :class="iconClasses"
     />
     
-    <!-- Текст -->
+    <!-- РўРµРєСЃС‚ -->
     <span>
       <slot />
     </span>
@@ -45,7 +45,7 @@
 <script setup>
 import { computed } from 'vue'
 
-// 🎯 Стили согласно дизайн-системе
+// рџЋЇ РЎС‚РёР»Рё СЃРѕРіР»Р°СЃРЅРѕ РґРёР·Р°Р№РЅ-СЃРёСЃС‚РµРјРµ
 const BASE_CLASSES = 'inline-flex items-center justify-center gap-2 font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2'
 const DISABLED_CLASSES = 'opacity-50 cursor-not-allowed'
 
@@ -117,7 +117,7 @@ const props = defineProps({
 
 defineEmits(['click'])
 
-// Вычисляемые свойства
+// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const buttonClasses = computed(() => {
   const variant = VARIANTS[props.variant]
   const size = SIZES[props.size]

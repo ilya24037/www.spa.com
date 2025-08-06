@@ -4,14 +4,31 @@ namespace App\Domain\Search\Engines;
 
 use App\Domain\Ad\Models\Ad;
 use App\Domain\Search\Services\BaseSearchEngine;
+use App\Domain\Search\Engines\Filters\AdFilterService;
+use App\Domain\Search\Engines\Filters\AdSimilarityFilter;
+use App\Domain\Search\Engines\Facets\AdFacetCalculator;
+use App\Domain\Search\Engines\Formatters\AdResultFormatter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Движок поиска объявлений
+ * Движок поиска объявлений - координатор
  */
 class AdSearchEngine extends BaseSearchEngine
 {
+    protected AdFilterService $filterService;
+    protected AdSimilarityFilter $similarityFilter;
+    protected AdFacetCalculator $facetCalculator;
+    protected AdResultFormatter $resultFormatter;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->filterService = new AdFilterService();
+        $this->similarityFilter = new AdSimilarityFilter();
+        $this->facetCalculator = new AdFacetCalculator();
+        $this->resultFormatter = new AdResultFormatter();
+    }
     /**
      * Получить базовый запрос
      */
@@ -76,12 +93,13 @@ class AdSearchEngine extends BaseSearchEngine
      */
     protected function applyFilters(Builder $builder, array $filters): void
     {
-        // Город
-        if (!empty($filters['city'])) {
-            $builder->where('ads.city', $filters['city']);
-        }
-
-        // Диапазон цен
+        $this->filterService->applyBasicFilters($builder, $filters);
+        $this->filterService->applyPriceFilters($builder, $filters);
+        $this->filterService->applyRatingFilters($builder, $filters);
+        $this->filterService->applyAvailabilityFilters($builder, $filters);
+        $this->filterService->applyDateFilters($builder, $filters);
+        
+        // Особые фильтры
         if (!empty($filters['price_range'])) {
             if (is_array($filters['price_range'])) {
                 [$min, $max] = $filters['price_range'];
@@ -91,76 +109,12 @@ class AdSearchEngine extends BaseSearchEngine
             $builder->whereBetween('ads.price', [(int)$min, (int)$max]);
         }
 
-        // Минимальный рейтинг мастера
         if (!empty($filters['rating'])) {
             $builder->where('users.rating', '>=', (float)$filters['rating']);
         }
 
-        // Опыт мастера
         if (!empty($filters['experience'])) {
             $builder->where('users.experience_years', '>=', (int)$filters['experience']);
-        }
-
-        // Тип услуги
-        if (!empty($filters['service_type'])) {
-            $builder->where('ads.specialty', $filters['service_type']);
-        }
-
-        // Доступность
-        if (!empty($filters['availability'])) {
-            $builder->where('ads.is_available', true);
-        }
-
-        // Тип объявления
-        if (!empty($filters['ad_type'])) {
-            $builder->where('ads.ad_type', $filters['ad_type']);
-        }
-
-        // Формат работы
-        if (!empty($filters['work_format'])) {
-            $builder->where('ads.work_format', $filters['work_format']);
-        }
-
-        // Проверенные мастера
-        if (!empty($filters['verified'])) {
-            $builder->where('users.is_verified', true);
-        }
-
-        // Дата создания
-        if (!empty($filters['created_since'])) {
-            $builder->where('ads.created_at', '>=', $filters['created_since']);
-        }
-
-        // Наличие фото
-        if (!empty($filters['has_photos'])) {
-            $builder->whereHas('media', function($q) {
-                $q->where('type', 'image');
-            });
-        }
-
-        // Наличие отзывов
-        if (!empty($filters['has_reviews'])) {
-            $builder->where('users.reviews_count', '>', 0);
-        }
-
-        // Минимальное количество отзывов
-        if (!empty($filters['min_reviews'])) {
-            $builder->where('users.reviews_count', '>=', (int)$filters['min_reviews']);
-        }
-
-        // Премиум объявления
-        if (!empty($filters['premium'])) {
-            $builder->where('ads.is_premium', true);
-        }
-
-        // Регион/область
-        if (!empty($filters['region'])) {
-            $builder->where('ads.region', $filters['region']);
-        }
-
-        // Метро (если есть)
-        if (!empty($filters['metro'])) {
-            $builder->where('ads.metro_station', $filters['metro']);
         }
     }
 
@@ -177,16 +131,7 @@ class AdSearchEngine extends BaseSearchEngine
      */
     protected function formatQuickResult($item): array
     {
-        return [
-            'id' => $item->id,
-            'title' => $item->title,
-            'price' => $item->price,
-            'city' => $item->city,
-            'master_name' => $item->user->name,
-            'master_rating' => $item->user->rating,
-            'image' => $item->media->first()?->url,
-            'url' => route('ads.show', $item->id),
-        ];
+        return $this->resultFormatter->formatQuickResult($item);
     }
 
     /**
@@ -194,18 +139,7 @@ class AdSearchEngine extends BaseSearchEngine
      */
     protected function formatSimilarResult($item): array
     {
-        return [
-            'id' => $item->id,
-            'title' => $item->title,
-            'price' => $item->price,
-            'city' => $item->city,
-            'specialty' => $item->specialty,
-            'master_name' => $item->user->name,
-            'master_rating' => $item->user->rating,
-            'similarity_score' => $item->similarity_score ?? 0,
-            'image' => $item->media->first()?->url,
-            'url' => route('ads.show', $item->id),
-        ];
+        return $this->resultFormatter->formatSimilarResult($item);
     }
 
     /**
@@ -213,18 +147,7 @@ class AdSearchEngine extends BaseSearchEngine
      */
     protected function formatGeoResult($item): array
     {
-        return [
-            'id' => $item->id,
-            'title' => $item->title,
-            'price' => $item->price,
-            'city' => $item->city,
-            'address' => $item->address,
-            'latitude' => $item->latitude,
-            'longitude' => $item->longitude,
-            'distance' => round($item->distance ?? 0, 2),
-            'master_name' => $item->user->name,
-            'url' => route('ads.show', $item->id),
-        ];
+        return $this->resultFormatter->formatGeoResult($item);
     }
 
     /**
@@ -232,31 +155,7 @@ class AdSearchEngine extends BaseSearchEngine
      */
     protected function applySimilarityFilters(Builder $builder, $ad): void
     {
-        // Похожие по специализации
-        $builder->where('ads.specialty', $ad->specialty);
-        
-        // Похожий ценовой диапазон (±30%)
-        $priceMin = $ad->price * 0.7;
-        $priceMax = $ad->price * 1.3;
-        $builder->whereBetween('ads.price', [$priceMin, $priceMax]);
-        
-        // Тот же город или регион
-        $builder->where(function($q) use ($ad) {
-            $q->where('ads.city', $ad->city)
-              ->orWhere('ads.region', $ad->region);
-        });
-        
-        // Добавляем счет похожести
-        $builder->addSelect(DB::raw("
-            (
-                CASE WHEN ads.specialty = '{$ad->specialty}' THEN 3 ELSE 0 END +
-                CASE WHEN ads.city = '{$ad->city}' THEN 2 ELSE 0 END +
-                CASE WHEN ads.work_format = '{$ad->work_format}' THEN 1 ELSE 0 END +
-                CASE WHEN ads.region = '{$ad->region}' THEN 1 ELSE 0 END
-            ) as similarity_score
-        "));
-        
-        $builder->orderBy('similarity_score', 'desc');
+        $this->similarityFilter->applySimilarityFilters($builder, $ad);
     }
 
     /**
@@ -264,49 +163,7 @@ class AdSearchEngine extends BaseSearchEngine
      */
     protected function applyAdvancedFilters(Builder $builder, array $criteria): void
     {
-        // Исключить объявления
-        if (!empty($criteria['exclude_ids'])) {
-            $builder->whereNotIn('ads.id', $criteria['exclude_ids']);
-        }
-
-        // Конкретные мастера
-        if (!empty($criteria['master_ids'])) {
-            $builder->whereIn('ads.user_id', $criteria['master_ids']);
-        }
-
-        // Диапазон дат
-        if (!empty($criteria['date_from'])) {
-            $builder->where('ads.created_at', '>=', $criteria['date_from']);
-        }
-        
-        if (!empty($criteria['date_to'])) {
-            $builder->where('ads.created_at', '<=', $criteria['date_to']);
-        }
-
-        // Сложные фильтры по рейтингу и отзывам
-        if (!empty($criteria['rating_reviews_combo'])) {
-            $builder->where(function($q) use ($criteria) {
-                $combo = $criteria['rating_reviews_combo'];
-                if ($combo === 'high_rated') {
-                    $q->where('users.rating', '>=', 4.5)
-                      ->where('users.reviews_count', '>=', 10);
-                } elseif ($combo === 'popular') {
-                    $q->where('users.reviews_count', '>=', 20);
-                } elseif ($combo === 'new_good') {
-                    $q->where('users.rating', '>=', 4.0)
-                      ->where('ads.created_at', '>=', now()->subDays(30));
-                }
-            });
-        }
-
-        // Радиус поиска
-        if (!empty($criteria['location']) && !empty($criteria['radius'])) {
-            $location = $criteria['location'];
-            $radius = $criteria['radius'];
-            
-            $this->addDistanceCalculation($builder, $location['lat'], $location['lng']);
-            $builder->having('distance', '<=', $radius);
-        }
+        $this->similarityFilter->applyAdvancedFilters($builder, $criteria);
     }
 
     /**
@@ -314,111 +171,7 @@ class AdSearchEngine extends BaseSearchEngine
      */
     protected function calculateFacet(Builder $builder, string $facet): array
     {
-        $clonedBuilder = clone $builder;
-        
-        return match($facet) {
-            'cities' => $this->calculateCitiesFacet($clonedBuilder),
-            'specialties' => $this->calculateSpecialtiesFacet($clonedBuilder),
-            'price_ranges' => $this->calculatePriceRangesFacet($clonedBuilder),
-            'ratings' => $this->calculateRatingsFacet($clonedBuilder),
-            'work_formats' => $this->calculateWorkFormatsFacet($clonedBuilder),
-            default => []
-        };
-    }
-
-    /**
-     * Вычислить фасет городов
-     */
-    protected function calculateCitiesFacet(Builder $builder): array
-    {
-        return $builder
-            ->select('ads.city', DB::raw('count(*) as count'))
-            ->groupBy('ads.city')
-            ->orderBy('count', 'desc')
-            ->limit(20)
-            ->pluck('count', 'city')
-            ->toArray();
-    }
-
-    /**
-     * Вычислить фасет специализаций
-     */
-    protected function calculateSpecialtiesFacet(Builder $builder): array
-    {
-        return $builder
-            ->select('ads.specialty', DB::raw('count(*) as count'))
-            ->groupBy('ads.specialty')
-            ->orderBy('count', 'desc')
-            ->limit(15)
-            ->pluck('count', 'specialty')
-            ->toArray();
-    }
-
-    /**
-     * Вычислить фасет ценовых диапазонов
-     */
-    protected function calculatePriceRangesFacet(Builder $builder): array
-    {
-        $ranges = [
-            '0-1000' => [0, 1000],
-            '1000-2000' => [1000, 2000],
-            '2000-3000' => [2000, 3000],
-            '3000-5000' => [3000, 5000],
-            '5000+' => [5000, PHP_INT_MAX],
-        ];
-        
-        $result = [];
-        foreach ($ranges as $label => $range) {
-            $count = (clone $builder)
-                ->whereBetween('ads.price', $range)
-                ->count();
-            
-            if ($count > 0) {
-                $result[$label] = $count;
-            }
-        }
-        
-        return $result;
-    }
-
-    /**
-     * Вычислить фасет рейтингов
-     */
-    protected function calculateRatingsFacet(Builder $builder): array
-    {
-        $ranges = [
-            '4.5+' => [4.5, 5.0],
-            '4.0+' => [4.0, 5.0],
-            '3.5+' => [3.5, 5.0],
-            '3.0+' => [3.0, 5.0],
-        ];
-        
-        $result = [];
-        foreach ($ranges as $label => $range) {
-            $count = (clone $builder)
-                ->whereBetween('users.rating', $range)
-                ->count();
-                
-            if ($count > 0) {
-                $result[$label] = $count;
-            }
-        }
-        
-        return $result;
-    }
-
-    /**
-     * Вычислить фасет форматов работы
-     */
-    protected function calculateWorkFormatsFacet(Builder $builder): array
-    {
-        return $builder
-            ->select('ads.work_format', DB::raw('count(*) as count'))
-            ->whereNotNull('ads.work_format')
-            ->groupBy('ads.work_format')
-            ->orderBy('count', 'desc')
-            ->pluck('count', 'work_format')
-            ->toArray();
+        return $this->facetCalculator->calculateFacet($builder, $facet);
     }
 
     /**
@@ -426,19 +179,7 @@ class AdSearchEngine extends BaseSearchEngine
      */
     protected function getCsvHeaders(): array
     {
-        return [
-            'ID',
-            'Заголовок',
-            'Описание',
-            'Цена',
-            'Город',
-            'Специализация',
-            'Мастер',
-            'Рейтинг мастера',
-            'Количество отзывов',
-            'Дата создания',
-            'URL'
-        ];
+        return $this->resultFormatter->getCsvHeaders();
     }
 
     /**
@@ -446,19 +187,7 @@ class AdSearchEngine extends BaseSearchEngine
      */
     protected function formatCsvRow($item): array
     {
-        return [
-            $item->id,
-            $item->title,
-            strip_tags($item->description),
-            $item->price,
-            $item->city,
-            $item->specialty,
-            $item->user->name,
-            $item->user->rating,
-            $item->user->reviews_count,
-            $item->created_at->format('d.m.Y H:i'),
-            route('ads.show', $item->id)
-        ];
+        return $this->resultFormatter->formatCsvRow($item);
     }
 
     /**

@@ -1,7 +1,7 @@
 <!-- resources/js/src/entities/ad/ui/AdForm/AdForm.vue -->
 <template>
   <div :class="CONTAINER_CLASSES">
-    <!-- Прогресс-бар -->
+    <!-- РџСЂРѕРіСЂРµСЃСЃ-Р±Р°СЂ -->
     <div v-if="showProgress" :class="PROGRESS_CONTAINER_CLASSES">
       <div :class="PROGRESS_BAR_CLASSES">
         <div :class="PROGRESS_FILL_CLASSES" :style="{ width: progressPercent + '%' }"></div>
@@ -9,30 +9,30 @@
       <div :class="PROGRESS_TEXT_CLASSES">{{ progressText }}</div>
     </div>
 
-    <!-- Основная форма -->
+    <!-- РћСЃРЅРѕРІРЅР°СЏ С„РѕСЂРјР° -->
     <form @submit.prevent="handleSubmit" novalidate :class="FORM_CLASSES">
       
-      <!-- ГРУППА 1: Базовая информация -->
+      <!-- Р“Р РЈРџРџРђ 1: Р‘Р°Р·РѕРІР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ -->
       <div :class="FORM_GROUP_CLASSES">
         <AdFormBasicInfo :errors="formErrors" />
       </div>
 
-      <!-- ГРУППА 2: Персональная информация -->
+      <!-- Р“Р РЈРџРџРђ 2: РџРµСЂСЃРѕРЅР°Р»СЊРЅР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ -->
       <div :class="FORM_GROUP_CLASSES">
         <AdFormPersonalInfo :errors="formErrors" />
       </div>
 
-      <!-- ГРУППА 3: Коммерческая информация -->
+      <!-- Р“Р РЈРџРџРђ 3: РљРѕРјРјРµСЂС‡РµСЃРєР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ -->
       <div :class="FORM_GROUP_CLASSES">
         <AdFormCommercialInfo :errors="formErrors" />
       </div>
 
-      <!-- ГРУППА 4: Локация и контакты -->
+      <!-- Р“Р РЈРџРџРђ 4: Р›РѕРєР°С†РёСЏ Рё РєРѕРЅС‚Р°РєС‚С‹ -->
       <div :class="FORM_GROUP_CLASSES">
         <AdFormLocationInfo :errors="formErrors" />
       </div>
 
-      <!-- ГРУППА 5: Медиа -->
+      <!-- Р“Р РЈРџРџРђ 5: РњРµРґРёР° -->
       <div :class="FORM_GROUP_CLASSES">
         <AdFormMediaInfo 
           :uploading="uploading"
@@ -45,7 +45,7 @@
         />
       </div>
 
-      <!-- Кнопки действий -->
+      <!-- РљРЅРѕРїРєРё РґРµР№СЃС‚РІРёР№ -->
       <div :class="ACTIONS_CLASSES">
         <AdFormActionButton
           variant="secondary"
@@ -53,7 +53,7 @@
           :loading="saving"
           @click="handleSaveDraft"
         >
-          {{ saving ? 'Сохранение...' : 'Сохранить черновик' }}
+          {{ saving ? 'РЎРѕС…СЂР°РЅРµРЅРёРµ...' : 'РЎРѕС…СЂР°РЅРёС‚СЊ С‡РµСЂРЅРѕРІРёРє' }}
         </AdFormActionButton>
 
         <AdFormActionButton
@@ -62,7 +62,7 @@
           :loading="saving"
           @click="handlePublish"
         >
-          {{ saving ? 'Публикация...' : 'Разместить объявление' }}
+          {{ saving ? 'РџСѓР±Р»РёРєР°С†РёСЏ...' : 'Р Р°Р·РјРµСЃС‚РёС‚СЊ РѕР±СЉСЏРІР»РµРЅРёРµ' }}
         </AdFormActionButton>
       </div>
     </form>
@@ -73,7 +73,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAdFormStore } from './stores/adFormStore'
 
-// Компоненты групп формы
+// РљРѕРјРїРѕРЅРµРЅС‚С‹ РіСЂСѓРїРї С„РѕСЂРјС‹
 import AdFormBasicInfo from './components/AdFormBasicInfo.vue'
 import AdFormPersonalInfo from './components/AdFormPersonalInfo.vue'
 import AdFormCommercialInfo from './components/AdFormCommercialInfo.vue'
@@ -81,7 +81,7 @@ import AdFormLocationInfo from './components/AdFormLocationInfo.vue'
 import AdFormMediaInfo from './components/AdFormMediaInfo.vue'
 import AdFormActionButton from './components/AdFormActionButton.vue'
 
-// 🎯 Стили согласно дизайн-системе
+// рџЋЇ РЎС‚РёР»Рё СЃРѕРіР»Р°СЃРЅРѕ РґРёР·Р°Р№РЅ-СЃРёСЃС‚РµРјРµ
 const CONTAINER_CLASSES = 'ad-form-container'
 const PROGRESS_CONTAINER_CLASSES = 'form-progress mb-6'
 const PROGRESS_BAR_CLASSES = 'w-full bg-gray-200 rounded-full h-2 mb-2'
@@ -116,17 +116,17 @@ const props = defineProps({
 
 const emit = defineEmits(['success', 'error'])
 
-// Используем Pinia store для состояния формы
+// РСЃРїРѕР»СЊР·СѓРµРј Pinia store РґР»СЏ СЃРѕСЃС‚РѕСЏРЅРёСЏ С„РѕСЂРјС‹
 const store = useAdFormStore()
 
-// Состояние компонента
+// РЎРѕСЃС‚РѕСЏРЅРёРµ РєРѕРјРїРѕРЅРµРЅС‚Р°
 const saving = ref(false)
 const uploading = ref(false)
 const uploadProgress = ref(0)
 const uploadingVideo = ref(false)
 const videoUploadProgress = ref(0)
 
-// Инициализация store
+// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ store
 onMounted(() => {
   store.initializeForm(props.initialData, {
     adId: props.adId,
@@ -135,7 +135,7 @@ onMounted(() => {
   })
 })
 
-// Вычисляемые свойства
+// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const formData = computed(() => store.formData)
 const formErrors = computed(() => store.errors)
 
@@ -144,13 +144,13 @@ const progressPercent = computed(() => {
 })
 
 const progressText = computed(() => {
-  return `Заполнено ${progressPercent.value}%`
+  return `Р—Р°РїРѕР»РЅРµРЅРѕ ${progressPercent.value}%`
 })
 
-// Методы
+// РњРµС‚РѕРґС‹
 const handleSubmit = async () => {
-  // Проверяем какая кнопка была нажата
-  // Логика обработки будет в соответствующих методах
+  // РџСЂРѕРІРµСЂСЏРµРј РєР°РєР°СЏ РєРЅРѕРїРєР° Р±С‹Р»Р° РЅР°Р¶Р°С‚Р°
+  // Р›РѕРіРёРєР° РѕР±СЂР°Р±РѕС‚РєРё Р±СѓРґРµС‚ РІ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёС… РјРµС‚РѕРґР°С…
 }
 
 const handleSaveDraft = async () => {
@@ -207,3 +207,4 @@ const handleVideoError = (error) => {
   @apply sticky bottom-0 bg-white p-4 border-t border-gray-200;
 }
 </style>
+

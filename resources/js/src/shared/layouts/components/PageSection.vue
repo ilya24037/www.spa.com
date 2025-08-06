@@ -18,7 +18,7 @@
 <script setup>
 import { computed } from 'vue'
 
-// 🎯 Стили в соответствии с Tailwind CSS
+// рџЋЇ РЎС‚РёР»Рё РІ СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРё СЃ Tailwind CSS
 const SECTION_CLASSES = 'mb-10 py-6 last:mb-0'
 const HEADER_CLASSES = 'mb-6'
 const TITLE_CLASSES = 'text-xl font-semibold text-gray-900 mb-2'
@@ -46,10 +46,10 @@ const sectionId = computed(() => {
 })
 
 const hasActions = computed(() => {
-  // В Composition API проверяем наличие слотов через $slots
+  // Р’ Composition API РїСЂРѕРІРµСЂСЏРµРј РЅР°Р»РёС‡РёРµ СЃР»РѕС‚РѕРІ С‡РµСЂРµР· $slots
   return !!getCurrentInstance()?.slots.actions
 })
 
-// Получаем экземпляр компонента для доступа к слотам
+// РџРѕР»СѓС‡Р°РµРј СЌРєР·РµРјРїР»СЏСЂ РєРѕРјРїРѕРЅРµРЅС‚Р° РґР»СЏ РґРѕСЃС‚СѓРїР° Рє СЃР»РѕС‚Р°Рј
 import { getCurrentInstance } from 'vue'
 </script>

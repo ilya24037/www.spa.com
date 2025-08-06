@@ -105,19 +105,19 @@ import { Button } from '@/src/shared/ui/atoms/Button'
 import { useId } from '@/shared/composables'
 import type { ButtonVariant } from '@/src/shared/ui/atoms/Button'
 
-// TypeScript типы
+// TypeScript С‚РёРїС‹
 export interface ModalProps {
-  // Видимость
+  // Р’РёРґРёРјРѕСЃС‚СЊ
   show?: boolean
   
-  // Содержимое
+  // РЎРѕРґРµСЂР¶РёРјРѕРµ
   title?: string
   message?: string
   
-  // Размеры
+  // Р Р°Р·РјРµСЂС‹
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | 'full'
   
-  // Кнопки
+  // РљРЅРѕРїРєРё
   showFooter?: boolean
   showConfirmButton?: boolean
   showCancelButton?: boolean
@@ -125,16 +125,16 @@ export interface ModalProps {
   cancelText?: string
   confirmVariant?: ButtonVariant
   
-  // Поведение
+  // РџРѕРІРµРґРµРЅРёРµ
   closeable?: boolean
   closeOnEscape?: boolean
   closeOnBackdrop?: boolean
   loading?: boolean
   
-  // Стили
+  // РЎС‚РёР»Рё
   customClass?: string
   
-  // Доступность
+  // Р”РѕСЃС‚СѓРїРЅРѕСЃС‚СЊ
   closeLabel?: string
 }
 
@@ -145,14 +145,14 @@ const props = withDefaults(defineProps<ModalProps>(), {
   showFooter: false,
   showConfirmButton: true,
   showCancelButton: true,
-  confirmText: 'Подтвердить',
-  cancelText: 'Отмена',
+  confirmText: 'РџРѕРґС‚РІРµСЂРґРёС‚СЊ',
+  cancelText: 'РћС‚РјРµРЅР°',
   confirmVariant: 'primary',
   closeable: true,
   closeOnEscape: true,
   closeOnBackdrop: true,
   loading: false,
-  closeLabel: 'Закрыть окно'
+  closeLabel: 'Р—Р°РєСЂС‹С‚СЊ РѕРєРЅРѕ'
 })
 
 // Emits
@@ -167,7 +167,7 @@ const emit = defineEmits<{
 // Refs
 const modalRef = ref<HTMLElement>()
 
-// IDs для доступности
+// IDs РґР»СЏ РґРѕСЃС‚СѓРїРЅРѕСЃС‚Рё
 const titleId = useId('modal-title')
 const descriptionId = useId('modal-description')
 
@@ -187,7 +187,7 @@ const maxWidthClass = computed(() => {
   return widths[props.maxWidth] || widths['2xl']
 })
 
-// Методы
+// РњРµС‚РѕРґС‹
 const close = () => {
   emit('update:show', false)
   emit('close')
@@ -211,7 +211,7 @@ const handleBackdropClick = () => {
   }
 }
 
-// Обработка ESC
+// РћР±СЂР°Р±РѕС‚РєР° ESC
 const handleEscape = (event: KeyboardEvent) => {
   if (event.key === 'Escape' && props.show && props.closeOnEscape && props.closeable) {
     close()
@@ -247,7 +247,7 @@ const trapFocus = () => {
   
   modalRef.value.addEventListener('keydown', handleTab)
   
-  // Focus первый элемент
+  // Focus РїРµСЂРІС‹Р№ СЌР»РµРјРµРЅС‚
   nextTick(() => {
     firstFocusable?.focus()
   })
@@ -257,7 +257,7 @@ const trapFocus = () => {
   }
 }
 
-// Блокировка скролла body
+// Р‘Р»РѕРєРёСЂРѕРІРєР° СЃРєСЂРѕР»Р»Р° body
 const lockBodyScroll = () => {
   const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
   document.body.style.paddingRight = `${scrollbarWidth}px`
@@ -269,14 +269,14 @@ const lockBodyScroll = () => {
   }
 }
 
-// Watch для show
+// Watch РґР»СЏ show
 watch(() => props.show, async (newValue) => {
   if (newValue) {
     await nextTick()
     const unlockScroll = lockBodyScroll()
     const removeFocusTrap = trapFocus()
     
-    // Сохраняем функции очистки
+    // РЎРѕС…СЂР°РЅСЏРµРј С„СѓРЅРєС†РёРё РѕС‡РёСЃС‚РєРё
     onUnmounted(() => {
       unlockScroll()
       removeFocusTrap?.()
@@ -362,3 +362,4 @@ onUnmounted(() => {
   }
 }
 </style>
+

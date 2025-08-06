@@ -1,35 +1,35 @@
 <!-- resources/js/src/features/map/ui/UniversalMap/MapControls.vue -->
 <template>
   <div :class="CONTAINER_CLASSES">
-    <!-- Зум + -->
+    <!-- Р—СѓРј + -->
     <button
       @click="$emit('zoom-in')"
       :disabled="!canZoomIn"
       :class="getControlButtonClasses()"
-      title="Приблизить"
+      title="РџСЂРёР±Р»РёР·РёС‚СЊ"
     >
       <svg :class="ICON_CLASSES" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
       </svg>
     </button>
 
-    <!-- Зум - -->
+    <!-- Р—СѓРј - -->
     <button
       @click="$emit('zoom-out')"
       :disabled="!canZoomOut"
       :class="getControlButtonClasses()"
-      title="Отдалить"
+      title="РћС‚РґР°Р»РёС‚СЊ"
     >
       <svg :class="ICON_CLASSES" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6"/>
       </svg>
     </button>
 
-    <!-- Моя локация -->
+    <!-- РњРѕСЏ Р»РѕРєР°С†РёСЏ -->
     <button
       @click="$emit('my-location')"
       :class="getControlButtonClasses()"
-      title="Моя локация"
+      title="РњРѕСЏ Р»РѕРєР°С†РёСЏ"
     >
       <svg :class="ICON_CLASSES" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
@@ -37,18 +37,18 @@
       </svg>
     </button>
 
-    <!-- Полный экран -->
+    <!-- РџРѕР»РЅС‹Р№ СЌРєСЂР°РЅ -->
     <button
       @click="$emit('fullscreen')"
       :class="getControlButtonClasses()"
-      title="Полный экран"
+      title="РџРѕР»РЅС‹Р№ СЌРєСЂР°РЅ"
     >
       <svg :class="ICON_CLASSES" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
       </svg>
     </button>
 
-    <!-- Показатель зума -->
+    <!-- РџРѕРєР°Р·Р°С‚РµР»СЊ Р·СѓРјР° -->
     <div :class="ZOOM_INDICATOR_CLASSES">
       {{ zoom }}x
     </div>
@@ -56,7 +56,7 @@
 </template>
 
 <script setup>
-// 🎯 Стили согласно дизайн-системе
+// рџЋЇ РЎС‚РёР»Рё СЃРѕРіР»Р°СЃРЅРѕ РґРёР·Р°Р№РЅ-СЃРёСЃС‚РµРјРµ
 const CONTAINER_CLASSES = 'absolute top-4 right-4 flex flex-col gap-2 z-20'
 const CONTROL_BUTTON_BASE_CLASSES = 'bg-white p-2 rounded shadow hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
 const ICON_CLASSES = 'w-4 h-4'
@@ -79,7 +79,7 @@ const props = defineProps({
 
 defineEmits(['zoom-in', 'zoom-out', 'my-location', 'fullscreen'])
 
-// Методы
+// РњРµС‚РѕРґС‹
 const getControlButtonClasses = () => {
   return CONTROL_BUTTON_BASE_CLASSES
 }

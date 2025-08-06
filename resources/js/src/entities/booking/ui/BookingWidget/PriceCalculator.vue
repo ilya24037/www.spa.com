@@ -2,10 +2,10 @@
 <template>
   <div class="price-block">
     <div class="text-3xl font-bold text-gray-900">
-      {{ formatPrice(displayPrice) }} ₽
+      {{ formatPrice(displayPrice) }} в‚Ѕ
     </div>
     <div v-if="discount" class="text-sm text-green-600">
-      Скидка {{ discount }}%
+      РЎРєРёРґРєР° {{ discount }}%
     </div>
   </div>
 </template>

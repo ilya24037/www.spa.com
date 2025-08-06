@@ -5,11 +5,11 @@
       <slot name="filters">
         <FilterPanel @apply="handleFiltersApply" @reset="handleFiltersReset">
           <FilterCategory 
-            title="Категории услуг"
-            icon="🏷️"
+            title="РљР°С‚РµРіРѕСЂРёРё СѓСЃР»СѓРі"
+            icon="рџЏ·пёЏ"
             :count="filterStore.filters.services.length"
           >
-            <!-- Здесь будет содержимое фильтра категорий -->
+            <!-- Р—РґРµСЃСЊ Р±СѓРґРµС‚ СЃРѕРґРµСЂР¶РёРјРѕРµ С„РёР»СЊС‚СЂР° РєР°С‚РµРіРѕСЂРёР№ -->
             <div class="space-y-2">
               <label v-for="category in availableCategories" :key="category.id" class="flex items-center">
                 <input 
@@ -37,14 +37,14 @@
     <div v-else-if="error" class="text-center py-12">
       <p class="text-red-500 mb-4">{{ error }}</p>
       <button @click="$emit('retry')" class="px-4 py-2 bg-blue-600 text-white rounded-lg">
-        Попробовать снова
+        РџРѕРїСЂРѕР±РѕРІР°С‚СЊ СЃРЅРѕРІР°
       </button>
     </div>
     
     <!-- Empty -->
     <div v-else-if="!masters || masters.length === 0" class="text-center py-12">
-      <p class="text-gray-500 text-lg mb-4">Мастера не найдены</p>
-      <p class="text-gray-400">Попробуйте изменить параметры поиска</p>
+      <p class="text-gray-500 text-lg mb-4">РњР°СЃС‚РµСЂР° РЅРµ РЅР°Р№РґРµРЅС‹</p>
+      <p class="text-gray-400">РџРѕРїСЂРѕР±СѓР№С‚Рµ РёР·РјРµРЅРёС‚СЊ РїР°СЂР°РјРµС‚СЂС‹ РїРѕРёСЃРєР°</p>
     </div>
     
     <!-- Grid -->
@@ -74,7 +74,7 @@ interface Props {
   availableCategories?: any[]
 }
 
-const props = withDefaults(defineProps<Props>(), {
+const _props = withDefaults(defineProps<Props>(), {
   masters: () => [],
   loading: false,
   error: '',
@@ -88,10 +88,10 @@ const emit = defineEmits<{
   filtersReset: []
 }>()
 
-// Store для фильтров
+// Store РґР»СЏ С„РёР»СЊС‚СЂРѕРІ
 const filterStore = useFilterStore()
 
-// Обработчики фильтров
+// РћР±СЂР°Р±РѕС‚С‡РёРєРё С„РёР»СЊС‚СЂРѕРІ
 const handleFiltersApply = () => {
   emit('filtersApply', filterStore.filters)
 }
@@ -101,9 +101,9 @@ const handleFiltersReset = () => {
   emit('filtersReset')
 }
 
-// Методы для работы с категориями
+// РњРµС‚РѕРґС‹ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ РєР°С‚РµРіРѕСЂРёСЏРјРё
 const isCategorySelected = (categoryId: number): boolean => {
-  // Простая проверка - считаем что категория выбрана если есть хоть один сервис
+  // РџСЂРѕСЃС‚Р°СЏ РїСЂРѕРІРµСЂРєР° - СЃС‡РёС‚Р°РµРј С‡С‚Рѕ РєР°С‚РµРіРѕСЂРёСЏ РІС‹Р±СЂР°РЅР° РµСЃР»Рё РµСЃС‚СЊ С…РѕС‚СЊ РѕРґРёРЅ СЃРµСЂРІРёСЃ
   return filterStore.filters.services.includes(categoryId)
 }
 
@@ -116,3 +116,4 @@ const handleCategoryChange = (categoryId: number, event: Event) => {
   }
 }
 </script>
+

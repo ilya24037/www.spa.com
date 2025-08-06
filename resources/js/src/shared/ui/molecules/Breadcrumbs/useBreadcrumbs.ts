@@ -5,7 +5,7 @@
  * const { breadcrumbs, addItem, updateItem, generateFromRoute } = useBreadcrumbs()
  */
 
-import { computed, reactive } from 'vue'
+import { ref, computed, reactive, readonly } from 'vue'
 import type { 
   BreadcrumbItem, 
   BreadcrumbsOptions, 

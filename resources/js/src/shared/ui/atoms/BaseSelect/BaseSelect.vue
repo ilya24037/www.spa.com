@@ -1,4 +1,4 @@
-<!-- Базовый селект в стиле Авито -->
+<!-- Р‘Р°Р·РѕРІС‹Р№ СЃРµР»РµРєС‚ РІ СЃС‚РёР»Рµ РђРІРёС‚Рѕ -->
 <template>
   <div class="select-container">
     <label v-if="label" class="select-label">{{ label }}</label>
@@ -82,7 +82,7 @@ const props = defineProps({
   },
   placeholder: {
     type: String,
-    default: 'Выберите...'
+    default: 'Р’С‹Р±РµСЂРёС‚Рµ...'
   },
   label: {
     type: String,
@@ -273,7 +273,7 @@ onUnmounted(() => {
   line-height: 1.4;
 }
 
-/* Скроллбар для dropdown */
+/* РЎРєСЂРѕР»Р»Р±Р°СЂ РґР»СЏ dropdown */
 .custom-select-dropdown::-webkit-scrollbar {
   width: 6px;
 }
@@ -291,3 +291,4 @@ onUnmounted(() => {
   background: #a8a8a8;
 }
 </style> 
+

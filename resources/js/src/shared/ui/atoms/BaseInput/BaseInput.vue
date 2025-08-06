@@ -1,4 +1,4 @@
-<!-- Базовый инпут в стиле Авито -->
+<!-- Р‘Р°Р·РѕРІС‹Р№ РёРЅРїСѓС‚ РІ СЃС‚РёР»Рµ РђРІРёС‚Рѕ -->
 <template>
   <div class="input-container">
     <label v-if="label" class="input-label">{{ label }}</label>
@@ -33,7 +33,7 @@
         @keydown.enter="$emit('enter')"
       />
       
-      <!-- Кнопка очистки -->
+      <!-- РљРЅРѕРїРєР° РѕС‡РёСЃС‚РєРё -->
              <button
          v-if="clearable && inputValue && !disabled && !Readonly"
          type="button"
@@ -52,20 +52,20 @@
          </svg>
        </button>
       
-      <!-- Префикс -->
+      <!-- РџСЂРµС„РёРєСЃ -->
       <div v-if="prefix" class="input-prefix">{{ prefix }}</div>
       
-      <!-- Суффикс -->
+      <!-- РЎСѓС„С„РёРєСЃ -->
       <div v-if="suffix" class="input-suffix">{{ suffix }}</div>
     </div>
     
-    <!-- Ошибка -->
+    <!-- РћС€РёР±РєР° -->
     <div v-if="error" class="input-error">{{ error }}</div>
     
-    <!-- Подсказка -->
+    <!-- РџРѕРґСЃРєР°Р·РєР° -->
     <div v-if="hint && !error" class="input-hint">{{ hint }}</div>
     
-    <!-- Счетчик символов -->
+    <!-- РЎС‡РµС‚С‡РёРє СЃРёРјРІРѕР»РѕРІ -->
     <div v-if="maxlength && showCounter" class="input-counter">
       {{ inputValue.length }}/{{ maxlength }}
     </div>
@@ -166,26 +166,26 @@ const inputValue = computed({
 const handleInput = (event) => {
   let value = event.target.value
   
-  // Для числовых инпутов - более мягкая обработка
+  // Р”Р»СЏ С‡РёСЃР»РѕРІС‹С… РёРЅРїСѓС‚РѕРІ - Р±РѕР»РµРµ РјСЏРіРєР°СЏ РѕР±СЂР°Р±РѕС‚РєР°
   if (props.type === 'number') {
-    // Разрешаем пустое значение, минус, точку и цифры
+    // Р Р°Р·СЂРµС€Р°РµРј РїСѓСЃС‚РѕРµ Р·РЅР°С‡РµРЅРёРµ, РјРёРЅСѓСЃ, С‚РѕС‡РєСѓ Рё С†РёС„СЂС‹
     if (value === '' || value === '-' || value === '.' || value === '-.') {
       emit('update:modelValue', value)
       return
     }
     
-    // Проверяем что это допустимое число (включая частично введенные)
+    // РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ СЌС‚Рѕ РґРѕРїСѓСЃС‚РёРјРѕРµ С‡РёСЃР»Рѕ (РІРєР»СЋС‡Р°СЏ С‡Р°СЃС‚РёС‡РЅРѕ РІРІРµРґРµРЅРЅС‹Рµ)
     if (/^-?\d*\.?\d*$/.test(value)) {
       const numValue = parseFloat(value)
       
-      // Если это полное число, проверяем ограничения
+      // Р•СЃР»Рё СЌС‚Рѕ РїРѕР»РЅРѕРµ С‡РёСЃР»Рѕ, РїСЂРѕРІРµСЂСЏРµРј РѕРіСЂР°РЅРёС‡РµРЅРёСЏ
       if (!isNaN(numValue)) {
         if (props.min !== null && numValue < props.min) {
-          // Не блокируем ввод, просто не применяем ограничение сразу
+          // РќРµ Р±Р»РѕРєРёСЂСѓРµРј РІРІРѕРґ, РїСЂРѕСЃС‚Рѕ РЅРµ РїСЂРёРјРµРЅСЏРµРј РѕРіСЂР°РЅРёС‡РµРЅРёРµ СЃСЂР°Р·Сѓ
           emit('update:modelValue', value)
           return
         } else if (props.max !== null && numValue > props.max) {
-          // Не блокируем ввод, просто не применяем ограничение сразу
+          // РќРµ Р±Р»РѕРєРёСЂСѓРµРј РІРІРѕРґ, РїСЂРѕСЃС‚Рѕ РЅРµ РїСЂРёРјРµРЅСЏРµРј РѕРіСЂР°РЅРёС‡РµРЅРёРµ СЃСЂР°Р·Сѓ
           emit('update:modelValue', value)
           return
         }
@@ -193,7 +193,7 @@ const handleInput = (event) => {
       
       emit('update:modelValue', value)
     }
-    // Если паттерн не подходит, игнорируем ввод
+    // Р•СЃР»Рё РїР°С‚С‚РµСЂРЅ РЅРµ РїРѕРґС…РѕРґРёС‚, РёРіРЅРѕСЂРёСЂСѓРµРј РІРІРѕРґ
     return
   }
   
@@ -205,21 +205,21 @@ const handleFocus = (event) => {
 }
 
 const handleBlur = (event) => {
-  // Валидация числовых значений при потере фокуса
+  // Р’Р°Р»РёРґР°С†РёСЏ С‡РёСЃР»РѕРІС‹С… Р·РЅР°С‡РµРЅРёР№ РїСЂРё РїРѕС‚РµСЂРµ С„РѕРєСѓСЃР°
   if (props.type === 'number' && event.target.value !== '') {
     const numValue = parseFloat(event.target.value)
     
     if (!isNaN(numValue)) {
       let finalValue = numValue
       
-      // Применяем ограничения min/max
+      // РџСЂРёРјРµРЅСЏРµРј РѕРіСЂР°РЅРёС‡РµРЅРёСЏ min/max
       if (props.min !== null && numValue < props.min) {
         finalValue = props.min
       } else if (props.max !== null && numValue > props.max) {
         finalValue = props.max
       }
       
-      // Если значение изменилось, обновляем
+      // Р•СЃР»Рё Р·РЅР°С‡РµРЅРёРµ РёР·РјРµРЅРёР»РѕСЃСЊ, РѕР±РЅРѕРІР»СЏРµРј
       if (finalValue !== numValue) {
         emit('update:modelValue', finalValue)
       }
@@ -312,17 +312,17 @@ defineExpose({
   padding-right: 40px;
 }
 
-/* Отступы для префикса */
+/* РћС‚СЃС‚СѓРїС‹ РґР»СЏ РїСЂРµС„РёРєСЃР° */
 .base-input.has-prefix {
   padding-left: 48px;
 }
 
-/* Отступы для суффикса */
+/* РћС‚СЃС‚СѓРїС‹ РґР»СЏ СЃСѓС„С„РёРєСЃР° */
 .base-input.has-suffix {
   padding-right: 48px;
 }
 
-/* Отступы для суффикса + кнопка очистки */
+/* РћС‚СЃС‚СѓРїС‹ РґР»СЏ СЃСѓС„С„РёРєСЃР° + РєРЅРѕРїРєР° РѕС‡РёСЃС‚РєРё */
 .base-input.has-suffix.has-clear {
   padding-right: 80px;
 }
@@ -354,7 +354,7 @@ defineExpose({
   border-radius: 4px;
 }
 
-/* Кнопка очистки когда есть суффикс */
+/* РљРЅРѕРїРєР° РѕС‡РёСЃС‚РєРё РєРѕРіРґР° РµСЃС‚СЊ СЃСѓС„С„РёРєСЃ */
 .input-wrapper.has-suffix .clear-button {
   right: 48px;
 }
@@ -410,7 +410,7 @@ defineExpose({
   text-align: right;
 }
 
-/* Стили для числовых инпутов */
+/* РЎС‚РёР»Рё РґР»СЏ С‡РёСЃР»РѕРІС‹С… РёРЅРїСѓС‚РѕРІ */
 .base-input[type="number"] {
   -moz-appearance: textfield;
 }
@@ -421,10 +421,11 @@ defineExpose({
   margin: 0;
 }
 
-/* Адаптивность */
+/* РђРґР°РїС‚РёРІРЅРѕСЃС‚СЊ */
 @media (max-width: 768px) {
   .base-input {
-    font-size: 16px; /* Предотвращает zoom на iOS */
+    font-size: 16px; /* РџСЂРµРґРѕС‚РІСЂР°С‰Р°РµС‚ zoom РЅР° iOS */
   }
 }
 </style> 
+

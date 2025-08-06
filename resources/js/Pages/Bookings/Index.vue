@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="py-6 lg:py-8">
     <!-- Loading состояние -->
     <PageLoader 
@@ -206,7 +206,7 @@
 
 <script setup lang="ts">
 import { logger } from '@/src/shared/lib/logger'
-import { computed, onMounted, watch } from 'vue'
+import { computed, onMounted, watch, ref } from 'vue'
 import { router } from '@inertiajs/vue3'
 import BookingStatus from '@/src/entities/booking/ui/BookingStatus/BookingStatus.vue'
 import BookingCalendar from '@/src/entities/booking/ui/BookingCalendar/BookingCalendar.vue'
@@ -339,7 +339,7 @@ const visiblePages = computed(() => {
 })
 
 // Методы
-const loadPage = async (page) => {
+const loadPage = async (page: any) => {
   if (loading.value || page === pagination.value.current_page) return
   
   loading.value = true
@@ -366,8 +366,8 @@ const handleCancelBooking = async ({ bookingId, reason }) => {
       // Обновляем локальные данные
       const bookingIndex = allBookings.value.findIndex(b => b.id === bookingId)
       if (bookingIndex !== -1) {
-        allBookings.value[bookingIndex].status = 'cancelled'
-        allBookings.value[bookingIndex].cancellationReason = reason
+        allBookings.value[bookingIndex]!.status = 'cancelled'
+        allBookings.value[bookingIndex]!.cancellationReason = reason
       }
       
       // Показываем уведомление
@@ -378,7 +378,7 @@ const handleCancelBooking = async ({ bookingId, reason }) => {
   }
 }
 
-const handleRescheduleBooking = (bookingId) => {
+const handleRescheduleBooking = (bookingId: any) => {
   const booking = allBookings.value.find(b => b.id === bookingId)
   if (booking) {
     rescheduleBooking.value = booking
@@ -387,14 +387,14 @@ const handleRescheduleBooking = (bookingId) => {
   }
 }
 
-const handleCompleteBooking = async (bookingId) => {
+const handleCompleteBooking = async (bookingId: any) => {
   if (!confirm('Отметить запись как завершенную?')) return
   
   try {
     // API вызов для завершения записи
     const bookingIndex = allBookings.value.findIndex(b => b.id === bookingId)
     if (bookingIndex !== -1) {
-      allBookings.value[bookingIndex].status = 'completed'
+      allBookings.value[bookingIndex]!.status = 'completed'
     }
     
     toast.success('Запись отмечена как завершенная')
@@ -403,7 +403,7 @@ const handleCompleteBooking = async (bookingId) => {
   }
 }
 
-const handleNewTimeSelection = (selection) => {
+const handleNewTimeSelection = (selection: any) => {
   newDateTime.value = selection.datetime
 }
 
@@ -416,8 +416,8 @@ const confirmReschedule = async () => {
     // API вызов для переноса записи
     const bookingIndex = allBookings.value.findIndex(b => b.id === rescheduleBooking.value.id)
     if (bookingIndex !== -1) {
-      allBookings.value[bookingIndex].startTime = newDateTime.value
-      allBookings.value[bookingIndex].status = 'rescheduled'
+      allBookings.value[bookingIndex]!.startTime = newDateTime.value
+      allBookings.value[bookingIndex]!.status = 'rescheduled'
     }
     
     showRescheduleModal.value = false

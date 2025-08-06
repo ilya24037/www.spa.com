@@ -1,10 +1,10 @@
 <!-- resources/js/src/features/masters-filter/ui/FilterAdditional/FilterAdditional.vue -->
 <template>
   <div :class="CONTAINER_CLASSES">
-    <h4 :class="TITLE_CLASSES">Дополнительно</h4>
+    <h4 :class="TITLE_CLASSES">Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕ</h4>
     
     <div :class="OPTIONS_CONTAINER_CLASSES">
-      <!-- Проверенные мастера -->
+      <!-- РџСЂРѕРІРµСЂРµРЅРЅС‹Рµ РјР°СЃС‚РµСЂР° -->
       <label :class="OPTION_ITEM_CLASSES">
         <input
           type="checkbox"
@@ -13,14 +13,14 @@
           :class="CHECKBOX_CLASSES"
         >
         <div :class="OPTION_CONTENT_CLASSES">
-          <span :class="OPTION_TEXT_CLASSES">Проверенные мастера</span>
+          <span :class="OPTION_TEXT_CLASSES">РџСЂРѕРІРµСЂРµРЅРЅС‹Рµ РјР°СЃС‚РµСЂР°</span>
           <svg :class="VERIFIED_ICON_CLASSES" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
           </svg>
         </div>
       </label>
 
-      <!-- Премиум мастера -->
+      <!-- РџСЂРµРјРёСѓРј РјР°СЃС‚РµСЂР° -->
       <label :class="OPTION_ITEM_CLASSES">
         <input
           type="checkbox"
@@ -29,12 +29,12 @@
           :class="CHECKBOX_CLASSES"
         >
         <div :class="OPTION_CONTENT_CLASSES">
-          <span :class="OPTION_TEXT_CLASSES">Премиум мастера</span>
+          <span :class="OPTION_TEXT_CLASSES">РџСЂРµРјРёСѓРј РјР°СЃС‚РµСЂР°</span>
           <span :class="PREMIUM_BADGE_CLASSES">PREMIUM</span>
         </div>
       </label>
 
-      <!-- Онлайн сейчас -->
+      <!-- РћРЅР»Р°Р№РЅ СЃРµР№С‡Р°СЃ -->
       <label :class="OPTION_ITEM_CLASSES">
         <input
           type="checkbox"
@@ -43,12 +43,12 @@
           :class="CHECKBOX_CLASSES"
         >
         <div :class="OPTION_CONTENT_CLASSES">
-          <span :class="OPTION_TEXT_CLASSES">Онлайн сейчас</span>
+          <span :class="OPTION_TEXT_CLASSES">РћРЅР»Р°Р№РЅ СЃРµР№С‡Р°СЃ</span>
           <span :class="ONLINE_INDICATOR_CLASSES"></span>
         </div>
       </label>
 
-      <!-- Выезд на дом -->
+      <!-- Р’С‹РµР·Рґ РЅР° РґРѕРј -->
       <label :class="OPTION_ITEM_CLASSES">
         <input
           type="checkbox"
@@ -57,14 +57,14 @@
           :class="CHECKBOX_CLASSES"
         >
         <div :class="OPTION_CONTENT_CLASSES">
-          <span :class="OPTION_TEXT_CLASSES">Выезд на дом</span>
+          <span :class="OPTION_TEXT_CLASSES">Р’С‹РµР·Рґ РЅР° РґРѕРј</span>
           <svg :class="HOME_ICON_CLASSES" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
           </svg>
         </div>
       </label>
 
-      <!-- Онлайн-запись -->
+      <!-- РћРЅР»Р°Р№РЅ-Р·Р°РїРёСЃСЊ -->
       <label :class="OPTION_ITEM_CLASSES">
         <input
           type="checkbox"
@@ -73,7 +73,7 @@
           :class="CHECKBOX_CLASSES"
         >
         <div :class="OPTION_CONTENT_CLASSES">
-          <span :class="OPTION_TEXT_CLASSES">Онлайн-запись</span>
+          <span :class="OPTION_TEXT_CLASSES">РћРЅР»Р°Р№РЅ-Р·Р°РїРёСЃСЊ</span>
           <svg :class="BOOKING_ICON_CLASSES" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
           </svg>
@@ -81,16 +81,16 @@
       </label>
     </div>
 
-    <!-- Показать активные фильтры -->
+    <!-- РџРѕРєР°Р·Р°С‚СЊ Р°РєС‚РёРІРЅС‹Рµ С„РёР»СЊС‚СЂС‹ -->
     <div v-if="hasActiveFilters" :class="ACTIVE_FILTERS_CLASSES">
       <span :class="ACTIVE_COUNT_CLASSES">
-        Активно фильтров: {{ activeFiltersCount }}
+        РђРєС‚РёРІРЅРѕ С„РёР»СЊС‚СЂРѕРІ: {{ activeFiltersCount }}
       </span>
       <button
         @click="clearAllFilters"
         :class="CLEAR_ALL_BUTTON_CLASSES"
       >
-        Сбросить все
+        РЎР±СЂРѕСЃРёС‚СЊ РІСЃРµ
       </button>
     </div>
   </div>
@@ -99,7 +99,7 @@
 <script setup>
 import { computed } from 'vue'
 
-// 🎯 Стили согласно дизайн-системе
+// рџЋЇ РЎС‚РёР»Рё СЃРѕРіР»Р°СЃРЅРѕ РґРёР·Р°Р№РЅ-СЃРёСЃС‚РµРјРµ
 const CONTAINER_CLASSES = 'space-y-3'
 const TITLE_CLASSES = 'font-medium text-gray-900'
 const OPTIONS_CONTAINER_CLASSES = 'space-y-3'
@@ -141,7 +141,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update'])
 
-// Вычисляемые свойства
+// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const activeFiltersCount = computed(() => {
   return [
     props.verified,
@@ -154,7 +154,7 @@ const activeFiltersCount = computed(() => {
 
 const hasActiveFilters = computed(() => activeFiltersCount.value > 0)
 
-// Методы
+// РњРµС‚РѕРґС‹
 const updateOption = (key, value) => {
   emit('update', { [key]: value })
 }
@@ -169,3 +169,4 @@ const clearAllFilters = () => {
   })
 }
 </script>
+

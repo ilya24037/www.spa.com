@@ -2,32 +2,41 @@
 
 namespace App\Application\Services\Integration;
 
-use App\Domain\Ad\Events\AdCreated;
-use App\Domain\Ad\Events\AdUpdated;
-use App\Domain\Ad\Events\AdDeleted;
-use App\Domain\Ad\Events\AdPublished;
-use App\Domain\Ad\Events\AdArchived;
+use App\Application\Services\Integration\UserAds\AdQueryHandler;
+use App\Application\Services\Integration\UserAds\AdOperationsHandler;
+use App\Application\Services\Integration\UserAds\AdStatisticsHandler;
+use App\Application\Services\Integration\UserAds\AdValidationHandler;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 /**
- * Сервис интеграции User ↔ Ads доменов
+ * Упрощенный сервис интеграции User ↔ Ads доменов
  * Заменяет прямые связи через трейт HasAds
+ * Делегирует работу специализированным обработчикам
  */
 class UserAdsIntegrationService
 {
+    private AdQueryHandler $queryHandler;
+    private AdOperationsHandler $operationsHandler;
+    private AdStatisticsHandler $statisticsHandler;
+    private AdValidationHandler $validationHandler;
+
+    public function __construct()
+    {
+        $this->queryHandler = new AdQueryHandler();
+        $this->operationsHandler = new AdOperationsHandler();
+        $this->statisticsHandler = new AdStatisticsHandler();
+        $this->validationHandler = new AdValidationHandler();
+    }
+
+    // === ЗАПРОСЫ К ОБЪЯВЛЕНИЯМ ===
+
     /**
      * Получить все объявления пользователя
      * Заменяет: $user->ads()
      */
     public function getUserAds(int $userId): Collection
     {
-        return DB::table('ads')
-            ->where('user_id', $userId)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        return $this->queryHandler->getUserAds($userId);
     }
 
     /**
@@ -36,11 +45,7 @@ class UserAdsIntegrationService
      */
     public function getUserActiveAds(int $userId): Collection
     {
-        return DB::table('ads')
-            ->where('user_id', $userId)
-            ->where('status', 'active')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        return $this->queryHandler->getUserActiveAds($userId);
     }
 
     /**
@@ -49,11 +54,7 @@ class UserAdsIntegrationService
      */
     public function getUserDraftAds(int $userId): Collection
     {
-        return DB::table('ads')
-            ->where('user_id', $userId)
-            ->where('status', 'draft')
-            ->orderBy('updated_at', 'desc')
-            ->get();
+        return $this->queryHandler->getUserDraftAds($userId);
     }
 
     /**
@@ -62,11 +63,31 @@ class UserAdsIntegrationService
      */
     public function getUserArchivedAds(int $userId): Collection
     {
-        return DB::table('ads')
-            ->where('user_id', $userId)
-            ->where('status', 'archived')
-            ->orderBy('updated_at', 'desc')
-            ->get();
+        return $this->queryHandler->getUserArchivedAds($userId);
+    }
+
+    /**
+     * Получить недавние объявления пользователя
+     */
+    public function getRecentUserAds(int $userId, int $limit = 10): Collection
+    {
+        return $this->queryHandler->getRecentUserAds($userId, $limit);
+    }
+
+    /**
+     * Получить объявления с истекающим сроком
+     */
+    public function getUserExpiringAds(int $userId, int $daysBeforeExpiry = 7): Collection
+    {
+        return $this->queryHandler->getUserExpiringAds($userId, $daysBeforeExpiry);
+    }
+
+    /**
+     * Получить неоплаченные объявления
+     */
+    public function getUserUnpaidAds(int $userId): Collection
+    {
+        return $this->queryHandler->getUserUnpaidAds($userId);
     }
 
     /**
@@ -75,9 +96,7 @@ class UserAdsIntegrationService
      */
     public function getUserAdsCount(int $userId): int
     {
-        return DB::table('ads')
-            ->where('user_id', $userId)
-            ->count();
+        return $this->queryHandler->getUserAdsCount($userId);
     }
 
     /**
@@ -86,52 +105,18 @@ class UserAdsIntegrationService
      */
     public function getUserActiveAdsCount(int $userId): int
     {
-        return DB::table('ads')
-            ->where('user_id', $userId)
-            ->where('status', 'active')
-            ->count();
+        return $this->queryHandler->getUserActiveAdsCount($userId);
     }
 
     /**
-     * Проверить может ли пользователь создать новое объявление
+     * Получить популярные категории объявлений пользователя
      */
-    public function canUserCreateAd(int $userId): bool
+    public function getUserAdsCategories(int $userId): array
     {
-        // Проверяем лимит активных объявлений (например, максимум 10)
-        $activeAdsCount = $this->getUserActiveAdsCount($userId);
-        if ($activeAdsCount >= 10) {
-            return false;
-        }
-
-        // Проверяем лимит создания в день (например, максимум 3)
-        $todayAdsCount = DB::table('ads')
-            ->where('user_id', $userId)
-            ->whereDate('created_at', today())
-            ->count();
-
-        if ($todayAdsCount >= 3) {
-            return false;
-        }
-
-        // Проверяем статус пользователя
-        $userStatus = DB::table('users')
-            ->where('id', $userId)
-            ->value('status');
-
-        return in_array($userStatus, ['active', 'verified']);
+        return $this->queryHandler->getUserAdsCategories($userId);
     }
 
-    /**
-     * Проверить принадлежит ли объявление пользователю
-     * Заменяет: $user->ads()->where('id', $adId)->exists()
-     */
-    public function userOwnsAd(int $userId, int $adId): bool
-    {
-        return DB::table('ads')
-            ->where('id', $adId)
-            ->where('user_id', $userId)
-            ->exists();
-    }
+    // === ОПЕРАЦИИ С ОБЪЯВЛЕНИЯМИ ===
 
     /**
      * Создать новое объявление через событие
@@ -139,49 +124,18 @@ class UserAdsIntegrationService
      */
     public function createUserAd(int $userId, array $adData): ?int
     {
-        try {
-            // Проверяем права и лимиты
-            if (!$this->canUserCreateAd($userId)) {
-                return null;
-            }
-
-            // Валидируем данные объявления
-            $validatedData = $this->validateAdData($adData);
-            if (!$validatedData) {
-                return null;
-            }
-
-            // Создаем объявление в БД
-            $adId = DB::table('ads')->insertGetId([
-                'user_id' => $userId,
-                'title' => $validatedData['title'],
-                'description' => $validatedData['description'] ?? '',
-                'category' => $validatedData['category'] ?? 'massage',
-                'specialty' => $validatedData['specialty'] ?? '',
-                'price' => $validatedData['price'] ?? null,
-                'status' => $validatedData['status'] ?? 'draft',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            // Отправляем событие
-            Event::dispatch(new AdCreated($adId, $userId, $validatedData));
-
-            Log::info('Ad created via integration service', [
-                'ad_id' => $adId,
-                'user_id' => $userId,
-                'title' => $validatedData['title']
-            ]);
-
-            return $adId;
-
-        } catch (\Exception $e) {
-            Log::error('Failed to create ad', [
-                'user_id' => $userId,
-                'error' => $e->getMessage()
-            ]);
+        // Проверяем права и лимиты
+        if (!$this->canUserCreateAd($userId)) {
             return null;
         }
+
+        // Валидируем данные объявления
+        $validatedData = $this->validateAdData($adData);
+        if (!$validatedData) {
+            return null;
+        }
+
+        return $this->operationsHandler->createUserAd($userId, $validatedData);
     }
 
     /**
@@ -190,56 +144,18 @@ class UserAdsIntegrationService
      */
     public function updateUserAd(int $userId, int $adId, array $adData): bool
     {
-        try {
-            // Проверяем права
-            if (!$this->userOwnsAd($userId, $adId)) {
-                return false;
-            }
-
-            // Проверяем что объявление можно редактировать
-            $ad = DB::table('ads')->where('id', $adId)->first();
-            if (!$ad || !in_array($ad->status, ['draft', 'pending'])) {
-                return false;
-            }
-
-            // Валидируем данные
-            $validatedData = $this->validateAdData($adData);
-            if (!$validatedData) {
-                return false;
-            }
-
-            // Обновляем объявление
-            $updated = DB::table('ads')
-                ->where('id', $adId)
-                ->update([
-                    'title' => $validatedData['title'] ?? $ad->title,
-                    'description' => $validatedData['description'] ?? $ad->description,
-                    'category' => $validatedData['category'] ?? $ad->category,
-                    'specialty' => $validatedData['specialty'] ?? $ad->specialty,
-                    'price' => $validatedData['price'] ?? $ad->price,
-                    'updated_at' => now(),
-                ]);
-
-            if ($updated) {
-                // Отправляем событие
-                Event::dispatch(new AdUpdated($adId, $userId, $validatedData));
-
-                Log::info('Ad updated via integration service', [
-                    'ad_id' => $adId,
-                    'user_id' => $userId
-                ]);
-            }
-
-            return $updated > 0;
-
-        } catch (\Exception $e) {
-            Log::error('Failed to update ad', [
-                'user_id' => $userId,
-                'ad_id' => $adId,
-                'error' => $e->getMessage()
-            ]);
+        // Проверяем права
+        if (!$this->userOwnsAd($userId, $adId)) {
             return false;
         }
+
+        // Валидируем данные
+        $validatedData = $this->validateAdData($adData);
+        if (!$validatedData) {
+            return false;
+        }
+
+        return $this->operationsHandler->updateUserAd($userId, $adId, $validatedData);
     }
 
     /**
@@ -247,41 +163,11 @@ class UserAdsIntegrationService
      */
     public function deleteUserAd(int $userId, int $adId): bool
     {
-        try {
-            // Проверяем права
-            if (!$this->userOwnsAd($userId, $adId)) {
-                return false;
-            }
-
-            // Мягкое удаление
-            $deleted = DB::table('ads')
-                ->where('id', $adId)
-                ->update([
-                    'status' => 'deleted',
-                    'deleted_at' => now(),
-                    'updated_at' => now(),
-                ]);
-
-            if ($deleted) {
-                // Отправляем событие
-                Event::dispatch(new AdDeleted($adId, $userId));
-
-                Log::info('Ad deleted via integration service', [
-                    'ad_id' => $adId,
-                    'user_id' => $userId
-                ]);
-            }
-
-            return $deleted > 0;
-
-        } catch (\Exception $e) {
-            Log::error('Failed to delete ad', [
-                'user_id' => $userId,
-                'ad_id' => $adId,
-                'error' => $e->getMessage()
-            ]);
+        if (!$this->userOwnsAd($userId, $adId)) {
             return false;
         }
+
+        return $this->operationsHandler->deleteUserAd($userId, $adId);
     }
 
     /**
@@ -289,37 +175,11 @@ class UserAdsIntegrationService
      */
     public function archiveUserAd(int $userId, int $adId): bool
     {
-        try {
-            if (!$this->userOwnsAd($userId, $adId)) {
-                return false;
-            }
-
-            $updated = DB::table('ads')
-                ->where('id', $adId)
-                ->update([
-                    'status' => 'archived',
-                    'updated_at' => now(),
-                ]);
-
-            if ($updated) {
-                Event::dispatch(new AdArchived($adId, $userId));
-                
-                Log::info('Ad archived via integration service', [
-                    'ad_id' => $adId,
-                    'user_id' => $userId
-                ]);
-            }
-
-            return $updated > 0;
-
-        } catch (\Exception $e) {
-            Log::error('Failed to archive ad', [
-                'user_id' => $userId,
-                'ad_id' => $adId,
-                'error' => $e->getMessage()
-            ]);
+        if (!$this->userOwnsAd($userId, $adId)) {
             return false;
         }
+
+        return $this->operationsHandler->archiveUserAd($userId, $adId);
     }
 
     /**
@@ -327,36 +187,11 @@ class UserAdsIntegrationService
      */
     public function restoreUserAd(int $userId, int $adId): bool
     {
-        try {
-            if (!$this->userOwnsAd($userId, $adId)) {
-                return false;
-            }
-
-            $updated = DB::table('ads')
-                ->where('id', $adId)
-                ->where('status', 'archived')
-                ->update([
-                    'status' => 'draft',
-                    'updated_at' => now(),
-                ]);
-
-            if ($updated) {
-                Log::info('Ad restored from archive via integration service', [
-                    'ad_id' => $adId,
-                    'user_id' => $userId
-                ]);
-            }
-
-            return $updated > 0;
-
-        } catch (\Exception $e) {
-            Log::error('Failed to restore ad', [
-                'user_id' => $userId,
-                'ad_id' => $adId,
-                'error' => $e->getMessage()
-            ]);
+        if (!$this->userOwnsAd($userId, $adId)) {
             return false;
         }
+
+        return $this->operationsHandler->restoreUserAd($userId, $adId);
     }
 
     /**
@@ -364,135 +199,21 @@ class UserAdsIntegrationService
      */
     public function publishUserAd(int $userId, int $adId): bool
     {
-        try {
-            if (!$this->userOwnsAd($userId, $adId)) {
-                return false;
-            }
-
-            // Проверяем готовность к публикации
-            $ad = DB::table('ads')->where('id', $adId)->first();
-            if (!$ad || $ad->status !== 'draft') {
-                return false;
-            }
-
-            // Проверяем обязательные поля
-            if (empty($ad->title) || empty($ad->description)) {
-                return false;
-            }
-
-            $updated = DB::table('ads')
-                ->where('id', $adId)
-                ->update([
-                    'status' => 'waiting_payment',
-                    'published_at' => now(),
-                    'updated_at' => now(),
-                ]);
-
-            if ($updated) {
-                Event::dispatch(new AdPublished($adId, $userId));
-
-                Log::info('Ad published via integration service', [
-                    'ad_id' => $adId,
-                    'user_id' => $userId
-                ]);
-            }
-
-            return $updated > 0;
-
-        } catch (\Exception $e) {
-            Log::error('Failed to publish ad', [
-                'user_id' => $userId,
-                'ad_id' => $adId,
-                'error' => $e->getMessage()
-            ]);
+        if (!$this->userOwnsAd($userId, $adId)) {
             return false;
         }
+
+        return $this->operationsHandler->publishUserAd($userId, $adId);
     }
 
-    /**
-     * Получить недавние объявления пользователя
-     */
-    public function getRecentUserAds(int $userId, int $limit = 10): Collection
-    {
-        return DB::table('ads')
-            ->where('user_id', $userId)
-            ->whereIn('status', ['active', 'draft', 'pending'])
-            ->orderBy('updated_at', 'desc')
-            ->limit($limit)
-            ->get();
-    }
+    // === СТАТИСТИКА И АНАЛИТИКА ===
 
     /**
      * Получить статистику объявлений пользователя
      */
     public function getUserAdsStatistics(int $userId): array
     {
-        $stats = DB::table('ads')
-            ->where('user_id', $userId)
-            ->selectRaw('
-                COUNT(*) as total_ads,
-                COUNT(CASE WHEN status = "active" THEN 1 END) as active_ads,
-                COUNT(CASE WHEN status = "draft" THEN 1 END) as draft_ads,
-                COUNT(CASE WHEN status = "archived" THEN 1 END) as archived_ads,
-                COUNT(CASE WHEN status = "pending" THEN 1 END) as pending_ads,
-                MIN(created_at) as first_ad,
-                MAX(created_at) as latest_ad
-            ')
-            ->first();
-
-        return [
-            'total_ads' => $stats->total_ads ?? 0,
-            'active_ads' => $stats->active_ads ?? 0,
-            'draft_ads' => $stats->draft_ads ?? 0,
-            'archived_ads' => $stats->archived_ads ?? 0,
-            'pending_ads' => $stats->pending_ads ?? 0,
-            'first_ad' => $stats->first_ad,
-            'latest_ad' => $stats->latest_ad,
-        ];
-    }
-
-    /**
-     * Получить популярные категории объявлений пользователя
-     */
-    public function getUserAdsCategories(int $userId): array
-    {
-        return DB::table('ads')
-            ->where('user_id', $userId)
-            ->whereIn('status', ['active', 'pending'])
-            ->selectRaw('category, COUNT(*) as count')
-            ->groupBy('category')
-            ->orderBy('count', 'desc')
-            ->pluck('count', 'category')
-            ->toArray();
-    }
-
-    /**
-     * Получить объявления с истекающим сроком
-     */
-    public function getUserExpiringAds(int $userId, int $daysBeforeExpiry = 7): Collection
-    {
-        $expiryDate = now()->addDays($daysBeforeExpiry);
-
-        return DB::table('ads')
-            ->where('user_id', $userId)
-            ->where('status', 'active')
-            ->whereNotNull('expires_at')
-            ->where('expires_at', '<=', $expiryDate)
-            ->where('expires_at', '>', now())
-            ->orderBy('expires_at', 'asc')
-            ->get();
-    }
-
-    /**
-     * Получить неоплаченные объявления
-     */
-    public function getUserUnpaidAds(int $userId): Collection
-    {
-        return DB::table('ads')
-            ->where('user_id', $userId)
-            ->where('status', 'waiting_payment')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        return $this->statisticsHandler->getUserAdsStatistics($userId);
     }
 
     /**
@@ -500,72 +221,49 @@ class UserAdsIntegrationService
      */
     public function getUserAdsRevenue(int $userId): array
     {
-        $revenue = DB::table('ads')
-            ->join('payments', 'ads.id', '=', 'payments.ad_id')
-            ->where('ads.user_id', $userId)
-            ->where('payments.status', 'completed')
-            ->selectRaw('
-                COUNT(*) as paid_ads,
-                SUM(payments.amount) as total_revenue,
-                AVG(payments.amount) as average_payment,
-                MIN(payments.created_at) as first_payment,
-                MAX(payments.created_at) as latest_payment
-            ')
-            ->first();
+        return $this->statisticsHandler->getUserAdsRevenue($userId);
+    }
 
-        return [
-            'paid_ads' => $revenue->paid_ads ?? 0,
-            'total_revenue' => $revenue->total_revenue ?? 0,
-            'average_payment' => $revenue->average_payment ?? 0,
-            'first_payment' => $revenue->first_payment,
-            'latest_payment' => $revenue->latest_payment,
-        ];
+    // === ВАЛИДАЦИЯ И ПРОВЕРКИ ===
+
+    /**
+     * Проверить может ли пользователь создать новое объявление
+     */
+    public function canUserCreateAd(int $userId): bool
+    {
+        return $this->validationHandler->canUserCreateAd($userId);
+    }
+
+    /**
+     * Проверить принадлежит ли объявление пользователю
+     * Заменяет: $user->ads()->where('id', $adId)->exists()
+     */
+    public function userOwnsAd(int $userId, int $adId): bool
+    {
+        return $this->validationHandler->userOwnsAd($userId, $adId);
     }
 
     /**
      * Валидировать данные объявления
      */
-    private function validateAdData(array $data): ?array
+    public function validateAdData(array $data): ?array
     {
-        // Проверяем обязательные поля
-        if (empty($data['title']) || strlen($data['title']) < 3) {
-            return null;
-        }
+        return $this->validationHandler->validateAdData($data);
+    }
 
-        $title = trim($data['title']);
-        if (strlen($title) > 100) {
-            return null;
-        }
+    /**
+     * Проверить готовность объявления к публикации
+     */
+    public function isAdReadyForPublication(int $adId): array
+    {
+        return $this->validationHandler->isAdReadyForPublication($adId);
+    }
 
-        // Проверяем описание (опционально, но если есть - валидируем)
-        $description = trim($data['description'] ?? '');
-        if (strlen($description) > 2000) {
-            return null;
-        }
-
-        // Проверяем цену
-        $price = null;
-        if (isset($data['price']) && is_numeric($data['price'])) {
-            $price = (float) $data['price'];
-            if ($price < 0 || $price > 100000) {
-                return null;
-            }
-        }
-
-        // Проверяем категорию
-        $allowedCategories = ['massage', 'spa', 'wellness', 'fitness', 'beauty'];
-        $category = $data['category'] ?? 'massage';
-        if (!in_array($category, $allowedCategories)) {
-            $category = 'massage';
-        }
-
-        return [
-            'title' => $title,
-            'description' => $description,
-            'category' => $category,
-            'specialty' => trim($data['specialty'] ?? ''),
-            'price' => $price,
-            'status' => $data['status'] ?? 'draft',
-        ];
+    /**
+     * Проверить лимиты пользователя по объявлениям
+     */
+    public function checkUserLimits(int $userId): array
+    {
+        return $this->validationHandler->checkUserLimits($userId);
     }
 }

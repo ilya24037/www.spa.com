@@ -121,12 +121,13 @@
 
 <script setup lang="ts">
 import { Link, useForm } from '@inertiajs/vue3'
+import { route } from 'ziggy-js'
 
 interface Props {
   show?: boolean
 }
 
-const props = withDefaults(defineProps<Props>(), {
+const _props = withDefaults(defineProps<Props>(), {
   show: false
 })
 
@@ -161,3 +162,4 @@ const closeModal = (): void => {
   emit('close')
 }
 </script>
+

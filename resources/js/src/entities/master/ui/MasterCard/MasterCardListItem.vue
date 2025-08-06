@@ -2,7 +2,7 @@
 <template>
   <div :class="CARD_CLASSES" @click="goToProfile">
     <div :class="CONTAINER_CLASSES">
-      <!-- Фото -->
+      <!-- Р¤РѕС‚Рѕ -->
       <div :class="PHOTO_CONTAINER_CLASSES">
         <img
           :src="masterPhoto"
@@ -12,7 +12,7 @@
         >
       </div>
 
-      <!-- Информация -->
+      <!-- РРЅС„РѕСЂРјР°С†РёСЏ -->
       <div :class="INFO_CONTAINER_CLASSES">
         <div :class="INFO_HEADER_CLASSES">
           <div>
@@ -28,14 +28,14 @@
             </div>
           </div>
           
-          <!-- Цена -->
+          <!-- Р¦РµРЅР° -->
           <div :class="PRICE_CONTAINER_CLASSES">
-            <div :class="PRICE_CLASSES">от {{ formatPrice(master.price_from || master.min_price) }} ₽</div>
-            <div :class="PRICE_UNIT_CLASSES">за сеанс</div>
+            <div :class="PRICE_CLASSES">РѕС‚ {{ formatPrice(master.price_from || master.min_price) }} в‚Ѕ</div>
+            <div :class="PRICE_UNIT_CLASSES">Р·Р° СЃРµР°РЅСЃ</div>
           </div>
         </div>
 
-        <!-- Услуги -->
+        <!-- РЈСЃР»СѓРіРё -->
         <div :class="SERVICES_CONTAINER_CLASSES">
           <span
             v-for="(service, index) in displayServices"
@@ -52,13 +52,13 @@
           </span>
         </div>
 
-        <!-- Действия -->
+        <!-- Р”РµР№СЃС‚РІРёСЏ -->
         <div :class="ACTIONS_CONTAINER_CLASSES">
           <button 
             @click.stop="openBooking"
             :class="BOOKING_BUTTON_CLASSES"
           >
-            Записаться
+            Р—Р°РїРёСЃР°С‚СЊСЃСЏ
           </button>
           <button 
             @click.stop="toggleFavorite"
@@ -78,7 +78,7 @@
 import { ref, computed } from 'vue'
 import { router } from '@inertiajs/vue3'
 
-// 🎯 Стили согласно дизайн-системе
+// рџЋЇ РЎС‚РёР»Рё СЃРѕРіР»Р°СЃРЅРѕ РґРёР·Р°Р№РЅ-СЃРёСЃС‚РµРјРµ
 const CARD_CLASSES = 'bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 cursor-pointer'
 const CONTAINER_CLASSES = 'flex gap-4'
 const PHOTO_CONTAINER_CLASSES = 'w-24 h-24 flex-shrink-0'
@@ -109,10 +109,10 @@ const props = defineProps({
   }
 })
 
-// Состояние
+// РЎРѕСЃС‚РѕСЏРЅРёРµ
 const imageError = ref(false)
 
-// Вычисляемые свойства
+// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const isFavorite = computed(() => props.master.is_favorite || false)
 
 const masterPhoto = computed(() => {
@@ -135,7 +135,7 @@ const hasMoreServices = computed(() => {
   return props.master.services && props.master.services.length > 3
 })
 
-// Методы
+// РњРµС‚РѕРґС‹
 const formatPrice = (price) => {
   if (!price) return '0'
   return new Intl.NumberFormat('ru-RU').format(price)

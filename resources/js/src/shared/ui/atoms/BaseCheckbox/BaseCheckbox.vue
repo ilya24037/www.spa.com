@@ -1,4 +1,4 @@
-<!-- Базовый чекбокс для Boolean значений (как на Авито) -->
+<!-- Р‘Р°Р·РѕРІС‹Р№ С‡РµРєР±РѕРєСЃ РґР»СЏ Boolean Р·РЅР°С‡РµРЅРёР№ (РєР°Рє РЅР° РђРІРёС‚Рѕ) -->
 <template>
   <div class="checkbox-container" @click="toggle">
     <div 
@@ -38,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-// TypeScript интерфейсы
+// TypeScript РёРЅС‚РµСЂС„РµР№СЃС‹
 interface BaseCheckboxProps {
   modelValue?: boolean
   label?: string
@@ -51,7 +51,7 @@ const props = withDefaults(defineProps<BaseCheckboxProps>(), {
   disabled: false
 });
 
-// TypeScript типизация emits
+// TypeScript С‚РёРїРёР·Р°С†РёСЏ emits
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
 }>();
@@ -135,3 +135,4 @@ const toggle = (event: MouseEvent): void => {
   cursor: not-allowed;
 }
 </style> 
+

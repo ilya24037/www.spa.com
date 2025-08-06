@@ -4,9 +4,9 @@
     :class="containerClasses"
     :style="{ height: computedHeight + 'px' }"
   >
-    <!-- Фон карты -->
+    <!-- Р¤РѕРЅ РєР°СЂС‚С‹ -->
     <div class="absolute inset-0 bg-gradient-to-br from-blue-50 to-blue-100">
-      <!-- Сетка для имитации карты -->
+      <!-- РЎРµС‚РєР° РґР»СЏ РёРјРёС‚Р°С†РёРё РєР°СЂС‚С‹ -->
       <div 
         v-if="mode !== 'mini'"
         class="h-full w-full opacity-10" 
@@ -19,7 +19,7 @@
       ></div>
     </div>
 
-    <!-- Заголовок карты (для preview режима) -->
+    <!-- Р—Р°РіРѕР»РѕРІРѕРє РєР°СЂС‚С‹ (РґР»СЏ preview СЂРµР¶РёРјР°) -->
     <div 
       v-if="mode === 'preview' && title"
       class="absolute top-4 left-4 z-20 bg-white px-3 py-2 rounded-lg shadow-md"
@@ -28,7 +28,7 @@
       <p v-if="subtitle" class="text-xs text-gray-600">{{ subtitle }}</p>
     </div>
 
-    <!-- Центральная иконка (для mini и picker режимов) -->
+    <!-- Р¦РµРЅС‚СЂР°Р»СЊРЅР°СЏ РёРєРѕРЅРєР° (РґР»СЏ mini Рё picker СЂРµР¶РёРјРѕРІ) -->
     <div 
       v-if="['mini', 'picker'].includes(mode) && !markers.length"
       class="absolute inset-0 flex items-center justify-center z-10"
@@ -44,7 +44,7 @@
       </div>
     </div>
 
-    <!-- Маркеры -->
+    <!-- РњР°СЂРєРµСЂС‹ -->
     <div v-if="markers.length" class="absolute inset-0 z-10">
       <div
         v-for="(marker, index) in visibleMarkers"
@@ -55,16 +55,16 @@
         @mouseenter="handleMarkerHover(marker, true)"
         @mouseleave="handleMarkerHover(marker, false)"
       >
-        <!-- Маркер -->
+        <!-- РњР°СЂРєРµСЂ -->
         <div class="relative">
-          <!-- Цена или название -->
+          <!-- Р¦РµРЅР° РёР»Рё РЅР°Р·РІР°РЅРёРµ -->
           <div 
             :class="markerClasses"
             class="transition-all duration-200 hover:scale-110"
           >
             {{ getMarkerLabel(marker) }}
           </div>
-          <!-- Стрелка -->
+          <!-- РЎС‚СЂРµР»РєР° -->
           <div 
             v-if="mode !== 'mini'"
             class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1"
@@ -73,14 +73,14 @@
           </div>
         </div>
 
-        <!-- Тултип при наведении -->
+        <!-- РўСѓР»С‚РёРї РїСЂРё РЅР°РІРµРґРµРЅРёРё -->
         <div
           v-if="hoveredMarker === marker.id && marker.tooltip"
           class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-white px-3 py-2 rounded-lg shadow-lg text-sm whitespace-nowrap"
         >
           <div class="font-medium">{{ marker.tooltip.title }}</div>
           <div v-if="marker.tooltip.subtitle" class="text-gray-600">{{ marker.tooltip.subtitle }}</div>
-          <!-- Стрелка тултипа -->
+          <!-- РЎС‚СЂРµР»РєР° С‚СѓР»С‚РёРїР° -->
           <div class="absolute top-full left-1/2 transform -translate-x-1/2">
             <div class="w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"></div>
           </div>
@@ -88,7 +88,7 @@
       </div>
     </div>
 
-    <!-- Контролы карты -->
+    <!-- РљРѕРЅС‚СЂРѕР»С‹ РєР°СЂС‚С‹ -->
     <div 
       v-if="showControls && mode === 'full'"
       class="absolute top-4 right-4 flex flex-col gap-2 z-20"
@@ -96,7 +96,7 @@
       <button 
         @click="zoomIn"
         class="bg-white p-2 rounded shadow hover:bg-gray-50 transition-colors"
-        title="Приблизить"
+        title="РџСЂРёР±Р»РёР·РёС‚СЊ"
       >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -105,7 +105,7 @@
       <button 
         @click="zoomOut"
         class="bg-white p-2 rounded shadow hover:bg-gray-50 transition-colors"
-        title="Отдалить"
+        title="РћС‚РґР°Р»РёС‚СЊ"
       >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
@@ -113,7 +113,7 @@
       </button>
     </div>
 
-    <!-- Кнопка геолокации -->
+    <!-- РљРЅРѕРїРєР° РіРµРѕР»РѕРєР°С†РёРё -->
     <div 
       v-if="showGeolocation && ['full', 'picker'].includes(mode)"
       class="absolute bottom-4 right-4 z-20"
@@ -121,7 +121,7 @@
       <button 
         @click="centerOnCurrentLocation"
         class="bg-white p-2 rounded-lg shadow hover:bg-gray-50 transition-colors"
-        title="Моё местоположение"
+        title="РњРѕС‘ РјРµСЃС‚РѕРїРѕР»РѕР¶РµРЅРёРµ"
       >
         <svg class="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -132,7 +132,7 @@
       </button>
     </div>
 
-    <!-- Кнопка действий (для preview режима) -->
+    <!-- РљРЅРѕРїРєР° РґРµР№СЃС‚РІРёР№ (РґР»СЏ preview СЂРµР¶РёРјР°) -->
     <div 
       v-if="mode === 'preview' && actionButton"
       class="absolute bottom-4 left-4 z-20"
@@ -145,7 +145,7 @@
       </button>
     </div>
 
-    <!-- Загрузка -->
+    <!-- Р—Р°РіСЂСѓР·РєР° -->
     <div 
       v-if="loading"
       class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-30"
@@ -155,11 +155,11 @@
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
-        <p class="mt-2 text-sm text-gray-600">Загрузка карты...</p>
+        <p class="mt-2 text-sm text-gray-600">Р—Р°РіСЂСѓР·РєР° РєР°СЂС‚С‹...</p>
       </div>
     </div>
 
-    <!-- Оверлей для picker режима -->
+    <!-- РћРІРµСЂР»РµР№ РґР»СЏ picker СЂРµР¶РёРјР° -->
     <div 
       v-if="mode === 'picker'"
       class="absolute inset-0 cursor-pointer z-15"
@@ -172,14 +172,14 @@
 import { ref, computed, onMounted } from 'vue'
 
 const props = defineProps({
-  // Режим отображения карты
+  // Р РµР¶РёРј РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ РєР°СЂС‚С‹
   mode: {
     type: String,
     default: 'preview',
     validator: (value) => ['preview', 'full', 'picker', 'mini'].includes(value)
   },
   
-  // Размеры
+  // Р Р°Р·РјРµСЂС‹
   height: {
     type: Number,
     default: null
@@ -189,19 +189,19 @@ const props = defineProps({
     default: '100%'
   },
   
-  // Данные маркеров
+  // Р”Р°РЅРЅС‹Рµ РјР°СЂРєРµСЂРѕРІ
   markers: {
     type: Array,
     default: () => []
   },
   
-  // Центр карты
+  // Р¦РµРЅС‚СЂ РєР°СЂС‚С‹
   center: {
     type: Object,
-    default: () => ({ lat: 58.0105, lng: 56.2502 }) // Пермь
+    default: () => ({ lat: 58.0105, lng: 56.2502 }) // РџРµСЂРјСЊ
   },
   
-  // Заголовок и подзаголовок
+  // Р—Р°РіРѕР»РѕРІРѕРє Рё РїРѕРґР·Р°РіРѕР»РѕРІРѕРє
   title: {
     type: String,
     default: ''
@@ -211,7 +211,7 @@ const props = defineProps({
     default: ''
   },
   
-  // Настройки отображения
+  // РќР°СЃС‚СЂРѕР№РєРё РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ
   showControls: {
     type: Boolean,
     default: true
@@ -225,19 +225,19 @@ const props = defineProps({
     default: 10
   },
   
-  // Кнопка действия для preview режима
+  // РљРЅРѕРїРєР° РґРµР№СЃС‚РІРёСЏ РґР»СЏ preview СЂРµР¶РёРјР°
   actionButton: {
     type: Object,
-    default: null // { text: 'Показать списком', action: 'toggle-view' }
+    default: null // { text: 'РџРѕРєР°Р·Р°С‚СЊ СЃРїРёСЃРєРѕРј', action: 'toggle-view' }
   },
   
-  // Плейсхолдер для picker режима
+  // РџР»РµР№СЃС…РѕР»РґРµСЂ РґР»СЏ picker СЂРµР¶РёРјР°
   placeholderText: {
     type: String,
-    default: 'Выберите место на карте'
+    default: 'Р’С‹Р±РµСЂРёС‚Рµ РјРµСЃС‚Рѕ РЅР° РєР°СЂС‚Рµ'
   },
   
-  // Состояние загрузки
+  // РЎРѕСЃС‚РѕСЏРЅРёРµ Р·Р°РіСЂСѓР·РєРё
   loading: {
     type: Boolean,
     default: false
@@ -253,11 +253,11 @@ const emit = defineEmits([
   'center-change'
 ])
 
-// Состояние
+// РЎРѕСЃС‚РѕСЏРЅРёРµ
 const hoveredMarker = ref(null)
 const zoom = ref(12)
 
-// Вычисляемые свойства
+// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const computedHeight = computed(() => {
   if (props.height) return props.height
   
@@ -304,9 +304,9 @@ const visibleMarkers = computed(() => {
   return props.markers.slice(0, props.maxMarkers)
 })
 
-// Методы
+// РњРµС‚РѕРґС‹
 const getMarkerPosition = (index) => {
-  // Генерируем псевдослучайные позиции для маркеров
+  // Р“РµРЅРµСЂРёСЂСѓРµРј РїСЃРµРІРґРѕСЃР»СѓС‡Р°Р№РЅС‹Рµ РїРѕР·РёС†РёРё РґР»СЏ РјР°СЂРєРµСЂРѕРІ
   const positions = [
     { top: '25%', left: '30%' },
     { top: '40%', left: '60%' },
@@ -324,15 +324,15 @@ const getMarkerPosition = (index) => {
 }
 
 const getMarkerLabel = (marker) => {
-  if (props.mode === 'mini') return '•'
+  if (props.mode === 'mini') return 'вЂў'
   if (marker.price) return formatPrice(marker.price)
   if (marker.min_price) return formatPrice(marker.min_price)
-  return marker.name || marker.title || '•'
+  return marker.name || marker.title || 'вЂў'
 }
 
 const formatPrice = (price) => {
   if (!price) return ''
-  return new Intl.NumberFormat('ru-RU').format(price) + ' ₽'
+  return new Intl.NumberFormat('ru-RU').format(price) + ' в‚Ѕ'
 }
 
 const handleMarkerClick = (marker) => {
@@ -346,7 +346,7 @@ const handleMarkerHover = (marker, isHovered) => {
 
 const handleMapClick = (event) => {
   if (props.mode === 'picker') {
-    // Эмулируем выбор координат
+    // Р­РјСѓР»РёСЂСѓРµРј РІС‹Р±РѕСЂ РєРѕРѕСЂРґРёРЅР°С‚
     const rect = event.currentTarget.getBoundingClientRect()
     const x = ((event.clientX - rect.left) / rect.width) * 100
     const y = ((event.clientY - rect.top) / rect.height) * 100
@@ -388,13 +388,14 @@ const centerOnCurrentLocation = () => {
 
 // Lifecycle
 onMounted(() => {
-  // Здесь можно инициализировать реальную карту (Яндекс.Карты, Google Maps)
+  // Р—РґРµСЃСЊ РјРѕР¶РЅРѕ РёРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°С‚СЊ СЂРµР°Р»СЊРЅСѓСЋ РєР°СЂС‚Сѓ (РЇРЅРґРµРєСЃ.РљР°СЂС‚С‹, Google Maps)
 })
 </script>
 
 <style scoped>
-/* Дополнительные стили для анимаций */
+/* Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ СЃС‚РёР»Рё РґР»СЏ Р°РЅРёРјР°С†РёР№ */
 .marker-hover {
   transform: scale(1.1);
 }
 </style> 
+

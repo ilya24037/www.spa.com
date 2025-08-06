@@ -44,7 +44,7 @@ export const useBookingStore = defineStore('booking', () => {
   const bookings: Ref<Booking[]> = ref([])
   const currentBooking: Ref<Booking | null> = ref(null)
   const loading: Ref<boolean> = ref(false)
-  const error: Ref<Error | null> = ref(null)
+  const error: Ref<string | null> = ref(null)
 
   // Состояние формы бронирования
   const bookingForm: Ref<BookingForm> = ref({
@@ -101,7 +101,7 @@ export const useBookingStore = defineStore('booking', () => {
   /**
    * Инициализация формы бронирования
    */
-  const initializeBookingForm = (master, service = null) => {
+  const initializeBookingForm = (master: any, service: any = null) => {
     bookingForm.value = {
       masterId: master.id,
       serviceId: service?.id || null,
@@ -121,7 +121,7 @@ export const useBookingStore = defineStore('booking', () => {
   /**
    * Обновление даты и времени
    */
-  const updateDateTime = (date, time) => {
+  const updateDateTime = (date: any, time: any) => {
     bookingForm.value.date = date
     bookingForm.value.time = time
     selectedDate.value = date
@@ -131,7 +131,7 @@ export const useBookingStore = defineStore('booking', () => {
   /**
    * Обновление данных клиента
    */
-  const updateClientData = (clientData) => {
+  const updateClientData = (clientData: any) => {
     Object.assign(bookingForm.value, {
       clientName: clientData.name,
       clientPhone: clientData.phone,
@@ -143,7 +143,7 @@ export const useBookingStore = defineStore('booking', () => {
   /**
    * Загрузка расписания мастера
    */
-  const loadMasterSchedule = async (masterId, startDate, endDate) => {
+  const loadMasterSchedule = async (masterId: any, startDate: any, endDate: any) => {
     loading.value = true
     error.value = null
 
@@ -182,7 +182,7 @@ export const useBookingStore = defineStore('booking', () => {
   /**
    * Загрузка доступных временных слотов для даты
    */
-  const loadTimeSlots = async (masterId, date) => {
+  const loadTimeSlots = async (masterId: any, date: any) => {
     loading.value = true
     
     try {
@@ -231,7 +231,7 @@ export const useBookingStore = defineStore('booking', () => {
       await new Promise((resolve, reject) => {
         setTimeout(() => {
           if (Math.random() > 0.1) { // 90% успеха
-            resolve()
+            resolve(undefined)
           } else {
             reject(new Error('Время уже занято другим клиентом'))
           }
@@ -258,7 +258,7 @@ export const useBookingStore = defineStore('booking', () => {
       return newBooking
 
     } catch (err) {
-      error.value = err.message || 'Ошибка создания бронирования'
+      error.value = (err as Error).message || 'Ошибка создания бронирования'
       throw err
     } finally {
       loading.value = false
@@ -268,7 +268,7 @@ export const useBookingStore = defineStore('booking', () => {
   /**
    * Загрузка списка бронирований пользователя
    */
-  const loadUserBookings = async (userId) => {
+  const loadUserBookings = async (userId: any) => {
     loading.value = true
     error.value = null
 
@@ -293,7 +293,7 @@ export const useBookingStore = defineStore('booking', () => {
   /**
    * Отмена бронирования
    */
-  const cancelBooking = async (bookingId, reason = null) => {
+  const cancelBooking = async (bookingId: any, reason: any = null) => {
     loading.value = true
     error.value = null
 
@@ -389,7 +389,7 @@ export const useBookingStore = defineStore('booking', () => {
 /**
  * Генерация временных слотов для даты
  */
-function generateTimeSlots(date) {
+function generateTimeSlots(date: any) {
   const slots = []
   const startHour = 9
   const endHour = 21
@@ -414,7 +414,7 @@ function generateTimeSlots(date) {
 /**
  * Генерация тестовых бронирований
  */
-function generateMockBookings(userId) {
+function generateMockBookings(userId: any) {
   const bookings = []
   const statuses = ['pending', 'confirmed', 'completed', 'cancelled']
   

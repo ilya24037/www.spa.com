@@ -40,7 +40,7 @@ export function useAsyncAction<T = any>() {
   ): Promise<T | null> => {
     const {
       successMessage,
-      errorMessage,
+      // errorMessage,
       showToast = true,
       onSuccess,
       onError
@@ -67,8 +67,8 @@ export function useAsyncAction<T = any>() {
       error.value = e instanceof Error ? e : new Error(String(e))
       
       if (showToast) {
-        const message = errorMessage || error.value.message || 'Произошла ошибка'
-        handleError(e, true)
+        // const message = errorMessage || error.value.message || 'Произошла ошибка'
+        handleError(e, 'network')
       }
       
       if (onError) {

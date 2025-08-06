@@ -1,6 +1,6 @@
 <!-- resources/js/Pages/Home.vue - FSD Refactored с Loading состояниями -->
 <template>
-  <MainLayout>
+  <div class="py-6 lg:py-8">
     <Head :title="`Массаж в ${currentCity} — найти мастера`" />
     
     <!-- Loading состояние -->
@@ -27,7 +27,7 @@
         @filters-reset="handleFiltersReset"
       />
     </template>
-  </MainLayout>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -35,8 +35,7 @@ import { logger } from '@/src/shared/lib/logger'
 import { Head } from '@inertiajs/vue3'
 import { computed, onMounted } from 'vue'
 
-// 🎯 FSD Импорты согласно плану
-import MainLayout from '@/src/shared/layouts/MainLayout/MainLayout.vue'
+// FSD импорты согласно плану
 import Breadcrumbs from '@/src/shared/ui/molecules/Breadcrumbs/Breadcrumbs.vue'
 import { MastersCatalog } from '@/src/widgets/masters-catalog'
 import PageLoader from '@/src/shared/ui/organisms/PageLoader/PageLoader.vue'
@@ -134,4 +133,3 @@ onMounted(() => {
   opacity: 0;
 }
 </style>
-

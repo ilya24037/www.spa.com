@@ -1,7 +1,7 @@
 <!-- resources/js/src/features/masters-filter/ui/FilterRating/FilterRating.vue -->
 <template>
   <div :class="CONTAINER_CLASSES">
-    <h4 :class="TITLE_CLASSES">Рейтинг</h4>
+    <h4 :class="TITLE_CLASSES">Р РµР№С‚РёРЅРі</h4>
     
     <div :class="RATING_OPTIONS_CLASSES">
       <label
@@ -33,19 +33,19 @@
       </label>
     </div>
 
-    <!-- Кнопка сброса -->
+    <!-- РљРЅРѕРїРєР° СЃР±СЂРѕСЃР° -->
     <button
       v-if="value !== null"
       @click="clearRating"
       :class="CLEAR_BUTTON_CLASSES"
     >
-      Сбросить рейтинг
+      РЎР±СЂРѕСЃРёС‚СЊ СЂРµР№С‚РёРЅРі
     </button>
   </div>
 </template>
 
 <script setup>
-// 🎯 Стили согласно дизайн-системе
+// рџЋЇ РЎС‚РёР»Рё СЃРѕРіР»Р°СЃРЅРѕ РґРёР·Р°Р№РЅ-СЃРёСЃС‚РµРјРµ
 const CONTAINER_CLASSES = 'space-y-3'
 const TITLE_CLASSES = 'font-medium text-gray-900'
 const RATING_OPTIONS_CLASSES = 'space-y-2'
@@ -68,16 +68,16 @@ const props = defineProps({
 
 const emit = defineEmits(['update'])
 
-// Опции рейтинга
+// РћРїС†РёРё СЂРµР№С‚РёРЅРіР°
 const ratingOptions = [
-  { value: 5, label: 'Только 5 звезд' },
-  { value: 4, label: '4 звезды и выше' },
-  { value: 3, label: '3 звезды и выше' },
-  { value: 2, label: '2 звезды и выше' },
-  { value: 1, label: '1 звезда и выше' }
+  { value: 5, label: 'РўРѕР»СЊРєРѕ 5 Р·РІРµР·Рґ' },
+  { value: 4, label: '4 Р·РІРµР·РґС‹ Рё РІС‹С€Рµ' },
+  { value: 3, label: '3 Р·РІРµР·РґС‹ Рё РІС‹С€Рµ' },
+  { value: 2, label: '2 Р·РІРµР·РґС‹ Рё РІС‹С€Рµ' },
+  { value: 1, label: '1 Р·РІРµР·РґР° Рё РІС‹С€Рµ' }
 ]
 
-// Методы
+// РњРµС‚РѕРґС‹
 const getStarClasses = (starNumber, rating) => {
   const isActive = starNumber <= rating
   
@@ -95,3 +95,4 @@ const clearRating = () => {
   emit('update', null)
 }
 </script>
+

@@ -1,17 +1,17 @@
 <template>
   <div class="booking-status">
-    <!-- Карточка бронирования -->
+    <!-- РљР°СЂС‚РѕС‡РєР° Р±СЂРѕРЅРёСЂРѕРІР°РЅРёСЏ -->
     <div :class="[
       'bg-white rounded-lg border-2 p-4 transition-all',
       getStatusBorderColor(booking.status),
       'hover:shadow-md'
     ]">
       
-      <!-- Заголовок с номером и статусом -->
+      <!-- Р—Р°РіРѕР»РѕРІРѕРє СЃ РЅРѕРјРµСЂРѕРј Рё СЃС‚Р°С‚СѓСЃРѕРј -->
       <div class="flex items-center justify-between mb-4">
         <div class="flex items-center gap-3">
           <div class="font-medium text-gray-900">
-            Запись {{ booking.bookingNumber }}
+            Р—Р°РїРёСЃСЊ {{ booking.bookingNumber }}
           </div>
           <span :class="[
             'px-2 py-1 rounded-full text-xs font-medium',
@@ -21,7 +21,7 @@
           </span>
         </div>
         
-        <!-- Меню действий -->
+        <!-- РњРµРЅСЋ РґРµР№СЃС‚РІРёР№ -->
         <div class="relative">
           <button
             @click="showActions = !showActions"
@@ -32,40 +32,40 @@
             </svg>
           </button>
           
-          <!-- Выпадающее меню -->
+          <!-- Р’С‹РїР°РґР°СЋС‰РµРµ РјРµРЅСЋ -->
           <div v-if="showActions" class="absolute right-0 top-8 bg-white rounded-lg shadow-lg border py-1 z-10 min-w-[150px]">
             <button
               v-if="canCancel"
               @click="handleCancel"
               class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 transition-colors"
             >
-              Отменить запись
+              РћС‚РјРµРЅРёС‚СЊ Р·Р°РїРёСЃСЊ
             </button>
             <button
               v-if="canReschedule"
               @click="handleReschedule"
               class="w-full px-4 py-2 text-left text-sm text-blue-600 hover:bg-blue-50 transition-colors"
             >
-              Перенести время
+              РџРµСЂРµРЅРµСЃС‚Рё РІСЂРµРјСЏ
             </button>
             <button
               v-if="canComplete"
               @click="handleComplete"
               class="w-full px-4 py-2 text-left text-sm text-green-600 hover:bg-green-50 transition-colors"
             >
-              Завершить
+              Р—Р°РІРµСЂС€РёС‚СЊ
             </button>
             <button
               @click="showDetails = !showDetails"
               class="w-full px-4 py-2 text-left text-sm text-gray-600 hover:bg-gray-50 transition-colors"
             >
-              {{ showDetails ? 'Скрыть детали' : 'Показать детали' }}
+              {{ showDetails ? 'РЎРєСЂС‹С‚СЊ РґРµС‚Р°Р»Рё' : 'РџРѕРєР°Р·Р°С‚СЊ РґРµС‚Р°Р»Рё' }}
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Основная информация -->
+      <!-- РћСЃРЅРѕРІРЅР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div class="space-y-2">
           <div class="flex items-center text-sm text-gray-600">
@@ -86,7 +86,7 @@
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            <span>{{ booking.duration }} минут</span>
+            <span>{{ booking.duration }} РјРёРЅСѓС‚</span>
           </div>
         </div>
         
@@ -102,19 +102,19 @@
             <svg class="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
             </svg>
-            <span class="font-semibold text-green-600">{{ formatPrice(booking.price) }} ₽</span>
+            <span class="font-semibold text-green-600">{{ formatPrice(booking.price) }} в‚Ѕ</span>
           </div>
           
           <div class="flex items-center text-xs text-gray-500">
             <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            <span>Создано {{ formatCreatedAt(booking.createdAt) }}</span>
+            <span>РЎРѕР·РґР°РЅРѕ {{ formatCreatedAt(booking.createdAt) }}</span>
           </div>
         </div>
       </div>
 
-      <!-- Индикатор времени до записи -->
+      <!-- РРЅРґРёРєР°С‚РѕСЂ РІСЂРµРјРµРЅРё РґРѕ Р·Р°РїРёСЃРё -->
       <div v-if="timeUntilBooking" class="mb-4">
         <div :class="[
           'text-center py-2 px-4 rounded-lg text-sm font-medium',
@@ -124,12 +124,12 @@
         </div>
       </div>
 
-      <!-- Детальная информация (раскрывающаяся) -->
+      <!-- Р”РµС‚Р°Р»СЊРЅР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ (СЂР°СЃРєСЂС‹РІР°СЋС‰Р°СЏСЃСЏ) -->
       <div v-if="showDetails" class="border-t pt-4 mt-4 space-y-3">
         
-        <!-- Контактная информация клиента -->
+        <!-- РљРѕРЅС‚Р°РєС‚РЅР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ РєР»РёРµРЅС‚Р° -->
         <div v-if="booking.clientName || booking.clientPhone">
-          <h4 class="text-sm font-medium text-gray-900 mb-2">Контакты клиента:</h4>
+          <h4 class="text-sm font-medium text-gray-900 mb-2">РљРѕРЅС‚Р°РєС‚С‹ РєР»РёРµРЅС‚Р°:</h4>
           <div class="space-y-1 text-sm text-gray-600">
             <div v-if="booking.clientName" class="flex items-center">
               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -148,15 +148,15 @@
           </div>
         </div>
 
-        <!-- Комментарии -->
+        <!-- РљРѕРјРјРµРЅС‚Р°СЂРёРё -->
         <div v-if="booking.notes">
-          <h4 class="text-sm font-medium text-gray-900 mb-2">Комментарий:</h4>
+          <h4 class="text-sm font-medium text-gray-900 mb-2">РљРѕРјРјРµРЅС‚Р°СЂРёР№:</h4>
           <p class="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">{{ booking.notes }}</p>
         </div>
 
-        <!-- История изменений -->
+        <!-- РСЃС‚РѕСЂРёСЏ РёР·РјРµРЅРµРЅРёР№ -->
         <div v-if="booking.statusHistory && booking.statusHistory.length">
-          <h4 class="text-sm font-medium text-gray-900 mb-2">История:</h4>
+          <h4 class="text-sm font-medium text-gray-900 mb-2">РСЃС‚РѕСЂРёСЏ:</h4>
           <div class="space-y-1">
             <div 
               v-for="history in booking.statusHistory" 
@@ -170,50 +170,50 @@
         </div>
       </div>
 
-      <!-- Кнопки быстрых действий -->
+      <!-- РљРЅРѕРїРєРё Р±С‹СЃС‚СЂС‹С… РґРµР№СЃС‚РІРёР№ -->
       <div v-if="showQuickActions" class="flex gap-2 mt-4">
         <button
           v-if="canCancel"
           @click="handleCancel"
           class="flex-1 bg-red-50 text-red-600 py-2 px-3 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors"
         >
-          Отменить
+          РћС‚РјРµРЅРёС‚СЊ
         </button>
         <button
           v-if="canReschedule"
           @click="handleReschedule"
           class="flex-1 bg-blue-50 text-blue-600 py-2 px-3 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors"
         >
-          Перенести
+          РџРµСЂРµРЅРµСЃС‚Рё
         </button>
         <button
           v-if="canComplete"
           @click="handleComplete"
           class="flex-1 bg-green-50 text-green-600 py-2 px-3 rounded-lg text-sm font-medium hover:bg-green-100 transition-colors"
         >
-          Завершить
+          Р—Р°РІРµСЂС€РёС‚СЊ
         </button>
       </div>
     </div>
 
-    <!-- Модальное окно подтверждения отмены -->
+    <!-- РњРѕРґР°Р»СЊРЅРѕРµ РѕРєРЅРѕ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ РѕС‚РјРµРЅС‹ -->
     <div v-if="showCancelModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Отменить запись?</h3>
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">РћС‚РјРµРЅРёС‚СЊ Р·Р°РїРёСЃСЊ?</h3>
         <p class="text-gray-600 mb-4">
-          Вы уверены, что хотите отменить запись на {{ formatDateTime(booking.startTime) }}?
+          Р’С‹ СѓРІРµСЂРµРЅС‹, С‡С‚Рѕ С…РѕС‚РёС‚Рµ РѕС‚РјРµРЅРёС‚СЊ Р·Р°РїРёСЃСЊ РЅР° {{ formatDateTime(booking.startTime) }}?
         </p>
         
         <div class="mb-4">
           <label for="cancelReason" class="block text-sm font-medium text-gray-700 mb-2">
-            Причина отмены (необязательно):
+            РџСЂРёС‡РёРЅР° РѕС‚РјРµРЅС‹ (РЅРµРѕР±СЏР·Р°С‚РµР»СЊРЅРѕ):
           </label>
           <textarea
             id="cancelReason"
             v-model="cancelReason"
             rows="3"
             class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
-            placeholder="Укажите причину отмены..."
+            placeholder="РЈРєР°Р¶РёС‚Рµ РїСЂРёС‡РёРЅСѓ РѕС‚РјРµРЅС‹..."
           ></textarea>
         </div>
         
@@ -222,14 +222,14 @@
             @click="showCancelModal = false"
             class="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-200 transition-colors"
           >
-            Не отменять
+            РќРµ РѕС‚РјРµРЅСЏС‚СЊ
           </button>
           <button
             @click="confirmCancel"
             :disabled="cancelling"
             class="flex-1 bg-red-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
           >
-            {{ cancelling ? 'Отмена...' : 'Отменить запись' }}
+            {{ cancelling ? 'РћС‚РјРµРЅР°...' : 'РћС‚РјРµРЅРёС‚СЊ Р·Р°РїРёСЃСЊ' }}
           </button>
         </div>
       </div>
@@ -243,7 +243,7 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/ru'
 
-// Настройка dayjs
+// РќР°СЃС‚СЂРѕР№РєР° dayjs
 dayjs.extend(relativeTime)
 dayjs.locale('ru')
 
@@ -259,21 +259,21 @@ const props = defineProps({
   },
   userRole: {
     type: String,
-    default: 'client' // 'client' или 'master'
+    default: 'client' // 'client' РёР»Рё 'master'
   }
 })
 
 // Events
 const emit = defineEmits(['cancel', 'reschedule', 'complete', 'update'])
 
-// Состояние компонента
+// РЎРѕСЃС‚РѕСЏРЅРёРµ РєРѕРјРїРѕРЅРµРЅС‚Р°
 const showActions = ref(false)
 const showDetails = ref(false)
 const showCancelModal = ref(false)
 const cancelReason = ref('')
 const cancelling = ref(false)
 
-// Вычисляемые свойства
+// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const canCancel = computed(() => {
   return ['pending', 'confirmed'].includes(props.booking.status) &&
          dayjs(props.booking.startTime).isAfter(dayjs())
@@ -304,9 +304,9 @@ const timeUntilBooking = computed(() => {
   return 'future'
 })
 
-// Методы форматирования
+// РњРµС‚РѕРґС‹ С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёСЏ
 const formatDateTime = (datetime) => {
-  return dayjs(datetime).format('DD MMMM YYYY в HH:mm')
+  return dayjs(datetime).format('DD MMMM YYYY РІ HH:mm')
 }
 
 const formatCreatedAt = (datetime) => {
@@ -317,7 +317,7 @@ const formatPrice = (price) => {
   return new Intl.NumberFormat('ru-RU').format(price)
 }
 
-// Методы получения стилей
+// РњРµС‚РѕРґС‹ РїРѕР»СѓС‡РµРЅРёСЏ СЃС‚РёР»РµР№
 const getStatusColor = (status) => {
   const colors = {
     pending: 'bg-yellow-100 text-yellow-800',
@@ -344,14 +344,14 @@ const getStatusBorderColor = (status) => {
 
 const getStatusText = (status) => {
   const texts = {
-    pending: 'Ожидает подтверждения',
-    confirmed: 'Подтверждено',
-    in_progress: 'В процессе',
-    completed: 'Завершено',
-    cancelled: 'Отменено',
-    rescheduled: 'Перенесено'
+    pending: 'РћР¶РёРґР°РµС‚ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ',
+    confirmed: 'РџРѕРґС‚РІРµСЂР¶РґРµРЅРѕ',
+    in_progress: 'Р’ РїСЂРѕС†РµСЃСЃРµ',
+    completed: 'Р—Р°РІРµСЂС€РµРЅРѕ',
+    cancelled: 'РћС‚РјРµРЅРµРЅРѕ',
+    rescheduled: 'РџРµСЂРµРЅРµСЃРµРЅРѕ'
   }
-  return texts[status] || 'Неизвестный статус'
+  return texts[status] || 'РќРµРёР·РІРµСЃС‚РЅС‹Р№ СЃС‚Р°С‚СѓСЃ'
 }
 
 const getTimeIndicatorColor = (timeType) => {
@@ -366,15 +366,15 @@ const getTimeIndicatorColor = (timeType) => {
 
 const getTimeUntilText = (timeType) => {
   const texts = {
-    soon: 'Запись через час или менее',
-    today: 'Запись сегодня',
-    week: 'Запись на этой неделе',
-    future: 'Запись в будущем'
+    soon: 'Р—Р°РїРёСЃСЊ С‡РµСЂРµР· С‡Р°СЃ РёР»Рё РјРµРЅРµРµ',
+    today: 'Р—Р°РїРёСЃСЊ СЃРµРіРѕРґРЅСЏ',
+    week: 'Р—Р°РїРёСЃСЊ РЅР° СЌС‚РѕР№ РЅРµРґРµР»Рµ',
+    future: 'Р—Р°РїРёСЃСЊ РІ Р±СѓРґСѓС‰РµРј'
   }
   return texts[timeType] || ''
 }
 
-// Обработчики событий
+// РћР±СЂР°Р±РѕС‚С‡РёРєРё СЃРѕР±С‹С‚РёР№
 const handleCancel = () => {
   showCancelModal.value = true
   showActions.value = false
@@ -407,14 +407,14 @@ const handleComplete = () => {
   showActions.value = false
 }
 
-// Закрытие меню при клике вне его
+// Р—Р°РєСЂС‹С‚РёРµ РјРµРЅСЋ РїСЂРё РєР»РёРєРµ РІРЅРµ РµРіРѕ
 const handleClickOutside = (event) => {
   if (!event.target.closest('.relative')) {
     showActions.value = false
   }
 }
 
-// Подключение обработчика клика
+// РџРѕРґРєР»СЋС‡РµРЅРёРµ РѕР±СЂР°Р±РѕС‚С‡РёРєР° РєР»РёРєР°
 document.addEventListener('click', handleClickOutside)
 </script>
 
@@ -423,15 +423,16 @@ document.addEventListener('click', handleClickOutside)
   @apply w-full;
 }
 
-/* Анимации */
+/* РђРЅРёРјР°С†РёРё */
 .booking-status .relative > div {
   transition: all 0.2s ease-in-out;
 }
 
-/* Стилизация для mobile */
+/* РЎС‚РёР»РёР·Р°С†РёСЏ РґР»СЏ mobile */
 @media (max-width: 768px) {
   .booking-status .grid-cols-2 {
     @apply grid-cols-1;
   }
 }
 </style>
+

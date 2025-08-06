@@ -3,762 +3,243 @@
 namespace App\Domain\Payment\Services;
 
 use App\Domain\Payment\Models\Payment;
-use App\Domain\User\Models\User;
+use App\Domain\Payment\Services\PaymentProcessorService;
 use App\Domain\Payment\Repositories\PaymentRepository;
-use App\Domain\Payment\DTOs\CheckoutDTO;
+use App\Domain\Payment\DTOs\CreatePaymentDTO;
+use App\Domain\Payment\DTOs\RefundPaymentDTO;
+use App\Domain\User\Models\User;
+use App\Domain\Booking\Models\Booking;
 use App\Domain\Payment\Enums\PaymentStatus;
 use App\Domain\Payment\Enums\PaymentMethod;
-use App\Domain\Payment\Enums\PaymentType;
-use App\Domain\Payment\Services\PaymentGatewayFactory;
-use App\Domain\Payment\Contracts\PaymentProcessorInterface;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Event;
 
 /**
- * Сервис для работы с платежами
+ * Упрощенный сервис платежей - делегирует сложную логику в PaymentProcessorService
  */
 class PaymentService
 {
-    protected PaymentRepository $repository;
-    protected PaymentGatewayFactory $gatewayFactory;
+    protected PaymentRepository $paymentRepository;
+    protected PaymentProcessorService $paymentProcessor;
 
     public function __construct(
-        PaymentRepository $repository,
-        PaymentGatewayFactory $gatewayFactory
+        PaymentRepository $paymentRepository,
+        PaymentProcessorService $paymentProcessor
     ) {
-        $this->repository = $repository;
-        $this->gatewayFactory = $gatewayFactory;
+        $this->paymentRepository = $paymentRepository;
+        $this->paymentProcessor = $paymentProcessor;
     }
 
     /**
-     * Создать новый платеж
+     * Создать платёж
      */
-    public function createPayment(array $data): Payment
+    public function createPayment(CreatePaymentDTO $dto): Payment
     {
-        $data = $this->preparePaymentData($data);
-        
-        DB::beginTransaction();
-        
-        try {
-            $payment = $this->repository->create($data);
-            
-            // Логируем создание платежа
-            Log::info('Payment created', [
-                'payment_id' => $payment->id,
-                'payment_number' => $payment->payment_number,
-                'amount' => $payment->amount,
-                'user_id' => $payment->user_id,
-            ]);
-            
-            // Генерируем событие
-            Event::dispatch('payment.created', $payment);
-            
-            DB::commit();
-            
-            return $payment;
-            
-        } catch (\Exception $e) {
-            DB::rollBack();
-            
-            Log::error('Payment creation failed', [
-                'data' => $data,
-                'error' => $e->getMessage(),
-            ]);
-            
-            throw $e;
-        }
+        return $this->paymentProcessor->processPayment($dto);
     }
 
     /**
-     * Обработать платеж
+     * Создать платёж для бронирования
      */
-    public function processPayment(Payment $payment): bool
+    public function createPaymentForBooking(Booking $booking, PaymentMethod $method): Payment
     {
-        if (!$payment->status->canTransitionTo(PaymentStatus::PROCESSING)) {
-            return false;
-        }
-        
-        DB::beginTransaction();
-        
-        try {
-            // Обновляем статус на "в обработке"
-            $payment->startProcessing();
-            
-            // Получаем процессор для метода оплаты
-            $processor = $this->gatewayFactory->getProcessor($payment->method);
-            
-            // Обрабатываем платеж через внешний сервис
-            $result = $processor->processPayment($payment);
-            
-            if ($result['success']) {
-                $this->confirmPayment($payment, $result);
-            } else {
-                $this->failPayment($payment, $result['error'] ?? 'Unknown error');
-            }
-            
-            DB::commit();
-            
-            return $result['success'];
-            
-        } catch (\Exception $e) {
-            DB::rollBack();
-            
-            Log::error('Payment processing failed', [
-                'payment_id' => $payment->id,
-                'error' => $e->getMessage(),
-            ]);
-            
-            $this->failPayment($payment, $e->getMessage());
-            
-            return false;
-        }
-    }
-
-    /**
-     * Подтвердить платеж
-     */
-    public function confirmPayment(Payment $payment, array $gatewayData = []): bool
-    {
-        DB::beginTransaction();
-        
-        try {
-            $updateData = [
-                'status' => PaymentStatus::COMPLETED,
-                'confirmed_at' => now(),
-            ];
-            
-            if (!empty($gatewayData)) {
-                $updateData['gateway_response'] = $gatewayData;
-                $updateData['external_id'] = $gatewayData['transaction_id'] ?? null;
-            }
-            
-            $this->repository->update($payment, $updateData);
-            
-            // Обрабатываем успешный платеж
-            $this->handleSuccessfulPayment($payment);
-            
-            // Генерируем событие
-            Event::dispatch('payment.confirmed', $payment);
-            
-            Log::info('Payment confirmed', [
-                'payment_id' => $payment->id,
-                'payment_number' => $payment->payment_number,
-            ]);
-            
-            DB::commit();
-            
-            return true;
-            
-        } catch (\Exception $e) {
-            DB::rollBack();
-            
-            Log::error('Payment confirmation failed', [
-                'payment_id' => $payment->id,
-                'error' => $e->getMessage(),
-            ]);
-            
-            return false;
-        }
-    }
-
-    /**
-     * Отклонить платеж
-     */
-    public function failPayment(Payment $payment, ?string $reason = null): bool
-    {
-        DB::beginTransaction();
-        
-        try {
-            $this->repository->update($payment, [
-                'status' => PaymentStatus::FAILED,
-                'failed_at' => now(),
-                'notes' => $reason,
-            ]);
-            
-            // Генерируем событие
-            Event::dispatch('payment.failed', $payment, $reason);
-            
-            Log::warning('Payment failed', [
-                'payment_id' => $payment->id,
-                'payment_number' => $payment->payment_number,
-                'reason' => $reason,
-            ]);
-            
-            DB::commit();
-            
-            return true;
-            
-        } catch (\Exception $e) {
-            DB::rollBack();
-            
-            Log::error('Payment failure handling failed', [
-                'payment_id' => $payment->id,
-                'error' => $e->getMessage(),
-            ]);
-            
-            return false;
-        }
-    }
-
-    /**
-     * Отменить платеж
-     */
-    public function cancelPayment(Payment $payment, ?string $reason = null): bool
-    {
-        if (!$payment->isCancellable()) {
-            return false;
-        }
-        
-        DB::beginTransaction();
-        
-        try {
-            $this->repository->update($payment, [
-                'status' => PaymentStatus::CANCELLED,
-                'notes' => $reason,
-            ]);
-            
-            // Генерируем событие
-            Event::dispatch('payment.cancelled', $payment, $reason);
-            
-            Log::info('Payment cancelled', [
-                'payment_id' => $payment->id,
-                'payment_number' => $payment->payment_number,
-                'reason' => $reason,
-            ]);
-            
-            DB::commit();
-            
-            return true;
-            
-        } catch (\Exception $e) {
-            DB::rollBack();
-            
-            Log::error('Payment cancellation failed', [
-                'payment_id' => $payment->id,
-                'error' => $e->getMessage(),
-            ]);
-            
-            return false;
-        }
-    }
-
-    /**
-     * Создать возврат
-     */
-    public function createRefund(
-        Payment $payment, 
-        float $amount, 
-        ?string $reason = null
-    ): ?Payment {
-        
-        if (!$payment->isRefundable() || $amount > $payment->getRemainingRefundAmount()) {
-            return null;
-        }
-        
-        DB::beginTransaction();
-        
-        try {
-            $refund = $this->repository->create([
-                'payment_number' => Payment::generatePaymentNumber(),
-                'user_id' => $payment->user_id,
-                'payable_type' => $payment->payable_type,
-                'payable_id' => $payment->payable_id,
-                'parent_payment_id' => $payment->id,
-                'type' => PaymentType::REFUND,
-                'method' => $payment->method,
-                'status' => PaymentStatus::PENDING,
-                'amount' => $amount,
-                'fee' => 0,
-                'total_amount' => $amount,
-                'currency' => $payment->currency,
-                'description' => "Возврат по платежу {$payment->payment_number}",
-                'notes' => $reason,
-                'gateway' => $payment->gateway,
-            ]);
-            
-            // Обрабатываем возврат через платежный шлюз
-            $this->processRefund($refund);
-            
-            // Обновляем статус основного платежа
-            $this->updateOriginalPaymentStatus($payment);
-            
-            // Генерируем событие
-            Event::dispatch('payment.refund_created', $refund, $payment);
-            
-            Log::info('Refund created', [
-                'refund_id' => $refund->id,
-                'original_payment_id' => $payment->id,
-                'amount' => $amount,
-                'reason' => $reason,
-            ]);
-            
-            DB::commit();
-            
-            return $refund;
-            
-        } catch (\Exception $e) {
-            DB::rollBack();
-            
-            Log::error('Refund creation failed', [
-                'payment_id' => $payment->id,
-                'amount' => $amount,
-                'error' => $e->getMessage(),
-            ]);
-            
-            return null;
-        }
-    }
-
-    /**
-     * Обработать возврат
-     */
-    public function processRefund(Payment $refund): bool
-    {
-        try {
-            $originalPayment = $refund->parentPayment;
-            
-            if (!$originalPayment) {
-                throw new \Exception('Original payment not found');
-            }
-            
-            // Получаем процессор для метода оплаты
-            $processor = $this->gatewayFactory->getProcessor($originalPayment->method);
-            
-            // Обрабатываем возврат через внешний сервис
-            $result = $processor->processRefund($refund, $originalPayment);
-            
-            if ($result['success']) {
-                $this->repository->update($refund, [
-                    'status' => PaymentStatus::COMPLETED,
-                    'confirmed_at' => now(),
-                    'external_id' => $result['refund_id'] ?? null,
-                    'gateway_response' => $result,
-                ]);
-                
-                Event::dispatch('payment.refund_completed', $refund);
-                
-                return true;
-            } else {
-                $this->repository->update($refund, [
-                    'status' => PaymentStatus::FAILED,
-                    'failed_at' => now(),
-                    'notes' => $result['error'] ?? 'Refund failed',
-                ]);
-                
-                return false;
-            }
-            
-        } catch (\Exception $e) {
-            Log::error('Refund processing failed', [
-                'refund_id' => $refund->id,
-                'error' => $e->getMessage(),
-            ]);
-            
-            $this->repository->update($refund, [
-                'status' => PaymentStatus::FAILED,
-                'failed_at' => now(),
-                'notes' => $e->getMessage(),
-            ]);
-            
-            return false;
-        }
-    }
-
-    /**
-     * Заморозить платеж
-     */
-    public function holdPayment(Payment $payment, ?string $reason = null): bool
-    {
-        return $this->repository->update($payment, [
-            'status' => PaymentStatus::HELD,
-            'notes' => $reason,
+        $dto = new CreatePaymentDTO([
+            'user_id' => $booking->user_id,
+            'booking_id' => $booking->id,
+            'amount' => $booking->total_price,
+            'payment_method' => $method,
+            'description' => "Оплата за услугу: {$booking->service_name}",
+            'metadata' => [
+                'booking_id' => $booking->id,
+                'master_id' => $booking->master_id
+            ]
         ]);
+
+        return $this->createPayment($dto);
     }
 
     /**
-     * Разморозить платеж
+     * Вернуть платёж
      */
-    public function unholdPayment(Payment $payment): bool
+    public function refundPayment(Payment $payment, ?float $amount = null, ?string $reason = null): Payment
     {
-        if ($payment->status !== PaymentStatus::HELD) {
-            return false;
-        }
-        
-        return $this->repository->update($payment, [
-            'status' => PaymentStatus::PENDING,
-            'notes' => null,
+        $dto = new RefundPaymentDTO([
+            'amount' => $amount ?? $payment->amount,
+            'reason' => $reason ?? 'Возврат по запросу'
         ]);
+
+        return $this->paymentProcessor->refundPayment($payment, $dto);
     }
 
     /**
-     * Получить доступные методы оплаты для суммы
+     * Получить платёж по ID
      */
-    public function getAvailableMethodsForAmount(float $amount): array
+    public function findById(int $id): ?Payment
     {
-        return PaymentMethod::getAvailableForAmount($amount);
+        return $this->paymentRepository->findById($id);
     }
 
     /**
-     * Рассчитать комиссию
+     * Получить платежи пользователя
      */
-    public function calculateFee(float $amount, PaymentMethod $method): float
+    public function getUserPayments(User $user, int $limit = 50): Collection
     {
-        return $method->calculateFee($amount);
+        return $this->paymentRepository->findByUser($user->id, $limit);
     }
 
     /**
-     * Рассчитать общую сумму с комиссией
+     * Получить платежи по бронированию
      */
-    public function calculateTotalWithFee(float $amount, PaymentMethod $method): float
+    public function getBookingPayments(Booking $booking): Collection
     {
-        return $method->getTotalWithFee($amount);
+        return $this->paymentRepository->findByBooking($booking->id);
     }
 
     /**
-     * Проверить статус платежа во внешней системе
+     * Получить успешные платежи
      */
-    public function checkPaymentStatus(Payment $payment): array
+    public function getSuccessfulPayments(int $limit = 100): Collection
     {
-        try {
-            if (!$payment->external_id || !$payment->gateway) {
-                return ['status' => 'unknown', 'message' => 'No external data'];
-            }
-            
-            $processor = $this->gatewayFactory->getProcessor($payment->method);
-            $result = $processor->checkStatus($payment);
-            
-            // Синхронизируем статус если он изменился
-            if ($result['status'] !== $payment->status->value) {
-                $this->syncPaymentStatus($payment, $result);
-            }
-            
-            return $result;
-            
-        } catch (\Exception $e) {
-            Log::error('Payment status check failed', [
-                'payment_id' => $payment->id,
-                'error' => $e->getMessage(),
-            ]);
-            
-            return ['status' => 'error', 'message' => $e->getMessage()];
-        }
+        return $this->paymentRepository->findByStatus(PaymentStatus::COMPLETED, $limit);
     }
 
     /**
-     * Синхронизировать статус платежа
+     * Получить неудачные платежи
      */
-    protected function syncPaymentStatus(Payment $payment, array $externalData): void
+    public function getFailedPayments(int $limit = 100): Collection
     {
-        $newStatus = PaymentStatus::tryFrom($externalData['status']);
-        
-        if ($newStatus && $payment->status->canTransitionTo($newStatus)) {
-            $this->repository->update($payment, [
-                'status' => $newStatus,
-                'gateway_response' => $externalData,
-            ]);
-            
-            Log::info('Payment status synchronized', [
-                'payment_id' => $payment->id,
-                'old_status' => $payment->status->value,
-                'new_status' => $newStatus->value,
-            ]);
-        }
+        return $this->paymentRepository->findByStatus(PaymentStatus::FAILED, $limit);
     }
 
     /**
-     * Обработать успешный платеж
+     * Обработать webhook
      */
-    protected function handleSuccessfulPayment(Payment $payment): void
+    public function handleWebhook(PaymentMethod $method, array $data): bool
     {
-        // Здесь можно добавить логику для обработки успешного платежа:
-        // - Активация услуг
-        // - Начисление бонусов
-        // - Отправка уведомлений
-        // - Обновление балансов
-        
-        switch ($payment->type) {
-            case PaymentType::SERVICE_PAYMENT:
-                $this->handleServicePayment($payment);
-                break;
-                
-            case PaymentType::BOOKING_DEPOSIT:
-                $this->handleDepositPayment($payment);
-                break;
-                
-            case PaymentType::SUBSCRIPTION:
-                $this->handleSubscriptionPayment($payment);
-                break;
-                
-            case PaymentType::TOP_UP:
-                $this->handleTopUpPayment($payment);
-                break;
-        }
+        return $this->paymentProcessor->handleWebhook($method, $data);
     }
 
     /**
-     * Обработать оплату услуги
+     * Проверить статус платежа
      */
-    protected function handleServicePayment(Payment $payment): void
+    public function checkPaymentStatus(Payment $payment): Payment
     {
-        // Логика обработки оплаты услуги
-        if ($payment->payable_type === 'App\Domain\Booking\Models\Booking') {
-            // Подтверждаем бронирование
-            $booking = $payment->payable;
-            if ($booking) {
-                $booking->update(['payment_status' => 'paid']);
-            }
-        }
-    }
-
-    /**
-     * Обработать депозитный платеж
-     */
-    protected function handleDepositPayment(Payment $payment): void
-    {
-        // Логика обработки депозита
-    }
-
-    /**
-     * Обработать платеж подписки
-     */
-    protected function handleSubscriptionPayment(Payment $payment): void
-    {
-        // Логика обработки подписки
-    }
-
-    /**
-     * Обработать пополнение баланса
-     */
-    protected function handleTopUpPayment(Payment $payment): void
-    {
-        // Пополняем баланс пользователя
-        $user = $payment->user;
-        if ($user && $user->balance) {
-            $user->balance->increment('amount', $payment->amount);
-        }
-    }
-
-    /**
-     * Обновить статус основного платежа при возврате
-     */
-    protected function updateOriginalPaymentStatus(Payment $payment): void
-    {
-        $payment->refresh();
-        
-        if ($payment->isFullyRefunded()) {
-            $this->repository->update($payment, ['status' => PaymentStatus::REFUNDED]);
-        } elseif ($payment->isPartiallyRefunded()) {
-            $this->repository->update($payment, ['status' => PaymentStatus::PARTIALLY_REFUNDED]);
-        }
-    }
-
-    /**
-     * Подготовить данные платежа
-     */
-    protected function preparePaymentData(array $data): array
-    {
-        // Устанавливаем значения по умолчанию
-        $defaults = [
-            'status' => PaymentStatus::PENDING,
-            'currency' => 'RUB',
-            'fee' => 0,
-        ];
-        
-        $data = array_merge($defaults, $data);
-        
-        // Рассчитываем комиссию если не указана
-        if (isset($data['method']) && isset($data['amount']) && !$data['fee']) {
-            $method = PaymentMethod::tryFrom($data['method']);
-            if ($method) {
-                $data['fee'] = $method->calculateFee($data['amount']);
-            }
-        }
-        
-        // Рассчитываем общую сумму
-        $data['total_amount'] = ($data['amount'] ?? 0) + ($data['fee'] ?? 0);
-        
-        return $data;
-    }
-
-    /**
-     * Очистка истекших платежей
-     */
-    public function cleanupExpiredPayments(): int
-    {
-        return $this->repository->cleanupExpired();
+        return $this->paymentProcessor->checkPaymentStatus($payment);
     }
 
     /**
      * Получить статистику платежей
      */
-    public function getStatistics(array $filters = []): array
+    public function getPaymentStats(User $user = null): array
     {
-        return $this->repository->getStatistics($filters);
-    }
-
-    /**
-     * Создать платеж для оплаты объявления
-     * Используется в PaymentController для рефакторинга
-     */
-    public function createCheckoutPayment(CheckoutDTO $dto): Payment
-    {
-        return DB::transaction(function () use ($dto) {
-            // Создаем платеж
-            $payment = Payment::create([
-                'user_id' => $dto->userId,
-                'ad_id' => $dto->adId,
-                'ad_plan_id' => $dto->planId,
-                'payment_id' => $dto->paymentId,
-                'amount' => $dto->amount,
-                'currency' => $dto->currency,
-                'status' => 'pending',
-                'description' => $dto->description,
-                'metadata' => $dto->metadata
-            ]);
-
-            // Логируем создание
-            Log::info('Checkout payment created', [
-                'payment_id' => $payment->id,
-                'ad_id' => $dto->adId,
-                'plan_id' => $dto->planId,
-                'amount' => $dto->amount
-            ]);
-
-            return $payment;
-        });
-    }
-
-    /**
-     * Процессинг оплаты тарифного плана
-     */
-    public function processAdPlanPayment(Ad $ad, AdPlan $plan, int $userId): Payment
-    {
-        $dto = new CheckoutDTO(
-            userId: $userId,
-            adId: $ad->id,
-            planId: $plan->id,
-            paymentId: Payment::generatePaymentId(),
-            amount: $plan->price,
-            currency: 'RUB',
-            description: 'Публикация объявления на ' . $plan->days . ' дней',
-            metadata: [
-                'ad_title' => $ad->title,
-                'plan_name' => $plan->name,
-                'plan_days' => $plan->days
-            ]
-        );
-
-        return $this->createCheckoutPayment($dto);
-    }
-
-    /**
-     * Активировать объявление после успешной оплаты
-     */
-    public function activateAdAfterPayment(Payment $payment): bool
-    {
-        if (!$payment->ad || !$payment->adPlan) {
-            return false;
+        if ($user) {
+            return $this->paymentRepository->getUserStats($user->id);
         }
 
-        return DB::transaction(function () use ($payment) {
-            // Обновляем статус платежа
-            $payment->update([
-                'status' => 'completed',
-                'paid_at' => now()
-            ]);
-
-            // Активируем объявление
-            $ad = $payment->ad;
-            $plan = $payment->adPlan;
-            
-            $ad->update([
-                'status' => Ad::STATUS_ACTIVE,
-                'is_paid' => true,
-                'paid_at' => now(),
-                'expires_at' => now()->addDays($plan->days)
-            ]);
-
-            Log::info('Ad activated after payment', [
-                'payment_id' => $payment->id,
-                'ad_id' => $ad->id,
-                'plan_id' => $plan->id
-            ]);
-
-            return true;
-        });
+        return $this->paymentRepository->getGlobalStats();
     }
 
     /**
-     * Создать платеж для пополнения баланса
+     * Получить платежи за период
      */
-    public function createTopUpPayment(int $userId, float $amount, string $paymentMethod): Payment
-    {
-        return DB::transaction(function () use ($userId, $amount, $paymentMethod) {
-            // Получаем пользователя и его баланс через репозиторий
-            $userRepository = app(\App\Domain\User\Repositories\UserRepository::class);
-            $user = $userRepository->findOrFail($userId);
-            $balance = $user->getBalance();
-
-            // Рассчитываем скидку
-            $discount = $balance->getDiscountForAmount($amount);
-
-            // Создаем платеж
-            $payment = Payment::create([
-                'user_id' => $userId,
-                'payment_id' => Payment::generatePaymentId(),
-                'amount' => $amount,
-                'discount_amount' => $discount['amount'],
-                'discount_percent' => $discount['percent'],
-                'final_amount' => $discount['final_amount'],
-                'currency' => 'RUB',
-                'status' => 'pending',
-                'payment_method' => $paymentMethod,
-                'purchase_type' => 'balance_top_up',
-                'description' => 'Пополнение баланса',
-                'metadata' => [
-                    'original_amount' => $amount,
-                    'discount_applied' => $discount['percent']
-                ]
-            ]);
-
-            Log::info('Top-up payment created', [
-                'payment_id' => $payment->id,
-                'user_id' => $userId,
-                'amount' => $amount,
-                'final_amount' => $discount['final_amount']
-            ]);
-
-            return $payment;
-        });
+    public function getPaymentsByPeriod(
+        \DateTime $from,
+        \DateTime $to,
+        PaymentStatus $status = null
+    ): Collection {
+        return $this->paymentRepository->findByPeriod($from, $to, $status);
     }
 
     /**
-     * Проверить возможность оплаты объявления
+     * Поиск платежей
      */
-    public function canPayForAd(Ad $ad): bool
+    public function searchPayments(array $criteria): Collection
     {
-        return $ad->status === 'waiting_payment';
+        return $this->paymentRepository->search($criteria);
     }
 
     /**
-     * Получить доступные планы через репозиторий
+     * Получить доступные методы платежа
      */
-    public function getAvailablePlans(): array
+    public function getAvailablePaymentMethods(): array
     {
-        // Используем Repository для получения планов
-        $plans = app(\App\Domain\Ad\Repositories\AdPlanRepository::class)->getOrderedPlans();
-        
-        return $plans->map(function ($plan) {
-            return [
-                'id' => $plan->id,
-                'name' => $plan->name,
-                'days' => $plan->days,
-                'price' => $plan->price,
-                'formatted_price' => $plan->formatted_price,
-                'description' => $plan->description,
-                'is_popular' => $plan->is_popular
-            ];
-        })->toArray();
+        return $this->paymentProcessor->getAvailablePaymentMethods();
+    }
+
+    /**
+     * Проверить доступность метода платежа
+     */
+    public function isPaymentMethodAvailable(PaymentMethod $method): bool
+    {
+        return $this->paymentProcessor->isGatewayAvailable($method);
+    }
+
+    /**
+     * Отменить платёж
+     */
+    public function cancelPayment(Payment $payment, string $reason = null): Payment
+    {
+        if (!in_array($payment->status, [PaymentStatus::PENDING, PaymentStatus::PROCESSING])) {
+            throw new \InvalidArgumentException('Можно отменить только ожидающие или обрабатываемые платежи');
+        }
+
+        $payment = $this->paymentRepository->update($payment, [
+            'status' => PaymentStatus::CANCELLED,
+            'cancelled_at' => now(),
+            'cancellation_reason' => $reason
+        ]);
+
+        Log::info('Payment cancelled', [
+            'payment_id' => $payment->id,
+            'reason' => $reason
+        ]);
+
+        return $payment;
+    }
+
+    /**
+     * Повторить неудачный платёж
+     */
+    public function retryPayment(Payment $payment): Payment
+    {
+        if ($payment->status !== PaymentStatus::FAILED) {
+            throw new \InvalidArgumentException('Можно повторить только неудачные платежи');
+        }
+
+        $dto = new CreatePaymentDTO([
+            'user_id' => $payment->user_id,
+            'booking_id' => $payment->booking_id,
+            'amount' => $payment->amount,
+            'currency' => $payment->currency,
+            'payment_method' => $payment->payment_method,
+            'description' => $payment->description,
+            'metadata' => array_merge($payment->metadata ?? [], ['retry_of' => $payment->id])
+        ]);
+
+        return $this->createPayment($dto);
+    }
+
+    /**
+     * Получить общую сумму платежей пользователя
+     */
+    public function getUserTotalPaid(User $user): float
+    {
+        return $this->paymentRepository->getUserTotalPaid($user->id);
+    }
+
+    /**
+     * Получить среднюю сумму платежа
+     */
+    public function getAveragePaymentAmount(): float
+    {
+        return $this->paymentRepository->getAverageAmount();
+    }
+
+    /**
+     * Экспорт платежей
+     */
+    public function exportPayments(array $criteria = []): Collection
+    {
+        return $this->paymentRepository->export($criteria);
     }
 }

@@ -1,8 +1,9 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { computed } from 'vue'
-import AppLayout from '@/src/shared/ui/layout/AppLayout/AppLayout.vue'
+import AppLayout from '@/Layouts/AppLayout.vue'
 import { PrimaryButton } from '@/src/shared/ui/atoms';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { route } from 'ziggy-js';
 
 interface VerifyEmailProps {
   status?: string
@@ -59,5 +60,6 @@ const verificationLinkSent = computed((): boolean =>
         </form>
     </AppLayout>
 </template>
+
 
 

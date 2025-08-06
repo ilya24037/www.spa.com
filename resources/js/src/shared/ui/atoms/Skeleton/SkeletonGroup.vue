@@ -8,7 +8,7 @@
       :width="line.width"
       :animated="line.animated"
       :custom-class="line.customClass"
-      :aria-label="`Загрузка строки ${index + 1} из ${linesArray.length}`"
+      :aria-label="`Р—Р°РіСЂСѓР·РєР° СЃС‚СЂРѕРєРё ${index + 1} РёР· ${linesArray.length}`"
     />
   </div>
 </template>
@@ -36,18 +36,18 @@ const linesArray = computed(() => {
       animated: props.animated
     }
     
-    // Случайная ширина для более реалистичного вида
+    // РЎР»СѓС‡Р°Р№РЅР°СЏ С€РёСЂРёРЅР° РґР»СЏ Р±РѕР»РµРµ СЂРµР°Р»РёСЃС‚РёС‡РЅРѕРіРѕ РІРёРґР°
     if (props.randomWidth && props.variant === 'text') {
       const widths = ['85%', '92%', '76%', '88%', '95%', '82%', '90%']
       line.width = widths[i % widths.length]
       
-      // Последняя строка часто короче
+      // РџРѕСЃР»РµРґРЅСЏСЏ СЃС‚СЂРѕРєР° С‡Р°СЃС‚Рѕ РєРѕСЂРѕС‡Рµ
       if (i === props.lines - 1) {
         line.width = ['60%', '65%', '58%', '72%'][Math.floor(Math.random() * 4)]
       }
     }
     
-    // Добавляем отступ между строками
+    // Р”РѕР±Р°РІР»СЏРµРј РѕС‚СЃС‚СѓРї РјРµР¶РґСѓ СЃС‚СЂРѕРєР°РјРё
     if (i < props.lines - 1) {
       line.customClass = 'mb-2'
     }
@@ -59,7 +59,7 @@ const linesArray = computed(() => {
 })
 
 const groupAriaLabel = computed(() => 
-  `Загрузка группы из ${props.lines} элементов`
+  `Р—Р°РіСЂСѓР·РєР° РіСЂСѓРїРїС‹ РёР· ${props.lines} СЌР»РµРјРµРЅС‚РѕРІ`
 )
 </script>
 
@@ -72,7 +72,7 @@ const groupAriaLabel = computed(() =>
   margin-top: 0.5rem;
 }
 
-/* Специальные отступы для разных вариантов */
+/* РЎРїРµС†РёР°Р»СЊРЅС‹Рµ РѕС‚СЃС‚СѓРїС‹ РґР»СЏ СЂР°Р·РЅС‹С… РІР°СЂРёР°РЅС‚РѕРІ */
 .skeleton-group .skeleton--heading + .skeleton--text {
   margin-top: 0.75rem;
 }

@@ -1,20 +1,20 @@
 <template>
   <div class="booking-calendar">
-    <!-- Заголовок -->
+    <!-- Р—Р°РіРѕР»РѕРІРѕРє -->
     <div class="mb-6">
       <h3 class="text-lg font-semibold text-gray-900 mb-2">
-        Выберите дату и время
+        Р’С‹Р±РµСЂРёС‚Рµ РґР°С‚Сѓ Рё РІСЂРµРјСЏ
       </h3>
       <p class="text-sm text-gray-600">
-        Доступное время для записи к мастеру
+        Р”РѕСЃС‚СѓРїРЅРѕРµ РІСЂРµРјСЏ РґР»СЏ Р·Р°РїРёСЃРё Рє РјР°СЃС‚РµСЂСѓ
       </p>
     </div>
 
-    <!-- Календарь выбора даты -->
+    <!-- РљР°Р»РµРЅРґР°СЂСЊ РІС‹Р±РѕСЂР° РґР°С‚С‹ -->
     <div class="mb-6">
-      <h4 class="text-md font-medium text-gray-800 mb-3">Дата записи</h4>
+      <h4 class="text-md font-medium text-gray-800 mb-3">Р”Р°С‚Р° Р·Р°РїРёСЃРё</h4>
       <div class="grid grid-cols-7 gap-1 mb-4">
-        <!-- Заголовки дней недели -->
+        <!-- Р—Р°РіРѕР»РѕРІРєРё РґРЅРµР№ РЅРµРґРµР»Рё -->
         <div 
           v-for="day in weekDays" 
           :key="day"
@@ -23,7 +23,7 @@
           {{ day }}
         </div>
         
-        <!-- Даты -->
+        <!-- Р”Р°С‚С‹ -->
         <button
           v-for="date in calendarDates" 
           :key="date.key"
@@ -46,10 +46,10 @@
       </div>
     </div>
 
-    <!-- Выбор времени -->
+    <!-- Р’С‹Р±РѕСЂ РІСЂРµРјРµРЅРё -->
     <div v-if="selectedDate" class="mb-6">
       <h4 class="text-md font-medium text-gray-800 mb-3">
-        Время записи на {{ selectedDate.format('D MMMM') }}
+        Р’СЂРµРјСЏ Р·Р°РїРёСЃРё РЅР° {{ selectedDate.format('D MMMM') }}
       </h4>
       
       <div v-if="loadingTimeSlots" class="flex justify-center py-8">
@@ -57,8 +57,8 @@
       </div>
       
       <div v-else-if="availableTimeSlots.length === 0" class="text-center py-8">
-        <p class="text-gray-500">На выбранную дату нет свободного времени</p>
-        <p class="text-sm text-gray-400 mt-1">Попробуйте выбрать другую дату</p>
+        <p class="text-gray-500">РќР° РІС‹Р±СЂР°РЅРЅСѓСЋ РґР°С‚Сѓ РЅРµС‚ СЃРІРѕР±РѕРґРЅРѕРіРѕ РІСЂРµРјРµРЅРё</p>
+        <p class="text-sm text-gray-400 mt-1">РџРѕРїСЂРѕР±СѓР№С‚Рµ РІС‹Р±СЂР°С‚СЊ РґСЂСѓРіСѓСЋ РґР°С‚Сѓ</p>
       </div>
       
       <div v-else class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
@@ -82,7 +82,7 @@
       </div>
     </div>
 
-    <!-- Выбранное время -->
+    <!-- Р’С‹Р±СЂР°РЅРЅРѕРµ РІСЂРµРјСЏ -->
     <div v-if="selectedDate && selectedTime" class="bg-blue-50 rounded-lg p-4">
       <div class="flex items-center">
         <div class="flex-shrink-0">
@@ -92,16 +92,16 @@
         </div>
         <div class="ml-3">
           <p class="text-sm font-medium text-blue-900">
-            Выбрано время записи
+            Р’С‹Р±СЂР°РЅРѕ РІСЂРµРјСЏ Р·Р°РїРёСЃРё
           </p>
           <p class="text-sm text-blue-700">
-            {{ selectedDate.format('DD MMMM YYYY') }} в {{ selectedTime }}
+            {{ selectedDate.format('DD MMMM YYYY') }} РІ {{ selectedTime }}
           </p>
         </div>
       </div>
     </div>
 
-    <!-- Ошибки -->
+    <!-- РћС€РёР±РєРё -->
     <div v-if="error" class="mt-4 bg-red-50 border border-red-200 rounded-lg p-4">
       <div class="flex">
         <div class="flex-shrink-0">
@@ -123,7 +123,7 @@ import dayjs from 'dayjs'
 import 'dayjs/locale/ru'
 import updateLocale from 'dayjs/plugin/updateLocale'
 
-// Настройка dayjs
+// РќР°СЃС‚СЂРѕР№РєР° dayjs
 dayjs.extend(updateLocale)
 dayjs.locale('ru')
 
@@ -150,30 +150,30 @@ const props = defineProps({
 // Events
 const emit = defineEmits(['update:selectedDate', 'update:selectedTime', 'selection-change'])
 
-// Состояние компонента
+// РЎРѕСЃС‚РѕСЏРЅРёРµ РєРѕРјРїРѕРЅРµРЅС‚Р°
 const selectedDate = ref(null)
 const selectedTime = ref(null)
 const availableTimeSlots = ref([])
 const loadingTimeSlots = ref(false)
 const error = ref(null)
 
-// Константы
-const weekDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
+// РљРѕРЅСЃС‚Р°РЅС‚С‹
+const weekDays = ['РџРЅ', 'Р’С‚', 'РЎСЂ', 'Р§С‚', 'РџС‚', 'РЎР±', 'Р’СЃ']
 
-// Вычисляемые свойства
+// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const calendarDates = computed(() => {
   const startDate = dayjs(props.minDate)
   const endDate = dayjs(props.maxDate)
   const dates = []
   
-  // Находим первый понедельник для отображения полной недели
+  // РќР°С…РѕРґРёРј РїРµСЂРІС‹Р№ РїРѕРЅРµРґРµР»СЊРЅРёРє РґР»СЏ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ РїРѕР»РЅРѕР№ РЅРµРґРµР»Рё
   const firstDay = startDate.startOf('month').startOf('week').add(1, 'day')
   
-  // Генерируем даты для календаря
+  // Р“РµРЅРµСЂРёСЂСѓРµРј РґР°С‚С‹ РґР»СЏ РєР°Р»РµРЅРґР°СЂСЏ
   let currentDate = firstDay
   const today = dayjs()
   
-  for (let i = 0; i < 42; i++) { // 6 недель максимум
+  for (let i = 0; i < 42; i++) { // 6 РЅРµРґРµР»СЊ РјР°РєСЃРёРјСѓРј
     if (currentDate.isAfter(endDate)) break
     
     dates.push({
@@ -190,7 +190,7 @@ const calendarDates = computed(() => {
   return dates
 })
 
-// Методы
+// РњРµС‚РѕРґС‹
 const selectDate = async (dateObj) => {
   if (!dateObj.available || dateObj.isPast) return
   
@@ -210,7 +210,7 @@ const selectTime = (timeSlot) => {
   selectedTime.value = timeSlot.time
   emit('update:selectedTime', timeSlot.time)
   
-  // Отправляем полную информацию о выборе
+  // РћС‚РїСЂР°РІР»СЏРµРј РїРѕР»РЅСѓСЋ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РІС‹Р±РѕСЂРµ
   emit('selection-change', {
     date: selectedDate.value.format('YYYY-MM-DD'),
     time: timeSlot.time,
@@ -224,10 +224,10 @@ const loadTimeSlots = async (date) => {
   error.value = null
   
   try {
-    // Имитация API вызова - замените на реальный API
+    // РРјРёС‚Р°С†РёСЏ API РІС‹Р·РѕРІР° - Р·Р°РјРµРЅРёС‚Рµ РЅР° СЂРµР°Р»СЊРЅС‹Р№ API
     await new Promise(resolve => setTimeout(resolve, 500))
     
-    // Генерируем временные слоты (9:00 - 21:00 с интервалом в час)
+    // Р“РµРЅРµСЂРёСЂСѓРµРј РІСЂРµРјРµРЅРЅС‹Рµ СЃР»РѕС‚С‹ (9:00 - 21:00 СЃ РёРЅС‚РµСЂРІР°Р»РѕРј РІ С‡Р°СЃ)
     const slots = []
     const startHour = 9
     const endHour = 21
@@ -235,7 +235,7 @@ const loadTimeSlots = async (date) => {
     for (let hour = startHour; hour < endHour; hour++) {
       const timeString = `${hour.toString().padStart(2, '0')}:00`
       
-      // Случайно делаем некоторые слоты недоступными для демонстрации
+      // РЎР»СѓС‡Р°Р№РЅРѕ РґРµР»Р°РµРј РЅРµРєРѕС‚РѕСЂС‹Рµ СЃР»РѕС‚С‹ РЅРµРґРѕСЃС‚СѓРїРЅС‹РјРё РґР»СЏ РґРµРјРѕРЅСЃС‚СЂР°С†РёРё
       const available = Math.random() > 0.3
       
       slots.push({
@@ -249,30 +249,30 @@ const loadTimeSlots = async (date) => {
     availableTimeSlots.value = slots
     
   } catch (err) {
-    error.value = 'Ошибка загрузки доступного времени. Попробуйте еще раз.'
+    error.value = 'РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё РґРѕСЃС‚СѓРїРЅРѕРіРѕ РІСЂРµРјРµРЅРё. РџРѕРїСЂРѕР±СѓР№С‚Рµ РµС‰Рµ СЂР°Р·.'
   } finally {
     loadingTimeSlots.value = false
   }
 }
 
-// Наблюдатели
+// РќР°Р±Р»СЋРґР°С‚РµР»Рё
 watch(() => props.masterId, () => {
-  // Сброс при смене мастера
+  // РЎР±СЂРѕСЃ РїСЂРё СЃРјРµРЅРµ РјР°СЃС‚РµСЂР°
   selectedDate.value = null
   selectedTime.value = null
   availableTimeSlots.value = []
 })
 
 watch(() => props.selectedService, () => {
-  // Перезагрузка слотов при смене услуги
+  // РџРµСЂРµР·Р°РіСЂСѓР·РєР° СЃР»РѕС‚РѕРІ РїСЂРё СЃРјРµРЅРµ СѓСЃР»СѓРіРё
   if (selectedDate.value) {
     loadTimeSlots(selectedDate.value)
   }
 })
 
-// Инициализация
+// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ
 onMounted(() => {
-  // Можно автоматически выбрать ближайшую доступную дату
+  // РњРѕР¶РЅРѕ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё РІС‹Р±СЂР°С‚СЊ Р±Р»РёР¶Р°Р№С€СѓСЋ РґРѕСЃС‚СѓРїРЅСѓСЋ РґР°С‚Сѓ
   const tomorrow = dayjs().add(1, 'day')
   if (tomorrow.isBetween(dayjs(props.minDate), dayjs(props.maxDate), 'day', '[]')) {
     selectDate({
@@ -289,7 +289,7 @@ onMounted(() => {
   @apply max-w-full;
 }
 
-/* Анимация для выбранных элементов */
+/* РђРЅРёРјР°С†РёСЏ РґР»СЏ РІС‹Р±СЂР°РЅРЅС‹С… СЌР»РµРјРµРЅС‚РѕРІ */
 .booking-calendar button {
   transition: all 0.2s ease-in-out;
 }
@@ -298,7 +298,7 @@ onMounted(() => {
   transform: translateY(-1px);
 }
 
-/* Стилизация загрузки */
+/* РЎС‚РёР»РёР·Р°С†РёСЏ Р·Р°РіСЂСѓР·РєРё */
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -307,3 +307,4 @@ onMounted(() => {
   animation: spin 1s linear infinite;
 }
 </style>
+

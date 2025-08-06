@@ -1,4 +1,4 @@
-﻿<!-- resources/js/Pages/Profile/Dashboard.vue - FSD Refactored -->
+<!-- resources/js/Pages/Profile/Dashboard.vue - FSD Refactored -->
 <template>
   <Head title="Личный кабинет" />
   
@@ -378,3 +378,4 @@ onMounted(() => {
   loadTabData(activeTab.value)
 })
 </script>
+

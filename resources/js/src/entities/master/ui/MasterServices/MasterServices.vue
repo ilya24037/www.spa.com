@@ -1,7 +1,7 @@
 <!-- resources/js/src/entities/master/ui/MasterServices/MasterServices.vue -->
 <template>
   <div :class="CONTAINER_CLASSES">
-    <h3 :class="TITLE_CLASSES">Услуги и цены</h3>
+    <h3 :class="TITLE_CLASSES">РЈСЃР»СѓРіРё Рё С†РµРЅС‹</h3>
     
     <div :class="SERVICES_LIST_CLASSES">
       <div
@@ -23,7 +23,7 @@
         </div>
         
         <div :class="SERVICE_PRICE_CLASSES">
-          <span :class="PRICE_AMOUNT_CLASSES">{{ formatPrice(service.price) }} ₽</span>
+          <span :class="PRICE_AMOUNT_CLASSES">{{ formatPrice(service.price) }} в‚Ѕ</span>
           <span v-if="service.price_unit" :class="PRICE_UNIT_CLASSES">
             /{{ getPriceUnitLabel(service.price_unit) }}
           </span>
@@ -31,9 +31,9 @@
       </div>
     </div>
 
-    <!-- Дополнительная информация -->
+    <!-- Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ -->
     <div v-if="master.services_additional_info" :class="ADDITIONAL_INFO_CLASSES">
-      <h4 :class="ADDITIONAL_TITLE_CLASSES">Дополнительная информация</h4>
+      <h4 :class="ADDITIONAL_TITLE_CLASSES">Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ</h4>
       <p :class="ADDITIONAL_TEXT_CLASSES">{{ master.services_additional_info }}</p>
     </div>
   </div>
@@ -42,7 +42,7 @@
 <script setup>
 import { computed } from 'vue'
 
-// 🎯 Стили согласно дизайн-системе
+// рџЋЇ РЎС‚РёР»Рё СЃРѕРіР»Р°СЃРЅРѕ РґРёР·Р°Р№РЅ-СЃРёСЃС‚РµРјРµ
 const CONTAINER_CLASSES = 'space-y-4'
 const TITLE_CLASSES = 'text-lg font-semibold text-gray-900'
 const SERVICES_LIST_CLASSES = 'space-y-3'
@@ -66,12 +66,12 @@ const props = defineProps({
   }
 })
 
-// Вычисляемые свойства
+// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const displayServices = computed(() => {
   return props.master.services || []
 })
 
-// Методы
+// РњРµС‚РѕРґС‹
 const formatPrice = (price) => {
   if (!price) return '0'
   return new Intl.NumberFormat('ru-RU').format(price)
@@ -80,22 +80,22 @@ const formatPrice = (price) => {
 const formatDuration = (duration) => {
   if (!duration) return ''
   
-  if (duration < 60) return `${duration} мин`
+  if (duration < 60) return `${duration} РјРёРЅ`
   
   const hours = Math.floor(duration / 60)
   const minutes = duration % 60
   
-  if (minutes === 0) return `${hours} ч`
-  return `${hours} ч ${minutes} мин`
+  if (minutes === 0) return `${hours} С‡`
+  return `${hours} С‡ ${minutes} РјРёРЅ`
 }
 
 const getPriceUnitLabel = (unit) => {
   const units = {
-    hour: 'час',
-    service: 'услуга',
-    session: 'сеанс',
-    minute: 'мин',
-    day: 'день'
+    hour: 'С‡Р°СЃ',
+    service: 'СѓСЃР»СѓРіР°',
+    session: 'СЃРµР°РЅСЃ',
+    minute: 'РјРёРЅ',
+    day: 'РґРµРЅСЊ'
   }
   
   return units[unit] || unit

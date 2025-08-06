@@ -1,12 +1,12 @@
 <template>
-  <!-- Универсальная галерея фотографий -->
+  <!-- РЈРЅРёРІРµСЂСЃР°Р»СЊРЅР°СЏ РіР°Р»РµСЂРµСЏ С„РѕС‚РѕРіСЂР°С„РёР№ -->
   <div class="photo-gallery" :class="galleryClasses">
     
-    <!-- Режим полной галереи (для мастеров/объявлений) -->
+    <!-- Р РµР¶РёРј РїРѕР»РЅРѕР№ РіР°Р»РµСЂРµРё (РґР»СЏ РјР°СЃС‚РµСЂРѕРІ/РѕР±СЉСЏРІР»РµРЅРёР№) -->
     <div v-if="mode === 'full'" class="full-gallery bg-white rounded-lg shadow-sm overflow-hidden">
-      <!-- Десктопная версия -->
+      <!-- Р”РµСЃРєС‚РѕРїРЅР°СЏ РІРµСЂСЃРёСЏ -->
       <div class="hidden md:flex gap-4 p-4">
-        <!-- Миниатюры слева -->
+        <!-- РњРёРЅРёР°С‚СЋСЂС‹ СЃР»РµРІР° -->
         <div v-if="showThumbnails" class="flex flex-col gap-2 w-20">
           <div 
             v-for="(photo, index) in processedPhotos" 
@@ -19,7 +19,7 @@
           >
             <img 
               :src="photo.thumb || photo.url"
-              :alt="`Фото ${index + 1}`"
+              :alt="`Р¤РѕС‚Рѕ ${index + 1}`"
               class="w-full h-full object-cover"
             >
             <div 
@@ -29,22 +29,22 @@
           </div>
         </div>
         
-        <!-- Основное изображение -->
+        <!-- РћСЃРЅРѕРІРЅРѕРµ РёР·РѕР±СЂР°Р¶РµРЅРёРµ -->
         <div class="flex-1">
           <div class="relative aspect-[4/3] bg-gray-100 rounded-lg overflow-hidden">
             <img 
               :src="currentPhoto.url"
-              :alt="currentPhoto.alt || 'Фото'"
+              :alt="currentPhoto.alt || 'Р¤РѕС‚Рѕ'"
               class="w-full h-full object-cover cursor-pointer"
               @click="openLightbox"
             >
             
-            <!-- Бейджи -->
+            <!-- Р‘РµР№РґР¶Рё -->
             <div v-if="showBadges" class="absolute top-4 left-4 flex flex-col gap-2">
               <slot name="badges" />
             </div>
             
-            <!-- Кнопка увеличения -->
+            <!-- РљРЅРѕРїРєР° СѓРІРµР»РёС‡РµРЅРёСЏ -->
             <button 
               v-if="showLightboxButton"
               @click="openLightbox"
@@ -55,7 +55,7 @@
               </svg>
             </button>
             
-            <!-- Счетчик фото -->
+            <!-- РЎС‡РµС‚С‡РёРє С„РѕС‚Рѕ -->
             <div v-if="showCounter" class="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
               {{ currentPhotoIndex + 1 }} / {{ processedPhotos.length }}
             </div>
@@ -63,12 +63,12 @@
         </div>
       </div>
       
-      <!-- Мобильная версия -->
+      <!-- РњРѕР±РёР»СЊРЅР°СЏ РІРµСЂСЃРёСЏ -->
       <div class="md:hidden">
         <div class="relative aspect-[4/3] bg-gray-100">
           <img 
             :src="currentPhoto.url"
-            :alt="currentPhoto.alt || 'Фото'"
+            :alt="currentPhoto.alt || 'Р¤РѕС‚Рѕ'"
             class="w-full h-full object-cover cursor-pointer"
             @click="openLightbox"
           >
@@ -114,7 +114,7 @@
           >
             <img 
               :src="photo.thumb || photo.url"
-              :alt="`Фото ${index + 1}`"
+              :alt="`Р¤РѕС‚Рѕ ${index + 1}`"
               class="w-full h-full object-cover"
             >
             <div 
@@ -126,7 +126,7 @@
       </div>
     </div>
 
-    <!-- Режим сетки (для объявлений) -->
+    <!-- Р РµР¶РёРј СЃРµС‚РєРё (РґР»СЏ РѕР±СЉСЏРІР»РµРЅРёР№) -->
     <div v-else-if="mode === 'grid'" class="grid-gallery">
       <h2 v-if="title" class="text-xl font-semibold mb-4">{{ title }}</h2>
       <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -137,23 +137,23 @@
         >
           <img 
             :src="photo.preview || photo.url" 
-            :alt="`Фото ${index + 1}`"
+            :alt="`Р¤РѕС‚Рѕ ${index + 1}`"
             class="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
             @click="openLightbox(index)"
           />
           <div v-if="index === 0" class="absolute bottom-2 left-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
-            Основное фото
+            РћСЃРЅРѕРІРЅРѕРµ С„РѕС‚Рѕ
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Режим превью (для карточек) -->
+    <!-- Р РµР¶РёРј РїСЂРµРІСЊСЋ (РґР»СЏ РєР°СЂС‚РѕС‡РµРє) -->
     <div v-else-if="mode === 'preview'" class="preview-gallery">
       <div class="relative w-full h-full">
         <img 
           :src="getImageUrl(firstPhoto)"
-          :alt="title || 'Фото'"
+          :alt="title || 'Р¤РѕС‚Рѕ'"
           class="w-full h-full object-cover"
           @error="handleImageError"
         >
@@ -258,7 +258,7 @@ const processedPhotos = computed(() => {
           url: photoUrl,
           thumb: photoThumb || photoUrl,
           preview: photo.preview || photoUrl,
-          alt: photo.alt || `Фото ${index + 1}`
+          alt: photo.alt || `Р¤РѕС‚Рѕ ${index + 1}`
         })
       }
     })
@@ -269,7 +269,7 @@ const processedPhotos = computed(() => {
       url: '/images/masters/demo-1.jpg',
       thumb: '/images/masters/demo-1.jpg',
       preview: '/images/masters/demo-1.jpg',
-      alt: 'Фото недоступно'
+      alt: 'Р¤РѕС‚Рѕ РЅРµРґРѕСЃС‚СѓРїРЅРѕ'
     })
   }
   

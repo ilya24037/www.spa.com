@@ -4,16 +4,16 @@
     :class="getContainerClasses()"
     :style="containerStyle"
   >
-    <!-- Фон карты -->
+    <!-- Р¤РѕРЅ РєР°СЂС‚С‹ -->
     <div :class="BACKGROUND_CLASSES">
-      <!-- Сетка для имитации карты -->
+      <!-- РЎРµС‚РєР° РґР»СЏ РёРјРёС‚Р°С†РёРё РєР°СЂС‚С‹ -->
       <div
         v-if="mode !== 'mini'"
         :class="GRID_CLASSES"
       ></div>
     </div>
 
-    <!-- Заголовок карты -->
+    <!-- Р—Р°РіРѕР»РѕРІРѕРє РєР°СЂС‚С‹ -->
     <div
       v-if="mode === 'preview' && title"
       :class="HEADER_CLASSES"
@@ -22,7 +22,7 @@
       <p v-if="subtitle" :class="SUBTITLE_CLASSES">{{ subtitle }}</p>
     </div>
 
-    <!-- Центральная иконка -->
+    <!-- Р¦РµРЅС‚СЂР°Р»СЊРЅР°СЏ РёРєРѕРЅРєР° -->
     <div
       v-if="showCenterIcon"
       :class="CENTER_ICON_CONTAINER_CLASSES"
@@ -38,7 +38,7 @@
       </div>
     </div>
 
-    <!-- Маркеры -->
+    <!-- РњР°СЂРєРµСЂС‹ -->
     <div v-if="hasMarkers" :class="MARKERS_CONTAINER_CLASSES">
       <MapMarker
         v-for="(marker, index) in visibleMarkers"
@@ -52,7 +52,7 @@
       />
     </div>
 
-    <!-- Контролы карты -->
+    <!-- РљРѕРЅС‚СЂРѕР»С‹ РєР°СЂС‚С‹ -->
     <MapControls
       v-if="showControls && mode === 'full'"
       :zoom="currentZoom"
@@ -64,17 +64,17 @@
       @fullscreen="toggleFullscreen"
     />
 
-    <!-- Статистика -->
+    <!-- РЎС‚Р°С‚РёСЃС‚РёРєР° -->
     <div
       v-if="showStats && hasMarkers"
       :class="STATS_CLASSES"
     >
       <span :class="STATS_TEXT_CLASSES">
-        {{ visibleMarkers.length }} из {{ markers.length }}
+        {{ visibleMarkers.length }} РёР· {{ markers.length }}
       </span>
     </div>
 
-    <!-- Загрузка -->
+    <!-- Р—Р°РіСЂСѓР·РєР° -->
     <div v-if="loading" :class="LOADING_CLASSES">
       <svg :class="LOADING_ICON_CLASSES" fill="none" viewBox="0 0 24 24">
         <circle
@@ -100,7 +100,7 @@ import { ref, computed, onMounted } from 'vue'
 import MapMarker from './MapMarker.vue'
 import MapControls from './MapControls.vue'
 
-// 🎯 Стили согласно дизайн-системе
+// рџЋЇ РЎС‚РёР»Рё СЃРѕРіР»Р°СЃРЅРѕ РґРёР·Р°Р№РЅ-СЃРёСЃС‚РµРјРµ
 const BASE_CONTAINER_CLASSES = 'relative rounded-lg overflow-hidden'
 const BACKGROUND_CLASSES = 'absolute inset-0 bg-gradient-to-br from-blue-50 to-blue-100'
 const GRID_CLASSES = 'h-full w-full opacity-10 bg-grid-pattern'
@@ -141,7 +141,7 @@ const props = defineProps({
   },
   placeholderText: {
     type: String,
-    default: 'Выберите место на карте'
+    default: 'Р’С‹Р±РµСЂРёС‚Рµ РјРµСЃС‚Рѕ РЅР° РєР°СЂС‚Рµ'
   },
   showControls: {
     type: Boolean,
@@ -163,12 +163,12 @@ const props = defineProps({
 
 const emit = defineEmits(['marker-click', 'marker-hover', 'zoom-change', 'bounds-change'])
 
-// Состояние
+// РЎРѕСЃС‚РѕСЏРЅРёРµ
 const currentZoom = ref(10)
 const hoveredMarker = ref(null)
 const isFullscreen = ref(false)
 
-// Вычисляемые свойства
+// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const hasMarkers = computed(() => props.markers.length > 0)
 
 const showCenterIcon = computed(() => 
@@ -186,7 +186,7 @@ const containerStyle = computed(() => ({
 const canZoomIn = computed(() => currentZoom.value < 18)
 const canZoomOut = computed(() => currentZoom.value > 1)
 
-// Методы
+// РњРµС‚РѕРґС‹
 const getContainerClasses = () => {
   const classes = [BASE_CONTAINER_CLASSES]
   
@@ -197,15 +197,15 @@ const getContainerClasses = () => {
 }
 
 const getMarkerPosition = (index) => {
-  // Генерируем псевдо-случайные позиции для демонстрации
+  // Р“РµРЅРµСЂРёСЂСѓРµРј РїСЃРµРІРґРѕ-СЃР»СѓС‡Р°Р№РЅС‹Рµ РїРѕР·РёС†РёРё РґР»СЏ РґРµРјРѕРЅСЃС‚СЂР°С†РёРё
   const rows = Math.ceil(Math.sqrt(visibleMarkers.value.length))
   const cols = Math.ceil(visibleMarkers.value.length / rows)
   
   const row = Math.floor(index / cols)
   const col = index % cols
   
-  const x = (col + 0.5) / cols * 80 + 10 // 10-90% ширины
-  const y = (row + 0.5) / rows * 80 + 10 // 10-90% высоты
+  const x = (col + 0.5) / cols * 80 + 10 // 10-90% С€РёСЂРёРЅС‹
+  const y = (row + 0.5) / rows * 80 + 10 // 10-90% РІС‹СЃРѕС‚С‹
   
   return {
     left: `${x}%`,
@@ -237,16 +237,16 @@ const zoomOut = () => {
 }
 
 const goToMyLocation = () => {
-  // Имитация определения местоположения
+  // РРјРёС‚Р°С†РёСЏ РѕРїСЂРµРґРµР»РµРЅРёСЏ РјРµСЃС‚РѕРїРѕР»РѕР¶РµРЅРёСЏ
 }
 
 const toggleFullscreen = () => {
   isFullscreen.value = !isFullscreen.value
 }
 
-// Жизненный цикл
+// Р–РёР·РЅРµРЅРЅС‹Р№ С†РёРєР»
 onMounted(() => {
-  // Инициализация карты
+  // РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РєР°СЂС‚С‹
 })
 </script>
 
@@ -258,3 +258,4 @@ onMounted(() => {
   background-size: 50px 50px;
 }
 </style>
+

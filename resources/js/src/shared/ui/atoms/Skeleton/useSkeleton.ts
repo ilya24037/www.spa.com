@@ -6,8 +6,8 @@
  * const { userCardSkeleton, articleSkeleton } = useSkeletonPresets()
  */
 
-import { ref, computed, reactive } from 'vue'
-import type { SkeletonVariant, SkeletonSize, SkeletonOptions, SkeletonPresets } from './Skeleton.types'
+import { ref, computed, reactive, readonly } from 'vue'
+import type { SkeletonOptions, SkeletonPresets } from './Skeleton.types'
 
 export function useSkeleton(initialOptions?: SkeletonOptions) {
   const isLoading = ref(false)

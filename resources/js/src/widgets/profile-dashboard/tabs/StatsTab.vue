@@ -1,7 +1,7 @@
 <!-- resources/js/src/widgets/profile-dashboard/tabs/StatsTab.vue -->
 <template>
   <div :class="CONTAINER_CLASSES">
-    <!-- Статистика карточки -->
+    <!-- РЎС‚Р°С‚РёСЃС‚РёРєР° РєР°СЂС‚РѕС‡РєРё -->
     <div :class="STATS_GRID_CLASSES">
       <div v-for="stat in statsCards" :key="stat.key" :class="STAT_CARD_CLASSES">
         <div :class="STAT_ICON_WRAPPER_CLASSES">
@@ -14,12 +14,12 @@
       </div>
     </div>
 
-    <!-- График -->
+    <!-- Р“СЂР°С„РёРє -->
     <div :class="CHART_SECTION_CLASSES">
-      <h3 :class="CHART_TITLE_CLASSES">Активность за последние 30 дней</h3>
+      <h3 :class="CHART_TITLE_CLASSES">РђРєС‚РёРІРЅРѕСЃС‚СЊ Р·Р° РїРѕСЃР»РµРґРЅРёРµ 30 РґРЅРµР№</h3>
       <div :class="CHART_PLACEHOLDER_CLASSES">
         <ChartBarIcon :class="CHART_ICON_CLASSES" />
-        <p :class="CHART_TEXT_CLASSES">График статистики будет здесь</p>
+        <p :class="CHART_TEXT_CLASSES">Р“СЂР°С„РёРє СЃС‚Р°С‚РёСЃС‚РёРєРё Р±СѓРґРµС‚ Р·РґРµСЃСЊ</p>
       </div>
     </div>
   </div>
@@ -34,7 +34,7 @@ import {
   ChartBarIcon
 } from '@heroicons/vue/outline'
 
-// 🎯 Стили
+// рџЋЇ РЎС‚РёР»Рё
 const CONTAINER_CLASSES = 'space-y-6'
 const STATS_GRID_CLASSES = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'
 const STAT_CARD_CLASSES = 'flex items-center gap-4 p-6 bg-gray-50 rounded-lg'
@@ -60,36 +60,36 @@ const props = defineProps({
   }
 })
 
-// Конфигурация карточек статистики
+// РљРѕРЅС„РёРіСѓСЂР°С†РёСЏ РєР°СЂС‚РѕС‡РµРє СЃС‚Р°С‚РёСЃС‚РёРєРё
 const statsCards = [
   {
     key: 'views',
-    label: 'Просмотры',
+    label: 'РџСЂРѕСЃРјРѕС‚СЂС‹',
     icon: EyeIcon
   },
   {
     key: 'calls',
-    label: 'Звонки',
+    label: 'Р—РІРѕРЅРєРё',
     icon: PhoneIcon
   },
   {
     key: 'bookings',
-    label: 'Бронирования',
+    label: 'Р‘СЂРѕРЅРёСЂРѕРІР°РЅРёСЏ',
     icon: CalendarIcon
   },
   {
     key: 'revenue',
-    label: 'Доход',
+    label: 'Р”РѕС…РѕРґ',
     icon: CurrencyDollarIcon
   }
 ]
 
-// Методы
+// РњРµС‚РѕРґС‹
 const formatStatValue = (key) => {
   const value = props.stats[key] || 0
   
   if (key === 'revenue') {
-    return `${value.toLocaleString()} ₽`
+    return `${value.toLocaleString()} в‚Ѕ`
   }
   
   if (value >= 1000) {

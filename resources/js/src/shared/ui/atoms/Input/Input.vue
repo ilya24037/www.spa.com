@@ -28,7 +28,7 @@
         :name="name"
         :placeholder="placeholder"
         :disabled="disabled"
-        :Readonly="Readonly"
+        :readonly="readonly"
         :required="required"
         :autofocus="autofocus"
         :autocomplete="autocomplete"
@@ -66,7 +66,7 @@
 
       <!-- Clear button -->
       <button
-        v-if="clearable && localValue && !disabled && !Readonly"
+        v-if="clearable && localValue && !disabled && !readonly"
         type="button"
         class="input-clear"
         aria-label="Очистить поле"
@@ -104,7 +104,7 @@
 
     <!-- Character counter -->
     <p v-if="showCounter && maxlength" class="input-counter">
-      {{ localValue?.length || 0 }} / {{ maxlength }}
+      {{ String(localValue)?.length || 0 }} / {{ maxlength }}
     </p>
   </div>
 </template>
@@ -394,3 +394,4 @@ defineExpose({
   @apply cursor-not-allowed;
 }
 </style>
+

@@ -1,7 +1,7 @@
 <!-- resources/js/src/features/gallery/ui/PhotoGallery/PhotoGallery.vue -->
 <template>
   <div :class="CONTAINER_CLASSES">
-    <!-- Заголовок -->
+    <!-- Р—Р°РіРѕР»РѕРІРѕРє -->
     <div v-if="title" :class="HEADER_CLASSES">
       <h3 :class="TITLE_CLASSES">{{ title }}</h3>
       <span v-if="photos.length" :class="COUNT_CLASSES">
@@ -9,17 +9,17 @@
       </span>
     </div>
 
-    <!-- Основная фотография -->
+    <!-- РћСЃРЅРѕРІРЅР°СЏ С„РѕС‚РѕРіСЂР°С„РёСЏ -->
     <div :class="MAIN_PHOTO_CONTAINER_CLASSES">
       <img
         :src="currentPhoto.url"
-        :alt="currentPhoto.alt || `Фото ${currentIndex + 1}`"
+        :alt="currentPhoto.alt || `Р¤РѕС‚Рѕ ${currentIndex + 1}`"
         :class="MAIN_PHOTO_CLASSES"
         @load="handleImageLoad"
         @error="handleImageError"
       >
 
-      <!-- Навигация -->
+      <!-- РќР°РІРёРіР°С†РёСЏ -->
       <button
         v-if="photos.length > 1"
         @click="previousPhoto"
@@ -40,12 +40,12 @@
         </svg>
       </button>
 
-      <!-- Счетчик -->
+      <!-- РЎС‡РµС‚С‡РёРє -->
       <div v-if="photos.length > 1" :class="COUNTER_CLASSES">
         {{ currentIndex + 1 }} / {{ photos.length }}
       </div>
 
-      <!-- Кнопка полноэкранного просмотра -->
+      <!-- РљРЅРѕРїРєР° РїРѕР»РЅРѕСЌРєСЂР°РЅРЅРѕРіРѕ РїСЂРѕСЃРјРѕС‚СЂР° -->
       <button
         @click="openFullscreen"
         :class="FULLSCREEN_BUTTON_CLASSES"
@@ -56,7 +56,7 @@
       </button>
     </div>
 
-    <!-- Миниатюры -->
+    <!-- РњРёРЅРёР°С‚СЋСЂС‹ -->
     <div v-if="photos.length > 1 && showThumbnails" :class="THUMBNAILS_CONTAINER_CLASSES">
       <button
         v-for="(photo, index) in photos"
@@ -66,13 +66,13 @@
       >
         <img
           :src="getThumbnailUrl(photo)"
-          :alt="`Миниатюра ${index + 1}`"
+          :alt="`РњРёРЅРёР°С‚СЋСЂР° ${index + 1}`"
           :class="THUMBNAIL_IMAGE_CLASSES"
         >
       </button>
     </div>
 
-    <!-- Полноэкранный просмотр -->
+    <!-- РџРѕР»РЅРѕСЌРєСЂР°РЅРЅС‹Р№ РїСЂРѕСЃРјРѕС‚СЂ -->
     <PhotoViewer />
   </div>
 </template>
@@ -82,7 +82,7 @@ import { ref, computed } from 'vue'
 import PhotoViewer from '../PhotoViewer/PhotoViewer.vue'
 import { useGalleryStore } from '@/src/features/gallery/model/gallery.store'
 
-// 🎯 Стили согласно дизайн-системе
+// рџЋЇ РЎС‚РёР»Рё СЃРѕРіР»Р°СЃРЅРѕ РґРёР·Р°Р№РЅ-СЃРёСЃС‚РµРјРµ
 const CONTAINER_CLASSES = 'space-y-4'
 const HEADER_CLASSES = 'flex items-center justify-between'
 const TITLE_CLASSES = 'text-lg font-semibold text-gray-900'
@@ -125,15 +125,15 @@ const emit = defineEmits(['photo-change'])
 // Store
 const galleryStore = useGalleryStore()
 
-// Состояние
+// РЎРѕСЃС‚РѕСЏРЅРёРµ
 const currentIndex = ref(props.initialIndex)
 
-// Вычисляемые свойства
+// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const currentPhoto = computed(() => 
   props.photos[currentIndex.value] || { url: '', alt: '' }
 )
 
-// Методы
+// РњРµС‚РѕРґС‹
 const getThumbnailUrl = (photo) => {
   return photo.thumbnail || photo.small || photo.url
 }
@@ -165,11 +165,11 @@ const openFullscreen = () => {
 }
 
 const handleImageLoad = () => {
-  // Обработка успешной загрузки
+  // РћР±СЂР°Р±РѕС‚РєР° СѓСЃРїРµС€РЅРѕР№ Р·Р°РіСЂСѓР·РєРё
 }
 
 const handleImageError = () => {
-  // Обработка ошибки загрузки
+  // РћР±СЂР°Р±РѕС‚РєР° РѕС€РёР±РєРё Р·Р°РіСЂСѓР·РєРё
 }
 
 const getPhotoWord = () => {
@@ -177,9 +177,10 @@ const getPhotoWord = () => {
   const lastDigit = count % 10
   const lastTwoDigits = count % 100
   
-  if (lastTwoDigits >= 11 && lastTwoDigits <= 14) return 'фотографий'
-  if (lastDigit === 1) return 'фотография'
-  if (lastDigit >= 2 && lastDigit <= 4) return 'фотографии'
-  return 'фотографий'
+  if (lastTwoDigits >= 11 && lastTwoDigits <= 14) return 'С„РѕС‚РѕРіСЂР°С„РёР№'
+  if (lastDigit === 1) return 'С„РѕС‚РѕРіСЂР°С„РёСЏ'
+  if (lastDigit >= 2 && lastDigit <= 4) return 'С„РѕС‚РѕРіСЂР°С„РёРё'
+  return 'С„РѕС‚РѕРіСЂР°С„РёР№'
 }
 </script>
+

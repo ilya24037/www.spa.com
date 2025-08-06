@@ -1,11 +1,11 @@
 <template>
-  <!-- Семантическая верстка - ЧЕК-ЛИСТ CLAUDE.md ✅ -->
+  <!-- РЎРµРјР°РЅС‚РёС‡РµСЃРєР°СЏ РІРµСЂСЃС‚РєР° - Р§Р•Рљ-Р›РРЎРў CLAUDE.md вњ… -->
   <article
     :class="cardClasses"
     role="article"
     :aria-label="title"
   >
-    <!-- Loading состояние - ЧЕК-ЛИСТ CLAUDE.md ✅ -->
+    <!-- Loading СЃРѕСЃС‚РѕСЏРЅРёРµ - Р§Р•Рљ-Р›РРЎРў CLAUDE.md вњ… -->
     <div v-if="loading" class="animate-pulse">
       <div class="h-48 bg-gray-200 rounded-t-lg"></div>
       <div class="p-4 space-y-3">
@@ -14,7 +14,7 @@
       </div>
     </div>
 
-    <!-- Error состояние - ЧЕК-ЛИСТ CLAUDE.md ✅ -->
+    <!-- Error СЃРѕСЃС‚РѕСЏРЅРёРµ - Р§Р•Рљ-Р›РРЎРў CLAUDE.md вњ… -->
     <div v-else-if="error" class="p-6 text-center">
       <div class="text-red-500 mb-2">
         <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -25,10 +25,10 @@
       <p class="text-gray-600">{{ error }}</p>
     </div>
 
-    <!-- Content - v-if защита от undefined - ЧЕК-ЛИСТ CLAUDE.md ✅ -->
+    <!-- Content - v-if Р·Р°С‰РёС‚Р° РѕС‚ undefined - Р§Р•Рљ-Р›РРЎРў CLAUDE.md вњ… -->
     <div v-else>
       <div v-if="image" class="relative overflow-hidden rounded-t-lg">
-        <!-- Оптимизация изображений - ЧЕК-ЛИСТ CLAUDE.md ✅ -->
+        <!-- РћРїС‚РёРјРёР·Р°С†РёСЏ РёР·РѕР±СЂР°Р¶РµРЅРёР№ - Р§Р•Рљ-Р›РРЎРў CLAUDE.md вњ… -->
         <img
           :src="image"
           :alt="imageAlt || title"
@@ -59,7 +59,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-// TypeScript типизация - ЧЕК-ЛИСТ CLAUDE.md ✅
+// TypeScript С‚РёРїРёР·Р°С†РёСЏ - Р§Р•Рљ-Р›РРЎРў CLAUDE.md вњ…
 interface Props {
   title?: string
   description?: string
@@ -71,7 +71,7 @@ interface Props {
   className?: string
 }
 
-// Default значения - ЧЕК-ЛИСТ CLAUDE.md ✅
+// Default Р·РЅР°С‡РµРЅРёСЏ - Р§Р•Рљ-Р›РРЎРў CLAUDE.md вњ…
 const props = withDefaults(defineProps<Props>(), {
   loading: false,
   error: '',
@@ -79,7 +79,7 @@ const props = withDefaults(defineProps<Props>(), {
   className: ''
 })
 
-// Мобильная адаптивность - ЧЕК-ЛИСТ CLAUDE.md ✅
+// РњРѕР±РёР»СЊРЅР°СЏ Р°РґР°РїС‚РёРІРЅРѕСЃС‚СЊ - Р§Р•Рљ-Р›РРЎРў CLAUDE.md вњ…
 const cardClasses = computed(() => [
   'bg-white rounded-lg transition-all',
   {

@@ -8,22 +8,22 @@
   >
     <!-- Loading overlay -->
     <div v-if="loading" class="card-loading">
-      <div class="card-spinner" aria-label="Загрузка..." />
+      <div class="card-spinner" aria-label="Р—Р°РіСЂСѓР·РєР°..." />
     </div>
 
-    <!-- Заголовок карточки -->
+    <!-- Р—Р°РіРѕР»РѕРІРѕРє РєР°СЂС‚РѕС‡РєРё -->
     <div v-if="$slots.header || title" class="card-header">
       <slot name="header">
         <h3 v-if="title" class="card-title">{{ title }}</h3>
       </slot>
     </div>
 
-    <!-- Содержимое карточки -->
+    <!-- РЎРѕРґРµСЂР¶РёРјРѕРµ РєР°СЂС‚РѕС‡РєРё -->
     <div class="card-body">
       <slot />
     </div>
 
-    <!-- Подвал карточки -->
+    <!-- РџРѕРґРІР°Р» РєР°СЂС‚РѕС‡РєРё -->
     <div v-if="$slots.footer" class="card-footer">
       <slot name="footer" />
     </div>
@@ -78,7 +78,7 @@ const handleClick = (event: MouseEvent) => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* Варианты карточек */
+/* Р’Р°СЂРёР°РЅС‚С‹ РєР°СЂС‚РѕС‡РµРє */
 .card--default {
   border: 1px solid #f0f0f0;
 }
@@ -96,20 +96,20 @@ const handleClick = (event: MouseEvent) => {
   border: 2px solid #1890ff;
 }
 
-/* Размеры карточек */
+/* Р Р°Р·РјРµСЂС‹ РєР°СЂС‚РѕС‡РµРє */
 .card--small {
-  /* Меньшие отступы для маленькой карточки */
+  /* РњРµРЅСЊС€РёРµ РѕС‚СЃС‚СѓРїС‹ РґР»СЏ РјР°Р»РµРЅСЊРєРѕР№ РєР°СЂС‚РѕС‡РєРё */
 }
 
 .card--medium {
-  /* Стандартные отступы */
+  /* РЎС‚Р°РЅРґР°СЂС‚РЅС‹Рµ РѕС‚СЃС‚СѓРїС‹ */
 }
 
 .card--large {
-  /* Увеличенные отступы для большой карточки */
+  /* РЈРІРµР»РёС‡РµРЅРЅС‹Рµ РѕС‚СЃС‚СѓРїС‹ РґР»СЏ Р±РѕР»СЊС€РѕР№ РєР°СЂС‚РѕС‡РєРё */
 }
 
-/* Заголовок карточки */
+/* Р—Р°РіРѕР»РѕРІРѕРє РєР°СЂС‚РѕС‡РєРё */
 .card-header {
   padding: 16px 24px;
   border-bottom: 1px solid #f0f0f0;
@@ -140,7 +140,7 @@ const handleClick = (event: MouseEvent) => {
   font-size: 20px;
 }
 
-/* Содержимое карточки */
+/* РЎРѕРґРµСЂР¶РёРјРѕРµ РєР°СЂС‚РѕС‡РєРё */
 .card-body {
   padding: 24px;
 }
@@ -153,7 +153,7 @@ const handleClick = (event: MouseEvent) => {
   padding: 32px;
 }
 
-/* Подвал карточки */
+/* РџРѕРґРІР°Р» РєР°СЂС‚РѕС‡РєРё */
 .card-footer {
   padding: 16px 24px;
   border-top: 1px solid #f0f0f0;
@@ -168,7 +168,7 @@ const handleClick = (event: MouseEvent) => {
   padding: 20px 32px;
 }
 
-/* Состояния карточки */
+/* РЎРѕСЃС‚РѕСЏРЅРёСЏ РєР°СЂС‚РѕС‡РєРё */
 .card--loading {
   position: relative;
   pointer-events: none;
@@ -213,7 +213,7 @@ const handleClick = (event: MouseEvent) => {
   100% { transform: rotate(360deg); }
 }
 
-/* Адаптивность */
+/* РђРґР°РїС‚РёРІРЅРѕСЃС‚СЊ */
 @media (max-width: 768px) {
   .card-header,
   .card-body,
@@ -234,3 +234,4 @@ const handleClick = (event: MouseEvent) => {
   }
 }
 </style>
+

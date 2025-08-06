@@ -1,34 +1,34 @@
 <template>
      <div>
-        <Head title="Оформление бронирования" />
+        <Head title="РћС„РѕСЂРјР»РµРЅРёРµ Р±СЂРѕРЅРёСЂРѕРІР°РЅРёСЏ" />
 
         <div class="container mx-auto px-4 py-8 max-w-4xl">
-            <!-- Хлебные крошки -->
+            <!-- РҐР»РµР±РЅС‹Рµ РєСЂРѕС€РєРё -->
             <nav class="mb-6 text-sm">
                 <Link :href="route('home')" class="text-gray-500 hover:text-gray-700">
-                    Главная
+                    Р“Р»Р°РІРЅР°СЏ
                 </Link>
                 <span class="mx-2 text-gray-400">/</span>
                 <Link :href="route('masters.show', masterProfile.id)" class="text-gray-500 hover:text-gray-700">
                     {{ masterProfile.user.name }}
                 </Link>
                 <span class="mx-2 text-gray-400">/</span>
-                <span class="text-gray-700">Бронирование</span>
+                <span class="text-gray-700">Р‘СЂРѕРЅРёСЂРѕРІР°РЅРёРµ</span>
             </nav>
 
             <div class="grid lg:grid-cols-3 gap-8">
-                <!-- Основная форма -->
+                <!-- РћСЃРЅРѕРІРЅР°СЏ С„РѕСЂРјР° -->
                 <div class="lg:col-span-2">
-                    <h1 class="text-2xl font-bold mb-6">Оформление бронирования</h1>
+                    <h1 class="text-2xl font-bold mb-6">РћС„РѕСЂРјР»РµРЅРёРµ Р±СЂРѕРЅРёСЂРѕРІР°РЅРёСЏ</h1>
 
                     <form @submit.prevent="submit" class="space-y-6">
-                        <!-- Выбор даты и времени -->
+                        <!-- Р’С‹Р±РѕСЂ РґР°С‚С‹ Рё РІСЂРµРјРµРЅРё -->
                         <div class="bg-white rounded-lg shadow-sm p-6">
-                            <h2 class="text-lg font-semibold mb-4">Выберите дату и время</h2>
+                            <h2 class="text-lg font-semibold mb-4">Р’С‹Р±РµСЂРёС‚Рµ РґР°С‚Сѓ Рё РІСЂРµРјСЏ</h2>
                             
-                            <!-- Календарь -->
+                            <!-- РљР°Р»РµРЅРґР°СЂСЊ -->
                             <div class="mb-4">
-                                <label class="block text-sm font-medium mb-2">Дата</label>
+                                <label class="block text-sm font-medium mb-2">Р”Р°С‚Р°</label>
                                 <div class="grid grid-cols-7 gap-1 mb-4">
                                     <div v-for="day in weekDays" :key="day" class="text-center text-xs font-medium text-gray-500 py-2">
                                         {{ day }}
@@ -52,9 +52,9 @@
                                 </div>
                             </div>
 
-                            <!-- Слоты времени -->
+                            <!-- РЎР»РѕС‚С‹ РІСЂРµРјРµРЅРё -->
                             <div v-if="form.booking_date && availableTimeSlots.length > 0">
-                                <label class="block text-sm font-medium mb-2">Время</label>
+                                <label class="block text-sm font-medium mb-2">Р’СЂРµРјСЏ</label>
                                 <div class="grid grid-cols-4 sm:grid-cols-6 gap-2">
                                     <button
                                         v-for="slot in availableTimeSlots"
@@ -80,13 +80,13 @@
                             </div>
 
                             <div v-else-if="form.booking_date" class="text-gray-500 text-sm mt-4">
-                                На выбранную дату нет свободных слотов
+                                РќР° РІС‹Р±СЂР°РЅРЅСѓСЋ РґР°С‚Сѓ РЅРµС‚ СЃРІРѕР±РѕРґРЅС‹С… СЃР»РѕС‚РѕРІ
                             </div>
                         </div>
 
-                        <!-- Место оказания услуги -->
+                        <!-- РњРµСЃС‚Рѕ РѕРєР°Р·Р°РЅРёСЏ СѓСЃР»СѓРіРё -->
                         <div class="bg-white rounded-lg shadow-sm p-6">
-                            <h2 class="text-lg font-semibold mb-4">Где будет оказана услуга?</h2>
+                            <h2 class="text-lg font-semibold mb-4">Р“РґРµ Р±СѓРґРµС‚ РѕРєР°Р·Р°РЅР° СѓСЃР»СѓРіР°?</h2>
                             
                             <div class="space-y-3">
                                 <label class="flex items-start p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition"
@@ -98,10 +98,10 @@
                                         class="mt-1"
                                     >
                                     <div class="ml-3">
-                                        <p class="font-medium">На выезде (у меня дома)</p>
-                                        <p class="text-sm text-gray-600">Мастер приедет по вашему адресу</p>
+                                        <p class="font-medium">РќР° РІС‹РµР·РґРµ (Сѓ РјРµРЅСЏ РґРѕРјР°)</p>
+                                        <p class="text-sm text-gray-600">РњР°СЃС‚РµСЂ РїСЂРёРµРґРµС‚ РїРѕ РІР°С€РµРјСѓ Р°РґСЂРµСЃСѓ</p>
                                         <p class="text-sm text-green-600 mt-1">
-                                            + {{ formatPrice(500) }} за выезд
+                                            + {{ formatPrice(500) }} Р·Р° РІС‹РµР·Рґ
                                         </p>
                                     </div>
                                 </label>
@@ -116,21 +116,21 @@
                                         class="mt-1"
                                     >
                                     <div class="ml-3">
-                                        <p class="font-medium">В салоне</p>
+                                        <p class="font-medium">Р’ СЃР°Р»РѕРЅРµ</p>
                                         <p class="text-sm text-gray-600">{{ masterProfile.salon_name }}</p>
                                         <p class="text-sm text-gray-500">{{ masterProfile.salon_address }}</p>
                                     </div>
                                 </label>
                             </div>
 
-                            <!-- Адрес для выезда -->
+                            <!-- РђРґСЂРµСЃ РґР»СЏ РІС‹РµР·РґР° -->
                             <div v-if="form.service_location === 'home'" class="mt-4">
-                                <label class="block text-sm font-medium mb-2">Адрес *</label>
+                                <label class="block text-sm font-medium mb-2">РђРґСЂРµСЃ *</label>
                                 <input 
                                     v-model="form.address"
                                     type="text"
                                     class="w-full border-gray-300 rounded-lg"
-                                    placeholder="Город, улица, дом, квартира"
+                                    placeholder="Р“РѕСЂРѕРґ, СѓР»РёС†Р°, РґРѕРј, РєРІР°СЂС‚РёСЂР°"
                                 >
                                 <div v-if="form.errors.address" class="text-red-500 text-sm mt-1">
                                     {{ form.errors.address }}
@@ -138,18 +138,18 @@
                             </div>
                         </div>
 
-                        <!-- Контактные данные -->
+                        <!-- РљРѕРЅС‚Р°РєС‚РЅС‹Рµ РґР°РЅРЅС‹Рµ -->
                         <div class="bg-white rounded-lg shadow-sm p-6">
-                            <h2 class="text-lg font-semibold mb-4">Контактные данные</h2>
+                            <h2 class="text-lg font-semibold mb-4">РљРѕРЅС‚Р°РєС‚РЅС‹Рµ РґР°РЅРЅС‹Рµ</h2>
                             
                             <div class="grid md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-sm font-medium mb-2">Имя *</label>
+                                    <label class="block text-sm font-medium mb-2">РРјСЏ *</label>
                                     <input 
                                         v-model="form.client_name"
                                         type="text"
                                         class="w-full border-gray-300 rounded-lg"
-                                        placeholder="Как к вам обращаться"
+                                        placeholder="РљР°Рє Рє РІР°Рј РѕР±СЂР°С‰Р°С‚СЊСЃСЏ"
                                     >
                                     <div v-if="form.errors.client_name" class="text-red-500 text-sm mt-1">
                                         {{ form.errors.client_name }}
@@ -157,7 +157,7 @@
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium mb-2">Телефон *</label>
+                                    <label class="block text-sm font-medium mb-2">РўРµР»РµС„РѕРЅ *</label>
                                     <input 
                                         v-model="form.client_phone"
                                         type="tel"
@@ -171,19 +171,19 @@
                             </div>
 
                             <div class="mt-4">
-                                <label class="block text-sm font-medium mb-2">Комментарий к заказу</label>
+                                <label class="block text-sm font-medium mb-2">РљРѕРјРјРµРЅС‚Р°СЂРёР№ Рє Р·Р°РєР°Р·Сѓ</label>
                                 <textarea 
                                     v-model="form.client_comment"
                                     rows="3"
                                     class="w-full border-gray-300 rounded-lg"
-                                    placeholder="Особые пожелания, как вас найти и т.д."
+                                    placeholder="РћСЃРѕР±С‹Рµ РїРѕР¶РµР»Р°РЅРёСЏ, РєР°Рє РІР°СЃ РЅР°Р№С‚Рё Рё С‚.Рґ."
                                 ></textarea>
                             </div>
                         </div>
 
-                        <!-- Способ оплаты -->
+                        <!-- РЎРїРѕСЃРѕР± РѕРїР»Р°С‚С‹ -->
                         <div class="bg-white rounded-lg shadow-sm p-6">
-                            <h2 class="text-lg font-semibold mb-4">Способ оплаты</h2>
+                            <h2 class="text-lg font-semibold mb-4">РЎРїРѕСЃРѕР± РѕРїР»Р°С‚С‹</h2>
                             
                             <div class="space-y-2">
                                 <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
@@ -193,7 +193,7 @@
                                         v-model="form.payment_method" 
                                         value="cash"
                                     >
-                                    <span class="ml-3">Наличными мастеру</span>
+                                    <span class="ml-3">РќР°Р»РёС‡РЅС‹РјРё РјР°СЃС‚РµСЂСѓ</span>
                                 </label>
 
                                 <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
@@ -203,7 +203,7 @@
                                         v-model="form.payment_method" 
                                         value="card"
                                     >
-                                    <span class="ml-3">Картой мастеру</span>
+                                    <span class="ml-3">РљР°СЂС‚РѕР№ РјР°СЃС‚РµСЂСѓ</span>
                                 </label>
 
                                 <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
@@ -213,13 +213,13 @@
                                         v-model="form.payment_method" 
                                         value="online"
                                     >
-                                    <span class="ml-3">Онлайн на сайте (скоро)</span>
-                                    <span class="ml-auto text-xs bg-gray-100 px-2 py-1 rounded">Недоступно</span>
+                                    <span class="ml-3">РћРЅР»Р°Р№РЅ РЅР° СЃР°Р№С‚Рµ (СЃРєРѕСЂРѕ)</span>
+                                    <span class="ml-auto text-xs bg-gray-100 px-2 py-1 rounded">РќРµРґРѕСЃС‚СѓРїРЅРѕ</span>
                                 </label>
                             </div>
                         </div>
 
-                        <!-- Согласие с правилами -->
+                        <!-- РЎРѕРіР»Р°СЃРёРµ СЃ РїСЂР°РІРёР»Р°РјРё -->
                         <div class="bg-white rounded-lg shadow-sm p-6">
                             <label class="flex items-start">
                                 <input 
@@ -228,14 +228,14 @@
                                     class="mt-1"
                                 >
                                 <span class="ml-3 text-sm text-gray-600">
-                                    Я согласен с 
-                                    <a href="#" class="text-blue-600 hover:underline">правилами сервиса</a>
-                                    и даю согласие на обработку персональных данных
+                                    РЇ СЃРѕРіР»Р°СЃРµРЅ СЃ 
+                                    <a href="#" class="text-blue-600 hover:underline">РїСЂР°РІРёР»Р°РјРё СЃРµСЂРІРёСЃР°</a>
+                                    Рё РґР°СЋ СЃРѕРіР»Р°СЃРёРµ РЅР° РѕР±СЂР°Р±РѕС‚РєСѓ РїРµСЂСЃРѕРЅР°Р»СЊРЅС‹С… РґР°РЅРЅС‹С…
                                 </span>
                             </label>
                         </div>
 
-                        <!-- Кнопка отправки -->
+                        <!-- РљРЅРѕРїРєР° РѕС‚РїСЂР°РІРєРё -->
                         <button 
                             type="submit"
                             :disabled="form.processing || !canSubmit"
@@ -246,15 +246,15 @@
                                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                             ]"
                         >
-                            {{ form.processing ? 'Отправка...' : 'Отправить заявку' }}
+                            {{ form.processing ? 'РћС‚РїСЂР°РІРєР°...' : 'РћС‚РїСЂР°РІРёС‚СЊ Р·Р°СЏРІРєСѓ' }}
                         </button>
                     </form>
                 </div>
 
-                <!-- Сайдбар с информацией -->
+                <!-- РЎР°Р№РґР±Р°СЂ СЃ РёРЅС„РѕСЂРјР°С†РёРµР№ -->
                 <div class="lg:col-span-1">
                     <div class="bg-white rounded-lg shadow-sm p-6 sticky top-4">
-                        <!-- Информация о мастере -->
+                        <!-- РРЅС„РѕСЂРјР°С†РёСЏ Рѕ РјР°СЃС‚РµСЂРµ -->
                         <div class="flex items-start gap-4 mb-6 pb-6 border-b">
                             <img 
                                 :src="masterProfile.user.avatar_url || '/images/default-avatar.png'"
@@ -266,25 +266,25 @@
                                 <div class="flex items-center gap-1 text-sm text-gray-600">
                                     <StarIcon class="w-4 h-4 text-yellow-400 fill-current" />
                                     <span>{{ masterProfile.rating }}</span>
-                                    <span class="text-gray-400">({{ masterProfile.reviews_count }} отзывов)</span>
+                                    <span class="text-gray-400">({{ masterProfile.reviews_count }} РѕС‚Р·С‹РІРѕРІ)</span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Информация об услуге -->
+                        <!-- РРЅС„РѕСЂРјР°С†РёСЏ РѕР± СѓСЃР»СѓРіРµ -->
                         <div class="mb-6 pb-6 border-b">
                             <h4 class="font-semibold mb-2">{{ service.name }}</h4>
                             <p class="text-sm text-gray-600 mb-2">
-                                Длительность: {{ service.duration }} мин
+                                Р”Р»РёС‚РµР»СЊРЅРѕСЃС‚СЊ: {{ service.duration }} РјРёРЅ
                             </p>
                             <p class="text-2xl font-bold text-blue-600">
                                 {{ formatPrice(service.price) }}
                             </p>
                         </div>
 
-                        <!-- Итоговая стоимость -->
+                        <!-- РС‚РѕРіРѕРІР°СЏ СЃС‚РѕРёРјРѕСЃС‚СЊ -->
                         <div>
-                            <h4 class="font-semibold mb-3">Итого к оплате:</h4>
+                            <h4 class="font-semibold mb-3">РС‚РѕРіРѕ Рє РѕРїР»Р°С‚Рµ:</h4>
                             
                             <div class="space-y-2 text-sm">
                                 <div class="flex justify-between">
@@ -293,22 +293,22 @@
                                 </div>
                                 
                                 <div v-if="form.service_location === 'home'" class="flex justify-between text-green-600">
-                                    <span>Выезд мастера</span>
+                                    <span>Р’С‹РµР·Рґ РјР°СЃС‚РµСЂР°</span>
                                     <span>+ {{ formatPrice(500) }}</span>
                                 </div>
                                 
                                 <div class="pt-2 border-t font-semibold text-lg flex justify-between">
-                                    <span>Итого:</span>
+                                    <span>РС‚РѕРіРѕ:</span>
                                     <span class="text-blue-600">{{ formatPrice(totalPrice) }}</span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Информация о бронировании -->
+                        <!-- РРЅС„РѕСЂРјР°С†РёСЏ Рѕ Р±СЂРѕРЅРёСЂРѕРІР°РЅРёРё -->
                         <div class="mt-6 p-4 bg-yellow-50 rounded-lg">
                             <p class="text-sm text-yellow-800">
                                 <ExclamationTriangleIcon class="w-4 h-4 inline mr-1" />
-                                После отправки заявки мастер свяжется с вами для подтверждения
+                                РџРѕСЃР»Рµ РѕС‚РїСЂР°РІРєРё Р·Р°СЏРІРєРё РјР°СЃС‚РµСЂ СЃРІСЏР¶РµС‚СЃСЏ СЃ РІР°РјРё РґР»СЏ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ
                             </p>
                         </div>
                     </div>
@@ -331,7 +331,7 @@ const props = defineProps({
     availableSlots: Object
 })
 
-// Форма
+// Р¤РѕСЂРјР°
 const form = useForm({
     master_profile_id: props.masterProfile.id,
     service_id: props.service.id,
@@ -346,26 +346,26 @@ const form = useForm({
     agree_terms: false
 })
 
-// Дни недели
-const weekDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
+// Р”РЅРё РЅРµРґРµР»Рё
+const weekDays = ['РџРЅ', 'Р’С‚', 'РЎСЂ', 'Р§С‚', 'РџС‚', 'РЎР±', 'Р’СЃ']
 
-// Текущий месяц для календаря
+// РўРµРєСѓС‰РёР№ РјРµСЃСЏС† РґР»СЏ РєР°Р»РµРЅРґР°СЂСЏ
 const currentMonth = ref(new Date())
 
-// Даты календаря
+// Р”Р°С‚С‹ РєР°Р»РµРЅРґР°СЂСЏ
 const calendarDates = computed(() => {
     const start = startOfMonth(currentMonth.value)
     const end = endOfMonth(currentMonth.value)
     const days = eachDayOfInterval({ start, end })
     
-    // Добавляем дни из предыдущего месяца
-    const startDay = getDay(start) || 7 // Воскресенье = 7
+    // Р”РѕР±Р°РІР»СЏРµРј РґРЅРё РёР· РїСЂРµРґС‹РґСѓС‰РµРіРѕ РјРµСЃСЏС†Р°
+    const startDay = getDay(start) || 7 // Р’РѕСЃРєСЂРµСЃРµРЅСЊРµ = 7
     const previousMonthDays = []
     for (let i = startDay - 1; i > 0; i--) {
         previousMonthDays.push(addDays(start, -i))
     }
     
-    // Объединяем все дни
+    // РћР±СЉРµРґРёРЅСЏРµРј РІСЃРµ РґРЅРё
     const allDays = [...previousMonthDays, ...days]
     
     return allDays.map(date => ({
@@ -377,22 +377,22 @@ const calendarDates = computed(() => {
     }))
 })
 
-// Доступные слоты времени для выбранной даты
+// Р”РѕСЃС‚СѓРїРЅС‹Рµ СЃР»РѕС‚С‹ РІСЂРµРјРµРЅРё РґР»СЏ РІС‹Р±СЂР°РЅРЅРѕР№ РґР°С‚С‹
 const availableTimeSlots = computed(() => {
     if (!form.booking_date) return []
     return props.availableSlots[form.booking_date] || []
 })
 
-// Общая стоимость
+// РћР±С‰Р°СЏ СЃС‚РѕРёРјРѕСЃС‚СЊ
 const totalPrice = computed(() => {
     let total = props.service.price
     if (form.service_location === 'home') {
-        total += 500 // Доплата за выезд
+        total += 500 // Р”РѕРїР»Р°С‚Р° Р·Р° РІС‹РµР·Рґ
     }
     return total
 })
 
-// Можно ли отправить форму
+// РњРѕР¶РЅРѕ Р»Рё РѕС‚РїСЂР°РІРёС‚СЊ С„РѕСЂРјСѓ
 const canSubmit = computed(() => {
     return form.booking_date && 
            form.booking_time && 
@@ -402,14 +402,14 @@ const canSubmit = computed(() => {
            (form.service_location === 'salon' || form.address)
 })
 
-// Выбор даты
+// Р’С‹Р±РѕСЂ РґР°С‚С‹
 const selectDate = (date) => {
     if (!date.available) return
     form.booking_date = date.date
-    form.booking_time = null // Сбрасываем время при смене даты
+    form.booking_time = null // РЎР±СЂР°СЃС‹РІР°РµРј РІСЂРµРјСЏ РїСЂРё СЃРјРµРЅРµ РґР°С‚С‹
 }
 
-// Форматирование цены
+// Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ С†РµРЅС‹
 const formatPrice = (price) => {
     return new Intl.NumberFormat('ru-RU', {
         style: 'currency',
@@ -418,16 +418,16 @@ const formatPrice = (price) => {
     }).format(price)
 }
 
-// Отправка формы
+// РћС‚РїСЂР°РІРєР° С„РѕСЂРјС‹
 const submit = () => {
     form.post(route('bookings.store'), {
         onSuccess: () => {
-            // Перенаправление произойдёт автоматически
+            // РџРµСЂРµРЅР°РїСЂР°РІР»РµРЅРёРµ РїСЂРѕРёР·РѕР№РґС‘С‚ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё
         }
     })
 }
 
-// При монтировании устанавливаем данные пользователя если есть
+// РџСЂРё РјРѕРЅС‚РёСЂРѕРІР°РЅРёРё СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј РґР°РЅРЅС‹Рµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РµСЃР»Рё РµСЃС‚СЊ
 onMounted(() => {
     if (window.auth?.user) {
         form.client_name = window.auth.user.name || ''

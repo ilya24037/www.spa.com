@@ -3,13 +3,9 @@
 namespace App\Domain\Payment\Handlers;
 
 use App\Domain\Payment\Contracts\WebhookHandlerInterface;
+use App\Domain\Payment\Handlers\Webhooks\PaymentWebhookProcessor;
+use App\Domain\Payment\Handlers\Webhooks\SubscriptionWebhookProcessor;
 use App\Domain\Payment\Services\PaymentService;
-use App\Domain\Payment\Services\TransactionService;
-use App\Domain\Payment\Services\SubscriptionService;
-use App\Domain\Payment\Models\Payment;
-use App\Domain\Payment\Models\Transaction;
-use App\Domain\Payment\Enums\TransactionStatus;
-use App\Enums\PaymentStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -24,11 +20,16 @@ class WebhookHandler
      */
     protected array $handlers = [];
 
+    protected PaymentWebhookProcessor $paymentProcessor;
+    protected SubscriptionWebhookProcessor $subscriptionProcessor;
+
     public function __construct(
         protected PaymentService $paymentService,
-        protected TransactionService $transactionService,
-        protected SubscriptionService $subscriptionService
+        PaymentWebhookProcessor $paymentProcessor,
+        SubscriptionWebhookProcessor $subscriptionProcessor
     ) {
+        $this->paymentProcessor = $paymentProcessor;
+        $this->subscriptionProcessor = $subscriptionProcessor;
         $this->registerDefaultHandlers();
     }
 
@@ -117,317 +118,35 @@ class WebhookHandler
 
         // Обработать событие в зависимости от типа
         return match($eventType) {
+            // Платежные события
             'payment.succeeded', 'charge.succeeded', 'payment_intent.succeeded' => 
-                $this->handlePaymentSuccess($handler, $request),
+                $this->paymentProcessor->handleSuccess($handler, $request),
             
             'payment.failed', 'charge.failed', 'payment_intent.payment_failed' => 
-                $this->handlePaymentFailed($handler, $request),
+                $this->paymentProcessor->handleFailed($handler, $request),
             
             'payment.refunded', 'charge.refunded', 'refund.succeeded' => 
-                $this->handleRefund($handler, $request),
+                $this->paymentProcessor->handleRefund($handler, $request),
             
+            // События подписок
             'subscription.created', 'customer.subscription.created' => 
-                $this->handleSubscriptionCreated($handler, $request),
+                $this->subscriptionProcessor->handleCreated($handler, $request),
             
             'subscription.updated', 'customer.subscription.updated' => 
-                $this->handleSubscriptionUpdated($handler, $request),
+                $this->subscriptionProcessor->handleUpdated($handler, $request),
             
             'subscription.deleted', 'customer.subscription.deleted' => 
-                $this->handleSubscriptionCancelled($handler, $request),
+                $this->subscriptionProcessor->handleCancelled($handler, $request),
             
             'invoice.payment_succeeded' => 
-                $this->handleInvoicePaymentSucceeded($handler, $request),
+                $this->subscriptionProcessor->handleInvoicePaymentSucceeded($handler, $request),
             
             'invoice.payment_failed' => 
-                $this->handleInvoicePaymentFailed($handler, $request),
+                $this->subscriptionProcessor->handleInvoicePaymentFailed($handler, $request),
             
+            // Кастомная обработка
             default => $handler->handle($request),
         };
-    }
-
-    /**
-     * Обработать успешный платеж
-     */
-    protected function handlePaymentSuccess(WebhookHandlerInterface $handler, Request $request): array
-    {
-        $externalId = $handler->getPaymentId($request);
-        
-        if (!$externalId) {
-            throw new \Exception('Payment ID not found in webhook');
-        }
-
-        // Найти платеж
-        $payment = Payment::where('external_id', $externalId)
-            ->where('gateway', $handler->getGatewayName())
-            ->first();
-
-        if (!$payment) {
-            Log::warning('Payment not found for webhook', [
-                'external_id' => $externalId,
-                'gateway' => $handler->getGatewayName(),
-            ]);
-
-            return [
-                'success' => true,
-                'message' => 'Payment not found',
-            ];
-        }
-
-        // Обновить статус платежа
-        if ($payment->status !== PaymentStatus::COMPLETED) {
-            $payment->update([
-                'status' => PaymentStatus::COMPLETED,
-                'confirmed_at' => now(),
-                'gateway_response' => $request->all(),
-            ]);
-
-            // Создать/обновить транзакцию
-            $transaction = Transaction::where('payment_id', $payment->id)->first();
-            
-            if ($transaction) {
-                $this->transactionService->processSuccessfulTransaction($transaction);
-            } else {
-                $this->transactionService->createPaymentTransaction($payment);
-            }
-        }
-
-        return [
-            'success' => true,
-            'payment_id' => $payment->id,
-            'status' => 'completed',
-        ];
-    }
-
-    /**
-     * Обработать неудачный платеж
-     */
-    protected function handlePaymentFailed(WebhookHandlerInterface $handler, Request $request): array
-    {
-        $externalId = $handler->getPaymentId($request);
-        
-        if (!$externalId) {
-            throw new \Exception('Payment ID not found in webhook');
-        }
-
-        // Найти платеж
-        $payment = Payment::where('external_id', $externalId)
-            ->where('gateway', $handler->getGatewayName())
-            ->first();
-
-        if (!$payment) {
-            return [
-                'success' => true,
-                'message' => 'Payment not found',
-            ];
-        }
-
-        // Обновить статус платежа
-        $payment->update([
-            'status' => PaymentStatus::FAILED,
-            'failed_at' => now(),
-            'gateway_response' => $request->all(),
-        ]);
-
-        // Обновить транзакцию
-        $transaction = Transaction::where('payment_id', $payment->id)->first();
-        
-        if ($transaction) {
-            $this->transactionService->processFailedTransaction(
-                $transaction, 
-                'Payment failed: ' . ($request->input('error.message') ?? 'Unknown error')
-            );
-        }
-
-        return [
-            'success' => true,
-            'payment_id' => $payment->id,
-            'status' => 'failed',
-        ];
-    }
-
-    /**
-     * Обработать возврат
-     */
-    protected function handleRefund(WebhookHandlerInterface $handler, Request $request): array
-    {
-        $externalId = $handler->getPaymentId($request);
-        $refundAmount = $request->input('amount', 0) / 100; // Обычно в копейках
-
-        // Найти оригинальный платеж
-        $payment = Payment::where('external_id', $externalId)
-            ->where('gateway', $handler->getGatewayName())
-            ->first();
-
-        if (!$payment) {
-            return [
-                'success' => true,
-                'message' => 'Payment not found',
-            ];
-        }
-
-        // Создать транзакцию возврата
-        $this->transactionService->createRefundTransaction(
-            $payment,
-            $refundAmount,
-            $request->input('reason', 'Refund processed via webhook')
-        );
-
-        // Обновить статус платежа
-        if ($refundAmount >= $payment->amount) {
-            $payment->update([
-                'status' => PaymentStatus::REFUNDED,
-                'refunded_at' => now(),
-            ]);
-        }
-
-        return [
-            'success' => true,
-            'payment_id' => $payment->id,
-            'refund_amount' => $refundAmount,
-        ];
-    }
-
-    /**
-     * Обработать создание подписки
-     */
-    protected function handleSubscriptionCreated(WebhookHandlerInterface $handler, Request $request): array
-    {
-        $subscriptionData = $handler->handle($request);
-
-        // Создать или обновить подписку
-        $subscription = $this->subscriptionService->createSubscription(
-            new \App\Domain\Payment\DTOs\CreateSubscriptionDTO($subscriptionData)
-        );
-
-        return [
-            'success' => true,
-            'subscription_id' => $subscription->id,
-            'status' => 'created',
-        ];
-    }
-
-    /**
-     * Обработать обновление подписки
-     */
-    protected function handleSubscriptionUpdated(WebhookHandlerInterface $handler, Request $request): array
-    {
-        $externalId = $request->input('id');
-        $status = $request->input('status');
-
-        $subscription = \App\Domain\Payment\Models\Subscription::where('gateway_subscription_id', $externalId)
-            ->where('gateway', $handler->getGatewayName())
-            ->first();
-
-        if (!$subscription) {
-            return [
-                'success' => true,
-                'message' => 'Subscription not found',
-            ];
-        }
-
-        // Обновить статус и другие данные
-        $updateData = [
-            'gateway_data' => $request->all(),
-        ];
-
-        if ($status) {
-            $updateData['status'] = $this->mapSubscriptionStatus($status);
-        }
-
-        $subscription->update($updateData);
-
-        return [
-            'success' => true,
-            'subscription_id' => $subscription->id,
-            'status' => 'updated',
-        ];
-    }
-
-    /**
-     * Обработать отмену подписки
-     */
-    protected function handleSubscriptionCancelled(WebhookHandlerInterface $handler, Request $request): array
-    {
-        $externalId = $request->input('id');
-
-        $subscription = \App\Domain\Payment\Models\Subscription::where('gateway_subscription_id', $externalId)
-            ->where('gateway', $handler->getGatewayName())
-            ->first();
-
-        if (!$subscription) {
-            return [
-                'success' => true,
-                'message' => 'Subscription not found',
-            ];
-        }
-
-        // Отменить подписку
-        $this->subscriptionService->cancelSubscription(
-            $subscription,
-            'Cancelled via webhook',
-            true
-        );
-
-        return [
-            'success' => true,
-            'subscription_id' => $subscription->id,
-            'status' => 'cancelled',
-        ];
-    }
-
-    /**
-     * Обработать успешную оплату инвойса (для подписок)
-     */
-    protected function handleInvoicePaymentSucceeded(WebhookHandlerInterface $handler, Request $request): array
-    {
-        // Логика обработки успешной оплаты по подписке
-        $subscriptionId = $request->input('subscription');
-        $amount = $request->input('amount_paid', 0) / 100;
-
-        $subscription = \App\Domain\Payment\Models\Subscription::where('gateway_subscription_id', $subscriptionId)
-            ->where('gateway', $handler->getGatewayName())
-            ->first();
-
-        if ($subscription) {
-            // Создать транзакцию
-            $this->transactionService->createSubscriptionTransaction(
-                $subscription,
-                $amount,
-                'Автоматическая оплата подписки'
-            );
-
-            // Продлить подписку
-            $this->subscriptionService->renewSubscription($subscription);
-        }
-
-        return [
-            'success' => true,
-            'message' => 'Invoice payment processed',
-        ];
-    }
-
-    /**
-     * Обработать неудачную оплату инвойса
-     */
-    protected function handleInvoicePaymentFailed(WebhookHandlerInterface $handler, Request $request): array
-    {
-        $subscriptionId = $request->input('subscription');
-
-        $subscription = \App\Domain\Payment\Models\Subscription::where('gateway_subscription_id', $subscriptionId)
-            ->where('gateway', $handler->getGatewayName())
-            ->first();
-
-        if ($subscription) {
-            // Обновить статус подписки
-            $subscription->update([
-                'status' => \App\Domain\Payment\Enums\SubscriptionStatus::PAST_DUE,
-            ]);
-        }
-
-        return [
-            'success' => true,
-            'message' => 'Invoice payment failure processed',
-        ];
     }
 
     /**
@@ -449,21 +168,5 @@ class WebhookHandler
     {
         // Регистрация обработчиков будет выполнена в ServiceProvider
         // или через конфигурацию
-    }
-
-    /**
-     * Преобразовать статус подписки из внешнего формата
-     */
-    protected function mapSubscriptionStatus(string $externalStatus): \App\Domain\Payment\Enums\SubscriptionStatus
-    {
-        return match($externalStatus) {
-            'active' => \App\Domain\Payment\Enums\SubscriptionStatus::ACTIVE,
-            'trialing' => \App\Domain\Payment\Enums\SubscriptionStatus::TRIALING,
-            'past_due' => \App\Domain\Payment\Enums\SubscriptionStatus::PAST_DUE,
-            'canceled', 'cancelled' => \App\Domain\Payment\Enums\SubscriptionStatus::CANCELLED,
-            'incomplete' => \App\Domain\Payment\Enums\SubscriptionStatus::INCOMPLETE,
-            'paused' => \App\Domain\Payment\Enums\SubscriptionStatus::PAUSED,
-            default => \App\Domain\Payment\Enums\SubscriptionStatus::PENDING,
-        };
     }
 }

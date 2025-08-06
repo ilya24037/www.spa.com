@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed, type Ref } from 'vue'
+import { ref, computed } from 'vue'
 import axios, { type AxiosResponse } from 'axios'
 
 // =================== TYPES ===================
@@ -86,7 +86,7 @@ interface ApiError {
 // =================== STORE ===================
 export const useBookingStore = defineStore('booking', () => {
   
-  // =================== СОСТОЯНИЕ ===================
+  // =================== РЎРћРЎРўРћРЇРќРР• ===================
   
   const bookings: import("vue").Ref<BookingResult[]> = ref([])
   const currentBooking: import("vue").Ref<BookingState> = ref({
@@ -94,7 +94,7 @@ export const useBookingStore = defineStore('booking', () => {
     serviceId: null,
     date: null,
     time: null,
-    locationType: 'home', // 'home' или 'salon'
+    locationType: 'home', // 'home' РёР»Рё 'salon'
     clientName: '',
     clientPhone: '',
     clientEmail: '',
@@ -108,7 +108,7 @@ export const useBookingStore = defineStore('booking', () => {
   const error: import("vue").Ref<string | null> = ref(null)
   const lastBooking: import("vue").Ref<BookingResult | null> = ref(null)
   
-  // =================== ВЫЧИСЛЯЕМЫЕ ===================
+  // =================== Р’Р«Р§РРЎР›РЇР•РњР«Р• ===================
   
   const isFormValid = computed((): boolean => {
     return Boolean(
@@ -131,9 +131,9 @@ export const useBookingStore = defineStore('booking', () => {
     bookings.value.filter(b => b.status === 'confirmed')
   )
   
-  // =================== ДЕЙСТВИЯ ===================
+  // =================== Р”Р•Р™РЎРўР’РРЇ ===================
   
-  // 📋 Получить список бронирований
+  // рџ“‹ РџРѕР»СѓС‡РёС‚СЊ СЃРїРёСЃРѕРє Р±СЂРѕРЅРёСЂРѕРІР°РЅРёР№
   async function fetchBookings(): Promise<BookingResult[]> {
     
     isLoading.value = true
@@ -147,16 +147,16 @@ export const useBookingStore = defineStore('booking', () => {
         }
       })
       
-      bookings.value = response.data.data || response.data as BookingResult[]
+      bookings.value = (response.data as any).data || response.data as BookingResult[]
       
       return bookings.value
     } catch (err: unknown) {
       const error = err as ApiError
       
       if (error.response?.status === 401) {
-        setError('Необходимо войти в систему')
+        setError('РќРµРѕР±С…РѕРґРёРјРѕ РІРѕР№С‚Рё РІ СЃРёСЃС‚РµРјСѓ')
       } else {
-        setError('Не удалось загрузить бронирования')
+        setError('РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ Р±СЂРѕРЅРёСЂРѕРІР°РЅРёСЏ')
       }
       
       throw error
@@ -165,7 +165,7 @@ export const useBookingStore = defineStore('booking', () => {
     }
   }
   
-  // 📅 Получить доступные слоты
+  // рџ“… РџРѕР»СѓС‡РёС‚СЊ РґРѕСЃС‚СѓРїРЅС‹Рµ СЃР»РѕС‚С‹
   async function fetchAvailableSlots(
     masterId: number, 
     serviceId: number, 
@@ -193,31 +193,31 @@ export const useBookingStore = defineStore('booking', () => {
       })
       
       if (date) {
-        // Слоты для конкретной даты
+        // РЎР»РѕС‚С‹ РґР»СЏ РєРѕРЅРєСЂРµС‚РЅРѕР№ РґР°С‚С‹
         availableSlots.value[date] = response.data.slots as TimeSlot[]
       } else {
-        // Слоты на несколько дней
+        // РЎР»РѕС‚С‹ РЅР° РЅРµСЃРєРѕР»СЊРєРѕ РґРЅРµР№
         availableSlots.value = response.data.slots as BookingSlots
       }
       
       return availableSlots.value
     } catch (err: unknown) {
       const error = err as ApiError
-      setError('Не удалось получить доступные слоты')
+      setError('РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ РґРѕСЃС‚СѓРїРЅС‹Рµ СЃР»РѕС‚С‹')
       throw error
     } finally {
       isLoading.value = false
     }
   }
   
-  // 📝 Создать новое бронирование (ОБНОВЛЕННЫЙ МЕТОД)
+  // рџ“ќ РЎРѕР·РґР°С‚СЊ РЅРѕРІРѕРµ Р±СЂРѕРЅРёСЂРѕРІР°РЅРёРµ (РћР‘РќРћР’Р›Р•РќРќР«Р™ РњР•РўРћР”)
   async function createBooking(bookingData: BookingData): Promise<BookingResult> {
     
     isLoading.value = true
     error.value = null
     
     try {
-      // Подготавливаем данные в правильном формате
+      // РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј РґР°РЅРЅС‹Рµ РІ РїСЂР°РІРёР»СЊРЅРѕРј С„РѕСЂРјР°С‚Рµ
       const dataToSend = {
         master_profile_id: bookingData.masterId,
         service_id: bookingData.serviceId,
@@ -233,7 +233,7 @@ export const useBookingStore = defineStore('booking', () => {
         payment_method: bookingData.paymentMethod
       }
       
-      // Отправляем на новый API endpoint
+      // РћС‚РїСЂР°РІР»СЏРµРј РЅР° РЅРѕРІС‹Р№ API endpoint
       const response: AxiosResponse<{ booking: BookingResult }> = await axios.post('/api/bookings', dataToSend, {
         headers: {
           'Authorization': `Bearer ${getAuthToken()}`,
@@ -242,32 +242,32 @@ export const useBookingStore = defineStore('booking', () => {
         }
       })
       
-      // Сохраняем результат
+      // РЎРѕС…СЂР°РЅСЏРµРј СЂРµР·СѓР»СЊС‚Р°С‚
       lastBooking.value = response.data.booking
       
-      // Добавляем в локальный список
+      // Р”РѕР±Р°РІР»СЏРµРј РІ Р»РѕРєР°Р»СЊРЅС‹Р№ СЃРїРёСЃРѕРє
       bookings.value.unshift(response.data.booking)
       
-      // Очищаем форму
+      // РћС‡РёС‰Р°РµРј С„РѕСЂРјСѓ
       resetCurrentBooking()
       
       return response.data.booking
     } catch (err: unknown) {
       const error = err as ApiError
       
-      // Обработка ошибок валидации
+      // РћР±СЂР°Р±РѕС‚РєР° РѕС€РёР±РѕРє РІР°Р»РёРґР°С†РёРё
       if (error.response?.status === 422) {
         const validationErrors = error.response.data?.errors || {}
         const errorMessage = Object.values(validationErrors).flat().join(', ') || error.response.data?.message
-        setError(errorMessage || 'Ошибка валидации')
+        setError(errorMessage || 'РћС€РёР±РєР° РІР°Р»РёРґР°С†РёРё')
         throw validationErrors
       }
       
-      // Обработка других ошибок
+      // РћР±СЂР°Р±РѕС‚РєР° РґСЂСѓРіРёС… РѕС€РёР±РѕРє
       if (error.response?.status === 401) {
-        setError('Необходимо войти в систему')
+        setError('РќРµРѕР±С…РѕРґРёРјРѕ РІРѕР№С‚Рё РІ СЃРёСЃС‚РµРјСѓ')
       } else {
-        setError(error.response?.data?.message || 'Не удалось создать бронирование')
+        setError(error.response?.data?.message || 'РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕР·РґР°С‚СЊ Р±СЂРѕРЅРёСЂРѕРІР°РЅРёРµ')
       }
       
       throw error
@@ -276,7 +276,7 @@ export const useBookingStore = defineStore('booking', () => {
     }
   }
   
-  // ❌ Отменить бронирование
+  // вќЊ РћС‚РјРµРЅРёС‚СЊ Р±СЂРѕРЅРёСЂРѕРІР°РЅРёРµ
   async function cancelBooking(bookingId: number, reason: string | null = null): Promise<any> {
     
     isLoading.value = true
@@ -293,7 +293,7 @@ export const useBookingStore = defineStore('booking', () => {
         }
       )
       
-      // Обновляем статус в локальном списке
+      // РћР±РЅРѕРІР»СЏРµРј СЃС‚Р°С‚СѓСЃ РІ Р»РѕРєР°Р»СЊРЅРѕРј СЃРїРёСЃРєРµ
       const booking = bookings.value.find(b => b.id === bookingId)
       if (booking) {
         booking.status = 'cancelled'
@@ -303,14 +303,14 @@ export const useBookingStore = defineStore('booking', () => {
       return response.data
     } catch (err: unknown) {
       const error = err as ApiError
-      setError(error.response?.data?.message || 'Не удалось отменить бронирование')
+      setError(error.response?.data?.message || 'РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РјРµРЅРёС‚СЊ Р±СЂРѕРЅРёСЂРѕРІР°РЅРёРµ')
       throw error
     } finally {
       isLoading.value = false
     }
   }
   
-  // ✅ Подтвердить бронирование (для мастеров)
+  // вњ… РџРѕРґС‚РІРµСЂРґРёС‚СЊ Р±СЂРѕРЅРёСЂРѕРІР°РЅРёРµ (РґР»СЏ РјР°СЃС‚РµСЂРѕРІ)
   async function confirmBooking(bookingId: number): Promise<any> {
     
     isLoading.value = true
@@ -324,7 +324,7 @@ export const useBookingStore = defineStore('booking', () => {
         }
       })
       
-      // Обновляем статус в локальном списке
+      // РћР±РЅРѕРІР»СЏРµРј СЃС‚Р°С‚СѓСЃ РІ Р»РѕРєР°Р»СЊРЅРѕРј СЃРїРёСЃРєРµ
       const booking = bookings.value.find(b => b.id === bookingId)
       if (booking) {
         booking.status = 'confirmed'
@@ -334,14 +334,14 @@ export const useBookingStore = defineStore('booking', () => {
       return response.data
     } catch (err: unknown) {
       const error = err as ApiError
-      setError(error.response?.data?.message || 'Не удалось подтвердить бронирование')
+      setError(error.response?.data?.message || 'РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕРґС‚РІРµСЂРґРёС‚СЊ Р±СЂРѕРЅРёСЂРѕРІР°РЅРёРµ')
       throw error
     } finally {
       isLoading.value = false
     }
   }
   
-  // 🏁 Завершить услугу (для мастеров)
+  // рџЏЃ Р—Р°РІРµСЂС€РёС‚СЊ СѓСЃР»СѓРіСѓ (РґР»СЏ РјР°СЃС‚РµСЂРѕРІ)
   async function completeBooking(bookingId: number): Promise<any> {
     
     isLoading.value = true
@@ -355,7 +355,7 @@ export const useBookingStore = defineStore('booking', () => {
         }
       })
       
-      // Обновляем статус в локальном списке
+      // РћР±РЅРѕРІР»СЏРµРј СЃС‚Р°С‚СѓСЃ РІ Р»РѕРєР°Р»СЊРЅРѕРј СЃРїРёСЃРєРµ
       const booking = bookings.value.find(b => b.id === bookingId)
       if (booking) {
         booking.status = 'completed'
@@ -366,16 +366,16 @@ export const useBookingStore = defineStore('booking', () => {
       return response.data
     } catch (err: unknown) {
       const error = err as ApiError
-      setError(error.response?.data?.message || 'Не удалось завершить услугу')
+      setError(error.response?.data?.message || 'РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РІРµСЂС€РёС‚СЊ СѓСЃР»СѓРіСѓ')
       throw error
     } finally {
       isLoading.value = false
     }
   }
   
-  // =================== ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ ===================
+  // =================== Р’РЎРџРћРњРћР“РђРўР•Р›Р¬РќР«Р• РњР•РўРћР”Р« ===================
   
-  // 🔄 Сбросить текущее бронирование
+  // рџ”„ РЎР±СЂРѕСЃРёС‚СЊ С‚РµРєСѓС‰РµРµ Р±СЂРѕРЅРёСЂРѕРІР°РЅРёРµ
   function resetCurrentBooking(): void {
     currentBooking.value = {
       masterId: null,
@@ -392,30 +392,30 @@ export const useBookingStore = defineStore('booking', () => {
     }
   }
   
-  // 📝 Обновить данные формы
+  // рџ“ќ РћР±РЅРѕРІРёС‚СЊ РґР°РЅРЅС‹Рµ С„РѕСЂРјС‹
   function updateBookingData(data: Partial<BookingState>): void {
     Object.assign(currentBooking.value, data)
   }
   
-  // 🔑 Получить токен авторизации
+  // рџ”‘ РџРѕР»СѓС‡РёС‚СЊ С‚РѕРєРµРЅ Р°РІС‚РѕСЂРёР·Р°С†РёРё
   function getAuthToken(): string {
-    // Для Laravel Sanctum токен может быть в cookie или localStorage
-    // В данном случае используем CSRF токен
+    // Р”Р»СЏ Laravel Sanctum С‚РѕРєРµРЅ РјРѕР¶РµС‚ Р±С‹С‚СЊ РІ cookie РёР»Рё localStorage
+    // Р’ РґР°РЅРЅРѕРј СЃР»СѓС‡Р°Рµ РёСЃРїРѕР»СЊР·СѓРµРј CSRF С‚РѕРєРµРЅ
     const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
     return token || ''
   }
   
-  // 🧹 Очистить ошибки
+  // рџ§№ РћС‡РёСЃС‚РёС‚СЊ РѕС€РёР±РєРё
   function clearError(): void {
     error.value = null
   }
   
-  // ⚠️ Установить ошибку
+  // вљ пёЏ РЈСЃС‚Р°РЅРѕРІРёС‚СЊ РѕС€РёР±РєСѓ
   function setError(message: string): void {
     error.value = message
   }
   
-  // 📊 Получить статистику
+  // рџ“Љ РџРѕР»СѓС‡РёС‚СЊ СЃС‚Р°С‚РёСЃС‚РёРєСѓ
   function getBookingStats(): BookingStats {
     return {
       total: totalBookings.value,
@@ -426,10 +426,10 @@ export const useBookingStore = defineStore('booking', () => {
     }
   }
   
-  // =================== ВОЗВРАЩАЕМ ИНТЕРФЕЙС ===================
+  // =================== Р’РћР—Р’Р РђР©РђР•Рњ РРќРўР•Р Р¤Р•Р™РЎ ===================
   
   return {
-    // Состояние
+    // РЎРѕСЃС‚РѕСЏРЅРёРµ
     bookings,
     currentBooking,
     availableSlots,
@@ -437,13 +437,13 @@ export const useBookingStore = defineStore('booking', () => {
     error,
     lastBooking,
     
-    // Вычисляемые
+    // Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ
     isFormValid,
     totalBookings,
     pendingBookings,
     confirmedBookings,
     
-    // Действия
+    // Р”РµР№СЃС‚РІРёСЏ
     fetchBookings,
     fetchAvailableSlots,
     createBooking,
@@ -451,7 +451,7 @@ export const useBookingStore = defineStore('booking', () => {
     confirmBooking,
     completeBooking,
     
-    // Вспомогательные
+    // Р’СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅС‹Рµ
     resetCurrentBooking,
     updateBookingData,
     clearError,

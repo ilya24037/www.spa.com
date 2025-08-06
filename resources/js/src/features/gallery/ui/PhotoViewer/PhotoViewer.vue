@@ -64,8 +64,8 @@
         </div>
 
         <!-- Image Info -->
-        <div v-if="currentImage?.caption" class="absolute bottom-12 left-1/2 transform -translate-x-1/2 text-white text-center max-w-md">
-          {{ currentImage.caption }}
+        <div v-if="currentImage?.description" class="absolute bottom-12 left-1/2 transform -translate-x-1/2 text-white text-center max-w-md">
+          {{ currentImage.description }}
         </div>
       </div>
     </div>

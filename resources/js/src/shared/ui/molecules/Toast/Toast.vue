@@ -17,10 +17,10 @@
         ]"
         role="alert"
         aria-live="polite"
-        :aria-label="`${type} уведомление: ${message}`"
+        :aria-label="`${type} СѓРІРµРґРѕРјР»РµРЅРёРµ: ${message}`"
       >
         <div class="toast-content">
-          <!-- Иконка -->
+          <!-- РРєРѕРЅРєР° -->
           <div class="toast-icon">
             <svg v-if="type === 'success'" width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path d="M16.25 5.75L7.5 14.5L3.75 10.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -36,19 +36,19 @@
             </svg>
           </div>
 
-          <!-- Контент -->
+          <!-- РљРѕРЅС‚РµРЅС‚ -->
           <div class="toast-text">
             <div v-if="title" class="toast-title">{{ title }}</div>
             <div class="toast-message">{{ message }}</div>
           </div>
 
-          <!-- Кнопка закрытия -->
+          <!-- РљРЅРѕРїРєР° Р·Р°РєСЂС‹С‚РёСЏ -->
           <button
             v-if="closable"
             @click="close"
             class="toast-close"
             type="button"
-            :aria-label="`Закрыть ${type} уведомление`"
+            :aria-label="`Р—Р°РєСЂС‹С‚СЊ ${type} СѓРІРµРґРѕРјР»РµРЅРёРµ`"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -56,7 +56,7 @@
           </button>
         </div>
 
-        <!-- Прогресс-бар -->
+        <!-- РџСЂРѕРіСЂРµСЃСЃ-Р±Р°СЂ -->
         <div v-if="duration > 0" class="toast-progress">
           <div 
             class="toast-progress-bar"
@@ -144,7 +144,7 @@ defineExpose({
   overflow: hidden;
 }
 
-/* Позиционирование */
+/* РџРѕР·РёС†РёРѕРЅРёСЂРѕРІР°РЅРёРµ */
 .toast-top-left {
   top: 20px;
   left: 20px;
@@ -283,7 +283,7 @@ defineExpose({
   }
 }
 
-/* Адаптивность */
+/* РђРґР°РїС‚РёРІРЅРѕСЃС‚СЊ */
 @media (max-width: 768px) {
   .toast-container {
     left: 16px !important;
@@ -302,3 +302,4 @@ defineExpose({
   }
 }
 </style>
+

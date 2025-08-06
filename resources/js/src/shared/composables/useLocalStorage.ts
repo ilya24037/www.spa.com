@@ -1,4 +1,4 @@
-import { watch, Ref, ref } from 'vue'
+import { watch, ref } from 'vue'
 import { logger } from '../lib/logger'
 
 /**

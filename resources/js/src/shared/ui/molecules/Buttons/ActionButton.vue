@@ -5,15 +5,15 @@
     :class="buttonClasses"
     @click="handleClick"
   >
-    <!-- Иконка загрузки -->
+    <!-- РРєРѕРЅРєР° Р·Р°РіСЂСѓР·РєРё -->
     <span v-if="loading" class="loading-spinner"></span>
     
-    <!-- Иконка кнопки -->
+    <!-- РРєРѕРЅРєР° РєРЅРѕРїРєРё -->
     <span v-if="!loading && $slots.icon" class="button-icon">
       <slot name="icon" />
     </span>
     
-    <!-- Текст кнопки -->
+    <!-- РўРµРєСЃС‚ РєРЅРѕРїРєРё -->
     <span class="button-text">
       <slot>{{ text }}</slot>
     </span>
@@ -97,7 +97,7 @@ const handleClick = (event) => {
   box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
 }
 
-/* Варианты кнопок */
+/* Р’Р°СЂРёР°РЅС‚С‹ РєРЅРѕРїРѕРє */
 .action-button--primary {
   background: #1890ff;
   color: #fff;
@@ -146,7 +146,7 @@ const handleClick = (event) => {
   background: #f0f8ff;
 }
 
-/* Размеры кнопок */
+/* Р Р°Р·РјРµСЂС‹ РєРЅРѕРїРѕРє */
 .action-button--small {
   padding: 6px 12px;
   font-size: 14px;
@@ -165,7 +165,7 @@ const handleClick = (event) => {
   min-height: 48px;
 }
 
-/* Состояния кнопок */
+/* РЎРѕСЃС‚РѕСЏРЅРёСЏ РєРЅРѕРїРѕРє */
 .action-button--disabled,
 .action-button:disabled {
   opacity: 0.6;
@@ -180,7 +180,7 @@ const handleClick = (event) => {
   width: 100%;
 }
 
-/* Спиннер загрузки */
+/* РЎРїРёРЅРЅРµСЂ Р·Р°РіСЂСѓР·РєРё */
 .loading-spinner {
   width: 16px;
   height: 16px;
@@ -206,3 +206,4 @@ const handleClick = (event) => {
   line-height: 1;
 }
 </style>
+

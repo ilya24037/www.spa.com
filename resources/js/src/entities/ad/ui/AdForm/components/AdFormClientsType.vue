@@ -1,20 +1,20 @@
 <template>
   <div class="clients-type">
     <label class="block text-sm font-medium text-gray-700 mb-2">
-      Тип клиентов
+      РўРёРї РєР»РёРµРЅС‚РѕРІ
     </label>
     <div class="space-y-2">
       <label class="flex items-center">
         <input type="checkbox" value="men" v-model="localValue" class="mr-2">
-        <span>Мужчины</span>
+        <span>РњСѓР¶С‡РёРЅС‹</span>
       </label>
       <label class="flex items-center">
         <input type="checkbox" value="women" v-model="localValue" class="mr-2">
-        <span>Женщины</span>
+        <span>Р–РµРЅС‰РёРЅС‹</span>
       </label>
       <label class="flex items-center">
         <input type="checkbox" value="couples" v-model="localValue" class="mr-2">
-        <span>Пары</span>
+        <span>РџР°СЂС‹</span>
       </label>
     </div>
   </div>
@@ -36,3 +36,4 @@ const localValue = computed({
   set: (value) => emit('update:modelValue', value)
 })
 </script>
+

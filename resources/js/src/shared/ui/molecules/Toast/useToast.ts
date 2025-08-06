@@ -64,7 +64,7 @@ export function useToast() {
   const hideToast = (id: string): void => {
     const index = toasts.value.findIndex(t => t.id === id)
     if (index !== -1) {
-      toasts.value[index].visible = false
+      if (toasts.value[index]) toasts.value[index].visible = false
       
       // Удаляем после анимации
       setTimeout(() => {

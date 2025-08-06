@@ -7,17 +7,17 @@
       :size="size"
     />
     
-    <!-- Дополнительная информация -->
+    <!-- Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ -->
     <div v-if="showDetails" :class="detailsClasses">
-      <!-- Дата истечения -->
+      <!-- Р”Р°С‚Р° РёСЃС‚РµС‡РµРЅРёСЏ -->
       <span v-if="expiresAt && (status === 'active' || status === 'waiting_payment')" :class="expiresClasses">
         <svg :class="clockIconClasses" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
-        до {{ formatExpiryDate(expiresAt) }}
+        РґРѕ {{ formatExpiryDate(expiresAt) }}
       </span>
       
-      <!-- Счетчик просмотров -->
+      <!-- РЎС‡РµС‚С‡РёРє РїСЂРѕСЃРјРѕС‚СЂРѕРІ -->
       <span v-if="views && status === 'active'" :class="viewsClasses">
         <svg :class="eyeIconClasses" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -26,7 +26,7 @@
         {{ views }}
       </span>
       
-      <!-- Причина отклонения -->
+      <!-- РџСЂРёС‡РёРЅР° РѕС‚РєР»РѕРЅРµРЅРёСЏ -->
       <span v-if="rejectionReason && (status === 'rejected' || status === 'blocked')" :class="rejectionClasses">
         {{ rejectionReason }}
       </span>
@@ -42,7 +42,7 @@ import 'dayjs/locale/ru'
 
 dayjs.locale('ru')
 
-// 🎯 Стили согласно дизайн-системе
+// рџЋЇ РЎС‚РёР»Рё СЃРѕРіР»Р°СЃРЅРѕ РґРёР·Р°Р№РЅ-СЃРёСЃС‚РµРјРµ
 const CONTAINER_BASE_CLASSES = 'flex flex-col gap-1'
 const DETAILS_CLASSES = 'flex items-center gap-2 text-xs text-gray-500'
 const EXPIRES_CLASSES = 'flex items-center gap-0.5'
@@ -86,7 +86,7 @@ const props = defineProps({
   }
 })
 
-// Вычисляемые свойства
+// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const containerClasses = computed(() => {
   const layoutClasses = {
     column: 'flex flex-col gap-1',
@@ -112,7 +112,7 @@ const rejectionClasses = computed(() => REJECTION_CLASSES)
 const clockIconClasses = computed(() => ICON_CLASSES)
 const eyeIconClasses = computed(() => ICON_CLASSES)
 
-// Методы
+// РњРµС‚РѕРґС‹
 const formatExpiryDate = (date) => {
   if (!date) return ''
   
@@ -121,11 +121,11 @@ const formatExpiryDate = (date) => {
   const diffDays = expiryDate.diff(now, 'day')
   
   if (diffDays === 0) {
-    return 'сегодня'
+    return 'СЃРµРіРѕРґРЅСЏ'
   } else if (diffDays === 1) {
-    return 'завтра'
+    return 'Р·Р°РІС‚СЂР°'
   } else if (diffDays < 7) {
-    return `${diffDays} дн.`
+    return `${diffDays} РґРЅ.`
   } else {
     return expiryDate.format('DD.MM')
   }

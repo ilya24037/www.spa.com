@@ -1,7 +1,7 @@
 <!-- resources/js/src/widgets/profile-dashboard/tabs/MyAdsTab.vue -->
 <template>
   <div :class="CONTAINER_CLASSES">
-    <!-- Фильтры статусов -->
+    <!-- Р¤РёР»СЊС‚СЂС‹ СЃС‚Р°С‚СѓСЃРѕРІ -->
     <div :class="FILTERS_CLASSES">
       <button
         v-for="status in statuses"
@@ -16,7 +16,7 @@
       </button>
     </div>
 
-    <!-- Список объявлений -->
+    <!-- РЎРїРёСЃРѕРє РѕР±СЉСЏРІР»РµРЅРёР№ -->
     <div v-if="filteredAds.length > 0" :class="ADS_LIST_CLASSES">
       <AdCard
         v-for="ad in filteredAds"
@@ -29,10 +29,10 @@
       />
     </div>
 
-    <!-- Пустое состояние -->
+    <!-- РџСѓСЃС‚РѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ -->
     <div v-else :class="EMPTY_STATE_CLASSES">
       <CollectionIcon :class="EMPTY_ICON_CLASSES" />
-      <h3 :class="EMPTY_TITLE_CLASSES">Нет объявлений</h3>
+      <h3 :class="EMPTY_TITLE_CLASSES">РќРµС‚ РѕР±СЉСЏРІР»РµРЅРёР№</h3>
       <p :class="EMPTY_DESCRIPTION_CLASSES">
         {{ getEmptyMessage() }}
       </p>
@@ -40,7 +40,7 @@
         @click="createNewAd"
         :class="CREATE_BUTTON_CLASSES"
       >
-        Создать объявление
+        РЎРѕР·РґР°С‚СЊ РѕР±СЉСЏРІР»РµРЅРёРµ
       </button>
     </div>
   </div>
@@ -52,7 +52,7 @@ import { router } from '@inertiajs/vue3'
 import { CollectionIcon } from '@heroicons/vue/outline'
 import AdCard from '@/src/entities/ad/ui/AdCard/AdCard.vue'
 
-// 🎯 Стили
+// рџЋЇ РЎС‚РёР»Рё
 const CONTAINER_CLASSES = 'space-y-6'
 const FILTERS_CLASSES = 'flex flex-wrap gap-2'
 const STATUS_BUTTON_BASE_CLASSES = 'px-4 py-2 rounded-lg font-medium text-sm transition-colors'
@@ -79,19 +79,19 @@ const props = defineProps({
 
 const emit = defineEmits(['refresh'])
 
-// Состояние
+// РЎРѕСЃС‚РѕСЏРЅРёРµ
 const activeStatus = ref('all')
 
-// Статусы
+// РЎС‚Р°С‚СѓСЃС‹
 const statuses = [
-  { key: 'all', label: 'Все' },
-  { key: 'active', label: 'Активные' },
-  { key: 'drafts', label: 'Черновики' },
-  { key: 'waiting', label: 'На модерации' },
-  { key: 'archived', label: 'Архив' }
+  { key: 'all', label: 'Р’СЃРµ' },
+  { key: 'active', label: 'РђРєС‚РёРІРЅС‹Рµ' },
+  { key: 'drafts', label: 'Р§РµСЂРЅРѕРІРёРєРё' },
+  { key: 'waiting', label: 'РќР° РјРѕРґРµСЂР°С†РёРё' },
+  { key: 'archived', label: 'РђСЂС…РёРІ' }
 ]
 
-// Вычисляемые свойства
+// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const filteredAds = computed(() => {
   if (activeStatus.value === 'all') {
     return props.ads
@@ -99,7 +99,7 @@ const filteredAds = computed(() => {
   return props.ads.filter(ad => ad.status === activeStatus.value)
 })
 
-// Методы
+// РњРµС‚РѕРґС‹
 const getStatusButtonClasses = (statusKey) => {
   return [
     STATUS_BUTTON_BASE_CLASSES,
@@ -117,15 +117,15 @@ const getStatusCount = (statusKey) => {
 const getEmptyMessage = () => {
   switch (activeStatus.value) {
     case 'active':
-      return 'У вас нет активных объявлений'
+      return 'РЈ РІР°СЃ РЅРµС‚ Р°РєС‚РёРІРЅС‹С… РѕР±СЉСЏРІР»РµРЅРёР№'
     case 'drafts':
-      return 'У вас нет черновиков'
+      return 'РЈ РІР°СЃ РЅРµС‚ С‡РµСЂРЅРѕРІРёРєРѕРІ'
     case 'waiting':
-      return 'Нет объявлений на модерации'
+      return 'РќРµС‚ РѕР±СЉСЏРІР»РµРЅРёР№ РЅР° РјРѕРґРµСЂР°С†РёРё'
     case 'archived':
-      return 'В архиве пусто'
+      return 'Р’ Р°СЂС…РёРІРµ РїСѓСЃС‚Рѕ'
     default:
-      return 'У вас пока нет объявлений'
+      return 'РЈ РІР°СЃ РїРѕРєР° РЅРµС‚ РѕР±СЉСЏРІР»РµРЅРёР№'
   }
 }
 
@@ -138,14 +138,15 @@ const handleEdit = (ad) => {
 }
 
 const handleDelete = async (ad) => {
-  if (confirm('Удалить объявление?')) {
-    // API вызов для удаления
+  if (confirm('РЈРґР°Р»РёС‚СЊ РѕР±СЉСЏРІР»РµРЅРёРµ?')) {
+    // API РІС‹Р·РѕРІ РґР»СЏ СѓРґР°Р»РµРЅРёСЏ
     emit('refresh')
   }
 }
 
 const handleToggleStatus = async (ad) => {
-  // API вызов для изменения статуса
+  // API РІС‹Р·РѕРІ РґР»СЏ РёР·РјРµРЅРµРЅРёСЏ СЃС‚Р°С‚СѓСЃР°
   emit('refresh')
 }
 </script>
+

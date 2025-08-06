@@ -11,7 +11,7 @@
       :class="spinnerClasses"
       :style="spinnerStyle"
     >
-      <!-- Встроенные варианты спиннеров -->
+      <!-- Р’СЃС‚СЂРѕРµРЅРЅС‹Рµ РІР°СЂРёР°РЅС‚С‹ СЃРїРёРЅРЅРµСЂРѕРІ -->
       <template v-if="variant === 'ring'">
         <div class="spinner-ring">
           <div></div><div></div><div></div><div></div>
@@ -51,14 +51,14 @@
         </svg>
       </template>
       
-      <!-- Кастомная иконка -->
+      <!-- РљР°СЃС‚РѕРјРЅР°СЏ РёРєРѕРЅРєР° -->
       <component
         v-else-if="customIcon"
         :is="customIcon"
         class="spinner-custom"
       />
       
-      <!-- По умолчанию - ring -->
+      <!-- РџРѕ СѓРјРѕР»С‡Р°РЅРёСЋ - ring -->
       <template v-else>
         <div class="spinner-ring">
           <div></div><div></div><div></div><div></div>
@@ -66,7 +66,7 @@
       </template>
     </div>
     
-    <!-- Текст загрузки -->
+    <!-- РўРµРєСЃС‚ Р·Р°РіСЂСѓР·РєРё -->
     <div 
       v-if="text || $slots.default" 
       :class="textClasses"
@@ -77,7 +77,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, useSlots } from 'vue'
 import type { SpinnerProps } from './Spinner.types'
 
 const props = withDefaults(defineProps<SpinnerProps>(), {
@@ -87,15 +87,17 @@ const props = withDefaults(defineProps<SpinnerProps>(), {
   centered: false,
   overlay: false,
   text: '',
-  ariaLabel: 'Загрузка...'
+  ariaLabel: 'Р—Р°РіСЂСѓР·РєР°...'
 })
+
+const slots = useSlots()
 
 const containerClasses = computed(() => [
   'spinner-container',
   {
     'spinner-container--centered': props.centered,
     'spinner-container--overlay': props.overlay,
-    'spinner-container--with-text': props.text || !!props.$slots?.default
+    'spinner-container--with-text': props.text || !!slots.default
   },
   props.customClass
 ])
@@ -179,7 +181,7 @@ const ariaLabel = computed(() => {
   gap: 1rem;
 }
 
-/* Базовые размеры спиннеров */
+/* Р‘Р°Р·РѕРІС‹Рµ СЂР°Р·РјРµСЂС‹ СЃРїРёРЅРЅРµСЂРѕРІ */
 .spinner {
   display: inline-block;
 }
@@ -204,7 +206,7 @@ const ariaLabel = computed(() => {
   height: 48px;
 }
 
-/* Цвета */
+/* Р¦РІРµС‚Р° */
 .spinner--primary {
   color: #3b82f6;
 }
@@ -392,14 +394,14 @@ const ariaLabel = computed(() => {
   }
 }
 
-/* Кастомный спиннер */
+/* РљР°СЃС‚РѕРјРЅС‹Р№ СЃРїРёРЅРЅРµСЂ */
 .spinner-custom {
   width: 100%;
   height: 100%;
   animation: spinner-rotate 1s linear infinite;
 }
 
-/* Текст */
+/* РўРµРєСЃС‚ */
 .spinner-text {
   color: #6b7280;
   font-weight: 500;
@@ -422,7 +424,7 @@ const ariaLabel = computed(() => {
   font-size: 1.125rem;
 }
 
-/* Темная тема */
+/* РўРµРјРЅР°СЏ С‚РµРјР° */
 @media (prefers-color-scheme: dark) {
   .spinner-container--overlay {
     background: rgba(0, 0, 0, 0.8);
@@ -433,7 +435,7 @@ const ariaLabel = computed(() => {
   }
 }
 
-/* Accessibility - уменьшенная анимация */
+/* Accessibility - СѓРјРµРЅСЊС€РµРЅРЅР°СЏ Р°РЅРёРјР°С†РёСЏ */
 @media (prefers-reduced-motion: reduce) {
   .spinner-ring div,
   .spinner-dots div,
@@ -446,7 +448,7 @@ const ariaLabel = computed(() => {
   }
 }
 
-/* Адаптивность */
+/* РђРґР°РїС‚РёРІРЅРѕСЃС‚СЊ */
 @media (max-width: 768px) {
   .spinner-container--centered {
     min-height: 150px;

@@ -7,12 +7,15 @@ export { TextInput } from './TextInput'
 
 // Other existing components
 export { Button } from './Button'
-export { BaseInput } from './BaseInput'
-export { BaseSelect } from './BaseSelect'
-export { BaseTextarea } from './BaseTextarea'
-export { BaseRadio } from './BaseRadio'
-export { BaseCheckbox } from './BaseCheckbox'
-export { Icon } from './Icon'
-export { LoadingSpinner } from './LoadingSpinner'
+export { default as BaseInput } from './BaseInput/BaseInput.vue'
+export { default as BaseSelect } from './BaseSelect/BaseSelect.vue'
+export { default as BaseTextarea } from './BaseTextarea/BaseTextarea.vue'
+export { default as BaseRadio } from './BaseRadio/BaseRadio.vue'
+export { default as BaseCheckbox } from './BaseCheckbox/BaseCheckbox.vue'
+export { default as Icon } from './Icon/Icon.vue'
+export { default as LoadingSpinner } from './LoadingSpinner/LoadingSpinner.vue'
 export { Skeleton } from './Skeleton'
-export { Spinner } from './Spinner'
+export { default as Spinner } from './Spinner/Spinner.vue'
+
+// Header components
+export * from './Logo'

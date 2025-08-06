@@ -4,11 +4,11 @@
     class="w-full bg-gray-100 rounded-lg overflow-hidden"
     :style="{ height: height + 'px' }"
   >
-    <!-- Заглушка карты -->
+    <!-- Р—Р°РіР»СѓС€РєР° РєР°СЂС‚С‹ -->
     <div class="relative h-full">
-      <!-- Фон карты -->
+      <!-- Р¤РѕРЅ РєР°СЂС‚С‹ -->
       <div class="absolute inset-0 bg-gradient-to-br from-blue-50 to-blue-100">
-        <!-- Сетка для имитации карты -->
+        <!-- РЎРµС‚РєР° РґР»СЏ РёРјРёС‚Р°С†РёРё РєР°СЂС‚С‹ -->
         <div class="h-full w-full opacity-10" style="
           background-image: 
             linear-gradient(0deg, #333 1px, transparent 1px),
@@ -17,7 +17,7 @@
         "></div>
       </div>
 
-      <!-- Маркеры -->
+      <!-- РњР°СЂРєРµСЂС‹ -->
       <div class="absolute inset-0">
         <div
           v-for="(card, index) in visibleCards"
@@ -25,12 +25,12 @@
           class="absolute transform -translate-x-1/2 -translate-y-1/2"
           :style="getMarkerPosition(index)"
         >
-          <!-- Маркер -->
+          <!-- РњР°СЂРєРµСЂ -->
           <div class="relative">
             <div class="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg hover:bg-blue-700 cursor-pointer transition-colors">
               {{ formatPrice(card.min_price) }}
             </div>
-            <!-- Стрелка -->
+            <!-- РЎС‚СЂРµР»РєР° -->
             <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
               <div class="w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-blue-600"></div>
             </div>
@@ -38,7 +38,7 @@
         </div>
       </div>
 
-      <!-- Контролы карты -->
+      <!-- РљРѕРЅС‚СЂРѕР»С‹ РєР°СЂС‚С‹ -->
       <div class="absolute top-4 right-4 flex flex-col gap-2">
         <button class="bg-white p-2 rounded shadow hover:bg-gray-50">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -52,10 +52,10 @@
         </button>
       </div>
 
-      <!-- Кнопка "Показать списком" -->
+      <!-- РљРЅРѕРїРєР° "РџРѕРєР°Р·Р°С‚СЊ СЃРїРёСЃРєРѕРј" -->
       <div class="absolute bottom-4 left-4">
         <button class="bg-white px-4 py-2 rounded-lg shadow hover:bg-gray-50 text-sm font-medium">
-          Показать списком
+          РџРѕРєР°Р·Р°С‚СЊ СЃРїРёСЃРєРѕРј
         </button>
       </div>
     </div>
@@ -80,10 +80,10 @@ const props = defineProps({
   }
 })
 
-// Показываем максимум 10 маркеров
+// РџРѕРєР°Р·С‹РІР°РµРј РјР°РєСЃРёРјСѓРј 10 РјР°СЂРєРµСЂРѕРІ
 const visibleCards = computed(() => props.cards.slice(0, 10))
 
-// Генерируем псевдослучайные позиции для маркеров
+// Р“РµРЅРµСЂРёСЂСѓРµРј РїСЃРµРІРґРѕСЃР»СѓС‡Р°Р№РЅС‹Рµ РїРѕР·РёС†РёРё РґР»СЏ РјР°СЂРєРµСЂРѕРІ
 function getMarkerPosition(index) {
   const positions = [
     { top: '20%', left: '30%' },
@@ -102,6 +102,6 @@ function getMarkerPosition(index) {
 }
 
 function formatPrice(price) {
-  return price ? `${price} ₽` : 'Договорная'
+  return price ? `${price} в‚Ѕ` : 'Р”РѕРіРѕРІРѕСЂРЅР°СЏ'
 }
 </script>

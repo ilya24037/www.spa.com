@@ -1,7 +1,7 @@
 <!-- resources/js/Components/Masters/BookingWidget/BookingActions.vue -->
 <template>
   <div class="booking-actions space-y-3">
-    <!-- Кнопка записи -->
+    <!-- РљРЅРѕРїРєР° Р·Р°РїРёСЃРё -->
     <button 
       @click="$emit('book')"
       class="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2"
@@ -10,10 +10,10 @@
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
       </svg>
-      <span>Записаться на приём</span>
+      <span>Р—Р°РїРёСЃР°С‚СЊСЃСЏ РЅР° РїСЂРёС‘Рј</span>
     </button>
     
-    <!-- Кнопка телефона -->
+    <!-- РљРЅРѕРїРєР° С‚РµР»РµС„РѕРЅР° -->
     <button 
       @click="handleCall"
       class="w-full bg-green-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
@@ -21,11 +21,11 @@
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
       </svg>
-      <span v-if="!showPhone">Показать телефон</span>
+      <span v-if="!showPhone">РџРѕРєР°Р·Р°С‚СЊ С‚РµР»РµС„РѕРЅ</span>
       <span v-else class="font-mono">{{ formattedPhone }}</span>
     </button>
     
-    <!-- Быстрая связь через мессенджеры -->
+    <!-- Р‘С‹СЃС‚СЂР°СЏ СЃРІСЏР·СЊ С‡РµСЂРµР· РјРµСЃСЃРµРЅРґР¶РµСЂС‹ -->
     <div v-if="hasMessengers" class="flex gap-2">
       <a 
         v-if="whatsapp"
@@ -56,7 +56,7 @@
       </a>
     </div>
     
-    <!-- Быстрый вопрос -->
+    <!-- Р‘С‹СЃС‚СЂС‹Р№ РІРѕРїСЂРѕСЃ -->
     <button 
       v-if="!hasMessengers"
       @click="$emit('ask-question')"
@@ -65,7 +65,7 @@
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
       </svg>
-      <span>Задать вопрос</span>
+      <span>Р—Р°РґР°С‚СЊ РІРѕРїСЂРѕСЃ</span>
     </button>
   </div>
 </template>
@@ -94,10 +94,10 @@ const props = defineProps({
 
 const emit = defineEmits(['book', 'call', 'ask-question'])
 
-// Состояние
+// РЎРѕСЃС‚РѕСЏРЅРёРµ
 const showPhone = ref(false)
 
-// Вычисляемые свойства
+// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const hasMessengers = computed(() => props.whatsapp || props.telegram)
 
 const formattedPhone = computed(() => {
@@ -106,18 +106,18 @@ const formattedPhone = computed(() => {
   return `+7 (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7, 9)}-${cleaned.slice(9, 11)}`
 })
 
-// Методы
+// РњРµС‚РѕРґС‹
 const handleCall = () => {
   if (!showPhone.value) {
     showPhone.value = true
     emit('call')
     
-    // Копируем телефон в буфер обмена
+    // РљРѕРїРёСЂСѓРµРј С‚РµР»РµС„РѕРЅ РІ Р±СѓС„РµСЂ РѕР±РјРµРЅР°
     if (navigator.clipboard) {
       navigator.clipboard.writeText(props.phone)
     }
   } else {
-    // Звоним
+    // Р—РІРѕРЅРёРј
     window.location.href = `tel:${props.phone}`
   }
 }
@@ -127,7 +127,7 @@ const cleanPhone = (phone) => {
 }
 
 const trackMessenger = (type) => {
-  // Отслеживание клика по мессенджеру
+  // РћС‚СЃР»РµР¶РёРІР°РЅРёРµ РєР»РёРєР° РїРѕ РјРµСЃСЃРµРЅРґР¶РµСЂСѓ
   if (window.gtag) {
     window.gtag('event', 'contact_messenger', {
       messenger_type: type
@@ -135,3 +135,4 @@ const trackMessenger = (type) => {
   }
 }
 </script>
+

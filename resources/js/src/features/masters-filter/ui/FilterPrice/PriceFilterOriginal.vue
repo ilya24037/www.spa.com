@@ -1,24 +1,24 @@
 <!-- resources/js/Components/Filters/PriceFilter.vue -->
 <template>
   <div>
-    <h4 class="text-sm font-medium mb-2">Стоимость, ₽</h4>
+    <h4 class="text-sm font-medium mb-2">РЎС‚РѕРёРјРѕСЃС‚СЊ, в‚Ѕ</h4>
 
-    <!-- Диапазон «От» / «До» -->
+    <!-- Р”РёР°РїР°Р·РѕРЅ В«РћС‚В» / В«Р”РѕВ» -->
     <div class="flex items-center gap-2">
       <input
         v-model.number="local.min"
         @input="emitChange"
         type="number"
-        placeholder="От"
+        placeholder="РћС‚"
         min="0"
         class="w-24 border rounded px-2 py-1 text-sm"
       />
-      <span class="text-gray-500">—</span>
+      <span class="text-gray-500">вЂ”</span>
       <input
         v-model.number="local.max"
         @input="emitChange"
         type="number"
-        placeholder="До"
+        placeholder="Р”Рѕ"
         min="0"
         class="w-24 border rounded px-2 py-1 text-sm"
       />
@@ -40,7 +40,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['update:modelValue'])
 
-// локальное реактивное состояние, чтобы не трогать родителя до onInput
+// Р»РѕРєР°Р»СЊРЅРѕРµ СЂРµР°РєС‚РёРІРЅРѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ, С‡С‚РѕР±С‹ РЅРµ С‚СЂРѕРіР°С‚СЊ СЂРѕРґРёС‚РµР»СЏ РґРѕ onInput
 const local = reactive({
   min: props.modelValue.min ?? null,
   max: props.modelValue.max ?? null
@@ -60,10 +60,12 @@ function emitChange () {
 </script>
 
 <style scoped>
-/* небольшие правки, чтобы инпуты были одной высоты */
+/* РЅРµР±РѕР»СЊС€РёРµ РїСЂР°РІРєРё, С‡С‚РѕР±С‹ РёРЅРїСѓС‚С‹ Р±С‹Р»Рё РѕРґРЅРѕР№ РІС‹СЃРѕС‚С‹ */
 input::-webkit-inner-spin-button,
 input::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 </style>
+
+

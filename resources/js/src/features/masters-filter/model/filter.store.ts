@@ -15,10 +15,6 @@ import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import type { 
   FilterState, 
-  LocationFilter, 
-  PriceRange,
-  WorkingHoursFilter,
-  Master,
   FilterOptions,
   ServiceLocationType,
   SortingType
@@ -118,9 +114,9 @@ export const useFilterStore = defineStore('masters-filter', () => {
   const selectedServicesText = computed(() => {
     const services = selectedServices.value
     if (services.length === 0) return 'Любые услуги'
-    if (services.length === 1) return services[0].name
+    if (services.length === 1) return services[0]?.name || ''
     if (services.length <= 3) return services.map(s => s.name).join(', ')
-    return `${services[0].name} и еще ${services.length - 1}`
+    return `${services[0]?.name || ''} и еще ${services.length - 1}`
   })
 
   // Диапазон цен как строка

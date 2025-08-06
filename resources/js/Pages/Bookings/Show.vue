@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <Head :title="`Бронирование №${booking.booking_number}`" />
 
     <!-- Обертка с правильными отступами как на главной -->

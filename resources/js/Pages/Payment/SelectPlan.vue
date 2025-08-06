@@ -1,10 +1,10 @@
 <template>
-  <Head title="Выберите срок публикации" />
+  <Head title="Р’С‹Р±РµСЂРёС‚Рµ СЃСЂРѕРє РїСѓР±Р»РёРєР°С†РёРё" />
   
   <AuthLayout>
     <div class="payment-select-plan">
       <div class="container">
-        <!-- Кнопка назад -->
+        <!-- РљРЅРѕРїРєР° РЅР°Р·Р°Рґ -->
         <div class="back-button-wrapper">
           <Link 
             :href="route('my-ads.index')" 
@@ -13,62 +13,62 @@
             <svg class="back-button__icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path d="M15 10H5M5 10L10 15M5 10L10 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            <span class="back-button__text">Назад</span>
+            <span class="back-button__text">РќР°Р·Р°Рґ</span>
           </Link>
         </div>
 
-        <!-- Заголовок -->
-        <h1 class="page-title">Выберите срок публикации</h1>
+        <!-- Р—Р°РіРѕР»РѕРІРѕРє -->
+        <h1 class="page-title">Р’С‹Р±РµСЂРёС‚Рµ СЃСЂРѕРє РїСѓР±Р»РёРєР°С†РёРё</h1>
 
-        <!-- Тарифные планы -->
+        <!-- РўР°СЂРёС„РЅС‹Рµ РїР»Р°РЅС‹ -->
         <div class="plans-grid">
-          <!-- План 7 дней -->
+          <!-- РџР»Р°РЅ 7 РґРЅРµР№ -->
           <div 
             class="plan-card" 
             :class="{ 'plan-card--active': selectedPlan?.days === 7 }"
             @click="selectPlan(getPlanByDays(7))"
           >
             <div class="plan-content">
-              <h3 class="plan-title">7 дней</h3>
-              <div class="plan-price">{{ getPlanByDays(7)?.price || 1235 }} ₽</div>
+              <h3 class="plan-title">7 РґРЅРµР№</h3>
+              <div class="plan-price">{{ getPlanByDays(7)?.price || 1235 }} в‚Ѕ</div>
               <p class="plan-description">
-                Если нужно быстро привлечь внимание к своему объявлению
+                Р•СЃР»Рё РЅСѓР¶РЅРѕ Р±С‹СЃС‚СЂРѕ РїСЂРёРІР»РµС‡СЊ РІРЅРёРјР°РЅРёРµ Рє СЃРІРѕРµРјСѓ РѕР±СЉСЏРІР»РµРЅРёСЋ
               </p>
             </div>
           </div>
 
-          <!-- План 14 дней -->
+          <!-- РџР»Р°РЅ 14 РґРЅРµР№ -->
           <div 
             class="plan-card" 
             :class="{ 'plan-card--active': selectedPlan?.days === 14 }"
             @click="selectPlan(getPlanByDays(14))"
           >
             <div class="plan-content">
-              <h3 class="plan-title">14 дней</h3>
-              <div class="plan-price">{{ getPlanByDays(14)?.price || 253 }} ₽</div>
+              <h3 class="plan-title">14 РґРЅРµР№</h3>
+              <div class="plan-price">{{ getPlanByDays(14)?.price || 253 }} в‚Ѕ</div>
               <p class="plan-description">
-                Когда нужно чуть больше времени
+                РљРѕРіРґР° РЅСѓР¶РЅРѕ С‡СѓС‚СЊ Р±РѕР»СЊС€Рµ РІСЂРµРјРµРЅРё
               </p>
             </div>
           </div>
 
-          <!-- План 30 дней (выбран) -->
+          <!-- РџР»Р°РЅ 30 РґРЅРµР№ (РІС‹Р±СЂР°РЅ) -->
           <div 
             class="plan-card" 
             :class="{ 'plan-card--active': selectedPlan?.days === 30 }"
             @click="selectPlan(getPlanByDays(30))"
           >
             <div class="plan-content">
-              <h3 class="plan-title">30 дней</h3>
-              <div class="plan-price">{{ getPlanByDays(30)?.price || 389 }} ₽</div>
+              <h3 class="plan-title">30 РґРЅРµР№</h3>
+              <div class="plan-price">{{ getPlanByDays(30)?.price || 389 }} в‚Ѕ</div>
               <p class="plan-description">
-                Самый популярный вариант
+                РЎР°РјС‹Р№ РїРѕРїСѓР»СЏСЂРЅС‹Р№ РІР°СЂРёР°РЅС‚
               </p>
             </div>
           </div>
         </div>
 
-        <!-- Информация о контактах -->
+        <!-- РРЅС„РѕСЂРјР°С†РёСЏ Рѕ РєРѕРЅС‚Р°РєС‚Р°С… -->
         <div class="contacts-info">
           <div class="contacts-info__content">
             <div class="contacts-circle">
@@ -85,7 +85,7 @@
             </div>
             
             <p class="contacts-text">
-              Когда объявление соберёт столько контактов, оно опустится в поиске
+              РљРѕРіРґР° РѕР±СЉСЏРІР»РµРЅРёРµ СЃРѕР±РµСЂС‘С‚ СЃС‚РѕР»СЊРєРѕ РєРѕРЅС‚Р°РєС‚РѕРІ, РѕРЅРѕ РѕРїСѓСЃС‚РёС‚СЃСЏ РІ РїРѕРёСЃРєРµ
             </p>
 
             <button 
@@ -93,7 +93,7 @@
               :disabled="!selectedPlan"
               class="continue-button"
             >
-              Продолжить
+              РџСЂРѕРґРѕР»Р¶РёС‚СЊ
             </button>
           </div>
         </div>
@@ -113,7 +113,7 @@ const props = defineProps({
   plans: Array
 })
 
-// По умолчанию выбран план на 30 дней
+// РџРѕ СѓРјРѕР»С‡Р°РЅРёСЋ РІС‹Р±СЂР°РЅ РїР»Р°РЅ РЅР° 30 РґРЅРµР№
 const selectedPlan = ref(props.plans.find(p => p.days === 30))
 
 const getPlanByDays = (days) => {
@@ -148,7 +148,7 @@ const proceedToCheckout = () => {
   padding: 0 20px;
 }
 
-/* Кнопка назад */
+/* РљРЅРѕРїРєР° РЅР°Р·Р°Рґ */
 .back-button-wrapper {
   margin-bottom: 30px;
 }
@@ -186,7 +186,7 @@ const proceedToCheckout = () => {
   line-height: 1.2;
 }
 
-/* Сетка планов */
+/* РЎРµС‚РєР° РїР»Р°РЅРѕРІ */
 .plans-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -194,7 +194,7 @@ const proceedToCheckout = () => {
   margin-bottom: 50px;
 }
 
-/* Карточка плана */
+/* РљР°СЂС‚РѕС‡РєР° РїР»Р°РЅР° */
 .plan-card {
   position: relative;
   background: #fff;
@@ -240,7 +240,7 @@ const proceedToCheckout = () => {
   margin: 0;
 }
 
-/* Бейдж продвижения */
+/* Р‘РµР№РґР¶ РїСЂРѕРґРІРёР¶РµРЅРёСЏ */
 .promo-badge {
   position: absolute;
   bottom: 20px;
@@ -276,7 +276,7 @@ const proceedToCheckout = () => {
   z-index: 1;
 }
 
-/* Информация о контактах */
+/* РРЅС„РѕСЂРјР°С†РёСЏ Рѕ РєРѕРЅС‚Р°РєС‚Р°С… */
 .contacts-info {
   background: #fff;
   border-radius: 12px;
@@ -319,7 +319,7 @@ const proceedToCheckout = () => {
   margin: 0;
 }
 
-/* Кнопка продолжить */
+/* РљРЅРѕРїРєР° РїСЂРѕРґРѕР»Р¶РёС‚СЊ */
 .continue-button {
   background: #000;
   color: #fff;
@@ -342,7 +342,7 @@ const proceedToCheckout = () => {
   cursor: not-allowed;
 }
 
-/* Адаптивность */
+/* РђРґР°РїС‚РёРІРЅРѕСЃС‚СЊ */
 @media (max-width: 768px) {
   .page-title {
     font-size: 28px;

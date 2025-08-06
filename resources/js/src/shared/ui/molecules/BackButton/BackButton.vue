@@ -13,7 +13,7 @@
 </template>
 
 <script setup>
-// 🎯 Стили согласно дизайн-системе
+// рџЋЇ РЎС‚РёР»Рё СЃРѕРіР»Р°СЃРЅРѕ РґРёР·Р°Р№РЅ-СЃРёСЃС‚РµРјРµ
 const BUTTON_CLASSES = 'inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
 const ICON_CLASSES = 'w-4 h-4'
 
@@ -28,7 +28,7 @@ const props = defineProps({
   },
   text: {
     type: String,
-    default: 'Назад'
+    default: 'РќР°Р·Р°Рґ'
   }
 })
 
@@ -39,17 +39,18 @@ const handleClick = () => {
   
   emit('click')
   
-  // Простой подход как на Avito
+  // РџСЂРѕСЃС‚РѕР№ РїРѕРґС…РѕРґ РєР°Рє РЅР° Avito
   if (props.to) {
     window.location.href = props.to
   } else {
-    // Простая проверка истории
+    // РџСЂРѕСЃС‚Р°СЏ РїСЂРѕРІРµСЂРєР° РёСЃС‚РѕСЂРёРё
     if (window.history.length > 1) {
       window.history.back()
     } else {
-      // Fallback на главную
+      // Fallback РЅР° РіР»Р°РІРЅСѓСЋ
       window.location.href = '/'
     }
   }
 }
 </script>
+

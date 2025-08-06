@@ -1,9 +1,9 @@
 <template>
     <div class="time-slot-picker">
-        <!-- Выбор даты -->
+        <!-- Р’С‹Р±РѕСЂ РґР°С‚С‹ -->
         <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-2">
-                Выберите дату
+                Р’С‹Р±РµСЂРёС‚Рµ РґР°С‚Сѓ
             </label>
             <div class="grid grid-cols-3 gap-2">
                 <button v-for="date in availableDates"
@@ -20,48 +20,48 @@
                 </button>
             </div>
             
-            <!-- Календарь для других дат -->
+            <!-- РљР°Р»РµРЅРґР°СЂСЊ РґР»СЏ РґСЂСѓРіРёС… РґР°С‚ -->
             <button @click="showCalendar = true"
                     class="mt-2 text-sm text-purple-600 hover:text-purple-700 font-medium">
-                Выбрать другую дату →
+                Р’С‹Р±СЂР°С‚СЊ РґСЂСѓРіСѓСЋ РґР°С‚Сѓ в†’
             </button>
         </div>
 
-        <!-- Выбор времени -->
+        <!-- Р’С‹Р±РѕСЂ РІСЂРµРјРµРЅРё -->
         <div v-if="selectedDate">
             <label class="block text-sm font-medium text-gray-700 mb-2">
-                Доступное время
+                Р”РѕСЃС‚СѓРїРЅРѕРµ РІСЂРµРјСЏ
             </label>
             
-            <!-- Загрузка -->
+            <!-- Р—Р°РіСЂСѓР·РєР° -->
             <div v-if="loadingSlots" class="py-8 text-center">
                 <div class="inline-flex items-center gap-2 text-gray-500">
                     <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Загружаем доступное время...
+                    Р—Р°РіСЂСѓР¶Р°РµРј РґРѕСЃС‚СѓРїРЅРѕРµ РІСЂРµРјСЏ...
                 </div>
             </div>
             
-            <!-- Нет слотов -->
+            <!-- РќРµС‚ СЃР»РѕС‚РѕРІ -->
             <div v-else-if="!timeSlots.length" class="py-8 text-center">
                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                           d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <p class="mt-2 text-gray-600">
-                    К сожалению, на эту дату нет свободного времени
+                    Рљ СЃРѕР¶Р°Р»РµРЅРёСЋ, РЅР° СЌС‚Сѓ РґР°С‚Сѓ РЅРµС‚ СЃРІРѕР±РѕРґРЅРѕРіРѕ РІСЂРµРјРµРЅРё
                 </p>
                 <button @click="selectedDate = null"
                         class="mt-2 text-sm text-purple-600 hover:text-purple-700">
-                    Выбрать другую дату
+                    Р’С‹Р±СЂР°С‚СЊ РґСЂСѓРіСѓСЋ РґР°С‚Сѓ
                 </button>
             </div>
             
-            <!-- Слоты времени -->
+            <!-- РЎР»РѕС‚С‹ РІСЂРµРјРµРЅРё -->
             <div v-else>
-                <!-- Группировка по периодам дня -->
+                <!-- Р“СЂСѓРїРїРёСЂРѕРІРєР° РїРѕ РїРµСЂРёРѕРґР°Рј РґРЅСЏ -->
                 <div v-for="period in timePeriods" :key="period.key" class="mb-4">
                     <h4 v-if="period.slots.length" class="text-xs font-medium text-gray-500 uppercase mb-2">
                         {{ period.label }}
@@ -84,29 +84,29 @@
                     </div>
                 </div>
                 
-                <!-- Легенда -->
+                <!-- Р›РµРіРµРЅРґР° -->
                 <div class="mt-4 flex items-center gap-4 text-xs text-gray-500">
                     <div class="flex items-center gap-1">
                         <div class="w-3 h-3 bg-white border border-gray-300 rounded"></div>
-                        <span>Свободно</span>
+                        <span>РЎРІРѕР±РѕРґРЅРѕ</span>
                     </div>
                     <div class="flex items-center gap-1">
                         <div class="w-3 h-3 bg-gray-100 rounded"></div>
-                        <span>Занято</span>
+                        <span>Р—Р°РЅСЏС‚Рѕ</span>
                     </div>
                     <div class="flex items-center gap-1">
                         <div class="w-3 h-3 bg-purple-600 rounded"></div>
-                        <span>Выбрано</span>
+                        <span>Р’С‹Р±СЂР°РЅРѕ</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Модальное окно календаря -->
+        <!-- РњРѕРґР°Р»СЊРЅРѕРµ РѕРєРЅРѕ РєР°Р»РµРЅРґР°СЂСЏ -->
         <Modal v-if="showCalendar" @close="showCalendar = false">
             <div class="p-6">
-                <h3 class="text-lg font-semibold mb-4">Выберите дату</h3>
-                <Calendar 
+                <h3 class="text-lg font-semibold mb-4">Р’С‹Р±РµСЂРёС‚Рµ РґР°С‚Сѓ</h3>
+                <BookingCalendar 
                     :available-dates="allAvailableDates"
                     :selected-date="selectedDate"
                     @select="handleDateSelect"
@@ -121,7 +121,7 @@ import { ref, computed, watch } from 'vue'
 import { format, addDays, isToday, isTomorrow, parseISO } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import Modal from '@/src/shared/ui/organisms/Modal/Modal.vue'
-import Calendar from '@/Components/Booking/Calendar.vue'
+import { BookingCalendar } from '@/src/features/booking'
 
 const props = defineProps({
     masterId: {
@@ -134,7 +134,7 @@ const props = defineProps({
     },
     duration: {
         type: Number,
-        default: 60 // минуты
+        default: 60 // РјРёРЅСѓС‚С‹
     },
     availableSlots: {
         type: Object,
@@ -160,8 +160,8 @@ const availableDates = computed(() => {
         const dateStr = format(date, 'yyyy-MM-dd')
         
         let label = format(date, 'd MMM', { locale: ru })
-        if (isToday(date)) label = 'Сегодня'
-        else if (isTomorrow(date)) label = 'Завтра'
+        if (isToday(date)) label = 'РЎРµРіРѕРґРЅСЏ'
+        else if (isTomorrow(date)) label = 'Р—Р°РІС‚СЂР°'
         
         dates.push({
             value: dateStr,
@@ -184,9 +184,9 @@ const timeSlots = computed(() => {
 
 const timePeriods = computed(() => {
     const periods = {
-        morning: { key: 'morning', label: 'Утро', slots: [] },
-        afternoon: { key: 'afternoon', label: 'День', slots: [] },
-        evening: { key: 'evening', label: 'Вечер', slots: [] }
+        morning: { key: 'morning', label: 'РЈС‚СЂРѕ', slots: [] },
+        afternoon: { key: 'afternoon', label: 'Р”РµРЅСЊ', slots: [] },
+        evening: { key: 'evening', label: 'Р’РµС‡РµСЂ', slots: [] }
     }
     
     timeSlots.value.forEach(slot => {
@@ -205,7 +205,7 @@ const timePeriods = computed(() => {
 })
 
 const allAvailableDates = computed(() => {
-    // Возвращаем все даты из props.availableSlots
+    // Р’РѕР·РІСЂР°С‰Р°РµРј РІСЃРµ РґР°С‚С‹ РёР· props.availableSlots
     return Object.keys(props.availableSlots)
 })
 
@@ -228,18 +228,18 @@ const handleDateSelect = (date) => {
     selectedTime.value = null
     showCalendar.value = false
     
-    // Загружаем слоты для выбранной даты
+    // Р—Р°РіСЂСѓР¶Р°РµРј СЃР»РѕС‚С‹ РґР»СЏ РІС‹Р±СЂР°РЅРЅРѕР№ РґР°С‚С‹
     loadSlotsForDate(date)
 }
 
 const loadSlotsForDate = async (date) => {
-    // Если слоты уже есть в props, не загружаем
+    // Р•СЃР»Рё СЃР»РѕС‚С‹ СѓР¶Рµ РµСЃС‚СЊ РІ props, РЅРµ Р·Р°РіСЂСѓР¶Р°РµРј
     if (props.availableSlots[date]) return
     
     loadingSlots.value = true
     
     try {
-        // Эмитим событие для загрузки слотов родительским компонентом
+        // Р­РјРёС‚РёРј СЃРѕР±С‹С‚РёРµ РґР»СЏ Р·Р°РіСЂСѓР·РєРё СЃР»РѕС‚РѕРІ СЂРѕРґРёС‚РµР»СЊСЃРєРёРј РєРѕРјРїРѕРЅРµРЅС‚РѕРј
         emit('load-slots', date)
     } finally {
         setTimeout(() => {
@@ -265,7 +265,7 @@ if (firstAvailableDate) {
 </script>
 
 <style scoped>
-/* Анимация появления слотов */
+/* РђРЅРёРјР°С†РёСЏ РїРѕСЏРІР»РµРЅРёСЏ СЃР»РѕС‚РѕРІ */
 .time-slot-picker button {
     transition: all 0.2s ease;
 }
@@ -274,7 +274,7 @@ if (firstAvailableDate) {
     transform: scale(0.95);
 }
 
-/* Анимация загрузки */
+/* РђРЅРёРјР°С†РёСЏ Р·Р°РіСЂСѓР·РєРё */
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
@@ -283,3 +283,4 @@ if (firstAvailableDate) {
     animation: spin 1s linear infinite;
 }
 </style>
+

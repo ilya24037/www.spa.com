@@ -1,10 +1,10 @@
 <!-- resources/js/src/widgets/master-profile/MasterProfileModals.vue -->
 <template>
-  <!-- Модальное окно "Поделиться" -->
+  <!-- РњРѕРґР°Р»СЊРЅРѕРµ РѕРєРЅРѕ "РџРѕРґРµР»РёС‚СЊСЃСЏ" -->
   <div v-if="showShare" :class="MODAL_OVERLAY_CLASSES" @click="handleOverlayClick('share')">
     <div :class="MODAL_CONTAINER_CLASSES">
       <div :class="MODAL_HEADER_CLASSES">
-        <h3 :class="MODAL_TITLE_CLASSES">Поделиться профилем</h3>
+        <h3 :class="MODAL_TITLE_CLASSES">РџРѕРґРµР»РёС‚СЊСЃСЏ РїСЂРѕС„РёР»РµРј</h3>
         <button
           @click="$emit('close-share')"
           :class="CLOSE_BUTTON_CLASSES"
@@ -16,9 +16,9 @@
       </div>
 
       <div :class="MODAL_CONTENT_CLASSES">
-        <!-- URL для копирования -->
+        <!-- URL РґР»СЏ РєРѕРїРёСЂРѕРІР°РЅРёСЏ -->
         <div :class="URL_SECTION_CLASSES">
-          <label :class="URL_LABEL_CLASSES">Ссылка на профиль</label>
+          <label :class="URL_LABEL_CLASSES">РЎСЃС‹Р»РєР° РЅР° РїСЂРѕС„РёР»СЊ</label>
           <div :class="URL_INPUT_CONTAINER_CLASSES">
             <input
               ref="urlInput"
@@ -29,14 +29,14 @@
               @click="copyUrl"
               :class="COPY_BUTTON_CLASSES"
             >
-              {{ urlCopied ? 'Скопировано!' : 'Копировать' }}
+              {{ urlCopied ? 'РЎРєРѕРїРёСЂРѕРІР°РЅРѕ!' : 'РљРѕРїРёСЂРѕРІР°С‚СЊ' }}
             </button>
           </div>
         </div>
 
-        <!-- Социальные сети -->
+        <!-- РЎРѕС†РёР°Р»СЊРЅС‹Рµ СЃРµС‚Рё -->
         <div :class="SOCIAL_SECTION_CLASSES">
-          <h4 :class="SOCIAL_TITLE_CLASSES">Поделиться в соцсетях</h4>
+          <h4 :class="SOCIAL_TITLE_CLASSES">РџРѕРґРµР»РёС‚СЊСЃСЏ РІ СЃРѕС†СЃРµС‚СЏС…</h4>
           <div :class="SOCIAL_BUTTONS_CLASSES">
             <button
               @click="shareToVK"
@@ -45,7 +45,7 @@
               <svg :class="SOCIAL_ICON_CLASSES" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12.785 16.241s.288-.032.436-.194c.136-.148.132-.426.132-.426s-.02-1.302.577-1.495c.588-.19 1.341.259 2.138 1.011.6.566 1.058.882 1.058.882l2.124-.03s1.11-.07.584-.951c-.043-.072-.306-.651-1.575-1.84-1.33-1.244-1.153-.043.45-1.3.978-1.154 1.732-1.856 1.732-1.856s.612-.46.136-.516l-2.423-.034s-.18-.024-.312.056c-.128.076-.21.253-.21.253s-.378.101-.742 2.29c-.769 2.254-1.095 2.371-1.223 2.23-.298-.327-.223-1.314-.223-2.016 0-2.19.328-3.097-.64-3.333-.32-.078-.556-.129-1.375-.137-.105-.01-1.879-.015-2.37.6-.32.4-.024.622.169.654.238.04.779.147.064 1.373-.102.55-.409 1.792-.588 2.052-.306.445-.511.372-.511-.237 0-.54.023-1.633.023-2.346 0-1.62.27-2.215-.525-2.376-.263-.053-.458-.08-.934-.085-.742-.008-1.357 0-1.71.176-.236.118-.419.38-.307.395.137.019.448.084.612.31.213.293.205.95.205.95s.122 2.58-.285 2.9c-.28.218-.664-.227-1.49-2.266-.423-.578-.741-1.218-.741-1.218s-.061-.152-.171-.234c-.133-.099-.32-.13-.32-.13l-2.301.015s-.345.01-.471.161c-.112.134-.009.41-.009.41s1.777 4.194 3.788 6.307c1.843 1.938 3.931 1.811 3.931 1.811h.952z"/>
               </svg>
-              ВКонтакте
+              Р’РљРѕРЅС‚Р°РєС‚Рµ
             </button>
 
             <button
@@ -73,11 +73,11 @@
     </div>
   </div>
 
-  <!-- Модальное окно "Пожаловаться" -->
+  <!-- РњРѕРґР°Р»СЊРЅРѕРµ РѕРєРЅРѕ "РџРѕР¶Р°Р»РѕРІР°С‚СЊСЃСЏ" -->
   <div v-if="showReport" :class="MODAL_OVERLAY_CLASSES" @click="handleOverlayClick('report')">
     <div :class="MODAL_CONTAINER_CLASSES">
       <div :class="MODAL_HEADER_CLASSES">
-        <h3 :class="MODAL_TITLE_CLASSES">Пожаловаться на мастера</h3>
+        <h3 :class="MODAL_TITLE_CLASSES">РџРѕР¶Р°Р»РѕРІР°С‚СЊСЃСЏ РЅР° РјР°СЃС‚РµСЂР°</h3>
         <button
           @click="$emit('close-report')"
           :class="CLOSE_BUTTON_CLASSES"
@@ -90,9 +90,9 @@
 
       <div :class="MODAL_CONTENT_CLASSES">
         <form @submit.prevent="submitReport">
-          <!-- Причина жалобы -->
+          <!-- РџСЂРёС‡РёРЅР° Р¶Р°Р»РѕР±С‹ -->
           <div :class="FORM_GROUP_CLASSES">
-            <label :class="FORM_LABEL_CLASSES">Причина жалобы</label>
+            <label :class="FORM_LABEL_CLASSES">РџСЂРёС‡РёРЅР° Р¶Р°Р»РѕР±С‹</label>
             <div :class="RADIO_GROUP_CLASSES">
               <label
                 v-for="reason in reportReasons"
@@ -110,32 +110,32 @@
             </div>
           </div>
 
-          <!-- Дополнительные комментарии -->
+          <!-- Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РєРѕРјРјРµРЅС‚Р°СЂРёРё -->
           <div :class="FORM_GROUP_CLASSES">
-            <label :class="FORM_LABEL_CLASSES">Дополнительная информация</label>
+            <label :class="FORM_LABEL_CLASSES">Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ</label>
             <textarea
               v-model="reportForm.comment"
               :class="TEXTAREA_CLASSES"
               rows="4"
-              placeholder="Опишите проблему подробнее (необязательно)"
+              placeholder="РћРїРёС€РёС‚Рµ РїСЂРѕР±Р»РµРјСѓ РїРѕРґСЂРѕР±РЅРµРµ (РЅРµРѕР±СЏР·Р°С‚РµР»СЊРЅРѕ)"
             ></textarea>
           </div>
 
-          <!-- Кнопки -->
+          <!-- РљРЅРѕРїРєРё -->
           <div :class="FORM_ACTIONS_CLASSES">
             <button
               type="button"
               @click="$emit('close-report')"
               :class="CANCEL_BUTTON_CLASSES"
             >
-              Отмена
+              РћС‚РјРµРЅР°
             </button>
             <button
               type="submit"
               :disabled="!reportForm.reason || reportSubmitting"
               :class="SUBMIT_BUTTON_CLASSES"
             >
-              {{ reportSubmitting ? 'Отправка...' : 'Отправить жалобу' }}
+              {{ reportSubmitting ? 'РћС‚РїСЂР°РІРєР°...' : 'РћС‚РїСЂР°РІРёС‚СЊ Р¶Р°Р»РѕР±Сѓ' }}
             </button>
           </div>
         </form>
@@ -148,7 +148,7 @@
 import { logger } from '@/src/shared/lib/logger'
 import { ref, computed } from 'vue'
 
-// 🎯 Стили согласно дизайн-системе
+// рџЋЇ РЎС‚РёР»Рё СЃРѕРіР»Р°СЃРЅРѕ РґРёР·Р°Р№РЅ-СЃРёСЃС‚РµРјРµ
 const MODAL_OVERLAY_CLASSES = 'fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4'
 const MODAL_CONTAINER_CLASSES = 'bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-hidden'
 const MODAL_HEADER_CLASSES = 'flex items-center justify-between p-6 border-b border-gray-200'
@@ -193,7 +193,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close-share', 'close-report', 'report-sent'])
 
-// Состояние
+// РЎРѕСЃС‚РѕСЏРЅРёРµ
 const urlInput = ref(null)
 const urlCopied = ref(false)
 const reportSubmitting = ref(false)
@@ -202,21 +202,21 @@ const reportForm = ref({
   comment: ''
 })
 
-// Причины для жалоб
+// РџСЂРёС‡РёРЅС‹ РґР»СЏ Р¶Р°Р»РѕР±
 const reportReasons = [
-  { value: 'fake_profile', label: 'Поддельный профиль' },
-  { value: 'inappropriate_content', label: 'Неподходящий контент' },
-  { value: 'spam', label: 'Спам' },
-  { value: 'fraud', label: 'Мошенничество' },
-  { value: 'other', label: 'Другое' }
+  { value: 'fake_profile', label: 'РџРѕРґРґРµР»СЊРЅС‹Р№ РїСЂРѕС„РёР»СЊ' },
+  { value: 'inappropriate_content', label: 'РќРµРїРѕРґС…РѕРґСЏС‰РёР№ РєРѕРЅС‚РµРЅС‚' },
+  { value: 'spam', label: 'РЎРїР°Рј' },
+  { value: 'fraud', label: 'РњРѕС€РµРЅРЅРёС‡РµСЃС‚РІРѕ' },
+  { value: 'other', label: 'Р”СЂСѓРіРѕРµ' }
 ]
 
-// Вычисляемые свойства
+// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const masterUrl = computed(() => {
   return `${window.location.origin}/masters/${props.master.id}`
 })
 
-// Методы
+// РњРµС‚РѕРґС‹
 const getSocialButtonClasses = (platform) => {
   const platformStyles = {
     vk: 'bg-blue-600 hover:bg-blue-700 text-white',
@@ -243,7 +243,7 @@ const copyUrl = async () => {
       urlCopied.value = false
     }, 2000)
   } catch (error) {
-    // Fallback для старых браузеров
+    // Fallback РґР»СЏ СЃС‚Р°СЂС‹С… Р±СЂР°СѓР·РµСЂРѕРІ
     if (urlInput.value) {
       urlInput.value.select()
       document.execCommand('copy')
@@ -257,18 +257,18 @@ const copyUrl = async () => {
 
 const shareToVK = () => {
   const url = encodeURIComponent(masterUrl.value)
-  const title = encodeURIComponent(`Мастер массажа ${props.master.name}`)
+  const title = encodeURIComponent(`РњР°СЃС‚РµСЂ РјР°СЃСЃР°Р¶Р° ${props.master.name}`)
   window.open(`https://vk.com/share.php?url=${url}&title=${title}`, '_blank')
 }
 
 const shareToTelegram = () => {
   const url = encodeURIComponent(masterUrl.value)
-  const text = encodeURIComponent(`Мастер массажа ${props.master.name}`)
+  const text = encodeURIComponent(`РњР°СЃС‚РµСЂ РјР°СЃСЃР°Р¶Р° ${props.master.name}`)
   window.open(`https://t.me/share/url?url=${url}&text=${text}`, '_blank')
 }
 
 const shareToWhatsApp = () => {
-  const text = encodeURIComponent(`Мастер массажа ${props.master.name} ${masterUrl.value}`)
+  const text = encodeURIComponent(`РњР°СЃС‚РµСЂ РјР°СЃСЃР°Р¶Р° ${props.master.name} ${masterUrl.value}`)
   window.open(`https://wa.me/?text=${text}`, '_blank')
 }
 
@@ -278,23 +278,24 @@ const submitReport = async () => {
   reportSubmitting.value = true
   
   try {
-    // Здесь бы был API вызов
+    // Р—РґРµСЃСЊ Р±С‹ Р±С‹Р» API РІС‹Р·РѕРІ
     await new Promise(resolve => setTimeout(resolve, 1000))
     
-    // Жалоба отправлена
+    // Р–Р°Р»РѕР±Р° РѕС‚РїСЂР°РІР»РµРЅР°
     
     emit('report-sent')
     emit('close-report')
     
-    // Сбрасываем форму
+    // РЎР±СЂР°СЃС‹РІР°РµРј С„РѕСЂРјСѓ
     reportForm.value = {
       reason: '',
       comment: ''
     }
   } catch (error) {
-    logger.error('Ошибка при отправке жалобы:', error)
+    logger.error('РћС€РёР±РєР° РїСЂРё РѕС‚РїСЂР°РІРєРµ Р¶Р°Р»РѕР±С‹:', error)
   } finally {
     reportSubmitting.value = false
   }
 }
 </script>
+

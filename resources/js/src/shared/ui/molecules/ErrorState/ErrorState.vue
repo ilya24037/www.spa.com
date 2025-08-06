@@ -1,4 +1,4 @@
-<!-- ErrorState.vue - Универсальный компонент отображения ошибок -->
+<!-- ErrorState.vue - РЈРЅРёРІРµСЂСЃР°Р»СЊРЅС‹Р№ РєРѕРјРїРѕРЅРµРЅС‚ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ РѕС€РёР±РѕРє -->
 <template>
   <div
     v-if="!state.isDismissed && error"
@@ -10,67 +10,67 @@
     ]"
     role="alert"
     aria-live="assertive"
-    :aria-label="`Ошибка: ${errorConfig.title}`"
+    :aria-label="`РћС€РёР±РєР°: ${errorConfig.title}`"
     data-testid="error-state"
   >
-    <!-- Иконка ошибки -->
+    <!-- РРєРѕРЅРєР° РѕС€РёР±РєРё -->
     <div v-if="showIcon" class="error-state__icon-wrapper">
       <div :class="['error-state__icon', errorConfig.iconColor]">
         <component :is="getIcon()" class="w-full h-full" />
       </div>
     </div>
 
-    <!-- Контент ошибки -->
+    <!-- РљРѕРЅС‚РµРЅС‚ РѕС€РёР±РєРё -->
     <div class="error-state__content">
-      <!-- Заголовок -->
+      <!-- Р—Р°РіРѕР»РѕРІРѕРє -->
       <h3 class="error-state__title">
         {{ customTitle || errorConfig.title }}
       </h3>
 
-      <!-- Сообщение -->
+      <!-- РЎРѕРѕР±С‰РµРЅРёРµ -->
       <p class="error-state__message">
         {{ customMessage || error.message || errorConfig.defaultMessage }}
       </p>
 
-      <!-- Детали ошибки -->
+      <!-- Р”РµС‚Р°Р»Рё РѕС€РёР±РєРё -->
       <div v-if="showDetails && (error.details || error.code)" class="error-state__details">
         <button
           v-if="!state.showFullDetails"
           @click="state.showFullDetails = true"
           class="error-state__details-toggle"
-          aria-label="Показать детали ошибки"
+          aria-label="РџРѕРєР°Р·Р°С‚СЊ РґРµС‚Р°Р»Рё РѕС€РёР±РєРё"
         >
           <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
-          Подробнее
+          РџРѕРґСЂРѕР±РЅРµРµ
         </button>
 
         <div v-else class="error-state__details-content">
           <button
             @click="state.showFullDetails = false"
             class="error-state__details-toggle mb-2"
-            aria-label="Скрыть детали ошибки"
+            aria-label="РЎРєСЂС‹С‚СЊ РґРµС‚Р°Р»Рё РѕС€РёР±РєРё"
           >
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
             </svg>
-            Скрыть детали
+            РЎРєСЂС‹С‚СЊ РґРµС‚Р°Р»Рё
           </button>
           
           <div class="error-state__details-text">
             <p v-if="error.details" class="mb-2">{{ error.details }}</p>
             <div v-if="error.code" class="text-xs">
-              Код ошибки: <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">{{ error.code }}</code>
+              РљРѕРґ РѕС€РёР±РєРё: <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">{{ error.code }}</code>
             </div>
             <div v-if="error.requestId" class="text-xs mt-1">
-              ID запроса: <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">{{ error.requestId }}</code>
+              ID Р·Р°РїСЂРѕСЃР°: <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">{{ error.requestId }}</code>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Действия -->
+      <!-- Р”РµР№СЃС‚РІРёСЏ -->
       <div v-if="showActions && effectiveActions.length > 0" class="error-state__actions">
         <button
           v-for="(action, index) in effectiveActions"
@@ -95,7 +95,7 @@
         </button>
       </div>
 
-      <!-- Ссылка на помощь -->
+      <!-- РЎСЃС‹Р»РєР° РЅР° РїРѕРјРѕС‰СЊ -->
       <div v-if="error.helpUrl" class="error-state__help">
         <a 
           :href="error.helpUrl" 
@@ -103,17 +103,17 @@
           rel="noopener noreferrer"
           class="error-state__help-link"
         >
-          Нужна помощь?
+          РќСѓР¶РЅР° РїРѕРјРѕС‰СЊ?
         </a>
       </div>
     </div>
 
-    <!-- Кнопка закрытия -->
+    <!-- РљРЅРѕРїРєР° Р·Р°РєСЂС‹С‚РёСЏ -->
     <button
       v-if="dismissible"
       @click="handleDismiss"
       class="error-state__dismiss"
-      aria-label="Закрыть сообщение об ошибке"
+      aria-label="Р—Р°РєСЂС‹С‚СЊ СЃРѕРѕР±С‰РµРЅРёРµ РѕР± РѕС€РёР±РєРµ"
     >
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -148,7 +148,7 @@ const props = withDefaults(defineProps<ErrorStateProps>(), {
 // Emits
 const emit = defineEmits<ErrorStateEmits>()
 
-// Состояние компонента
+// РЎРѕСЃС‚РѕСЏРЅРёРµ РєРѕРјРїРѕРЅРµРЅС‚Р°
 const state = ref<ErrorStateState>({
   isRetrying: false,
   isDismissed: false,
@@ -156,7 +156,7 @@ const state = ref<ErrorStateState>({
   reportSent: false
 })
 
-// Вычисляемые свойства
+// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const errorConfig = computed<ErrorTypeConfig>(() => {
   if (!props.error) {
     return DEFAULT_ERROR_CONFIGS.generic
@@ -171,9 +171,9 @@ const effectiveActions = computed<ErrorAction[]>(() => {
 
   const defaultActions: ErrorAction[] = []
   
-  // Добавляем кнопку повтора если разрешено
+  // Р”РѕР±Р°РІР»СЏРµРј РєРЅРѕРїРєСѓ РїРѕРІС‚РѕСЂР° РµСЃР»Рё СЂР°Р·СЂРµС€РµРЅРѕ
   if (props.retryable && errorConfig.value.defaultActions) {
-    const retryAction = errorConfig.value.defaultActions.find(a => a.label === 'Повторить')
+    const retryAction = errorConfig.value.defaultActions.find(a => a.label === 'РџРѕРІС‚РѕСЂРёС‚СЊ')
     if (retryAction) {
       defaultActions.push({
         ...retryAction,
@@ -182,10 +182,10 @@ const effectiveActions = computed<ErrorAction[]>(() => {
     }
   }
 
-  // Добавляем кнопку отчета если ошибка репортабельная
+  // Р”РѕР±Р°РІР»СЏРµРј РєРЅРѕРїРєСѓ РѕС‚С‡РµС‚Р° РµСЃР»Рё РѕС€РёР±РєР° СЂРµРїРѕСЂС‚Р°Р±РµР»СЊРЅР°СЏ
   if (errorConfig.value.reportable && !state.reportSent) {
     defaultActions.push({
-      label: 'Сообщить об ошибке',
+      label: 'РЎРѕРѕР±С‰РёС‚СЊ РѕР± РѕС€РёР±РєРµ',
       variant: 'secondary',
       action: handleReport
     })
@@ -194,10 +194,10 @@ const effectiveActions = computed<ErrorAction[]>(() => {
   return defaultActions
 })
 
-// Методы
+// РњРµС‚РѕРґС‹
 const getIcon = () => {
-  // В реальном приложении здесь был бы импорт иконок
-  // Для примера возвращаем SVG компонент
+  // Р’ СЂРµР°Р»СЊРЅРѕРј РїСЂРёР»РѕР¶РµРЅРёРё Р·РґРµСЃСЊ Р±С‹Р» Р±С‹ РёРјРїРѕСЂС‚ РёРєРѕРЅРѕРє
+  // Р”Р»СЏ РїСЂРёРјРµСЂР° РІРѕР·РІСЂР°С‰Р°РµРј SVG РєРѕРјРїРѕРЅРµРЅС‚
   return {
     template: `
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -213,7 +213,7 @@ const handleRetry = async (): Promise<void> => {
     state.isRetrying = true
     emit('retry')
     
-    // Симуляция задержки для UX
+    // РЎРёРјСѓР»СЏС†РёСЏ Р·Р°РґРµСЂР¶РєРё РґР»СЏ UX
     await new Promise(resolve => setTimeout(resolve, 1000))
   } finally {
     state.isRetrying = false
@@ -239,7 +239,7 @@ const handleReport = async (): Promise<void> => {
     emit('report', props.error)
     state.reportSent = true
     
-    // В реальном приложении здесь был бы API вызов
+    // Р’ СЂРµР°Р»СЊРЅРѕРј РїСЂРёР»РѕР¶РµРЅРёРё Р·РґРµСЃСЊ Р±С‹Р» Р±С‹ API РІС‹Р·РѕРІ
     // Error reported
   } catch (err) {
     logger.error('Failed to report error:', err)
@@ -248,12 +248,12 @@ const handleReport = async (): Promise<void> => {
 </script>
 
 <style scoped>
-/* Базовые стили */
+/* Р‘Р°Р·РѕРІС‹Рµ СЃС‚РёР»Рё */
 .error-state {
   @apply relative flex gap-4 p-4 rounded-lg border;
 }
 
-/* Варианты отображения */
+/* Р’Р°СЂРёР°РЅС‚С‹ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ */
 .error-state--inline {
   @apply bg-red-50 border-red-200 text-red-800;
 }
@@ -270,7 +270,7 @@ const handleReport = async (): Promise<void> => {
   @apply bg-gray-50 border-0 min-h-[400px] items-center justify-center text-center;
 }
 
-/* Размеры */
+/* Р Р°Р·РјРµСЂС‹ */
 .error-state--small {
   @apply p-3 text-sm;
 }
@@ -287,7 +287,7 @@ const handleReport = async (): Promise<void> => {
   @apply p-8 min-h-screen;
 }
 
-/* Иконка */
+/* РРєРѕРЅРєР° */
 .error-state__icon-wrapper {
   @apply flex-shrink-0;
 }
@@ -304,7 +304,7 @@ const handleReport = async (): Promise<void> => {
   @apply w-12 h-12;
 }
 
-/* Контент */
+/* РљРѕРЅС‚РµРЅС‚ */
 .error-state__content {
   @apply flex-1 min-w-0;
 }
@@ -329,7 +329,7 @@ const handleReport = async (): Promise<void> => {
   @apply text-xs;
 }
 
-/* Детали */
+/* Р”РµС‚Р°Р»Рё */
 .error-state__details {
   @apply mt-3;
 }
@@ -346,7 +346,7 @@ const handleReport = async (): Promise<void> => {
   @apply text-sm text-gray-600;
 }
 
-/* Действия */
+/* Р”РµР№СЃС‚РІРёСЏ */
 .error-state__actions {
   @apply flex gap-2 mt-4;
 }
@@ -376,7 +376,7 @@ const handleReport = async (): Promise<void> => {
   @apply inline-flex;
 }
 
-/* Помощь */
+/* РџРѕРјРѕС‰СЊ */
 .error-state__help {
   @apply mt-3 pt-3 border-t border-gray-200;
 }
@@ -385,12 +385,12 @@ const handleReport = async (): Promise<void> => {
   @apply text-sm text-blue-600 hover:text-blue-700 underline;
 }
 
-/* Кнопка закрытия */
+/* РљРЅРѕРїРєР° Р·Р°РєСЂС‹С‚РёСЏ */
 .error-state__dismiss {
   @apply absolute top-2 right-2 p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all;
 }
 
-/* Анимации */
+/* РђРЅРёРјР°С†РёРё */
 @keyframes slideIn {
   from {
     opacity: 0;
@@ -406,3 +406,4 @@ const handleReport = async (): Promise<void> => {
   animation: slideIn 0.3s ease-out;
 }
 </style>
+

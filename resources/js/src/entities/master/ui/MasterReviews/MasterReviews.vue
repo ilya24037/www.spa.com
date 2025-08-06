@@ -2,18 +2,18 @@
 <template>
   <div :class="CONTAINER_CLASSES">
     <div :class="HEADER_CLASSES">
-      <h3 :class="TITLE_CLASSES">Отзывы ({{ totalReviews }})</h3>
+      <h3 :class="TITLE_CLASSES">РћС‚Р·С‹РІС‹ ({{ totalReviews }})</h3>
       <button
         v-if="hasMoreReviews"
         @click="loadMoreReviews"
         :class="LOAD_MORE_BUTTON_CLASSES"
         :disabled="loading"
       >
-        {{ loading ? 'Загрузка...' : 'Показать еще' }}
+        {{ loading ? 'Р—Р°РіСЂСѓР·РєР°...' : 'РџРѕРєР°Р·Р°С‚СЊ РµС‰Рµ' }}
       </button>
     </div>
 
-    <!-- Общий рейтинг -->
+    <!-- РћР±С‰РёР№ СЂРµР№С‚РёРЅРі -->
     <div :class="RATING_SUMMARY_CLASSES">
       <div :class="RATING_SCORE_CLASSES">
         <span :class="SCORE_NUMBER_CLASSES">{{ overallRating }}</span>
@@ -28,11 +28,11 @@
             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
           </svg>
         </div>
-        <span :class="REVIEWS_COUNT_CLASSES">на основе {{ totalReviews }} отзывов</span>
+        <span :class="REVIEWS_COUNT_CLASSES">РЅР° РѕСЃРЅРѕРІРµ {{ totalReviews }} РѕС‚Р·С‹РІРѕРІ</span>
       </div>
     </div>
 
-    <!-- Список отзывов -->
+    <!-- РЎРїРёСЃРѕРє РѕС‚Р·С‹РІРѕРІ -->
     <div :class="REVIEWS_LIST_CLASSES">
       <div
         v-for="review in displayReviews"
@@ -41,7 +41,7 @@
       >
         <div :class="REVIEW_HEADER_CLASSES">
           <div :class="REVIEWER_INFO_CLASSES">
-            <span :class="REVIEWER_NAME_CLASSES">{{ review.author_name || 'Аноним' }}</span>
+            <span :class="REVIEWER_NAME_CLASSES">{{ review.author_name || 'РђРЅРѕРЅРёРј' }}</span>
             <span :class="REVIEW_DATE_CLASSES">{{ formatDate(review.created_at) }}</span>
           </div>
           
@@ -60,10 +60,10 @@
 
         <p :class="REVIEW_TEXT_CLASSES">{{ review.comment }}</p>
 
-        <!-- Ответ мастера -->
+        <!-- РћС‚РІРµС‚ РјР°СЃС‚РµСЂР° -->
         <div v-if="review.response" :class="RESPONSE_CLASSES">
           <div :class="RESPONSE_HEADER_CLASSES">
-            <span :class="RESPONSE_AUTHOR_CLASSES">Ответ мастера</span>
+            <span :class="RESPONSE_AUTHOR_CLASSES">РћС‚РІРµС‚ РјР°СЃС‚РµСЂР°</span>
             <span :class="RESPONSE_DATE_CLASSES">{{ formatDate(review.response_date) }}</span>
           </div>
           <p :class="RESPONSE_TEXT_CLASSES">{{ review.response }}</p>
@@ -71,13 +71,13 @@
       </div>
     </div>
 
-    <!-- Заглушка если нет отзывов -->
+    <!-- Р—Р°РіР»СѓС€РєР° РµСЃР»Рё РЅРµС‚ РѕС‚Р·С‹РІРѕРІ -->
     <div v-if="displayReviews.length === 0" :class="EMPTY_STATE_CLASSES">
       <svg :class="EMPTY_ICON_CLASSES" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
       </svg>
-      <p :class="EMPTY_TEXT_CLASSES">Пока нет отзывов</p>
-      <p :class="EMPTY_SUBTITLE_CLASSES">Станьте первым, кто оставит отзыв о работе мастера</p>
+      <p :class="EMPTY_TEXT_CLASSES">РџРѕРєР° РЅРµС‚ РѕС‚Р·С‹РІРѕРІ</p>
+      <p :class="EMPTY_SUBTITLE_CLASSES">РЎС‚Р°РЅСЊС‚Рµ РїРµСЂРІС‹Рј, РєС‚Рѕ РѕСЃС‚Р°РІРёС‚ РѕС‚Р·С‹РІ Рѕ СЂР°Р±РѕС‚Рµ РјР°СЃС‚РµСЂР°</p>
     </div>
   </div>
 </template>
@@ -89,7 +89,7 @@ import 'dayjs/locale/ru'
 
 dayjs.locale('ru')
 
-// 🎯 Стили согласно дизайн-системе
+// рџЋЇ РЎС‚РёР»Рё СЃРѕРіР»Р°СЃРЅРѕ РґРёР·Р°Р№РЅ-СЃРёСЃС‚РµРјРµ
 const CONTAINER_CLASSES = 'space-y-6'
 const HEADER_CLASSES = 'flex items-center justify-between'
 const TITLE_CLASSES = 'text-lg font-semibold text-gray-900'
@@ -134,11 +134,11 @@ const props = defineProps({
 
 const emit = defineEmits(['load-more'])
 
-// Состояние
+// РЎРѕСЃС‚РѕСЏРЅРёРµ
 const loading = ref(false)
 const reviews = ref([...props.initialReviews])
 
-// Вычисляемые свойства
+// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const displayReviews = computed(() => reviews.value)
 
 const totalReviews = computed(() => props.master.reviews_count || 0)
@@ -151,7 +151,7 @@ const hasMoreReviews = computed(() => {
   return reviews.value.length < totalReviews.value
 })
 
-// Методы
+// РњРµС‚РѕРґС‹
 const getStarClasses = (starNumber) => {
   const rating = props.master.rating || 0
   const isActive = starNumber <= Math.round(rating)
@@ -185,3 +185,4 @@ const loadMoreReviews = async () => {
   }
 }
 </script>
+

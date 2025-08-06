@@ -5,7 +5,7 @@
  * const { cardState, toggleLoading, toggleDisabled } = useCard()
  */
 
-import { computed } from 'vue'
+import { ref, computed, readonly } from 'vue'
 import type { CardVariant, CardSize, CardOptions } from './Card.types'
 
 export interface CardState {
@@ -29,60 +29,60 @@ export function useCard(initialOptions?: CardOptions) {
    * Переключить состояние загрузки
    */
   const toggleLoading = (loading?: boolean) => {
-    state.loading = loading ?? !state.loading
+    state.value.loading = loading ?? !state.value.loading
   }
 
   /**
    * Переключить заблокированное состояние
    */
   const toggleDisabled = (disabled?: boolean) => {
-    state.disabled = disabled ?? !state.disabled
+    state.value.disabled = disabled ?? !state.value.disabled
   }
 
   /**
    * Установить вариант стиля
    */
   const setVariant = (variant: CardVariant) => {
-    state.variant = variant
+    state.value.variant = variant
   }
 
   /**
    * Установить размер
    */
   const setSize = (size: CardSize) => {
-    state.size = size
+    state.value.size = size
   }
 
   /**
    * Переключить интерактивность
    */
   const toggleHoverable = (hoverable?: boolean) => {
-    state.hoverable = hoverable ?? !state.hoverable
+    state.value.hoverable = hoverable ?? !state.value.hoverable
   }
 
   /**
    * Проверка на интерактивность
    */
   const isInteractive = computed(() => 
-    state.hoverable && !state.disabled && !state.loading
+    state.value.hoverable && !state.value.disabled && !state.value.loading
   )
 
   /**
    * Проверка на доступность
    */
   const isClickable = computed(() => 
-    !state.disabled && !state.loading
+    !state.value.disabled && !state.value.loading
   )
 
   /**
    * Сброс состояния к начальному
    */
   const reset = () => {
-    state.loading = false
-    state.disabled = false
-    state.variant = initialOptions?.variant ?? 'default'
-    state.size = initialOptions?.size ?? 'medium'
-    state.hoverable = initialOptions?.hoverable ?? false
+    state.value.loading = false
+    state.value.disabled = false
+    state.value.variant = initialOptions?.variant ?? 'default'
+    state.value.size = initialOptions?.size ?? 'medium'
+    state.value.hoverable = initialOptions?.hoverable ?? false
   }
 
   /**
@@ -140,10 +140,10 @@ export function useCardCollection<T = any>(items: T[] = []) {
    * Выбрать/снять выбор карточки
    */
   const toggleSelection = (id: string | number) => {
-    if (selectedIds.value.has(id)) {
-      selectedIds.value.delete(id)
+    if (selectedIds.has(id)) {
+      selectedIds.delete(id)
     } else {
-      selectedIds.value.add(id)
+      selectedIds.add(id)
     }
   }
 
@@ -152,7 +152,7 @@ export function useCardCollection<T = any>(items: T[] = []) {
    */
   const selectAll = (getIdFn: (item: T) => string | number) => {
     items.forEach(item => {
-      selectedIds.value.add(getIdFn(item))
+      selectedIds.add(getIdFn(item))
     })
   }
 
@@ -160,14 +160,14 @@ export function useCardCollection<T = any>(items: T[] = []) {
    * Снять выбор со всех карточек
    */
   const clearSelection = () => {
-    selectedIds.value.clear()
+    selectedIds.clear()
   }
 
   /**
    * Проверить выбрана ли карточка
    */
   const isSelected = (id: string | number) => {
-    return selectedIds.value.has(id)
+    return selectedIds.has(id)
   }
 
   /**
@@ -175,9 +175,9 @@ export function useCardCollection<T = any>(items: T[] = []) {
    */
   const setLoading = (id: string | number, loading: boolean) => {
     if (loading) {
-      loadingIds.value.add(id)
+      loadingIds.add(id)
     } else {
-      loadingIds.value.delete(id)
+      loadingIds.delete(id)
     }
   }
 
@@ -185,7 +185,7 @@ export function useCardCollection<T = any>(items: T[] = []) {
    * Проверить загружается ли карточка
    */
   const isLoading = (id: string | number) => {
-    return loadingIds.value.has(id)
+    return loadingIds.has(id)
   }
 
   /**
@@ -194,7 +194,7 @@ export function useCardCollection<T = any>(items: T[] = []) {
   const executeForSelected = async <R>(
     action: (id: string | number) => Promise<R>
   ): Promise<R[]> => {
-    const selectedArray = Array.from(selectedIds.value)
+    const selectedArray = Array.from(selectedIds)
     
     return Promise.all(
       selectedArray.map(id => action(id))
@@ -203,12 +203,12 @@ export function useCardCollection<T = any>(items: T[] = []) {
 
   return {
     // Состояние
-    selectedIds: readonly(selectedIds),
-    loadingIds: readonly(loadingIds),
+    selectedIds: readonly(ref(selectedIds)),
+    loadingIds: readonly(ref(loadingIds)),
     
     // Вычисляемые свойства
-    selectedCount: computed(() => selectedIds.value.size),
-    hasSelected: computed(() => selectedIds.value.size > 0),
+    selectedCount: computed(() => selectedIds.size),
+    hasSelected: computed(() => selectedIds.size > 0),
     
     // Методы выбора
     toggleSelection,

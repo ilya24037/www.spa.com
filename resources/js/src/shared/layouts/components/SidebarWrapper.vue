@@ -1,5 +1,5 @@
 <template>
-  <!-- Десктоп версия -->
+  <!-- Р”РµСЃРєС‚РѕРї РІРµСЂСЃРёСЏ -->
   <div 
     v-if="alwaysVisibleDesktop"
     :class="[
@@ -15,24 +15,24 @@
         contentClass
       ]"
     >
-      <!-- Заголовок десктоп -->
+      <!-- Р—Р°РіРѕР»РѕРІРѕРє РґРµСЃРєС‚РѕРї -->
       <div v-if="showDesktopHeader && ($slots.header || title)" :class="HEADER_CLASSES">
         <slot name="header">
           <h2 v-if="title" :class="TITLE_CLASSES">{{ title }}</h2>
         </slot>
       </div>
       
-      <!-- Контент -->
+      <!-- РљРѕРЅС‚РµРЅС‚ -->
       <slot />
       
-      <!-- Футер десктоп -->
+      <!-- Р¤СѓС‚РµСЂ РґРµСЃРєС‚РѕРї -->
       <div v-if="$slots.footer" :class="FOOTER_CLASSES">
         <slot name="footer" />
       </div>
     </div>
   </div>
 
-  <!-- Обычная версия (скрываемая) -->
+  <!-- РћР±С‹С‡РЅР°СЏ РІРµСЂСЃРёСЏ (СЃРєСЂС‹РІР°РµРјР°СЏ) -->
   <div 
     v-else
     :class="[
@@ -48,34 +48,34 @@
         contentClass
       ]"
     >
-      <!-- Заголовок десктоп -->
+      <!-- Р—Р°РіРѕР»РѕРІРѕРє РґРµСЃРєС‚РѕРї -->
       <div v-if="showDesktopHeader && ($slots.header || title)" :class="HEADER_CLASSES">
         <slot name="header">
           <h2 v-if="title" :class="TITLE_CLASSES">{{ title }}</h2>
         </slot>
       </div>
       
-      <!-- Контент -->
+      <!-- РљРѕРЅС‚РµРЅС‚ -->
       <slot />
       
-      <!-- Футер десктоп -->
+      <!-- Р¤СѓС‚РµСЂ РґРµСЃРєС‚РѕРї -->
       <div v-if="$slots.footer" :class="FOOTER_CLASSES">
         <slot name="footer" />
       </div>
     </div>
   </div>
 
-  <!-- Мобильная версия -->
+  <!-- РњРѕР±РёР»СЊРЅР°СЏ РІРµСЂСЃРёСЏ -->
   <Teleport to="body">
     <div 
       v-if="modelValue"
       :class="MOBILE_OVERLAY_CLASSES"
       @click="$emit('update:modelValue', false)"
     >
-      <!-- Затемненный фон -->
+      <!-- Р—Р°С‚РµРјРЅРµРЅРЅС‹Р№ С„РѕРЅ -->
       <div :class="MOBILE_BACKDROP_CLASSES" />
       
-      <!-- Панель -->
+      <!-- РџР°РЅРµР»СЊ -->
       <div 
         :class="[
           mobileMode === 'bottom-sheet' ? MOBILE_BOTTOM_SHEET_CLASSES : mobilePanelClasses,
@@ -83,7 +83,7 @@
         ]"
         @click.stop
       >
-        <!-- Заголовок мобильный -->
+        <!-- Р—Р°РіРѕР»РѕРІРѕРє РјРѕР±РёР»СЊРЅС‹Р№ -->
         <div v-if="$slots.header || title" :class="mobileMode === 'bottom-sheet' ? MOBILE_BOTTOM_HEADER_CLASSES : MOBILE_HEADER_CLASSES">
           <div :class="MOBILE_HEADER_CONTENT_CLASSES">
             <slot name="header">
@@ -100,12 +100,12 @@
           </div>
         </div>
         
-        <!-- Контент мобильный -->
+        <!-- РљРѕРЅС‚РµРЅС‚ РјРѕР±РёР»СЊРЅС‹Р№ -->
         <div :class="[contentClass, mobileMode === 'bottom-sheet' ? 'max-h-[70vh] overflow-y-auto' : '']">
           <slot />
         </div>
         
-        <!-- Футер мобильный -->
+        <!-- Р¤СѓС‚РµСЂ РјРѕР±РёР»СЊРЅС‹Р№ -->
         <div v-if="$slots.footer" :class="MOBILE_FOOTER_CLASSES">
           <slot name="footer" />
         </div>
@@ -117,21 +117,21 @@
 <script setup>
 import { computed } from 'vue'
 
-// 🎯 ВСЕ СТИЛИ В КОНСТАНТАХ - КАК В CONTENTCARD
-// Размеры и позиционирование
-const DESKTOP_WIDTH = 'w-64'                    // 256px - ширина боковой панели по умолчанию
-const MOBILE_WIDTH = 'w-80'                     // 320px - ширина мобильной панели
+// рџЋЇ Р’РЎР• РЎРўРР›Р Р’ РљРћРќРЎРўРђРќРўРђРҐ - РљРђРљ Р’ CONTENTCARD
+// Р Р°Р·РјРµСЂС‹ Рё РїРѕР·РёС†РёРѕРЅРёСЂРѕРІР°РЅРёРµ
+const DESKTOP_WIDTH = 'w-64'                    // 256px - С€РёСЂРёРЅР° Р±РѕРєРѕРІРѕР№ РїР°РЅРµР»Рё РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
+const MOBILE_WIDTH = 'w-80'                     // 320px - С€РёСЂРёРЅР° РјРѕР±РёР»СЊРЅРѕР№ РїР°РЅРµР»Рё
 
-// Базовые стили компонента
+// Р‘Р°Р·РѕРІС‹Рµ СЃС‚РёР»Рё РєРѕРјРїРѕРЅРµРЅС‚Р°
 const BASE_CLASSES = 'bg-white rounded-lg shadow-sm'
 const DESKTOP_CONTAINER_CLASSES = 'hidden lg:block flex-shrink-0'
 
-// Стили заголовка и футера
+// РЎС‚РёР»Рё Р·Р°РіРѕР»РѕРІРєР° Рё С„СѓС‚РµСЂР°
 const HEADER_CLASSES = 'px-6 py-4 border-b'
 const FOOTER_CLASSES = 'border-t p-6'
 const TITLE_CLASSES = 'font-semibold text-lg'
 
-// Мобильные стили - панель слева/справа
+// РњРѕР±РёР»СЊРЅС‹Рµ СЃС‚РёР»Рё - РїР°РЅРµР»СЊ СЃР»РµРІР°/СЃРїСЂР°РІР°
 const MOBILE_OVERLAY_CLASSES = 'lg:hidden fixed inset-0 z-50 flex'
 const MOBILE_BACKDROP_CLASSES = 'fixed inset-0 bg-black bg-opacity-50'
 const MOBILE_PANEL_CLASSES = 'relative bg-white h-full shadow-xl overflow-y-auto'
@@ -140,11 +140,11 @@ const MOBILE_HEADER_CONTENT_CLASSES = 'flex items-center justify-between'
 const MOBILE_FOOTER_CLASSES = 'border-t p-6'
 const MOBILE_CLOSE_BUTTON_CLASSES = 'p-2 hover:bg-gray-100 rounded-lg'
 
-// Мобильные стили - bottom sheet
+// РњРѕР±РёР»СЊРЅС‹Рµ СЃС‚РёР»Рё - bottom sheet
 const MOBILE_BOTTOM_SHEET_CLASSES = 'fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-xl'
 const MOBILE_BOTTOM_HEADER_CLASSES = 'px-6 py-4 border-b lg:hidden relative'
 
-// Упрощенные пропсы
+// РЈРїСЂРѕС‰РµРЅРЅС‹Рµ РїСЂРѕРїСЃС‹
 const props = defineProps({
   modelValue: {
     type: Boolean,
@@ -168,7 +168,7 @@ const props = defineProps({
     default: false
   },
   
-  // НОВЫЕ ПРОПСЫ
+  // РќРћР’Р«Р• РџР РћРџРЎР«
   position: {
     type: String,
     default: 'left',
@@ -187,7 +187,7 @@ const props = defineProps({
   
   widthClass: {
     type: String,
-    default: null // если null, используем DESKTOP_WIDTH
+    default: null // РµСЃР»Рё null, РёСЃРїРѕР»СЊР·СѓРµРј DESKTOP_WIDTH
   },
   
   mobileMode: {
@@ -202,17 +202,17 @@ const props = defineProps({
   }
 })
 
-// События
+// РЎРѕР±С‹С‚РёСЏ
 defineEmits(['update:modelValue'])
 
-// Вычисляемые свойства
+// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const desktopPositionClasses = computed(() => {
-  // ВАЖНО: НЕ добавляем order классы по умолчанию!
-  // Это позволит существующим использованиям работать как раньше
+  // Р’РђР–РќРћ: РќР• РґРѕР±Р°РІР»СЏРµРј order РєР»Р°СЃСЃС‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ!
+  // Р­С‚Рѕ РїРѕР·РІРѕР»РёС‚ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёРј РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏРј СЂР°Р±РѕС‚Р°С‚СЊ РєР°Рє СЂР°РЅСЊС€Рµ
   if (props.position === 'right') {
-    return '' // Не добавляем order, позиционирование через родительский контейнер
+    return '' // РќРµ РґРѕР±Р°РІР»СЏРµРј order, РїРѕР·РёС†РёРѕРЅРёСЂРѕРІР°РЅРёРµ С‡РµСЂРµР· СЂРѕРґРёС‚РµР»СЊСЃРєРёР№ РєРѕРЅС‚РµР№РЅРµСЂ
   }
-  return '' // По умолчанию тоже без order
+  return '' // РџРѕ СѓРјРѕР»С‡Р°РЅРёСЋ С‚РѕР¶Рµ Р±РµР· order
 })
 
 const stickyClass = computed(() => {
@@ -229,7 +229,7 @@ const mobileWidthClass = computed(() => {
   return props.widthClass || MOBILE_WIDTH
 })
 
-// Вычисляемое свойство для мобильной панели с учетом позиции
+// Р’С‹С‡РёСЃР»СЏРµРјРѕРµ СЃРІРѕР№СЃС‚РІРѕ РґР»СЏ РјРѕР±РёР»СЊРЅРѕР№ РїР°РЅРµР»Рё СЃ СѓС‡РµС‚РѕРј РїРѕР·РёС†РёРё
 const mobilePanelClasses = computed(() => {
   if (props.position === 'right') {
     return MOBILE_PANEL_CLASSES + ' right-0'

@@ -1,7 +1,7 @@
 <!-- resources/js/src/features/masters-filter/ui/FilterSearch/FilterSearch.vue -->
 <template>
   <div :class="CONTAINER_CLASSES">
-    <label :class="LABEL_CLASSES">Поиск</label>
+    <label :class="LABEL_CLASSES">РџРѕРёСЃРє</label>
     <div :class="INPUT_CONTAINER_CLASSES">
       <svg :class="SEARCH_ICON_CLASSES" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -27,23 +27,23 @@
 </template>
 
 <script setup lang="ts">
-// TypeScript интерфейсы
+// TypeScript РёРЅС‚РµСЂС„РµР№СЃС‹
 interface FilterSearchProps {
   value?: string
   placeholder?: string
 }
 
-const props = withDefaults(defineProps<FilterSearchProps>(), {
+const _props = withDefaults(defineProps<FilterSearchProps>(), {
   value: '',
-  placeholder: 'Поиск мастеров...'
+  placeholder: 'РџРѕРёСЃРє РјР°СЃС‚РµСЂРѕРІ...'
 });
 
-// TypeScript типизация emits
+// TypeScript С‚РёРїРёР·Р°С†РёСЏ emits
 const emit = defineEmits<{
   update: [value: string]
 }>()
 
-// 🎯 Стили согласно дизайн-системе
+// рџЋЇ РЎС‚РёР»Рё СЃРѕРіР»Р°СЃРЅРѕ РґРёР·Р°Р№РЅ-СЃРёСЃС‚РµРјРµ
 const CONTAINER_CLASSES = 'space-y-2'
 const LABEL_CLASSES = 'text-sm font-medium text-gray-700'
 const INPUT_CONTAINER_CLASSES = 'relative'
@@ -52,3 +52,4 @@ const INPUT_CLASSES = 'w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-
 const CLEAR_BUTTON_CLASSES = 'absolute right-3 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-100 rounded'
 const CLEAR_ICON_CLASSES = 'w-4 h-4 text-gray-400 hover:text-gray-600'
 </script>
+

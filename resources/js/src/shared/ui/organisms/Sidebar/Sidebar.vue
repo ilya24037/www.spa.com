@@ -8,7 +8,7 @@
     <button
       @click="toggleSidebar"
       class="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-md"
-      :aria-label="isOpen ? 'Закрыть меню' : 'Открыть меню'"
+      :aria-label="isOpen ? 'Р—Р°РєСЂС‹С‚СЊ РјРµРЅСЋ' : 'РћС‚РєСЂС‹С‚СЊ РјРµРЅСЋ'"
     >
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path v-if="!isOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -43,7 +43,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  ariaLabel: 'Боковое меню',
+  ariaLabel: 'Р‘РѕРєРѕРІРѕРµ РјРµРЅСЋ',
   defaultOpen: false
 })
 
@@ -57,7 +57,7 @@ const closeSidebar = () => {
   isOpen.value = false
 }
 
-// Мобильная адаптивность - ЧЕК-ЛИСТ CLAUDE.md ✅
+// РњРѕР±РёР»СЊРЅР°СЏ Р°РґР°РїС‚РёРІРЅРѕСЃС‚СЊ - Р§Р•Рљ-Р›РРЎРў CLAUDE.md вњ…
 const sidebarClasses = computed(() => [
   'relative'
 ])
@@ -70,7 +70,7 @@ const navClasses = computed(() => [
   isOpen.value ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
 ])
 
-// Экспорт методов для внешнего управления
+// Р­РєСЃРїРѕСЂС‚ РјРµС‚РѕРґРѕРІ РґР»СЏ РІРЅРµС€РЅРµРіРѕ СѓРїСЂР°РІР»РµРЅРёСЏ
 defineExpose({
   toggleSidebar,
   closeSidebar

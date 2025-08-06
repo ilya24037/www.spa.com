@@ -1,7 +1,7 @@
 <!-- resources/js/src/entities/ad/ui/AdStatus/AdStatus.vue -->
 <template>
   <span :class="statusClasses" v-if="status">
-    <!-- Иконка -->
+    <!-- РРєРѕРЅРєР° -->
     <svg 
       v-if="showIcon && status === 'draft'" 
       :class="iconClasses" 
@@ -69,34 +69,34 @@
 <script setup>
 import { computed } from 'vue'
 
-// 📊 Статусы объявлений (из Laravel Enum)
+// рџ“Љ РЎС‚Р°С‚СѓСЃС‹ РѕР±СЉСЏРІР»РµРЅРёР№ (РёР· Laravel Enum)
 const AD_STATUSES = {
   draft: {
-    label: 'Черновик',
+    label: 'Р§РµСЂРЅРѕРІРёРє',
     color: 'bg-gray-100 text-gray-800'
   },
   waiting_payment: {
-    label: 'Ждет оплаты',
+    label: 'Р–РґРµС‚ РѕРїР»Р°С‚С‹',
     color: 'bg-amber-100 text-amber-800'
   },
   active: {
-    label: 'Активное',
+    label: 'РђРєС‚РёРІРЅРѕРµ',
     color: 'bg-green-100 text-green-800'
   },
   archived: {
-    label: 'В архиве',
+    label: 'Р’ Р°СЂС…РёРІРµ',
     color: 'bg-gray-100 text-gray-600'
   },
   expired: {
-    label: 'Истекло',
+    label: 'РСЃС‚РµРєР»Рѕ',
     color: 'bg-red-100 text-red-800'
   },
   rejected: {
-    label: 'Отклонено',
+    label: 'РћС‚РєР»РѕРЅРµРЅРѕ',
     color: 'bg-red-100 text-red-800'
   },
   blocked: {
-    label: 'Заблокировано',
+    label: 'Р—Р°Р±Р»РѕРєРёСЂРѕРІР°РЅРѕ',
     color: 'bg-red-200 text-red-900'
   }
 }
@@ -118,7 +118,7 @@ const props = defineProps({
   }
 })
 
-// Вычисляемые свойства
+// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const statusConfig = computed(() => AD_STATUSES[props.status] || AD_STATUSES.draft)
 
 const statusLabel = computed(() => statusConfig.value.label)

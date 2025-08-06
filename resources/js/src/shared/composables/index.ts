@@ -1,43 +1,43 @@
 /**
- * Экспорт всех базовых composables
+ * Р­РєСЃРїРѕСЂС‚ РІСЃРµС… Р±Р°Р·РѕРІС‹С… composables
  * 
- * Импорт в компонентах:
+ * РРјРїРѕСЂС‚ РІ РєРѕРјРїРѕРЅРµРЅС‚Р°С…:
  * import { useToast, useModal, useLoadingState } from '@/src/shared/composables'
  */
 
-// Управление состояниями
+// РЈРїСЂР°РІР»РµРЅРёРµ СЃРѕСЃС‚РѕСЏРЅРёСЏРјРё
 export { useLoadingState } from './useLoadingState'
 export type { LoadingState } from './useLoadingState'
 
-// Уведомления (замена alert)
+// РЈРІРµРґРѕРјР»РµРЅРёСЏ (Р·Р°РјРµРЅР° alert)
 export { useToast, useToastList } from './useToast'
-export type { Toast, ToastType } from './useToast'
+// Toast types not available
 
-// Модальные окна (замена alert/confirm)
+// РњРѕРґР°Р»СЊРЅС‹Рµ РѕРєРЅР° (Р·Р°РјРµРЅР° alert/confirm)
 export { useModal } from './useModal'
-export type { ModalOptions } from './useModal'
+// ModalOptions type not available
 
-// Обработка ошибок
+// РћР±СЂР°Р±РѕС‚РєР° РѕС€РёР±РѕРє
 export { useErrorHandler } from './useErrorHandler'
-export type { ErrorDetails, ValidationErrors } from './useErrorHandler'
+// Error types not available
 
-// Асинхронные действия
+// РђСЃРёРЅС…СЂРѕРЅРЅС‹Рµ РґРµР№СЃС‚РІРёСЏ
 export { useAsyncAction } from './useAsyncAction'
 export type { AsyncActionOptions } from './useAsyncAction'
 
-// Управление формами
+// РЈРїСЂР°РІР»РµРЅРёРµ С„РѕСЂРјР°РјРё
 export { useForm } from './useForm'
 export type { FormField, FormOptions } from './useForm'
 
-// Пагинация
+// РџР°РіРёРЅР°С†РёСЏ
 export { usePagination } from './usePagination'
 export type { PaginationOptions, PaginationMeta } from './usePagination'
 
-// Debounce и Throttle
+// Debounce Рё Throttle
 export { useDebounce, useDebounceFn, useThrottleFn } from './useDebounce'
 
-// Хранилище
+// РҐСЂР°РЅРёР»РёС‰Рµ
 export { useLocalStorage, useSessionStorage } from './useLocalStorage'
 
-// Утилиты
+// РЈС‚РёР»РёС‚С‹
 export { useId } from './useId'

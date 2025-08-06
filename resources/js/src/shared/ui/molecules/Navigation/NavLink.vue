@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
 
-// TypeScript интерфейс для props
+// TypeScript РёРЅС‚РµСЂС„РµР№СЃ РґР»СЏ props
 interface NavLinkProps {
   href: string
   active?: boolean
@@ -24,3 +24,4 @@ const classes = computed((): string =>
         <slot />
     </Link>
 </template>
+

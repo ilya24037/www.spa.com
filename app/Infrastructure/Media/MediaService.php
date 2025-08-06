@@ -3,75 +3,38 @@
 namespace App\Infrastructure\Media;
 
 use App\Domain\Media\Models\Media;
-use App\Enums\MediaType;
-use App\Enums\MediaStatus;
-// use App\Domain\Media\Repositories\MediaRepository; // ВРЕМЕННО ОТКЛЮЧЕНО
+use App\Infrastructure\Media\Services\MediaUploadService;
+use App\Infrastructure\Media\Services\MediaProcessorService;
+use App\Infrastructure\Media\Services\MediaManagementService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
-use Intervention\Image\Facades\Image;
 
+/**
+ * Главный медиа-сервис - координатор операций
+ */
 class MediaService
 {
-    private array $processors = [
-        'image' => 'processImage',
-        'video' => 'processVideo',
-        'audio' => 'processAudio',
-        'document' => 'processDocument',
-        'avatar' => 'processAvatar',
-    ];
-
     public function __construct(
+        private MediaUploadService $uploadService,
+        private MediaProcessorService $processorService,
+        private MediaManagementService $managementService
         // private MediaRepository $mediaRepository // ВРЕМЕННО ОТКЛЮЧЕНО
     ) {}
 
+    /**
+     * Загрузка медиафайла
+     */
     public function upload(
         UploadedFile $file, 
         ?Model $entity = null, 
         string $collection = 'default',
         array $metadata = []
     ): Media {
-        $mediaType = $this->determineMediaType($file);
-        
-        if (!$mediaType) {
-            throw new \InvalidArgumentException('Неподдерживаемый тип файла');
-        }
+        $mediaData = $this->uploadService->upload($file, $entity, $collection, $metadata);
 
-        $this->validateFile($file, $mediaType);
-
-        $fileName = $this->generateFileName($file, $mediaType);
-        $disk = config('media.disk', 'public');
-
-        $path = $file->storeAs(
-            $mediaType->getStorageDirectory(),
-            $fileName,
-            $disk
-        );
-
-        $fileHash = hash_file('md5', $file->getRealPath());
-
-        $mediaData = [
-            'mediable_type' => $entity ? get_class($entity) : null,
-            'mediable_id' => $entity?->id,
-            'collection_name' => $collection,
-            'name' => $file->getClientOriginalName(),
-            'file_name' => $path,
-            'mime_type' => $file->getMimeType(),
-            'disk' => $disk,
-            'size' => $file->getSize(),
-            'type' => $mediaType,
-            'status' => MediaStatus::PENDING,
-            'metadata' => array_merge($metadata, [
-                'file_hash' => $fileHash,
-                'original_name' => $file->getClientOriginalName(),
-                'uploaded_at' => now()->toISOString(),
-            ]),
-            'sort_order' => $this->getNextSortOrder($entity, $collection),
-        ];
-
-        $media = $this->mediaRepository->create($mediaData);
+        // TODO: Создание через MediaRepository
+        // $media = $this->mediaRepository->create($mediaData);
+        $media = new Media($mediaData); // Временная заглушка
 
         $this->processMediaAsync($media);
 

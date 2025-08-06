@@ -1,5 +1,5 @@
-﻿<script setup lang="ts">
-import AppLayout from '@/src/shared/ui/layout/AppLayout/AppLayout.vue'
+<script setup lang="ts">
+import AppLayout from '@/Layouts/AppLayout.vue'
 import { InputError, InputLabel, PrimaryButton, TextInput } from '@/src/shared/ui/atoms'
 import { Head, useForm } from '@inertiajs/vue3'
 

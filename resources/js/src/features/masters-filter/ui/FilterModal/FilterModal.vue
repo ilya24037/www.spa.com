@@ -2,7 +2,7 @@
   <Modal
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event)"
-    title="Фильтры"
+    title="Р¤РёР»СЊС‚СЂС‹"
     size="md"
   >
     <FilterPanel @apply="handleApply" @reset="handleReset">

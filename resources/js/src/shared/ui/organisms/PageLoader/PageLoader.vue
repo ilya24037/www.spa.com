@@ -7,16 +7,16 @@
     :aria-label="ariaLabel"
     :aria-live="showProgress ? 'polite' : 'off'"
   >
-    <!-- Overlay для полноэкранного режима -->
+    <!-- Overlay РґР»СЏ РїРѕР»РЅРѕСЌРєСЂР°РЅРЅРѕРіРѕ СЂРµР¶РёРјР° -->
     <div 
       v-if="overlay && fullScreen"
       class="fixed inset-0 bg-white bg-opacity-90 backdrop-blur-sm z-50"
       data-testid="page-loader-overlay"
     />
 
-    <!-- Основной контейнер -->
+    <!-- РћСЃРЅРѕРІРЅРѕР№ РєРѕРЅС‚РµР№РЅРµСЂ -->
     <div :class="contentClasses">
-      <!-- Спиннер -->
+      <!-- РЎРїРёРЅРЅРµСЂ -->
       <div 
         v-if="showSpinner"
         class="flex justify-center mb-6"
@@ -29,7 +29,7 @@
         />
       </div>
 
-      <!-- Прогресс бар -->
+      <!-- РџСЂРѕРіСЂРµСЃСЃ Р±Р°СЂ -->
       <div 
         v-if="showProgress && progress > 0"
         class="w-full max-w-md mx-auto mb-6"
@@ -50,7 +50,7 @@
         </div>
       </div>
 
-      <!-- Сообщение -->
+      <!-- РЎРѕРѕР±С‰РµРЅРёРµ -->
       <div 
         v-if="message"
         class="text-center mb-8"
@@ -59,7 +59,7 @@
         <p class="text-gray-600 text-lg">{{ message }}</p>
       </div>
 
-      <!-- Скелетоны -->
+      <!-- РЎРєРµР»РµС‚РѕРЅС‹ -->
       <div 
         v-if="showSkeletons"
         class="space-y-4"
@@ -92,7 +92,7 @@ import type {
   PageTypeConfigs
 } from './PageLoader.types'
 
-// Props с TypeScript типизацией
+// Props СЃ TypeScript С‚РёРїРёР·Р°С†РёРµР№
 const props = withDefaults(defineProps<PageLoaderProps>(), {
   type: 'default',
   message: '',
@@ -109,14 +109,14 @@ const props = withDefaults(defineProps<PageLoaderProps>(), {
 // Emits
 defineEmits<PageLoaderEmits>()
 
-// Конфигурации для разных типов страниц
+// РљРѕРЅС„РёРіСѓСЂР°С†РёРё РґР»СЏ СЂР°Р·РЅС‹С… С‚РёРїРѕРІ СЃС‚СЂР°РЅРёС†
 const pageConfigs: PageTypeConfigs = {
   catalog: {
     showSkeletons: true,
     skeletonCount: 6,
     showSpinner: true,
     showProgress: false,
-    message: 'Загружаем мастеров...',
+    message: 'Р—Р°РіСЂСѓР¶Р°РµРј РјР°СЃС‚РµСЂРѕРІ...',
     fullScreen: false,
     overlay: false,
     animation: 'fade'
@@ -126,7 +126,7 @@ const pageConfigs: PageTypeConfigs = {
     skeletonCount: 1,
     showSpinner: true,
     showProgress: false,
-    message: 'Загружаем профиль...',
+    message: 'Р—Р°РіСЂСѓР¶Р°РµРј РїСЂРѕС„РёР»СЊ...',
     fullScreen: false,
     overlay: false,
     animation: 'fade'
@@ -136,7 +136,7 @@ const pageConfigs: PageTypeConfigs = {
     skeletonCount: 4,
     showSpinner: true,
     showProgress: false,
-    message: 'Загружаем данные...',
+    message: 'Р—Р°РіСЂСѓР¶Р°РµРј РґР°РЅРЅС‹Рµ...',
     fullScreen: false,
     overlay: false,
     animation: 'fade'
@@ -146,7 +146,7 @@ const pageConfigs: PageTypeConfigs = {
     skeletonCount: 1,
     showSpinner: true,
     showProgress: false,
-    message: 'Подготавливаем форму...',
+    message: 'РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј С„РѕСЂРјСѓ...',
     fullScreen: false,
     overlay: false,
     animation: 'slide'
@@ -156,7 +156,7 @@ const pageConfigs: PageTypeConfigs = {
     skeletonCount: 3,
     showSpinner: true,
     showProgress: false,
-    message: 'Загружаем контент...',
+    message: 'Р—Р°РіСЂСѓР¶Р°РµРј РєРѕРЅС‚РµРЅС‚...',
     fullScreen: false,
     overlay: false,
     animation: 'fade'
@@ -176,27 +176,27 @@ const pageConfigs: PageTypeConfigs = {
     skeletonCount: 3,
     showSpinner: true,
     showProgress: false,
-    message: 'Загрузка...',
+    message: 'Р—Р°РіСЂСѓР·РєР°...',
     fullScreen: false,
     overlay: false,
     animation: 'fade'
   }
 }
 
-// Получаем конфигурацию для текущего типа
+// РџРѕР»СѓС‡Р°РµРј РєРѕРЅС„РёРіСѓСЂР°С†РёСЋ РґР»СЏ С‚РµРєСѓС‰РµРіРѕ С‚РёРїР°
 const config = computed(() => pageConfigs[props.type])
 
-// Вычисляемые свойства
+// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const showSpinner = computed<boolean>(() => config.value.showSpinner)
 const actualMessage = computed<string>(() => props.message || config.value.message)
-const actualSkeletonCount = computed<number>(() => props.skeletonCount || config.value.skeletonCount)
-const actualShowSkeletons = computed<boolean>(() => props.showSkeletons && config.value.showSkeletons)
+const _actualSkeletonCount = computed<number>(() => props.skeletonCount || config.value.skeletonCount)
+const _actualShowSkeletons = computed<boolean>(() => props.showSkeletons && config.value.showSkeletons)
 
 const ariaLabel = computed<string>(() => {
   if (props.showProgress && props.progress > 0) {
-    return `Загрузка: ${props.progress}%`
+    return `Р—Р°РіСЂСѓР·РєР°: ${props.progress}%`
   }
-  return actualMessage.value || 'Загрузка страницы'
+  return actualMessage.value || 'Р—Р°РіСЂСѓР·РєР° СЃС‚СЂР°РЅРёС†С‹'
 })
 
 const containerClasses = computed<string>(() => {
@@ -292,7 +292,7 @@ const skeletonClasses = computed<string>(() => {
 </script>
 
 <style scoped>
-/* Анимации для разных типов */
+/* РђРЅРёРјР°С†РёРё РґР»СЏ СЂР°Р·РЅС‹С… С‚РёРїРѕРІ */
 .page-loader--animation-fade {
   @apply opacity-0 animate-fade-in;
 }
@@ -309,7 +309,7 @@ const skeletonClasses = computed<string>(() => {
   @apply animate-pulse;
 }
 
-/* Кастомные анимации */
+/* РљР°СЃС‚РѕРјРЅС‹Рµ Р°РЅРёРјР°С†РёРё */
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -353,7 +353,7 @@ const skeletonClasses = computed<string>(() => {
   animation: scale-up 0.3s ease-out;
 }
 
-/* Стили для разных типов */
+/* РЎС‚РёР»Рё РґР»СЏ СЂР°Р·РЅС‹С… С‚РёРїРѕРІ */
 .page-loader--catalog {
   @apply bg-gray-50;
 }

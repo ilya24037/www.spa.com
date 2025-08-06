@@ -1,7 +1,7 @@
 <template>
   <div class="form-section">
     <div class="form-section-card">
-      <!-- Заголовок секции -->
+      <!-- Р—Р°РіРѕР»РѕРІРѕРє СЃРµРєС†РёРё -->
       <div v-if="title || hint" class="form-section-header">
         <h2 v-if="title" class="form-section-title">
           {{ title }}
@@ -12,12 +12,12 @@
         </div>
       </div>
 
-      <!-- Содержимое секции -->
+      <!-- РЎРѕРґРµСЂР¶РёРјРѕРµ СЃРµРєС†РёРё -->
       <div class="form-section-content">
         <slot />
       </div>
 
-      <!-- Ошибки секции -->
+      <!-- РћС€РёР±РєРё СЃРµРєС†РёРё -->
       <div v-if="hasErrors" class="form-section-errors">
         <div v-for="error in sectionErrors" :key="error" class="error-message">
           {{ error }}
@@ -53,7 +53,7 @@ const props = defineProps({
   }
 })
 
-// Вычисляем ошибки для данной секции
+// Р’С‹С‡РёСЃР»СЏРµРј РѕС€РёР±РєРё РґР»СЏ РґР°РЅРЅРѕР№ СЃРµРєС†РёРё
 const sectionErrors = computed(() => {
   if (!props.errorKeys.length) return []
   
@@ -110,7 +110,7 @@ const hasErrors = computed(() => sectionErrors.value.length > 0)
 }
 
 .form-section-content {
-  /* Контент секции */
+  /* РљРѕРЅС‚РµРЅС‚ СЃРµРєС†РёРё */
 }
 
 .form-section-errors {

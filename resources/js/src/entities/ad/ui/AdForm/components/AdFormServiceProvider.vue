@@ -1,16 +1,16 @@
 <template>
   <div class="service-provider">
     <label class="block text-sm font-medium text-gray-700 mb-2">
-      Тип услуг
+      РўРёРї СѓСЃР»СѓРі
     </label>
     <div class="space-y-2">
       <label class="flex items-center">
         <input type="radio" :value="'individual'" v-model="localValue" class="mr-2">
-        <span>Индивидуальный</span>
+        <span>РРЅРґРёРІРёРґСѓР°Р»СЊРЅС‹Р№</span>
       </label>
       <label class="flex items-center">
         <input type="radio" :value="'salon'" v-model="localValue" class="mr-2">
-        <span>Салон</span>
+        <span>РЎР°Р»РѕРЅ</span>
       </label>
     </div>
   </div>
@@ -32,3 +32,4 @@ const localValue = computed({
   set: (value) => emit('update:modelValue', value)
 })
 </script>
+

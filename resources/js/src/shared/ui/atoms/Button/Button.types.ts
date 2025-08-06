@@ -1,5 +1,5 @@
 import type { Component } from 'vue'
-import type { RouteLocationRaw } from '@vue/router'
+// import type { RouteLocationRaw } from 'vue-router'
 
 export type ButtonVariant = 
   | 'primary' 
@@ -17,28 +17,28 @@ export type ButtonType = 'button' | 'submit' | 'reset'
 export type ButtonRounded = boolean | 'sm' | 'md' | 'lg' | 'full'
 
 export interface ButtonProps {
-  // Внешний вид
+  // Р’РЅРµС€РЅРёР№ РІРёРґ
   variant?: ButtonVariant
   size?: ButtonSize
   fullWidth?: boolean
   rounded?: ButtonRounded
   
-  // Состояния
+  // РЎРѕСЃС‚РѕСЏРЅРёСЏ
   loading?: boolean
   loadingText?: string
   disabled?: boolean
   
-  // Содержимое
+  // РЎРѕРґРµСЂР¶РёРјРѕРµ
   text?: string
   iconLeft?: Component | string
   iconRight?: Component | string
   
-  // Действия
+  // Р”РµР№СЃС‚РІРёСЏ
   type?: ButtonType
   href?: string
-  to?: string | RouteLocationRaw
+  to?: string | any
   
-  // Доступность
+  // Р”РѕСЃС‚СѓРїРЅРѕСЃС‚СЊ
   ariaLabel?: string
 }
 

@@ -1,6 +1,6 @@
 <!-- resources/js/src/entities/ad/ui/AdCard/AdCard.vue -->
 <template>
-  <!-- Error состояние -->
+  <!-- Error СЃРѕСЃС‚РѕСЏРЅРёРµ -->
   <ErrorState
     v-if="errorState.error"
     :error="errorState.error"
@@ -13,43 +13,43 @@
     class="h-full"
   />
   
-  <!-- Основная карточка -->
+  <!-- РћСЃРЅРѕРІРЅР°СЏ РєР°СЂС‚РѕС‡РєР° -->
   <div 
     v-else
     :class="CARD_CLASSES"
     role="article"
-    :aria-label="`Объявление: ${props.ad.title || props.ad.name || props.ad.display_name}`"
+    :aria-label="`РћР±СЉСЏРІР»РµРЅРёРµ: ${props.ad.title || props.ad.name || props.ad.display_name}`"
     data-testid="ad-card"
   >
-    <!-- Бейджи статуса -->
+    <!-- Р‘РµР№РґР¶Рё СЃС‚Р°С‚СѓСЃР° -->
     <div :class="BADGES_CONTAINER_CLASSES">
-      <!-- Распродажа/Скидка -->
+      <!-- Р Р°СЃРїСЂРѕРґР°Р¶Р°/РЎРєРёРґРєР° -->
       <span v-if="ad.discount" :class="SALE_BADGE_CLASSES">
-        Распродажа
+        Р Р°СЃРїСЂРѕРґР°Р¶Р°
       </span>
       
-      <!-- Премиум -->
+      <!-- РџСЂРµРјРёСѓРј -->
       <span v-if="ad.is_premium" :class="PREMIUM_BADGE_CLASSES">
         Premium
       </span>
       
-      <!-- Проверен -->
+      <!-- РџСЂРѕРІРµСЂРµРЅ -->
       <span v-if="ad.is_verified" :class="VERIFIED_BADGE_CLASSES">
         <svg :class="VERIFIED_ICON_CLASSES" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
         </svg>
-        Проверен
+        РџСЂРѕРІРµСЂРµРЅ
       </span>
     </div>
 
-    <!-- Избранное -->
+    <!-- РР·Р±СЂР°РЅРЅРѕРµ -->
     <button 
       @click.stop="toggleFavorite"
       :class="[
         FAVORITE_BUTTON_CLASSES,
         isFavorite ? 'text-[#f91155]' : 'text-gray-400 hover:text-[#f91155]'
       ]"
-      :aria-label="isFavorite ? 'Удалить из избранного' : 'Добавить в избранное'"
+      :aria-label="isFavorite ? 'РЈРґР°Р»РёС‚СЊ РёР· РёР·Р±СЂР°РЅРЅРѕРіРѕ' : 'Р”РѕР±Р°РІРёС‚СЊ РІ РёР·Р±СЂР°РЅРЅРѕРµ'"
       data-testid="favorite-button"
     >
       <svg :class="FAVORITE_ICON_CLASSES" :fill="isFavorite ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
@@ -57,7 +57,7 @@
       </svg>
     </button>
 
-    <!-- Галерея фото -->
+    <!-- Р“Р°Р»РµСЂРµСЏ С„РѕС‚Рѕ -->
     <div 
       :class="IMAGE_CONTAINER_CLASSES"
       @click="openAd"
@@ -65,10 +65,10 @@
       @mouseleave="currentImage = 0"
       role="button"
       tabindex="0"
-      :aria-label="`Открыть объявление ${props.ad.title || props.ad.name}`"
+      :aria-label="`РћС‚РєСЂС‹С‚СЊ РѕР±СЉСЏРІР»РµРЅРёРµ ${props.ad.title || props.ad.name}`"
       data-testid="ad-image"
     >
-      <!-- Основное изображение -->
+      <!-- РћСЃРЅРѕРІРЅРѕРµ РёР·РѕР±СЂР°Р¶РµРЅРёРµ -->
       <transition name="fade" mode="out-in">
         <img
           v-if="currentImageUrl"
@@ -85,7 +85,7 @@
         </div>
       </transition>
 
-      <!-- Индикаторы фото -->
+      <!-- РРЅРґРёРєР°С‚РѕСЂС‹ С„РѕС‚Рѕ -->
       <div 
         v-if="allImages.length > 1"
         :class="INDICATORS_CONTAINER_CLASSES"
@@ -100,7 +100,7 @@
         />
       </div>
 
-      <!-- Процент скидки -->
+      <!-- РџСЂРѕС†РµРЅС‚ СЃРєРёРґРєРё -->
       <div 
         v-if="ad.discount || ad.discount_percent" 
         :class="DISCOUNT_BADGE_CLASSES"
@@ -109,22 +109,22 @@
       </div>
     </div>
 
-    <!-- Информация -->
+    <!-- РРЅС„РѕСЂРјР°С†РёСЏ -->
     <div :class="CONTENT_CLASSES">
-      <!-- Цена -->
+      <!-- Р¦РµРЅР° -->
       <div :class="PRICE_CONTAINER_CLASSES">
         <div :class="PRICE_WRAPPER_CLASSES">
           <span :class="PRICE_CLASSES">
-            {{ formatPrice(ad.price || ad.price_from || 2000) }} ₽
+            {{ formatPrice(ad.price || ad.price_from || 2000) }} в‚Ѕ
           </span>
-          <!-- Старая цена если есть скидка -->
+          <!-- РЎС‚Р°СЂР°СЏ С†РµРЅР° РµСЃР»Рё РµСЃС‚СЊ СЃРєРёРґРєР° -->
           <span 
             v-if="ad.old_price" 
             :class="OLD_PRICE_CLASSES"
           >
-            {{ formatPrice(ad.old_price) }} ₽
+            {{ formatPrice(ad.old_price) }} в‚Ѕ
           </span>
-          <!-- Процент скидки -->
+          <!-- РџСЂРѕС†РµРЅС‚ СЃРєРёРґРєРё -->
           <span 
             v-if="ad.discount || ad.discount_percent" 
             :class="DISCOUNT_TEXT_CLASSES"
@@ -132,22 +132,22 @@
             -{{ ad.discount || ad.discount_percent }}%
           </span>
         </div>
-        <div :class="PRICE_UNIT_CLASSES">за час</div>
+        <div :class="PRICE_UNIT_CLASSES">Р·Р° С‡Р°СЃ</div>
       </div>
 
-      <!-- Заголовок -->
+      <!-- Р—Р°РіРѕР»РѕРІРѕРє -->
       <h3 :class="TITLE_CLASSES">
-        {{ ad.title || ad.name || ad.display_name || 'Массаж' }}
+        {{ ad.title || ad.name || ad.display_name || 'РњР°СЃСЃР°Р¶' }}
       </h3>
 
-      <!-- Описание -->
+      <!-- РћРїРёСЃР°РЅРёРµ -->
       <p :class="DESCRIPTION_CLASSES">
         {{ getDescription() }}
       </p>
 
-      <!-- Метрики -->
+      <!-- РњРµС‚СЂРёРєРё -->
       <div :class="METRICS_CONTAINER_CLASSES">
-        <!-- Рейтинг -->
+        <!-- Р РµР№С‚РёРЅРі -->
         <div :class="RATING_WRAPPER_CLASSES">
           <svg :class="STAR_ICON_CLASSES" fill="currentColor" viewBox="0 0 20 20">
             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
@@ -156,7 +156,7 @@
           <span :class="RATING_COUNT_CLASSES">({{ ad.reviews_count || 0 }})</span>
         </div>
 
-        <!-- Локация -->
+        <!-- Р›РѕРєР°С†РёСЏ -->
         <div :class="LOCATION_WRAPPER_CLASSES">
           <svg :class="LOCATION_ICON_CLASSES" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -164,35 +164,35 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                 d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
           </svg>
-          <span>{{ ad.district || ad.location || 'Центр' }}</span>
+          <span>{{ ad.district || ad.location || 'Р¦РµРЅС‚СЂ' }}</span>
         </div>
       </div>
 
-      <!-- Кнопки действий -->
+      <!-- РљРЅРѕРїРєРё РґРµР№СЃС‚РІРёР№ -->
       <div :class="ACTIONS_CONTAINER_CLASSES">
         <button
           @click.stop="contactMaster"
           :class="CONTACT_BUTTON_CLASSES"
-          aria-label="Связаться с мастером"
+          aria-label="РЎРІСЏР·Р°С‚СЊСЃСЏ СЃ РјР°СЃС‚РµСЂРѕРј"
           data-testid="contact-button"
         >
           <svg :class="CONTACT_ICON_CLASSES" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                 d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
           </svg>
-          Связаться
+          РЎРІСЏР·Р°С‚СЊСЃСЏ
         </button>
         <button
           @click.stop="openBooking"
           :class="BOOKING_BUTTON_CLASSES"
-          aria-label="Записаться на услугу"
+          aria-label="Р—Р°РїРёСЃР°С‚СЊСЃСЏ РЅР° СѓСЃР»СѓРіСѓ"
           data-testid="booking-button"
         >
           <svg :class="BOOKING_ICON_CLASSES" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                 d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4h3a1 1 0 011 1v9a1 1 0 01-1 1H4a1 1 0 01-1-1V8a1 1 0 011-1h4z"/>
           </svg>
-          Записаться
+          Р—Р°РїРёСЃР°С‚СЊСЃСЏ
         </button>
       </div>
     </div>
@@ -214,10 +214,10 @@ import type {
   FavoriteToggleResponse 
 } from './AdCard.types'
 
-// Error handler (без toast - показываем через ErrorState)
+// Error handler (Р±РµР· toast - РїРѕРєР°Р·С‹РІР°РµРј С‡РµСЂРµР· ErrorState)
 const errorState = useErrorHandler(false)
 
-// Toast только для успешных действий
+// Toast С‚РѕР»СЊРєРѕ РґР»СЏ СѓСЃРїРµС€РЅС‹С… РґРµР№СЃС‚РІРёР№
 const toast = useToast()
 
 // Props
@@ -226,7 +226,7 @@ const props = defineProps<AdCardProps>()
 // Emits  
 const emit = defineEmits<AdCardEmits>()
 
-// 🎯 Стили согласно дизайн-системе
+// рџЋЇ РЎС‚РёР»Рё СЃРѕРіР»Р°СЃРЅРѕ РґРёР·Р°Р№РЅ-СЃРёСЃС‚РµРјРµ
 const CARD_CLASSES: string = 'relative group bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden'
 const BADGES_CONTAINER_CLASSES: string = 'absolute top-2 left-2 z-10 flex flex-col gap-1'
 const SALE_BADGE_CLASSES: string = 'bg-[#f91155] text-white px-2 py-0.5 rounded text-xs font-medium'
@@ -264,10 +264,10 @@ const CONTACT_ICON_CLASSES: string = 'w-4 h-4'
 const BOOKING_BUTTON_CLASSES: string = 'flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-1'
 const BOOKING_ICON_CLASSES: string = 'w-4 h-4'
 
-// Состояние
+// РЎРѕСЃС‚РѕСЏРЅРёРµ
 const currentImage: import("vue").Ref<number> = ref(0)
 
-// Вычисляемые свойства
+// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const isFavorite = computed((): boolean => props.ad.is_favorite || false)
 
 const allImages = computed((): AdImage[] => {
@@ -283,7 +283,7 @@ const currentImageUrl = computed((): string => {
   return image?.url || image?.path || (typeof image === 'string' ? image : '') || '/images/placeholders/master-1.jpg'
 })
 
-// Методы
+// РњРµС‚РѕРґС‹
 const formatPrice = (price: number | undefined): string => {
   if (!price) return '0'
   return new Intl.NumberFormat('ru-RU').format(price)
@@ -292,7 +292,7 @@ const formatPrice = (price: number | undefined): string => {
 const getDescription = (): string => {
   return props.ad.description || 
          props.ad.specialty || 
-         'Массаж и SPA услуги'
+         'РњР°СЃСЃР°Р¶ Рё SPA СѓСЃР»СѓРіРё'
 }
 
 const handleMouseMove = (event: MouseMoveEvent): void => {
@@ -330,12 +330,12 @@ const toggleFavorite = async (): Promise<void> => {
       preserveState: true,
       preserveScroll: true,
       onSuccess: () => {
-        toast.success(currentState ? 'Удалено из избранного' : 'Добавлено в избранное')
+        toast.success(currentState ? 'РЈРґР°Р»РµРЅРѕ РёР· РёР·Р±СЂР°РЅРЅРѕРіРѕ' : 'Р”РѕР±Р°РІР»РµРЅРѕ РІ РёР·Р±СЂР°РЅРЅРѕРµ')
       },
       onError: (errors) => {
         errorState.handleError({
-          message: 'Не удалось обновить избранное',
-          details: 'Проверьте подключение к интернету и попробуйте снова',
+          message: 'РќРµ СѓРґР°Р»РѕСЃСЊ РѕР±РЅРѕРІРёС‚СЊ РёР·Р±СЂР°РЅРЅРѕРµ',
+          details: 'РџСЂРѕРІРµСЂСЊС‚Рµ РїРѕРґРєР»СЋС‡РµРЅРёРµ Рє РёРЅС‚РµСЂРЅРµС‚Сѓ Рё РїРѕРїСЂРѕР±СѓР№С‚Рµ СЃРЅРѕРІР°',
           status: errors?.response?.status
         }, 'data_load')
       }
@@ -354,7 +354,7 @@ const contactMaster = (): void => {
       const cleanPhone = props.ad.phone.replace(/\D/g, '')
       window.location.href = `tel:${cleanPhone}`
     } else {
-      toast.info('Контакты будут доступны после записи')
+      toast.info('РљРѕРЅС‚Р°РєС‚С‹ Р±СѓРґСѓС‚ РґРѕСЃС‚СѓРїРЅС‹ РїРѕСЃР»Рµ Р·Р°РїРёСЃРё')
     }
   } catch (error: unknown) {
     errorState.handleError(error, 'generic')
@@ -371,22 +371,22 @@ const openBooking = (): void => {
   }
 }
 
-// Метод для повторной попытки после ошибки
+// РњРµС‚РѕРґ РґР»СЏ РїРѕРІС‚РѕСЂРЅРѕР№ РїРѕРїС‹С‚РєРё РїРѕСЃР»Рµ РѕС€РёР±РєРё
 const handleRetry = async (): Promise<void> => {
   errorState.clearError()
   
-  // Проверяем, что данные объявления корректны
+  // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РґР°РЅРЅС‹Рµ РѕР±СЉСЏРІР»РµРЅРёСЏ РєРѕСЂСЂРµРєС‚РЅС‹
   if (!props.ad || !props.ad.id) {
     errorState.handleError({
-      message: 'Данные объявления не загружены',
-      details: 'Попробуйте обновить страницу'
+      message: 'Р”Р°РЅРЅС‹Рµ РѕР±СЉСЏРІР»РµРЅРёСЏ РЅРµ Р·Р°РіСЂСѓР¶РµРЅС‹',
+      details: 'РџРѕРїСЂРѕР±СѓР№С‚Рµ РѕР±РЅРѕРІРёС‚СЊ СЃС‚СЂР°РЅРёС†Сѓ'
     }, 'data_load')
     return
   }
   
-  // Пытаемся перезагрузить карточку
+  // РџС‹С‚Р°РµРјСЃСЏ РїРµСЂРµР·Р°РіСЂСѓР·РёС‚СЊ РєР°СЂС‚РѕС‡РєСѓ
   await errorState.retryOperation(async () => {
-    // Эмитируем событие для родительского компонента
+    // Р­РјРёС‚РёСЂСѓРµРј СЃРѕР±С‹С‚РёРµ РґР»СЏ СЂРѕРґРёС‚РµР»СЊСЃРєРѕРіРѕ РєРѕРјРїРѕРЅРµРЅС‚Р°
     emit('retryRequested', props.ad.id)
   })
 }
@@ -400,3 +400,4 @@ const handleRetry = async (): Promise<void> => {
   opacity: 0;
 }
 </style>
+

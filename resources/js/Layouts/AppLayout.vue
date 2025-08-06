@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <!-- Динамический фон в зависимости от типа страницы -->
   <div :class="[
     'min-h-screen flex flex-col',
@@ -12,7 +12,7 @@
       <div class="site-padding flex-1 flex flex-col">
         
         <!-- Шапка с компенсацией отступов (скрыта для авторизации) -->
-        <header v-if="!isAuthPage" class="sticky top-0 z-50 negative-margin">
+        <div v-if="!isAuthPage" class="sticky top-0 z-50 negative-margin">
           <div class="site-padding">
             <ErrorBoundary 
               error-title="Навигация временно недоступна"
@@ -21,7 +21,7 @@
               <Navbar />
             </ErrorBoundary>
           </div>
-        </header>
+        </div>
         
         <!-- Основной контент уже имеет отступы от обертки -->
         <main class="flex-1">
@@ -29,7 +29,7 @@
         </main>
         
         <!-- Footer (скрыт для авторизации) -->
-        <Footer v-if="!isAuthPage" />
+        <Footer v-if="!isAuthPage" :config="footerConfig" />
       </div>
     </div>
          
@@ -41,12 +41,16 @@
 <script setup>
 import { provide, computed } from 'vue'
 import { usePage } from '@inertiajs/vue3'
-import Navbar from '@/Components/Header/Navbar.vue'
-import Footer from '@/Components/Footer/Footer.vue'
-import ErrorBoundary from '@/src/shared/ui/molecules/ErrorBoundary/ErrorBoundary.vue'
-import ToastNotifications from '@/src/shared/ui/molecules/ToastNotifications/ToastNotifications.vue'
+import { Header as Navbar } from '@/src/shared/ui/organisms/Header'
+import { Footer } from '@/src/shared/ui/organisms/Footer'
+import { defaultFooterConfig } from '@/src/shared/ui/organisms/Footer/model/footer.config'
+import { ErrorBoundary } from '@/src/shared/ui/molecules/ErrorBoundary'
+import { ToastNotifications } from '@/src/shared/ui/molecules/ToastNotifications'
 
 const page = usePage()
+
+// Конфигурация Footer
+const footerConfig = defaultFooterConfig
 
 // Определяем, является ли это страницей авторизации
 const isAuthPage = computed(() => {

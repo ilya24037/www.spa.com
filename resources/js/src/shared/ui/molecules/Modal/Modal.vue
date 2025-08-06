@@ -1,5 +1,5 @@
 <template>
-  <!-- Teleport для правильного рендеринга - CLAUDE.md ✅ -->
+  <!-- Teleport РґР»СЏ РїСЂР°РІРёР»СЊРЅРѕРіРѕ СЂРµРЅРґРµСЂРёРЅРіР° - CLAUDE.md вњ… -->
   <Teleport to="body">
     <Transition name="modal">
       <div
@@ -58,7 +58,7 @@
 <script setup lang="ts">
 import { computed, watch, onMounted, onUnmounted } from 'vue'
 
-// TypeScript типизация - ЧЕК-ЛИСТ CLAUDE.md ✅
+// TypeScript С‚РёРїРёР·Р°С†РёСЏ - Р§Р•Рљ-Р›РРЎРў CLAUDE.md вњ…
 interface Props {
   modelValue: boolean
   title?: string
@@ -74,7 +74,7 @@ const props = withDefaults(defineProps<Props>(), {
   showClose: true,
   closeOnEscape: true,
   closeOnClickOutside: true,
-  closeAriaLabel: 'Закрыть'
+  closeAriaLabel: 'Р—Р°РєСЂС‹С‚СЊ'
 })
 
 const emit = defineEmits<{
@@ -82,10 +82,10 @@ const emit = defineEmits<{
   'close': []
 }>()
 
-// Уникальный ID для aria-labelledby
+// РЈРЅРёРєР°Р»СЊРЅС‹Р№ ID РґР»СЏ aria-labelledby
 const titleId = `modal-title-${Math.random().toString(36).substr(2, 9)}`
 
-// Размеры модального окна - мобильная адаптивность ✅
+// Р Р°Р·РјРµСЂС‹ РјРѕРґР°Р»СЊРЅРѕРіРѕ РѕРєРЅР° - РјРѕР±РёР»СЊРЅР°СЏ Р°РґР°РїС‚РёРІРЅРѕСЃС‚СЊ вњ…
 const modalClasses = computed(() => [
   'relative bg-white rounded-lg shadow-xl w-full transition-all',
   {
@@ -104,14 +104,14 @@ const handleClose = () => {
   }
 }
 
-// Обработка Escape
+// РћР±СЂР°Р±РѕС‚РєР° Escape
 const handleEscape = (e: KeyboardEvent) => {
   if (props.closeOnEscape && e.key === 'Escape' && props.modelValue) {
     handleClose()
   }
 }
 
-// Блокировка скролла body
+// Р‘Р»РѕРєРёСЂРѕРІРєР° СЃРєСЂРѕР»Р»Р° body
 watch(() => props.modelValue, (newVal) => {
   if (newVal) {
     document.body.style.overflow = 'hidden'
@@ -141,3 +141,4 @@ onUnmounted(() => {
   opacity: 0;
 }
 </style>
+

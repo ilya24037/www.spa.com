@@ -23,7 +23,7 @@
         <span :class="stat.trend > 0 ? 'text-green-600' : stat.trend < 0 ? 'text-red-600' : 'text-gray-600'">
           {{ stat.trend > 0 ? '+' : '' }}{{ stat.trend }}%
         </span>
-        <span class="text-gray-500 ml-1">за месяц</span>
+        <span class="text-gray-500 ml-1">Р·Р° РјРµСЃСЏС†</span>
       </div>
     </div>
   </div>
@@ -77,7 +77,7 @@ const stats = computed<Stat[]>(() => {
   return [
     {
       key: 'views',
-      label: 'Просмотры',
+      label: 'РџСЂРѕСЃРјРѕС‚СЂС‹',
       value: (safeStats.views || 0).toLocaleString(),
       icon: 'eye',
       bgColor: 'bg-blue-100',
@@ -86,7 +86,7 @@ const stats = computed<Stat[]>(() => {
     },
     {
       key: 'favorites',
-      label: 'В избранном',
+      label: 'Р’ РёР·Р±СЂР°РЅРЅРѕРј',
       value: safeStats.favorites || 0,
       icon: 'heart',
       bgColor: 'bg-red-100',
@@ -95,7 +95,7 @@ const stats = computed<Stat[]>(() => {
     },
     {
       key: 'messages',
-      label: 'Сообщения',
+      label: 'РЎРѕРѕР±С‰РµРЅРёСЏ',
       value: safeStats.messages || 0,
       icon: 'chat',
       bgColor: 'bg-green-100',
@@ -104,8 +104,8 @@ const stats = computed<Stat[]>(() => {
     },
     {
       key: 'earnings',
-      label: 'Заработок',
-      value: `${(safeStats.earnings || 0).toLocaleString()} ₽`,
+      label: 'Р—Р°СЂР°Р±РѕС‚РѕРє',
+      value: `${(safeStats.earnings || 0).toLocaleString()} в‚Ѕ`,
       icon: 'currency',
       bgColor: 'bg-yellow-100',
       iconColor: 'text-yellow-600',

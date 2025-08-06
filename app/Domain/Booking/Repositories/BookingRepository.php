@@ -3,21 +3,28 @@
 namespace App\Domain\Booking\Repositories;
 
 use App\Domain\Booking\Models\Booking;
-use App\Enums\BookingStatus;
-use App\Enums\BookingType;
+use App\Domain\Booking\Handlers\BookingCrudHandler;
+use App\Domain\Booking\Handlers\BookingSearchHandler;
+use App\Domain\Booking\Handlers\BookingCalendarHandler;
+use App\Domain\Booking\Handlers\BookingAnalyticsHandler;
 use App\Domain\Common\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 /**
- * Репозиторий для работы с бронированиями
+ * Упрощенный репозиторий бронирований
+ * Делегирует логику специализированным обработчикам
  * 
  * @extends BaseRepository<Booking>
  */
 class BookingRepository extends BaseRepository
 {
+    protected BookingCrudHandler $crudHandler;
+    protected BookingSearchHandler $searchHandler;
+    protected BookingCalendarHandler $calendarHandler;
+    protected BookingAnalyticsHandler $analyticsHandler;
+
     /**
      * Получить класс модели
      */
@@ -29,489 +36,223 @@ class BookingRepository extends BaseRepository
     public function __construct()
     {
         parent::__construct();
+        
+        $this->crudHandler = new BookingCrudHandler($this->model);
+        $this->searchHandler = new BookingSearchHandler($this->model);
+        $this->calendarHandler = new BookingCalendarHandler($this->model);
+        $this->analyticsHandler = new BookingAnalyticsHandler($this->model);
     }
+
+    // === CRUD ОПЕРАЦИИ ===
 
     /**
      * Найти бронирование по ID с загрузкой связей
-     * Переопределяем базовый метод
      */
     public function find(int $id): ?Booking
     {
-        return $this->with(['client', 'master', 'service', 'payment'])->find($id);
+        return $this->crudHandler->find($id);
     }
 
     /**
      * Найти бронирование по ID или выбросить исключение
-     * Переопределяем базовый метод
      */
     public function findOrFail(int $id): Booking
     {
-        return $this->model->findOrFail($id);
+        return $this->crudHandler->findOrFail($id);
     }
 
     public function findByNumber(string $bookingNumber): ?Booking
     {
-        return $this->model->where('booking_number', $bookingNumber)->first();
+        return $this->crudHandler->findByNumber($bookingNumber);
     }
 
-    /**
-     * Получить бронирования пользователя с пагинацией
-     */
-    public function getBookingsForUser($user, int $perPage = 10)
-    {
-        return Booking::with(['masterProfile.user', 'service', 'client'])
-            ->where(function($query) use ($user) {
-                // Показываем бронирования где пользователь - клиент
-                $query->where('client_id', $user->id);
-                
-                // Или где пользователь - мастер
-                if ($user->masterProfile) {
-                    $query->orWhere('master_profile_id', $user->masterProfile->id);
-                }
-            })
-            ->orderBy('booking_date', 'desc')
-            ->orderBy('start_time', 'desc')
-            ->paginate($perPage);
-    }
-
-    /**
-     * Валидировать запрос на создание бронирования
-     */
-    public function validateBookingRequest(int $masterProfileId, int $serviceId): array
-    {
-        $masterProfile = \App\Domain\Master\Models\MasterProfile::with(['user', 'services', 'schedules'])
-            ->findOrFail($masterProfileId);
-            
-        $service = \App\Domain\Service\Models\Service::findOrFail($serviceId);
-        
-        // Проверяем, что услуга принадлежит мастеру
-        if (!$masterProfile->services->contains($service)) {
-            throw new \InvalidArgumentException('Выбранная услуга не доступна у этого мастера');
-        }
-
-        return compact('masterProfile', 'service');
-    }
-
-    /**
-     * Найти бронирование с загруженными связями
-     */
     public function findWithRelations(int $bookingId): ?Booking
     {
-        return Booking::with(['masterProfile.user', 'service', 'client'])->find($bookingId);
+        return $this->crudHandler->findWithRelations($bookingId);
     }
 
     public function create(array $data): Booking
     {
-        return $this->model->create($data);
+        return $this->crudHandler->create($data);
     }
 
     public function update(int $id, array $data): bool
     {
-        return $this->model->where('id', $id)->update($data);
+        return $this->crudHandler->update($id, $data);
     }
 
     public function delete(int $id): bool
     {
-        $booking = $this->find($id);
-        return $booking ? $booking->delete() : false;
+        return $this->crudHandler->delete($id);
     }
 
     public function forceDelete(int $id): bool
     {
-        $booking = $this->model->withTrashed()->find($id);
-        return $booking ? $booking->forceDelete() : false;
+        return $this->crudHandler->forceDelete($id);
     }
 
     public function restore(int $id): bool
     {
-        $booking = $this->model->withTrashed()->find($id);
-        return $booking ? $booking->restore() : false;
+        return $this->crudHandler->restore($id);
     }
 
-    public function findForClient(int $clientId, array $filters = []): Collection
+    public function validateBookingRequest(int $masterProfileId, int $serviceId): array
     {
-        $query = $this->model->forClient($clientId);
-        
-        return $this->applyFilters($query, $filters)->get();
-    }
-
-    public function findForMaster(int $masterId, array $filters = []): Collection
-    {
-        $query = $this->model->forMaster($masterId);
-        
-        return $this->applyFilters($query, $filters)->get();
-    }
-
-    public function search(array $filters = [], int $perPage = 15): LengthAwarePaginator
-    {
-        $query = $this->model->newQuery();
-
-        $query = $this->applyFilters($query, $filters);
-
-        $sortBy = $filters['sort_by'] ?? 'start_time';
-        $sortOrder = $filters['sort_order'] ?? 'desc';
-        
-        if ($sortBy === 'date') {
-            $query->orderBy('start_time', $sortOrder);
-        } elseif ($sortBy === 'status') {
-            // Сортировка по приоритету статуса
-            $query->orderByRaw("
-                CASE 
-                    WHEN status = 'in_progress' THEN 1
-                    WHEN status = 'confirmed' THEN 2
-                    WHEN status = 'pending' THEN 3
-                    WHEN status = 'rescheduled' THEN 4
-                    WHEN status = 'completed' THEN 5
-                    ELSE 6
-                END " . $sortOrder);
-        } elseif ($sortBy === 'price') {
-            $query->orderBy('total_price', $sortOrder);
-        } else {
-            $query->orderBy($sortBy, $sortOrder);
-        }
-
-        return $query->with(['client', 'master', 'service'])->paginate($perPage);
-    }
-
-    protected function applyFilters($query, array $filters = [])
-    {
-        if (isset($filters['status'])) {
-            if ($filters['status'] instanceof BookingStatus) {
-                $query->byStatus($filters['status']);
-            } elseif (is_array($filters['status'])) {
-                $query->whereIn('status', $filters['status']);
-            } else {
-                $query->where('status', $filters['status']);
-            }
-        }
-
-        if (isset($filters['type'])) {
-            if ($filters['type'] instanceof BookingType) {
-                $query->byType($filters['type']);
-            } else {
-                $query->where('type', $filters['type']);
-            }
-        }
-
-        if (isset($filters['client_id'])) {
-            $query->forClient($filters['client_id']);
-        }
-
-        if (isset($filters['master_id'])) {
-            $query->forMaster($filters['master_id']);
-        }
-
-        if (isset($filters['service_id'])) {
-            $query->where('service_id', $filters['service_id']);
-        }
-
-        if (isset($filters['date_from'])) {
-            $query->where('start_time', '>=', $filters['date_from']);
-        }
-
-        if (isset($filters['date_to'])) {
-            $query->where('start_time', '<=', $filters['date_to']);
-        }
-
-        if (isset($filters['date'])) {
-            $query->whereDate('start_time', $filters['date']);
-        }
-
-        if (isset($filters['price_min'])) {
-            $query->where('total_price', '>=', $filters['price_min']);
-        }
-
-        if (isset($filters['price_max'])) {
-            $query->where('total_price', '<=', $filters['price_max']);
-        }
-
-        if (isset($filters['search'])) {
-            $search = $filters['search'];
-            $query->where(function ($q) use ($search) {
-                $q->where('booking_number', 'like', "%{$search}%")
-                  ->orWhere('client_name', 'like', "%{$search}%")
-                  ->orWhere('client_phone', 'like', "%{$search}%")
-                  ->orWhere('client_email', 'like', "%{$search}%")
-                  ->orWhere('notes', 'like', "%{$search}%");
-            });
-        }
-
-        if (isset($filters['active']) && $filters['active']) {
-            $query->active();
-        }
-
-        if (isset($filters['upcoming']) && $filters['upcoming']) {
-            $query->upcoming();
-        }
-
-        if (isset($filters['past']) && $filters['past']) {
-            $query->past();
-        }
-
-        return $query;
-    }
-
-    public function getUpcoming(int $limit = 10): Collection
-    {
-        return $this->model->upcoming()
-                          ->active()
-                          ->orderBy('start_time')
-                          ->limit($limit)
-                          ->get();
-    }
-
-    public function getUpcomingForMaster(int $masterId, int $limit = 10): Collection
-    {
-        return $this->model->forMaster($masterId)
-                          ->upcoming()
-                          ->active()
-                          ->orderBy('start_time')
-                          ->limit($limit)
-                          ->get();
-    }
-
-    public function getUpcomingForClient(int $clientId, int $limit = 10): Collection
-    {
-        return $this->model->forClient($clientId)
-                          ->upcoming()
-                          ->active()
-                          ->orderBy('start_time')
-                          ->limit($limit)
-                          ->get();
-    }
-
-    public function getTodayBookings(?int $masterId = null): Collection
-    {
-        $query = $this->model->today()->active();
-        
-        if ($masterId) {
-            $query->forMaster($masterId);
-        }
-        
-        return $query->orderBy('start_time')->get();
-    }
-
-    public function getBookingsForDate(Carbon $date, ?int $masterId = null): Collection
-    {
-        $query = $this->model->whereDate('start_time', $date);
-        
-        if ($masterId) {
-            $query->forMaster($masterId);
-        }
-        
-        return $query->orderBy('start_time')->get();
-    }
-
-    public function getBookingsForDateRange(Carbon $startDate, Carbon $endDate, ?int $masterId = null): Collection
-    {
-        $query = $this->model->whereBetween('start_time', [$startDate, $endDate]);
-        
-        if ($masterId) {
-            $query->forMaster($masterId);
-        }
-        
-        return $query->orderBy('start_time')->get();
-    }
-
-    public function findOverlapping(Carbon $startTime, Carbon $endTime, int $masterId, ?int $excludeId = null): Collection
-    {
-        $query = $this->model->where('master_id', $masterId)
-                            ->active()
-                            ->where(function ($q) use ($startTime, $endTime) {
-                                $q->whereBetween('start_time', [$startTime, $endTime])
-                                  ->orWhereBetween('end_time', [$startTime, $endTime])
-                                  ->orWhere(function ($q2) use ($startTime, $endTime) {
-                                      $q2->where('start_time', '<=', $startTime)
-                                         ->where('end_time', '>=', $endTime);
-                                  });
-                            });
-
-        if ($excludeId) {
-            $query->where('id', '!=', $excludeId);
-        }
-
-        return $query->get();
-    }
-
-    public function getStatistics(array $filters = []): array
-    {
-        $query = $this->model->newQuery();
-        
-        if (isset($filters['master_id'])) {
-            $query->forMaster($filters['master_id']);
-        }
-        
-        if (isset($filters['date_from'])) {
-            $query->where('start_time', '>=', $filters['date_from']);
-        }
-        
-        if (isset($filters['date_to'])) {
-            $query->where('start_time', '<=', $filters['date_to']);
-        }
-
-        $stats = $query->select([
-            DB::raw('COUNT(*) as total_bookings'),
-            DB::raw('COUNT(CASE WHEN status = "completed" THEN 1 END) as completed_bookings'),
-            DB::raw('COUNT(CASE WHEN status IN ("cancelled_by_client", "cancelled_by_master", "no_show") THEN 1 END) as cancelled_bookings'),
-            DB::raw('SUM(CASE WHEN status = "completed" THEN total_price ELSE 0 END) as total_revenue'),
-            DB::raw('AVG(CASE WHEN status = "completed" THEN total_price ELSE NULL END) as average_booking_value'),
-            DB::raw('COUNT(CASE WHEN status IN ("pending", "confirmed", "in_progress") THEN 1 END) as active_bookings'),
-        ])->first();
-
-        $conversionRate = $stats->total_bookings > 0 
-            ? round(($stats->completed_bookings / $stats->total_bookings) * 100, 2) 
-            : 0;
-
-        $cancellationRate = $stats->total_bookings > 0 
-            ? round(($stats->cancelled_bookings / $stats->total_bookings) * 100, 2) 
-            : 0;
-
-        return [
-            'total_bookings' => $stats->total_bookings ?? 0,
-            'completed_bookings' => $stats->completed_bookings ?? 0,
-            'cancelled_bookings' => $stats->cancelled_bookings ?? 0,
-            'active_bookings' => $stats->active_bookings ?? 0,
-            'total_revenue' => $stats->total_revenue ?? 0,
-            'average_booking_value' => $stats->average_booking_value ?? 0,
-            'conversion_rate' => $conversionRate,
-            'cancellation_rate' => $cancellationRate,
-        ];
-    }
-
-    public function getRevenueByMonth(int $year, ?int $masterId = null): Collection
-    {
-        $query = $this->model->whereYear('start_time', $year)
-                            ->where('status', 'completed');
-        
-        if ($masterId) {
-            $query->forMaster($masterId);
-        }
-
-        return $query->select([
-            DB::raw('MONTH(start_time) as month'),
-            DB::raw('SUM(total_price) as revenue'),
-            DB::raw('COUNT(*) as bookings_count')
-        ])
-        ->groupBy(DB::raw('MONTH(start_time)'))
-        ->orderBy('month')
-        ->get();
-    }
-
-    public function getPopularServices(int $limit = 10, ?int $masterId = null): Collection
-    {
-        $query = $this->model->join('services', 'bookings.service_id', '=', 'services.id')
-                            ->where('bookings.status', 'completed');
-        
-        if ($masterId) {
-            $query->where('bookings.master_id', $masterId);
-        }
-
-        return $query->select([
-            'services.id',
-            'services.name',
-            DB::raw('COUNT(*) as bookings_count'),
-            DB::raw('SUM(bookings.total_price) as total_revenue'),
-            DB::raw('AVG(bookings.total_price) as average_price')
-        ])
-        ->groupBy('services.id', 'services.name')
-        ->orderByDesc('bookings_count')
-        ->limit($limit)
-        ->get();
-    }
-
-    public function getNeedsReminder(): Collection
-    {
-        return $this->model->needsReminder()->get();
-    }
-
-    public function getOverdue(): Collection
-    {
-        return $this->model->overdue()->get();
-    }
-
-    public function getExpiringSoon(int $hours = 24): Collection
-    {
-        return $this->model->where('status', 'pending')
-                          ->where('start_time', '>', now())
-                          ->where('start_time', '<=', now()->addHours($hours))
-                          ->get();
-    }
-
-    public function getFrequentClients(int $limit = 10, ?int $masterId = null): Collection
-    {
-        $query = $this->model->join('users', 'bookings.client_id', '=', 'users.id')
-                            ->where('bookings.status', 'completed');
-        
-        if ($masterId) {
-            $query->where('bookings.master_id', $masterId);
-        }
-
-        return $query->select([
-            'users.id',
-            'users.name',
-            'users.email',
-            DB::raw('COUNT(*) as bookings_count'),
-            DB::raw('SUM(bookings.total_price) as total_spent'),
-            DB::raw('MAX(bookings.start_time) as last_booking')
-        ])
-        ->groupBy('users.id', 'users.name', 'users.email')
-        ->orderByDesc('bookings_count')
-        ->limit($limit)
-        ->get();
-    }
-
-    public function markReminderSent(int $bookingId): bool
-    {
-        return $this->update($bookingId, [
-            'reminder_sent' => true,
-            'reminder_sent_at' => now()
-        ]);
+        return $this->crudHandler->validateBookingRequest($masterProfileId, $serviceId);
     }
 
     public function batchUpdateStatus(array $ids, $status): int
     {
-        return $this->model->whereIn('id', $ids)->update(['status' => $status]);
+        return $this->crudHandler->batchUpdateStatus($ids, $status);
     }
 
-    public function getBookingCalendar(Carbon $startDate, Carbon $endDate, ?int $masterId = null): array
+    public function markReminderSent(int $bookingId): bool
     {
-        $query = $this->model->whereBetween('start_time', [$startDate, $endDate]);
-        
-        if ($masterId) {
-            $query->forMaster($masterId);
-        }
+        return $this->crudHandler->markReminderSent($bookingId);
+    }
 
-        $bookings = $query->with(['client', 'service'])->get();
+    // === ПОИСК И ФИЛЬТРАЦИЯ ===
 
-        $calendar = [];
-        
-        foreach ($bookings as $booking) {
-            $date = $booking->start_time->format('Y-m-d');
-            
-            if (!isset($calendar[$date])) {
-                $calendar[$date] = [];
-            }
-            
-            $calendar[$date][] = [
-                'id' => $booking->id,
-                'title' => $booking->service->name ?? 'Услуга',
-                'client' => $booking->client->name ?? $booking->client_name,
-                'start' => $booking->start_time->format('c'),
-                'end' => $booking->end_time->format('c'),
-                'status' => $booking->status,
-                'color' => $booking->status instanceof BookingStatus ? $booking->status->getColor() : '#6B7280',
-            ];
-        }
+    public function search(array $filters = [], int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->searchHandler->search($filters, $perPage);
+    }
 
-        return $calendar;
+    public function getBookingsForUser($user, int $perPage = 10)
+    {
+        return $this->searchHandler->getBookingsForUser($user, $perPage);
+    }
+
+    public function findForClient(int $clientId, array $filters = []): Collection
+    {
+        return $this->searchHandler->findForClient($clientId, $filters);
+    }
+
+    public function findForMaster(int $masterId, array $filters = []): Collection
+    {
+        return $this->searchHandler->findForMaster($masterId, $filters);
+    }
+
+    public function findOverlapping(Carbon $startTime, Carbon $endTime, int $masterId, ?int $excludeId = null): Collection
+    {
+        return $this->searchHandler->findOverlapping($startTime, $endTime, $masterId, $excludeId);
+    }
+
+    public function getNeedsReminder(): Collection
+    {
+        return $this->searchHandler->getNeedsReminder();
+    }
+
+    public function getOverdue(): Collection
+    {
+        return $this->searchHandler->getOverdue();
+    }
+
+    public function getExpiringSoon(int $hours = 24): Collection
+    {
+        return $this->searchHandler->getExpiringSoon($hours);
     }
 
     public function optimizeQuery()
     {
-        return $this->model->select([
-            'id', 'booking_number', 'client_id', 'master_id', 'service_id',
-            'type', 'status', 'start_time', 'end_time', 'total_price',
-            'client_name', 'client_phone', 'created_at'
-        ]);
+        return $this->searchHandler->optimizeQuery();
+    }
+
+    // === КАЛЕНДАРНЫЕ ФУНКЦИИ ===
+
+    public function getUpcoming(int $limit = 10): Collection
+    {
+        return $this->calendarHandler->getUpcoming($limit);
+    }
+
+    public function getUpcomingForMaster(int $masterId, int $limit = 10): Collection
+    {
+        return $this->calendarHandler->getUpcomingForMaster($masterId, $limit);
+    }
+
+    public function getUpcomingForClient(int $clientId, int $limit = 10): Collection
+    {
+        return $this->calendarHandler->getUpcomingForClient($clientId, $limit);
+    }
+
+    public function getTodayBookings(?int $masterId = null): Collection
+    {
+        return $this->calendarHandler->getTodayBookings($masterId);
+    }
+
+    public function getBookingsForDate(Carbon $date, ?int $masterId = null): Collection
+    {
+        return $this->calendarHandler->getBookingsForDate($date, $masterId);
+    }
+
+    public function getBookingsForDateRange(Carbon $startDate, Carbon $endDate, ?int $masterId = null): Collection
+    {
+        return $this->calendarHandler->getBookingsForDateRange($startDate, $endDate, $masterId);
+    }
+
+    public function getBookingCalendar(Carbon $startDate, Carbon $endDate, ?int $masterId = null): array
+    {
+        return $this->calendarHandler->getBookingCalendar($startDate, $endDate, $masterId);
+    }
+
+    // === АНАЛИТИКА И СТАТИСТИКА ===
+
+    public function getStatistics(array $filters = []): array
+    {
+        return $this->analyticsHandler->getStatistics($filters);
+    }
+
+    public function getRevenueByMonth(int $year, ?int $masterId = null): Collection
+    {
+        return $this->analyticsHandler->getRevenueByMonth($year, $masterId);
+    }
+
+    public function getPopularServices(int $limit = 10, ?int $masterId = null): Collection
+    {
+        return $this->analyticsHandler->getPopularServices($limit, $masterId);
+    }
+
+    public function getFrequentClients(int $limit = 10, ?int $masterId = null): Collection
+    {
+        return $this->analyticsHandler->getFrequentClients($limit, $masterId);
+    }
+
+    public function getDetailedAnalytics(array $filters = []): array
+    {
+        return $this->analyticsHandler->getDetailedAnalytics($filters);
+    }
+
+    // === ДОПОЛНИТЕЛЬНЫЕ МЕТОДЫ ===
+
+    /**
+     * Получить доступность мастера на дату
+     */
+    public function getMasterAvailability(int $masterId, Carbon $date): array
+    {
+        return $this->calendarHandler->getMasterAvailability($masterId, $date);
+    }
+
+    /**
+     * Получить статистику занятости по дням недели
+     */
+    public function getWeeklyOccupancy(int $masterId, Carbon $startDate): array
+    {
+        return $this->calendarHandler->getWeeklyOccupancy($masterId, $startDate);
+    }
+
+    /**
+     * Дублировать бронирование
+     */
+    public function duplicate(int $id, array $overrideData = []): ?Booking
+    {
+        return $this->crudHandler->duplicate($id, $overrideData);
+    }
+
+    /**
+     * Проверить уникальность номера бронирования
+     */
+    public function isBookingNumberUnique(string $bookingNumber, ?int $excludeId = null): bool
+    {
+        return $this->crudHandler->isBookingNumberUnique($bookingNumber, $excludeId);
     }
 }

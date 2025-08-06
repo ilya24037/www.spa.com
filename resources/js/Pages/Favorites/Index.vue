@@ -1,10 +1,10 @@
-<!-- Страница избранного (/favorites) -->
+<!-- РЎС‚СЂР°РЅРёС†Р° РёР·Р±СЂР°РЅРЅРѕРіРѕ (/favorites) -->
 <template>
-    <Head title="Избранное" />
+    <Head title="РР·Р±СЂР°РЅРЅРѕРµ" />
     
-    <!-- Обертка с правильными отступами как в Dashboard -->
+    <!-- РћР±РµСЂС‚РєР° СЃ РїСЂР°РІРёР»СЊРЅС‹РјРё РѕС‚СЃС‚СѓРїР°РјРё РєР°Рє РІ Dashboard -->
     <div class="py-6 lg:py-8">
-        <!-- Loading состояние -->
+        <!-- Loading СЃРѕСЃС‚РѕСЏРЅРёРµ -->
         <PageLoader 
             v-if="pageLoader.isLoading.value"
             type="catalog"
@@ -13,20 +13,20 @@
             :skeleton-count="3"
         />
         
-        <!-- Основной контент -->
+        <!-- РћСЃРЅРѕРІРЅРѕР№ РєРѕРЅС‚РµРЅС‚ -->
         <template v-else>
-            <!-- Основной контент с гэпом между блоками -->
+            <!-- РћСЃРЅРѕРІРЅРѕР№ РєРѕРЅС‚РµРЅС‚ СЃ РіСЌРїРѕРј РјРµР¶РґСѓ Р±Р»РѕРєР°РјРё -->
             <div class="flex gap-6">
                 
-                <!-- Боковая панель -->
+                <!-- Р‘РѕРєРѕРІР°СЏ РїР°РЅРµР»СЊ -->
                 <ProfileSidebar 
                     :counts="counts"
                     :user-stats="userStats"
                 />
                 
-                <!-- Основной контент -->
+                <!-- РћСЃРЅРѕРІРЅРѕР№ РєРѕРЅС‚РµРЅС‚ -->
                 <main class="flex-1">
-                    <ContentCard title="Избранные мастера">
+                    <ContentCard title="РР·Р±СЂР°РЅРЅС‹Рµ РјР°СЃС‚РµСЂР°">
                     <div v-if="favorites.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <MasterCard 
                             v-for="master in favorites"
@@ -39,12 +39,12 @@
                         <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                         </svg>
-                        <p class="text-gray-500 text-lg mb-4">У вас пока нет избранных мастеров</p>
+                        <p class="text-gray-500 text-lg mb-4">РЈ РІР°СЃ РїРѕРєР° РЅРµС‚ РёР·Р±СЂР°РЅРЅС‹С… РјР°СЃС‚РµСЂРѕРІ</p>
                         <Link 
                             href="/" 
                             class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                         >
-                            Найти мастеров
+                            РќР°Р№С‚Рё РјР°СЃС‚РµСЂРѕРІ
                         </Link>
                     </div>
                 </ContentCard>
@@ -59,14 +59,14 @@ import { logger } from '@/src/shared/lib/logger'
 import { Head } from '@inertiajs/vue3'
 import { onMounted } from 'vue'
 
-// 🎯 FSD Импорты
+// рџЋЇ FSD РРјРїРѕСЂС‚С‹
 import ProfileSidebar from '@/src/shared/ui/organisms/ProfileSidebar/ProfileSidebar.vue'
 import ContentCard from '@/src/shared/ui/organisms/ContentCard/ContentCard.vue'
 import MasterCard from '@/src/entities/master/ui/MasterCard/MasterCard.vue'
 import PageLoader from '@/src/shared/ui/organisms/PageLoader/PageLoader.vue'
 import { usePageLoading } from '@/src/shared/composables/usePageLoading'
 
-// Типизация данных
+// РўРёРїРёР·Р°С†РёСЏ РґР°РЅРЅС‹С…
 interface Master {
   id: number | string
   name: string
@@ -98,7 +98,7 @@ interface FavoritesIndexProps {
   userStats: UserStats
 }
 
-// Props с типизацией
+// Props СЃ С‚РёРїРёР·Р°С†РёРµР№
 const props = withDefaults(defineProps<FavoritesIndexProps>(), {
   favorites: () => [],
   counts: () => ({
@@ -115,7 +115,7 @@ const props = withDefaults(defineProps<FavoritesIndexProps>(), {
   })
 })
 
-// Управление загрузкой страницы
+// РЈРїСЂР°РІР»РµРЅРёРµ Р·Р°РіСЂСѓР·РєРѕР№ СЃС‚СЂР°РЅРёС†С‹
 const pageLoader = usePageLoading({
   type: 'catalog',
   autoStart: true,
@@ -131,19 +131,19 @@ const pageLoader = usePageLoading({
   }
 })
 
-// Инициализация при монтировании
+// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РїСЂРё РјРѕРЅС‚РёСЂРѕРІР°РЅРёРё
 onMounted(() => {
-  // Поэтапная загрузка для лучшего UX
+  // РџРѕСЌС‚Р°РїРЅР°СЏ Р·Р°РіСЂСѓР·РєР° РґР»СЏ Р»СѓС‡С€РµРіРѕ UX
   setTimeout(() => {
-    pageLoader.setProgress(40, 'Загружаем избранных мастеров...')
+    pageLoader.setProgress(40, 'Р—Р°РіСЂСѓР¶Р°РµРј РёР·Р±СЂР°РЅРЅС‹С… РјР°СЃС‚РµСЂРѕРІ...')
   }, 300)
 
   setTimeout(() => {
-    pageLoader.setProgress(70, 'Обрабатываем статистику...')
+    pageLoader.setProgress(70, 'РћР±СЂР°Р±Р°С‚С‹РІР°РµРј СЃС‚Р°С‚РёСЃС‚РёРєСѓ...')
   }, 700)
 
   setTimeout(() => {
-    pageLoader.setProgress(90, 'Подготавливаем интерфейс...')
+    pageLoader.setProgress(90, 'РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј РёРЅС‚РµСЂС„РµР№СЃ...')
   }, 1100)
 
   setTimeout(() => {

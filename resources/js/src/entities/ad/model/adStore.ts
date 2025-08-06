@@ -219,7 +219,7 @@ export const useAdStore = defineStore('ad', () => {
   /**
    * Загрузить объявление по ID
    */
-  const fetchAd = async (id) => {
+  const fetchAd = async (id: any) => {
     loading.value = true
     
     try {
@@ -247,7 +247,7 @@ export const useAdStore = defineStore('ad', () => {
   /**
    * Создать объявление
    */
-  const createAd = async (data) => {
+  const createAd = async (data: any) => {
     saving.value = true
     
     try {
@@ -273,7 +273,7 @@ export const useAdStore = defineStore('ad', () => {
   /**
    * Обновить объявление
    */
-  const updateAd = async (id, data) => {
+  const updateAd = async (id: any, data: any) => {
     saving.value = true
     
     try {
@@ -302,7 +302,7 @@ export const useAdStore = defineStore('ad', () => {
   /**
    * Удалить объявление
    */
-  const deleteAd = async (id) => {
+  const deleteAd = async (id: any) => {
     saving.value = true
     
     try {
@@ -336,7 +336,7 @@ export const useAdStore = defineStore('ad', () => {
   /**
    * Изменить статус объявления
    */
-  const changeAdStatus = async (id, status) => {
+  const changeAdStatus = async (id: any, status: any) => {
     saving.value = true
     
     try {
@@ -369,7 +369,7 @@ export const useAdStore = defineStore('ad', () => {
   /**
    * Добавить/удалить из избранного
    */
-  const toggleFavorite = async (adId) => {
+  const toggleFavorite = async (adId: any) => {
     try {
       const ad = ads.value.find(a => a.id === adId)
       if (!ad) return
@@ -430,7 +430,7 @@ export const useAdStore = defineStore('ad', () => {
   /**
    * Установить фильтры
    */
-  const setFilters = (newFilters) => {
+  const setFilters = (newFilters: any) => {
     Object.assign(filters, newFilters)
     pagination.current_page = 1 // Сбрасываем на первую страницу
   }
@@ -450,7 +450,7 @@ export const useAdStore = defineStore('ad', () => {
   /**
    * Установить поисковый запрос
    */
-  const setSearchQuery = (query) => {
+  const setSearchQuery = (query: any) => {
     searchQuery.value = query
     pagination.current_page = 1 // Сбрасываем на первую страницу
   }

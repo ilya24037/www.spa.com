@@ -7,24 +7,24 @@
     @mouseenter="$emit('hover', true)"
     @mouseleave="$emit('hover', false)"
   >
-    <!-- Маркер -->
+    <!-- РњР°СЂРєРµСЂ -->
     <div :class="MARKER_CLASSES">
       <div :class="getMarkerContentClasses()">
         {{ markerLabel }}
       </div>
-      <!-- Стрелка -->
+      <!-- РЎС‚СЂРµР»РєР° -->
       <div v-if="mode !== 'mini'" :class="ARROW_CLASSES">
         <div :class="ARROW_TRIANGLE_CLASSES"></div>
       </div>
     </div>
 
-    <!-- Тултип при наведении -->
+    <!-- РўСѓР»С‚РёРї РїСЂРё РЅР°РІРµРґРµРЅРёРё -->
     <div v-if="isHovered && hasTooltip" :class="TOOLTIP_CLASSES">
       <div :class="TOOLTIP_TITLE_CLASSES">{{ marker.tooltip.title }}</div>
       <div v-if="marker.tooltip.subtitle" :class="TOOLTIP_SUBTITLE_CLASSES">
         {{ marker.tooltip.subtitle }}
       </div>
-      <!-- Стрелка тултипа -->
+      <!-- РЎС‚СЂРµР»РєР° С‚СѓР»С‚РёРїР° -->
       <div :class="TOOLTIP_ARROW_CLASSES">
         <div :class="TOOLTIP_ARROW_TRIANGLE_CLASSES"></div>
       </div>
@@ -35,7 +35,7 @@
 <script setup>
 import { computed } from 'vue'
 
-// 🎯 Стили согласно дизайн-системе
+// рџЋЇ РЎС‚РёР»Рё СЃРѕРіР»Р°СЃРЅРѕ РґРёР·Р°Р№РЅ-СЃРёСЃС‚РµРјРµ
 const CONTAINER_CLASSES = 'absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer'
 const MARKER_CLASSES = 'relative'
 const MARKER_CONTENT_BASE_CLASSES = 'transition-all duration-200 hover:scale-110 px-2 py-1 rounded-full text-xs font-medium shadow-md'
@@ -71,22 +71,22 @@ const props = defineProps({
 
 defineEmits(['click', 'hover'])
 
-// Вычисляемые свойства
+// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const markerLabel = computed(() => {
   if (props.marker.price) {
-    return `${props.marker.price}₽`
+    return `${props.marker.price}в‚Ѕ`
   }
   if (props.marker.name) {
     return props.marker.name
   }
-  return props.marker.label || '●'
+  return props.marker.label || 'в—Џ'
 })
 
 const hasTooltip = computed(() => 
   props.marker.tooltip && (props.marker.tooltip.title || props.marker.tooltip.subtitle)
 )
 
-// Методы
+// РњРµС‚РѕРґС‹
 const getMarkerContentClasses = () => {
   const classes = [MARKER_CONTENT_BASE_CLASSES]
   

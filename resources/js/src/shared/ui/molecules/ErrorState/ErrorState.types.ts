@@ -161,7 +161,7 @@ export interface ErrorStatistics {
 }
 
 // Типы для интеграции с Vue
-import type { Ref } from 'vue'
+// import type { Ref } from 'vue'
 
 // Экспорт дефолтной конфигурации
 export const DEFAULT_ERROR_CONFIGS: ErrorTypeConfigs = {

@@ -1,7 +1,6 @@
 import { logger } from '@/src/shared/lib/logger'
 
 import { ref } from 'vue'
-import type { Ref } from 'vue'
 import { useToast } from './useToast'
 import type {
   ErrorInfo,
