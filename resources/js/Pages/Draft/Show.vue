@@ -1,12 +1,12 @@
 <template>
-  <Head :title="`${ad.title || 'Р§РµСЂРЅРѕРІРёРє'} - SPA Platform`" />
+  <Head :title="`${ad.title || 'Черновик'} - SPA Platform`" />
   
   <div>
-    <!-- РљРѕРЅС‚РµР№РЅРµСЂ РєР°Рє РЅР° РіР»Р°РІРЅРѕР№ -->
+    <!-- Контейнер как на главной -->
     <div class="py-6 lg:py-8">
-      <!-- РҐР»РµР±РЅС‹Рµ РєСЂРѕС€РєРё -->
+      <!-- Хлебные крошки -->
       <div class="mb-6">
-        <!-- РҐР»РµР±РЅС‹Рµ РєСЂРѕС€РєРё -->
+        <!-- Хлебные крошки -->
         <Breadcrumbs
           :items="breadcrumbItems"
         />
@@ -201,7 +201,7 @@
       @cancel="handleDeleteCancel"
       @confirm="handleDeleteConfirm"
       title="РЈРґР°Р»РёС‚СЊ С‡РµСЂРЅРѕРІРёРє?"
-      message="Р­С‚Рѕ РґРµР№СЃС‚РІРёРµ РЅРµР»СЊР·СЏ РѕС‚РјРµРЅРёС‚СЊ. Р§РµСЂРЅРѕРІРёРє Р±СѓРґРµС‚ СѓРґР°Р»РµРЅ РЅР°РІСЃРµРіРґР°."
+      message="Р­С‚Рѕ РґРµР№СЃС‚РІРёРµ РЅРµР»СЊР·СЏ РѕС‚РјРµРЅРёС‚СЊ. Черновик Р±СѓРґРµС‚ СѓРґР°Р»РµРЅ РЅР°РІСЃРµРіРґР°."
       confirm-text="РЈРґР°Р»РёС‚СЊ"
       cancel-text="РћС‚РјРµРЅР°"
     />
@@ -334,7 +334,7 @@ const deleteDraft = () => {
 const breadcrumbItems = [
   { title: 'Р“Р»Р°РІРЅР°СЏ', href: '/' },
   { title: 'РњРѕРё РѕР±СЉСЏРІР»РµРЅРёСЏ', href: '/profile/items/draft/all' },
-  { title: props.ad.title || 'Р§РµСЂРЅРѕРІРёРє' }
+  { title: props.ad.title || 'Черновик' }
 ]
 </script>
 

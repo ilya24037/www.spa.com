@@ -1,4 +1,4 @@
-<!-- PageLoader?.vue -->
+<!-- PageLoader.vue -->
 <template>
   <div 
     :class="containerClasses"

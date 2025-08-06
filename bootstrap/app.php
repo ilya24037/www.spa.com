@@ -15,9 +15,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Application\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+            // \App\Application\Http\Middleware\PerformanceMiddleware::class, // Временно отключено
         ]);
 
-        //
+        // Глобальные middleware (временно отключено)
+        // $middleware->append([
+        //     \App\Application\Http\Middleware\PerformanceMiddleware::class,
+        // ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

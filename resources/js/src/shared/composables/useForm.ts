@@ -40,8 +40,8 @@ export function useForm<T extends Record<string, any>>(options: FormOptions<T>) 
   
   // Состояние формы
   const values = ref<T>({ ...initialValues })
-  const touched =<Record<string, boolean>>({})
-  const errors =<Record<string, string>>({})
+  const touched = ref<Record<string, boolean>>({})
+  const errors = ref<Record<string, string>>({})
   
   // Async action для submit
   const { execute, loading } = useAsyncAction()
@@ -49,11 +49,11 @@ export function useForm<T extends Record<string, any>>(options: FormOptions<T>) 
   
   // Вычисляемые свойства
   const isDirty = computed(() => {
-    return JSON.stringify(values) !== JSON.stringify(initialValues)
+    return JSON.stringify(values.value) !== JSON.stringify(initialValues)
   })
   
   const isValid = computed(() => {
-    return Object.keys(errors).length === 0
+    return Object.keys(errors.value).length === 0
   })
   
   const hasErrors = computed(() => {
@@ -64,24 +64,24 @@ export function useForm<T extends Record<string, any>>(options: FormOptions<T>) 
   const validateField = (field: keyof T) => {
     if (!validate) return
     
-    const validationResult = validate(values)
+    const validationResult = validate(values.value)
     if (validationResult && validationResult[field as string]) {
-      errors[field as string] = validationResult[field as string]
+      errors.value[field as string] = validationResult[field as string]
     } else {
-      delete errors[field as string]
+      delete errors.value[field as string]
     }
   }
   
   const validateForm = (): boolean => {
     if (!validate) return true
     
-    const validationResult = validate(values)
+    const validationResult = validate(values.value)
     
     // Очистить старые ошибки
-    Object.keys(errors).forEach(key => delete errors[key])
+    Object.keys(errors.value).forEach(key => delete errors.value[key])
     
     if (validationResult) {
-      Object.assign(errors, validationResult)
+      Object.assign(errors.value, validationResult)
       return false
     }
     
@@ -89,36 +89,36 @@ export function useForm<T extends Record<string, any>>(options: FormOptions<T>) 
   }
   
   const touch = (field: keyof T) => {
-    touched[field as string] = true
+    touched.value[field as string] = true
     validateField(field)
   }
   
   const touchAll = () => {
-    Object.keys(values).forEach(key => {
-      touched[key] = true
+    Object.keys(values.value).forEach(key => {
+      touched.value[key] = true
     })
   }
   
   const setFieldValue = (field: keyof T, value: any) => {
-    values[field] = value
-    if (touched[field as string]) {
+    values.value[field] = value
+    if (touched.value[field as string]) {
       validateField(field)
     }
   }
   
   const setFieldError = (field: keyof T, error: string) => {
-    errors[field as string] = error
-    touched[field as string] = true
+    errors.value[field as string] = error
+    touched.value[field as string] = true
   }
   
   const clearFieldError = (field: keyof T) => {
-    delete errors[field as string]
+    delete errors.value[field as string]
   }
   
   const reset = () => {
-    Object.assign(values, initialValues)
-    Object.keys(touched).forEach(key => delete touched[key])
-    Object.keys(errors).forEach(key => delete errors[key])
+    Object.assign(values.value, initialValues)
+    Object.keys(touched.value).forEach(key => delete touched.value[key])
+    Object.keys(errors.value).forEach(key => delete errors.value[key])
     clearError()
   }
   
@@ -130,12 +130,12 @@ export function useForm<T extends Record<string, any>>(options: FormOptions<T>) 
     }
     
     await execute(
-      () => onSubmit(values),
+      () => onSubmit(values.value),
       {
         onError: () => {
           // Обработка ошибок валидации от сервера
           Object.entries(validationErrors.value).forEach(([field, messages]) => {
-            errors[field] = messages[0]
+            errors.value[field] = messages[0]
           })
         }
       }
@@ -143,12 +143,12 @@ export function useForm<T extends Record<string, any>>(options: FormOptions<T>) 
   }
   
   const getFieldProps = (field: keyof T) => ({
-    value: values[field],
+    value: values.value[field],
     'onUpdate:modelValue': (value: any) => setFieldValue(field, value),
     onBlur: () => touch(field),
-    error: errors[field as string] || null,
-    'aria-invalid': !!errors[field as string],
-    'aria-describedby': errors[field as string] ? `${field}-error` : undefined
+    error: errors.value[field as string] || null,
+    'aria-invalid': !!errors.value[field as string],
+    'aria-describedby': errors.value[field as string] ? `${field as string}-error` : undefined
   })
   
   return {

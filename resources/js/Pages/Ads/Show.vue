@@ -179,7 +179,7 @@ const getStatusClass = (status: any) => {
 const getStatusText = (status: any) => {
   const texts = {
     'active': 'РђРєС‚РёРІРЅРѕ',
-    'draft': 'Р§РµСЂРЅРѕРІРёРє',
+    'draft': 'Черновик',
     'waiting_payment': 'Р–РґРµС‚ РѕРїР»Р°С‚С‹',
     'archived': 'Р’ Р°СЂС…РёРІРµ',
     'expired': 'РСЃС‚РµРєР»Рѕ'

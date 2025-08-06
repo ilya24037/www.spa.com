@@ -72,7 +72,7 @@ import { computed } from 'vue'
 // рџ“Љ РЎС‚Р°С‚СѓСЃС‹ РѕР±СЉСЏРІР»РµРЅРёР№ (РёР· Laravel Enum)
 const AD_STATUSES = {
   draft: {
-    label: 'Р§РµСЂРЅРѕРІРёРє',
+    label: 'Черновик',
     color: 'bg-gray-100 text-gray-800'
   },
   waiting_payment: {

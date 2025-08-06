@@ -50,7 +50,7 @@ const COUNT_CLASSES = 'text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-f
 
 // рџ“Љ Р’СЃРµ РґРѕСЃС‚СѓРїРЅС‹Рµ СЃС‚Р°С‚СѓСЃС‹ (РёР· Laravel Enum)
 const ALL_STATUSES = {
-  draft: { label: 'Р§РµСЂРЅРѕРІРёРє', order: 1 },
+  draft: { label: 'Черновик', order: 1 },
   waiting_payment: { label: 'Р–РґРµС‚ РѕРїР»Р°С‚С‹', order: 2 },
   active: { label: 'РђРєС‚РёРІРЅРѕРµ', order: 3 },
   archived: { label: 'Р’ Р°СЂС…РёРІРµ', order: 4 },

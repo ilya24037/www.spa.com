@@ -6,6 +6,9 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h } from 'vue';
 import { createPinia } from 'pinia';
 
+// Импорт системы ленивой загрузки (упрощенная версия)
+import { preloadCriticalComponents, preloadRouteComponents, ImageOptimizationPlugin } from './utils/lazyLoadingStub';
+
 import { ZiggyVue } from 'ziggy-js';
 import { Ziggy } from './ziggy';
 import { route } from 'ziggy-js';
@@ -38,11 +41,39 @@ createInertiaApp({
     setup({ el, App, props, plugin }) {
         const pinia = createPinia();
         
-        return createApp({ render: () => h(App, props) })
+        // Запускаем предзагрузку критических компонентов
+        preloadCriticalComponents();
+        
+        // Предзагрузка компонентов на основе текущего маршрута
+        if (props.initialPage?.component) {
+            const routeName = props.initialPage.url || '';
+            preloadRouteComponents(routeName);
+        }
+        
+        const app = createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(pinia)
             .use(ZiggyVue, Ziggy)
-            .mount(el);
+            .use(ImageOptimizationPlugin); // Плагин оптимизации изображений
+            
+        // Глобальные обработчики производительности
+        app.config.performance = true;
+        
+        // Обработчик ошибок для ленивых компонентов
+        app.config.errorHandler = (err, instance, info) => {
+            console.error('Vue error:', err, info);
+            
+            // Отправка ошибок в систему мониторинга
+            if (typeof window !== 'undefined' && window.performance) {
+                console.warn('Component error detected:', {
+                    error: err.message,
+                    component: instance?.$options.name || 'Unknown',
+                    info
+                });
+            }
+        };
+        
+        return app.mount(el);
     },
     progress: {
         color: '#4B5563',

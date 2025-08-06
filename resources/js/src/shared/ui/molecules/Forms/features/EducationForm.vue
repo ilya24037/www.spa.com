@@ -567,7 +567,9 @@ const handleFileSelect = (event: Event) => {
 }
 
 const handleFileDrop = (event: DragEvent) => {
-  isDragOver?.value = false
+  if (isDragOver.value !== undefined) {
+      isDragOver.value = false
+    }
   const files = Array?.from(event?.dataTransfer?.files || [])
   addPhotos(files?.filter(file => file?.type.startsWith('image/')))
 }

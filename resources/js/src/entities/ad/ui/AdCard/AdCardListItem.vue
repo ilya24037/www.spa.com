@@ -1,4 +1,4 @@
-<!-- resources/js/src/entities/ad/ui/AdCard/AdCardListItem?.vue -->
+<!-- resources/js/src/entities/ad/ui/AdCard/AdCardListItem.vue -->
 <template>
   <div :class="CARD_CLASSES" @click="openAd">
     <div :class="CONTAINER_CLASSES">
@@ -125,7 +125,7 @@ import type {
   AdCardListItemProps,AdService,
   AdCardListItemState,
   AdCardError,
-  StyleConstants,} from './AdCardListItem?.types'
+  StyleConstants,} from './AdCardListItem.types'
 
 // Props СЃ TypeScript С‚РёРїРёР·Р°С†РёРµР№
 const _props = withDefaults(defineProps<AdCardListItemProps>(), {})
@@ -297,7 +297,9 @@ const getDescription = (): string => {
 
 const handleImageError = (): void => {
   try {
-    imageError?.value = true
+    if (imageError.value !== undefined) {
+      imageError.value = true
+    }
     
     // Р›РѕРіРёСЂСѓРµРј РѕС€РёР±РєСѓ РґР»СЏ Р°РЅР°Р»РёС‚РёРєРё
     logger?.warn(`Image load error for ad ${_props?.ad.id}`, {
@@ -382,7 +384,7 @@ const contactMaster = (): void => {
         toast?.error('РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РЅРѕРјРµСЂ С‚РµР»РµС„РѕРЅР°')
       }
     } else {
-      toast?.info('РљРѕРЅС‚Р°РєС‚С‹ Р±СѓРґСѓС‚ РґРѕСЃС‚СѓРїРЅС‹ РїРѕСЃР»Рµ Р·Р°РїРёСЃРё')
+      toast?.info('Контакты будут доступны после записи')
     }
   } catch (error: unknown) {
     const adError: AdCardError = {

@@ -1,0 +1,534 @@
+/**
+ * Module - Adaptive Cards
+ * Адаптивные карточки для разных устройств и контекстов
+ */
+
+/* === БАЗОВАЯ АДАПТИВНАЯ КАРТОЧКА === */
+
+.adaptive-card {
+  /* Базовая структура */
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  
+  /* Визуализация */
+  background: var(--card-bg, white);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  
+  /* Тени адаптируются под размер экрана */
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.06);
+  
+  /* Переходы */
+  transition: all 0.2s ease;
+  
+  /* На планшетах и десктопах тени глубже */
+  @media (min-width: 768px) {
+    box-shadow: 
+      0 4px 6px rgba(0, 0, 0, 0.05),
+      0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Hover эффекты только на устройствах с hover */
+  @media (hover: hover) {
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 
+        0 10px 25px rgba(0, 0, 0, 0.1),
+        0 5px 10px rgba(0, 0, 0, 0.05);
+      border-color: var(--color-primary, #3b82f6);
+    }
+  }
+  
+  /* На тач-устройствах используем active вместо hover */
+  @media (hover: none) {
+    &:active {
+      transform: scale(0.98);
+      transition: transform 0.1s ease;
+    }
+  }
+}
+
+/* === ЭЛЕМЕНТЫ АДАПТИВНОЙ КАРТОЧКИ === */
+
+/* Адаптивное изображение */
+.adaptive-card__image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+  background-color: var(--color-gray-100, #f3f4f6);
+  
+  /* На маленьких экранах изображения выше */
+  @media (max-width: 639px) {
+    height: 180px;
+  }
+  
+  /* На больших экранах - стандартная высота */
+  @media (min-width: 1024px) {
+    height: 220px;
+  }
+  
+  /* Ленивая загрузка */
+  &[loading="lazy"] {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  &[loading="lazy"].loaded {
+    opacity: 1;
+  }
+}
+
+/* Адаптивный контент */
+.adaptive-card__content {
+  padding: 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  
+  /* На больших экранах больше отступы */
+  @media (min-width: 768px) {
+    padding: 1.25rem;
+  }
+  
+  @media (min-width: 1024px) {
+    padding: 1.5rem;
+  }
+}
+
+/* Адаптивный заголовок */
+.adaptive-card__title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+  
+  /* Ограничиваем до 2 строк */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  
+  /* На планшетах заголовки больше */
+  @media (min-width: 768px) {
+    font-size: 1rem;
+  }
+  
+  /* На десктопах еще больше */
+  @media (min-width: 1024px) {
+    font-size: 1.125rem;
+    -webkit-line-clamp: 3;
+  }
+}
+
+/* Адаптивное описание */
+.adaptive-card__description {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  
+  /* Ограничиваем до 2 строк на мобильных */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  
+  /* На планшетах показываем больше текста */
+  @media (min-width: 768px) {
+    font-size: 0.875rem;
+    -webkit-line-clamp: 3;
+  }
+  
+  /* На десктопах полное описание */
+  @media (min-width: 1024px) {
+    -webkit-line-clamp: 4;
+  }
+}
+
+/* Адаптивная мета информация */
+.adaptive-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  
+  /* На мобильных стэкаем вертикально */
+  @media (max-width: 639px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+
+/* === ТИПЫ КАРТОЧЕК === */
+
+/* Service Card - Карточка услуги */
+.service-card {
+  /* Наследуем все свойства adaptive-card */
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--card-bg, white);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+
+.service-card__price {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+  
+  @media (min-width: 768px) {
+    font-size: 1.25rem;
+  }
+}
+
+.service-card__duration {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  
+  &::before {
+    content: '⏱️';
+  }
+}
+
+.service-card__rating {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  
+  .stars {
+    color: var(--color-warning, #f59e0b);
+  }
+  
+  .count {
+    color: var(--text-secondary);
+  }
+}
+
+/* Master Card - Карточка мастера */
+.master-card {
+  /* Наследуем все свойства adaptive-card */
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--card-bg, white);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.master-card__avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto 1rem;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  
+  @media (min-width: 768px) {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+.master-card__name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  
+  @media (min-width: 768px) {
+    font-size: 1.125rem;
+  }
+}
+
+.master-card__specialization {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  
+  @media (min-width: 768px) {
+    font-size: 0.875rem;
+  }
+}
+
+.master-card__stats {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-muted, #f3f4f6);
+  
+  @media (max-width: 639px) {
+    gap: 0.5rem;
+    font-size: 0.75rem;
+  }
+}
+
+.master-card__stat {
+  text-align: center;
+  
+  .number {
+    display: block;
+    font-weight: 600;
+    color: var(--color-primary);
+  }
+  
+  .label {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+  }
+}
+
+/* === ПРОМО КАРТОЧКИ === */
+
+/* Featured Card - Рекомендуемая карточка */
+.featured-card {
+  /* Наследуем все свойства adaptive-card */
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--card-bg, white);
+  border: 1px solid var(--color-primary);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+
+.featured-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary, #8b5cf6));
+}
+
+.featured-card__badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: var(--color-primary);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  z-index: 2;
+}
+
+/* Sale Card - Карточка со скидкой */
+.sale-card {
+  /* Наследуем все свойства adaptive-card */
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--card-bg, white);
+  border: 1px solid var(--color-error, #ef4444);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+
+.sale-card::after {
+  content: 'СКИДКА';
+  position: absolute;
+  top: 1rem;
+  right: -0.5rem;
+  background: var(--color-error);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  transform: rotate(15deg);
+  border-radius: 0.25rem;
+  z-index: 2;
+  
+  @media (max-width: 639px) {
+    font-size: 0.625rem;
+    padding: 0.2rem 0.5rem;
+  }
+}
+
+.sale-card__old-price {
+  font-size: 0.875rem;
+  color: var(--text-tertiary);
+  text-decoration: line-through;
+  margin-left: 0.5rem;
+}
+
+.sale-card__discount {
+  background: var(--color-error);
+  color: white;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+/* === СОСТОЯНИЯ КАРТОЧЕК === */
+
+/* Loading State */
+.adaptive-card--loading {
+  pointer-events: none;
+}
+
+.adaptive-card--loading .adaptive-card__image {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.adaptive-card--loading .adaptive-card__title,
+.adaptive-card--loading .adaptive-card__description {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  color: transparent;
+  border-radius: 0.25rem;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Error State */
+.adaptive-card--error {
+  border-color: var(--color-error);
+  opacity: 0.7;
+}
+
+.adaptive-card--error .adaptive-card__image {
+  background: var(--color-gray-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.adaptive-card--error .adaptive-card__image::after {
+  content: '⚠️ Ошибка загрузки';
+  color: var(--text-tertiary);
+  font-size: 0.75rem;
+}
+
+/* === АДАПТИВНЫЕ МОДИФИКАТОРЫ === */
+
+/* Компактный режим для мобильных */
+.adaptive-card--compact {
+  @media (max-width: 639px) {
+    .adaptive-card__content {
+      padding: 0.75rem;
+    }
+    
+    .adaptive-card__title {
+      font-size: 0.8rem;
+      -webkit-line-clamp: 1;
+    }
+    
+    .adaptive-card__description {
+      display: none;
+    }
+  }
+}
+
+/* Расширенный режим для десктопов */
+.adaptive-card--expanded {
+  @media (min-width: 1024px) {
+    .adaptive-card__description {
+      -webkit-line-clamp: 6;
+    }
+    
+    .adaptive-card__content {
+      padding: 2rem;
+    }
+  }
+}
+
+/* === ACCESSIBILITY === */
+
+/* Высокий контраст */
+@media (prefers-contrast: high) {
+  .adaptive-card {
+    border-width: 2px;
+    border-color: var(--text-primary);
+  }
+  
+  .adaptive-card__title {
+    color: var(--text-primary);
+    font-weight: 700;
+  }
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  .adaptive-card {
+    transition: none;
+  }
+  
+  .adaptive-card:hover {
+    transform: none;
+  }
+  
+  .shimmer {
+    animation: none;
+  }
+}
+
+/* Фокус для доступности */
+.adaptive-card:focus-within {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* === УТИЛИТЫ ДЛЯ ОТЛАДКИ === */
+
+.debug .adaptive-card {
+  outline: 2px dashed red;
+}
+
+.debug .adaptive-card__image {
+  outline: 1px solid blue;
+}
+
+.debug .adaptive-card__content {
+  outline: 1px solid green;
+}

@@ -436,11 +436,15 @@ const handlePhotosSelect = (event: Event) => {
   const target = event?.target as HTMLInputElement
   const files = Array.from(target?.files || [])
   addPhotos(files)
-  target?.value = '' // Сброс input для возможности повторного выбора
+  if (target.value !== undefined) {
+      target.value = '' // Сброс input для возможности повторного выбора
+    }
 }
 
 const handlePhotosDrop = (event: DragEvent) => {
-  isDragOverPhotos?.value = false
+  if (isDragOverPhotos.value !== undefined) {
+      isDragOverPhotos.value = false
+    }
   const files = Array.from(event?.dataTransfer?.files || [])
   const imageFiles = files?.filter(file => file?.type.startsWith('image/'))
   addPhotos(imageFiles)
@@ -492,11 +496,15 @@ const handleVideoSelect = (event: Event) => {
   if (file) {
     addVideo(file)
   }
-  target?.value = '' // Сброс input
+  if (target.value !== undefined) {
+      target.value = '' // Сброс input
+    }
 }
 
 const handleVideoDrop = (event: DragEvent) => {
-  isDragOverVideo?.value = false
+  if (isDragOverVideo.value !== undefined) {
+      isDragOverVideo.value = false
+    }
   const files = Array.from(event?.dataTransfer?.files || [])
   const videoFile = files?.find(file => file?.type.startsWith('video/'))
   if (videoFile) {

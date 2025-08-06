@@ -185,15 +185,15 @@ const _headerClasses = computed(() => [
 /* Dark mode support (будущее) */
 @media (prefers-color-scheme: dark) {
   .bg-white {
-    background-color: theme('colors?.gray.900');
+    background-color: theme('colors.gray.900');
   }
   
   .text-gray-600 {
-    color: theme('colors?.gray.300');
+    color: theme('colors.gray.300');
   }
   
   .border-gray-100 {
-    border-color: theme('colors?.gray.700');
+    border-color: theme('colors.gray.700');
   }
 }
 </style>

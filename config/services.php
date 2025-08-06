@@ -35,4 +35,31 @@ return [
         ],
     ],
 
+    'sms' => [
+        'enabled' => env('SMS_ENABLED', false),
+        'provider' => env('SMS_PROVIDER', 'test'),
+        'max_length' => env('SMS_MAX_LENGTH', 160),
+        'supports_unicode' => env('SMS_SUPPORTS_UNICODE', true),
+        
+        // SMSC.ru настройки
+        'smsc' => [
+            'login' => env('SMSC_LOGIN'),
+            'password' => env('SMSC_PASSWORD'),
+            'sender' => env('SMSC_SENDER', 'SPA-COM'),
+        ],
+        
+        // SMS.ru настройки
+        'smsru' => [
+            'api_id' => env('SMSRU_API_ID'),
+            'from' => env('SMSRU_FROM', 'SPA-COM'),
+        ],
+        
+        // Twilio настройки
+        'twilio' => [
+            'account_sid' => env('TWILIO_ACCOUNT_SID'),
+            'auth_token' => env('TWILIO_AUTH_TOKEN'),
+            'from' => env('TWILIO_FROM'),
+        ],
+    ],
+
 ];

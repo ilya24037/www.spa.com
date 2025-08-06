@@ -1,4 +1,4 @@
-<!-- resources/js/src/entities/ad/ui/AdCard/AdCard?.vue -->
+<!-- resources/js/src/entities/ad/ui/AdCard/AdCard.vue -->
 <template>
   <!-- Error СЃРѕСЃС‚РѕСЏРЅРёРµ -->
   <ErrorState
@@ -209,7 +209,7 @@ import type {
   AdCardProps, 
   AdCardEmits,
   AdImage
-} from './AdCard?.types'
+} from './AdCard.types'
 
 // Error handler (Р±РµР· toast - РїРѕРєР°Р·С‹РІР°РµРј С‡РµСЂРµР· ErrorState)
 const errorState = useErrorHandler(false)
@@ -304,7 +304,9 @@ const handleMouseMove = (event: MouseEvent): void => {
   const newIndex = Math.floor(x / imageWidth)
   
   if (newIndex >= 0 && newIndex < allImages?.value.length) {
-    currentImage?.value = newIndex
+    if (currentImage.value !== undefined) {
+      currentImage.value = newIndex
+    }
   }
 }
 
@@ -352,9 +354,11 @@ const contactMaster = (): void => {
     
     if (_props?.ad.phone && _props?.ad.show_contacts) {
       const cleanPhone = _props?.ad.phone?.replace(/\D/g, '')
-      window?.(window as any).location.href = `tel:${cleanPhone}`
+      if (typeof window !== 'undefined') {
+        (window as any).location.href = `tel:${cleanPhone}`
+      }
     } else {
-      toast?.info('РљРѕРЅС‚Р°РєС‚С‹ Р±СѓРґСѓС‚ РґРѕСЃС‚СѓРїРЅС‹ РїРѕСЃР»Рµ Р·Р°РїРёСЃРё')
+      toast?.info('Контакты будут доступны после записи')
     }
   } catch (error: unknown) {
     errorState?.handleError(error, 'generic')

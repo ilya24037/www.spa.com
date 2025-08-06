@@ -23,7 +23,7 @@
             { title: 'Красота' },
             { title: 'Эротический массаж' }
           ]"
-          separator=">" as any
+          separator=">"
           class="text-sm"
         />
       </div>

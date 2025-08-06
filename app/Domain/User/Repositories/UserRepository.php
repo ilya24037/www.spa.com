@@ -257,57 +257,21 @@ class UserRepository extends BaseRepository
     }
 
     /**
-     * Получить статистику пользователей
+     * @deprecated Используйте UserStatsService::getGeneralStats()
      */
     public function getStats(): array
     {
-        $total = User::count();
-        
-        return [
-            'total' => $total,
-            'active' => User::where('status', UserStatus::ACTIVE)->count(),
-            'inactive' => User::where('status', UserStatus::INACTIVE)->count(),
-            'pending' => User::where('status', UserStatus::PENDING)->count(),
-            'suspended' => User::where('status', UserStatus::SUSPENDED)->count(),
-            'banned' => User::where('status', UserStatus::BANNED)->count(),
-            'deleted' => User::where('status', UserStatus::DELETED)->count(),
-            
-            // По ролям
-            'clients' => User::where('role', UserRole::CLIENT)->count(),
-            'masters' => User::where('role', UserRole::MASTER)->count(),
-            'admins' => User::where('role', UserRole::ADMIN)->count(),
-            'moderators' => User::where('role', UserRole::MODERATOR)->count(),
-            
-            // По времени
-            'registered_today' => User::whereDate('created_at', today())->count(),
-            'registered_week' => User::where('created_at', '>=', now()->subWeek())->count(),
-            'registered_month' => User::where('created_at', '>=', now()->subMonth())->count(),
-            
-            // Верификация
-            'verified' => User::whereNotNull('email_verified_at')->count(),
-            'unverified' => User::whereNull('email_verified_at')->count(),
-            
-            // Профили
-            'with_complete_profiles' => User::whereHas('profile', function($q) {
-                // Предполагаем, что есть метод для проверки полноты профиля
-            })->count(),
-        ];
+        return app(\App\Domain\User\Services\UserStatsService::class)
+            ->getGeneralStats();
     }
 
     /**
-     * Получить статистику по регистрациям за период
+     * @deprecated Используйте UserStatsService::getRegistrationStats()
      */
     public function getRegistrationStats(int $days = 30): array
     {
-        $stats = [];
-        $startDate = now()->subDays($days);
-        
-        for ($i = 0; $i < $days; $i++) {
-            $date = $startDate->copy()->addDays($i);
-            $stats[$date->format('Y-m-d')] = User::whereDate('created_at', $date)->count();
-        }
-        
-        return $stats;
+        return app(\App\Domain\User\Services\UserStatsService::class)
+            ->getRegistrationStats($days);
     }
 
     /**
@@ -365,29 +329,12 @@ class UserRepository extends BaseRepository
     }
 
     /**
-     * Получить пользователей для экспорта
+     * @deprecated Используйте UserExportService::getForExport()
      */
     public function getForExport(array $filters = []): Collection
     {
-        $query = User::with(['profile', 'settings']);
-
-        if (!empty($filters['role'])) {
-            $query->where('role', $filters['role']);
-        }
-
-        if (!empty($filters['status'])) {
-            $query->where('status', $filters['status']);
-        }
-
-        if (!empty($filters['date_from'])) {
-            $query->where('created_at', '>=', $filters['date_from']);
-        }
-
-        if (!empty($filters['date_to'])) {
-            $query->where('created_at', '<=', $filters['date_to']);
-        }
-
-        return $query->orderBy('created_at', 'desc')->get();
+        return app(\App\Domain\User\Services\UserExportService::class)
+            ->getForExport($filters);
     }
 
     /**

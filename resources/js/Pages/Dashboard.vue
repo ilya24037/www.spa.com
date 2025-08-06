@@ -1,4 +1,4 @@
-<!-- resources/js/Pages/Dashboard?.vue - FSDactored СЃ Loading СЃРѕСЃС‚РѕСЏРЅРёСЏРјРё -->
+<!-- resources/js/Pages/Dashboard.vue - FSD архитектура с Loading состояниями -->
 <template>
   <ProfileLayout>
     <!-- Loading СЃРѕСЃС‚РѕСЏРЅРёРµ -->

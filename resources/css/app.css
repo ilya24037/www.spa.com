@@ -1,12 +1,176 @@
-/* Импортируем дизайн-токены ПЕРВЫМИ */
+/**
+ * SPA Platform - Main CSS File
+ * Архитектура по SMACSS + БЭМ стандартам больших маркетплейсов
+ */
+
+/* === 0. ДИЗАЙН-ТОКЕНЫ (обязательно первыми) === */
 @import './design-tokens.css';
 
-/* Импортируем компонентные стили */
-@import './components.css';
+/* === 1. BASE - Базовые стили === */
+@import './01-base/reset.css';
+@import './01-base/typography.css';
 
+/* === 2. LAYOUT - Макетные стили === */
+@import './02-layout/grid.css';
+/* @import './02-layout/header.css'; */
+/* @import './02-layout/footer.css'; */
+
+/* === 3. MODULES - Компонентные стили === */
+@import './03-modules/buttons.css';
+@import './03-modules/cards.css';
+@import './03-modules/adaptive-cards.css';
+
+/* === 4. STATE - Состояния компонентов === */
+@import './04-state/interactive.css';
+
+/* === 5. THEME - Темизация === */
+/* @import './05-theme/colors.css'; */
+/* @import './05-theme/animations.css'; */
+
+/* === TAILWIND CSS (после нашей архитектуры) === */
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
+
+/* === LEGACY - Старые компонентные стили (временно) === */
+@import './components.css';
+
+/* === УТИЛИТЫ И ХЕЛПЕРЫ === */
+
+/* Утилитарные классы для быстрой верстки */
+.u-text-center { text-align: center !important; }
+.u-text-left { text-align: left !important; }
+.u-text-right { text-align: right !important; }
+
+.u-margin-auto { margin: auto !important; }
+.u-margin-0 { margin: 0 !important; }
+
+.u-padding-0 { padding: 0 !important; }
+
+.u-width-full { width: 100% !important; }
+.u-height-full { height: 100% !important; }
+
+.u-flex { display: flex !important; }
+.u-flex-column { flex-direction: column !important; }
+.u-flex-center { 
+  display: flex !important; 
+  align-items: center !important; 
+  justify-content: center !important; 
+}
+
+.u-relative { position: relative !important; }
+.u-absolute { position: absolute !important; }
+
+.u-overflow-hidden { overflow: hidden !important; }
+.u-overflow-auto { overflow: auto !important; }
+
+/* Дебаг сетки (только в development) */
+.debug * {
+  outline: 1px solid rgba(255, 0, 0, 0.3) !important;
+}
+
+.debug *:hover {
+  outline: 2px solid rgba(255, 0, 0, 0.6) !important;
+}
+
+/* === КАСТОМНЫЕ СВОЙСТВА ДЛЯ SPA PLATFORM === */
+
+:root {
+  /* Специфичные для нашего проекта */
+  --spa-header-height: 4rem;
+  --spa-sidebar-width: 16rem;
+  --spa-footer-height: 3rem;
+  
+  /* Размеры карточек */
+  --spa-card-width-small: 250px;
+  --spa-card-width-medium: 320px;
+  --spa-card-width-large: 400px;
+  
+  /* Брейкпоинты */
+  --spa-breakpoint-mobile: 640px;
+  --spa-breakpoint-tablet: 768px;
+  --spa-breakpoint-desktop: 1024px;
+  --spa-breakpoint-wide: 1280px;
+}
+
+/* === АДАПТИВНЫЕ ХЕЛПЕРЫ === */
+
+/* Контейнеры с максимальной шириной */
+.container-sm { max-width: 640px; margin: 0 auto; padding: 0 1rem; }
+.container-md { max-width: 768px; margin: 0 auto; padding: 0 1rem; }
+.container-lg { max-width: 1024px; margin: 0 auto; padding: 0 1rem; }
+.container-xl { max-width: 1280px; margin: 0 auto; padding: 0 1rem; }
+
+/* Сетки для каталогов товаров */
+.grid-catalog {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
+.grid-masters {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.grid-services {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+/* === АНИМАЦИИ === */
+
+/* Плавное появление */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Плавное увеличение */
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Вращение */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Применение анимаций */
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.2s ease-out;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* === ПРИНТЫ === */
+
+@media print {
+  /* Скрываем элементы не нужные для печати */
+  .no-print,
+  .button,
+  .card__actions,
+  nav,
+  footer {
+    display: none !important;
+  }
+  
+  /* Оптимизируем для печати */
+  .card {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+  }
+}
 
 @layer base {
   /* Белый фон для всей страницы */

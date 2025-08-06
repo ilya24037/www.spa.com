@@ -27,10 +27,7 @@ use Inertia\Inertia;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// Тестовая страница для проверки кодировки
-Route::get('/test-encoding', function() {
-    return Inertia::render('TestEncoding');
-})->name('test.encoding');
+// Тестовая страница для проверки кодировки убрана
 
 // CSRF токен для AJAX запросов
 Route::get('/csrf-token', function() {
@@ -408,3 +405,12 @@ Route::middleware('auth')->group(function () {
         Route::delete('/video', [App\Application\Http\Controllers\Ad\AdMediaController::class, 'deleteVideo'])->name('video.delete');
     });
 });
+
+// Демо страницы для примеров
+Route::get('/examples/isolated-widgets', function () {
+    return Inertia::render('Examples/IsolatedWidgetsExample');
+})->name('examples.isolated-widgets');
+
+Route::get('/examples/adaptive-grid', function () {
+    return Inertia::render('Examples/AdaptiveGridExample');
+})->name('examples.adaptive-grid');

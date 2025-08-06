@@ -86,7 +86,7 @@ const activeStatus = ref('all')
 const statuses = [
   { key: 'all', label: 'Р’СЃРµ' },
   { key: 'active', label: 'РђРєС‚РёРІРЅС‹Рµ' },
-  { key: 'drafts', label: 'Р§РµСЂРЅРѕРІРёРєРё' },
+  { key: 'drafts', label: 'ЧерновикРё' },
   { key: 'waiting', label: 'РќР° РјРѕРґРµСЂР°С†РёРё' },
   { key: 'archived', label: 'РђСЂС…РёРІ' }
 ]

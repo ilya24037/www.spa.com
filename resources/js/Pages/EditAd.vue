@@ -13,7 +13,7 @@
     
     <!-- РћСЃРЅРѕРІРЅРѕР№ РєРѕРЅС‚РµРЅС‚ -->
     <div v-else class="max-w-4xl mx-auto py-6 lg:py-8">
-      <!-- РҐР»РµР±РЅС‹Рµ РєСЂРѕС€РєРё РІ СЃС‚РёР»Рµ Avito -->
+      <!-- Хлебные крошки РІ СЃС‚РёР»Рµ Avito -->
       <nav class="flex items-center mb-6" aria-label="Breadcrumb">
         <button 
           @click="goBack"
