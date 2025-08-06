@@ -257,7 +257,7 @@
                         <!-- РРЅС„РѕСЂРјР°С†РёСЏ Рѕ РјР°СЃС‚РµСЂРµ -->
                         <div class="flex items-start gap-4 mb-6 pb-6 border-b">
                             <img 
-                                :src="masterProfile.user.avatar_url || '/images/default-avatar.png'"
+                                :src="masterProfile.user?.avatar_url || '/images/default-avatar.png'"
                                 :alt="masterProfile.user.name"
                                 class="w-16 h-16 rounded-full object-cover"
                             >
@@ -324,19 +324,36 @@ import { route } from 'ziggy-js'
 import { ref, computed, onMounted } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import { StarIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/solid'
-import { format, addDays, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameDay, isToday, isSameMonth } from 'date-fns'
-import { ru } from 'date-fns/locale'
+import { format, addDays, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isToday, isSameMonth } from 'date-fns'
 
-const props = defineProps({
-    masterProfile: Object,
-    service: Object,
-    availableSlots: Object
-})
+interface MasterProfile {
+    id: number
+    user: {
+        name: string
+    }
+    [key: string]: any
+}
+
+interface Service {
+    id: number
+    name?: string
+    price?: number
+    duration?: number
+    [key: string]: any
+}
+
+interface BookingProps {
+    masterProfile: MasterProfile
+    service: Service
+    availableSlots: Record<string, any>
+}
+
+const props = defineProps<BookingProps>()
 
 // Р¤РѕСЂРјР°
 const form = useForm({
-    master_profile_id: props.masterProfile.id,
-    service_id: props.service.id,
+    master_profile_id: props.masterProfile?.id || 0,
+    service_id: props.service?.id || 0,
     booking_date: null,
     booking_time: null,
     service_location: 'home',
@@ -387,7 +404,7 @@ const availableTimeSlots = computed(() => {
 
 // РћР±С‰Р°СЏ СЃС‚РѕРёРјРѕСЃС‚СЊ
 const totalPrice = computed(() => {
-    let total = props.service.price
+    let total = props.service.price || 0
     if (form.service_location === 'home') {
         total += 500 // Р”РѕРїР»Р°С‚Р° Р·Р° РІС‹РµР·Рґ
     }
@@ -405,14 +422,14 @@ const canSubmit = computed(() => {
 })
 
 // Р’С‹Р±РѕСЂ РґР°С‚С‹
-const selectDate = (date) => {
+const selectDate = (date: any): void => {
     if (!date.available) return
     form.booking_date = date.date
     form.booking_time = null // РЎР±СЂР°СЃС‹РІР°РµРј РІСЂРµРјСЏ РїСЂРё СЃРјРµРЅРµ РґР°С‚С‹
 }
 
 // Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ С†РµРЅС‹
-const formatPrice = (price) => {
+const formatPrice = (price: any): string => {
     return new Intl.NumberFormat('ru-RU', {
         style: 'currency',
         currency: 'RUB',
