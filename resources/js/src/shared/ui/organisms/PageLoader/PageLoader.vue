@@ -1,4 +1,4 @@
-<!-- PageLoader.vue -->
+<!-- PageLoader?.vue -->
 <template>
   <div 
     :class="containerClasses"
@@ -183,55 +183,55 @@ const pageConfigs: PageTypeConfigs = {
 }
 
 // РџРѕР»СѓС‡Р°РµРј РєРѕРЅС„РёРіСѓСЂР°С†РёСЋ РґР»СЏ С‚РµРєСѓС‰РµРіРѕ С‚РёРїР°
-const config = computed(() => pageConfigs[props.type])
+const config = computed(() => pageConfigs[_props?.type])
 
 // Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
-const showSpinner = computed<boolean>(() => config.value.showSpinner)
-const actualMessage = computed<string>(() => props.message || config.value.message)
-const _actualSkeletonCount = computed<number>(() => props.skeletonCount || config.value.skeletonCount)
-const _actualShowSkeletons = computed<boolean>(() => props.showSkeletons && config.value.showSkeletons)
+const showSpinner = computed<boolean>(() => config?.value.showSpinner)
+const actualMessage = computed<string>(() => _props?.message || config?.value.message)
+const _actualSkeletonCount = computed<number>(() => _props?.skeletonCount || config?.value.skeletonCount)
+const _actualShowSkeletons = computed<boolean>(() => _props?.showSkeletons && config?.value.showSkeletons)
 
 const ariaLabel = computed<string>(() => {
-  if (props.showProgress && props.progress > 0) {
-    return `Р—Р°РіСЂСѓР·РєР°: ${props.progress}%`
+  if (_props?.showProgress && _props?.progress > 0) {
+    return `Р—Р°РіСЂСѓР·РєР°: ${_props?.progress}%`
   }
-  return actualMessage.value || 'Р—Р°РіСЂСѓР·РєР° СЃС‚СЂР°РЅРёС†С‹'
+  return actualMessage?.value || 'Р—Р°РіСЂСѓР·РєР° СЃС‚СЂР°РЅРёС†С‹'
 })
 
 const containerClasses = computed<string>(() => {
   const baseClasses = [
     'page-loader',
-    `page-loader--${props.type}`,
-    `page-loader--animation-${config.value.animation}`
+    `page-loader--${_props?.type}`,
+    `page-loader--animation-${config?.value.animation}`
   ]
 
-  if (props.fullScreen || config.value.fullScreen) {
-    baseClasses.push('fixed', 'inset-0', 'z-40', 'flex', 'items-center', 'justify-center', 'bg-white')
+  if (_props?.fullScreen || config?.value.fullScreen) {
+    baseClasses?.push('fixed', 'inset-0', 'z-40', 'flex', 'items-center', 'justify-center', 'bg-white')
   } else {
-    baseClasses.push('w-full', 'py-12')
+    baseClasses?.push('w-full', 'py-12')
   }
 
-  if (props.className) {
-    baseClasses.push(props.className)
+  if (_props?.className) {
+    baseClasses?.push(_props?.className)
   }
 
-  return baseClasses.join(' ')
+  return baseClasses?.join(' ')
 })
 
 const contentClasses = computed<string>(() => {
   const baseClasses = ['page-loader__content']
 
-  if (props.fullScreen || config.value.fullScreen) {
-    baseClasses.push('text-center', 'max-w-md', 'mx-auto', 'px-6')
+  if (_props?.fullScreen || config?.value.fullScreen) {
+    baseClasses?.push('text-center', 'max-w-md', 'mx-auto', 'px-6')
   } else {
-    baseClasses.push('container', 'mx-auto', 'px-4')
+    baseClasses?.push('container', 'mx-auto', 'px-4')
   }
 
-  return baseClasses.join(' ')
+  return baseClasses?.join(' ')
 })
 
 const spinnerSize = computed<string>(() => {
-  switch (props.type) {
+  switch (_props?.type) {
     case 'minimal':
       return 'sm'
     case 'catalog':
@@ -243,7 +243,7 @@ const spinnerSize = computed<string>(() => {
 })
 
 const spinnerColor = computed<string>(() => {
-  switch (props.type) {
+  switch (_props?.type) {
     case 'profile':
       return 'purple'
     case 'dashboard':
@@ -256,7 +256,7 @@ const spinnerColor = computed<string>(() => {
 })
 
 const skeletonComponent = computed(() => {
-  switch (props.type) {
+  switch (_props?.type) {
     case 'catalog':
       return SkeletonCard
     case 'profile':
@@ -275,18 +275,18 @@ const skeletonComponent = computed(() => {
 const skeletonClasses = computed<string>(() => {
   const baseClasses = ['animate-pulse']
 
-  switch (props.type) {
+  switch (_props?.type) {
     case 'catalog':
-      baseClasses.push('mb-4')
+      baseClasses?.push('mb-4')
       break
     case 'dashboard':
-      baseClasses.push('mb-6')
+      baseClasses?.push('mb-6')
       break
     default:
-      baseClasses.push('mb-3')
+      baseClasses?.push('mb-3')
   }
 
-  return baseClasses.join(' ')
+  return baseClasses?.join(' ')
 })
 </script>
 
@@ -332,7 +332,7 @@ const skeletonClasses = computed<string>(() => {
 @keyframes scale-up {
   from {
     opacity: 0;
-    transform: scale(0.95);
+    transform: scale(0?.95);
   }
   to {
     opacity: 1;
@@ -341,15 +341,15 @@ const skeletonClasses = computed<string>(() => {
 }
 
 .animate-fade-in {
-  animation: fade-in 0.3s ease-out;
+  animation: fade-in 0?.3s ease-out;
 }
 
 .animate-slide-up {
-  animation: slide-up 0.4s ease-out;
+  animation: slide-up 0?.4s ease-out;
 }
 
 .animate-scale-up {
-  animation: scale-up 0.3s ease-out;
+  animation: scale-up 0?.3s ease-out;
 }
 
 /* РЎС‚РёР»Рё РґР»СЏ СЂР°Р·РЅС‹С… С‚РёРїРѕРІ */

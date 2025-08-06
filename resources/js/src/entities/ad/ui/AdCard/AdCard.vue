@@ -1,15 +1,15 @@
-<!-- resources/js/src/entities/ad/ui/AdCard/AdCard.vue -->
+<!-- resources/js/src/entities/ad/ui/AdCard/AdCard?.vue -->
 <template>
   <!-- Error СЃРѕСЃС‚РѕСЏРЅРёРµ -->
   <ErrorState
-    v-if="errorState.error.value"
-    :error="errorState.error.value"
+    v-if="errorState?.error.value"
+    :error="errorState?.error.value"
     size="medium"
     variant="card"
     :retryable="true"
     :dismissible="true"
     @retry="handleRetry"
-    @dismiss="errorState.clearError"
+    @dismiss="errorState?.clearError"
     class="h-full"
   />
   
@@ -18,25 +18,25 @@
     v-else
     :class="CARD_CLASSES"
     role="article"
-    :aria-label="`РћР±СЉСЏРІР»РµРЅРёРµ: ${props.ad.title || props.ad.name || props.ad.display_name}`"
+    :aria-label="`РћР±СЉСЏРІР»РµРЅРёРµ: ${_props?.ad.title || _props?.ad.name || _props?.ad.display_name}`"
     data-testid="ad-card"
   >
     <!-- Р‘РµР№РґР¶Рё СЃС‚Р°С‚СѓСЃР° -->
     <div :class="BADGES_CONTAINER_CLASSES">
       <!-- Р Р°СЃРїСЂРѕРґР°Р¶Р°/РЎРєРёРґРєР° -->
-      <span v-if="ad.discount" :class="SALE_BADGE_CLASSES">
+      <span v-if="ad?.discount" :class="SALE_BADGE_CLASSES">
         Р Р°СЃРїСЂРѕРґР°Р¶Р°
       </span>
       
       <!-- РџСЂРµРјРёСѓРј -->
-      <span v-if="ad.is_premium" :class="PREMIUM_BADGE_CLASSES">
+      <span v-if="ad?.is_premium" :class="PREMIUM_BADGE_CLASSES">
         Premium
       </span>
       
       <!-- РџСЂРѕРІРµСЂРµРЅ -->
-      <span v-if="ad.is_verified" :class="VERIFIED_BADGE_CLASSES">
+      <span v-if="ad?.is_verified" :class="VERIFIED_BADGE_CLASSES">
         <svg :class="VERIFIED_ICON_CLASSES" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+          <path fill-rule="evenodd" d="M16?.707 5?.293a1 1 0 010 1?.414l-8 8a1 1 0 01-1?.414 0l-4-4a1 1 0 011?.414-1?.414L8 12?.586l7.293-7?.293a1 1 0 011?.414 0z" clip-rule="evenodd" />
         </svg>
         РџСЂРѕРІРµСЂРµРЅ
       </span>
@@ -44,7 +44,7 @@
 
     <!-- РР·Р±СЂР°РЅРЅРѕРµ -->
     <button 
-      @click.stop="toggleFavorite"
+      @click?.stop="toggleFavorite"
       :class="[
         FAVORITE_BUTTON_CLASSES,
         isFavorite ? 'text-[#f91155]' : 'text-gray-400 hover:text-[#f91155]'
@@ -53,7 +53,7 @@
       data-testid="favorite-button"
     >
       <svg :class="FAVORITE_ICON_CLASSES" :fill="isFavorite ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4?.318 6?.318a4.5 4?.5 0 000 6?.364L12 20?.364l7.682-7?.682a4.5 4?.5 0 00-6?.364-6?.364L12 7?.636l-1?.318-1?.318a4.5 4?.5 0 00-6?.364 0z"/>
       </svg>
     </button>
 
@@ -65,7 +65,7 @@
       @mouseleave="currentImage = 0"
       role="button"
       tabindex="0"
-      :aria-label="`РћС‚РєСЂС‹С‚СЊ РѕР±СЉСЏРІР»РµРЅРёРµ ${props.ad.title || props.ad.name}`"
+      :aria-label="`РћС‚РєСЂС‹С‚СЊ РѕР±СЉСЏРІР»РµРЅРёРµ ${_props?.ad.title || _props?.ad.name}`"
       data-testid="ad-image"
     >
       <!-- РћСЃРЅРѕРІРЅРѕРµ РёР·РѕР±СЂР°Р¶РµРЅРёРµ -->
@@ -74,20 +74,20 @@
           v-if="currentImageUrl"
           :key="currentImageUrl"
           :src="currentImageUrl"
-          :alt="ad.title || ad.name || ad.display_name"
+          :alt="ad?.title || ad?.name || ad?.display_name"
           :class="IMAGE_CLASSES"
           loading="lazy"
         />
         <div v-else :class="PLACEHOLDER_CLASSES">
           <svg :class="PLACEHOLDER_ICON_CLASSES" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            <path d="M12 12c2?.21 0 4-1?.79 4-4s-1?.79-4-4-4-4 1?.79-4 4 1?.79 4 4 4zm0 2c-2?.67 0-8 1?.34-8 4v2h16v-2c0-2?.66-5?.33-4-8-4z"/>
           </svg>
         </div>
       </transition>
 
       <!-- РРЅРґРёРєР°С‚РѕСЂС‹ С„РѕС‚Рѕ -->
       <div 
-        v-if="allImages.length > 1"
+        v-if="allImages?.length > 1"
         :class="INDICATORS_CONTAINER_CLASSES"
       >
         <span
@@ -102,10 +102,10 @@
 
       <!-- РџСЂРѕС†РµРЅС‚ СЃРєРёРґРєРё -->
       <div 
-        v-if="ad.discount || ad.discount_percent" 
+        v-if="ad?.discount || ad?.discount_percent" 
         :class="DISCOUNT_BADGE_CLASSES"
       >
-        -{{ ad.discount || ad.discount_percent }}%
+        -{{ ad?.discount || ad?.discount_percent }}%
       </div>
     </div>
 
@@ -115,21 +115,21 @@
       <div :class="PRICE_CONTAINER_CLASSES">
         <div :class="PRICE_WRAPPER_CLASSES">
           <span :class="PRICE_CLASSES">
-            {{ formatPrice(ad.price || ad.price_from || 2000) }} в‚Ѕ
+            {{ formatPrice(ad?.price || ad?.price_from || 2000) }} в‚Ѕ
           </span>
           <!-- РЎС‚Р°СЂР°СЏ С†РµРЅР° РµСЃР»Рё РµСЃС‚СЊ СЃРєРёРґРєР° -->
           <span 
-            v-if="ad.old_price" 
+            v-if="ad?.old_price" 
             :class="OLD_PRICE_CLASSES"
           >
-            {{ formatPrice(ad.old_price) }} в‚Ѕ
+            {{ formatPrice(ad?.old_price) }} в‚Ѕ
           </span>
           <!-- РџСЂРѕС†РµРЅС‚ СЃРєРёРґРєРё -->
           <span 
-            v-if="ad.discount || ad.discount_percent" 
+            v-if="ad?.discount || ad?.discount_percent" 
             :class="DISCOUNT_TEXT_CLASSES"
           >
-            -{{ ad.discount || ad.discount_percent }}%
+            -{{ ad?.discount || ad?.discount_percent }}%
           </span>
         </div>
         <div :class="PRICE_UNIT_CLASSES">Р·Р° С‡Р°СЃ</div>
@@ -137,7 +137,7 @@
 
       <!-- Р—Р°РіРѕР»РѕРІРѕРє -->
       <h3 :class="TITLE_CLASSES">
-        {{ ad.title || ad.name || ad.display_name || 'РњР°СЃСЃР°Р¶' }}
+        {{ ad?.title || ad?.name || ad?.display_name || 'РњР°СЃСЃР°Р¶' }}
       </h3>
 
       <!-- РћРїРёСЃР°РЅРёРµ -->
@@ -150,40 +150,40 @@
         <!-- Р РµР№С‚РёРЅРі -->
         <div :class="RATING_WRAPPER_CLASSES">
           <svg :class="STAR_ICON_CLASSES" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+            <path d="M9?.049 2?.927c.3-.921 1?.603-.921 1?.902 0l1?.07 3?.292a1 1 0 00?.95.69h3?.462c.969 0 1?.371 1?.24.588 1?.81l-2?.8 2?.034a1 1 0 00-.364 1?.118l1.07 3?.292c.3?.921-.755 1?.688-1?.54 1?.118l-2?.8-2?.034a1 1 0 00-1?.175 0l-2?.8 2?.034c-.784?.57-1?.838-.197-1?.539-1?.118l1.07-3?.292a1 1 0 00-.364-1?.118L2.98 8?.72c-.783-.57-.38-1?.81.588-1?.81h3.461a1 1 0 00?.951-.69l1?.07-3?.292z"/>
           </svg>
-          <span :class="RATING_VALUE_CLASSES">{{ ad.rating || '5.0' }}</span>
-          <span :class="RATING_COUNT_CLASSES">({{ ad.reviews_count || 0 }})</span>
+          <span :class="RATING_VALUE_CLASSES">{{ ad?.rating || '5?.0' }}</span>
+          <span :class="RATING_COUNT_CLASSES">({{ ad?.reviews_count || 0 }})</span>
         </div>
 
         <!-- Р›РѕРєР°С†РёСЏ -->
         <div :class="LOCATION_WRAPPER_CLASSES">
           <svg :class="LOCATION_ICON_CLASSES" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                d="M17?.657 16?.657L13.414 20?.9a1.998 1?.998 0 01-2?.827 0l-4?.244-4?.243a8 8 0 1111?.314 0z"/>
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                 d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
           </svg>
-          <span>{{ ad.district || ad.location || 'Р¦РµРЅС‚СЂ' }}</span>
+          <span>{{ ad?.district || ad?.location || 'Р¦РµРЅС‚СЂ' }}</span>
         </div>
       </div>
 
       <!-- РљРЅРѕРїРєРё РґРµР№СЃС‚РІРёР№ -->
       <div :class="ACTIONS_CONTAINER_CLASSES">
         <button
-          @click.stop="contactMaster"
+          @click?.stop="contactMaster"
           :class="CONTACT_BUTTON_CLASSES"
           aria-label="РЎРІСЏР·Р°С‚СЊСЃСЏ СЃ РјР°СЃС‚РµСЂРѕРј"
           data-testid="contact-button"
         >
           <svg :class="CONTACT_ICON_CLASSES" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                d="M3 5a2 2 0 012-2h3?.28a1 1 0 01?.948.684l1?.498 4?.493a1 1 0 01-.502 1?.21l-2?.257 1?.13a11.042 11?.042 0 005?.516 5?.516l1.13-2?.257a1 1 0 011?.21-.502l4?.493 1?.498a1 1 0 01?.684.949V19a2 2 0 01-2 2h-1C9?.716 21 3 14?.284 3 6V5z"/>
           </svg>
           РЎРІСЏР·Р°С‚СЊСЃСЏ
         </button>
         <button
-          @click.stop="openBooking"
+          @click?.stop="openBooking"
           :class="BOOKING_BUTTON_CLASSES"
           aria-label="Р—Р°РїРёСЃР°С‚СЊСЃСЏ РЅР° СѓСЃР»СѓРіСѓ"
           data-testid="booking-button"
@@ -209,7 +209,7 @@ import type {
   AdCardProps, 
   AdCardEmits,
   AdImage
-} from './AdCard.types'
+} from './AdCard?.types'
 
 // Error handler (Р±РµР· toast - РїРѕРєР°Р·С‹РІР°РµРј С‡РµСЂРµР· ErrorState)
 const errorState = useErrorHandler(false)
@@ -229,10 +229,10 @@ const emit = defineEmits<AdCardEmits>()
 // рџЋЇ РЎС‚РёР»Рё СЃРѕРіР»Р°СЃРЅРѕ РґРёР·Р°Р№РЅ-СЃРёСЃС‚РµРјРµ
 const CARD_CLASSES: string = 'relative group bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden'
 const BADGES_CONTAINER_CLASSES: string = 'absolute top-2 left-2 z-10 flex flex-col gap-1'
-const SALE_BADGE_CLASSES: string = 'bg-[#f91155] text-white px-2 py-0.5 rounded text-xs font-medium'
-const PREMIUM_BADGE_CLASSES: string = 'bg-[#7000ff] text-white px-2 py-0.5 rounded text-xs font-medium'
-const VERIFIED_BADGE_CLASSES: string = 'bg-green-500 text-white px-2 py-0.5 rounded text-xs font-medium'
-const VERIFIED_ICON_CLASSES: string = 'w-3 h-3 inline mr-0.5'
+const SALE_BADGE_CLASSES: string = 'bg-[#f91155] text-white px-2 py-0?.5 rounded text-xs font-medium'
+const PREMIUM_BADGE_CLASSES: string = 'bg-[#7000ff] text-white px-2 py-0?.5 rounded text-xs font-medium'
+const VERIFIED_BADGE_CLASSES: string = 'bg-green-500 text-white px-2 py-0?.5 rounded text-xs font-medium'
+const VERIFIED_ICON_CLASSES: string = 'w-3 h-3 inline mr-0?.5'
 const FAVORITE_BUTTON_CLASSES: string = 'absolute top-2 right-2 z-10 p-2 bg-white/90 backdrop-blur rounded-lg hover:bg-white shadow-sm transition-all'
 const FAVORITE_ICON_CLASSES: string = 'w-5 h-5'
 const IMAGE_CONTAINER_CLASSES: string = 'relative h-56 bg-gray-100 cursor-pointer overflow-hidden'
@@ -241,7 +241,7 @@ const PLACEHOLDER_CLASSES: string = 'w-full h-full flex items-center justify-cen
 const PLACEHOLDER_ICON_CLASSES: string = 'w-16 h-16 text-gray-300'
 const INDICATORS_CONTAINER_CLASSES: string = 'absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1'
 const INDICATOR_CLASSES: string = 'block h-1 rounded-full bg-white/80 transition-all duration-200'
-const DISCOUNT_BADGE_CLASSES: string = 'absolute bottom-2 left-2 bg-[#f91155] text-white px-2 py-0.5 rounded text-xs font-bold'
+const DISCOUNT_BADGE_CLASSES: string = 'absolute bottom-2 left-2 bg-[#f91155] text-white px-2 py-0?.5 rounded text-xs font-bold'
 const CONTENT_CLASSES: string = 'p-3'
 const PRICE_CONTAINER_CLASSES: string = 'mb-2'
 const PRICE_WRAPPER_CLASSES: string = 'flex items-baseline gap-2'
@@ -268,19 +268,19 @@ const BOOKING_ICON_CLASSES: string = 'w-4 h-4'
 const currentImage: import("vue").Ref<number> = ref(0)
 
 // Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
-const isFavorite = computed((): boolean => props.ad.is_favorite || false)
+const isFavorite = computed((): boolean => _props?.ad.is_favorite || false)
 
 const allImages = computed((): AdImage[] => {
-  return props.ad.images || props.ad.photos || []
+  return _props?.ad.images || _props?.ad.photos || []
 })
 
 const currentImageUrl = computed((): string => {
-  if (!allImages.value.length) {
-    return '/images/placeholders/master-1.jpg'
+  if (!allImages?.value.length) {
+    return '/images/placeholders/master-1?.jpg'
   }
   
-  const image = allImages.value[currentImage.value]
-  return image?.url || image?.path || (typeof image === 'string' ? image : '') || '/images/placeholders/master-1.jpg'
+  const image = allImages?.value[currentImage?.value]
+  return image?.url || image?.path || (typeof image === 'string' ? image : '') || '/images/placeholders/master-1?.jpg'
 })
 
 // РњРµС‚РѕРґС‹
@@ -290,50 +290,50 @@ const formatPrice = (price: number | undefined): string => {
 }
 
 const getDescription = (): string => {
-  return props.ad.description || 
-         props.ad.specialty || 
+  return _props?.ad.description || 
+         _props?.ad.specialty || 
          'РњР°СЃСЃР°Р¶ Рё SPA СѓСЃР»СѓРіРё'
 }
 
 const handleMouseMove = (event: MouseEvent): void => {
-  if (allImages.value.length <= 1) return
+  if (allImages?.value.length <= 1) return
   
-  const rect = (event.currentTarget as HTMLElement).getBoundingClientRect()
-  const x = event.clientX - rect.left
-  const imageWidth = rect.width / allImages.value.length
+  const rect = (event?.currentTarget as HTMLElement).getBoundingClientRect()
+  const x = event?.clientX - rect?.left
+  const imageWidth = rect?.width / allImages?.value.length
   const newIndex = Math.floor(x / imageWidth)
   
-  if (newIndex >= 0 && newIndex < allImages.value.length) {
-    currentImage.value = newIndex
+  if (newIndex >= 0 && newIndex < allImages?.value.length) {
+    currentImage?.value = newIndex
   }
 }
 
 const openAd = (): void => {
   try {
-    errorState.clearError()
-    emit('adOpened', props.ad.id)
-    router.visit(`/ads/${props.ad.id}`)
+    errorState?.clearError()
+    emit('adOpened', _props?.ad.id)
+    router?.visit(`/ads/${_props?.ad.id}`)
   } catch (error: unknown) {
-    errorState.handleError(error, 'data_load')
+    errorState?.handleError(error, 'data_load')
   }
 }
 
 const toggleFavorite = async (): Promise<void> => {
   try {
-    errorState.clearError()
-    const currentState = isFavorite.value
-    emit('favoriteToggled', props.ad.id, !currentState)
+    errorState?.clearError()
+    const currentState = isFavorite?.value
+    emit('favoriteToggled', _props?.ad.id, !currentState)
     
-    await router.post('/api/favorites/toggle', {
-      ad_id: props.ad.id
+    await router?.post('/api/favorites/toggle', {
+      ad_id: _props?.ad.id
     }, {
       preserveState: true,
       preserveScroll: true,
       onSuccess: () => {
-        toast.success(currentState ? 'РЈРґР°Р»РµРЅРѕ РёР· РёР·Р±СЂР°РЅРЅРѕРіРѕ' : 'Р”РѕР±Р°РІР»РµРЅРѕ РІ РёР·Р±СЂР°РЅРЅРѕРµ')
+        toast?.success(currentState ? 'РЈРґР°Р»РµРЅРѕ РёР· РёР·Р±СЂР°РЅРЅРѕРіРѕ' : 'Р”РѕР±Р°РІР»РµРЅРѕ РІ РёР·Р±СЂР°РЅРЅРѕРµ')
       },
-      onError: (errors) => {
-        errorState.handleError({
+      onError: (errors: any) => {
+        errorState?.handleError({
           message: 'РќРµ СѓРґР°Р»РѕСЃСЊ РѕР±РЅРѕРІРёС‚СЊ РёР·Р±СЂР°РЅРЅРѕРµ',
           details: 'РџСЂРѕРІРµСЂСЊС‚Рµ РїРѕРґРєР»СЋС‡РµРЅРёРµ Рє РёРЅС‚РµСЂРЅРµС‚Сѓ Рё РїРѕРїСЂРѕР±СѓР№С‚Рµ СЃРЅРѕРІР°',
           status: errors?.response?.status
@@ -341,43 +341,43 @@ const toggleFavorite = async (): Promise<void> => {
       }
     })
   } catch (error: unknown) {
-    errorState.handleError(error, 'data_load')
+    errorState?.handleError(error, 'data_load')
   }
 }
 
 const contactMaster = (): void => {
   try {
-    errorState.clearError()
-    emit('contactRequested', props.ad.id)
+    errorState?.clearError()
+    emit('contactRequested', _props?.ad.id)
     
-    if (props.ad.phone && props.ad.show_contacts) {
-      const cleanPhone = props.ad.phone.replace(/\D/g, '')
-      window.location.href = `tel:${cleanPhone}`
+    if (_props?.ad.phone && _props?.ad.show_contacts) {
+      const cleanPhone = _props?.ad.phone?.replace(/\D/g, '')
+      window?.location.href = `tel:${cleanPhone}`
     } else {
-      toast.info('РљРѕРЅС‚Р°РєС‚С‹ Р±СѓРґСѓС‚ РґРѕСЃС‚СѓРїРЅС‹ РїРѕСЃР»Рµ Р·Р°РїРёСЃРё')
+      toast?.info('РљРѕРЅС‚Р°РєС‚С‹ Р±СѓРґСѓС‚ РґРѕСЃС‚СѓРїРЅС‹ РїРѕСЃР»Рµ Р·Р°РїРёСЃРё')
     }
   } catch (error: unknown) {
-    errorState.handleError(error, 'generic')
+    errorState?.handleError(error, 'generic')
   }
 }
 
 const openBooking = (): void => {
   try {
-    errorState.clearError()
-    emit('bookingRequested', props.ad.id)
-    router.visit(`/ads/${props.ad.id}?booking=true`)
+    errorState?.clearError()
+    emit('bookingRequested', _props?.ad.id)
+    router?.visit(`/ads/${_props?.ad.id}?booking=true`)
   } catch (error: unknown) {
-    errorState.handleError(error, 'booking')
+    errorState?.handleError(error, 'booking')
   }
 }
 
 // РњРµС‚РѕРґ РґР»СЏ РїРѕРІС‚РѕСЂРЅРѕР№ РїРѕРїС‹С‚РєРё РїРѕСЃР»Рµ РѕС€РёР±РєРё
 const handleRetry = async (): Promise<void> => {
-  errorState.clearError()
+  errorState?.clearError()
   
   // РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РґР°РЅРЅС‹Рµ РѕР±СЉСЏРІР»РµРЅРёСЏ РєРѕСЂСЂРµРєС‚РЅС‹
-  if (!props.ad || !props.ad.id) {
-    errorState.handleError({
+  if (!_props?.ad || !_props?.ad.id) {
+    errorState?.handleError({
       message: 'Р”Р°РЅРЅС‹Рµ РѕР±СЉСЏРІР»РµРЅРёСЏ РЅРµ Р·Р°РіСЂСѓР¶РµРЅС‹',
       details: 'РџРѕРїСЂРѕР±СѓР№С‚Рµ РѕР±РЅРѕРІРёС‚СЊ СЃС‚СЂР°РЅРёС†Сѓ'
     }, 'data_load')
@@ -385,16 +385,16 @@ const handleRetry = async (): Promise<void> => {
   }
   
   // РџС‹С‚Р°РµРјСЃСЏ РїРµСЂРµР·Р°РіСЂСѓР·РёС‚СЊ РєР°СЂС‚РѕС‡РєСѓ
-  await errorState.retryOperation(async () => {
+  await errorState?.retryOperation(async () => {
     // Р­РјРёС‚РёСЂСѓРµРј СЃРѕР±С‹С‚РёРµ РґР»СЏ СЂРѕРґРёС‚РµР»СЊСЃРєРѕРіРѕ РєРѕРјРїРѕРЅРµРЅС‚Р°
-    emit('retryRequested', props.ad.id)
+    emit('retryRequested', _props?.ad.id)
   })
 }
 </script>
 
 <style scoped>
 .fade-enter-active, .fade-leave-active {
-  transition: opacity 0.2s;
+  transition: opacity 0?.2s;
 }
 .fade-enter-from, .fade-leave-to {
   opacity: 0;

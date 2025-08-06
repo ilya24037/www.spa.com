@@ -104,9 +104,9 @@ export function useBooking(master: Master, initialService: Service | null = null
             
             if ((response as any).props?.slots) {
                 if (date) {
-                    availableSlots.value[date] = (response as any).props.slots
+                    availableSlots.value[date] = (response as any)._props.slots
                 } else {
-                    availableSlots.value = (response as any).props.slots
+                    availableSlots.value = (response as any)._props.slots
                 }
             }
         } catch (error: any) {

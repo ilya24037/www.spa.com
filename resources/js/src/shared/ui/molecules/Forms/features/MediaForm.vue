@@ -28,8 +28,8 @@
             'border-blue-300 bg-blue-50': isDragOverPhotos,
             'border-red-300': hasError('photos')
           }"
-          @drop.prevent="handlePhotosDrop"
-          @dragover.prevent="isDragOverPhotos = true"
+          @drop?.prevent="handlePhotosDrop"
+          @dragover?.prevent="isDragOverPhotos = true"
           @dragleave="isDragOverPhotos = false"
         >
           <input
@@ -42,10 +42,10 @@
             @change="handlePhotosSelect"
           />
           
-          <div v-if="!formData.photos?.length" class="upload-empty-state">
+          <div v-if="!formData?.photos?.length" class="upload-empty-state">
             <div class="upload-icon">
               <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4?.586-4?.586a2 2 0 012?.828 0L16 16m-2-2l1?.586-1?.586a2 2 0 012?.828 0L20 14m-6-6h?.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
             <h4 class="upload-title">Добавьте фотографии</h4>
@@ -54,7 +54,7 @@
               type="button"
               :disabled="disabled || readonly"
               class="btn-primary mt-4"
-              @click="($refs.photosInput as HTMLInputElement)?.click()"
+              @click="($refs?.photosInput as HTMLInputElement)?.click()"
             >
               Выбрать фотографии
             </button>
@@ -77,18 +77,18 @@
             <div class="upload-stats">
               <div class="stats-item">
                 <span class="stats-label">Загружено:</span>
-                <span class="stats-value">{{ formData.photos.length }} / {{ maxPhotos }}</span>
+                <span class="stats-value">{{ formData?.photos.length }} / {{ maxPhotos }}</span>
               </div>
               <div class="stats-item">
                 <span class="stats-label">Размер:</span>
-                <span class="stats-value">{{ formatTotalSize(formData.photos) }}</span>
+                <span class="stats-value">{{ formatTotalSize(formData?.photos) }}</span>
               </div>
             </div>
 
             <div class="photos-grid">
               <TransitionGroup name="photo-item" tag="div" class="grid-container">
                 <div
-                  v-for="(photo, index) in formData.photos"
+                  v-for="(photo, index) in formData?.photos"
                   :key="getPhotoKey(photo, index)"
                   class="photo-item"
                   :class="{ 'photo-item--primary': index === 0 }"
@@ -112,7 +112,7 @@
                           @click="movePhotoToFirst(index)"
                         >
                           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11?.049 2?.927c.3-.921 1?.603-.921 1?.902 0l1?.519 4?.674a1 1 0 00?.95.69h4?.915c.969 0 1?.371 1?.24.588 1?.81l-3?.976 2?.888a1 1 0 00-.363 1?.118l1.518 4?.674c.3?.922-.755 1?.688-1?.538 1?.118l-3?.976-2?.888a1 1 0 00-1?.176 0l-3?.976 2?.888c-.783?.57-1?.838-.197-1?.538-1?.118l1.518-4?.674a1 1 0 00-.363-1?.118l-3?.976-2?.888c-.784-.57-.38-1?.81.588-1?.81h4.914a1 1 0 00?.951-.69l1?.519-4?.674z" />
                           </svg>
                         </button>
                         <button
@@ -123,7 +123,7 @@
                           @click="removePhoto(index)"
                         >
                           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12?.142A2 2 0 0116?.138 21H7?.862a2 2 0 01-1?.995-1?.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
                         </button>
                       </div>
@@ -132,7 +132,7 @@
                   <div class="photo-info">
                     <div class="photo-badge" v-if="index === 0">
                       <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                        <path d="M11?.049 2?.927c.3-.921 1?.603-.921 1?.902 0l1?.519 4?.674a1 1 0 00?.95.69h4?.915c.969 0 1?.371 1?.24.588 1?.81l-3?.976 2?.888a1 1 0 00-.363 1?.118l1.518 4?.674c.3?.922-.755 1?.688-1?.538 1?.118l-3?.976-2?.888a1 1 0 00-1?.176 0l-3?.976 2?.888c-.783?.57-1?.838-.197-1?.538-1?.118l1.518-4?.674a1 1 0 00-.363-1?.118l-3?.976-2?.888c-.784-.57-.38-1?.81.588-1?.81h4.914a1 1 0 00?.951-.69l1?.519-4?.674z" />
                       </svg>
                       Главная
                     </div>
@@ -142,11 +142,11 @@
               </TransitionGroup>
               
               <button
-                v-if="formData.photos.length < maxPhotos"
+                v-if="formData?.photos.length < maxPhotos"
                 type="button"
                 :disabled="disabled || readonly"
                 class="add-more-btn"
-                @click="($refs.photosInput as HTMLInputElement)?.click()"
+                @click="($refs?.photosInput as HTMLInputElement)?.click()"
               >
                 <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -176,8 +176,8 @@
             'border-blue-300 bg-blue-50': isDragOverVideo,
             'border-red-300': hasError('video')
           }"
-          @drop.prevent="handleVideoDrop"
-          @dragover.prevent="isDragOverVideo = true"
+          @drop?.prevent="handleVideoDrop"
+          @dragover?.prevent="isDragOverVideo = true"
           @dragleave="isDragOverVideo = false"
         >
           <input
@@ -189,10 +189,10 @@
             @change="handleVideoSelect"
           />
           
-          <div v-if="!formData.video" class="upload-empty-state">
+          <div v-if="!formData?.video" class="upload-empty-state">
             <div class="upload-icon">
               <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4?.553-2?.276A1 1 0 0121 8?.618v6.764a1 1 0 01-1?.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
               </svg>
             </div>
             <h4 class="upload-title">Добавьте видео</h4>
@@ -201,7 +201,7 @@
               type="button"
               :disabled="disabled || readonly"
               class="btn-secondary mt-4"
-              @click="($refs.videoInput as HTMLInputElement)?.click()"
+              @click="($refs?.videoInput as HTMLInputElement)?.click()"
             >
               Выбрать видео
             </button>
@@ -222,7 +222,7 @@
           <div v-else class="video-preview">
             <div class="video-container">
               <video
-                :src="getFilePreview(formData.video)"
+                :src="getFilePreview(formData?.video)"
                 class="video-player"
                 controls
                 preload="metadata"
@@ -247,7 +247,7 @@
                   <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2h4a1 1 0 011 1v1a1 1 0 01-1 1v12a2 2 0 01-2 2H6a2 2 0 01-2-2V7a1 1 0 01-1-1V5a1 1 0 011-1h4z" />
                   </svg>
-                  {{ formatFileSize(formData.video) }}
+                  {{ formatFileSize(formData?.video) }}
                 </span>
               </div>
             </div>
@@ -271,10 +271,10 @@
           <label class="checkbox-item">
             <input
               type="checkbox"
-              :checked="formData.media_settings?.includes('show_in_gallery')"
+              :checked="formData?.media_settings?.includes('show_in_gallery')"
               :disabled="disabled || readonly"
               class="form-field-checkbox"
-              @change="toggleMediaSetting('show_in_gallery', ($event.target as HTMLInputElement).checked)"
+              @change="toggleMediaSetting('show_in_gallery', ($event?.target as HTMLInputElement).checked)"
             />
             <span class="checkbox-label">
               Показывать в галерее профиля
@@ -285,10 +285,10 @@
           <label class="checkbox-item">
             <input
               type="checkbox"
-              :checked="formData.media_settings?.includes('allow_download')"
+              :checked="formData?.media_settings?.includes('allow_download')"
               :disabled="disabled || readonly"
               class="form-field-checkbox"
-              @change="toggleMediaSetting('allow_download', ($event.target as HTMLInputElement).checked)"
+              @change="toggleMediaSetting('allow_download', ($event?.target as HTMLInputElement).checked)"
             />
             <span class="checkbox-label">
               Разрешить скачивание
@@ -299,10 +299,10 @@
           <label class="checkbox-item">
             <input
               type="checkbox"
-              :checked="formData.media_settings?.includes('show_watermark')"
+              :checked="formData?.media_settings?.includes('show_watermark')"
               :disabled="disabled || readonly"
               class="form-field-checkbox"
-              @change="toggleMediaSetting('show_watermark', ($event.target as HTMLInputElement).checked)"
+              @change="toggleMediaSetting('show_watermark', ($event?.target as HTMLInputElement).checked)"
             />
             <span class="checkbox-label">
               Добавить водяной знак
@@ -313,10 +313,10 @@
           <label class="checkbox-item">
             <input
               type="checkbox"
-              :checked="formData.media_settings?.includes('auto_compress')"
+              :checked="formData?.media_settings?.includes('auto_compress')"
               :disabled="disabled || readonly"
               class="form-field-checkbox"
-              @change="toggleMediaSetting('auto_compress', ($event.target as HTMLInputElement).checked)"
+              @change="toggleMediaSetting('auto_compress', ($event?.target as HTMLInputElement).checked)"
             />
             <span class="checkbox-label">
               Автоматическое сжатие
@@ -332,11 +332,11 @@
         <div class="footer-stats">
           <div class="stat-item">
             <span class="stat-label">Фотографии:</span>
-            <span class="stat-value">{{ formData.photos?.length || 0 }} / {{ maxPhotos }}</span>
+            <span class="stat-value">{{ formData?.photos?.length || 0 }} / {{ maxPhotos }}</span>
           </div>
           <div class="stat-item">
             <span class="stat-label">Видео:</span>
-            <span class="stat-value">{{ formData.video ? '1' : '0' }} / 1</span>
+            <span class="stat-value">{{ formData?.video ? '1' : '0' }} / 1</span>
           </div>
           <div class="stat-item">
             <span class="stat-label">Общий размер:</span>
@@ -345,7 +345,7 @@
         </div>
         <div class="footer-hint">
           <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h?.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <span class="text-sm text-gray-600">
             Качественные медиа материалы увеличивают количество заказов на 65%
@@ -401,7 +401,7 @@ const maxPhotoSize = 10 * 1024 * 1024 // 10MB
 const maxVideoSize = 100 * 1024 * 1024 // 100MB
 
 // Вычисляемые свойства
-const formData = computed(() => props.modelValue)
+const formData = computed(() => _props?.modelValue)
 
 // Методы
 const updateValue = (value: any) => {
@@ -409,17 +409,17 @@ const updateValue = (value: any) => {
 }
 
 const updateField = (fieldName: string, value: any) => {
-  const newData = { ...formData.value, [fieldName]: value }
+  const newData = { ...formData?.value, [fieldName]: value }
   emit('update:modelValue', newData)
   emit('field-change', fieldName, value)
 }
 
 const hasError = (fieldName: string): boolean => {
-  return !!props.errors[fieldName]
+  return !!_props?.errors[fieldName]
 }
 
 const getError = (fieldName: string): string => {
-  const error = props.errors[fieldName]
+  const error = _props?.errors[fieldName]
   return Array.isArray(error) ? error[0] : error || ''
 }
 
@@ -433,38 +433,38 @@ const onToggle = (collapsed: boolean) => {
 
 // Методы для работы с фотографиями
 const handlePhotosSelect = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  const files = Array.from(target.files || [])
+  const target = event?.target as HTMLInputElement
+  const files = Array.from(target?.files || [])
   addPhotos(files)
-  target.value = '' // Сброс input для возможности повторного выбора
+  target?.value = '' // Сброс input для возможности повторного выбора
 }
 
 const handlePhotosDrop = (event: DragEvent) => {
-  isDragOverPhotos.value = false
-  const files = Array.from(event.dataTransfer?.files || [])
-  const imageFiles = files.filter(file => file.type.startsWith('image/'))
+  isDragOverPhotos?.value = false
+  const files = Array.from(event?.dataTransfer?.files || [])
+  const imageFiles = files?.filter(file => file?.type.startsWith('image/'))
   addPhotos(imageFiles)
 }
 
 const addPhotos = (files: File[]) => {
-  const currentPhotos = formData.value.photos || []
-  const availableSlots = maxPhotos - currentPhotos.length
-  const filesToAdd = files.slice(0, availableSlots)
+  const currentPhotos = formData?.value.photos || []
+  const availableSlots = maxPhotos - currentPhotos?.length
+  const filesToAdd = files?.slice(0, availableSlots)
   
   // Проверка размера и типа файлов
-  const validFiles = filesToAdd.filter(file => {
-    if (!file.type.startsWith('image/')) {
-      console.warn(`Файл ${file.name} не является изображением`)
+  const validFiles = filesToAdd?.filter(file => {
+    if (!file?.type.startsWith('image/')) {
+      console.warn(`Файл ${file?.name} не является изображением`)
       return false
     }
-    if (file.size > maxPhotoSize) {
-      console.warn(`Файл ${file.name} слишком большой (максимум 10 МБ)`)
+    if (file?.size > maxPhotoSize) {
+      console.warn(`Файл ${file?.name} слишком большой (максимум 10 МБ)`)
       return false
     }
     return true
   })
 
-  if (validFiles.length > 0) {
+  if (validFiles?.length > 0) {
     const newPhotos = [...currentPhotos, ...validFiles]
     updateField('photos', newPhotos)
     emit('photos-upload', validFiles)
@@ -472,33 +472,33 @@ const addPhotos = (files: File[]) => {
 }
 
 const removePhoto = (index: number) => {
-  const currentPhotos = [...(formData.value.photos || [])]
-  currentPhotos.splice(index, 1)
+  const currentPhotos = [...(formData?.value.photos || [])]
+  currentPhotos?.splice(index, 1)
   updateField('photos', currentPhotos)
   emit('photo-remove', index)
 }
 
 const movePhotoToFirst = (index: number) => {
-  const currentPhotos = [...(formData.value.photos || [])]
-  const photo = currentPhotos.splice(index, 1)[0]
-  currentPhotos.unshift(photo)
+  const currentPhotos = [...(formData?.value.photos || [])]
+  const photo = currentPhotos?.splice(index, 1)[0]
+  currentPhotos?.unshift(photo)
   updateField('photos', currentPhotos)
 }
 
 // Методы для работы с видео
 const handleVideoSelect = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  const file = target.files?.[0]
+  const target = event?.target as HTMLInputElement
+  const file = target?.files?.[0]
   if (file) {
     addVideo(file)
   }
-  target.value = '' // Сброс input
+  target?.value = '' // Сброс input
 }
 
 const handleVideoDrop = (event: DragEvent) => {
-  isDragOverVideo.value = false
-  const files = Array.from(event.dataTransfer?.files || [])
-  const videoFile = files.find(file => file.type.startsWith('video/'))
+  isDragOverVideo?.value = false
+  const files = Array.from(event?.dataTransfer?.files || [])
+  const videoFile = files?.find(file => file?.type.startsWith('video/'))
   if (videoFile) {
     addVideo(videoFile)
   }
@@ -506,13 +506,13 @@ const handleVideoDrop = (event: DragEvent) => {
 
 const addVideo = (file: File) => {
   // Проверка размера и типа файла
-  if (!file.type.startsWith('video/')) {
-    console.warn(`Файл ${file.name} не является видео`)
+  if (!file?.type.startsWith('video/')) {
+    console.warn(`Файл ${file?.name} не является видео`)
     return
   }
   
-  if (file.size > maxVideoSize) {
-    console.warn(`Файл ${file.name} слишком большой (максимум 100 МБ)`)
+  if (file?.size > maxVideoSize) {
+    console.warn(`Файл ${file?.name} слишком большой (максимум 100 МБ)`)
     return
   }
 
@@ -527,13 +527,13 @@ const removeVideo = () => {
 
 // Методы для настроек
 const toggleMediaSetting = (setting: string, checked: boolean) => {
-  const currentSettings = formData.value.media_settings || []
+  const currentSettings = formData?.value.media_settings || []
   let newSettings: string[]
 
   if (checked) {
     newSettings = [...currentSettings, setting]
   } else {
-    newSettings = currentSettings.filter(s => s !== setting)
+    newSettings = currentSettings?.filter(s => s !== setting)
   }
 
   updateField('media_settings', newSettings)
@@ -545,16 +545,16 @@ const getFilePreview = (file: File): string => {
 }
 
 const getPhotoKey = (photo: File, index: number): string => {
-  return `${photo.name}_${photo.size}_${index}`
+  return `${photo?.name}_${photo?.size}_${index}`
 }
 
 const handleImageError = (event: Event) => {
-  const img = event.target as HTMLImageElement
-  img.style.display = 'none'
+  const img = event?.target as HTMLImageElement
+  img?.style.display = 'none'
 }
 
 const formatFileSize = (file: File): string => {
-  const bytes = file.size
+  const bytes = file?.size
   if (bytes === 0) return '0 B'
   
   const k = 1024
@@ -565,7 +565,7 @@ const formatFileSize = (file: File): string => {
 }
 
 const formatTotalSize = (files: File[]): string => {
-  const totalBytes = files.reduce((sum, file) => sum + file.size, 0)
+  const totalBytes = files?.reduce((sum, file) => sum + file?.size, 0)
   if (totalBytes === 0) return '0 B'
   
   const k = 1024
@@ -576,9 +576,9 @@ const formatTotalSize = (files: File[]): string => {
 }
 
 const formatTotalMediaSize = (): string => {
-  const photos = formData.value.photos || []
-  const video = formData.value.video
-  const totalBytes = photos.reduce((sum, file) => sum + file.size, 0) + (video?.size || 0)
+  const photos = formData?.value.photos || []
+  const video = formData?.value.video
+  const totalBytes = photos?.reduce((sum, file) => sum + file?.size, 0) + (video?.size || 0)
   
   if (totalBytes === 0) return '0 B'
   
@@ -590,15 +590,15 @@ const formatTotalMediaSize = (): string => {
 }
 
 // Очистка URL объектов при размонтировании
-watch(() => formData.value.photos, (newPhotos, oldPhotos) => {
+watch(() => formData?.value.photos, (newPhotos, oldPhotos) => {
   if (oldPhotos) {
-    oldPhotos.forEach(file => {
+    oldPhotos?.forEach(file => {
       URL.revokeObjectURL(URL.createObjectURL(file))
     })
   }
 })
 
-watch(() => formData.value.video, (newVideo, oldVideo) => {
+watch(() => formData?.value.video, (newVideo, oldVideo) => {
   if (oldVideo) {
     URL.revokeObjectURL(URL.createObjectURL(oldVideo))
   }
@@ -831,17 +831,17 @@ watch(() => formData.value.video, (newVideo, oldVideo) => {
 /* Анимации */
 .photo-item-enter-active,
 .photo-item-leave-active {
-  transition: all 0.3s ease;
+  transition: all 0?.3s ease;
 }
 
 .photo-item-enter-from {
   opacity: 0;
-  transform: scale(0.8);
+  transform: scale(0?.8);
 }
 
 .photo-item-leave-to {
   opacity: 0;
-  transform: scale(0.8);
+  transform: scale(0?.8);
 }
 
 /* Адаптивность */

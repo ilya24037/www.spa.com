@@ -1,14 +1,14 @@
 <template>
   <!-- Error СЃРѕСЃС‚РѕСЏРЅРёРµ -->
   <ErrorState
-    v-if="errorState.error"
-    :error="errorState.error"
+    v-if="errorState?.error"
+    :error="errorState?.error"
     size="medium"
     variant="card"
     :retryable="true"
     :dismissible="true"
     @retry="handleRetry"
-    @dismiss="errorState.clearError"
+    @dismiss="errorState?.clearError"
     class="mb-6"
   />
   
@@ -25,7 +25,7 @@
     </div>
 
     <!-- Р¤РѕСЂРјР° -->
-    <form @submit.prevent="handleSubmit" class="space-y-6">
+    <form @submit?.prevent="handleSubmit" class="space-y-6">
       
       <!-- РРјСЏ РєР»РёРµРЅС‚Р° -->
       <div>
@@ -34,19 +34,19 @@
         </label>
         <input
           id="clientName"
-          v-model="form.clientName"
+          v-model="form?.clientName"
           type="text"
           placeholder="Р’РІРµРґРёС‚Рµ РІР°С€Рµ РёРјСЏ"
           :class="[
             'w-full px-3 py-2 border rounded-lg text-sm transition-colors',
-            errors.value.clientName 
+            errors?.value.clientName 
               ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
               : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
           ]"
           @blur="validateField('clientName')"
         />
-        <p v-if="errors.value.clientName" class="mt-1 text-sm text-red-600">
-          {{ errors.value.clientName }}
+        <p v-if="errors?.value.clientName" class="mt-1 text-sm text-red-600">
+          {{ errors?.value.clientName }}
         </p>
       </div>
 
@@ -57,20 +57,20 @@
         </label>
         <input
           id="clientPhone"
-          v-model="form.clientPhone"
+          v-model="form?.clientPhone"
           type="tel"
           placeholder="+7 (999) 999-99-99"
           :class="[
             'w-full px-3 py-2 border rounded-lg text-sm transition-colors',
-            errors.value.clientPhone 
+            errors?.value.clientPhone 
               ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
               : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
           ]"
           @input="formatPhone"
           @blur="validateField('clientPhone')"
         />
-        <p v-if="errors.value.clientPhone" class="mt-1 text-sm text-red-600">
-          {{ errors.value.clientPhone }}
+        <p v-if="errors?.value.clientPhone" class="mt-1 text-sm text-red-600">
+          {{ errors?.value.clientPhone }}
         </p>
         <p class="mt-1 text-xs text-gray-500">
           РќР° СЌС‚РѕС‚ РЅРѕРјРµСЂ РїСЂРёРґРµС‚ SMS СЃ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёРµРј Р·Р°РїРёСЃРё
@@ -84,19 +84,19 @@
         </label>
         <input
           id="clientEmail"
-          v-model="form.clientEmail"
+          v-model="form?.clientEmail"
           type="email"
-          placeholder="your@email.com"
+          placeholder="your@email?.com"
           :class="[
             'w-full px-3 py-2 border rounded-lg text-sm transition-colors',
-            errors.value.clientEmail 
+            errors?.value.clientEmail 
               ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
               : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
           ]"
           @blur="validateField('clientEmail')"
         />
-        <p v-if="errors.value.clientEmail" class="mt-1 text-sm text-red-600">
-          {{ errors.value.clientEmail }}
+        <p v-if="errors?.value.clientEmail" class="mt-1 text-sm text-red-600">
+          {{ errors?.value.clientEmail }}
         </p>
       </div>
 
@@ -107,14 +107,14 @@
         </label>
         <textarea
           id="notes"
-          v-model="form.notes"
+          v-model="form?.notes"
           rows="3"
           placeholder="Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РїРѕР¶РµР»Р°РЅРёСЏ РёР»Рё РІРѕРїСЂРѕСЃС‹..."
           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 transition-colors resize-none"
           maxlength="500"
         ></textarea>
         <p class="mt-1 text-xs text-gray-500">
-          {{ form.notes.length }}/500 СЃРёРјРІРѕР»РѕРІ
+          {{ form?.notes.length }}/500 СЃРёРјРІРѕР»РѕРІ
         </p>
       </div>
 
@@ -122,11 +122,11 @@
       <div class="flex items-start">
         <input
           id="dataProcessingConsent"
-          v-model="form.dataProcessingConsent"
+          v-model="form?.dataProcessingConsent"
           type="checkbox"
           :class="[
-            'h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 mt-0.5',
-            errors.value.dataProcessingConsent ? 'border-red-300' : ''
+            'h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 mt-0?.5',
+            errors?.value.dataProcessingConsent ? 'border-red-300' : ''
           ]"
         />
         <label for="dataProcessingConsent" class="ml-2 text-sm text-gray-700">
@@ -137,8 +137,8 @@
           <span class="text-red-500">*</span>
         </label>
       </div>
-      <p v-if="errors.value.dataProcessingConsent" class="text-sm text-red-600">
-        {{ errors.value.dataProcessingConsent }}
+      <p v-if="errors?.value.dataProcessingConsent" class="text-sm text-red-600">
+        {{ errors?.value.dataProcessingConsent }}
       </p>
 
       <!-- РРЅС„РѕСЂРјР°С†РёСЏ Рѕ Р·Р°РїРёСЃРё -->
@@ -147,20 +147,20 @@
         <div class="space-y-2 text-sm text-gray-700">
           <div class="flex justify-between">
             <span>Р”Р°С‚Р° Рё РІСЂРµРјСЏ:</span>
-            <span class="font-medium">{{ formatDateTime(bookingInfo.datetime) }}</span>
+            <span class="font-medium">{{ formatDateTime(bookingInfo?.datetime) }}</span>
           </div>
-          <div v-if="bookingInfo.service" class="flex justify-between">
+          <div v-if="bookingInfo?.service" class="flex justify-between">
             <span>РЈСЃР»СѓРіР°:</span>
-            <span class="font-medium">{{ bookingInfo.service.name }}</span>
+            <span class="font-medium">{{ bookingInfo?.service.name }}</span>
           </div>
-          <div v-if="bookingInfo.service?.duration" class="flex justify-between">
+          <div v-if="bookingInfo?.service?.duration" class="flex justify-between">
             <span>РџСЂРѕРґРѕР»Р¶РёС‚РµР»СЊРЅРѕСЃС‚СЊ:</span>
-            <span class="font-medium">{{ bookingInfo.service.duration }} РјРёРЅ</span>
+            <span class="font-medium">{{ bookingInfo?.service.duration }} РјРёРЅ</span>
           </div>
-          <div v-if="bookingInfo.service?.price" class="flex justify-between items-center">
+          <div v-if="bookingInfo?.service?.price" class="flex justify-between items-center">
             <span>РЎС‚РѕРёРјРѕСЃС‚СЊ:</span>
             <span class="font-semibold text-lg text-green-600">
-              {{ formatPrice(bookingInfo.service.price) }} в‚Ѕ
+              {{ formatPrice(bookingInfo?.service.price) }} в‚Ѕ
             </span>
           </div>
         </div>
@@ -188,7 +188,7 @@
         >
           <svg v-if="loading" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5?.373 0 0 5?.373 0 12h4zm2 5?.291A7.962 7?.962 0 014 12H0c0 3?.042 1?.135 5?.824 3 7?.938l3-2?.647z"></path>
           </svg>
           {{ loading ? 'РЎРѕР·РґР°РЅРёРµ Р·Р°РїРёСЃРё...' : 'Р—Р°РїРёСЃР°С‚СЊСЃСЏ' }}
         </button>
@@ -199,7 +199,7 @@
         <div class="flex">
           <div class="flex-shrink-0">
             <svg class="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h?.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
           <div class="ml-3">
@@ -219,7 +219,7 @@ import { useErrorHandler } from '@/src/shared/composables/useErrorHandler'
 import { ErrorState } from '@/src/shared/ui/molecules/ErrorState'
 
 // РќР°СЃС‚СЂРѕР№РєР° dayjs
-dayjs.locale('ru')
+dayjs?.locale('ru')
 
 // Error handler (Р±РµР· toast - РїРѕРєР°Р·С‹РІР°РµРј С‡РµСЂРµР· ErrorState)
 const errorState = useErrorHandler(false)
@@ -266,10 +266,10 @@ const formError = ref<string | null>(null)
 
 // Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const isValid = computed(() => {
-  return form.value.clientName.trim() !== '' &&
-         form.value.clientPhone.trim() !== '' &&
-         form.value.dataProcessingConsent &&
-         Object.keys(errors.value).length === 0
+  return form?.value.clientName?.trim() !== '' &&
+         form?.value.clientPhone?.trim() !== '' &&
+         form?.value.dataProcessingConsent &&
+         Object?.keys(errors?.value).length === 0
 })
 
 // РњРµС‚РѕРґС‹ РІР°Р»РёРґР°С†РёРё
@@ -277,44 +277,44 @@ type ValidateFieldName = 'clientName' | 'clientPhone' | 'clientEmail' | 'dataPro
 
 const validateField = (fieldName: ValidateFieldName): void => {
   try {
-    errors.value = { ...errors.value }
-    delete errors.value[fieldName]
+    errors?.value = { ...errors?.value }
+    delete errors?.value[fieldName]
 
     switch (fieldName) {
       case 'clientName':
-        if (!form.value.clientName.trim()) {
-          errors.value.clientName = 'РЈРєР°Р¶РёС‚Рµ РІР°С€Рµ РёРјСЏ'
-        } else if (form.value.clientName.trim().length < 2) {
-          errors.value.clientName = 'РРјСЏ РґРѕР»Р¶РЅРѕ СЃРѕРґРµСЂР¶Р°С‚СЊ РјРёРЅРёРјСѓРј 2 СЃРёРјРІРѕР»Р°'
+        if (!form?.value.clientName?.trim()) {
+          errors?.value.clientName = 'РЈРєР°Р¶РёС‚Рµ РІР°С€Рµ РёРјСЏ'
+        } else if (form?.value.clientName?.trim().length < 2) {
+          errors?.value.clientName = 'РРјСЏ РґРѕР»Р¶РЅРѕ СЃРѕРґРµСЂР¶Р°С‚СЊ РјРёРЅРёРјСѓРј 2 СЃРёРјРІРѕР»Р°'
         }
         break
 
       case 'clientPhone':
         const phoneRegex = /^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/
-        if (!form.value.clientPhone.trim()) {
-          errors.value.clientPhone = 'РЈРєР°Р¶РёС‚Рµ РЅРѕРјРµСЂ С‚РµР»РµС„РѕРЅР°'
-        } else if (!phoneRegex.test(form.value.clientPhone)) {
-          errors.value.clientPhone = 'РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ С„РѕСЂРјР°С‚ С‚РµР»РµС„РѕРЅР°'
+        if (!form?.value.clientPhone?.trim()) {
+          errors?.value.clientPhone = 'РЈРєР°Р¶РёС‚Рµ РЅРѕРјРµСЂ С‚РµР»РµС„РѕРЅР°'
+        } else if (!phoneRegex?.test(form?.value.clientPhone)) {
+          errors?.value.clientPhone = 'РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ С„РѕСЂРјР°С‚ С‚РµР»РµС„РѕРЅР°'
         }
         break
 
       case 'clientEmail':
-        if (form.value.clientEmail.trim()) {
+        if (form?.value.clientEmail?.trim()) {
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-          if (!emailRegex.test(form.value.clientEmail)) {
-            errors.value.clientEmail = 'РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ С„РѕСЂРјР°С‚ email'
+          if (!emailRegex?.test(form?.value.clientEmail)) {
+            errors?.value.clientEmail = 'РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ С„РѕСЂРјР°С‚ email'
           }
         }
         break
 
       case 'dataProcessingConsent':
-        if (!form.value.dataProcessingConsent) {
-          errors.value.dataProcessingConsent = 'РќРµРѕР±С…РѕРґРёРјРѕ СЃРѕРіР»Р°СЃРёРµ РЅР° РѕР±СЂР°Р±РѕС‚РєСѓ РґР°РЅРЅС‹С…'
+        if (!form?.value.dataProcessingConsent) {
+          errors?.value.dataProcessingConsent = 'РќРµРѕР±С…РѕРґРёРјРѕ СЃРѕРіР»Р°СЃРёРµ РЅР° РѕР±СЂР°Р±РѕС‚РєСѓ РґР°РЅРЅС‹С…'
         }
         break
     }
   } catch (error: unknown) {
-    errorState.handleError({
+    errorState?.handleError({
       message: 'РћС€РёР±РєР° РІР°Р»РёРґР°С†РёРё РїРѕР»СЏ',
       details: `РќРµ СѓРґР°РµС‚СЃСЏ РїСЂРѕРІРµСЂРёС‚СЊ РїРѕР»Рµ ${fieldName}`
     }, 'validation')
@@ -327,13 +327,13 @@ const validateForm = (): boolean => {
     validateField('clientPhone')
     validateField('clientEmail')
     
-    if (!form.value.dataProcessingConsent) {
-      errors.value.dataProcessingConsent = 'РќРµРѕР±С…РѕРґРёРјРѕ СЃРѕРіР»Р°СЃРёРµ РЅР° РѕР±СЂР°Р±РѕС‚РєСѓ РґР°РЅРЅС‹С…'
+    if (!form?.value.dataProcessingConsent) {
+      errors?.value.dataProcessingConsent = 'РќРµРѕР±С…РѕРґРёРјРѕ СЃРѕРіР»Р°СЃРёРµ РЅР° РѕР±СЂР°Р±РѕС‚РєСѓ РґР°РЅРЅС‹С…'
     }
 
-    return Object.keys(errors.value).length === 0
+    return Object?.keys(errors?.value).length === 0
   } catch (error: unknown) {
-    errorState.handleError({
+    errorState?.handleError({
       message: 'РћС€РёР±РєР° РІР°Р»РёРґР°С†РёРё С„РѕСЂРјС‹',
       details: 'РќРµ СѓРґР°РµС‚СЃСЏ РїСЂРѕРІРµСЂРёС‚СЊ РєРѕСЂСЂРµРєС‚РЅРѕСЃС‚СЊ РґР°РЅРЅС‹С…'
     }, 'validation')
@@ -344,38 +344,38 @@ const validateForm = (): boolean => {
 // РњРµС‚РѕРґС‹ С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёСЏ
 const formatPhone = (event: Event): void => {
   try {
-    const target = event.target as HTMLInputElement
-    let value = target.value.replace(/\D/g, '')
+    const target = event?.target as HTMLInputElement
+    let value = target?.value.replace(/\D/g, '')
     
-    if (value.startsWith('8')) {
-      value = '7' + value.slice(1)
+    if (value?.startsWith('8')) {
+      value = '7' + value?.slice(1)
     }
     
-    if (!value.startsWith('7')) {
+    if (!value?.startsWith('7')) {
       value = '7' + value
     }
     
-    if (value.length > 11) {
-      value = value.slice(0, 11)
+    if (value?.length > 11) {
+      value = value?.slice(0, 11)
     }
     
     let formatted = '+7'
-    if (value.length > 1) {
-      formatted += ' (' + value.slice(1, 4)
+    if (value?.length > 1) {
+      formatted += ' (' + value?.slice(1, 4)
     }
-    if (value.length > 4) {
-      formatted += ') ' + value.slice(4, 7)
+    if (value?.length > 4) {
+      formatted += ') ' + value?.slice(4, 7)
     }
-    if (value.length > 7) {
-      formatted += '-' + value.slice(7, 9)
+    if (value?.length > 7) {
+      formatted += '-' + value?.slice(7, 9)
     }
-    if (value.length > 9) {
-      formatted += '-' + value.slice(9, 11)
+    if (value?.length > 9) {
+      formatted += '-' + value?.slice(9, 11)
     }
     
-    form.value.clientPhone = formatted
+    form?.value.clientPhone = formatted
   } catch (error: unknown) {
-    errorState.handleError({
+    errorState?.handleError({
       message: 'РћС€РёР±РєР° С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёСЏ С‚РµР»РµС„РѕРЅР°',
       details: 'Р’РІРµРґРёС‚Рµ РєРѕСЂСЂРµРєС‚РЅС‹Р№ РЅРѕРјРµСЂ С‚РµР»РµС„РѕРЅР°'
     }, 'validation')
@@ -402,34 +402,34 @@ const formatPrice = (price: number | undefined): string => {
 // РћР±СЂР°Р±РѕС‚С‡РёРєРё СЃРѕР±С‹С‚РёР№
 const handleSubmit = () => {
   try {
-    errorState.clearError()
-    formError.value = null
+    errorState?.clearError()
+    formError?.value = null
     
     if (!validateForm()) {
-      formError.value = 'РџСЂРѕРІРµСЂСЊС‚Рµ РїСЂР°РІРёР»СЊРЅРѕСЃС‚СЊ Р·Р°РїРѕР»РЅРµРЅРёСЏ С„РѕСЂРјС‹'
+      formError?.value = 'РџСЂРѕРІРµСЂСЊС‚Рµ РїСЂР°РІРёР»СЊРЅРѕСЃС‚СЊ Р·Р°РїРѕР»РЅРµРЅРёСЏ С„РѕСЂРјС‹'
       return
     }
 
-    if (!props.bookingInfo) {
-      formError.value = 'РЎРЅР°С‡Р°Р»Р° РІС‹Р±РµСЂРёС‚Рµ РґР°С‚Сѓ Рё РІСЂРµРјСЏ Р·Р°РїРёСЃРё'
+    if (!_props?.bookingInfo) {
+      formError?.value = 'РЎРЅР°С‡Р°Р»Р° РІС‹Р±РµСЂРёС‚Рµ РґР°С‚Сѓ Рё РІСЂРµРјСЏ Р·Р°РїРёСЃРё'
       return
     }
 
     // РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј РґР°РЅРЅС‹Рµ РґР»СЏ РѕС‚РїСЂР°РІРєРё
     const bookingData = {
-      ...props.bookingInfo,
+      ..._props?.bookingInfo,
       client: {
-        name: form.value.clientName.trim(),
-        phone: form.value.clientPhone,
-        email: form.value.clientEmail.trim() || null
+        name: form?.value.clientName?.trim(),
+        phone: form?.value.clientPhone,
+        email: form?.value.clientEmail?.trim() || null
       },
-      notes: form.value.notes.trim() || null,
-      dataProcessingConsent: form.value.dataProcessingConsent
+      notes: form?.value.notes?.trim() || null,
+      dataProcessingConsent: form?.value.dataProcessingConsent
     }
 
     emit('submit', bookingData)
   } catch (error: unknown) {
-    errorState.handleError({
+    errorState?.handleError({
       message: 'РћС€РёР±РєР° РїСЂРё РѕС‚РїСЂР°РІРєРµ С„РѕСЂРјС‹',
       details: 'РџСЂРѕРІРµСЂСЊС‚Рµ РїСЂР°РІРёР»СЊРЅРѕСЃС‚СЊ Р·Р°РїРѕР»РЅРµРЅРёСЏ РІСЃРµС… РїРѕР»РµР№'
     }, 'validation')
@@ -438,14 +438,14 @@ const handleSubmit = () => {
 
 // РњРµС‚РѕРґ РґР»СЏ РїРѕРІС‚РѕСЂРЅРѕР№ РїРѕРїС‹С‚РєРё РїРѕСЃР»Рµ РѕС€РёР±РєРё
 const handleRetry = async (): Promise<void> => {
-  errorState.clearError()
-  formError.value = null
+  errorState?.clearError()
+  formError?.value = null
   
   // РћС‡РёС‰Р°РµРј РѕС€РёР±РєРё РІР°Р»РёРґР°С†РёРё
-  errors.value = {}
+  errors?.value = {}
   
   // Р­РјРёС‚РёСЂСѓРµРј СЃРѕР±С‹С‚РёРµ РґР»СЏ СЂРѕРґРёС‚РµР»СЊСЃРєРѕРіРѕ РєРѕРјРїРѕРЅРµРЅС‚Р°
-  await errorState.retryOperation(async () => {
+  await errorState?.retryOperation(async () => {
     emit('retryRequested')
   })
 }
@@ -453,14 +453,14 @@ const handleRetry = async (): Promise<void> => {
 // РќР°Р±Р»СЋРґР°С‚РµР»Рё
 watch(form, () => {
   emit('form-change', {
-    isValid: isValid.value,
-    formData: form.value
+    isValid: isValid?.value,
+    formData: form?.value
   })
 }, { deep: true })
 
-watch(() => form.value.dataProcessingConsent, (newValue) => {
+watch(() => form?.value.dataProcessingConsent, (newValue: any) => {
   if (newValue) {
-    delete errors.value.dataProcessingConsent
+    delete errors?.value.dataProcessingConsent
   }
 })
 </script>
@@ -471,14 +471,14 @@ watch(() => form.value.dataProcessingConsent, (newValue) => {
 }
 
 /* РђРЅРёРјР°С†РёСЏ РґР»СЏ РїРѕР»РµР№ СЃ РѕС€РёР±РєР°РјРё */
-.booking-form input.border-red-300,
-.booking-form textarea.border-red-300 {
+.booking-form input?.border-red-300,
+.booking-form textarea?.border-red-300 {
   @apply animate-pulse;
 }
 
 /* РЎС‚РёР»РёР·Р°С†РёСЏ С‡РµРєР±РѕРєСЃР° */
 input[type="checkbox"]:checked {
-  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='m13.854 3.646-7.5 7.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6 10.293l7.146-7.147a.5.5 0 0 1 .708.708z'/%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www?.w3.org/2000/svg'%3e%3cpath d='m13?.854 3?.646-7?.5 7?.5a.5?.5 0 0 1-.708 0l-3?.5-3?.5a.5?.5 0 1 1 .708-.708L6 10?.293l7.146-7?.147a.5?.5 0 0 1 .708?.708z'/%3e%3c/svg%3e");
 }
 
 /* РђРЅРёРјР°С†РёСЏ Р·Р°РіСЂСѓР·РєРё */
@@ -500,7 +500,7 @@ input[type="checkbox"]:checked {
 }
 
 .animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: pulse 2s cubic-bezier(0?.4, 0, 0?.6, 1) infinite;
 }
 </style>
 

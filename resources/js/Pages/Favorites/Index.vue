@@ -6,9 +6,9 @@
     <div class="py-6 lg:py-8">
         <!-- Loading СЃРѕСЃС‚РѕСЏРЅРёРµ -->
         <PageLoader 
-            v-if="pageLoader.isLoading.value"
+            v-if="pageLoader?.isLoading.value"
             type="catalog"
-            :message="pageLoader.message.value"
+            :message="pageLoader?.message.value"
             :show-progress="false"
             :skeleton-count="3"
         />
@@ -27,17 +27,17 @@
                 <!-- РћСЃРЅРѕРІРЅРѕР№ РєРѕРЅС‚РµРЅС‚ -->
                 <main class="flex-1">
                     <ContentCard title="РР·Р±СЂР°РЅРЅС‹Рµ РјР°СЃС‚РµСЂР°">
-                    <div v-if="favorites.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div v-if="favorites?.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <MasterCard 
                             v-for="master in favorites"
-                            :key="master.id"
+                            :key="master?.id"
                             :master="master as any"
                         />
                     </div>
                     
                     <div v-else class="text-center py-12">
                         <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4?.318 6?.318a4.5 4?.5 0 000 6?.364L12 20?.364l7.682-7?.682a4.5 4?.5 0 00-6?.364-6?.364L12 7?.636l-1?.318-1?.318a4.5 4?.5 0 00-6?.364 0z" />
                         </svg>
                         <p class="text-gray-500 text-lg mb-4">РЈ РІР°СЃ РїРѕРєР° РЅРµС‚ РёР·Р±СЂР°РЅРЅС‹С… РјР°СЃС‚РµСЂРѕРІ</p>
                         <Link 
@@ -126,8 +126,8 @@ const pageLoader = usePageLoading({
   onComplete: () => {
     // Favorites page loading completed
   },
-  onError: (error) => {
-    logger.error('Favorites page loading error:', error)
+  onError: (error: any) => {
+    logger?.error('Favorites page loading error:', error)
   }
 })
 
@@ -135,19 +135,19 @@ const pageLoader = usePageLoading({
 onMounted(() => {
   // РџРѕСЌС‚Р°РїРЅР°СЏ Р·Р°РіСЂСѓР·РєР° РґР»СЏ Р»СѓС‡С€РµРіРѕ UX
   setTimeout(() => {
-    pageLoader.setProgress(40, 'Р—Р°РіСЂСѓР¶Р°РµРј РёР·Р±СЂР°РЅРЅС‹С… РјР°СЃС‚РµСЂРѕРІ...')
+    pageLoader?.setProgress(40, 'Р—Р°РіСЂСѓР¶Р°РµРј РёР·Р±СЂР°РЅРЅС‹С… РјР°СЃС‚РµСЂРѕРІ...')
   }, 300)
 
   setTimeout(() => {
-    pageLoader.setProgress(70, 'РћР±СЂР°Р±Р°С‚С‹РІР°РµРј СЃС‚Р°С‚РёСЃС‚РёРєСѓ...')
+    pageLoader?.setProgress(70, 'РћР±СЂР°Р±Р°С‚С‹РІР°РµРј СЃС‚Р°С‚РёСЃС‚РёРєСѓ...')
   }, 700)
 
   setTimeout(() => {
-    pageLoader.setProgress(90, 'РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј РёРЅС‚РµСЂС„РµР№СЃ...')
+    pageLoader?.setProgress(90, 'РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј РёРЅС‚РµСЂС„РµР№СЃ...')
   }, 1100)
 
   setTimeout(() => {
-    pageLoader.completeLoading()
+    pageLoader?.completeLoading()
   }, 1500)
 })
 </script>

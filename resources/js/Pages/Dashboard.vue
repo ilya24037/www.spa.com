@@ -1,13 +1,13 @@
-<!-- resources/js/Pages/Dashboard.vue - FSDactored СЃ Loading СЃРѕСЃС‚РѕСЏРЅРёСЏРјРё -->
+<!-- resources/js/Pages/Dashboard?.vue - FSDactored СЃ Loading СЃРѕСЃС‚РѕСЏРЅРёСЏРјРё -->
 <template>
   <ProfileLayout>
     <!-- Loading СЃРѕСЃС‚РѕСЏРЅРёРµ -->
     <PageLoader 
-      v-if="pageLoader.isLoading.value"
+      v-if="pageLoader?.isLoading.value"
       type="dashboard"
-      :message="pageLoader.message.value"
+      :message="pageLoader?.message.value"
       :show-progress="true"
-      :progress="pageLoader.progress.value"
+      :progress="pageLoader?.progress.value"
       :skeleton-count="4"
     />
     
@@ -89,20 +89,20 @@ const pageLoader = usePageLoading({
   onComplete: () => {
     // Dashboard loading completed
   },
-  onError: (error) => {
-    logger.error('Dashboard loading error:', error)
+  onError: (error: any) => {
+    logger?.error('Dashboard loading error:', error)
   }
 })
 
 // РћР±СЂР°Р±РѕС‚С‡РёРєРё Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С…
 const handleStatsLoading = (): void => {
-  pageLoader.setProgress(60, 'Р—Р°РіСЂСѓР¶Р°РµРј СЃС‚Р°С‚РёСЃС‚РёРєСѓ...')
+  pageLoader?.setProgress(60, 'Р—Р°РіСЂСѓР¶Р°РµРј СЃС‚Р°С‚РёСЃС‚РёРєСѓ...')
 }
 
 const handleDataLoaded = (): void => {
-  pageLoader.setProgress(90, 'Р¤РёРЅР°Р»РёР·Р°С†РёСЏ РґР°РЅРЅС‹С…...')
+  pageLoader?.setProgress(90, 'Р¤РёРЅР°Р»РёР·Р°С†РёСЏ РґР°РЅРЅС‹С…...')
   setTimeout(() => {
-    pageLoader.completeLoading()
+    pageLoader?.completeLoading()
   }, 500)
 }
 
@@ -110,23 +110,23 @@ const handleDataLoaded = (): void => {
 onMounted(() => {
   // РџРѕСЌС‚Р°РїРЅР°СЏ Р·Р°РіСЂСѓР·РєР° РґР»СЏ Р»СѓС‡С€РµРіРѕ UX
   setTimeout(() => {
-    pageLoader.setProgress(20, 'Р—Р°РіСЂСѓР¶Р°РµРј СЃС‡РµС‚С‡РёРєРё...')
+    pageLoader?.setProgress(20, 'Р—Р°РіСЂСѓР¶Р°РµРј СЃС‡РµС‚С‡РёРєРё...')
   }, 300)
 
   setTimeout(() => {
-    pageLoader.setProgress(40, 'Р—Р°РіСЂСѓР¶Р°РµРј РѕР±СЉСЏРІР»РµРЅРёСЏ...')
+    pageLoader?.setProgress(40, 'Р—Р°РіСЂСѓР¶Р°РµРј РѕР±СЉСЏРІР»РµРЅРёСЏ...')
   }, 800)
 
   setTimeout(() => {
-    pageLoader.setProgress(70, 'РћР±СЂР°Р±Р°С‚С‹РІР°РµРј СЃС‚Р°С‚РёСЃС‚РёРєСѓ...')
+    pageLoader?.setProgress(70, 'РћР±СЂР°Р±Р°С‚С‹РІР°РµРј СЃС‚Р°С‚РёСЃС‚РёРєСѓ...')
   }, 1200)
 
   setTimeout(() => {
-    pageLoader.setProgress(90, 'РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј РёРЅС‚РµСЂС„РµР№СЃ...')
+    pageLoader?.setProgress(90, 'РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј РёРЅС‚РµСЂС„РµР№СЃ...')
   }, 1600)
 
   setTimeout(() => {
-    pageLoader.completeLoading()
+    pageLoader?.completeLoading()
   }, 2000)
 })
 </script>
@@ -135,7 +135,7 @@ onMounted(() => {
 /* РџР»Р°РІРЅС‹Рµ РїРµСЂРµС…РѕРґС‹ РјРµР¶РґСѓ СЃРѕСЃС‚РѕСЏРЅРёСЏРјРё */
 .dashboard-transition-enter-active,
 .dashboard-transition-leave-active {
-  transition: all 0.3s ease;
+  transition: all 0?.3s ease;
 }
 
 .dashboard-transition-enter-from {

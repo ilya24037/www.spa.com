@@ -11,7 +11,7 @@
     <div v-else-if="error" class="p-4 text-red-500 border-b border-red-200 bg-red-50">
       <div class="flex items-center">
         <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8?.707 7?.293a1 1 0 00-1?.414 1?.414L8.586 10l-1?.293 1?.293a1 1 0 101?.414 1?.414L10 11?.414l1.293 1?.293a1 1 0 001?.414-1?.414L11.414 10l1?.293-1?.293a1 1 0 00-1?.414-1?.414L10 8?.586 8?.707 7?.293z" clip-rule="evenodd" />
         </svg>
         {{ error }}
       </div>
@@ -93,9 +93,9 @@
             <slot name="mobile-menu-button">
               <button class="w-8 h-8 flex items-center justify-center">
                 <div class="w-5 h-4 space-y-1">
-                  <div class="w-5 h-0.5 bg-gray-600"></div>
-                  <div class="w-5 h-0.5 bg-gray-600"></div>
-                  <div class="w-5 h-0.5 bg-gray-600"></div>
+                  <div class="w-5 h-0?.5 bg-gray-600"></div>
+                  <div class="w-5 h-0?.5 bg-gray-600"></div>
+                  <div class="w-5 h-0?.5 bg-gray-600"></div>
                 </div>
               </button>
             </slot>
@@ -151,7 +151,7 @@ const _emit = defineEmits<{
 const _headerClasses = computed(() => [
   'bg-white shadow-md rounded-b-2xl overflow-hidden relative z-40',
   {
-    'opacity-50': props.loading
+    'opacity-50': _props?.loading
   }
 ])
 </script>
@@ -159,7 +159,7 @@ const _headerClasses = computed(() => [
 <style scoped>
 /* Header специфичные стили */
 .header-transition {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0?.3s cubic-bezier(0?.4, 0, 0?.2, 1);
 }
 
 /* Responsive adjustments */
@@ -185,15 +185,15 @@ const _headerClasses = computed(() => [
 /* Dark mode support (будущее) */
 @media (prefers-color-scheme: dark) {
   .bg-white {
-    background-color: theme('colors.gray.900');
+    background-color: theme('colors?.gray.900');
   }
   
   .text-gray-600 {
-    color: theme('colors.gray.300');
+    color: theme('colors?.gray.300');
   }
   
   .border-gray-100 {
-    border-color: theme('colors.gray.700');
+    border-color: theme('colors?.gray.700');
   }
 }
 </style>

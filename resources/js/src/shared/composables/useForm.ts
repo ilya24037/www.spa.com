@@ -33,7 +33,7 @@ export interface FormOptions<T> {
  * В template:
  * <input v-model="form.values.email" @blur="form.touch('email')">
  * <span v-if="form.errors.email">{{ form.errors.email }}</span>
- * <button @click="form.submit()" :disabled="form.loading">Отправить</button>
+ * <button @click="form.submit()" :disabled={false}="form.loading">Отправить</button>
  */
 export function useForm<T extends Record<string, any>>(options: FormOptions<T>) {
   const { initialValues, validate, onSubmit } = options

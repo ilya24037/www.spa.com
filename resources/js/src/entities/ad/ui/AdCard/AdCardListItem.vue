@@ -1,4 +1,4 @@
-<!-- resources/js/src/entities/ad/ui/AdCard/AdCardListItem.vue -->
+<!-- resources/js/src/entities/ad/ui/AdCard/AdCardListItem?.vue -->
 <template>
   <div :class="CARD_CLASSES" @click="openAd">
     <div :class="CONTAINER_CLASSES">
@@ -6,14 +6,14 @@
       <div :class="PHOTO_CONTAINER_CLASSES">
         <img
           :src="adPhoto"
-          :alt="ad.title || ad.name"
+          :alt="ad?.title || ad?.name"
           :class="PHOTO_CLASSES"
           @error="handleImageError"
         >
         <!-- Р‘РµР№РґР¶Рё -->
         <div :class="BADGES_CONTAINER_CLASSES">
-          <span v-if="ad.is_premium" :class="PREMIUM_BADGE_CLASSES">Premium</span>
-          <span v-if="ad.discount" :class="DISCOUNT_BADGE_CLASSES">-{{ ad.discount }}%</span>
+          <span v-if="ad?.is_premium" :class="PREMIUM_BADGE_CLASSES">Premium</span>
+          <span v-if="ad?.discount" :class="DISCOUNT_BADGE_CLASSES">-{{ ad?.discount }}%</span>
         </div>
       </div>
 
@@ -21,26 +21,26 @@
       <div :class="INFO_CONTAINER_CLASSES">
         <div :class="INFO_HEADER_CLASSES">
           <div>
-            <h3 :class="TITLE_CLASSES">{{ ad.title || ad.name || 'РњР°СЃСЃР°Р¶' }}</h3>
+            <h3 :class="TITLE_CLASSES">{{ ad?.title || ad?.name || 'РњР°СЃСЃР°Р¶' }}</h3>
             <div :class="METADATA_CONTAINER_CLASSES">
               <!-- Р РµР№С‚РёРЅРі -->
               <div :class="RATING_WRAPPER_CLASSES">
                 <svg :class="STAR_ICON_CLASSES" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  <path d="M9?.049 2?.927c.3-.921 1?.603-.921 1?.902 0l1?.07 3?.292a1 1 0 00?.95.69h3?.462c.969 0 1?.371 1?.24.588 1?.81l-2?.8 2?.034a1 1 0 00-.364 1?.118l1.07 3?.292c.3?.921-.755 1?.688-1?.54 1?.118l-2?.8-2?.034a1 1 0 00-1?.175 0l-2?.8 2?.034c-.784?.57-1?.838-.197-1?.539-1?.118l1.07-3?.292a1 1 0 00-.364-1?.118L2.98 8?.72c-.783-.57-.38-1?.81.588-1?.81h3.461a1 1 0 00?.951-.69l1?.07-3?.292z" />
                 </svg>
-                <span :class="RATING_VALUE_CLASSES">{{ ad.rating || '5.0' }}</span>
-                <span :class="RATING_COUNT_CLASSES">({{ ad.reviews_count || 0 }})</span>
+                <span :class="RATING_VALUE_CLASSES">{{ ad?.rating || '5?.0' }}</span>
+                <span :class="RATING_COUNT_CLASSES">({{ ad?.reviews_count || 0 }})</span>
               </div>
               
               <!-- Р›РѕРєР°С†РёСЏ -->
               <div :class="LOCATION_WRAPPER_CLASSES">
                 <svg :class="LOCATION_ICON_CLASSES" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                      d="M17?.657 16?.657L13.414 20?.9a1.998 1?.998 0 01-2?.827 0l-4?.244-4?.243a8 8 0 1111?.314 0z"/>
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                       d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
-                <span>{{ ad.district || ad.location || 'Р¦РµРЅС‚СЂ' }}</span>
+                <span>{{ ad?.district || ad?.location || 'Р¦РµРЅС‚СЂ' }}</span>
               </div>
             </div>
           </div>
@@ -76,24 +76,24 @@
             v-if="hasMoreServices"
             :class="MORE_SERVICES_CLASSES"
           >
-            +{{ ad.services.length - 3 }}
+            +{{ ad?.services?.length - 3 }}
           </span>
         </div>
 
         <!-- Р”РµР№СЃС‚РІРёСЏ -->
         <div :class="ACTIONS_CONTAINER_CLASSES">
           <button 
-            @click.stop="contactMaster"
+            @click?.stop="contactMaster"
             :class="CONTACT_BUTTON_CLASSES"
           >
             <svg :class="CONTACT_ICON_CLASSES" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                  d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                  d="M3 5a2 2 0 012-2h3?.28a1 1 0 01?.948.684l1?.498 4?.493a1 1 0 01-.502 1?.21l-2?.257 1?.13a11.042 11?.042 0 005?.516 5?.516l1.13-2?.257a1 1 0 011?.21-.502l4?.493 1?.498a1 1 0 01?.684.949V19a2 2 0 01-2 2h-1C9?.716 21 3 14?.284 3 6V5z"/>
             </svg>
             РЎРІСЏР·Р°С‚СЊСЃСЏ
           </button>
           <button 
-            @click.stop="openBooking"
+            @click?.stop="openBooking"
             :class="BOOKING_BUTTON_CLASSES"
           >
             <svg :class="BOOKING_ICON_CLASSES" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,11 +103,11 @@
             Р—Р°РїРёСЃР°С‚СЊСЃСЏ
           </button>
           <button 
-            @click.stop="toggleFavorite"
+            @click?.stop="toggleFavorite"
             :class="FAVORITE_BUTTON_CLASSES"
           >
             <svg :class="FAVORITE_ICON_CLASSES" :fill="isFavorite ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4?.318 6?.318a4.5 4?.5 0 000 6?.364L12 20?.364l7.682-7?.682a4.5 4?.5 0 00-6?.364-6?.364L12 7?.636l-1?.318-1?.318a4.5 4?.5 0 00-6?.364 0z" />
             </svg>
           </button>
         </div>
@@ -125,7 +125,7 @@ import type {
   AdCardListItemProps,AdService,
   AdCardListItemState,
   AdCardError,
-  StyleConstants,} from './AdCardListItem.types'
+  StyleConstants,} from './AdCardListItem?.types'
 
 // Props СЃ TypeScript С‚РёРїРёР·Р°С†РёРµР№
 const _props = withDefaults(defineProps<AdCardListItemProps>(), {})
@@ -139,9 +139,9 @@ const styleConstants: StyleConstants = {
   CONTAINER_CLASSES: 'flex gap-4',
   PHOTO_CONTAINER_CLASSES: 'w-32 h-32 flex-shrink-0 relative',
   PHOTO_CLASSES: 'w-full h-full object-cover rounded-lg',
-  BADGES_CONTAINER_CLASSES: 'absolute top-1 left-1 flex flex-col gap-0.5',
-  PREMIUM_BADGE_CLASSES: 'bg-[#7000ff] text-white px-1.5 py-0.5 rounded text-xs font-medium',
-  DISCOUNT_BADGE_CLASSES: 'bg-[#f91155] text-white px-1.5 py-0.5 rounded text-xs font-medium',
+  BADGES_CONTAINER_CLASSES: 'absolute top-1 left-1 flex flex-col gap-0?.5',
+  PREMIUM_BADGE_CLASSES: 'bg-[#7000ff] text-white px-1?.5 py-0?.5 rounded text-xs font-medium',
+  DISCOUNT_BADGE_CLASSES: 'bg-[#f91155] text-white px-1?.5 py-0?.5 rounded text-xs font-medium',
   INFO_CONTAINER_CLASSES: 'flex-1 min-w-0',
   INFO_HEADER_CLASSES: 'flex items-start justify-between mb-2',
   TITLE_CLASSES: 'font-semibold text-lg line-clamp-1',
@@ -219,62 +219,62 @@ const state = ref<AdCardListItemState>({
 
 // РћС‚РґРµР»СЊРЅС‹Рµ РґР»СЏ СѓРґРѕР±СЃС‚РІР°
 const imageError = computed<boolean>({
-  get: () => state.value.imageError,
-  set: (value: boolean) => { state.value.imageError = value }
+  get: () => state?.value.imageError,
+  set: (value: boolean) => { state?.value.imageError = value }
 })
 
 // Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР° СЃ С‚РёРїРёР·Р°С†РёРµР№
 const isFavorite = computed<boolean>(() => 
-  Boolean(props.ad.is_favorite)
+  Boolean(_props?.ad.is_favorite)
 )
 
 const adPhoto = computed<string>(() => {
-  if (imageError.value) {
-    return '/images/placeholders/master-1.jpg'
+  if (imageError?.value) {
+    return '/images/placeholders/master-1?.jpg'
   }
   
   // РџСЂРѕРІРµСЂСЏРµРј images
-  if (props.ad.images && Array.isArray(props.ad.images) && props.ad.images.length > 0) {
-    const firstImage = props.ad.images[0]
+  if (_props?.ad.images && Array.isArray(_props?.ad.images) && _props?.ad.images?.length > 0) {
+    const firstImage = _props?.ad.images[0]
     if (typeof firstImage === 'object' && firstImage) {
-      return firstImage.url || firstImage.path || '/images/placeholders/master-1.jpg'
+      return firstImage?.url || firstImage?.path || '/images/placeholders/master-1?.jpg'
     }
-    return String(firstImage) || '/images/placeholders/master-1.jpg'
+    return String(firstImage) || '/images/placeholders/master-1?.jpg'
   }
   
   // РџСЂРѕРІРµСЂСЏРµРј photos
-  if (props.ad.photos && Array.isArray(props.ad.photos) && props.ad.photos.length > 0) {
-    const firstPhoto = props.ad.photos[0]
+  if (_props?.ad.photos && Array.isArray(_props?.ad.photos) && _props?.ad.photos?.length > 0) {
+    const firstPhoto = _props?.ad.photos[0]
     if (typeof firstPhoto === 'object' && firstPhoto) {
-      return firstPhoto.url || firstPhoto.path || '/images/placeholders/master-1.jpg'
+      return firstPhoto?.url || firstPhoto?.path || '/images/placeholders/master-1?.jpg'
     }
-    return String(firstPhoto) || '/images/placeholders/master-1.jpg'
+    return String(firstPhoto) || '/images/placeholders/master-1?.jpg'
   }
   
   // РћСЃС‚Р°Р»СЊРЅС‹Рµ РІР°СЂРёР°РЅС‚С‹
-  return props.ad.avatar || 
-         props.ad.main_photo || 
-         '/images/placeholders/master-1.jpg'
+  return _props?.ad.avatar || 
+         _props?.ad.main_photo || 
+         '/images/placeholders/master-1?.jpg'
 })
 
 const displayServices = computed<AdService[]>(() => {
-  if (!props.ad.services || !Array.isArray(props.ad.services)) {
+  if (!_props?.ad.services || !Array.isArray(_props?.ad.services)) {
     return []
   }
-  return props.ad.services.slice(0, 3)
+  return _props?.ad.services?.slice(0, 3)
 })
 
 const hasMoreServices = computed<boolean>(() => {
-  return Boolean(props.ad.services && props.ad.services.length > 3)
+  return Boolean(_props?.ad.services && _props?.ad.services?.length > 3)
 })
 
 const formattedPrice = computed<string>(() => {
-  const price = props.ad.price || props.ad.price_from
+  const price = _props?.ad.price || _props?.ad.price_from
   return formatPrice(price)
 })
 
 const formattedOldPrice = computed<string | undefined>(() => {
-  return props.ad.old_price ? formatPrice(props.ad.old_price) : undefined
+  return _props?.ad.old_price ? formatPrice(_props?.ad.old_price) : undefined
 })
 
 const adDescription = computed<string>(() => {
@@ -290,39 +290,39 @@ const formatPrice = (price?: number): string => {
 }
 
 const getDescription = (): string => {
-  return props.ad.description || 
-         props.ad.specialty || 
+  return _props?.ad.description || 
+         _props?.ad.specialty || 
          'РџСЂРѕС„РµСЃСЃРёРѕРЅР°Р»СЊРЅС‹Р№ РјР°СЃСЃР°Р¶ Рё SPA СѓСЃР»СѓРіРё'
 }
 
 const handleImageError = (): void => {
   try {
-    imageError.value = true
+    imageError?.value = true
     
     // Р›РѕРіРёСЂСѓРµРј РѕС€РёР±РєСѓ РґР»СЏ Р°РЅР°Р»РёС‚РёРєРё
-    logger.warn(`Image load error for ad ${props.ad.id}`, {
+    logger?.warn(`Image load error for ad ${_props?.ad.id}`, {
       metadata: {
-        attemptedUrl: adPhoto.value,
-        adId: props.ad.id,
+        attemptedUrl: adPhoto?.value,
+        adId: _props?.ad.id,
         timestamp: new Date().toISOString()
       }
     })
   } catch (error: unknown) {
-    logger.error('Error in handleImageError:', error)
+    logger?.error('Error in handleImageError:', error)
   }
 }
 
 const openAd = (): void => {
   try {
-    const url = `/ads/${props.ad.id}`
-    router.visit(url)
+    const url = `/ads/${_props?.ad.id}`
+    router?.visit(url)
     
     // РћС‚РєСЂС‹С‚РёРµ РѕР±СЉСЏРІР»РµРЅРёСЏ
   } catch (error: unknown) {
     const adError: AdCardError = {
       type: 'navigation',
       message: 'РћС€РёР±РєР° РїСЂРё РѕС‚РєСЂС‹С‚РёРё РѕР±СЉСЏРІР»РµРЅРёСЏ',
-      adId: props.ad.id,
+      adId: _props?.ad.id,
       originalError: error
     }
     handleError(adError)
@@ -330,112 +330,112 @@ const openAd = (): void => {
 }
 
 const toggleFavorite = async (): Promise<void> => {
-  if (state.value.isProcessingFavorite) {
+  if (state?.value.isProcessingFavorite) {
     return
   }
   
   try {
-    state.value.isProcessingFavorite = true
+    state?.value.isProcessingFavorite = true
     
-    await router.post('/api/favorites/toggle', {
-      ad_id: props.ad.id
+    await router?.post('/api/favorites/toggle', {
+      ad_id: _props?.ad.id
     }, {
       preserveState: true,
       preserveScroll: true,
-      onSuccess: (_response) => {
-        const currentState = isFavorite.value
-        toast.success(currentState ? 'РЈРґР°Р»РµРЅРѕ РёР· РёР·Р±СЂР°РЅРЅРѕРіРѕ' : 'Р”РѕР±Р°РІР»РµРЅРѕ РІ РёР·Р±СЂР°РЅРЅРѕРµ')
+      onSuccess: (_response: any) => {
+        const currentState = isFavorite?.value
+        toast?.success(currentState ? 'РЈРґР°Р»РµРЅРѕ РёР· РёР·Р±СЂР°РЅРЅРѕРіРѕ' : 'Р”РѕР±Р°РІР»РµРЅРѕ РІ РёР·Р±СЂР°РЅРЅРѕРµ')
       },
-      onError: (errors) => {
-        logger.error('Favorite toggle error:', errors)
-        toast.error('РћС€РёР±РєР° РїСЂРё РґРѕР±Р°РІР»РµРЅРёРё РІ РёР·Р±СЂР°РЅРЅРѕРµ')
+      onError: (errors: any) => {
+        logger?.error('Favorite toggle error:', errors)
+        toast?.error('РћС€РёР±РєР° РїСЂРё РґРѕР±Р°РІР»РµРЅРёРё РІ РёР·Р±СЂР°РЅРЅРѕРµ')
       }
     })
   } catch (error: unknown) {
     const adError: AdCardError = {
       type: 'favorite_toggle',
       message: 'РћС€РёР±РєР° РїСЂРё РґРѕР±Р°РІР»РµРЅРёРё РІ РёР·Р±СЂР°РЅРЅРѕРµ',
-      adId: props.ad.id,
+      adId: _props?.ad.id,
       originalError: error
     }
     handleError(adError)
   } finally {
-    state.value.isProcessingFavorite = false
+    state?.value.isProcessingFavorite = false
   }
 }
 
 const contactMaster = (): void => {
-  if (state.value.isContactingMaster) {
+  if (state?.value.isContactingMaster) {
     return
   }
   
   try {
-    state.value.isContactingMaster = true
+    state?.value.isContactingMaster = true
     
-    if (props.ad.phone && props.ad.show_contacts) {
-      const cleanPhone = props.ad.phone.replace(/\D/g, '')
+    if (_props?.ad.phone && _props?.ad.show_contacts) {
+      const cleanPhone = _props?.ad.phone?.replace(/\D/g, '')
       
-      if (cleanPhone.length >= 10) {
-        window.location.href = `tel:${cleanPhone}`
-        toast.info('РћС‚РєСЂС‹РІР°СЋ РїСЂРёР»РѕР¶РµРЅРёРµ РґР»СЏ Р·РІРѕРЅРєР°...')
+      if (cleanPhone?.length >= 10) {
+        window?.location.href = `tel:${cleanPhone}`
+        toast?.info('РћС‚РєСЂС‹РІР°СЋ РїСЂРёР»РѕР¶РµРЅРёРµ РґР»СЏ Р·РІРѕРЅРєР°...')
       } else {
-        toast.error('РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РЅРѕРјРµСЂ С‚РµР»РµС„РѕРЅР°')
+        toast?.error('РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РЅРѕРјРµСЂ С‚РµР»РµС„РѕРЅР°')
       }
     } else {
-      toast.info('РљРѕРЅС‚Р°РєС‚С‹ Р±СѓРґСѓС‚ РґРѕСЃС‚СѓРїРЅС‹ РїРѕСЃР»Рµ Р·Р°РїРёСЃРё')
+      toast?.info('РљРѕРЅС‚Р°РєС‚С‹ Р±СѓРґСѓС‚ РґРѕСЃС‚СѓРїРЅС‹ РїРѕСЃР»Рµ Р·Р°РїРёСЃРё')
     }
   } catch (error: unknown) {
     const adError: AdCardError = {
       type: 'contact',
       message: 'РћС€РёР±РєР° РїСЂРё РѕР±СЂР°С‰РµРЅРёРё Рє РјР°СЃС‚РµСЂСѓ',
-      adId: props.ad.id,
+      adId: _props?.ad.id,
       originalError: error
     }
     handleError(adError)
   } finally {
     setTimeout(() => {
-      state.value.isContactingMaster = false
+      state?.value.isContactingMaster = false
     }, 1000)
   }
 }
 
 const openBooking = (): void => {
-  if (state.value.isOpeningBooking) {
+  if (state?.value.isOpeningBooking) {
     return
   }
   
   try {
-    state.value.isOpeningBooking = true
+    state?.value.isOpeningBooking = true
     
-    const url = `/ads/${props.ad.id}?booking=true`
-    router.visit(url)
+    const url = `/ads/${_props?.ad.id}?booking=true`
+    router?.visit(url)
     
     // РћС‚РєСЂС‹С‚РёРµ Р±СЂРѕРЅРёСЂРѕРІР°РЅРёСЏ
   } catch (error: unknown) {
     const adError: AdCardError = {
       type: 'booking',
       message: 'РћС€РёР±РєР° РїСЂРё РѕС‚РєСЂС‹С‚РёРё Р±СЂРѕРЅРёСЂРѕРІР°РЅРёСЏ',
-      adId: props.ad.id,
+      adId: _props?.ad.id,
       originalError: error
     }
     handleError(adError)
   } finally {
     setTimeout(() => {
-      state.value.isOpeningBooking = false
+      state?.value.isOpeningBooking = false
     }, 500)
   }
 }
 
 // РћР±СЂР°Р±РѕС‚РєР° РѕС€РёР±РѕРє
 const handleError = (error: AdCardError): void => {
-  logger.error('AdCardListItem Error [${error.type}]:', undefined, { metadata: {
-    message: error.message,
-    adId: error.adId,
-    originalError: error.originalError,
+  logger?.error('AdCardListItem Error [${error?.type}]:', undefined, { metadata: {
+    message: error?.message,
+    adId: error?.adId,
+    originalError: error?.originalError,
     timestamp: new Date().toISOString()
   } })
   
-  toast.error(error.message)
+  toast?.error(error?.message)
 }
 
 // Р’СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅС‹Рµ РјРµС‚РѕРґС‹
@@ -443,12 +443,12 @@ const getServiceName = (service: AdService | string): string => {
   if (typeof service === 'string') {
     return service
   }
-  return service.name || 'РЈСЃР»СѓРіР°'
+  return service?.name || 'РЈСЃР»СѓРіР°'
 }
 
 const getServiceKey = (service: AdService | string, index: number): string | number => {
-  if (typeof service === 'object' && service.id) {
-    return service.id
+  if (typeof service === 'object' && service?.id) {
+    return service?.id
   }
   return index
 }

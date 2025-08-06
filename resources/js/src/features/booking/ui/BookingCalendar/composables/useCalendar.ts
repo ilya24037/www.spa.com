@@ -32,8 +32,8 @@ export function useCalendar(props: BookingCalendarProps) {
   // Навигация календаря
   const navigation = computed<CalendarNavigation>(() => {
     const currentDate = new Date(state.value.currentYear, state.value.currentMonth, 1)
-    const minDate = props.minDate ? new Date(props.minDate) : new Date()
-    const maxDate = props.maxDate ? new Date(props.maxDate) : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+    const minDate = _props.minDate ? new Date(_props.minDate) : new Date()
+    const maxDate = _props.maxDate ? new Date(_props.maxDate) : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
 
     const canGoPrevious = currentDate > new Date(minDate.getFullYear(), minDate.getMonth(), 1)
     const canGoNext = currentDate < new Date(maxDate.getFullYear(), maxDate.getMonth(), 1)
@@ -88,7 +88,7 @@ export function useCalendar(props: BookingCalendarProps) {
   const createCalendarDay = (date: Date, isCurrentMonth: boolean): CalendarDay => {
     const dateString = formatDateString(date)
     const today = new Date()
-    const bookingInfo = props.bookingData?.[dateString] || null
+    const bookingInfo = _props.bookingData?.[dateString] || null
     const isAvailable = checkDateAvailability(dateString)
 
     return {
@@ -130,12 +130,12 @@ export function useCalendar(props: BookingCalendarProps) {
     if (date < today) return false
     
     // Если список доступных дат не задан, считаем все будущие даты доступными
-    if (!props.availableDates || props.availableDates.length === 0) {
+    if (!_props.availableDates || _props.availableDates.length === 0) {
       return true
     }
     
     // Проверяем наличие в списке доступных дат
-    return props.availableDates.includes(dateString)
+    return _props.availableDates.includes(dateString)
   }
 
   // Получение статуса даты
@@ -204,15 +204,15 @@ export function useCalendar(props: BookingCalendarProps) {
 
   // Инициализация календаря
   const initializeCalendar = () => {
-    if (props.modelValue) {
-      const selectedDate = new Date(props.modelValue)
+    if (_props.modelValue) {
+      const selectedDate = new Date(_props.modelValue)
       state.value.selectedDate = formatDateString(selectedDate)
       goToMonth(selectedDate.getFullYear(), selectedDate.getMonth())
     }
   }
 
   // Отслеживание изменений modelValue
-  watch(() => props.modelValue, (newValue) => {
+  watch(() => _props.modelValue, (newValue) => {
     if (newValue) {
       const date = new Date(newValue)
       const dateString = formatDateString(date)
