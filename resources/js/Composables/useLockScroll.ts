@@ -32,10 +32,10 @@ export function useLockScroll(): UseLockScrollReturn {
     document.body.style.overflow = ''
     document.body.style.position = ''
     document.body.style.top = ''
-    document.body.style.width = 'auto'
+    document.body.style.width = ''
     
     // Возвращаем позицию скролла
-    (window as any).scrollTo(0, scrollPosition.value)
+    window.scrollTo(0, scrollPosition.value)
     
     isLocked.value = false
   }

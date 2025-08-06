@@ -110,7 +110,7 @@ export const useAdStore = defineStore('ad', () => {
    * Отфильтрованные объявления
    */
   const filteredAds = computed<Ad[]>(() => {
-    let result = ads?.value
+    let result = ads.value
     
     // Фильтр по статусу
     if (filters?.status) {
@@ -147,21 +147,21 @@ export const useAdStore = defineStore('ad', () => {
    * Активные объявления
    */
   const activeAds = computed(() => 
-    ads?.value.filter(ad => ad?.status === 'active')
+    ads.value.filter(ad => ad?.status === 'active')
   )
   
   /**
    * Черновики
    */
   const draftAds = computed(() => 
-    ads?.value.filter(ad => ad?.status === 'draft')
+    ads.value.filter(ad => ad?.status === 'draft')
   )
   
   /**
    * Архивные объявления
    */
   const archivedAds = computed(() => 
-    ads?.value.filter(ad => ad?.status === 'archived')
+    ads.value.filter(ad => ad?.status === 'archived')
   )
   
   /**
@@ -229,7 +229,7 @@ export const useAdStore = defineStore('ad', () => {
       currentAd.value = processedData
       
       // Добавляем в список если его там нет
-      const existingIndex = ads?.value.findIndex(ad => ad?.id === id)
+      const existingIndex = ads.value.findIndex(ad => ad?.id === id)
       if (existingIndex >= 0) {
         ads.value[existingIndex] = processedData
       } else {
@@ -281,7 +281,7 @@ export const useAdStore = defineStore('ad', () => {
       const updatedAd = adApi?.processServerData(response)
       
       // Обновляем в списке
-      const index = ads?.value.findIndex(ad => ad?.id === id)
+      const index = ads.value.findIndex(ad => ad?.id === id)
       if (index >= 0) {
         ads.value[index] = updatedAd
       }
@@ -309,10 +309,10 @@ export const useAdStore = defineStore('ad', () => {
       await adApi?.deleteAd(id)
       
       // Удаляем из списка
-      const index = ads?.value.findIndex(ad => ad?.id === id)
+      const index = ads.value.findIndex(ad => ad?.id === id)
       if (index >= 0) {
-        const deletedAd = ads?.value[index]
-        ads?.value.splice(index, 1)
+        const deletedAd = ads.value[index]
+        ads.value.splice(index, 1)
         
         // Обновляем статистику
         userStats.total--
@@ -343,10 +343,10 @@ export const useAdStore = defineStore('ad', () => {
       await adApi?.changeStatus(id, status)
       
       // Обновляем в списке
-      const index = ads?.value.findIndex(ad => ad?.id === id)
+      const index = ads.value.findIndex(ad => ad?.id === id)
       if (index >= 0) {
-        const oldStatus = ads?.value[index].status
-        ads?.value[index].status = status
+        const oldStatus = ads.value[index].status
+        ads.value[index].status = status
         
         // Обновляем статистику
         if (oldStatus === 'draft') userStats.draft--
@@ -358,7 +358,7 @@ export const useAdStore = defineStore('ad', () => {
         if (status === 'archived') userStats.archived++
       }
       
-      return ads?.value[index]
+      return ads.value[index]
     } catch (error) {
       throw error
     } finally {
@@ -371,21 +371,21 @@ export const useAdStore = defineStore('ad', () => {
    */
   const toggleFavorite = async (adId: any) => {
     try {
-      const ad = ads?.value.find(a => a?.id === adId)
+      const ad = ads.value.find(a => a?.id === adId)
       if (!ad) return
       
       if (ad?.is_favorite) {
         await adApi?.removeFromFavorites(adId)
-        ad?.is_favorite = false
+        ad.is_favorite = false
         
         // Удаляем из избранных
-        const favIndex = favoriteAds?.value.findIndex(fav => fav?.id === adId)
+        const favIndex = favoriteAds.value.findIndex(fav => fav?.id === adId)
         if (favIndex >= 0) {
-          favoriteAds?.value.splice(favIndex, 1)
+          favoriteAds.value.splice(favIndex, 1)
         }
       } else {
         await adApi?.addToFavorites(adId)
-        ad?.is_favorite = true
+        ad.is_favorite = true
         
         // Добавляем в избранные
         favoriteAds.value.unshift(ad)
@@ -432,19 +432,19 @@ export const useAdStore = defineStore('ad', () => {
    */
   const setFilters = (newFilters: any) => {
     Object.assign(filters, newFilters)
-    pagination?.current_page = 1 // Сбрасываем на первую страницу
+    pagination.current_page = 1 // Сбрасываем на первую страницу
   }
   
   /**
    * Очистить фильтры
    */
   const clearFilters = () => {
-    Object?.keys(filters).forEach(key => {
+    Object.keys(filters).forEach(key => {
       (filters as any)[key] = null
     })
-    filters?.sortBy = 'created_at'
-    filters?.sortOrder = 'desc'
-    pagination?.current_page = 1
+    filters.sortBy = 'created_at'
+    filters.sortOrder = 'desc'
+    pagination.current_page = 1
   }
   
   /**
@@ -452,7 +452,7 @@ export const useAdStore = defineStore('ad', () => {
    */
   const setSearchQuery = (query: any) => {
     searchQuery.value = query
-    pagination?.current_page = 1 // Сбрасываем на первую страницу
+    pagination.current_page = 1 // Сбрасываем на первую страницу
   }
   
   /**

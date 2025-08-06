@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed, type Ref, type ComputedRef } from 'vue'
+import { ref, computed, type Ref } from 'vue'
 import dayjs from 'dayjs'
 
 // TypeScript интерфейсы
@@ -41,13 +41,13 @@ interface TimeSlot {
 
 export const useBookingStore = defineStore('booking', () => {
   // Состояние
-  const bookings = ref<Ref<Booking[]>>([])
-  const currentBooking = ref<Ref<Booking | null>>(null)
-  const loading = ref<Ref<boolean>>(false)
-  const error = ref<Ref<string | null>>(null)
+  const bookings = ref<Booking[]>([])
+  const currentBooking = ref<Booking | null>(null)
+  const loading = ref<boolean>(false)
+  const error = ref<string | null>(null)
 
   // Состояние формы бронирования
-  const bookingForm = ref<Ref<BookingForm>>({
+  const bookingForm = ref<BookingForm>({
     masterId: null,
     serviceId: null,
     date: null,
@@ -61,28 +61,28 @@ export const useBookingStore = defineStore('booking', () => {
   })
 
   // Состояние календаря
-  const masterSchedule = ref<Ref<any[]>>([])
-  const availableTimeSlots = ref<Ref<TimeSlot[]>>([])
-  const selectedDate = ref<Ref<string | null>>(null)
-  const selectedTime = ref<Ref<string | null>>(null)
+  const masterSchedule = ref<any[]>([])
+  const availableTimeSlots = ref<TimeSlot[]>([])
+  const selectedDate = ref<string | null>(null)
+  const selectedTime = ref<string | null>(null)
 
   // Геттеры
   const formattedDateTime = computed(() => {
-    if (!bookingForm?.value.date || !bookingForm?.value.time) return null
-    return `${bookingForm?.value.date} ${bookingForm?.value.time}`
+    if (!bookingForm.value.date || !bookingForm.value.time) return null
+    return `${bookingForm.value.date} ${bookingForm.value.time}`
   })
 
   const isFormValid = computed(() => {
-    return bookingForm?.value.masterId &&
-           bookingForm?.value.date &&
-           bookingForm?.value.time &&
-           bookingForm?.value.clientName?.trim() &&
-           bookingForm?.value.clientPhone?.trim()
+    return bookingForm.value.masterId &&
+           bookingForm.value.date &&
+           bookingForm.value.time &&
+           bookingForm.value.clientName?.trim() &&
+           bookingForm.value.clientPhone?.trim()
   })
 
   const upcomingBookings = computed(() => {
     const now = dayjs()
-    return bookings?.value.filter(booking => 
+    return bookings.value.filter(booking => 
       dayjs(booking?.date + ' ' + booking?.time).isAfter(now) && 
       ['confirmed', 'pending'].includes(booking?.status)
     )
@@ -90,7 +90,7 @@ export const useBookingStore = defineStore('booking', () => {
 
   const pastBookings = computed(() => {
     const now = dayjs()
-    return bookings?.value.filter(booking => 
+    return bookings.value.filter(booking => 
       dayjs(booking?.date + ' ' + booking?.time).isBefore(now) || 
       booking?.status === 'completed'
     )
@@ -122,8 +122,8 @@ export const useBookingStore = defineStore('booking', () => {
    * Обновление даты и времени
    */
   const updateDateTime = (date: any, time: any) => {
-    bookingForm?.value.date = date
-    bookingForm?.value.time = time
+    bookingForm.value.date = date
+    bookingForm.value.time = time
     selectedDate.value = date
     selectedTime.value = time
   }
@@ -132,7 +132,7 @@ export const useBookingStore = defineStore('booking', () => {
    * Обновление данных клиента
    */
   const updateClientData = (clientData: any) => {
-    Object.assign(bookingForm?.value, {
+    Object.assign(bookingForm.value, {
       clientName: clientData?.name,
       clientPhone: clientData?.phone,
       clientEmail: clientData?.email || '',
@@ -156,16 +156,16 @@ export const useBookingStore = defineStore('booking', () => {
       let currentDate = dayjs(startDate)
       const end = dayjs(endDate)
       
-      while (currentDate?.isBefore(end) || currentDate?.isSame(end, 'day')) {
+      while (currentDate.isBefore(end) || currentDate.isSame(end, 'day')) {
         // Пропускаем выходные (суббота, воскресенье)
-        if (![0, 6].includes(currentDate?.day())) {
-          schedule?.push({
-            date: currentDate?.format('YYYY-MM-DD'),
+        if (![0, 6].includes(currentDate.day())) {
+          schedule.push({
+            date: currentDate.format('YYYY-MM-DD'),
             available: Math.random() > 0.2, // 80% дней доступны
             timeSlots: generateTimeSlots(currentDate)
           })
         }
-        currentDate = currentDate?.add(1, 'day')
+        currentDate = currentDate.add(1, 'day')
       }
       
       masterSchedule.value = schedule
@@ -205,7 +205,7 @@ export const useBookingStore = defineStore('booking', () => {
    * Создание бронирования
    */
   const createBooking = async () => {
-    if (!isFormValid?.value) {
+    if (!isFormValid.value) {
       throw new Error('Форма заполнена некорректно')
     }
 
@@ -215,15 +215,15 @@ export const useBookingStore = defineStore('booking', () => {
     try {
       // Подготовка данных для API
       const bookingData = {
-        master_id: bookingForm?.value.masterId,
-        service_id: bookingForm?.value.serviceId,
-        start_time: `${bookingForm?.value.date} ${bookingForm?.value.time}:00`,
-        duration_minutes: bookingForm?.value.duration,
-        total_price: bookingForm?.value.totalPrice,
-        client_name: bookingForm?.value.clientName,
-        client_phone: bookingForm?.value.clientPhone,
-        client_email: bookingForm?.value.clientEmail || null,
-        notes: bookingForm?.value.notes || null,
+        master_id: bookingForm.value.masterId,
+        service_id: bookingForm.value.serviceId,
+        start_time: `${bookingForm.value.date} ${bookingForm.value.time}:00`,
+        duration_minutes: bookingForm.value.duration,
+        total_price: bookingForm.value.totalPrice,
+        client_name: bookingForm.value.clientName,
+        client_phone: bookingForm.value.clientPhone,
+        client_email: bookingForm.value.clientEmail || null,
+        notes: bookingForm.value.notes || null,
         status: 'pending'
       }
 
@@ -240,11 +240,11 @@ export const useBookingStore = defineStore('booking', () => {
 
       // Создаем объект бронирования
       const newBooking = {
-        id: Date?.now(),
-        bookingNumber: `BK-${Date?.now().toString().slice(-6)}`,
+        id: Date.now(),
+        bookingNumber: `BK-${Date.now().toString().slice(-6)}`,
         ...bookingData,
-        startTime: bookingData?.start_time,
-        endTime: dayjs(bookingData?.start_time).add(bookingData?.duration_minutes, 'minutes').format('YYYY-MM-DD HH:mm:ss'),
+        startTime: bookingData.start_time,
+        endTime: dayjs(bookingData.start_time).add(bookingData.duration_minutes, 'minutes').format('YYYY-MM-DD HH:mm:ss'),
         createdAt: dayjs().format('YYYY-MM-DD HH:mm:ss')
       }
 
@@ -302,11 +302,11 @@ export const useBookingStore = defineStore('booking', () => {
       await new Promise(resolve => setTimeout(resolve, 500))
 
       // Обновляем статус в локальном состоянии
-      const bookingIndex = bookings?.value.findIndex(b => b?.id === bookingId)
+      const bookingIndex = bookings.value.findIndex(b => b?.id === bookingId)
       if (bookingIndex !== -1) {
-        bookings?.value[bookingIndex].status = 'cancelled'
-        bookings?.value[bookingIndex].cancellationReason = reason
-        bookings?.value[bookingIndex].cancelledAt = dayjs().format('YYYY-MM-DD HH:mm:ss')
+        bookings.value[bookingIndex].status = 'cancelled'
+        bookings.value[bookingIndex].cancellationReason = reason
+        bookings.value[bookingIndex].cancelledAt = dayjs().format('YYYY-MM-DD HH:mm:ss')
       }
 
       return true
@@ -396,15 +396,15 @@ function generateTimeSlots(date: any) {
   const interval = 60 // минут
 
   for (let hour = startHour; hour < endHour; hour++) {
-    const timeString = `${hour?.toString().padStart(2, '0')}:00`
+    const timeString = `${hour.toString().padStart(2, '0')}:00`
     
     // Случайно делаем некоторые слоты недоступными
     const available = Math.random() > 0.3
     
-    slots?.push({
+    slots.push({
       time: timeString,
       available: available,
-      datetime: date?.format('YYYY-MM-DD') + ' ' + timeString
+      datetime: date.format('YYYY-MM-DD') + ' ' + timeString
     })
   }
 
@@ -421,19 +421,19 @@ function generateMockBookings(userId: any) {
   for (let i = 0; i < 5; i++) {
     const startTime = dayjs().add(i - 2, 'days').hour(10 + i).minute(0).second(0)
     
-    bookings?.push({
+    bookings.push({
       id: 1000 + i,
       bookingNumber: `BK-${(1000 + i).toString().slice(-6)}`,
       masterId: 1,
       serviceId: 1,
-      startTime: startTime?.format('YYYY-MM-DD HH:mm:ss'),
-      endTime: startTime?.add(60, 'minutes').format('YYYY-MM-DD HH:mm:ss'),
+      startTime: startTime.format('YYYY-MM-DD HH:mm:ss'),
+      endTime: startTime.add(60, 'minutes').format('YYYY-MM-DD HH:mm:ss'),
       durationMinutes: 60,
       totalPrice: 3000 + (i * 500),
       clientName: 'Иван Петров',
       clientPhone: '+7 (999) 123-45-67',
-      clientEmail: 'ivan@example?.com',
-      status: statuses[i % statuses?.length],
+      clientEmail: 'ivan@example.com',
+      status: statuses[i % statuses.length],
       notes: i % 2 === 0 ? 'Дополнительные пожелания' : null,
       createdAt: dayjs().subtract(i, 'days').format('YYYY-MM-DD HH:mm:ss')
     })

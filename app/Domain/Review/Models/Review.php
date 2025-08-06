@@ -304,81 +304,67 @@ class Review extends Model
     }
 
     /**
-     * Одобрить отзыв
+     * @deprecated Используйте ReviewBusinessLogicService::approve()
      */
     public function approve(?User $moderator = null): void
     {
-        $this->update([
-            'status' => ReviewStatus::APPROVED,
-            'moderated_at' => now(),
-            'moderated_by' => $moderator?->id,
-        ]);
+        app(\App\Domain\Review\Services\ReviewBusinessLogicService::class)
+            ->approve($this, $moderator);
     }
 
     /**
-     * Отклонить отзыв
+     * @deprecated Используйте ReviewBusinessLogicService::reject()
      */
     public function reject(?User $moderator = null, ?string $reason = null): void
     {
-        $this->update([
-            'status' => ReviewStatus::REJECTED,
-            'moderated_at' => now(),
-            'moderated_by' => $moderator?->id,
-            'moderation_notes' => $reason,
-        ]);
+        app(\App\Domain\Review\Services\ReviewBusinessLogicService::class)
+            ->reject($this, $moderator, $reason);
     }
 
     /**
-     * Пожаловаться на отзыв
+     * @deprecated Используйте ReviewBusinessLogicService::flag()
      */
     public function flag(User $flagger, string $reason): void
     {
-        $this->update([
-            'status' => ReviewStatus::FLAGGED,
-            'flagged_at' => now(),
-            'flagged_by' => $flagger->id,
-            'flagged_reason' => $reason,
-        ]);
+        app(\App\Domain\Review\Services\ReviewBusinessLogicService::class)
+            ->flag($this, $flagger, $reason);
     }
 
     /**
-     * Отметить как полезный
+     * @deprecated Используйте ReviewBusinessLogicService::markAsHelpful()
      */
     public function markAsHelpful(): void
     {
-        $this->increment('helpful_count');
+        app(\App\Domain\Review\Services\ReviewBusinessLogicService::class)
+            ->markAsHelpful($this);
     }
 
     /**
-     * Отметить как бесполезный
+     * @deprecated Используйте ReviewBusinessLogicService::markAsNotHelpful()
      */
     public function markAsNotHelpful(): void
     {
-        $this->increment('not_helpful_count');
+        app(\App\Domain\Review\Services\ReviewBusinessLogicService::class)
+            ->markAsNotHelpful($this);
     }
 
     /**
-     * Увеличить счетчик просмотров
+     * @deprecated Используйте ReviewBusinessLogicService::incrementViews()
      */
     public function incrementViews(): void
     {
-        $metadata = $this->metadata ?? [];
-        $metadata['views'] = ($metadata['views'] ?? 0) + 1;
-        $this->update(['metadata' => $metadata]);
+        app(\App\Domain\Review\Services\ReviewBusinessLogicService::class)
+            ->incrementViews($this);
     }
 
     /**
      * Получить URL фотографий
+     * @deprecated Используйте ReviewPhotoService::getPhotoUrls()
      */
     public function getPhotoUrls(): array
     {
-        if (empty($this->photos)) {
-            return [];
-        }
-
-        return array_map(function($photo) {
-            return asset('storage/reviews/' . $photo);
-        }, $this->photos);
+        return app(\App\Domain\Review\Services\ReviewPhotoService::class)
+            ->getPhotoUrls($this);
     }
 
     /**
