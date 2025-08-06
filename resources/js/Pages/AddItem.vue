@@ -23,7 +23,7 @@
             { title: 'Красота' },
             { title: 'Эротический массаж' }
           ]"
-          separator="›"
+          separator=">" as any
           class="text-sm"
         />
       </div>
@@ -63,7 +63,7 @@ const initialData = {
 }
 
 // Обработчики событий
-const handleSuccess = (response) => {
+const handleSuccess = (response: any) => {
   
   // Перенаправляем на страницу созданного объявления
   if (response.ad && response.ad.id) {
@@ -73,7 +73,7 @@ const handleSuccess = (response) => {
   }
 }
 
-const handleDraftSaved = (draftData) => {
+const handleDraftSaved = (_draftData: any) => {
   // Можно показать уведомление
 }
 </script> 

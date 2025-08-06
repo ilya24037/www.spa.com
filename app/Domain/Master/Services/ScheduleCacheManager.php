@@ -15,7 +15,7 @@ class ScheduleCacheManager
     /**
      * Получить данные из кеша
      */
-    public function get(string $key, callable $callback = null)
+    public function get(string $key, ?callable $callback = null)
     {
         $cacheKey = $this->buildCacheKey($key);
         
@@ -29,7 +29,7 @@ class ScheduleCacheManager
     /**
      * Сохранить данные в кеш
      */
-    public function put(string $key, $value, int $ttl = null): void
+    public function put(string $key, $value, ?int $ttl = null): void
     {
         $cacheKey = $this->buildCacheKey($key);
         $ttl = $ttl ?? self::CACHE_TTL;

@@ -475,7 +475,7 @@ onMounted(() => {
 // Наблюдатели
 watch(activeTab, (newTab) => {
   // Обновляем URL при смене вкладки
-  const url = new URL((window as any).(window as any).location.href)
+  const url = new URL((window as any).location.href)
   url.searchParams.set('tab', newTab)
   (window as any).history.replaceState({}, '', url)
 })

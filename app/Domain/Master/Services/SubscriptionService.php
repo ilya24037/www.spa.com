@@ -6,14 +6,37 @@ use App\Domain\Master\Models\MasterProfile;
 use App\Domain\Master\Models\MasterSubscription;
 use App\Enums\SubscriptionPlan;
 use App\Enums\SubscriptionStatus;
-use Illuminate\Support\Collection;
-use Carbon\Carbon;
 
 /**
- * Сервис управления подписками мастеров
+ * Сервис управления подписками мастеров - координатор
  */
 class SubscriptionService
 {
+    private SubscriptionManager $subscriptionManager;
+    private SubscriptionTrialService $trialService;
+    private SubscriptionRenewalService $renewalService;
+    private SubscriptionPlanHandler $planHandler;
+    private SubscriptionLimitChecker $limitChecker;
+    private SubscriptionAnalytics $analytics;
+    private SubscriptionStatusUpdater $statusUpdater;
+
+    public function __construct(
+        SubscriptionManager $subscriptionManager,
+        SubscriptionTrialService $trialService,
+        SubscriptionRenewalService $renewalService,
+        SubscriptionPlanHandler $planHandler,
+        SubscriptionLimitChecker $limitChecker,
+        SubscriptionAnalytics $analytics,
+        SubscriptionStatusUpdater $statusUpdater
+    ) {
+        $this->subscriptionManager = $subscriptionManager;
+        $this->trialService = $trialService;
+        $this->renewalService = $renewalService;
+        $this->planHandler = $planHandler;
+        $this->limitChecker = $limitChecker;
+        $this->analytics = $analytics;
+        $this->statusUpdater = $statusUpdater;
+    }
     /**
      * Создать новую подписку
      */
@@ -23,29 +46,11 @@ class SubscriptionService
         int $periodMonths = 1,
         array $paymentData = []
     ): MasterSubscription {
-        // Деактивируем старые подписки
-        $this->deactivateOldSubscriptions($master);
-
-        // Рассчитываем стоимость
-        $price = $plan->calculateTotal($periodMonths);
-
-        // Создаем подписку
-        $subscription = MasterSubscription::create([
-            'master_profile_id' => $master->id,
-            'plan' => $plan,
-            'status' => SubscriptionStatus::PENDING,
-            'price' => $price,
-            'period_months' => $periodMonths,
-            'payment_method' => $paymentData['method'] ?? null,
-            'transaction_id' => $paymentData['transaction_id'] ?? null,
-            'metadata' => $paymentData['metadata'] ?? null,
-        ]);
-
-        // Если это бесплатный план, сразу активируем
-        if ($plan === SubscriptionPlan::FREE) {
-            $subscription->activate();
-        }
-
+        $subscription = $this->subscriptionManager->create($master, $plan, $periodMonths, $paymentData);
+        
+        // Обновляем статус мастера
+        $this->statusUpdater->updateMasterStatus($master, $subscription);
+        
         return $subscription;
     }
 

@@ -139,7 +139,7 @@
 import { Head, Link } from '@inertiajs/vue3'
 import PhotoGallery from '@/src/features/gallery/ui/PhotoGallery/PhotoGallery.vue'
 
-const props = defineProps({
+const _props = defineProps({
   ad: {
     type: Object,
     required: true
@@ -151,7 +151,7 @@ const props = defineProps({
 })
 
 // РЈС‚РёР»РёС‚С‹ С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёСЏ
-const formatDate = (dateString) => {
+const formatDate = (dateString: any) => {
   if (!dateString) return ''
   return new Date(dateString).toLocaleDateString('ru-RU', {
     year: 'numeric',
@@ -160,12 +160,12 @@ const formatDate = (dateString) => {
   })
 }
 
-const formatPrice = (price) => {
+const formatPrice = (price: any) => {
   if (!price) return 'Р¦РµРЅР° РЅРµ СѓРєР°Р·Р°РЅР°'
   return new Intl.NumberFormat('ru-RU').format(price) + ' в‚Ѕ'
 }
 
-const getStatusClass = (status) => {
+const getStatusClass = (status: any) => {
   const classes = {
     'active': 'bg-green-100 text-green-800',
     'draft': 'bg-yellow-100 text-yellow-800',
@@ -173,10 +173,10 @@ const getStatusClass = (status) => {
     'archived': 'bg-gray-100 text-gray-800',
     'expired': 'bg-red-100 text-red-800'
   }
-  return classes[status] || 'bg-gray-100 text-gray-800'
+  return (classes as any)[status] || 'bg-gray-100 text-gray-800'
 }
 
-const getStatusText = (status) => {
+const getStatusText = (status: any) => {
   const texts = {
     'active': 'РђРєС‚РёРІРЅРѕ',
     'draft': 'Р§РµСЂРЅРѕРІРёРє',
@@ -184,10 +184,10 @@ const getStatusText = (status) => {
     'archived': 'Р’ Р°СЂС…РёРІРµ',
     'expired': 'РСЃС‚РµРєР»Рѕ'
   }
-  return texts[status] || status
+  return (texts as any)[status] || status
 }
 
-const getPriceUnitText = (unit) => {
+const getPriceUnitText = (unit: any) => {
   const units = {
     'service': 'Р·Р° СѓСЃР»СѓРіСѓ',
     'hour': 'Р·Р° С‡Р°СЃ',
@@ -195,19 +195,19 @@ const getPriceUnitText = (unit) => {
     'day': 'Р·Р° РґРµРЅСЊ',
     'month': 'Р·Р° РјРµСЃСЏС†'
   }
-  return units[unit] || unit
+  return (units as any)[unit] || unit
 }
 
-const getContactMethodText = (method) => {
+const getContactMethodText = (method: any) => {
   const methods = {
     'any': 'Р›СЋР±РѕР№ СЃРїРѕСЃРѕР±',
     'calls': 'РўРѕР»СЊРєРѕ Р·РІРѕРЅРєРё',
     'messages': 'РўРѕР»СЊРєРѕ СЃРѕРѕР±С‰РµРЅРёСЏ'
   }
-  return methods[method] || method
+  return (methods as any)[method] || method
 }
 
-const getServiceLocationText = (locations) => {
+const getServiceLocationText = (locations: any) => {
   if (!Array.isArray(locations)) return ''
   
   const locationTexts = {
@@ -216,6 +216,6 @@ const getServiceLocationText = (locations) => {
     'salon': 'Р’ СЃР°Р»РѕРЅРµ'
   }
   
-  return locations.map(loc => locationTexts[loc] || loc).join(', ')
+  return locations.map(loc => (locationTexts as any)[loc] || loc).join(', ')
 }
 </script>

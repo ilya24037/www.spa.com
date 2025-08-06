@@ -14,9 +14,9 @@ export function useMediaQuery(query: string): Ref<boolean> {
       updateMatches()
       
       // Используем addEventListener для поддержки старых браузеров
-      if (mediaQuery.addEventListener) {
+      if (mediaQuery && mediaQuery.addEventListener) {
         mediaQuery.addEventListener('change', updateMatches)
-      } else {
+      } else if (mediaQuery) {
         // @ts-ignore - поддержка старых браузеров
         mediaQuery.addListener(updateMatches)
       }

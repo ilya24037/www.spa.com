@@ -30,7 +30,7 @@ const showModal = ref<boolean>(true)
 const closeModal = (): void => {
   showModal.value = false
   // РџРµСЂРµРЅР°РїСЂР°РІР»СЏРµРј РЅР° РіР»Р°РІРЅСѓСЋ СЃС‚СЂР°РЅРёС†Сѓ
-  (window as any).(window as any).location.href = '/'
+  window.location.href = '/'
 }
 </script>
 

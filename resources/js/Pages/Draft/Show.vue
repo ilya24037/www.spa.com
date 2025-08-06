@@ -299,7 +299,7 @@ const getDayName = (dayOfWeek) => {
 
 const showPhone = () => {
   if (props.ad.phone) {
-    (window as any).(window as any).location.href = `tel:${props.ad.phone.replace(/\D/g, '')}`
+    (window as any).location.href = `tel:${props.ad.phone.replace(/\D/g, '')}`
   } else {
     toast.info('РўРµР»РµС„РѕРЅ Р±СѓРґРµС‚ РґРѕСЃС‚СѓРїРµРЅ РїРѕСЃР»Рµ РїСѓР±Р»РёРєР°С†РёРё РѕР±СЉСЏРІР»РµРЅРёСЏ')
   }
