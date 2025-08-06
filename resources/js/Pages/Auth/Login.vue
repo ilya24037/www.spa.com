@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Head, useForm } from '@inertiajs/vue3'
-import { route } from 'ziggy-js'
+import { route as _route } from 'ziggy-js'
 import { AuthModal } from '@/src/features/auth/ui/AuthModal'
 
 interface LoginForm {
@@ -10,7 +10,7 @@ interface LoginForm {
   remember: boolean
 }
 
-const form = useForm<LoginForm>({
+const _form = useForm<LoginForm>({
   email: '',
   password: '',
   remember: false,

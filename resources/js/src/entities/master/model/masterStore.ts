@@ -205,7 +205,7 @@ export const useMasterStore = defineStore('master', () => {
   /**
    * Р—Р°РіСЂСѓР·РёС‚СЊ РјР°СЃС‚РµСЂРѕРІ
    */
-  const fetchMasters = async (params = {}) => {
+  const fetchMasters = async (params: any = {}) => {
     loading.value = true
     
     try {
@@ -238,7 +238,7 @@ export const useMasterStore = defineStore('master', () => {
       })
       
       return response
-    } catch (error) {
+    } catch (error: any) {
       throw error
     } finally {
       loading.value = false
@@ -248,7 +248,7 @@ export const useMasterStore = defineStore('master', () => {
   /**
    * Р—Р°РіСЂСѓР·РёС‚СЊ РјР°СЃС‚РµСЂР° РїРѕ ID
    */
-  const fetchMaster = async (id: any) => {
+  const fetchMaster = async (id: number | string) => {
     loading.value = true
     
     try {
@@ -265,7 +265,7 @@ export const useMasterStore = defineStore('master', () => {
       }
       
       return response
-    } catch (error) {
+    } catch (error: any) {
       throw error
     } finally {
       loading.value = false
@@ -275,7 +275,7 @@ export const useMasterStore = defineStore('master', () => {
   /**
    * РџРѕРёСЃРє РјР°СЃС‚РµСЂРѕРІ
    */
-  const searchMasters = async (query, additionalFilters = {}) => {
+  const searchMasters = async (query: string, additionalFilters: any = {}) => {
     loading.value = true
     
     try {
@@ -295,7 +295,7 @@ export const useMasterStore = defineStore('master', () => {
       })
       
       return response
-    } catch (error) {
+    } catch (error: any) {
       throw error
     } finally {
       loading.value = false
@@ -305,7 +305,7 @@ export const useMasterStore = defineStore('master', () => {
   /**
    * Р—Р°РіСЂСѓР·РёС‚СЊ РѕС‚Р·С‹РІС‹ РјР°СЃС‚РµСЂР°
    */
-  const fetchMasterReviews = async (masterId, params = {}) => {
+  const fetchMasterReviews = async (masterId: number, params: any = {}) => {
     loadingReviews.value = true
     
     try {
@@ -318,7 +318,7 @@ export const useMasterStore = defineStore('master', () => {
       }
       
       return response
-    } catch (error) {
+    } catch (error: any) {
       throw error
     } finally {
       loadingReviews.value = false
@@ -328,12 +328,12 @@ export const useMasterStore = defineStore('master', () => {
   /**
    * Р—Р°РіСЂСѓР·РёС‚СЊ РїРѕС…РѕР¶РёС… РјР°СЃС‚РµСЂРѕРІ
    */
-  const fetchSimilarMasters = async (masterId, params = {}) => {
+  const fetchSimilarMasters = async (masterId: number, params: any = {}) => {
     try {
       const response = await masterApi.getSimilarMasters(masterId, params)
       similarMasters.value = response.data
       return response
-    } catch (error) {
+    } catch (error: any) {
       throw error
     }
   }
@@ -341,7 +341,7 @@ export const useMasterStore = defineStore('master', () => {
   /**
    * Р”РѕР±Р°РІРёС‚СЊ/СѓРґР°Р»РёС‚СЊ РёР· РёР·Р±СЂР°РЅРЅРѕРіРѕ
    */
-  const toggleFavorite = async (masterId: any) => {
+  const toggleFavorite = async (masterId: number) => {
     try {
       const master = masters.value.find(m => m.id === masterId) || currentMaster.value
       if (!master) return
@@ -364,7 +364,7 @@ export const useMasterStore = defineStore('master', () => {
       }
       
       return master.is_favorite
-    } catch (error) {
+    } catch (error: any) {
       throw error
     }
   }
@@ -379,7 +379,7 @@ export const useMasterStore = defineStore('master', () => {
       const response = await masterApi.getFavorites()
       favoriteMasters.value = response.data
       return response
-    } catch (error) {
+    } catch (error: any) {
       throw error
     } finally {
       loading.value = false
@@ -389,7 +389,7 @@ export const useMasterStore = defineStore('master', () => {
   /**
    * РЈРІРµР»РёС‡РёС‚СЊ РїСЂРѕСЃРјРѕС‚СЂС‹
    */
-  const incrementViews = async (masterId: any) => {
+  const incrementViews = async (masterId: number) => {
     try {
       await masterApi.incrementViews(masterId)
       
@@ -398,7 +398,7 @@ export const useMasterStore = defineStore('master', () => {
       if (master && master.views_count) {
         master.views_count++
       }
-    } catch (error) {
+    } catch (error: any) {
       // РќРµ РїРѕРєР°Р·С‹РІР°РµРј РѕС€РёР±РєСѓ РїРѕР»СЊР·РѕРІР°С‚РµР»СЋ РґР»СЏ РїСЂРѕСЃРјРѕС‚СЂРѕРІ
     }
   }

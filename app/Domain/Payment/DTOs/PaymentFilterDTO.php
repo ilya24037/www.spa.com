@@ -5,6 +5,10 @@ namespace App\Domain\Payment\DTOs;
 use App\Enums\PaymentStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentType;
+use App\Domain\Payment\Services\PaymentFilterFactoryService;
+use App\Domain\Payment\Services\PaymentFilterDateService;
+use App\Domain\Payment\Services\PaymentFilterBuilderService;
+use App\Domain\Payment\Services\PaymentFilterAnalysisService;
 use Carbon\Carbon;
 
 /**
@@ -66,16 +70,14 @@ class PaymentFilterDTO
         return self::fromArray($request->all());
     }
 
+    // === ФАБРИЧНЫЕ МЕТОДЫ (делегируем в сервисы) ===
+
     /**
      * Фильтр для пользователя
      */
-    public static function forUser(
-        int $userId,
-        array $additionalFilters = []
-    ): self {
-        return self::fromArray(array_merge([
-            'user_id' => $userId,
-        ], $additionalFilters));
+    public static function forUser(int $userId, array $additionalFilters = []): self
+    {
+        return PaymentFilterFactoryService::forUser($userId, $additionalFilters);
     }
 
     /**
@@ -83,9 +85,7 @@ class PaymentFilterDTO
      */
     public static function successful(array $additionalFilters = []): self
     {
-        return self::fromArray(array_merge([
-            'statuses' => [PaymentStatus::COMPLETED->value],
-        ], $additionalFilters));
+        return PaymentFilterFactoryService::successful($additionalFilters);
     }
 
     /**
@@ -93,13 +93,7 @@ class PaymentFilterDTO
      */
     public static function failed(array $additionalFilters = []): self
     {
-        return self::fromArray(array_merge([
-            'statuses' => [
-                PaymentStatus::FAILED->value,
-                PaymentStatus::CANCELLED->value,
-                PaymentStatus::EXPIRED->value,
-            ],
-        ], $additionalFilters));
+        return PaymentFilterFactoryService::failed($additionalFilters);
     }
 
     /**
@@ -107,26 +101,15 @@ class PaymentFilterDTO
      */
     public static function pending(array $additionalFilters = []): self
     {
-        return self::fromArray(array_merge([
-            'statuses' => [
-                PaymentStatus::PENDING->value,
-                PaymentStatus::PROCESSING->value,
-            ],
-        ], $additionalFilters));
+        return PaymentFilterFactoryService::pending($additionalFilters);
     }
 
     /**
      * Фильтр за период
      */
-    public static function forPeriod(
-        Carbon $from,
-        Carbon $to,
-        array $additionalFilters = []
-    ): self {
-        return self::fromArray(array_merge([
-            'date_from' => $from->toDateString(),
-            'date_to' => $to->toDateString(),
-        ], $additionalFilters));
+    public static function forPeriod(Carbon $from, Carbon $to, array $additionalFilters = []): self
+    {
+        return PaymentFilterDateService::forPeriod($from, $to, $additionalFilters);
     }
 
     /**
@@ -134,11 +117,7 @@ class PaymentFilterDTO
      */
     public static function today(array $additionalFilters = []): self
     {
-        return self::forPeriod(
-            now()->startOfDay(),
-            now()->endOfDay(),
-            $additionalFilters
-        );
+        return PaymentFilterDateService::today($additionalFilters);
     }
 
     /**
@@ -146,11 +125,7 @@ class PaymentFilterDTO
      */
     public static function yesterday(array $additionalFilters = []): self
     {
-        return self::forPeriod(
-            now()->subDay()->startOfDay(),
-            now()->subDay()->endOfDay(),
-            $additionalFilters
-        );
+        return PaymentFilterDateService::yesterday($additionalFilters);
     }
 
     /**
@@ -158,11 +133,7 @@ class PaymentFilterDTO
      */
     public static function thisWeek(array $additionalFilters = []): self
     {
-        return self::forPeriod(
-            now()->startOfWeek(),
-            now()->endOfWeek(),
-            $additionalFilters
-        );
+        return PaymentFilterDateService::thisWeek($additionalFilters);
     }
 
     /**
@@ -170,11 +141,7 @@ class PaymentFilterDTO
      */
     public static function thisMonth(array $additionalFilters = []): self
     {
-        return self::forPeriod(
-            now()->startOfMonth(),
-            now()->endOfMonth(),
-            $additionalFilters
-        );
+        return PaymentFilterDateService::thisMonth($additionalFilters);
     }
 
     /**
@@ -227,26 +194,14 @@ class PaymentFilterDTO
         });
     }
 
+    // === АНАЛИЗ И ПОСТРОЕНИЕ (делегируем в сервисы) ===
+
     /**
      * Проверить есть ли активные фильтры
      */
     public function hasActiveFilters(): bool
     {
-        return !empty(array_filter([
-            $this->statuses,
-            $this->methods,
-            $this->types,
-            $this->userId,
-            $this->gateway,
-            $this->amountFrom,
-            $this->amountTo,
-            $this->dateFrom,
-            $this->dateTo,
-            $this->payableType,
-            $this->hasRefunds,
-            $this->search,
-            $this->currency,
-        ]));
+        return app(PaymentFilterAnalysisService::class)->hasActiveFilters($this);
     }
 
     /**
@@ -254,21 +209,15 @@ class PaymentFilterDTO
      */
     public function getActiveFiltersCount(): int
     {
-        return count(array_filter([
-            $this->statuses,
-            $this->methods,
-            $this->types,
-            $this->userId,
-            $this->gateway,
-            $this->amountFrom,
-            $this->amountTo,
-            $this->dateFrom,
-            $this->dateTo,
-            $this->payableType,
-            $this->hasRefunds,
-            $this->search,
-            $this->currency,
-        ]));
+        return app(PaymentFilterAnalysisService::class)->getActiveFiltersCount($this);
+    }
+
+    /**
+     * Получить описание фильтров
+     */
+    public function getDescription(): array
+    {
+        return app(PaymentFilterAnalysisService::class)->getDescription($this);
     }
 
     /**
@@ -276,11 +225,7 @@ class PaymentFilterDTO
      */
     public function reset(): self
     {
-        return new self(
-            sortBy: $this->sortBy,
-            sortOrder: $this->sortOrder,
-            perPage: $this->perPage,
-        );
+        return app(PaymentFilterBuilderService::class)->reset($this);
     }
 
     /**
@@ -288,10 +233,7 @@ class PaymentFilterDTO
      */
     public function sortBy(string $field, string $order = 'desc'): self
     {
-        $clone = clone $this;
-        $clone->sortBy = $field;
-        $clone->sortOrder = $order;
-        return $clone;
+        return app(PaymentFilterBuilderService::class)->sortBy($this, $field, $order);
     }
 
     /**
@@ -299,10 +241,7 @@ class PaymentFilterDTO
      */
     public function paginate(int $page, int $perPage = 20): self
     {
-        $clone = clone $this;
-        $clone->page = $page;
-        $clone->perPage = $perPage;
-        return $clone;
+        return app(PaymentFilterBuilderService::class)->paginate($this, $page, $perPage);
     }
 
     /**
@@ -310,9 +249,7 @@ class PaymentFilterDTO
      */
     public function withStatus(PaymentStatus $status): self
     {
-        $clone = clone $this;
-        $clone->statuses = array_merge($this->statuses ?? [], [$status]);
-        return $clone;
+        return app(PaymentFilterBuilderService::class)->withStatus($this, $status);
     }
 
     /**
@@ -320,9 +257,7 @@ class PaymentFilterDTO
      */
     public function withMethod(PaymentMethod $method): self
     {
-        $clone = clone $this;
-        $clone->methods = array_merge($this->methods ?? [], [$method]);
-        return $clone;
+        return app(PaymentFilterBuilderService::class)->withMethod($this, $method);
     }
 
     /**
@@ -330,9 +265,7 @@ class PaymentFilterDTO
      */
     public function withType(PaymentType $type): self
     {
-        $clone = clone $this;
-        $clone->types = array_merge($this->types ?? [], [$type]);
-        return $clone;
+        return app(PaymentFilterBuilderService::class)->withType($this, $type);
     }
 
     /**
@@ -340,9 +273,7 @@ class PaymentFilterDTO
      */
     public function forUser(int $userId): self
     {
-        $clone = clone $this;
-        $clone->userId = $userId;
-        return $clone;
+        return app(PaymentFilterBuilderService::class)->forUser($this, $userId);
     }
 
     /**
@@ -350,10 +281,7 @@ class PaymentFilterDTO
      */
     public function amountRange(float $from, float $to): self
     {
-        $clone = clone $this;
-        $clone->amountFrom = $from;
-        $clone->amountTo = $to;
-        return $clone;
+        return app(PaymentFilterBuilderService::class)->amountRange($this, $from, $to);
     }
 
     /**
@@ -361,10 +289,7 @@ class PaymentFilterDTO
      */
     public function dateRange(Carbon $from, Carbon $to): self
     {
-        $clone = clone $this;
-        $clone->dateFrom = $from;
-        $clone->dateTo = $to;
-        return $clone;
+        return app(PaymentFilterBuilderService::class)->dateRange($this, $from, $to);
     }
 
     /**
@@ -372,9 +297,7 @@ class PaymentFilterDTO
      */
     public function search(string $query): self
     {
-        $clone = clone $this;
-        $clone->search = $query;
-        return $clone;
+        return app(PaymentFilterBuilderService::class)->search($this, $query);
     }
 
     /**
@@ -391,44 +314,4 @@ class PaymentFilterDTO
         );
     }
 
-    /**
-     * Получить описание фильтров
-     */
-    public function getDescription(): array
-    {
-        $description = [];
-
-        if ($this->statuses) {
-            $labels = array_map(fn($s) => $s->getLabel(), $this->statuses);
-            $description[] = 'Статус: ' . implode(', ', $labels);
-        }
-
-        if ($this->methods) {
-            $labels = array_map(fn($m) => $m->getLabel(), $this->methods);
-            $description[] = 'Способ: ' . implode(', ', $labels);
-        }
-
-        if ($this->types) {
-            $labels = array_map(fn($t) => $t->getLabel(), $this->types);
-            $description[] = 'Тип: ' . implode(', ', $labels);
-        }
-
-        if ($this->amountFrom || $this->amountTo) {
-            $from = $this->amountFrom ? number_format($this->amountFrom, 0, ',', ' ') : '0';
-            $to = $this->amountTo ? number_format($this->amountTo, 0, ',', ' ') : '∞';
-            $description[] = "Сумма: {$from} - {$to} руб.";
-        }
-
-        if ($this->dateFrom || $this->dateTo) {
-            $from = $this->dateFrom ? $this->dateFrom->format('d.m.Y') : '';
-            $to = $this->dateTo ? $this->dateTo->format('d.m.Y') : '';
-            $description[] = "Период: {$from} - {$to}";
-        }
-
-        if ($this->search) {
-            $description[] = "Поиск: \"{$this->search}\"";
-        }
-
-        return $description;
-    }
 }

@@ -124,11 +124,11 @@ export const useAdStore = defineStore('ad', () => {
     
     // Фильтр по цене
     if (filters.priceFrom) {
-      result = result.filter(ad => (ad.price || 0) >= filters.priceFrom)
+      result = result.filter(ad => (ad.price || 0) >= filters.priceFrom!)
     }
     
     if (filters.priceTo) {
-      result = result.filter(ad => (ad.price || 0) <= filters.priceTo)
+      result = result.filter(ad => (ad.price || 0) <= filters.priceTo!)
     }
     
     // Поиск по тексту
@@ -316,9 +316,9 @@ export const useAdStore = defineStore('ad', () => {
         
         // Обновляем статистику
         userStats.total--
-        if (deletedAd.status === 'draft') userStats.draft--
-        if (deletedAd.status === 'active') userStats.active--
-        if (deletedAd.status === 'archived') userStats.archived--
+        if (deletedAd?.status === 'draft') userStats.draft--
+        if (deletedAd?.status === 'active') userStats.active--
+        if (deletedAd?.status === 'archived') userStats.archived--
       }
       
       // Очищаем текущее объявление если оно удалено
@@ -440,7 +440,7 @@ export const useAdStore = defineStore('ad', () => {
    */
   const clearFilters = () => {
     Object.keys(filters).forEach(key => {
-      filters[key] = null
+      (filters as any)[key] = null
     })
     filters.sortBy = 'created_at'
     filters.sortOrder = 'desc'

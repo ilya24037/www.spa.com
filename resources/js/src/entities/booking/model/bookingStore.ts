@@ -83,7 +83,7 @@ export const useBookingStore = defineStore('booking', () => {
   const upcomingBookings = computed(() => {
     const now = dayjs()
     return bookings.value.filter(booking => 
-      dayjs(booking.startTime).isAfter(now) && 
+      dayjs(booking.date + ' ' + booking.time).isAfter(now) && 
       ['confirmed', 'pending'].includes(booking.status)
     )
   })
@@ -91,7 +91,7 @@ export const useBookingStore = defineStore('booking', () => {
   const pastBookings = computed(() => {
     const now = dayjs()
     return bookings.value.filter(booking => 
-      dayjs(booking.startTime).isBefore(now) || 
+      dayjs(booking.date + ' ' + booking.time).isBefore(now) || 
       booking.status === 'completed'
     )
   })
@@ -143,7 +143,7 @@ export const useBookingStore = defineStore('booking', () => {
   /**
    * Загрузка расписания мастера
    */
-  const loadMasterSchedule = async (masterId: any, startDate: any, endDate: any) => {
+  const loadMasterSchedule = async (masterId: number, startDate: string, endDate: string) => {
     loading.value = true
     error.value = null
 
@@ -182,7 +182,7 @@ export const useBookingStore = defineStore('booking', () => {
   /**
    * Загрузка доступных временных слотов для даты
    */
-  const loadTimeSlots = async (masterId: any, date: any) => {
+  const loadTimeSlots = async (masterId: number, date: string) => {
     loading.value = true
     
     try {
@@ -268,7 +268,7 @@ export const useBookingStore = defineStore('booking', () => {
   /**
    * Загрузка списка бронирований пользователя
    */
-  const loadUserBookings = async (userId: any) => {
+  const loadUserBookings = async (userId: number) => {
     loading.value = true
     error.value = null
 
@@ -293,7 +293,7 @@ export const useBookingStore = defineStore('booking', () => {
   /**
    * Отмена бронирования
    */
-  const cancelBooking = async (bookingId: any, reason: any = null) => {
+  const cancelBooking = async (bookingId: number, reason: string | null = null) => {
     loading.value = true
     error.value = null
 

@@ -66,7 +66,7 @@ export function useBooking(master: Master, initialService: Service | null = null
         if (!selectedDateTime.value) return ''
         
         const date = new Date(selectedDateTime.value.datetime)
-        const options = {
+        const options: Intl.DateTimeFormatOptions = {
             weekday: 'long',
             day: 'numeric',
             month: 'long',
@@ -78,23 +78,23 @@ export function useBooking(master: Master, initialService: Service | null = null
     })
     
     // Methods
-    const selectService = (service) => {
+    const selectService = (service: Service) => {
         selectedService.value = service
         // Сбрасываем выбранное время при смене услуги
         selectedDateTime.value = null
     }
     
-    const selectDateTime = (dateTime) => {
+    const selectDateTime = (dateTime: { datetime: string }) => {
         selectedDateTime.value = dateTime
     }
     
-    const loadAvailableSlots = async (date = null) => {
-        if (!master.value?.id || !selectedService.value?.id) return
+    const loadAvailableSlots = async (date: string | null = null) => {
+        if (!master.id || !selectedService.value?.id) return
         
         loadingSlots.value = true
         
         try {
-            const response = await router.get(`/api/masters/${master.value.id}/available-slots`, {
+            const response = await router.get(`/api/masters/${master.id}/available-slots`, {
                 service_id: selectedService.value.id,
                 date: date,
                 preserveState: true,
@@ -102,14 +102,14 @@ export function useBooking(master: Master, initialService: Service | null = null
                 only: ['slots']
             })
             
-            if (response.props.slots) {
+            if ((response as any).props?.slots) {
                 if (date) {
-                    availableSlots.value[date] = response.props.slots
+                    availableSlots.value[date] = (response as any).props.slots
                 } else {
-                    availableSlots.value = response.props.slots
+                    availableSlots.value = (response as any).props.slots
                 }
             }
-        } catch (error) {
+        } catch (error: any) {
             showError('Не удалось загрузить доступное время')
         } finally {
             loadingSlots.value = false
@@ -126,10 +126,10 @@ export function useBooking(master: Master, initialService: Service | null = null
         
         try {
             await bookingStore.createBooking({
-                master_profile_id: master.value.id,
-                service_id: selectedService.value.id,
-                booking_date: selectedDateTime.value.date,
-                booking_time: selectedDateTime.value.time,
+                master_profile_id: master.id,
+                service_id: selectedService.value!.id,
+                booking_date: selectedDateTime.value!.datetime.split('T')[0],
+                booking_time: selectedDateTime.value!.datetime.split('T')[1],
                 client_comment: clientComment.value,
                 price: totalPrice.value
             })
@@ -144,7 +144,7 @@ export function useBooking(master: Master, initialService: Service | null = null
                 router.visit('/bookings')
             }, 2000)
             
-        } catch (error) {
+        } catch (error: any) {
             showError(error.response?.data?.message || 'Ошибка при создании бронирования')
         } finally {
             isCreating.value = false

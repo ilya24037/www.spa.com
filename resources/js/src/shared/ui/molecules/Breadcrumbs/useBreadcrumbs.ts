@@ -15,18 +15,18 @@ import type {
 
 export function useBreadcrumbs(initialOptions?: BreadcrumbsOptions) {
   const items = ref<BreadcrumbItem[]>([])
-  const options = reactive({
+  const options = reactive<BreadcrumbsOptions & { formatTitle: (title: string) => string; generateH: (route: any) => string }>({
     autoHome: true,
     maxTitleLength: 50,
     formatTitle: (title: string) => title,
-    generateH: (route: any) => route.path || route.h || '',
+    generateH: (route: any) => route.path || route.href || '',
     ...initialOptions
   })
 
   /**
    * Добавить элемент в конец цепочки
    */
-  const addItem = (item: BreadcrumbItem) => {
+  const addItem = (item: BreadcrumbItem): void => {
     const formattedItem = {
       ...item,
       title: formatTitle(item.title)
@@ -37,7 +37,7 @@ export function useBreadcrumbs(initialOptions?: BreadcrumbsOptions) {
   /**
    * Добавить элемент в начало цепочки
    */
-  const prependItem = (item: BreadcrumbItem) => {
+  const prependItem = (item: BreadcrumbItem): void => {
     const formattedItem = {
       ...item,
       title: formatTitle(item.title)
@@ -48,7 +48,7 @@ export function useBreadcrumbs(initialOptions?: BreadcrumbsOptions) {
   /**
    * Обновить элемент по индексу
    */
-  const updateItem = (index: number, updates: Partial<BreadcrumbItem>) => {
+  const updateItem = (index: number, updates: Partial<BreadcrumbItem>): void => {
     if (index >= 0 && index < items.value.length) {
       const updatedItem = {
         ...items.value[index],
@@ -82,7 +82,7 @@ export function useBreadcrumbs(initialOptions?: BreadcrumbsOptions) {
   /**
    * Заменить все элементы
    */
-  const setItems = (newItems: BreadcrumbItem[]) => {
+  const setItems = (newItems: BreadcrumbItem[]): void => {
     items.value = newItems.map(item => ({
       ...item,
       title: formatTitle(item.title)

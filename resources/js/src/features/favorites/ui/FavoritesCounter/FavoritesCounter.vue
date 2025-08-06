@@ -241,7 +241,7 @@ const hideTooltip = (): void => {
   }, 150)
 }
 
-const handleMouseEnter = (): void => {
+const _handleMouseEnter = (): void => {
   showTooltip()
 }
 

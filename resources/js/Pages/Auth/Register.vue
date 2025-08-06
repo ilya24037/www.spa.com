@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Head, useForm } from '@inertiajs/vue3'
-import { route } from 'ziggy-js'
+import { route as _route } from 'ziggy-js'
 import { RegisterModal } from '@/src/features/auth/ui/RegisterModal'
 
 interface RegisterForm {
@@ -11,7 +11,7 @@ interface RegisterForm {
   password_confirmation: string
 }
 
-const form = useForm<RegisterForm>({
+const _form = useForm<RegisterForm>({
   name: '',
   email: '',
   password: '',

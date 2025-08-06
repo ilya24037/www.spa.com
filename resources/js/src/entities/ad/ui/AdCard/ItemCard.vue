@@ -73,7 +73,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, type Ref } from 'vue'
+import { ref, computed, withDefaults, type Ref } from 'vue'
 import { router } from '@inertiajs/vue3'
 import ItemImage from './ItemImage.vue'
 import ItemContent from './ItemContent.vue'
@@ -95,7 +95,7 @@ import type {
 const toast = useToast()
 
 // Props
-const props = defineProps<ItemCardProps>()
+const props = withDefaults(defineProps<ItemCardProps>(), {})
 
 // Emits  
 const emit = defineEmits<ItemCardEmits>()

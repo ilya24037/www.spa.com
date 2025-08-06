@@ -54,7 +54,7 @@
               type="button"
               :disabled="disabled || readonly"
               class="btn-primary mt-4"
-              @click="$refs.photosInput?.click()"
+              @click="($refs.photosInput as HTMLInputElement)?.click()"
             >
               Выбрать фотографии
             </button>
@@ -146,7 +146,7 @@
                 type="button"
                 :disabled="disabled || readonly"
                 class="add-more-btn"
-                @click="$refs.photosInput?.click()"
+                @click="($refs.photosInput as HTMLInputElement)?.click()"
               >
                 <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -201,7 +201,7 @@
               type="button"
               :disabled="disabled || readonly"
               class="btn-secondary mt-4"
-              @click="$refs.videoInput?.click()"
+              @click="($refs.videoInput as HTMLInputElement)?.click()"
             >
               Выбрать видео
             </button>
@@ -357,7 +357,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, withDefaults } from 'vue'
 import FormSection from '../FormSection.vue'
 import FormFieldGroup from '../components/FormFieldGroup.vue'
 import type { MediaFormData, FormErrors } from '../types/form.types'

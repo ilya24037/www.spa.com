@@ -183,7 +183,7 @@
         @item-remove="onCourseRemove"
         @item-change="onCourseChange"
       >
-        <template #default="{ item, index, updateItem, getItemError }">
+        <template #default="{ item, index: _index, updateItem, getItemError }">
           <!-- Название курса -->
           <div class="form-field">
             <label class="form-field-label">
@@ -342,7 +342,7 @@
               type="button"
               :disabled="disabled || readonly"
               class="btn-primary"
-              @click="$refs.fileInput?.click()"
+              @click="($refs.fileInput as HTMLInputElement)?.click()"
             >
               Выберите файлы
             </button>
@@ -379,7 +379,7 @@
               type="button"
               :disabled="disabled || readonly || (formData.certificate_photos?.length >= maxPhotos)"
               class="upload-add-more"
-              @click="$refs.fileInput?.click()"
+              @click="($refs.fileInput as HTMLInputElement)?.click()"
             >
               <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -438,11 +438,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, withDefaults } from 'vue'
 import FormSection from '../FormSection.vue'
 import FormFieldGroup from '../components/FormFieldGroup.vue'
 import DynamicFieldList from '../components/DynamicFieldList.vue'
-import { useForm } from '../composables/useForm'
+import { useForm as _useForm } from '../composables/useForm'
 import type { EducationFormData, Course, FormErrors } from '../types/form.types'
 
 interface Props {

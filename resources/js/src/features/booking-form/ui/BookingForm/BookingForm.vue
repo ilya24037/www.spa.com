@@ -39,14 +39,14 @@
           placeholder="Р’РІРµРґРёС‚Рµ РІР°С€Рµ РёРјСЏ"
           :class="[
             'w-full px-3 py-2 border rounded-lg text-sm transition-colors',
-            errors.clientName 
+            errors.value.clientName 
               ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
               : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
           ]"
           @blur="validateField('clientName')"
         />
-        <p v-if="errors.clientName" class="mt-1 text-sm text-red-600">
-          {{ errors.clientName }}
+        <p v-if="errors.value.clientName" class="mt-1 text-sm text-red-600">
+          {{ errors.value.clientName }}
         </p>
       </div>
 
@@ -62,15 +62,15 @@
           placeholder="+7 (999) 999-99-99"
           :class="[
             'w-full px-3 py-2 border rounded-lg text-sm transition-colors',
-            errors.clientPhone 
+            errors.value.clientPhone 
               ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
               : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
           ]"
           @input="formatPhone"
           @blur="validateField('clientPhone')"
         />
-        <p v-if="errors.clientPhone" class="mt-1 text-sm text-red-600">
-          {{ errors.clientPhone }}
+        <p v-if="errors.value.clientPhone" class="mt-1 text-sm text-red-600">
+          {{ errors.value.clientPhone }}
         </p>
         <p class="mt-1 text-xs text-gray-500">
           РќР° СЌС‚РѕС‚ РЅРѕРјРµСЂ РїСЂРёРґРµС‚ SMS СЃ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёРµРј Р·Р°РїРёСЃРё
@@ -89,14 +89,14 @@
           placeholder="your@email.com"
           :class="[
             'w-full px-3 py-2 border rounded-lg text-sm transition-colors',
-            errors.clientEmail 
+            errors.value.clientEmail 
               ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
               : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
           ]"
           @blur="validateField('clientEmail')"
         />
-        <p v-if="errors.clientEmail" class="mt-1 text-sm text-red-600">
-          {{ errors.clientEmail }}
+        <p v-if="errors.value.clientEmail" class="mt-1 text-sm text-red-600">
+          {{ errors.value.clientEmail }}
         </p>
       </div>
 
@@ -126,7 +126,7 @@
           type="checkbox"
           :class="[
             'h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 mt-0.5',
-            errors.dataProcessingConsent ? 'border-red-300' : ''
+            errors.value.dataProcessingConsent ? 'border-red-300' : ''
           ]"
         />
         <label for="dataProcessingConsent" class="ml-2 text-sm text-gray-700">
@@ -137,8 +137,8 @@
           <span class="text-red-500">*</span>
         </label>
       </div>
-      <p v-if="errors.dataProcessingConsent" class="text-sm text-red-600">
-        {{ errors.dataProcessingConsent }}
+      <p v-if="errors.value.dataProcessingConsent" class="text-sm text-red-600">
+        {{ errors.value.dataProcessingConsent }}
       </p>
 
       <!-- РРЅС„РѕСЂРјР°С†РёСЏ Рѕ Р·Р°РїРёСЃРё -->
@@ -261,8 +261,8 @@ const form = ref({
   dataProcessingConsent: false
 })
 
-const errors = ref({})
-const formError = ref(null)
+const errors = ref<Record<string, string>>({})
+const formError = ref<string | null>(null)
 
 // Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const isValid = computed(() => {

@@ -99,7 +99,7 @@ interface FavoritesIndexProps {
 }
 
 // Props СЃ С‚РёРїРёР·Р°С†РёРµР№
-const props = withDefaults(defineProps<FavoritesIndexProps>(), {
+const _props = withDefaults(defineProps<FavoritesIndexProps>(), {
   favorites: () => [],
   counts: () => ({
     ads: 0,

@@ -200,7 +200,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, type Ref } from 'vue'
+import { ref, computed, withDefaults, type Ref } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { useToast } from '@/src/shared/composables/useToast'
 import { useErrorHandler } from '@/src/shared/composables/useErrorHandler'
@@ -221,7 +221,10 @@ const errorState = useErrorHandler(false)
 const toast = useToast()
 
 // Props
-const props = defineProps<AdCardProps>()
+const props = withDefaults(defineProps<AdCardProps>(), {
+  variant: 'default',
+  showActions: true
+})
 
 // Emits  
 const emit = defineEmits<AdCardEmits>()
