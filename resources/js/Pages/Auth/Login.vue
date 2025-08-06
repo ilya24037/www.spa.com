@@ -1,20 +1,21 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Head, useForm } from '@inertiajs/vue3'
+import { Head } from '@inertiajs/vue3'
 import { route as _route } from 'ziggy-js'
 import { AuthModal } from '@/src/features/auth/ui/AuthModal'
 
-interface LoginForm {
-  email: string
-  password: string
-  remember: boolean
-}
+// interface LoginForm {
+//   email: string
+//   password: string
+//   remember: boolean
+// }
 
-const _form = useForm<LoginForm>({
-  email: '',
-  password: '',
-  remember: false,
-})
+// Form не используется, но может потребоваться для авторизации
+// const form = useForm<LoginForm>({
+//   email: '',
+//   password: '',
+//   remember: false,
+// })
 
 const showModal = ref<boolean>(true)
 

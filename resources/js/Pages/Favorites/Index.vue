@@ -31,7 +31,7 @@
                         <MasterCard 
                             v-for="master in favorites"
                             :key="master.id"
-                            :master="master"
+                            :master="master as any"
                         />
                     </div>
                     

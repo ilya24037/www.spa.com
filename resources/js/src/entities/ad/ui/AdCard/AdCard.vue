@@ -2,8 +2,8 @@
 <template>
   <!-- Error СЃРѕСЃС‚РѕСЏРЅРёРµ -->
   <ErrorState
-    v-if="errorState.error"
-    :error="errorState.error"
+    v-if="errorState.error.value"
+    :error="errorState.error.value"
     size="medium"
     variant="card"
     :retryable="true"
@@ -200,18 +200,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, withDefaults, type Ref } from 'vue'
+import { ref, computed, withDefaults } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { useToast } from '@/src/shared/composables/useToast'
 import { useErrorHandler } from '@/src/shared/composables/useErrorHandler'
 import { ErrorState } from '@/src/shared/ui/molecules/ErrorState'
 import type { 
   AdCardProps, 
-  AdCardEmits, 
-  AdCardState,
-  AdImage,
-  MouseMoveEvent,
-  FavoriteToggleResponse 
+  AdCardEmits,
+  AdImage
 } from './AdCard.types'
 
 // Error handler (Р±РµР· toast - РїРѕРєР°Р·С‹РІР°РµРј С‡РµСЂРµР· ErrorState)
@@ -298,10 +295,10 @@ const getDescription = (): string => {
          'РњР°СЃСЃР°Р¶ Рё SPA СѓСЃР»СѓРіРё'
 }
 
-const handleMouseMove = (event: MouseMoveEvent): void => {
+const handleMouseMove = (event: MouseEvent): void => {
   if (allImages.value.length <= 1) return
   
-  const rect = event.currentTarget.getBoundingClientRect()
+  const rect = (event.currentTarget as HTMLElement).getBoundingClientRect()
   const x = event.clientX - rect.left
   const imageWidth = rect.width / allImages.value.length
   const newIndex = Math.floor(x / imageWidth)

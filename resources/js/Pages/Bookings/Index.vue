@@ -248,7 +248,7 @@ interface BookingsIndexProps {
 const toast = useToast()
 
 // Props от Inertia с типизацией
-const props = withDefaults(defineProps<BookingsIndexProps>(), {
+const _props = withDefaults(defineProps<BookingsIndexProps>(), {
   isMaster: false
 })
 
@@ -280,11 +280,11 @@ const newDateTime = ref<string | null>(null)
 const rescheduling = ref<boolean>(false)
 
 // Данные
-const allBookings = ref<BookingData[]>(props.bookings.data || [])
-const pagination = ref<BookingPagination | any>(props.bookings.meta || props.bookings)
+const allBookings = ref<BookingData[]>(_props.bookings.data || [])
+const pagination = ref<BookingPagination | any>(_props.bookings.meta || _props.bookings)
 
 // Вычисляемые свойства
-const userRole = computed(() => props.isMaster ? 'master' : 'client')
+const userRole = computed(() => _props.isMaster ? 'master' : 'client')
 
 const totalBookings = computed(() => allBookings.value.length)
 
@@ -349,8 +349,8 @@ const loadPage = async (page: any) => {
       preserveState: true,
       preserveScroll: true,
       onSuccess: (page) => {
-        allBookings.value = page.props.bookings.data
-        pagination.value = page.props.bookings.meta || page.props.bookings
+        allBookings.value = (page.props as any).bookings.data
+        pagination.value = (page.props as any).bookings.meta || (page.props as any).bookings
       }
     })
   } finally {
@@ -358,7 +358,7 @@ const loadPage = async (page: any) => {
   }
 }
 
-const handleCancelBooking = async ({ bookingId, reason }) => {
+const handleCancelBooking = async ({ bookingId, reason }: { bookingId: number, reason: string }) => {
   try {
     const result = await bookingStore.cancelBooking(bookingId, reason)
     
@@ -373,8 +373,8 @@ const handleCancelBooking = async ({ bookingId, reason }) => {
       // Показываем уведомление
       toast.success('Запись успешно отменена')
     }
-  } catch (error) {
-    toast.error('Ошибка при отмене записи: ' + error.message)
+  } catch (error: any) {
+    toast.error('Ошибка при отмене записи: ' + (error as any).message)
   }
 }
 
@@ -398,8 +398,8 @@ const handleCompleteBooking = async (bookingId: any) => {
     }
     
     toast.success('Запись отмечена как завершенная')
-  } catch (error) {
-    toast.error('Ошибка при завершении записи: ' + error.message)
+  } catch (error: any) {
+    toast.error('Ошибка при завершении записи: ' + (error as any).message)
   }
 }
 
@@ -414,7 +414,7 @@ const confirmReschedule = async () => {
   
   try {
     // API вызов для переноса записи
-    const bookingIndex = allBookings.value.findIndex(b => b.id === rescheduleBooking.value.id)
+    const bookingIndex = allBookings.value.findIndex(b => b.id === rescheduleBooking.value!.id)
     if (bookingIndex !== -1) {
       allBookings.value[bookingIndex]!.startTime = newDateTime.value
       allBookings.value[bookingIndex]!.status = 'rescheduled'
@@ -425,8 +425,8 @@ const confirmReschedule = async () => {
     newDateTime.value = null
     
     toast.success('Запись успешно перенесена')
-  } catch (error) {
-    toast.error('Ошибка при переносе записи: ' + error.message)
+  } catch (error: any) {
+    toast.error('Ошибка при переносе записи: ' + (error as any).message)
   } finally {
     rescheduling.value = false
   }
@@ -435,7 +435,7 @@ const confirmReschedule = async () => {
 // Инициализация
 onMounted(() => {
   // Проверяем наличие данных
-  if (!props.bookings?.data) {
+  if (!_props.bookings?.data) {
     const noDataError = {
       type: 'client' as const,
       message: 'Данные записей не найдены',
@@ -473,7 +473,7 @@ onMounted(() => {
 // Наблюдатели
 watch(activeTab, (newTab) => {
   // Обновляем URL при смене вкладки
-  const url = new URL(window.location)
+  const url = new URL(window.location.href)
   url.searchParams.set('tab', newTab)
   window.history.replaceState({}, '', url)
 })

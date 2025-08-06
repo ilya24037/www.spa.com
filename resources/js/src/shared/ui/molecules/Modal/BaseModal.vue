@@ -128,7 +128,7 @@ interface Props {
   modelValue: boolean
   title?: string
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
-  variant?: 'primary' | 'danger' | 'warning' | 'success'
+  variant?: 'primary' | 'danger' | 'warning' | 'success' | 'info'
   centered?: boolean
   fullscreen?: boolean
   closable?: boolean

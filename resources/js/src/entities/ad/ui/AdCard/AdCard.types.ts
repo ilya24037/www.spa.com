@@ -35,6 +35,8 @@ export interface Ad {
 
 export interface AdCardProps {
   ad: Ad
+  variant?: 'default' | 'compact' | 'detailed'
+  showActions?: boolean
 }
 
 export interface AdCardEmits {
@@ -110,6 +112,6 @@ export interface ApiError {
 }
 
 // Типы для событий мыши
-export interface MouseMoveEvent extends MouseEvent {
+export interface MouseMoveEvent extends Omit<MouseEvent, 'currentTarget'> {
   currentTarget: HTMLElement
 }
