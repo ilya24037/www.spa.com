@@ -1,0 +1,99 @@
+[
+  {
+    "archive_rel": "Components/Booking/BookingForm.vue",
+    "size_bytes": 27440,
+    "size_human": "26.8 KB",
+    "purpose": "Компонент UI",
+    "status": "basename",
+    "new_target": null,
+    "probable_matches": [
+      "js/src/features/booking-form/ui/BookingForm/BookingForm.vue"
+    ]
+  },
+  {
+    "archive_rel": "Pages/Masters/Show.vue",
+    "size_bytes": 26313,
+    "size_human": "25.7 KB",
+    "purpose": "Страница",
+    "status": "exact",
+    "new_target": "js/Pages/Masters/Show.vue",
+    "probable_matches": []
+  },
+  {
+    "archive_rel": "Pages/Bookings/Show.vue",
+    "size_bytes": 25704,
+    "size_human": "25.1 KB",
+    "purpose": "Страница",
+    "status": "exact",
+    "new_target": "js/Pages/Bookings/Show.vue",
+    "probable_matches": []
+  },
+  {
+    "archive_rel": "Pages/Bookings/Index.vue",
+    "size_bytes": 24450,
+    "size_human": "23.9 KB",
+    "purpose": "Страница",
+    "status": "exact",
+    "new_target": "js/Pages/Bookings/Index.vue",
+    "probable_matches": []
+  },
+  {
+    "archive_rel": "Pages/Bookings/NewBooking.vue",
+    "size_bytes": 22707,
+    "size_human": "22.2 KB",
+    "purpose": "Страница",
+    "status": "exact",
+    "new_target": "js/Pages/Bookings/NewBooking.vue",
+    "probable_matches": []
+  },
+  {
+    "archive_rel": "Components/Form/AdForm.vue",
+    "size_bytes": 22669,
+    "size_human": "22.1 KB",
+    "purpose": "Компонент UI",
+    "status": "basename",
+    "new_target": null,
+    "probable_matches": [
+      "js/src/widgets/AdForm/ui/AdForm.vue",
+      "js/src/entities/ad/ui/AdForm/AdForm.vue"
+    ]
+  },
+  {
+    "archive_rel": "Components/Reviews/ReviewsList.vue",
+    "size_bytes": 18621,
+    "size_human": "18.2 KB",
+    "purpose": "Компонент UI",
+    "status": "missing",
+    "new_target": null,
+    "probable_matches": []
+  },
+  {
+    "archive_rel": "Pages/Reviews/Index.vue",
+    "size_bytes": 17986,
+    "size_human": "17.6 KB",
+    "purpose": "Страница",
+    "status": "exact",
+    "new_target": "js/Pages/Reviews/Index.vue",
+    "probable_matches": []
+  },
+  {
+    "archive_rel": "Pages/Dashboard.vue",
+    "size_bytes": 17651,
+    "size_human": "17.2 KB",
+    "purpose": "Страница",
+    "status": "exact",
+    "new_target": "js/Pages/Dashboard.vue",
+    "probable_matches": []
+  },
+  {
+    "archive_rel": "Components/Booking/BookingModal.vue",
+    "size_bytes": 16896,
+    "size_human": "16.5 KB",
+    "purpose": "Компонент UI",
+    "status": "basename",
+    "new_target": null,
+    "probable_matches": [
+      "js/src/entities/booking/ui/BookingModal/BookingModal.vue"
+    ]
+  }
+]
