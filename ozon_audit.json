@@ -1,0 +1,106 @@
+{
+  "visitedUrl": "https://www.ozon.ru/?__rr=1",
+  "markers": {
+    "reactRoot": false,
+    "nextDataTag": false,
+    "vueRoot": false,
+    "nuxt": false,
+    "redux": false,
+    "nextDataGlobal": false,
+    "appInitial": false,
+    "webpackChunk": false,
+    "appRootId": false,
+    "title": "Доступ ограничен",
+    "doctype": "html"
+  },
+  "htmlLang": "ru",
+  "cssLinks": [
+    "https://cdn1.ozone.ru/s3/abt-complaints/static/v1/common.css",
+    "https://cdn2.ozone.ru/s3/abt-challenge/style_v26.css"
+  ],
+  "scriptLinks": [
+    "https://cdn2.ozone.ru/s3/abt-challenge/script_v26.js"
+  ],
+  "layoutTopChildren": [
+    {
+      "tag": "noscript",
+      "id": null,
+      "class": null,
+      "styles": {
+        "display": "block",
+        "position": "static",
+        "flexDirection": "row",
+        "justifyContent": "normal",
+        "alignItems": "normal",
+        "gridTemplateColumns": "none",
+        "gridTemplateRows": "none",
+        "gridAutoFlow": "row",
+        "width": "auto",
+        "height": "auto"
+      }
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "container",
+      "styles": {
+        "display": "flex",
+        "position": "static",
+        "flexDirection": "column",
+        "justifyContent": "normal",
+        "alignItems": "normal",
+        "gridTemplateColumns": "none",
+        "gridTemplateRows": "none",
+        "gridAutoFlow": "row",
+        "width": "484px",
+        "height": "900px"
+      }
+    },
+    {
+      "tag": "script",
+      "id": null,
+      "class": null,
+      "styles": {
+        "display": "none",
+        "position": "static",
+        "flexDirection": "row",
+        "justifyContent": "normal",
+        "alignItems": "normal",
+        "gridTemplateColumns": "none",
+        "gridTemplateRows": "none",
+        "gridAutoFlow": "row",
+        "width": "auto",
+        "height": "auto"
+      }
+    }
+  ],
+  "domOutline": [
+    {
+      "tag": "noscript",
+      "id": null,
+      "class": "",
+      "children": []
+    },
+    {
+      "tag": "div",
+      "id": null,
+      "class": "container",
+      "children": [
+        {
+          "tag": "div",
+          "class": "content"
+        }
+      ]
+    },
+    {
+      "tag": "script",
+      "id": null,
+      "class": "",
+      "children": []
+    }
+  ],
+  "apiEndpointsSample": [
+    "https://www.ozon.ru/abt/result",
+    "https://www.ozon.ru/abt/result?__rr=1"
+  ]
+}

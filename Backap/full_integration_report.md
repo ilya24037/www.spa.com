@@ -1,0 +1,229 @@
+# Backap/js full integration report
+
+- Total archive files: 214
+
+## Summary by category
+- exact: 44
+- case-insensitive: 0
+- basename-similar: 120
+- missing: 50
+
+## Missing
+- Components/Booking/BookingSuccessModal.vue
+- Components/Booking/Calendar.vue
+- Components/Cards/ListCard.vue
+- Components/Features/MasterShow/components/ReviewsList.vue
+- Components/Features/MasterShow/components/ServicesList.vue
+- Components/Features/PhotoUploader/архив index.vue
+- Components/Features/Services/components/ServiceCategory.vue
+- Components/Features/Services/components/ServiceItem.vue
+- Components/Filters/LocationFilter.vue
+- Components/Filters/PriceFilter.vue
+- Components/Form/Sections/EducationSection.vue
+- Components/Header/AuthBlock.vue
+- Components/Header/CompareButton.vue
+- Components/Header/FavoritesButton.vue
+- Components/Header/Navbar.vue
+- Components/Header/QuickLinks.vue
+- Components/Header/UserMenu.vue
+- Components/Icons/TelegramIcon.vue
+- Components/Icons/WhatsAppIcon.vue
+- Components/Map/Map.vue
+- Components/Map/SimpleMap.vue
+- Components/Map/YandexMap.vue
+- Components/Masters/MasterContactInfo.vue
+- Components/Masters/MasterDetails/InfoBlock.vue
+- Components/Masters/MasterGallery/GalleryImage.vue
+- Components/Masters/MasterGallery/GalleryLightbox.vue
+- Components/Masters/MasterGallery/MasterGalleryPreview.vue
+- Components/Masters/MasterGallery/OzonStyleGallery.vue
+- Components/Masters/MasterGallery/ThumbnailList.vue
+- Components/Masters/MasterGallery/useGallery.js
+- Components/Masters/MasterGalleryPreview.vue
+- Components/Masters/MasterHeader/QuickStats.vue
+- Components/Masters/ReviewsSection.vue
+- Components/Masters/ServicesSection.vue
+- Components/Masters/SimilarMastersSection.vue
+- Components/Media/MediaGallery/PrivacyGallery.vue
+- Components/MediaUpload/MediaUploader.vue
+- Components/MetaTags.vue
+- Components/Modals/PhoneModal.vue
+- Components/Reviews/ReviewsList.vue
+- Composables/useImages.js
+- Composables/useLockScroll.js
+- Composables/useMedia.js
+- Composables/useMediaQuery.js
+- Composables/useNavigation.js
+- Composables/useSwipeGesture.js
+- Layouts/AppLayout.vue
+- Layouts/AuthLayout.vue
+- Pages/Test.vue
+- stores/projectStore.js
+
+## Basename-similar (with similarity)
+- Components/Form/Sections/ContactsSection.vue => js/src/features/AdSections/ContactsSection/ui/ContactsSection.vue (sim=1.0)
+- Components/Form/Sections/ExperienceSection.vue => js/src/features/AdSections/ExperienceSection/ui/ExperienceSection.vue (sim=1.0)
+- Components/Form/Sections/ParametersSection.vue => js/src/features/AdSections/ParametersSection/ui/ParametersSection.vue (sim=1.0)
+- Components/Form/Sections/PhotosSection.vue => js/src/features/AdSections/PhotosSection/ui/PhotosSection.vue (sim=1.0)
+- Components/Form/Sections/PriceSection.vue => js/src/features/AdSections/PriceSection/ui/PriceSection.vue (sim=1.0)
+- Components/Form/Sections/PromoSection.vue => js/src/features/AdSections/PromoSection/ui/PromoSection.vue (sim=1.0)
+- Components/Form/Sections/VideosSection.vue => js/src/features/AdSections/VideosSection/ui/VideosSection.vue (sim=1.0)
+- Components/Form/Sections/WorkFormatSection.vue => js/src/features/AdSections/WorkFormatSection/ui/WorkFormatSection.vue (sim=1.0)
+- Components/Form/Upload/VideoUploader.vue => js/src/entities/ad/ui/AdForm/upload/VideoUploader.vue (sim=1.0)
+- Components/Form/Sections/GeographySection.vue => js/src/features/AdSections/GeographySection/ui/GeographySection.vue (sim=0.9999)
+- Components/Form/Sections/PriceListSection.vue => js/src/features/AdSections/PriceListSection/ui/PriceListSection.vue (sim=0.9999)
+- Components/Form/Sections/ScheduleSection.vue => js/src/features/AdSections/ScheduleSection/ui/ScheduleSection.vue (sim=0.9999)
+- Components/Form/Upload/PhotoUploader.vue => js/src/entities/ad/ui/AdForm/upload/PhotoUploader.vue (sim=0.9999)
+- Components/Form/Controls/PriceInput.vue => js/src/entities/ad/ui/AdForm/controls/PriceInput.vue (sim=0.9998)
+- Components/Form/Sections/MediaSection.vue => js/src/features/AdSections/MediaSection/ui/MediaSection.vue (sim=0.9997)
+- Components/Form/Sections/FeaturesSection.vue => js/src/features/AdSections/FeaturesSection/ui/FeaturesSection.vue (sim=0.9996)
+- Components/Form/Sections/GeoSection.vue => js/src/features/AdSections/GeoSection/ui/GeoSection.vue (sim=0.9989)
+- Components/Common/ApplicationLogo.vue => js/src/shared/ui/molecules/ApplicationLogo/ApplicationLogo.vue (sim=0.9971)
+- Components/Form/AdForm.vue => js/src/entities/ad/ui/AdForm/AdForm.vue (sim=0.9963)
+- Components/UI/Navigation/ResponsiveNavLink.vue => js/src/shared/ui/molecules/Navigation/ResponsiveNavLink.vue (sim=0.9887)
+- Components/Filters/FiltersSidebar.vue => js/src/features/masters-filter/ui/FiltersSidebar/FiltersSidebar.vue (sim=0.9829)
+- Components/UI/Forms/InputError.vue => js/src/shared/ui/organisms/Forms/InputError.vue (sim=0.9817)
+- Components/Common/ToastNotifications.vue => js/src/shared/ui/molecules/ToastNotifications/ToastNotifications.vue (sim=0.9772)
+- Components/UI/BaseSelect.vue => js/src/shared/ui/atoms/BaseSelect/BaseSelect.vue (sim=0.976)
+- Components/UI/Forms/InputLabel.vue => js/src/shared/ui/organisms/Forms/InputLabel.vue (sim=0.9758)
+- Components/UI/Forms/TextInput.vue => js/src/shared/ui/organisms/Forms/TextInput.vue (sim=0.9712)
+- Components/UI/Buttons/SecondaryButton.vue => js/src/shared/ui/molecules/Buttons/SecondaryButton.vue (sim=0.9711)
+- Components/UI/Buttons/PrimaryButton.vue => js/src/shared/ui/molecules/Buttons/PrimaryButton.vue (sim=0.9708)
+- Components/UI/Buttons/DangerButton.vue => js/src/shared/ui/molecules/Buttons/DangerButton.vue (sim=0.9697)
+- Components/Masters/BookingWidget/PriceCalculator.vue => js/src/entities/booking/ui/BookingWidget/PriceCalculator.vue (sim=0.969)
+- Components/UI/Forms/Checkbox.vue => js/src/shared/ui/organisms/Forms/Checkbox.vue (sim=0.9668)
+- Components/Auth/RegisterModal.vue => js/src/features/auth/ui/RegisterModal/RegisterModal.vue (sim=0.9648)
+- Components/Auth/AuthModal.vue => js/src/features/auth/ui/AuthModal/AuthModal.vue (sim=0.9625)
+- Components/UI/BaseRadio.vue => js/src/shared/ui/atoms/BaseRadio/BaseRadio.vue (sim=0.9614)
+- Components/Profile/ItemCardDemo.vue => js/src/entities/ad/ui/AdCard/ItemCardDemo.vue (sim=0.9473)
+- Components/UI/BaseCheckbox.vue => js/src/shared/ui/atoms/BaseCheckbox/BaseCheckbox.vue (sim=0.9472)
+- Components/Header/SearchBar.vue => js/src/features/search/ui/SearchBar/SearchBar.vue (sim=0.9427)
+- Components/Masters/BookingWidget/index.vue => js/src/entities/booking/ui/BookingWidget/index.vue (sim=0.9422)
+- Components/Common/StarRating.vue => js/src/shared/ui/molecules/StarRating/StarRating.vue (sim=0.9404)
+- Components/Filters/Filters.vue => js/src/features/masters-filter/ui/FiltersOriginal/Filters.vue (sim=0.9374)
+- Components/Header/MobileMenu.vue => js/src/widgets/header/MobileMenu.vue (sim=0.9369)
+- Components/UI/BaseTextarea.vue => js/src/shared/ui/atoms/BaseTextarea/BaseTextarea.vue (sim=0.9309)
+- Components/UI/CheckboxGroup.vue => js/src/shared/ui/molecules/CheckboxGroup/CheckboxGroup.vue (sim=0.9231)
+- Components/Header/Logo.vue => js/src/widgets/header/Logo.vue (sim=0.9222)
+- Components/Masters/BookingWidget/BookingActions.vue => js/src/entities/booking/ui/BookingWidget/BookingActions.vue (sim=0.9204)
+- Components/Masters/BookingWidget/useBooking.js => js/src/entities/booking/ui/BookingWidget/useBooking.ts (sim=0.9191)
+- Components/UI/Navigation/NavLink.vue => js/src/shared/ui/molecules/Navigation/NavLink.vue (sim=0.9096)
+- Components/Form/Sections/SpecialtySection.vue => js/src/features/AdSections/SpecialtySection/ui/SpecialtySection.vue (sim=0.9041)
+- Components/UI/Toast.vue => js/src/shared/ui/molecules/Toast/Toast.vue (sim=0.9006)
+- Components/Features/PhotoUploader/VideoUploader.vue => js/src/entities/ad/ui/AdForm/upload/VideoUploader.vue (sim=0.8937)
+- Components/Form/Sections/TitleSection.vue => js/src/features/AdSections/TitleSection/ui/TitleSection.vue (sim=0.8923)
+- Components/Form/Sections/DetailsSection.vue => js/src/features/AdSections/DetailsSection/ui/DetailsSection.vue (sim=0.8858)
+- Components/Masters/BookingWidget/TimeSlotPicker.vue => js/src/entities/booking/ui/BookingWidget/TimeSlotPicker.vue (sim=0.877)
+- Components/Masters/MasterGallery/ImageGalleryModal.vue => js/src/shared/ui/molecules/ImageGallery/ImageGalleryModal.vue (sim=0.8762)
+- Components/Common/ImageGalleryModal.vue => js/src/shared/ui/molecules/ImageGallery/ImageGalleryModal.vue (sim=0.8759)
+- Components/Cards/MasterCard.vue => js/src/entities/master/ui/MasterCard/MasterCard.vue (sim=0.8739)
+- Components/Form/Geo/GeoSuggest.vue => js/src/entities/ad/ui/AdForm/geo/GeoSuggest.vue (sim=0.8722)
+- Components/UI/Navigation/Dropdown.vue => js/src/shared/ui/molecules/Navigation/Dropdown.vue (sim=0.8675)
+- Components/Masters/BookingWidget/WorkSchedule.vue => js/src/entities/booking/ui/BookingWidget/WorkSchedule.vue (sim=0.8649)
+- Components/Cards/ItemActionsDropdown.vue => js/src/entities/ad/ui/AdCard/ItemActionsDropdown.vue (sim=0.8604)
+- Components/Masters/MasterDetails/index.vue => js/Pages/Reviews/Index.vue (sim=0.8587)
+- Components/Cards/ItemContent.vue => js/src/entities/ad/ui/AdCard/ItemContent.vue (sim=0.8558)
+- Components/UI/Navigation/DropdownLink.vue => js/src/shared/ui/molecules/Navigation/DropdownLink.vue (sim=0.8551)
+- Components/Cards/ItemStats.vue => js/src/entities/ad/ui/AdCard/ItemStats.vue (sim=0.8545)
+- Components/Form/Sections/ServiceProviderSection.vue => js/src/features/AdSections/ServiceProviderSection/ui/ServiceProviderSection.vue (sim=0.8499)
+- Components/Features/PhotoUploader/index.vue => js/Pages/Bookings/Index.vue (sim=0.8423)
+- Components/Features/MasterShow/index.vue => js/widgets/master-profile/index.ts (sim=0.8316)
+- stores/bookingStore.js => js/src/entities/booking/model/bookingStore.ts (sim=0.8307)
+- Components/UI/BaseInput.vue => js/src/shared/ui/atoms/BaseInput/BaseInput.vue (sim=0.8279)
+- Components/Layout/SidebarWrapper.vue => js/src/shared/layouts/components/SidebarWrapper.vue (sim=0.8271)
+- Components/Masters/MasterDescription/index.vue => js/src/entities/booking/ui/BookingWidget/index.vue (sim=0.8265)
+- Components/Filters/QuickTagsRow.vue => js/src/features/masters-filter/ui/QuickTags/QuickTagsRow.vue (sim=0.8225)
+- Components/Media/MediaGallery/index.vue => js/widgets/master-profile/index.ts (sim=0.822)
+- Components/Form/Sections/DescriptionSection.vue => js/src/features/AdSections/DescriptionSection/ui/DescriptionSection.vue (sim=0.8133)
+- Components/Cards/ServiceCard.vue => js/src/entities/service/ui/ServiceCard/ServiceCard.vue (sim=0.8117)
+- Components/Cards/ItemImage.vue => js/src/entities/ad/ui/AdCard/ItemImage.vue (sim=0.8025)
+- Components/Masters/MasterReviews/index.vue => js/widgets/master-profile/index.ts (sim=0.8003)
+- Components/Masters/MasterHeader/index.vue => js/Pages/Compare/Index.vue (sim=0.7956)
+- Components/Layout/BackButton.vue => js/src/shared/ui/molecules/BackButton/BackButton.vue (sim=0.7955)
+- Components/Masters/MasterContactCard/index.vue => js/Pages/Wallet/Index.vue (sim=0.79)
+- Components/Masters/MasterServices/index.vue => js/src/entities/booking/ui/BookingWidget/index.vue (sim=0.7856)
+- Components/Masters/MasterInfo/index.vue => js/widgets/master-profile/index.ts (sim=0.7837)
+- Components/Layout/ContentCard.vue => js/src/shared/layouts/components/ContentCard.vue (sim=0.7816)
+- Components/Form/Sections/ClientsSection.vue => js/src/features/AdSections/ClientsSection/ui/ClientsSection.vue (sim=0.7767)
+- Components/Header/CitySelector.vue => js/src/widgets/header/CitySelector.vue (sim=0.7743)
+- Components/Cards/ItemActions.vue => js/src/entities/ad/ui/AdCard/ItemActions.vue (sim=0.7659)
+- Components/Profile/ItemCard.vue => js/Pages/Demo/ItemCard.vue (sim=0.7633)
+- Composables/useToast.js => js/src/shared/ui/molecules/Toast/useToast.ts (sim=0.7623)
+- Components/Booking/BookingModal.vue => js/src/entities/booking/ui/BookingModal/BookingModal.vue (sim=0.7571)
+- Components/Masters/MasterGallery/index.vue => js/widgets/master-profile/index.ts (sim=0.7555)
+- Components/Filters/ServiceFilter.vue => js/src/features/masters-filter/ui/FilterService/ServiceFilter.vue (sim=0.7551)
+- Components/Media/MediaUploader/index.vue => js/src/features/Services/index.vue (sim=0.7478)
+- Components/UI/Modal.vue => js/src/shared/ui/molecules/Modal/Modal.vue (sim=0.7469)
+- Components/Features/Services/index.vue => js/Pages/Services/Index.vue (sim=0.7455)
+- Components/Booking/BookingForm.vue => js/src/features/booking-form/ui/BookingForm/BookingForm.vue (sim=0.7219)
+- Components/UI/ConfirmModal.vue => js/src/shared/ui/organisms/ConfirmModal/ConfirmModal.vue (sim=0.6973)
+- Components/Map/UniversalMap.vue => js/src/features/map/ui/UniversalMap/UniversalMap.vue (sim=0.6886)
+- Components/Form/Sections/LocationSection.vue => js/src/entities/ad/ui/AdForm/sections/LocationSection.vue (sim=0.6834)
+- Components/Header/CatalogDropdown.vue => js/src/features/catalog/ui/CatalogDropdown/CatalogDropdown.vue (sim=0.6767)
+- Components/Common/ErrorBoundary.vue => js/shared/ui/molecules/ErrorBoundary/ErrorBoundary.vue (sim=0.6713)
+- Components/Cards/MasterCardList.vue => js/src/entities/master/ui/MasterCard/MasterCardList.vue (sim=0.6212)
+- stores/authStore.js => js/stores/authStore.ts (sim=0.6203)
+- Components/Layout/PageSection.vue => js/src/shared/layouts/components/PageSection.vue (sim=0.6127)
+- stores/masterStore.js => js/stores/masterStore.ts (sim=0.5848)
+- Components/Layout/PageHeader.vue => js/src/shared/layouts/components/PageHeader.vue (sim=0.5797)
+- Components/Gallery/PhotoGallery.vue => js/src/features/gallery/ui/PhotoGallery/PhotoGallery.vue (sim=0.5761)
+- Components/Cards/Card.vue => js/src/shared/ui/organisms/Cards/Card.vue (sim=0.52)
+- Components/Features/MasterShow/components/BookingWidget.vue => js/src/entities/booking/ui/BookingWidget/BookingWidget.vue (sim=0.4972)
+- stores/favorites.js => js/stores/favorites.ts (sim=0.4719)
+- Components/Header/CityModal.vue => js/src/features/city-selector/ui/CityModal/CityModal.vue (sim=0.4686)
+- Components/Layout/Breadcrumbs.vue => js/src/shared/ui/molecules/Breadcrumbs/Breadcrumbs.vue (sim=0.4601)
+- Components/Media/MediaUploader/PhotoUploader.vue => js/src/entities/ad/ui/AdForm/upload/PhotoUploader.vue (sim=0.4494)
+- Components/Cards/Cards.vue => css/03-modules/cards.css (sim=0.2443)
+- Components/Common/Breadcrumbs.vue => js/src/shared/ui/molecules/Breadcrumbs/Breadcrumbs.vue (sim=0.2394)
+- Components/Footer/Footer.vue => js/src/shared/ui/organisms/Footer/Footer.vue (sim=0.2381)
+- Components/Modals/BookingModal.vue => js/src/entities/booking/ui/BookingModal/BookingModal.vue (sim=0.2258)
+- Components/Features/MasterShow/components/MasterInfo.vue => js/src/entities/master/ui/MasterInfo/MasterInfo.vue (sim=0.163)
+- Components/Masters/MasterGallery.vue => js/src/entities/master/ui/MasterGallery/MasterGallery.vue (sim=0.0695)
+- Composables/useErrorHandler.js => js/src/shared/composables/useErrorHandler.ts (sim=0.0089)
+- Components/Map/MapMarker.vue => js/src/features/map/ui/MapMarker/MapMarker.vue (sim=0.0)
+
+## Exact / Case-insensitive
+- Composables/useAdForm.js => js/Composables/useAdForm.js (exact)
+- Composables/useAutosave.js => js/Composables/useAutosave.js (exact)
+- Pages/AddItem.vue => js/Pages/AddItem.vue (exact)
+- Pages/Ads/Show.vue => js/Pages/Ads/Show.vue (exact)
+- Pages/Auth/ConfirmPassword.vue => js/Pages/Auth/ConfirmPassword.vue (exact)
+- Pages/Auth/ForgotPassword.vue => js/Pages/Auth/ForgotPassword.vue (exact)
+- Pages/Auth/Login.vue => js/Pages/Auth/Login.vue (exact)
+- Pages/Auth/Register.vue => js/Pages/Auth/Register.vue (exact)
+- Pages/Auth/ResetPassword.vue => js/Pages/Auth/ResetPassword.vue (exact)
+- Pages/Auth/VerifyEmail.vue => js/Pages/Auth/VerifyEmail.vue (exact)
+- Pages/Bookings/Index.vue => js/Pages/Bookings/Index.vue (exact)
+- Pages/Bookings/NewBooking.vue => js/Pages/Bookings/NewBooking.vue (exact)
+- Pages/Bookings/Show.vue => js/Pages/Bookings/Show.vue (exact)
+- Pages/Compare/Index.vue => js/Pages/Compare/Index.vue (exact)
+- Pages/Dashboard.vue => js/Pages/Dashboard.vue (exact)
+- Pages/Demo/ItemCard.vue => js/Pages/Demo/ItemCard.vue (exact)
+- Pages/Draft/Show.vue => js/Pages/Draft/Show.vue (exact)
+- Pages/EditAd.vue => js/Pages/EditAd.vue (exact)
+- Pages/Favorites/Index.vue => js/Pages/Favorites/Index.vue (exact)
+- Pages/Home.vue => js/Pages/Home.vue (exact)
+- Pages/Masters/Create.vue => js/Pages/Masters/Create.vue (exact)
+- Pages/Masters/Edit.vue => js/Pages/Masters/Edit.vue (exact)
+- Pages/Masters/Show.vue => js/Pages/Masters/Show.vue (exact)
+- Pages/Messages/Index.vue => js/Pages/Messages/Index.vue (exact)
+- Pages/Notifications/Index.vue => js/Pages/Notifications/Index.vue (exact)
+- Pages/Payment/Checkout.vue => js/Pages/Payment/Checkout.vue (exact)
+- Pages/Payment/SbpQr.vue => js/Pages/Payment/SbpQr.vue (exact)
+- Pages/Payment/SelectPlan.vue => js/Pages/Payment/SelectPlan.vue (exact)
+- Pages/Payment/Success.vue => js/Pages/Payment/Success.vue (exact)
+- Pages/Profile/Edit.vue => js/Pages/Profile/Edit.vue (exact)
+- Pages/Profile/Partials/DeleteUserForm.vue => js/Pages/Profile/Partials/DeleteUserForm.vue (exact)
+- Pages/Profile/Partials/UpdatePasswordForm.vue => js/Pages/Profile/Partials/UpdatePasswordForm.vue (exact)
+- Pages/Profile/Partials/UpdateProfileInformationForm.vue => js/Pages/Profile/Partials/UpdateProfileInformationForm.vue (exact)
+- Pages/Reviews/Index.vue => js/Pages/Reviews/Index.vue (exact)
+- Pages/Services/Index.vue => js/Pages/Services/Index.vue (exact)
+- Pages/Settings/Index.vue => js/Pages/Settings/Index.vue (exact)
+- Pages/Wallet/Index.vue => js/Pages/Wallet/Index.vue (exact)
+- app.js => js/app.js (exact)
+- bootstrap.js => js/bootstrap.js (exact)
+- utils/adApi.js => js/utils/adApi.js (exact)
+- utils/formOptions.js => js/utils/formOptions.js (exact)
+- utils/formValidators.js => js/utils/formValidators.js (exact)
+- utils/helpers.js => js/utils/helpers.js (exact)
+- ziggy.js => js/ziggy.js (exact)
