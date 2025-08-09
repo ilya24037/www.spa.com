@@ -39,13 +39,13 @@
         aria-valuemin="0"
         aria-valuemax="100"
       >
-        <div class="bg-gray-200 rounded-full h-2 overflow-hidden">
+        <div class="bg-gray-500 rounded-full h-2 overflow-hidden">
           <div 
             class="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
             :style="{ width: `${progress}%` }"
           />
         </div>
-        <div class="text-center mt-2 text-sm text-gray-600">
+        <div class="text-center mt-2 text-sm text-gray-500">
           {{ progress }}%
         </div>
       </div>
@@ -56,7 +56,9 @@
         class="text-center mb-8"
         data-testid="page-loader-message"
       >
-        <p class="text-gray-600 text-lg">{{ message }}</p>
+        <p class="text-gray-500 text-lg">
+          {{ message }}
+        </p>
       </div>
 
       <!-- РЎРєРµР»РµС‚РѕРЅС‹ -->
@@ -86,23 +88,23 @@ import SkeletonForm from './skeletons/SkeletonForm.vue'
 import SkeletonContent from './skeletons/SkeletonContent.vue'
 import SkeletonStats from './skeletons/SkeletonStats.vue'
 import type {
-  PageLoaderProps,
-  PageLoaderEmits,
-  PageTypeConfigs
+    PageLoaderProps,
+    PageLoaderEmits,
+    PageTypeConfigs
 } from './PageLoader.types'
 
 // Props СЃ TypeScript С‚РёРїРёР·Р°С†РёРµР№
 const _props = withDefaults(defineProps<PageLoaderProps>(), {
-  type: 'default',
-  message: '',
-  showSkeletons: true,
-  skeletonCount: 6,
-  showProgress: false,
-  progress: 0,
-  duration: 0,
-  fullScreen: false,
-  overlay: false,
-  className: ''
+    type: 'default',
+    message: '',
+    showSkeletons: true,
+    skeletonCount: 6,
+    showProgress: false,
+    progress: 0,
+    duration: 0,
+    fullScreen: false,
+    overlay: false,
+    className: ''
 })
 
 // Emits
@@ -110,76 +112,76 @@ defineEmits<PageLoaderEmits>()
 
 // РљРѕРЅС„РёРіСѓСЂР°С†РёРё РґР»СЏ СЂР°Р·РЅС‹С… С‚РёРїРѕРІ СЃС‚СЂР°РЅРёС†
 const pageConfigs: PageTypeConfigs = {
-  catalog: {
-    showSkeletons: true,
-    skeletonCount: 6,
-    showSpinner: true,
-    showProgress: false,
-    message: 'Р—Р°РіСЂСѓР¶Р°РµРј РјР°СЃС‚РµСЂРѕРІ...',
-    fullScreen: false,
-    overlay: false,
-    animation: 'fade'
-  },
-  profile: {
-    showSkeletons: true,
-    skeletonCount: 1,
-    showSpinner: true,
-    showProgress: false,
-    message: 'Р—Р°РіСЂСѓР¶Р°РµРј РїСЂРѕС„РёР»СЊ...',
-    fullScreen: false,
-    overlay: false,
-    animation: 'fade'
-  },
-  dashboard: {
-    showSkeletons: true,
-    skeletonCount: 4,
-    showSpinner: true,
-    showProgress: false,
-    message: 'Р—Р°РіСЂСѓР¶Р°РµРј РґР°РЅРЅС‹Рµ...',
-    fullScreen: false,
-    overlay: false,
-    animation: 'fade'
-  },
-  form: {
-    showSkeletons: true,
-    skeletonCount: 1,
-    showSpinner: true,
-    showProgress: false,
-    message: 'РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј С„РѕСЂРјСѓ...',
-    fullScreen: false,
-    overlay: false,
-    animation: 'slide'
-  },
-  content: {
-    showSkeletons: true,
-    skeletonCount: 3,
-    showSpinner: true,
-    showProgress: false,
-    message: 'Р—Р°РіСЂСѓР¶Р°РµРј РєРѕРЅС‚РµРЅС‚...',
-    fullScreen: false,
-    overlay: false,
-    animation: 'fade'
-  },
-  minimal: {
-    showSkeletons: false,
-    skeletonCount: 0,
-    showSpinner: true,
-    showProgress: false,
-    message: '',
-    fullScreen: false,
-    overlay: false,
-    animation: 'none'
-  },
-  default: {
-    showSkeletons: true,
-    skeletonCount: 3,
-    showSpinner: true,
-    showProgress: false,
-    message: 'Р—Р°РіСЂСѓР·РєР°...',
-    fullScreen: false,
-    overlay: false,
-    animation: 'fade'
-  }
+    catalog: {
+        showSkeletons: true,
+        skeletonCount: 6,
+        showSpinner: true,
+        showProgress: false,
+        message: 'Р—Р°РіСЂСѓР¶Р°РµРј РјР°СЃС‚РµСЂРѕРІ...',
+        fullScreen: false,
+        overlay: false,
+        animation: 'fade'
+    },
+    profile: {
+        showSkeletons: true,
+        skeletonCount: 1,
+        showSpinner: true,
+        showProgress: false,
+        message: 'Р—Р°РіСЂСѓР¶Р°РµРј РїСЂРѕС„РёР»СЊ...',
+        fullScreen: false,
+        overlay: false,
+        animation: 'fade'
+    },
+    dashboard: {
+        showSkeletons: true,
+        skeletonCount: 4,
+        showSpinner: true,
+        showProgress: false,
+        message: 'Р—Р°РіСЂСѓР¶Р°РµРј РґР°РЅРЅС‹Рµ...',
+        fullScreen: false,
+        overlay: false,
+        animation: 'fade'
+    },
+    form: {
+        showSkeletons: true,
+        skeletonCount: 1,
+        showSpinner: true,
+        showProgress: false,
+        message: 'РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј С„РѕСЂРјСѓ...',
+        fullScreen: false,
+        overlay: false,
+        animation: 'slide'
+    },
+    content: {
+        showSkeletons: true,
+        skeletonCount: 3,
+        showSpinner: true,
+        showProgress: false,
+        message: 'Р—Р°РіСЂСѓР¶Р°РµРј РєРѕРЅС‚РµРЅС‚...',
+        fullScreen: false,
+        overlay: false,
+        animation: 'fade'
+    },
+    minimal: {
+        showSkeletons: false,
+        skeletonCount: 0,
+        showSpinner: true,
+        showProgress: false,
+        message: '',
+        fullScreen: false,
+        overlay: false,
+        animation: 'none'
+    },
+    default: {
+        showSkeletons: true,
+        skeletonCount: 3,
+        showSpinner: true,
+        showProgress: false,
+        message: 'Р—Р°РіСЂСѓР·РєР°...',
+        fullScreen: false,
+        overlay: false,
+        animation: 'fade'
+    }
 }
 
 // РџРѕР»СѓС‡Р°РµРј РєРѕРЅС„РёРіСѓСЂР°С†РёСЋ РґР»СЏ С‚РµРєСѓС‰РµРіРѕ С‚РёРїР°
@@ -192,101 +194,101 @@ const _actualSkeletonCount = computed<number>(() => _props?.skeletonCount || con
 const _actualShowSkeletons = computed<boolean>(() => _props?.showSkeletons && config?.value.showSkeletons)
 
 const ariaLabel = computed<string>(() => {
-  if (_props?.showProgress && _props?.progress > 0) {
-    return `Р—Р°РіСЂСѓР·РєР°: ${_props?.progress}%`
-  }
-  return actualMessage?.value || 'Р—Р°РіСЂСѓР·РєР° СЃС‚СЂР°РЅРёС†С‹'
+    if (_props?.showProgress && _props?.progress > 0) {
+        return `Р—Р°РіСЂСѓР·РєР°: ${_props?.progress}%`
+    }
+    return actualMessage?.value || 'Р—Р°РіСЂСѓР·РєР° СЃС‚СЂР°РЅРёС†С‹'
 })
 
 const containerClasses = computed<string>(() => {
-  const baseClasses = [
-    'page-loader',
-    `page-loader--${_props?.type}`,
-    `page-loader--animation-${config?.value.animation}`
-  ]
+    const baseClasses = [
+        'page-loader',
+        `page-loader--${_props?.type}`,
+        `page-loader--animation-${config?.value.animation}`
+    ]
 
-  if (_props?.fullScreen || config?.value.fullScreen) {
-    baseClasses?.push('fixed', 'inset-0', 'z-40', 'flex', 'items-center', 'justify-center', 'bg-white')
-  } else {
-    baseClasses?.push('w-full', 'py-12')
-  }
+    if (_props?.fullScreen || config?.value.fullScreen) {
+        baseClasses?.push('fixed', 'inset-0', 'z-40', 'flex', 'items-center', 'justify-center', 'bg-white')
+    } else {
+        baseClasses?.push('w-full', 'py-12')
+    }
 
-  if (_props?.className) {
-    baseClasses?.push(_props?.className)
-  }
+    if (_props?.className) {
+        baseClasses?.push(_props?.className)
+    }
 
-  return baseClasses?.join(' ')
+    return baseClasses?.join(' ')
 })
 
 const contentClasses = computed<string>(() => {
-  const baseClasses = ['page-loader__content']
+    const baseClasses = ['page-loader__content']
 
-  if (_props?.fullScreen || config?.value.fullScreen) {
-    baseClasses?.push('text-center', 'max-w-md', 'mx-auto', 'px-6')
-  } else {
-    baseClasses?.push('container', 'mx-auto', 'px-4')
-  }
+    if (_props?.fullScreen || config?.value.fullScreen) {
+        baseClasses?.push('text-center', 'max-w-md', 'mx-auto', 'px-6')
+    } else {
+        baseClasses?.push('container', 'mx-auto', 'px-4')
+    }
 
-  return baseClasses?.join(' ')
+    return baseClasses?.join(' ')
 })
 
 const spinnerSize = computed<string>(() => {
-  switch (_props?.type) {
+    switch (_props?.type) {
     case 'minimal':
-      return 'sm'
+        return 'sm'
     case 'catalog':
     case 'dashboard':
-      return 'lg'
+        return 'lg'
     default:
-      return 'md'
-  }
+        return 'md'
+    }
 })
 
 const spinnerColor = computed<string>(() => {
-  switch (_props?.type) {
+    switch (_props?.type) {
     case 'profile':
-      return 'purple'
+        return 'purple'
     case 'dashboard':
-      return 'blue'
+        return 'blue'
     case 'form':
-      return 'green'
+        return 'green'
     default:
-      return 'indigo'
-  }
+        return 'indigo'
+    }
 })
 
 const skeletonComponent = computed(() => {
-  switch (_props?.type) {
+    switch (_props?.type) {
     case 'catalog':
-      return SkeletonCard
+        return SkeletonCard
     case 'profile':
-      return SkeletonProfile
+        return SkeletonProfile
     case 'dashboard':
-      return SkeletonStats
+        return SkeletonStats
     case 'form':
-      return SkeletonForm
+        return SkeletonForm
     case 'content':
-      return SkeletonContent
+        return SkeletonContent
     default:
-      return SkeletonList
-  }
+        return SkeletonList
+    }
 })
 
 const skeletonClasses = computed<string>(() => {
-  const baseClasses = ['animate-pulse']
+    const baseClasses = ['animate-pulse']
 
-  switch (_props?.type) {
+    switch (_props?.type) {
     case 'catalog':
-      baseClasses?.push('mb-4')
-      break
+        baseClasses?.push('mb-4')
+        break
     case 'dashboard':
-      baseClasses?.push('mb-6')
-      break
+        baseClasses?.push('mb-6')
+        break
     default:
-      baseClasses?.push('mb-3')
-  }
+        baseClasses?.push('mb-3')
+    }
 
-  return baseClasses?.join(' ')
+    return baseClasses?.join(' ')
 })
 </script>
 
@@ -354,7 +356,7 @@ const skeletonClasses = computed<string>(() => {
 
 /* РЎС‚РёР»Рё РґР»СЏ СЂР°Р·РЅС‹С… С‚РёРїРѕРІ */
 .page-loader--catalog {
-  @apply bg-gray-50;
+  @apply bg-gray-500;
 }
 
 .page-loader--profile {

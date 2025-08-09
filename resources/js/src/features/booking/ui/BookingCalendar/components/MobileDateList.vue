@@ -21,8 +21,18 @@
         class="mobile-date-list-empty"
       >
         <div class="mobile-date-list-empty-icon">
-          <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          <svg
+            class="w-8 h-8 text-gray-500"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
           </svg>
         </div>
         <p class="mobile-date-list-empty-text">
@@ -30,8 +40,8 @@
         </p>
         <button
           v-if="onRefresh"
-          @click="onRefresh"
           class="mobile-date-list-refresh"
+          @click="onRefresh"
         >
           РћР±РЅРѕРІРёС‚СЊ
         </button>
@@ -101,8 +111,8 @@
       <!-- РљРЅРѕРїРєР° "РџРѕРєР°Р·Р°С‚СЊ Р±РѕР»СЊС€Рµ" -->
       <button
         v-if="availableDates.length > maxVisibleDates && !showAll"
-        @click="showAll = true"
         class="mobile-date-list-show-more"
+        @click="showAll = true"
       >
         РџРѕРєР°Р·Р°С‚СЊ РµС‰Рµ {{ availableDates.length - maxVisibleDates }} РґР°С‚
       </button>
@@ -130,14 +140,14 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  title: 'Р‘Р»РёР¶Р°Р№С€РёРµ РґРѕСЃС‚СѓРїРЅС‹Рµ РґР°С‚С‹',
-  emptyStateText: 'РќРµС‚ РґРѕСЃС‚СѓРїРЅС‹С… РґР°С‚ РґР»СЏ Р±СЂРѕРЅРёСЂРѕРІР°РЅРёСЏ',
-  showMobileList: true,
-  maxVisibleDates: 5,
-  compact: false,
-  disabled: false,
-  showAdditionalInfo: false,
-  selectedDate: null
+    title: 'Р‘Р»РёР¶Р°Р№С€РёРµ РґРѕСЃС‚СѓРїРЅС‹Рµ РґР°С‚С‹',
+    emptyStateText: 'РќРµС‚ РґРѕСЃС‚СѓРїРЅС‹С… РґР°С‚ РґР»СЏ Р±СЂРѕРЅРёСЂРѕРІР°РЅРёСЏ',
+    showMobileList: true,
+    maxVisibleDates: 5,
+    compact: false,
+    disabled: false,
+    showAdditionalInfo: false,
+    selectedDate: null
 })
 
 const emit = defineEmits<{
@@ -150,30 +160,30 @@ const showAll = ref(false)
 
 // Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const visibleDates = computed(() => {
-  if (showAll.value || props.availableDates.length <= props.maxVisibleDates) {
-    return props.availableDates
-  }
-  return props.availableDates.slice(0, props.maxVisibleDates)
+    if (showAll.value || props.availableDates.length <= props.maxVisibleDates) {
+        return props.availableDates
+    }
+    return props.availableDates.slice(0, props.maxVisibleDates)
 })
 
 // РћР±СЂР°Р±РѕС‚С‡РёРєРё
 const handleDateSelect = (dateItem: AvailableDateItem) => {
-  if (props.disabled) return
-  emit('dateSelect', dateItem.dateString)
+    if (props.disabled) return
+    emit('dateSelect', dateItem.dateString)
 }
 
 // РџРѕР»СѓС‡РµРЅРёРµ CSS РєР»Р°СЃСЃРѕРІ СЃС‚Р°С‚СѓСЃР°
 const getStatusClasses = (dateString: string): string => {
-  if (!props.getStatusForDate) return 'mobile-date-item-indicator--available'
+    if (!props.getStatusForDate) return 'mobile-date-item-indicator--available'
   
-  const status = props.getStatusForDate(dateString)
-  return `mobile-date-item-indicator--${status}`
+    const status = props.getStatusForDate(dateString)
+    return `mobile-date-item-indicator--${status}`
 }
 
 // РџРѕР»СѓС‡РµРЅРёРµ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕР№ РёРЅС„РѕСЂРјР°С†РёРё
 const getAdditionalInfo = (dateItem: AvailableDateItem): string => {
-  if (!props.getAdditionalInfoForDate) return ''
-  return props.getAdditionalInfoForDate(dateItem.dateString)
+    if (!props.getAdditionalInfoForDate) return ''
+    return props.getAdditionalInfoForDate(dateItem.dateString)
 }
 </script>
 
@@ -191,7 +201,7 @@ const getAdditionalInfo = (dateItem: AvailableDateItem): string => {
 }
 
 .mobile-date-list-title {
-  @apply text-sm font-medium text-gray-700 mb-1;
+  @apply text-sm font-medium text-gray-500 mb-1;
 }
 
 .mobile-date-list-count {
@@ -250,7 +260,7 @@ const getAdditionalInfo = (dateItem: AvailableDateItem): string => {
 }
 
 .mobile-date-item-date {
-  @apply font-medium text-gray-900;
+  @apply font-medium text-gray-500;
 }
 
 .mobile-date-item-slots {
@@ -278,7 +288,7 @@ const getAdditionalInfo = (dateItem: AvailableDateItem): string => {
 }
 
 .mobile-date-item-indicator--unavailable {
-  @apply bg-gray-400;
+  @apply bg-gray-500;
 }
 
 .mobile-date-item-check {
@@ -286,7 +296,7 @@ const getAdditionalInfo = (dateItem: AvailableDateItem): string => {
 }
 
 .mobile-date-item-extra {
-  @apply mt-2 pt-2 border-t border-gray-100 text-xs text-gray-500;
+  @apply mt-2 pt-2 border-t border-gray-500 text-xs text-gray-500;
 }
 
 /* РљРЅРѕРїРєР° "РџРѕРєР°Р·Р°С‚СЊ Р±РѕР»СЊС€Рµ" */
@@ -319,7 +329,7 @@ const getAdditionalInfo = (dateItem: AvailableDateItem): string => {
 /* Р’С‹СЃРѕРєРёР№ РєРѕРЅС‚СЂР°СЃС‚ */
 @media (prefers-contrast: high) {
   .mobile-date-item {
-    @apply border-2 border-gray-600;
+    @apply border-2 border-gray-500;
   }
   
   .mobile-date-item--selected {
@@ -327,7 +337,7 @@ const getAdditionalInfo = (dateItem: AvailableDateItem): string => {
   }
   
   .mobile-date-item-indicator {
-    @apply ring-2 ring-gray-800;
+    @apply ring-2 ring-gray-500;
   }
 }
 
@@ -345,27 +355,27 @@ const getAdditionalInfo = (dateItem: AvailableDateItem): string => {
 /* РўРµРјРЅР°СЏ С‚РµРјР° */
 @media (prefers-color-scheme: dark) {
   .mobile-date-list-title {
-    @apply text-gray-300;
+    @apply text-gray-500;
   }
   
   .mobile-date-item {
-    @apply border-gray-600 bg-gray-800;
+    @apply border-gray-500 bg-gray-500;
   }
   
   .mobile-date-item:not(.mobile-date-item--disabled):hover {
-    @apply border-blue-400 bg-gray-700;
+    @apply border-blue-400 bg-gray-500;
   }
   
   .mobile-date-item--selected {
-    @apply border-blue-400 bg-gray-700;
+    @apply border-blue-400 bg-gray-500;
   }
   
   .mobile-date-item-date {
-    @apply text-gray-100;
+    @apply text-gray-500;
   }
   
   .mobile-date-item-slots {
-    @apply text-gray-400;
+    @apply text-gray-500;
   }
 }
 </style>

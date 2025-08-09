@@ -21,51 +21,51 @@
 
 <script setup>
 import { 
-  UserIcon,
-  LockClosedIcon,
-  BellIcon,
-  CreditCardIcon,
-  ChevronRightIcon
+    UserIcon,
+    LockClosedIcon,
+    BellIcon,
+    CreditCardIcon,
+    ChevronRightIcon
 } from '@heroicons/vue/outline'
 
 // 🎯 Стили
 const CONTAINER_CLASSES = 'space-y-6'
 const SETTINGS_GRID_CLASSES = 'space-y-4'
-const SETTING_LINK_CLASSES = 'flex items-center gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors'
-const SETTING_ICON_CLASSES = 'w-10 h-10 text-gray-600 bg-white p-2 rounded-lg'
-const SETTING_TITLE_CLASSES = 'font-medium text-gray-900'
-const SETTING_DESCRIPTION_CLASSES = 'text-sm text-gray-600'
-const CHEVRON_ICON_CLASSES = 'w-5 h-5 text-gray-400 ml-auto'
+const SETTING_LINK_CLASSES = 'flex items-center gap-4 p-4 bg-gray-500 hover:bg-gray-500 rounded-lg transition-colors'
+const SETTING_ICON_CLASSES = 'w-10 h-10 text-gray-500 bg-white p-2 rounded-lg'
+const SETTING_TITLE_CLASSES = 'font-medium text-gray-500'
+const SETTING_DESCRIPTION_CLASSES = 'text-sm text-gray-500'
+const CHEVRON_ICON_CLASSES = 'w-5 h-5 text-gray-500 ml-auto'
 
 // Конфигурация настроек
 const settings = [
-  {
-    key: 'profile',
-    title: 'Профиль',
-    description: 'Личная информация и контакты',
-    icon: UserIcon,
-    href: '/settings/profile'
-  },
-  {
-    key: 'security',
-    title: 'Безопасность',
-    description: 'Пароль и настройки входа',
-    icon: LockClosedIcon,
-    href: '/settings/security'
-  },
-  {
-    key: 'notifications',
-    title: 'Уведомления',
-    description: 'Email и push-уведомления',
-    icon: BellIcon,
-    href: '/settings/notifications'
-  },
-  {
-    key: 'payments',
-    title: 'Платежи',
-    description: 'Способы оплаты и вывод средств',
-    icon: CreditCardIcon,
-    href: '/settings/payments'
-  }
+    {
+        key: 'profile',
+        title: 'Профиль',
+        description: 'Личная информация и контакты',
+        icon: UserIcon,
+        href: '/settings/profile'
+    },
+    {
+        key: 'security',
+        title: 'Безопасность',
+        description: 'Пароль и настройки входа',
+        icon: LockClosedIcon,
+        href: '/settings/security'
+    },
+    {
+        key: 'notifications',
+        title: 'Уведомления',
+        description: 'Email и push-уведомления',
+        icon: BellIcon,
+        href: '/settings/notifications'
+    },
+    {
+        key: 'payments',
+        title: 'Платежи',
+        description: 'Способы оплаты и вывод средств',
+        icon: CreditCardIcon,
+        href: '/settings/payments'
+    }
 ]
 </script>

@@ -32,6 +32,8 @@ export interface Master {
 
 export interface MasterCardProps {
   master: Master
+  variant?: 'default' | 'compact' | 'detailed'
+  showActions?: boolean
 }
 
 export interface MasterCardEmits {

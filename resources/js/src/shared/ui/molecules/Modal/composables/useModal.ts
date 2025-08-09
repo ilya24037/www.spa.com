@@ -222,8 +222,8 @@ class ModalStack {
     return this.stack.length === 0
   }
   
-  getTopModal(): string | null {
-    return this.stack.length > 0 ? this.stack[this.stack.length - 1] : null
+  getTopModal(): string | undefined {
+    return this.stack.length > 0 ? this.stack[this.stack.length - 1] : undefined
   }
 }
 

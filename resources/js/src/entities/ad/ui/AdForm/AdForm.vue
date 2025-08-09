@@ -1,210 +1,690 @@
-<!-- resources/js/src/entities/ad/ui/AdForm/AdForm.vue -->
 <template>
-  <div :class="CONTAINER_CLASSES">
-    <!-- РџСЂРѕРіСЂРµСЃСЃ-Р±Р°СЂ -->
-    <div v-if="showProgress" :class="PROGRESS_CONTAINER_CLASSES">
-      <div :class="PROGRESS_BAR_CLASSES">
-        <div :class="PROGRESS_FILL_CLASSES" :style="{ width: progressPercent + '%' }"></div>
+    <div class="universal-ad-form">
+        <!-- Универсальная форма для всех категорий -->
+        <form @submit.prevent="handleSubmit" novalidate>
+            
+            <!-- 1. Подробности (title + specialty) -->
+            <div class="form-group-section">
+                <TitleSection 
+                    v-model:title="form.title" 
+                    :errors="errors"
+                />
+                <SpecialtySection 
+                    v-model:specialty="form.specialty" 
+                    :errors="errors"
+                />
+            </div>
+
+            <!-- 2. Ваши клиенты -->
+            <div class="form-group-section">
+                <ClientsSection 
+                    v-model:clients="form.clients" 
+                    :errors="errors"
+                />
+            </div>
+
+            <!-- 3. Где вы оказываете услуги -->
+            <div class="form-group-section">
+                <LocationSection 
+                    v-model:serviceLocation="form.service_location" 
+                    :errors="errors"
+                />
+            </div>
+
+            <!-- 4. Формат работы -->
+            <div class="form-group-section">
+                <WorkFormatSection 
+                    v-model:workFormat="form.work_format" 
+                    :errors="errors"
+                />
+            </div>
+
+            <!-- 5. Кто оказывает услуги -->
+            <div class="form-group-section">
+                <ServiceProviderSection 
+                    v-model:serviceProvider="form.service_provider" 
+                    :errors="errors"
+                />
+            </div>
+
+            <!-- 6. Опыт работы -->
+            <div class="form-group-section">
+                <ExperienceSection 
+                    v-model:experience="form.experience" 
+                    :errors="errors"
+                />
+            </div>
+
+            <!-- 7. Описание -->
+            <div class="form-group-section">
+                <DescriptionSection 
+                    v-model:description="form.description" 
+                    :errors="errors"
+                />
+            </div>
+
+            <!-- 7.1. Услуги (новый модульный компонент) -->
+            <div class="form-group-section">
+                <ServicesModule 
+                    v-model:services="form.services" 
+                    v-model:servicesAdditionalInfo="form.services_additional_info" 
+                    :allowedCategories="[]"
+                    :errors="errors"
+                />
+            </div>
+
+            <!-- 7.2. Особенности мастера (новый модульный компонент) -->
+            <div class="form-group-section">
+                <FeaturesSection 
+                    v-model:features="form.features" 
+                    v-model:additionalFeatures="form.additional_features" 
+                    :errors="errors"
+                />
+            </div>
+
+            <!-- 7.3. График работы (новый модульный компонент) -->
+            <div class="form-group-section">
+                <ScheduleSection 
+                    v-model:schedule="form.schedule" 
+                    v-model:scheduleNotes="form.schedule_notes" 
+                    :errors="errors"
+                />
+            </div>
+
+            <!-- 8. Стоимость основной услуги -->
+            <div class="form-group-section">
+                <h2 class="form-group-title">Стоимость основной услуги</h2>
+                <div class="field-hint" style="margin-bottom: 20px; color: #8c8c8c; font-size: 16px;">
+                    Заказчик увидит эту цену рядом с названием объявления.
       </div>
-      <div :class="PROGRESS_TEXT_CLASSES">{{ progressText }}</div>
+                <PriceSection 
+                    v-model:price="form.price" 
+                    v-model:priceUnit="form.price_unit" 
+                    v-model:isStartingPrice="form.is_starting_price" 
+                    :errors="errors"
+                />
+      </div>
+
+            <!-- 9. Физические параметры -->
+            <div class="form-group-section">
+                <ParametersSection 
+                    v-model:height="form.height" 
+                    v-model:weight="form.weight" 
+                    v-model:hairColor="form.hair_color" 
+                    v-model:eyeColor="form.eye_color" 
+                    v-model:nationality="form.nationality" 
+                    :errors="errors"
+                />
     </div>
 
-    <!-- РћСЃРЅРѕРІРЅР°СЏ С„РѕСЂРјР° -->
-    <form @submit.prevent="handleSubmit" novalidate :class="FORM_CLASSES">
-      
-      <!-- Р“Р РЈРџРџРђ 1: Р‘Р°Р·РѕРІР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ -->
-      <div :class="FORM_GROUP_CLASSES">
-        <AdFormBasicInfo :errors="formErrors" />
+            <!-- 10. Акции -->
+            <div class="form-group-section">
+                <PromoSection 
+                    v-model:newClientDiscount="form.new_client_discount" 
+                    v-model:gift="form.gift" 
+                    :errors="errors"
+                />
       </div>
 
-      <!-- Р“Р РЈРџРџРђ 2: РџРµСЂСЃРѕРЅР°Р»СЊРЅР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ -->
-      <div :class="FORM_GROUP_CLASSES">
-        <AdFormPersonalInfo :errors="formErrors" />
+            <!-- 11. Фотографии -->
+            <div class="form-group-section">
+                <PhotosSection 
+                    v-model:photos="form.photos" 
+                    :errors="errors"
+                />
       </div>
 
-      <!-- Р“Р РЈРџРџРђ 3: РљРѕРјРјРµСЂС‡РµСЃРєР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ -->
-      <div :class="FORM_GROUP_CLASSES">
-        <AdFormCommercialInfo :errors="formErrors" />
+            <!-- 11.2 Видео -->
+            <div class="form-group-section">
+                <VideosSection 
+                    v-model:videos="form.videos" 
+                    :errors="errors"
+                />
       </div>
 
-      <!-- Р“Р РЈРџРџРђ 4: Р›РѕРєР°С†РёСЏ Рё РєРѕРЅС‚Р°РєС‚С‹ -->
-      <div :class="FORM_GROUP_CLASSES">
-        <AdFormLocationInfo :errors="formErrors" />
+            <!-- 13. География -->
+            <div class="form-group-section geography-section">
+                <GeoSection 
+                    v-model:geo="form.geo" 
+                    :errors="errors"
+                />
       </div>
 
-      <!-- Р“Р РЈРџРџРђ 5: РњРµРґРёР° -->
-      <div :class="FORM_GROUP_CLASSES">
-        <AdFormMediaInfo 
-          :uploading="uploading"
-          :upload-progress="uploadProgress"
-          :uploading-video="uploadingVideo"
-          :video-upload-progress="videoUploadProgress"
-          :errors="formErrors"
-          @photo-error="handlePhotoError"
-          @video-error="handleVideoError"
+            <!-- 12. Контакты -->
+            <div class="form-group-section">
+                <ContactsSection 
+                    v-model:phone="form.phone" 
+                    v-model:contactMethod="form.contact_method" 
+                    v-model:whatsapp="form.whatsapp" 
+                    v-model:telegram="form.telegram" 
+                    :errors="errors"
         />
       </div>
 
-      <!-- РљРЅРѕРїРєРё РґРµР№СЃС‚РІРёР№ -->
-      <div :class="ACTIONS_CLASSES">
-        <AdFormActionButton
-          variant="secondary"
-          size="large"
-          :loading="saving"
+            <!-- Кнопки действий -->
+            <div class="form-actions">
+                <!-- Левая кнопка - Сохранить черновик -->
+                <button 
+                    type="button" 
           @click="handleSaveDraft"
-        >
-          {{ saving ? 'РЎРѕС…СЂР°РЅРµРЅРёРµ...' : 'РЎРѕС…СЂР°РЅРёС‚СЊ С‡РµСЂРЅРѕРІРёРє' }}
-        </AdFormActionButton>
-
-        <AdFormActionButton
-          variant="primary"
-          size="large"
-          :loading="saving"
+                    :disabled="saving"
+                >
+                    {{ saving ? 'Сохранение...' : 'Сохранить черновик' }}
+                </button>
+                
+                <!-- Правая кнопка - Разместить объявление -->
+                <button 
+                    type="button" 
           @click="handlePublish"
+                    :disabled="saving"
         >
-          {{ saving ? 'РџСѓР±Р»РёРєР°С†РёСЏ...' : 'Р Р°Р·РјРµСЃС‚РёС‚СЊ РѕР±СЉСЏРІР»РµРЅРёРµ' }}
-        </AdFormActionButton>
+                    {{ saving ? 'Публикация...' : 'Разместить объявление' }}
+                </button>
       </div>
     </form>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useAdFormStore } from './stores/adFormStore'
+import { ref, reactive, computed, onMounted, nextTick } from 'vue'
+import { router } from '@inertiajs/vue3'
+import { useAdForm } from '@/Composables/useAdForm'
+import { publishAd } from '@/utils/adApi'
 
-// РљРѕРјРїРѕРЅРµРЅС‚С‹ РіСЂСѓРїРї С„РѕСЂРјС‹
-import AdFormBasicInfo from './components/AdFormBasicInfo.vue'
-import AdFormPersonalInfo from './components/AdFormPersonalInfo.vue'
-import AdFormCommercialInfo from './components/AdFormCommercialInfo.vue'
-import AdFormLocationInfo from './components/AdFormLocationInfo.vue'
-import AdFormMediaInfo from './components/AdFormMediaInfo.vue'
-import AdFormActionButton from './components/AdFormActionButton.vue'
+// Импорты секций формы
+import TitleSection from './sections/TitleSection.vue'
+import SpecialtySection from './sections/SpecialtySection.vue'
+import ServiceProviderSection from './sections/ServiceProviderSection.vue'
+import ClientsSection from './sections/ClientsSection.vue'
+import LocationSection from './sections/LocationSection.vue'
+import WorkFormatSection from './sections/WorkFormatSection.vue'
+import ExperienceSection from './sections/ExperienceSection.vue'
+import PriceSection from './sections/PriceSection.vue'
+import DescriptionSection from './sections/DescriptionSection.vue'
+import ParametersSection from './sections/ParametersSection.vue'
+import PromoSection from './sections/PromoSection.vue'
+import PhotosSection from './sections/PhotosSection.vue'
+import VideosSection from './sections/VideosSection.vue'
+import GeoSection from './sections/GeoSection.vue'
+import ContactsSection from './sections/ContactsSection.vue'
 
-// рџЋЇ РЎС‚РёР»Рё СЃРѕРіР»Р°СЃРЅРѕ РґРёР·Р°Р№РЅ-СЃРёСЃС‚РµРјРµ
-const CONTAINER_CLASSES = 'ad-form-container'
-const PROGRESS_CONTAINER_CLASSES = 'form-progress mb-6'
-const PROGRESS_BAR_CLASSES = 'w-full bg-gray-200 rounded-full h-2 mb-2'
-const PROGRESS_FILL_CLASSES = 'bg-blue-600 h-2 rounded-full transition-all duration-300'
-const PROGRESS_TEXT_CLASSES = 'text-sm text-gray-600 text-center'
-const FORM_CLASSES = 'ad-form space-y-8'
-const FORM_GROUP_CLASSES = 'form-group space-y-6'
-const ACTIONS_CLASSES = 'form-actions flex gap-4 pt-6 border-t border-gray-200'
+// Модульные компоненты (новая архитектура)
+import ServicesModule from '@/src/features/Services/index.vue'
+import FeaturesSection from './sections/FeaturesSection.vue'
+import ScheduleSection from './sections/ScheduleSection.vue'
 
+
+// Props
 const props = defineProps({
-  category: {
-    type: String,
-    required: true
-  },
-  categories: {
-    type: Array,
-    required: true
-  },
-  adId: {
-    type: [String, Number],
-    default: null
-  },
-  initialData: {
-    type: Object,
-    default: () => ({})
-  },
-  showProgress: {
-    type: Boolean,
-    default: false
-  }
+    category: {
+        type: String,
+        required: true
+    },
+    categories: {
+        type: Array,
+        required: true
+    },
+    adId: {
+        type: [String, Number],
+        default: null
+    },
+    initialData: {
+        type: Object,
+        default: () => ({})
+    }
 })
 
-const emit = defineEmits(['success', 'error'])
+// Events
+const emit = defineEmits(['success'])
 
-// РСЃРїРѕР»СЊР·СѓРµРј Pinia store РґР»СЏ СЃРѕСЃС‚РѕСЏРЅРёСЏ С„РѕСЂРјС‹
-const store = useAdFormStore()
-
-// РЎРѕСЃС‚РѕСЏРЅРёРµ РєРѕРјРїРѕРЅРµРЅС‚Р°
-const saving = ref(false)
-const uploading = ref(false)
-const uploadProgress = ref(0)
-const uploadingVideo = ref(false)
-const videoUploadProgress = ref(0)
-
-// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ store
-onMounted(() => {
-  store.initializeForm(props.initialData, {
-    adId: props.adId,
+// Используем композабл для работы с формой
+const { 
+    form, 
+    errors: formErrors, 
+    handleSubmit: submitForm,
+    loadDraft
+} = useAdForm({
     category: props.category,
-    categories: props.categories
-  })
+    ...props.initialData
+}, { 
+    isEditMode: !!props.adId,
+    adId: props.adId,
+    autosaveEnabled: false
 })
 
-// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
-const formData = computed(() => store.formData)
-const formErrors = computed(() => store.errors)
+// Собственное состояние для сохранения
+const saving = ref(false)
+const validationErrors = ref({})
 
-const progressPercent = computed(() => {
-  return store.completionPercentage || 0
+// Определяем обязательные поля
+const requiredFields = {
+    title: 'Название объявления',
+    specialty: 'Специальность или сфера',
+    clients: 'Ваши клиенты',
+    service_location: 'Где вы оказываете услуги', 
+    work_format: 'Формат работы',
+    experience: 'Опыт работы',
+    description: 'Описание услуги',
+    price: 'Стоимость услуги',
+    phone: 'Телефон для связи'
+}
+
+// Функция валидации формы
+const validateForm = () => {
+    validationErrors.value = {}
+    let isValid = true
+    let firstErrorField = null
+
+    // Проверяем каждое обязательное поле
+    for (const [field, label] of Object.entries(requiredFields)) {
+        if (field === 'clients' || field === 'service_location') {
+            // Для массивов проверяем, что выбран хотя бы один элемент
+            if (!form[field] || form[field].length === 0) {
+                validationErrors.value[field] = `Поле "${label}" обязательно для заполнения`
+                if (!firstErrorField) firstErrorField = field
+                isValid = false
+            }
+        } else if (field === 'description') {
+            // Для описания проверяем минимальную длину
+            if (!form[field] || form[field].toString().trim() === '') {
+                validationErrors.value[field] = `Поле "${label}" обязательно для заполнения`
+                if (!firstErrorField) firstErrorField = field
+                isValid = false
+            } else if (form[field].toString().trim().length < 50) {
+                validationErrors.value[field] = `${label} должно содержать не менее 50 символов`
+                if (!firstErrorField) firstErrorField = field
+                isValid = false
+            }
+        } else {
+            // Для обычных полей проверяем на пустоту
+            if (!form[field] || form[field].toString().trim() === '') {
+                validationErrors.value[field] = `Поле "${label}" обязательно для заполнения`
+                if (!firstErrorField) firstErrorField = field
+                isValid = false
+            }
+        }
+    }
+
+    // Если есть ошибки, прокручиваем к первой
+    if (!isValid && firstErrorField) {
+        scrollToField(firstErrorField)
+    }
+
+    return isValid
+}
+
+// Функция прокрутки к полю с ошибкой
+const scrollToField = async (fieldName) => {
+    await nextTick()
+    
+    // Ищем элемент по имени поля или id
+    const element = document.querySelector(
+        `[name="${fieldName}"], #${fieldName}, [data-field="${fieldName}"]`
+    )
+    
+    if (element) {
+        // Прокручиваем с отступом от верха
+        const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
+        const offsetPosition = elementPosition - 100
+        
+        window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+        })
+        
+        // Фокусируемся на элементе если возможно
+        if (element.focus) {
+            setTimeout(() => element.focus(), 500)
+        }
+    }
+}
+
+// Объединяем ошибки из формы и валидации
+const errors = computed(() => {
+    return { ...formErrors.value, ...validationErrors.value }
 })
 
-const progressText = computed(() => {
-  return `Р—Р°РїРѕР»РЅРµРЅРѕ ${progressPercent.value}%`
+// Категория устанавливается через initialData в useAdForm
+
+// Если это режим редактирования, загружаем данные
+onMounted(async () => {
+    if (props.adId) {
+        if (props.initialData && Object.keys(props.initialData).length > 0) {
+            // Загружаем данные из props
+            Object.keys(props.initialData).forEach(key => {
+                if (props.initialData[key] !== null && props.initialData[key] !== undefined) {
+                    form[key] = props.initialData[key]
+                }
+            })
+        } else {
+            // Загружаем данные через API
+            await loadDraft(props.adId)
+        }
+    }
 })
 
-// РњРµС‚РѕРґС‹
+// Обработчики
 const handleSubmit = async () => {
-  // РџСЂРѕРІРµСЂСЏРµРј РєР°РєР°СЏ РєРЅРѕРїРєР° Р±С‹Р»Р° РЅР°Р¶Р°С‚Р°
-  // Р›РѕРіРёРєР° РѕР±СЂР°Р±РѕС‚РєРё Р±СѓРґРµС‚ РІ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёС… РјРµС‚РѕРґР°С…
+    try {
+        const result = await submitForm()
+        emit('success', result)
+    } catch (error) {
+        console.error('Ошибка при создании объявления:', error)
+    }
 }
 
+// Простое сохранение черновика
+const saveDraft = async () => {
+    try {
+        saving.value = true
+        
+        // Отправляем данные на сервер для сохранения черновика
+        // Фильтруем только поддерживаемые поля
+        const draftData = {
+            category: props.category,
+            title: form.title,
+            specialty: form.specialty,
+            clients: form.clients,
+            service_location: form.service_location,
+            work_format: form.work_format,
+            service_provider: form.service_provider,
+            experience: form.experience,
+            description: form.description,
+            price: form.price,
+            price_unit: form.price_unit,
+            is_starting_price: form.is_starting_price,
+            discount: form.discount,
+            gift: form.gift,
+            address: form.address,
+            travel_area: form.travel_area,
+            phone: form.phone,
+            contact_method: form.contact_method
+        }
+        
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+        if (!csrfToken) {
+            throw new Error('CSRF токен не найден')
+        }
+        
+        const response = await fetch('/ads/draft', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(draftData)
+        })
+        
+        if (response.ok) {
+            const result = await response.json()
+            return result
+        } else {
+            const errorText = await response.text()
+            console.error('Ошибка сервера:', response.status, errorText)
+            throw new Error(`Ошибка при сохранении черновика: ${response.status}`)
+        }
+    } catch (error) {
+        console.error('Ошибка при сохранении черновика:', error)
+        // Не выбрасываем ошибку дальше, чтобы не блокировать перенаправление
+        return null
+    } finally {
+        saving.value = false
+    }
+}
+
+// Обработчик кнопки "Сохранить черновик"
 const handleSaveDraft = async () => {
-  saving.value = true
-  try {
-    await store.saveAsDraft()
-    emit('success', { action: 'draft', data: store.formData })
-  } catch (error) {
-    emit('error', { action: 'draft', error })
-  } finally {
-    saving.value = false
-  }
+    saving.value = true
+    
+    // Используем Inertia router для отправки
+    router.post('/ads/draft', {
+        category: props.category,
+        title: form.title,
+        specialty: form.specialty,
+        clients: form.clients,
+        service_location: form.service_location,
+        work_format: form.work_format,
+        service_provider: form.service_provider,
+        experience: form.experience,
+        description: form.description,
+        price: form.price,
+        price_unit: form.price_unit,
+        is_starting_price: form.is_starting_price,
+        discount: form.discount,
+        gift: form.gift,
+        address: form.address,
+        travel_area: form.travel_area,
+        phone: form.phone,
+        contact_method: form.contact_method,
+        photos: form.photos,
+        video: form.video,
+        show_photos_in_gallery: form.show_photos_in_gallery,
+        allow_download_photos: form.allow_download_photos,
+        watermark_photos: form.watermark_photos
+    }, {
+        preserveScroll: true,
+        onFinish: () => {
+            saving.value = false
+        }
+    })
 }
 
+// Обработчик кнопки "Разместить объявление"
 const handlePublish = async () => {
-  saving.value = true
-  try {
-    await store.publishAd()
-    emit('success', { action: 'publish', data: store.formData })
-  } catch (error) {
-    emit('error', { action: 'publish', error })
-  } finally {
-    saving.value = false
-  }
+    // Сначала валидируем форму
+    if (!validateForm()) {
+        return // Если есть ошибки, не продолжаем
+    }
+    
+    try {
+        saving.value = true
+        
+        // Подготавливаем данные для отправки
+        const publishData = {
+            ...form,
+            category: props.category, // Добавляем категорию из props
+            // Убеждаемся, что массивы корректно переданы
+            clients: Array.isArray(form.clients) ? form.clients : [],
+            service_location: Array.isArray(form.service_location) ? form.service_location : [],
+            service_provider: Array.isArray(form.service_provider) ? form.service_provider : [],
+            is_starting_price: Array.isArray(form.is_starting_price) ? form.is_starting_price : [],
+            // Переименовываем поле скидки для сервера
+            discount: form.new_client_discount || null
+        }
+        
+        
+        // Сохраняем объявление
+        const result = await publishAd(publishData)
+        
+        if (result && result.success) {
+            // Используем URL из ответа сервера
+            if (result.redirect) {
+                window.location.href = result.redirect
+            } else if (result.id) {
+                // Fallback на старый формат
+                router.visit(`/ad/${result.id}/select-plan`)
+            }
+        }
+    } catch (error) {
+        console.error('Ошибка при публикации объявления:', error)
+        
+        // Показываем ошибки валидации
+        if (error.response && error.response.data && error.response.data.errors) {
+            const errors = error.response.data.errors
+            for (let field in errors) {
+                console.error(`${field}: ${errors[field].join(', ')}`)
+            }
+        }
+    } finally {
+        saving.value = false
+    }
 }
 
-const handlePhotoError = (error) => {
-  emit('error', { action: 'photo_upload', error })
-}
 
-const handleVideoError = (error) => {
-  emit('error', { action: 'video_upload', error })
-}
+
+// Инициализация происходит через useAdForm.js
 </script>
 
 <style scoped>
-.ad-form-container {
-  @apply max-w-4xl mx-auto;
-}
-
-.form-progress {
-  @apply sticky top-0 z-10 bg-white p-4 border-b border-gray-200;
-}
-
-.ad-form {
-  @apply bg-white;
-}
-
-.form-group {
-  @apply bg-gray-50 p-6 rounded-lg;
-}
-
+/* Кнопки действий */
 .form-actions {
-  @apply sticky bottom-0 bg-white p-4 border-t border-gray-200;
+    margin-top: 32px;
+    display: flex;
+    gap: 16px;
+    padding: 24px 0;
+    border-top: 1px solid #f0f0f0;
+}
+
+.form-actions button {
+    flex: 1;
+    padding: 16px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.form-actions button:first-child {
+    background: #f5f5f5;
+    color: #1a1a1a;
+}
+
+.form-actions button:first-child:hover {
+    background: #e6e6e6;
+}
+
+/* Чекбоксы */
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    gap: 12px;
+    padding: 8px 0;
+    user-select: none;
+}
+
+.custom-checkbox {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #d9d9d9;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    background: #fff;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.custom-checkbox:hover {
+    border-color: #8c8c8c;
+}
+
+.custom-checkbox.checked {
+    background: #007bff;
+    border-color: #007bff;
+}
+
+.check-icon {
+    width: 12px;
+    height: 10px;
+    color: #fff;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.custom-checkbox.checked .check-icon {
+    opacity: 1;
+}
+
+.checkbox-label {
+    font-size: 16px;
+    color: #1a1a1a;
+    font-weight: 400;
+    line-height: 1.4;
+    cursor: pointer;
+    user-select: none;
+}
+
+.form-actions button:last-child {
+    background: #1890ff;
+    color: white;
+}
+
+.form-actions button:last-child:hover {
+    background: #1677ff;
+}
+
+.form-actions button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Радио кнопки как на Avito */
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.radio-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+}
+
+.custom-radio {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #d9d9d9;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    background: #fff;
+    flex-shrink: 0;
+}
+
+.custom-radio.checked {
+    border-color: #1890ff;
+}
+
+.custom-radio.checked::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #1890ff;
+}
+
+.radio-content {
+    flex: 1;
+}
+
+.radio-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: #1a1a1a;
+    line-height: 1.4;
+}
+
+.radio-description {
+    font-size: 14px;
+    color: #8c8c8c;
+    line-height: 1.4;
+    margin-top: 2px;
 }
 </style>
-

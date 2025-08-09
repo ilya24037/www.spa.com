@@ -3,6 +3,7 @@
  * Не зависит от глобальных API - собственная инкапсуляция
  */
 
+import { logger } from '@/src/shared/utils/logger'
 import type { 
   MasterProfile, 
   MasterProfileFilters 
@@ -46,7 +47,7 @@ export class MasterProfileWidgetApi {
       const data = await response.json()
       return this.transformMasterData(data)
     } catch (error) {
-      console.error('[MasterProfileWidget] API Error:', error)
+      logger.error('[MasterProfileWidget] API Error:', error)
       throw new Error(
         error instanceof Error 
           ? error.message 
@@ -73,7 +74,7 @@ export class MasterProfileWidgetApi {
 
       return await response.json()
     } catch (error) {
-      console.error('[MasterProfileWidget] Services API Error:', error)
+      logger.error('[MasterProfileWidget] Services API Error:', error)
       throw error
     }
   }
@@ -96,7 +97,7 @@ export class MasterProfileWidgetApi {
 
       return await response.json()
     } catch (error) {
-      console.error('[MasterProfileWidget] Photos API Error:', error)
+      logger.error('[MasterProfileWidget] Photos API Error:', error)
       throw error
     }
   }
@@ -148,28 +149,29 @@ export class MasterProfileWidgetApi {
   }
 
   /**
-   * Кеширование данных виджета
+   * Кеширование данных виджета (зарезервировано для будущей оптимизации)
    */
-  private cache = new Map<string, { data: any, timestamp: number }>()
-  private readonly CACHE_TTL = 5 * 60 * 1000 // 5 минут
+  // private cache = new Map<string, { data: any, timestamp: number }>()
+  // private readonly CACHE_TTL = 5 * 60 * 1000 // 5 минут
 
-  private getCacheKey(masterId: number, filters: MasterProfileFilters): string {
-    return `master-${masterId}-${JSON.stringify(filters)}`
-  }
+  // Методы кеширования (зарезервированы для будущей оптимизации)
+  // private getCacheKey(masterId: number, filters: MasterProfileFilters): string {
+  //   return `master-${masterId}-${JSON.stringify(filters)}`
+  // }
 
-  private isValidCache(timestamp: number): boolean {
-    return Date.now() - timestamp < this.CACHE_TTL
-  }
+  // private isValidCache(timestamp: number): boolean {
+  //   return Date.now() - timestamp < this.CACHE_TTL
+  // }
 
-  private setCache(key: string, data: any): void {
-    this.cache.set(key, { data, timestamp: Date.now() })
-  }
+  // private setCache(key: string, data: any): void {
+  //   this.cache.set(key, { data, timestamp: Date.now() })
+  // }
 
-  private getCache(key: string): any | null {
-    const cached = this.cache.get(key)
-    if (cached && this.isValidCache(cached.timestamp)) {
-      return cached.data
-    }
-    return null
-  }
+  // private getCache(key: string): any | null {
+  //   const cached = this.cache.get(key)
+  //   if (cached && this.isValidCache(cached.timestamp)) {
+  //     return cached.data
+  //   }
+  //   return null
+  // }
 }

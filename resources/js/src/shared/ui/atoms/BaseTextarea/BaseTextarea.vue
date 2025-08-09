@@ -22,14 +22,18 @@
         @focus="handleFocus"
         @blur="handleBlur"
         @keydown.enter="handleEnter"
-      ></textarea>
+      />
     </div>
     
     <!-- РћС€РёР±РєР° -->
-    <div v-if="error" class="textarea-error">{{ error }}</div>
+    <div v-if="error" class="textarea-error">
+      {{ error }}
+    </div>
     
     <!-- РџРѕРґСЃРєР°Р·РєР° -->
-    <div v-if="hint && !error" class="textarea-hint">{{ hint }}</div>
+    <div v-if="hint && !error" class="textarea-hint">
+      {{ hint }}
+    </div>
     
     <!-- РЎС‡РµС‚С‡РёРє СЃРёРјРІРѕР»РѕРІ -->
     <div v-if="maxlength && showCounter" class="textarea-counter">
@@ -43,49 +47,49 @@ import { ref, computed, nextTick } from 'vue'
 
 // Props
 const props = defineProps({
-  modelValue: {
-    type: String,
-    default: ''
-  },
-  label: {
-    type: String,
-    default: ''
-  },
-  placeholder: {
-    type: String,
-    default: ''
-  },
-  disabled: {
-    type: Boolean,
-    default: false
-  }, readonly: {
-    type: Boolean,
-    default: false
-  },
-  rows: {
-    type: Number,
-    default: 4
-  },
-  error: {
-    type: String,
-    default: ''
-  },
-  hint: {
-    type: String,
-    default: ''
-  },
-  maxlength: {
-    type: Number,
-    default: null
-  },
-  showCounter: {
-    type: Boolean,
-    default: false
-  },
-  resizable: {
-    type: Boolean,
-    default: true
-  }
+    modelValue: {
+        type: String,
+        default: ''
+    },
+    label: {
+        type: String,
+        default: ''
+    },
+    placeholder: {
+        type: String,
+        default: ''
+    },
+    disabled: {
+        type: Boolean,
+        default: false
+    }, readonly: {
+        type: Boolean,
+        default: false
+    },
+    rows: {
+        type: Number,
+        default: 4
+    },
+    error: {
+        type: String,
+        default: ''
+    },
+    hint: {
+        type: String,
+        default: ''
+    },
+    maxlength: {
+        type: Number,
+        default: null
+    },
+    showCounter: {
+        type: Boolean,
+        default: false
+    },
+    resizable: {
+        type: Boolean,
+        default: true
+    }
 })
 
 // Events
@@ -96,46 +100,46 @@ const textareaRef = ref(null)
 
 // Computed
 const textareaValue = computed({
-  get() {
-    return props.modelValue
-  },
-  set(value) {
-    emit('update:modelValue', value)
-  }
+    get() {
+        return props.modelValue
+    },
+    set(value) {
+        emit('update:modelValue', value)
+    }
 })
 
 // Methods
 const handleInput = (event) => {
-  emit('update:modelValue', event.target.value)
+    emit('update:modelValue', event.target.value)
 }
 
 const handleFocus = (event) => {
-  emit('focus', event)
+    emit('focus', event)
 }
 
 const handleBlur = (event) => {
-  emit('blur', event)
+    emit('blur', event)
 }
 
 const handleEnter = (event) => {
-  emit('enter', event)
+    emit('enter', event)
 }
 
 // Public methods
 const focus = () => {
-  nextTick(() => {
-    textareaRef.value?.focus()
-  })
+    nextTick(() => {
+        textareaRef.value?.focus()
+    })
 }
 
 const blur = () => {
-  textareaRef.value?.blur()
+    textareaRef.value?.blur()
 }
 
 // Expose public methods
 defineExpose({
-  focus,
-  blur
+    focus,
+    blur
 })
 </script>
 

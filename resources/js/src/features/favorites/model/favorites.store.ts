@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import axios from 'axios'
+import { logger } from '@/src/shared/utils/logger'
 
 // TypeScript интерфейсы
 export interface FavoriteItem {
@@ -69,6 +70,13 @@ export const useFavoritesStore = defineStore('favorites', () => {
   
   const hasFavorites = computed(() => favorites.value.length > 0)
   
+  // Для обратной совместимости - список ID мастеров в избранном
+  const favoriteIds = computed(() => 
+    favorites.value
+      .filter(f => f.type === 'master')
+      .map(f => f.itemId)
+  )
+  
   // Actions
   const loadFavorites = async (): Promise<void> => {
     isLoading.value = true
@@ -82,8 +90,14 @@ export const useFavoritesStore = defineStore('favorites', () => {
         lastSyncTime.value = new Date()
       }
     } catch (err: any) {
-      error.value = err.response?.data?.message || 'Ошибка загрузки избранного'
-      console.error('Failed to load favorites:', err)
+      // Молча обрабатываем 404 и 401 ошибки
+      if (err.response?.status === 404 || err.response?.status === 401) {
+        favorites.value = []
+        // Removed console.log in production
+      } else {
+        error.value = err.response?.data?.message || 'Ошибка загрузки избранного'
+        logger.warn('Failed to load favorites:', err.message || err)
+      }
     } finally {
       isLoading.value = false
     }
@@ -114,7 +128,7 @@ export const useFavoritesStore = defineStore('favorites', () => {
       return false
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Ошибка добавления в избранное'
-      console.error('Failed to add to favorites:', err)
+      logger.error('Failed to add to favorites:', err)
       return false
     } finally {
       isLoading.value = false
@@ -139,7 +153,7 @@ export const useFavoritesStore = defineStore('favorites', () => {
         favorites.value.splice(favoriteIndex, 0, removedFavorite)
       }
       error.value = err.response?.data?.message || 'Ошибка удаления из избранного'
-      console.error('Failed to remove from favorites:', err)
+      logger.error('Failed to remove from favorites:', err)
       return false
     }
   }
@@ -154,6 +168,23 @@ export const useFavoritesStore = defineStore('favorites', () => {
   
   const isFavorite = (type: 'master' | 'service' | 'ad', itemId: number): boolean => {
     return favorites.value.some(f => f.type === type && f.itemId === itemId)
+  }
+  
+  // Удобные методы для мастеров (обратная совместимость)
+  const isMasterFavorite = (masterId: number): boolean => {
+    return isFavorite('master', masterId)
+  }
+  
+  const addMasterToFavorites = async (masterId: number, masterData?: any): Promise<boolean> => {
+    return addToFavorites('master', masterId, masterData)
+  }
+  
+  const removeMasterFromFavorites = async (masterId: number): Promise<boolean> => {
+    return removeFromFavorites('master', masterId)
+  }
+  
+  const toggleMasterFavorite = async (masterId: number, masterData?: any): Promise<boolean> => {
+    return toggleFavorite('master', masterId, masterData)
   }
   
   const getFavorite = (type: 'master' | 'service' | 'ad', itemId: number): FavoriteItem | null => {
@@ -173,7 +204,7 @@ export const useFavoritesStore = defineStore('favorites', () => {
       // Откатить изменения
       favorites.value = backupFavorites
       error.value = err.response?.data?.message || 'Ошибка очистки избранного'
-      console.error('Failed to clear favorites:', err)
+      logger.error('Failed to clear favorites:', err)
       return false
     }
   }
@@ -194,7 +225,7 @@ export const useFavoritesStore = defineStore('favorites', () => {
         new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime()
       )
       error.value = err.response?.data?.message || `Ошибка очистки избранного типа ${type}`
-      console.error(`Failed to clear ${type} favorites:`, err)
+      logger.error(`Failed to clear ${type} favorites:`, err)
       return false
     }
   }
@@ -205,7 +236,7 @@ export const useFavoritesStore = defineStore('favorites', () => {
     try {
       await loadFavorites()
     } catch (err) {
-      console.warn('Favorites sync failed:', err)
+      logger.warn('Favorites sync failed:', err)
     }
   }
   
@@ -229,7 +260,7 @@ export const useFavoritesStore = defineStore('favorites', () => {
       return new Blob([response.data], { type: 'application/json' })
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Ошибка экспорта избранного'
-      console.error('Failed to export favorites:', err)
+      logger.error('Failed to export favorites:', err)
       return null
     }
   }
@@ -245,8 +276,8 @@ export const useFavoritesStore = defineStore('favorites', () => {
     lastSyncTime.value = null
   }
   
-  // Инициализация при создании store
-  loadFavorites()
+  // Не загружаем автоматически - API может быть недоступен
+  // loadFavorites() - вызывается вручную когда нужно
   
   return {
     // State
@@ -261,6 +292,7 @@ export const useFavoritesStore = defineStore('favorites', () => {
     favoritesByType,
     recentFavorites,
     hasFavorites,
+    favoriteIds,
     
     // Actions
     loadFavorites,
@@ -269,6 +301,11 @@ export const useFavoritesStore = defineStore('favorites', () => {
     toggleFavorite,
     isFavorite,
     getFavorite,
+    // Для мастеров
+    isMasterFavorite,
+    addMasterToFavorites,
+    removeMasterFromFavorites,
+    toggleMasterFavorite,
     clearAllFavorites,
     clearFavoritesByType,
     syncFavorites,

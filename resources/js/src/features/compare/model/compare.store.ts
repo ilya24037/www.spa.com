@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import axios from 'axios'
+import { logger } from '@/src/shared/utils/logger'
 
 // TypeScript интерфейсы
 export interface CompareItem {
@@ -91,8 +92,14 @@ export const useCompareStore = defineStore('compare', () => {
         lastSyncTime.value = new Date()
       }
     } catch (err: any) {
-      error.value = err.response?.data?.message || 'Ошибка загрузки списка сравнения'
-      console.error('Failed to load compare items:', err)
+      // Молча обрабатываем 404 и 401 ошибки
+      if (err.response?.status === 404 || err.response?.status === 401) {
+        compareItems.value = []
+        // Removed console.log in production
+      } else {
+        error.value = err.response?.data?.message || 'Ошибка загрузки списка сравнения'
+        logger.warn('Failed to load compare items:', err.message || err)
+      }
     } finally {
       isLoading.value = false
     }
@@ -129,7 +136,7 @@ export const useCompareStore = defineStore('compare', () => {
       return false
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Ошибка добавления в сравнение'
-      console.error('Failed to add to compare:', err)
+      logger.error('Failed to add to compare:', err)
       return false
     } finally {
       isLoading.value = false
@@ -154,7 +161,7 @@ export const useCompareStore = defineStore('compare', () => {
         compareItems.value.splice(compareIndex, 0, removedItem)
       }
       error.value = err.response?.data?.message || 'Ошибка удаления из сравнения'
-      console.error('Failed to remove from compare:', err)
+      logger.error('Failed to remove from compare:', err)
       return false
     }
   }
@@ -188,7 +195,7 @@ export const useCompareStore = defineStore('compare', () => {
       // Откатить изменения
       compareItems.value = backupItems
       error.value = err.response?.data?.message || 'Ошибка очистки списка сравнения'
-      console.error('Failed to clear compare:', err)
+      logger.error('Failed to clear compare:', err)
       return false
     }
   }
@@ -209,7 +216,7 @@ export const useCompareStore = defineStore('compare', () => {
         new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime()
       )
       error.value = err.response?.data?.message || `Ошибка очистки сравнения типа ${type}`
-      console.error(`Failed to clear ${type} compare:`, err)
+      logger.error(`Failed to clear ${type} compare:`, err)
       return false
     }
   }
@@ -220,7 +227,7 @@ export const useCompareStore = defineStore('compare', () => {
     try {
       await loadCompareItems()
     } catch (err) {
-      console.warn('Compare sync failed:', err)
+      logger.warn('Compare sync failed:', err)
     }
   }
   
@@ -239,7 +246,7 @@ export const useCompareStore = defineStore('compare', () => {
       return response.data?.report || null
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Ошибка генерации отчета сравнения'
-      console.error('Failed to generate compare report:', err)
+      logger.error('Failed to generate compare report:', err)
       return null
     }
   }
@@ -253,7 +260,7 @@ export const useCompareStore = defineStore('compare', () => {
       return new Blob([response.data], { type: 'application/json' })
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Ошибка экспорта списка сравнения'
-      console.error('Failed to export compare:', err)
+      logger.error('Failed to export compare:', err)
       return null
     }
   }
@@ -269,8 +276,8 @@ export const useCompareStore = defineStore('compare', () => {
     lastSyncTime.value = null
   }
   
-  // Инициализация при создании store
-  loadCompareItems()
+  // Не загружаем автоматически - API может быть недоступен
+  // loadCompareItems() - вызывается вручную когда нужно
   
   return {
     // State

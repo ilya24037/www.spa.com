@@ -1,6 +1,6 @@
 import { ref, computed, type Ref, type ComputedRef } from 'vue'
 import { router } from '@inertiajs/vue3'
-import { useBookingStore } from '@/stores/bookingStore.ts'
+import { useBookingStore } from '@/stores/bookingStore'
 import { useToast } from '@/src/shared/composables/useToast'
 
 interface Master {
@@ -125,14 +125,24 @@ export function useBooking(master: Master, initialService: Service | null = null
         isCreating.value = true
         
         try {
-            await bookingStore.createBooking({
-                master_profile_id: master.id,
+            const bookingData: BookingData = {
+                master_id: master.id,
                 service_id: selectedService.value!.id,
-                booking_date: selectedDateTime.value!.datetime.split('T')[0],
-                booking_time: selectedDateTime.value!.datetime.split('T')[1],
-                client_comment: clientComment.value,
-                price: totalPrice.value
-            })
+                datetime: selectedDateTime.value!.datetime,
+                client_comment: clientComment.value || undefined
+            }
+            
+            await bookingStore.createBooking({
+                master_id: bookingData.master_id,
+                service_id: bookingData.service_id,
+                start_time: bookingData.datetime,
+                duration_minutes: selectedService.value!.duration || 60,
+                total_price: totalPrice.value,
+                client_name: bookingData.client_comment ? 'Клиент' : '', // TODO: получать из формы пользователя
+                client_phone: '', // TODO: получать из профиля пользователя или формы
+                client_email: undefined,
+                notes: bookingData.client_comment
+            } as any)
             
             showSuccess('Бронирование успешно создано! Ожидайте подтверждения от мастера.')
             
@@ -162,8 +172,8 @@ export function useBooking(master: Master, initialService: Service | null = null
         showConfirmModal.value = false
     }
     
-    const calculateEndTime = (startTime, duration) => {
-        const [hours, minutes] = startTime.split(':').map(Number)
+    const calculateEndTime = (startTime: string, duration: number) => {
+        const [hours = 0, minutes = 0] = startTime.split(':').map(Number)
         const totalMinutes = hours * 60 + minutes + duration
         
         const endHours = Math.floor(totalMinutes / 60)
@@ -172,7 +182,7 @@ export function useBooking(master: Master, initialService: Service | null = null
         return `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`
     }
     
-    const formatPrice = (price) => {
+    const formatPrice = (price: number) => {
         return new Intl.NumberFormat('ru-RU', {
             style: 'currency',
             currency: 'RUB',
@@ -181,7 +191,7 @@ export function useBooking(master: Master, initialService: Service | null = null
         }).format(price)
     }
     
-    const formatDuration = (minutes) => {
+    const formatDuration = (minutes: number) => {
         const hours = Math.floor(minutes / 60)
         const mins = minutes % 60
         

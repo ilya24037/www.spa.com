@@ -2,4 +2,4 @@
 export { default as QuickNavigation } from './QuickNavigation.vue'
 
 // Re-export types
-// export type { NavigationLink, Props as QuickNavigationProps } from './QuickNavigation.vue'
+export type { NavigationLink, QuickNavigationProps } from './QuickNavigation.types'

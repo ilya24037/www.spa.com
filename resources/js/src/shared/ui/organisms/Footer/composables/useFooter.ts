@@ -63,9 +63,9 @@ export function useFooter(initialConfig?: Partial<FooterConfig>): UseFooterRetur
     
     // Сохраняем в localStorage
     try {
-      localStorage.setItem('accessibility-mode', globalAccessibilityEnabled.value.toString())
-    } catch (error) {
-      console.warn('Не удалось сохранить настройки доступности:', error)
+      window.localStorage.setItem('accessibility-mode', globalAccessibilityEnabled.value.toString())
+    } catch (_error) {
+      // Не удалось сохранить настройки доступности
     }
   }
 
@@ -180,7 +180,7 @@ function showAccessibilityNotification(): void {
   document.body.appendChild(notification)
   
   // Показываем уведомление
-  requestAnimationFrame(() => {
+  window.requestAnimationFrame(() => {
     notification.style.transform = 'translateY(0)'
     notification.style.opacity = '1'
   })
@@ -200,13 +200,13 @@ function showAccessibilityNotification(): void {
 // Инициализируем настройки доступности при загрузке
 if (typeof window !== 'undefined') {
   try {
-    const saved = localStorage.getItem('accessibility-mode')
+    const saved = window.localStorage.getItem('accessibility-mode')
     if (saved === 'true') {
       globalAccessibilityEnabled.value = true
       // Применяем настройки после загрузки DOM
       document.addEventListener('DOMContentLoaded', enableAccessibilityMode)
     }
   } catch (error) {
-    console.warn('Не удалось загрузить настройки доступности:', error)
+    // Не удалось загрузить настройки доступности
   }
 }

@@ -1,6 +1,6 @@
 <template>
   <!-- ProfileLayout: Layout для личного кабинета -->
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen bg-gray-500">
     <div class="max-w-7xl mx-auto p-6">
       <div class="flex gap-6">
         <!-- Боковая панель профиля -->
@@ -27,23 +27,23 @@ import ProfileSidebar from './ProfileSidebar.vue'
 
 // Props
 const props = defineProps({
-  user: {
-    type: Object,
-    required: true
-  },
-  counts: {
-    type: Object,
-    default: () => ({
-      ads: 0,
-      bookings: 0,
-      reviews: 0,
-      favorites: 0
-    })
-  },
-  activeTab: {
-    type: String,
-    default: 'ads'
-  }
+    user: {
+        type: Object,
+        required: true
+    },
+    counts: {
+        type: Object,
+        default: () => ({
+            ads: 0,
+            bookings: 0,
+            reviews: 0,
+            favorites: 0
+        })
+    },
+    activeTab: {
+        type: String,
+        default: 'ads'
+    }
 })
 
 // Events
@@ -51,7 +51,7 @@ const emit = defineEmits(['tab-change'])
 
 // Methods
 const handleTabChange = (tab) => {
-  emit('tab-change', tab)
+    emit('tab-change', tab)
 }
 </script>
 

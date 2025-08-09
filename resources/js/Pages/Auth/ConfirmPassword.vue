@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { route } from 'ziggy-js'
 
-import AppLayout from '@/Layouts/AppLayout.vue'
 import { InputError, InputLabel, PrimaryButton, TextInput } from '@/src/shared/ui/atoms'
 import { Head, useForm } from '@inertiajs/vue3';
 
@@ -10,7 +9,7 @@ interface ConfirmPasswordForm {
 }
 
 const form = useForm<ConfirmPasswordForm>({
-  password: '',
+    password: '',
 })
 
 const submit = (): void => {
@@ -21,40 +20,40 @@ const submit = (): void => {
 </script>
 
 <template>
-    <AppLayout>
-        <Head title="Confirm Password" />
+  <div>
+    <Head title="Confirm Password" />
 
-        <div class="mb-4 text-sm text-gray-600">
-            This is a secure area of the application. Please confirm your
-            password before continuing.
-        </div>
+    <div class="mb-4 text-sm text-gray-500">
+      This is a secure area of the application. Please confirm your
+      password before continuing.
+    </div>
 
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="password" value="Password" />
-                <TextInput
-                    id="password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password"
-                    required
-                    autocomplete="current-password"
-                    autofocus
-                />
-                <InputError class="mt-2" :message="form.errors.password" />
-            </div>
+    <form @submit.prevent="submit">
+      <div>
+        <InputLabel for="password" value="Password" />
+        <TextInput
+          id="password"
+          v-model="form.password"
+          type="password"
+          class="mt-1 block w-full"
+          required
+          autocomplete="current-password"
+          autofocus
+        />
+        <InputError class="mt-2" :message="form.errors.password" />
+      </div>
 
-            <div class="mt-4 flex justify-end">
-                <PrimaryButton
-                    class="ms-4"
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                >
-                    Confirm
-                </PrimaryButton>
-            </div>
-        </form>
-    </AppLayout>
+      <div class="mt-4 flex justify-end">
+        <PrimaryButton
+          class="ms-4"
+          :class="{ 'opacity-25': form.processing }"
+          :disabled="form.processing"
+        >
+          Confirm
+        </PrimaryButton>
+      </div>
+    </form>
+  </div>
 </template>
 
 

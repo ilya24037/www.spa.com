@@ -17,9 +17,9 @@ export interface LoadingState<T = any> {
  * await execute(() => api.getUser(id))
  */
 export function useLoadingState<T = any>(initialData: T | null = null): LoadingState<T> {
-  const isLoading = ref(false)
+  const isLoading = ref<boolean>(false)
   const error = ref<Error | null>(null)
-  const data = ref<T | null>(initialData)
+  const data = ref(initialData) as Ref<T | null>
 
   const execute = async (fn: () => Promise<T>): Promise<T | undefined> => {
     isLoading.value = true

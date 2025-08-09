@@ -1,7 +1,6 @@
 import { ref, computed, watch, readonly } from 'vue'
 import type {
   CalendarState,
-  CalendarNavigation,
   CalendarDay,
   DateBookingInfo,
   DateAvailabilityStatus,
@@ -30,7 +29,7 @@ export function useCalendar(props: BookingCalendarProps) {
   const weekDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
 
   // Навигация календаря
-  const navigation = computed<CalendarNavigation>(() => {
+  const navigation = computed(() => {
     const currentDate = new Date(state.value.currentYear, state.value.currentMonth, 1)
     const minDate = props.minDate ? new Date(props.minDate) : new Date()
     const maxDate = props.maxDate ? new Date(props.maxDate) : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)

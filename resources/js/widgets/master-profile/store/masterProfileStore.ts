@@ -4,15 +4,14 @@
  */
 
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, readonly } from 'vue'
 import type { 
-  MasterProfile, 
   MasterProfileWidgetState, 
   MasterProfileFilters,
-  MasterService,
-  MasterPhoto
+  MasterService
 } from '../types/masterProfile.types'
 import { MasterProfileWidgetApi } from '../api/masterProfileApi'
+import { logger } from '@/src/shared/utils/logger'
 
 export const useMasterProfileWidgetStore = defineStore('master-profile-widget', () => {
   // === СОСТОЯНИЕ ===
@@ -62,7 +61,7 @@ export const useMasterProfileWidgetStore = defineStore('master-profile-widget', 
       
     } catch (error) {
       state.value.error = error instanceof Error ? error.message : 'Ошибка загрузки'
-      console.error('[MasterProfileWidget] Load error:', error)
+      logger.error('[MasterProfileWidget] Load error:', error)
       
       // Изолированная обработка ошибок
       trackWidgetEvent('master_profile_error', { masterId, error: state.value.error })

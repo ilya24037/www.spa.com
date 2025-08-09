@@ -3,27 +3,36 @@
     <!-- Loading state -->
     <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <div v-for="i in 6" :key="i" class="animate-pulse">
-        <div class="h-32 bg-gray-200 rounded-lg"></div>
+        <div class="h-32 bg-gray-500 rounded-lg" />
       </div>
     </div>
     
     <!-- Error state -->
     <div v-else-if="error" class="text-center py-8">
-      <p class="text-red-500 mb-4">{{ error }}</p>
-      <button @click="$emit('retry')" class="px-4 py-2 bg-blue-600 text-white rounded-lg">
+      <p class="text-red-500 mb-4">
+        {{ error }}
+      </p>
+      <button class="px-4 py-2 bg-blue-600 text-white rounded-lg" @click="$emit('retry')">
         Попробовать снова
       </button>
     </div>
     
     <!-- Empty state -->
     <div v-else-if="!items || items.length === 0" class="text-center py-12">
-      <p class="text-gray-500 mb-4">{{ emptyMessage }}</p>
+      <p class="text-gray-500 mb-4">
+        {{ emptyMessage }}
+      </p>
       <slot name="empty" />
     </div>
     
     <!-- List -->
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <slot v-for="item in items" :key="item.id" name="item" :item="item">
+      <slot
+        v-for="item in items"
+        :key="item.id"
+        name="item"
+        :item="item"
+      >
         <div class="p-4 bg-white rounded-lg shadow">
           {{ item }}
         </div>
@@ -48,12 +57,12 @@ interface Props {
 }
 
 withDefaults(defineProps<Props>(), {
-  items: () => [],
-  loading: false,
-  error: '',
-  emptyMessage: 'Нет данных для отображения',
-  showPagination: false,
-  totalPages: 1
+    items: () => [],
+    loading: false,
+    error: '',
+    emptyMessage: 'Нет данных для отображения',
+    showPagination: false,
+    totalPages: 1
 })
 
 defineEmits<{

@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed, type Ref } from 'vue'
 import { router } from '@inertiajs/vue3'
 import axios from 'axios'
+import { logger } from '@/src/shared/utils/logger'
 
 // TypeScript интерфейсы
 export interface User {
@@ -153,7 +154,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       await axios.post('/api/auth/logout')
     } catch (err) {
-      console.warn('Logout request failed:', err)
+      logger.warn('Logout request failed:', err)
     }
     
     // Очистить состояние
@@ -187,7 +188,7 @@ export const useAuthStore = defineStore('auth', () => {
       // Токен недействителен
       localStorage.removeItem('auth_token')
       delete axios.defaults.headers.common['Authorization']
-      console.warn('Failed to fetch user:', err)
+      logger.warn('Failed to fetch user:', err)
     }
   }
   

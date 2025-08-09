@@ -3,7 +3,8 @@
  */
 
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, readonly } from 'vue'
+import { logger } from '@/src/shared/utils/logger'
 import type { 
   CatalogItem, 
   CatalogFilter, 
@@ -73,7 +74,7 @@ export const useCatalogWidgetStore = defineStore('catalog-widget', () => {
       
     } catch (error) {
       state.value.error = error instanceof Error ? error.message : 'Ошибка загрузки каталога'
-      console.error('[CatalogWidget] Load error:', error)
+      logger.error('[CatalogWidget] Load error:', error)
     } finally {
       state.value.isLoading = false
     }
@@ -141,23 +142,23 @@ export const useCatalogWidgetStore = defineStore('catalog-widget', () => {
 
   function getRandomMassageType(): string {
     const types = ['релаксационный', 'лечебный', 'спортивный', 'антицеллюлитный', 'лимфодренажный']
-    return types[Math.floor(Math.random() * types.length)]
+    return types[Math.floor(Math.random() * types.length)] || 'релаксационный'
   }
 
   function getRandomCategory(): string {
     const categories = ['massage', 'spa', 'beauty', 'wellness']
-    return categories[Math.floor(Math.random() * categories.length)]
+    return categories[Math.floor(Math.random() * categories.length)] || 'massage'
   }
 
   function getRandomLocation(): string {
     const locations = ['Москва', 'СПб', 'Казань', 'Новосибирск', 'Екатеринбург']
-    return locations[Math.floor(Math.random() * locations.length)]
+    return locations[Math.floor(Math.random() * locations.length)] || 'Москва'
   }
 
   /**
    * Отслеживание событий виджета
    */
-  function trackWidgetEvent(event: string, data: any) {
+  function trackWidgetEvent(event: string, data: Record<string, unknown>) {
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('widget-analytics', {
         detail: {

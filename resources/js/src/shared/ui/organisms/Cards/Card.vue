@@ -14,7 +14,9 @@
     <!-- Р—Р°РіРѕР»РѕРІРѕРє РєР°СЂС‚РѕС‡РєРё -->
     <div v-if="$slots.header || title" class="card-header">
       <slot name="header">
-        <h3 v-if="title" class="card-title">{{ title }}</h3>
+        <h3 v-if="title" class="card-title">
+          {{ title }}
+        </h3>
       </slot>
     </div>
 
@@ -35,11 +37,11 @@ import { computed } from 'vue'
 import type { CardProps } from './Card.types'
 
 const props = withDefaults(defineProps<CardProps>(), {
-  variant: 'default',
-  size: 'medium',
-  hoverable: false,
-  loading: false,
-  disabled: false
+    variant: 'default',
+    size: 'medium',
+    hoverable: false,
+    loading: false,
+    disabled: false
 })
 
 const emit = defineEmits<{
@@ -47,21 +49,21 @@ const emit = defineEmits<{
 }>()
 
 const cardClasses = computed(() => [
-  'card',
-  `card--${props.variant}`,
-  `card--${props.size}`,
-  props.customClass,
-  {
-    'card--hoverable': props.hoverable && !props.disabled && !props.loading,
-    'card--loading': props.loading,
-    'card--disabled': props.disabled
-  }
+    'card',
+    `card--${props.variant}`,
+    `card--${props.size}`,
+    props.customClass,
+    {
+        'card--hoverable': props.hoverable && !props.disabled && !props.loading,
+        'card--loading': props.loading,
+        'card--disabled': props.disabled
+    }
 ])
 
 const handleClick = (event: MouseEvent) => {
-  if (!props.disabled && !props.loading) {
-    emit('click', event)
-  }
+    if (!props.disabled && !props.loading) {
+        emit('click', event)
+    }
 }
 </script>
 

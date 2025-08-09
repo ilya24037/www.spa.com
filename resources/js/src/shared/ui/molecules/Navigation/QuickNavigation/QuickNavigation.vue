@@ -8,9 +8,9 @@
     <!-- РћР±С‹С‡РЅС‹Рµ СЃСЃС‹Р»РєРё -->
     <template v-if="!loading">
       <component
+        :is="link.external ? 'a' : Link"
         v-for="link in visibleLinks"
         :key="link.href"
-        :is="link.external ? 'a' : Link"
         :href="link.href"
         :target="link.external ? '_blank' : undefined"
         :rel="link.external ? 'noopener noreferrer' : undefined"
@@ -20,8 +20,8 @@
       >
         <!-- РРєРѕРЅРєР° (РµСЃР»Рё РµСЃС‚СЊ) -->
         <component
-          v-if="link.icon"
           :is="link.icon"
+          v-if="link.icon"
           :class="iconClasses"
           aria-hidden="true"
         />
@@ -49,7 +49,12 @@
           viewBox="0 0 24 24"
           aria-hidden="true"
         >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+          />
         </svg>
       </component>
       
@@ -58,9 +63,9 @@
         v-if="hasMoreLinks"
         type="button"
         :class="moreButtonClasses"
-        @click="toggleShowAll"
         :aria-expanded="showAll"
         :aria-label="showAll ? 'РЎРєСЂС‹С‚СЊ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ СЃСЃС‹Р»РєРё' : 'РџРѕРєР°Р·Р°С‚СЊ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ СЃСЃС‹Р»РєРё'"
+        @click="toggleShowAll"
       >
         <span>{{ showAll ? 'РЎРєСЂС‹С‚СЊ' : `+${hiddenLinksCount}` }}</span>
         <svg
@@ -70,7 +75,12 @@
           viewBox="0 0 24 24"
           aria-hidden="true"
         >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="showAll ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            :d="showAll ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'"
+          />
         </svg>
       </button>
     </template>
@@ -131,27 +141,27 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  links: () => [
-    { href: '/masters', text: 'Р’СЃРµ РјР°СЃС‚РµСЂР°', priority: 1 },
-    { href: '/services/massage', text: 'РњР°СЃСЃР°Р¶', priority: 2 },
-    { href: '/services/spa', text: 'РЎРџРђ', priority: 3 },
-    { href: '/services/cosmetology', text: 'РљРѕСЃРјРµС‚РѕР»РѕРіРёСЏ', priority: 4 },
-    { href: '/services/at-home', text: 'РќР° РґРѕРјСѓ', priority: 5 },
-    { href: '/gift-certificates', text: 'РЎРµСЂС‚РёС„РёРєР°С‚С‹', priority: 6 }
-  ],
-  variant: 'horizontal',
-  size: 'medium',
-  maxVisible: 6,
-  showExternalIcon: true,
-  showActivityIndicator: false,
-  loading: false,
-  skeletonCount: 5,
-  customClass: '',
-  linkClass: '',
-  activeClass: '',
-  ariaLabel: 'Р‘С‹СЃС‚СЂР°СЏ РЅР°РІРёРіР°С†РёСЏ',
-  compact: false,
-  responsive: true
+    links: () => [
+        { href: '/masters', text: 'Р’СЃРµ РјР°СЃС‚РµСЂР°', priority: 1 },
+        { href: '/services/massage', text: 'РњР°СЃСЃР°Р¶', priority: 2 },
+        { href: '/services/spa', text: 'РЎРџРђ', priority: 3 },
+        { href: '/services/cosmetology', text: 'РљРѕСЃРјРµС‚РѕР»РѕРіРёСЏ', priority: 4 },
+        { href: '/services/at-home', text: 'РќР° РґРѕРјСѓ', priority: 5 },
+        { href: '/gift-certificates', text: 'РЎРµСЂС‚РёС„РёРєР°С‚С‹', priority: 6 }
+    ],
+    variant: 'horizontal',
+    size: 'medium',
+    maxVisible: 6,
+    showExternalIcon: true,
+    showActivityIndicator: false,
+    loading: false,
+    skeletonCount: 5,
+    customClass: '',
+    linkClass: '',
+    activeClass: '',
+    ariaLabel: 'Р‘С‹СЃС‚СЂР°СЏ РЅР°РІРёРіР°С†РёСЏ',
+    compact: false,
+    responsive: true
 })
 
 // TypeScript С‚РёРїРёР·Р°С†РёСЏ emits
@@ -168,160 +178,160 @@ const activeIndicatorOffset = ref(0)
 
 // Computed
 const sortedLinks = computed(() => 
-  props.links
-    .filter(link => link.visible !== false && !link.disabled)
-    .sort((a, b) => (a.priority || 999) - (b.priority || 999))
+    props.links
+        .filter(link => link.visible !== false && !link.disabled)
+        .sort((a, b) => (a.priority || 999) - (b.priority || 999))
 )
 
 const visibleLinks = computed(() => {
-  if (showAll.value || props.maxVisible <= 0) {
-    return sortedLinks.value
-  }
-  return sortedLinks.value.slice(0, props.maxVisible)
+    if (showAll.value || props.maxVisible <= 0) {
+        return sortedLinks.value
+    }
+    return sortedLinks.value.slice(0, props.maxVisible)
 })
 
 const hiddenLinksCount = computed(() => 
-  Math.max(0, sortedLinks.value.length - props.maxVisible)
+    Math.max(0, sortedLinks.value.length - props.maxVisible)
 )
 
 const hasMoreLinks = computed(() => 
-  !showAll.value && hiddenLinksCount.value > 0 && props.maxVisible > 0
+    !showAll.value && hiddenLinksCount.value > 0 && props.maxVisible > 0
 )
 
 const navigationClasses = computed(() => [
-  'relative flex transition-all duration-200',
-  {
+    'relative flex transition-all duration-200',
+    {
     // Variant styles
-    'items-center gap-6': props.variant === 'horizontal',
-    'flex-col items-start gap-2': props.variant === 'vertical',
-    'flex-col': props.variant === 'dropdown',
+        'items-center gap-6': props.variant === 'horizontal',
+        'flex-col items-start gap-2': props.variant === 'vertical',
+        'flex-col': props.variant === 'dropdown',
     
-    // Size styles  
-    'text-xs gap-3': props.size === 'small',
-    'text-sm gap-4': props.size === 'medium',
-    'text-base gap-6': props.size === 'large',
+        // Size styles  
+        'text-xs gap-3': props.size === 'small',
+        'text-sm gap-4': props.size === 'medium',
+        'text-base gap-6': props.size === 'large',
     
-    // Responsive
-    'flex-wrap': props.responsive && props.variant === 'horizontal',
+        // Responsive
+        'flex-wrap': props.responsive && props.variant === 'horizontal',
     
-    // Compact
-    'gap-2': props.compact
-  },
-  props.customClass
+        // Compact
+        'gap-2': props.compact
+    },
+    props.customClass
 ])
 
 const linkClasses = (link: NavigationLink) => [
-  'inline-flex items-center transition-all duration-200 relative',
-  'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md',
-  {
+    'inline-flex items-center transition-all duration-200 relative',
+    'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md',
+    {
     // Base styles
-    'text-gray-700 hover:text-blue-600': !link.active,
-    'text-blue-600 font-medium': link.active,
+        'text-gray-500 hover:text-blue-600': !link.active,
+        'text-blue-600 font-medium': link.active,
     
-    // Size variants
-    'px-2 py-1': props.size === 'small',
-    'px-3 py-1.5': props.size === 'medium',
-    'px-4 py-2': props.size === 'large',
+        // Size variants
+        'px-2 py-1': props.size === 'small',
+        'px-3 py-1.5': props.size === 'medium',
+        'px-4 py-2': props.size === 'large',
     
-    // Compact mode
-    'px-1 py-0.5': props.compact,
+        // Compact mode
+        'px-1 py-0.5': props.compact,
     
-    // Disabled state
-    'opacity-50 cursor-not-allowed pointer-events-none': link.disabled
-  },
-  props.linkClass,
-  link.active ? props.activeClass : ''
+        // Disabled state
+        'opacity-50 cursor-not-allowed pointer-events-none': link.disabled
+    },
+    props.linkClass,
+    link.active ? props.activeClass : ''
 ]
 
 const iconClasses = computed(() => [
-  'transition-colors duration-200',
-  {
-    'w-3 h-3 mr-1': props.size === 'small',
-    'w-4 h-4 mr-1.5': props.size === 'medium',
-    'w-5 h-5 mr-2': props.size === 'large'
-  }
+    'transition-colors duration-200',
+    {
+        'w-3 h-3 mr-1': props.size === 'small',
+        'w-4 h-4 mr-1.5': props.size === 'medium',
+        'w-5 h-5 mr-2': props.size === 'large'
+    }
 ])
 
 const textClasses = computed(() => [
-  'transition-colors duration-200',
-  {
-    'hidden sm:inline': props.responsive && props.compact
-  }
+    'transition-colors duration-200',
+    {
+        'hidden sm:inline': props.responsive && props.compact
+    }
 ])
 
 const badgeClasses = computed(() => [
-  'ml-1.5 px-1.5 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full',
-  'min-w-[1.25rem] h-5 flex items-center justify-center leading-none'
+    'ml-1.5 px-1.5 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full',
+    'min-w-[1.25rem] h-5 flex items-center justify-center leading-none'
 ])
 
 const moreButtonClasses = computed(() => [
-  'inline-flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors duration-200',
-  'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md',
-  {
-    'px-2 py-1 text-xs': props.size === 'small',
-    'px-3 py-1.5 text-sm': props.size === 'medium', 
-    'px-4 py-2 text-base': props.size === 'large'
-  }
+    'inline-flex items-center gap-1 text-gray-500 hover:text-blue-600 transition-colors duration-200',
+    'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md',
+    {
+        'px-2 py-1 text-xs': props.size === 'small',
+        'px-3 py-1.5 text-sm': props.size === 'medium', 
+        'px-4 py-2 text-base': props.size === 'large'
+    }
 ])
 
 const moreIconClasses = computed(() => [
-  'w-3 h-3 transition-transform duration-200',
-  {
-    'rotate-180': showAll.value
-  }
+    'w-3 h-3 transition-transform duration-200',
+    {
+        'rotate-180': showAll.value
+    }
 ])
 
 const skeletonClasses = computed(() => [
-  'bg-gray-200 rounded animate-pulse',
-  {
-    'h-4 w-16': props.size === 'small',
-    'h-5 w-20': props.size === 'medium',
-    'h-6 w-24': props.size === 'large'
-  }
+    'bg-gray-500 rounded animate-pulse',
+    {
+        'h-4 w-16': props.size === 'small',
+        'h-5 w-20': props.size === 'medium',
+        'h-6 w-24': props.size === 'large'
+    }
 ])
 
 // Methods
 const handleLinkClick = (link: NavigationLink, event?: Event): void => {
-  if (link.disabled) {
-    event?.preventDefault()
-    return
-  }
+    if (link.disabled) {
+        event?.preventDefault()
+        return
+    }
   
-  activeLink.value = link
-  emit('link-click', link, event!)
+    activeLink.value = link
+    emit('link-click', link, event!)
 }
 
 const toggleShowAll = (): void => {
-  showAll.value = !showAll.value
-  emit('toggle-show-all', showAll.value)
+    showAll.value = !showAll.value
+    emit('toggle-show-all', showAll.value)
 }
 
 const formatBadge = (badge: number | string): string => {
-  if (typeof badge === 'number') {
-    return badge > 99 ? '99+' : badge.toString()
-  }
-  return badge
+    if (typeof badge === 'number') {
+        return badge > 99 ? '99+' : badge.toString()
+    }
+    return badge
 }
 
 const updateActiveIndicator = async (): Promise<void> => {
-  if (!props.showActivityIndicator || !activeLink.value) return
+    if (!props.showActivityIndicator || !activeLink.value) return
   
-  await nextTick()
-  // Р—РґРµСЃСЊ РјРѕР¶РЅРѕ РґРѕР±Р°РІРёС‚СЊ Р»РѕРіРёРєСѓ СЂР°СЃС‡РµС‚Р° РїРѕР·РёС†РёРё Р°РєС‚РёРІРЅРѕРіРѕ РёРЅРґРёРєР°С‚РѕСЂР°
+    await nextTick()
+    // Р—РґРµСЃСЊ РјРѕР¶РЅРѕ РґРѕР±Р°РІРёС‚СЊ Р»РѕРіРёРєСѓ СЂР°СЃС‡РµС‚Р° РїРѕР·РёС†РёРё Р°РєС‚РёРІРЅРѕРіРѕ РёРЅРґРёРєР°С‚РѕСЂР°
 }
 
 // Lifecycle
 onMounted(() => {
-  // РќР°Р№С‚Рё Р°РєС‚РёРІРЅСѓСЋ СЃСЃС‹Р»РєСѓ РїСЂРё РјРѕРЅС‚РёСЂРѕРІР°РЅРёРё
-  const currentActive = props.links.find(link => link.active)
-  if (currentActive) {
-    activeLink.value = currentActive
-    updateActiveIndicator()
-  }
+    // РќР°Р№С‚Рё Р°РєС‚РёРІРЅСѓСЋ СЃСЃС‹Р»РєСѓ РїСЂРё РјРѕРЅС‚РёСЂРѕРІР°РЅРёРё
+    const currentActive = props.links.find(link => link.active)
+    if (currentActive) {
+        activeLink.value = currentActive
+        updateActiveIndicator()
+    }
 })
 
 onUnmounted(() => {
-  // Cleanup РµСЃР»Рё РЅРµРѕР±С…РѕРґРёРјРѕ
+    // Cleanup РµСЃР»Рё РЅРµРѕР±С…РѕРґРёРјРѕ
 })
 </script>
 
@@ -365,11 +375,11 @@ onUnmounted(() => {
 
 /* Dark mode РїРѕРґРґРµСЂР¶РєР° */
 @media (prefers-color-scheme: dark) {
-  .text-gray-700 {
+  .text-gray-500 {
     color: theme('colors.gray.200');
   }
   
-  .text-gray-600 {
+  .text-gray-500 {
     color: theme('colors.gray.300');
   }
   
@@ -377,7 +387,7 @@ onUnmounted(() => {
     color: theme('colors.blue.400');
   }
   
-  .bg-gray-200 {
+  .bg-gray-500 {
     background-color: theme('colors.gray.700');
   }
 }

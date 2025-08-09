@@ -1,8 +1,12 @@
 <!-- resources/js/src/entities/ad/ui/AdForm/components/AdFormCommercialInfo.vue -->
 <template>
   <div :class="SECTION_CLASSES">
-    <h3 :class="TITLE_CLASSES">Коммерческая информация</h3>
-    <p :class="SUBTITLE_CLASSES">Цены, услуги, график работы и условия оплаты</p>
+    <h3 :class="TITLE_CLASSES">
+      Коммерческая информация
+    </h3>
+    <p :class="SUBTITLE_CLASSES">
+      Цены, услуги, график работы и условия оплаты
+    </p>
     
     <div :class="FIELDS_CONTAINER_CLASSES">
       <!-- Цены -->
@@ -33,14 +37,14 @@ import AdFormPayment from './AdFormPayment.vue'
 
 // 🎯 Стили согласно дизайн-системе
 const SECTION_CLASSES = 'space-y-6'
-const TITLE_CLASSES = 'text-xl font-semibold text-gray-900'
-const SUBTITLE_CLASSES = 'text-sm text-gray-600'
+const TITLE_CLASSES = 'text-xl font-semibold text-gray-500'
+const SUBTITLE_CLASSES = 'text-sm text-gray-500'
 const FIELDS_CONTAINER_CLASSES = 'space-y-6'
 
 defineProps({
-  errors: {
-    type: Object,
-    default: () => ({})
-  }
+    errors: {
+        type: Object,
+        default: () => ({})
+    }
 })
 </script>

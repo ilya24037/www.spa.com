@@ -6,7 +6,7 @@
     @click="handleClick"
   >
     <!-- РРєРѕРЅРєР° Р·Р°РіСЂСѓР·РєРё -->
-    <span v-if="loading" class="loading-spinner"></span>
+    <span v-if="loading" class="loading-spinner" />
     
     <!-- РРєРѕРЅРєР° РєРЅРѕРїРєРё -->
     <span v-if="!loading && $slots.icon" class="button-icon">
@@ -24,55 +24,55 @@
 import { computed } from 'vue'
 
 const props = defineProps({
-  variant: {
-    type: String,
-    default: 'primary',
-    validator: (value) => ['primary', 'secondary', 'success', 'danger', 'ghost'].includes(value)
-  },
-  size: {
-    type: String,
-    default: 'medium',
-    validator: (value) => ['small', 'medium', 'large'].includes(value)
-  },
-  type: {
-    type: String,
-    default: 'button'
-  },
-  disabled: {
-    type: Boolean,
-    default: false
-  },
-  loading: {
-    type: Boolean,
-    default: false
-  },
-  text: {
-    type: String,
-    default: ''
-  },
-  fullWidth: {
-    type: Boolean,
-    default: false
-  }
+    variant: {
+        type: String,
+        default: 'primary',
+        validator: (value) => ['primary', 'secondary', 'success', 'danger', 'ghost'].includes(value)
+    },
+    size: {
+        type: String,
+        default: 'medium',
+        validator: (value) => ['small', 'medium', 'large'].includes(value)
+    },
+    type: {
+        type: String,
+        default: 'button'
+    },
+    disabled: {
+        type: Boolean,
+        default: false
+    },
+    loading: {
+        type: Boolean,
+        default: false
+    },
+    text: {
+        type: String,
+        default: ''
+    },
+    fullWidth: {
+        type: Boolean,
+        default: false
+    }
 })
 
 const emit = defineEmits(['click'])
 
 const buttonClasses = computed(() => [
-  'action-button',
-  `action-button--${props.variant}`,
-  `action-button--${props.size}`,
-  {
-    'action-button--disabled': props.disabled,
-    'action-button--loading': props.loading,
-    'action-button--full-width': props.fullWidth
-  }
+    'action-button',
+    `action-button--${props.variant}`,
+    `action-button--${props.size}`,
+    {
+        'action-button--disabled': props.disabled,
+        'action-button--loading': props.loading,
+        'action-button--full-width': props.fullWidth
+    }
 ])
 
 const handleClick = (event) => {
-  if (!props.disabled && !props.loading) {
-    emit('click', event)
-  }
+    if (!props.disabled && !props.loading) {
+        emit('click', event)
+    }
 }
 </script>
 

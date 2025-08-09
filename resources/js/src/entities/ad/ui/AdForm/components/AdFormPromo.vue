@@ -1,7 +1,7 @@
 <template>
   <div>
-    <label class="block text-sm font-medium text-gray-700">Промо</label>
-    <textarea class="mt-1 block w-full rounded-md border-gray-300" rows="3"></textarea>
+    <label class="block text-sm font-medium text-gray-500">Промо</label>
+    <textarea class="mt-1 block w-full rounded-md border-gray-500" rows="3" />
   </div>
 </template>
 

@@ -160,7 +160,9 @@
       "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" -l \"C:\\www.spa.com\\app\\Domain\\Search\\Sorters\\RatingSorter.php\")",
       "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" -l \"C:\\www.spa.com\\app\\Domain\\Search\\Sorters\\PriceSorter.php\")",
       "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" -l \"C:\\www.spa.com\\app\\Domain\\Search\\Sorters\\DistanceSorter.php\")",
-      "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" -l \"C:\\www.spa.com\\app\\Domain\\Search\\Sorters\\PopularitySorter.php\")"
+      "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" -l \"C:\\www.spa.com\\app\\Domain\\Search\\Sorters\\PopularitySorter.php\")",
+      "WebFetch(domain:habr.com)",
+      "Bash(C:www.spa.comai-context-ru.bat)"
     ],
     "deny": []
   }

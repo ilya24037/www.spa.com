@@ -5,7 +5,11 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use App\Infrastructure\Search\ElasticsearchClient;
 use App\Infrastructure\Search\Indexers\AdIndexer;
+use App\Infrastructure\Search\Indexers\AdDocumentTransformer;
+use App\Infrastructure\Search\Indexers\AdIndexMappings;
 use App\Infrastructure\Search\Indexers\MasterIndexer;
+use App\Infrastructure\Search\Transformers\MasterDocumentTransformer;
+use App\Infrastructure\Search\Calculators\MasterScoreCalculator;
 use Illuminate\Console\Scheduling\Schedule;
 
 class ElasticsearchServiceProvider extends ServiceProvider
@@ -26,13 +30,39 @@ class ElasticsearchServiceProvider extends ServiceProvider
             return new ElasticsearchClient();
         });
 
+        // Регистрируем зависимости для индексаторов
+        $this->app->singleton(AdDocumentTransformer::class, function ($app) {
+            return new AdDocumentTransformer();
+        });
+
+        $this->app->singleton(AdIndexMappings::class, function ($app) {
+            return new AdIndexMappings();
+        });
+
+        // Регистрируем зависимости для MasterIndexer
+        $this->app->singleton(MasterDocumentTransformer::class, function ($app) {
+            return new MasterDocumentTransformer();
+        });
+
+        $this->app->singleton(MasterScoreCalculator::class, function ($app) {
+            return new MasterScoreCalculator();
+        });
+
         // Регистрируем индексаторы
         $this->app->singleton(AdIndexer::class, function ($app) {
-            return new AdIndexer($app->make(ElasticsearchClient::class));
+            return new AdIndexer(
+                $app->make(ElasticsearchClient::class),
+                $app->make(AdDocumentTransformer::class),
+                $app->make(AdIndexMappings::class)
+            );
         });
 
         $this->app->singleton(MasterIndexer::class, function ($app) {
-            return new MasterIndexer($app->make(ElasticsearchClient::class));
+            return new MasterIndexer(
+                $app->make(ElasticsearchClient::class),
+                $app->make(MasterDocumentTransformer::class),
+                $app->make(MasterScoreCalculator::class)
+            );
         });
 
         // Регистрируем алиасы для удобства

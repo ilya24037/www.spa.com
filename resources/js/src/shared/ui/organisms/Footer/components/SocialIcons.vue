@@ -6,7 +6,7 @@
       :href="social.href"
       target="_blank"
       rel="noopener noreferrer"
-      class="w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 focus:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors border border-gray-200"
+      class="w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-500 focus:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors border border-gray-500"
       :aria-label="`Перейти в ${social.name}`"
       :title="social.name"
       role="listitem"
@@ -41,12 +41,12 @@ defineProps<Props>()
 }
 
 /* Hover эффекты */
-.hover\:bg-gray-100:hover {
+.hover\:bg-gray-500:hover {
   background-color: #f3f4f6;
 }
 
 /* Focus эффекты для доступности */
-.focus\:bg-gray-100:focus {
+.focus\:bg-gray-500:focus {
   background-color: #f3f4f6;
 }
 

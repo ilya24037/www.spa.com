@@ -167,7 +167,7 @@ class RescheduleBookingAction
     public function getAvailableSlots(
         Booking $booking, 
         Carbon $date, 
-        int $durationMinutes = null
+        ?int $durationMinutes = null
     ): array {
         $duration = $durationMinutes ?? $booking->duration_minutes;
         

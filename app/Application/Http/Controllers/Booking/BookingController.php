@@ -114,7 +114,7 @@ class BookingController extends Controller
     /**
      * Просмотр бронирования
      */
-    public function show(Booking $booking)
+    public function show(Booking $booking, Request $request)
     {
         $this->authorize('view', $booking);
 

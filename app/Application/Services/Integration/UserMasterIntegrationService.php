@@ -63,8 +63,14 @@ class UserMasterIntegrationService
      */
     public function createMasterProfileForUser(int $userId, array $profileData): void
     {
+        // Добавляем user_id в данные профиля
+        $profileData['user_id'] = $userId;
+        
+        // Создаем DTO для создания профиля
+        $dto = new \App\Domain\Master\DTOs\CreateMasterDTO($profileData);
+        
         // Используем сервис для валидации и создания
-        $masterProfile = $this->masterService->createMasterProfile($userId, $profileData);
+        $masterProfile = $this->masterService->createProfile($dto);
 
         // Отправляем событие о создании
         Event::dispatch(new MasterProfileCreated(
@@ -87,7 +93,11 @@ class UserMasterIntegrationService
         }
 
         $oldData = $oldProfile->toArray();
-        $result = $this->masterService->updateMasterProfile($profileId, $data);
+        
+        // Создаем DTO для обновления
+        $dto = new \App\Domain\Master\DTOs\UpdateMasterDTO($data);
+        $updatedProfile = $this->masterService->updateProfile($profileId, $dto);
+        $result = $updatedProfile !== null;
 
         if ($result) {
             // Определяем измененные поля
@@ -117,7 +127,13 @@ class UserMasterIntegrationService
         }
 
         $oldStatus = $profile->status;
-        $result = $this->masterService->activateMasterProfile($profileId);
+        
+        try {
+            $activatedProfile = $this->masterService->activateProfile($profileId);
+            $result = $activatedProfile !== null;
+        } catch (\Exception $e) {
+            return false;
+        }
 
         if ($result) {
             Event::dispatch(new MasterStatusChanged(
@@ -143,7 +159,13 @@ class UserMasterIntegrationService
         }
 
         $oldStatus = $profile->status;
-        $result = $this->masterService->deactivateMasterProfile($profileId, $reason);
+        
+        try {
+            $deactivatedProfile = $this->masterService->deactivateProfile($profileId, $reason);
+            $result = $deactivatedProfile !== null;
+        } catch (\Exception $e) {
+            return false;
+        }
 
         if ($result) {
             Event::dispatch(new MasterStatusChanged(

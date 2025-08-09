@@ -71,6 +71,6 @@ interface Props {
 }
 
 withDefaults(defineProps<Props>(), {
-  className: 'w-5 h-5'
+    className: 'w-5 h-5'
 })
 </script>

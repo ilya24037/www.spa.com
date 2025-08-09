@@ -1,64 +1,81 @@
 <template>
   <div class="masters-catalog">
-    <!-- Filters -->
-    <div class="mb-6">
-      <slot name="filters">
-        <FilterPanel @apply="handleFiltersApply" @reset="handleFiltersReset">
-          <FilterCategory 
-            title="РљР°С‚РµРіРѕСЂРёРё СѓСЃР»СѓРі"
-            icon="рџЏ·пёЏ"
-            :count="filterStore.filters.services.length"
+    <!-- Двухколоночный layout: sidebar + content -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+      <!-- Sidebar (filters) -->
+      <aside class="lg:col-span-1">
+        <slot name="filters">
+          <FilterPanel @apply="handleFiltersApply" @reset="handleFiltersReset">
+            <FilterCategory 
+              title="Категории услуг"
+              icon="🛠️"
+              :count="filterStore.filters.services.length"
+            >
+              <div class="space-y-2">
+                <label v-for="category in availableCategories" :key="category.id" class="flex items-center">
+                  <input 
+                    type="checkbox" 
+                    :checked="isCategorySelected(category.id)"
+                    class="mr-2"
+                    @change="handleCategoryChange(category.id, $event)"
+                  >
+                  {{ category.name }}
+                </label>
+              </div>
+            </FilterCategory>
+          </FilterPanel>
+        </slot>
+      </aside>
+
+      <!-- Content (cards, pagination) -->
+      <section class="lg:col-span-3">
+        <!-- Loading -->
+        <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div v-for="i in 6" :key="i" class="animate-pulse">
+            <div class="h-64 bg-gray-500 rounded-lg" />
+          </div>
+        </div>
+
+        <!-- Error -->
+        <div v-else-if="error" class="text-center py-12">
+          <p class="text-red-500 mb-4">
+            {{ error }}
+          </p>
+          <button class="px-4 py-2 bg-blue-600 text-white rounded-lg" @click="$emit('retry')">
+            Попробовать снова
+          </button>
+        </div>
+
+        <!-- Empty -->
+        <div v-else-if="!masters || masters.length === 0" class="text-center py-12">
+          <p class="text-gray-500 text-lg mb-4">
+            Мастера не найдены
+          </p>
+          <p class="text-gray-500">
+            Попробуйте изменить параметры поиска
+          </p>
+        </div>
+
+        <!-- Grid -->
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <slot
+            v-for="master in masters"
+            :key="master.id"
+            name="master"
+            :master="master"
           >
-            <!-- Р—РґРµСЃСЊ Р±СѓРґРµС‚ СЃРѕРґРµСЂР¶РёРјРѕРµ С„РёР»СЊС‚СЂР° РєР°С‚РµРіРѕСЂРёР№ -->
-            <div class="space-y-2">
-              <label v-for="category in availableCategories" :key="category.id" class="flex items-center">
-                <input 
-                  type="checkbox" 
-                  :checked="isCategorySelected(category.id)"
-                  @change="handleCategoryChange(category.id, $event)"
-                  class="mr-2"
-                />
-                {{ category.name }}
-              </label>
-            </div>
-          </FilterCategory>
-        </FilterPanel>
-      </slot>
-    </div>
-    
-    <!-- Loading -->
-    <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div v-for="i in 6" :key="i" class="animate-pulse">
-        <div class="h-64 bg-gray-200 rounded-lg"></div>
-      </div>
-    </div>
-    
-    <!-- Error -->
-    <div v-else-if="error" class="text-center py-12">
-      <p class="text-red-500 mb-4">{{ error }}</p>
-      <button @click="$emit('retry')" class="px-4 py-2 bg-blue-600 text-white rounded-lg">
-        РџРѕРїСЂРѕР±РѕРІР°С‚СЊ СЃРЅРѕРІР°
-      </button>
-    </div>
-    
-    <!-- Empty -->
-    <div v-else-if="!masters || masters.length === 0" class="text-center py-12">
-      <p class="text-gray-500 text-lg mb-4">РњР°СЃС‚РµСЂР° РЅРµ РЅР°Р№РґРµРЅС‹</p>
-      <p class="text-gray-400">РџРѕРїСЂРѕР±СѓР№С‚Рµ РёР·РјРµРЅРёС‚СЊ РїР°СЂР°РјРµС‚СЂС‹ РїРѕРёСЃРєР°</p>
-    </div>
-    
-    <!-- Grid -->
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <slot v-for="master in masters" :key="master.id" name="master" :master="master">
-        <MasterCard :master="master" />
-      </slot>
-    </div>
-    
-    <!-- Pagination -->
-    <div v-if="showPagination" class="mt-8">
-      <slot name="pagination" />
+            <MasterCard :master="master" />
+          </slot>
+        </div>
+
+        <!-- Pagination -->
+        <div v-if="showPagination" class="mt-8">
+          <slot name="pagination" />
+        </div>
+      </section>
     </div>
   </div>
+  
 </template>
 
 <script setup lang="ts">
@@ -75,11 +92,11 @@ interface Props {
 }
 
 const _props = withDefaults(defineProps<Props>(), {
-  masters: () => [],
-  loading: false,
-  error: '',
-  showPagination: false,
-  availableCategories: () => []
+    masters: () => [],
+    loading: false,
+    error: '',
+    showPagination: false,
+    availableCategories: () => []
 })
 
 const emit = defineEmits<{
@@ -88,32 +105,32 @@ const emit = defineEmits<{
   filtersReset: []
 }>()
 
-// Store РґР»СЏ С„РёР»СЊС‚СЂРѕРІ
+// Store для фильтров
 const filterStore = useFilterStore()
 
-// РћР±СЂР°Р±РѕС‚С‡РёРєРё С„РёР»СЊС‚СЂРѕРІ
+// Обработчики фильтров
 const handleFiltersApply = () => {
-  emit('filtersApply', filterStore.filters)
+    emit('filtersApply', filterStore.filters)
 }
 
 const handleFiltersReset = () => {
-  filterStore.resetFilters()
-  emit('filtersReset')
+    filterStore.resetFilters()
+    emit('filtersReset')
 }
 
-// РњРµС‚РѕРґС‹ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ РєР°С‚РµРіРѕСЂРёСЏРјРё
+// Проверка выбранной категории
 const isCategorySelected = (categoryId: number): boolean => {
-  // РџСЂРѕСЃС‚Р°СЏ РїСЂРѕРІРµСЂРєР° - СЃС‡РёС‚Р°РµРј С‡С‚Рѕ РєР°С‚РµРіРѕСЂРёСЏ РІС‹Р±СЂР°РЅР° РµСЃР»Рё РµСЃС‚СЊ С…РѕС‚СЊ РѕРґРёРЅ СЃРµСЂРІРёСЃ
-  return filterStore.filters.services.includes(categoryId)
+    return filterStore.filters.services.includes(categoryId)
 }
 
+// Обработчик изменения категории
 const handleCategoryChange = (categoryId: number, event: Event) => {
-  const target = event.target as HTMLInputElement
-  if (target.checked) {
-    filterStore.addServiceToFilter(categoryId)
-  } else {
-    filterStore.removeServiceFromFilter(categoryId)
-  }
+    const target = event.target as HTMLInputElement
+    if (target.checked) {
+        filterStore.addServiceToFilter(categoryId)
+    } else {
+        filterStore.removeServiceFromFilter(categoryId)
+    }
 }
 </script>
 

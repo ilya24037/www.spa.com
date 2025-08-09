@@ -12,16 +12,16 @@
       >
         <!-- РРєРѕРЅРєР° (РµСЃР»Рё РµСЃС‚СЊ) -->
         <component
-          v-if="item.icon && showIcons"
           :is="item.icon"
+          v-if="item.icon && showIcons"
           :class="iconClasses"
           aria-hidden="true"
         />
         
         <!-- РЎСЃС‹Р»РєР° (РЅРµ РїРѕСЃР»РµРґРЅРёР№ СЌР»РµРјРµРЅС‚) -->
         <component
-          v-if="index < safeItems.length - 1"
           :is="item.to ? 'router-link' : 'a'"
+          v-if="index < safeItems.length - 1"
           v-bind="getLinkProps(item)"
           :class="linkClasses"
           @click="handleItemClick(item, index)"
@@ -40,8 +40,8 @@
         
         <!-- Р Р°Р·РґРµР»РёС‚РµР»СЊ -->
         <component
-          v-if="index < safeItems.length - 1"
           :is="separatorIcon || 'svg'"
+          v-if="index < safeItems.length - 1"
           :class="separatorClasses"
           v-bind="separatorIcon ? {} : {
             fill: 'none',
@@ -73,123 +73,123 @@ import { computed } from 'vue'
 import type { BreadcrumbsProps, BreadcrumbsEmits, BreadcrumbItem } from './Breadcrumbs.types'
 
 const props = withDefaults(defineProps<BreadcrumbsProps>(), {
-  size: 'medium',
-  separator: 'chevron',
-  showIcons: false,
-  showHome: false,
-  maxItems: 0,
-  enableJsonLd: false,
-  ariaLabel: 'РќР°РІРёРіР°С†РёРѕРЅРЅР°СЏ С†РµРїРѕС‡РєР°'
+    size: 'medium',
+    separator: 'chevron',
+    showIcons: false,
+    showHome: false,
+    maxItems: 0,
+    enableJsonLd: false,
+    ariaLabel: 'РќР°РІРёРіР°С†РёРѕРЅРЅР°СЏ С†РµРїРѕС‡РєР°'
 })
 
 const emit = defineEmits<BreadcrumbsEmits>()
 
 // Р‘РµР·РѕРїР°СЃРЅС‹Р№ РјР°СЃСЃРёРІ СЌР»РµРјРµРЅС‚РѕРІ
 const safeItems = computed(() => {
-  if (!Array.isArray(props.items)) return []
+    if (!Array.isArray(props.items)) return []
   
-  let items = [...props.items]
+    let items = [...props.items]
   
-  // Р”РѕР±Р°РІР»СЏРµРј РґРѕРјР°С€РЅСЋСЋ СЃС‚СЂР°РЅРёС†Сѓ РµСЃР»Рё РЅСѓР¶РЅРѕ
-  if (props.showHome && !items.some(item => item.isHome)) {
-    items.unshift({
-      title: 'Р“Р»Р°РІРЅР°СЏ',
-      href: '/',
-      isHome: true
-    })
-  }
+    // Р”РѕР±Р°РІР»СЏРµРј РґРѕРјР°С€РЅСЋСЋ СЃС‚СЂР°РЅРёС†Сѓ РµСЃР»Рё РЅСѓР¶РЅРѕ
+    if (props.showHome && !items.some(item => item.isHome)) {
+        items.unshift({
+            title: 'Р“Р»Р°РІРЅР°СЏ',
+            href: '/',
+            isHome: true
+        })
+    }
   
-  // РћРіСЂР°РЅРёС‡РёРІР°РµРј РєРѕР»РёС‡РµСЃС‚РІРѕ СЌР»РµРјРµРЅС‚РѕРІ
-  if (props.maxItems > 0 && items.length > props.maxItems) {
-    const first = items[0]
-    const last = items.slice(-2) // РџРѕСЃР»РµРґРЅРёРµ 2 СЌР»РµРјРµРЅС‚Р°
-    if (first) items = [first, { title: '...', href: '', isEllipsis: true }, ...last]
-  }
+    // РћРіСЂР°РЅРёС‡РёРІР°РµРј РєРѕР»РёС‡РµСЃС‚РІРѕ СЌР»РµРјРµРЅС‚РѕРІ
+    if (props.maxItems > 0 && items.length > props.maxItems) {
+        const first = items[0]
+        const last = items.slice(-2) // РџРѕСЃР»РµРґРЅРёРµ 2 СЌР»РµРјРµРЅС‚Р°
+        if (first) items = [first, { title: '...', href: '', isEllipsis: true }, ...last]
+    }
   
-  return items
+    return items
 })
 
 // Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ РєР»Р°СЃСЃС‹
 const containerClasses = computed(() => [
-  'breadcrumbs',
-  `breadcrumbs--${props.size}`,
-  props.customClass
+    'breadcrumbs',
+    `breadcrumbs--${props.size}`,
+    props.customClass
 ])
 
 const listClasses = computed(() => [
-  'breadcrumbs__list'
+    'breadcrumbs__list'
 ])
 
 const itemClasses = computed(() => [
-  'breadcrumbs__item'
+    'breadcrumbs__item'
 ])
 
 const iconClasses = computed(() => [
-  'breadcrumbs__icon'
+    'breadcrumbs__icon'
 ])
 
 const linkClasses = computed(() => [
-  'breadcrumbs__link'
+    'breadcrumbs__link'
 ])
 
 const currentClasses = computed(() => [
-  'breadcrumbs__current'
+    'breadcrumbs__current'
 ])
 
 const separatorClasses = computed(() => [
-  'breadcrumbs__separator'
+    'breadcrumbs__separator'
 ])
 
 // РњРµС‚РѕРґС‹
 const getItemKey = (item: BreadcrumbItem, index: number): string => {
-  return item.key || item.href || `breadcrumb-${index}`
+    return item.key || item.href || `breadcrumb-${index}`
 }
 
 const getLinkProps = (item: BreadcrumbItem) => {
-  if (item.to) {
-    return { to: item.to }
-  }
-  return { 
-    href: item.href,
-    target: item.external ? '_blank' : undefined,
-    rel: item.external ? 'noopener noreferrer' : undefined
-  }
+    if (item.to) {
+        return { to: item.to }
+    }
+    return { 
+        href: item.href,
+        target: item.external ? '_blank' : undefined,
+        rel: item.external ? 'noopener noreferrer' : undefined
+    }
 }
 
 const handleItemClick = (item: BreadcrumbItem, index: number) => {
-  if (item.isEllipsis) return
-  emit('item-click', { item, index })
+    if (item.isEllipsis) return
+    emit('item-click', { item, index })
 }
 
 const getSeparatorPath = (): string => {
-  const separatorPaths = {
-    chevron: 'M9 5l7 7-7 7',
-    slash: 'M5 12h14',
-    arrow: 'M13 7l5 5-5 5M6 12h12'
-  }
-  return separatorPaths[props.separator] || separatorPaths.chevron
+    const separatorPaths = {
+        chevron: 'M9 5l7 7-7 7',
+        slash: 'M5 12h14',
+        arrow: 'M13 7l5 5-5 5M6 12h12'
+    }
+    return separatorPaths[props.separator] || separatorPaths.chevron
 }
 
 // JSON-LD СЃС…РµРјР° РґР»СЏ SEO
 const jsonLdSchema = computed(() => {
-  if (!props.enableJsonLd) return ''
+    if (!props.enableJsonLd) return ''
   
-  const listItems = safeItems.value
-    .filter(item => !item.isEllipsis)
-    .map((item, index) => ({
-      '@type': 'ListItem',
-      position: index + 1,
-      name: item.title,
-      item: item.href ? new URL(item.href, window.location.origin).href : undefined
-    }))
+    const listItems = safeItems.value
+        .filter(item => !item.isEllipsis)
+        .map((item, index) => ({
+            '@type': 'ListItem',
+            position: index + 1,
+            name: item.title,
+            item: item.href ? new URL(item.href, window.location.origin).href : undefined
+        }))
   
-  const schema = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: listItems
-  }
+    const schema = {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: listItems
+    }
   
-  return JSON.stringify(schema)
+    return JSON.stringify(schema)
 })
 </script>
 

@@ -13,6 +13,6 @@ interface Props {
 }
 
 withDefaults(defineProps<Props>(), {
-  type: 'submit'
+    type: 'submit'
 })
 </script>

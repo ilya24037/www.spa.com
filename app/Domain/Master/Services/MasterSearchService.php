@@ -4,19 +4,17 @@ namespace App\Domain\Master\Services;
 
 use App\Domain\Master\Models\MasterProfile;
 use App\Domain\Master\Repositories\MasterRepository;
-use App\Support\Services\BaseService;
 use Illuminate\Http\Request;
 
 /**
  * Сервис для поиска мастеров
  */
-class MasterSearchService extends BaseService
+class MasterSearchService
 {
     private MasterRepository $masterRepository;
 
     public function __construct(MasterRepository $masterRepository)
     {
-        parent::__construct($masterRepository);
         $this->masterRepository = $masterRepository;
     }
 

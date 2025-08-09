@@ -21,34 +21,34 @@ import { Footer, useFooter, defaultFooterConfig } from '../index'
 
 // Используем composable для управления Footer
 const { config: footerConfig, handleAccessibilityToggle } = useFooter({
-  // Можем кастомизировать конфигурацию
-  companyInfo: {
-    ...defaultFooterConfig.companyInfo,
-    currentYear: new Date().getFullYear()
-  },
-  accessibility: {
-    ...defaultFooterConfig.accessibility,
-    callback: () => {
-      // Дополнительная логика для приложения
+    // Можем кастомизировать конфигурацию
+    companyInfo: {
+        ...defaultFooterConfig.companyInfo,
+        currentYear: new Date().getFullYear()
+    },
+    accessibility: {
+        ...defaultFooterConfig.accessibility,
+        callback: () => {
+            // Дополнительная логика для приложения
+        }
     }
-  }
 })
 
 // Пример динамического изменения конфигурации
-const handleCustomConfigUpdate = () => {
-  // Можем обновить конфигурацию динамически
-  footerConfig.value = {
-    ...footerConfig.value,
-    quickActions: [
-      ...footerConfig.value.quickActions,
-      {
-        id: 'new-action',
-        text: 'Новое действие',
-        href: '/new-action',
-        icon: 'user-plus'
-      }
-    ]
-  }
+const _handleCustomConfigUpdate = () => {
+    // Можем обновить конфигурацию динамически
+    footerConfig.value = {
+        ...footerConfig.value,
+        quickActions: [
+            ...footerConfig.value.quickActions,
+            {
+                id: 'new-action',
+                text: 'Новое действие',
+                href: '/new-action',
+                icon: 'user-plus'
+            }
+        ]
+    }
 }
 </script>
 

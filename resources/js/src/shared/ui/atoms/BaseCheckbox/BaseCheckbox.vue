@@ -46,9 +46,9 @@ interface BaseCheckboxProps {
 }
 
 const props = withDefaults(defineProps<BaseCheckboxProps>(), {
-  modelValue: false,
-  label: '',
-  disabled: false
+    modelValue: false,
+    label: '',
+    disabled: false
 });
 
 // TypeScript С‚РёРїРёР·Р°С†РёСЏ emits
@@ -58,11 +58,11 @@ const emit = defineEmits<{
 
 // Methods
 const toggle = (event: MouseEvent): void => {
-  if (props.disabled) return
+    if (props.disabled) return
   
-  event.preventDefault()
-  event.stopPropagation()
-  emit('update:modelValue', !props.modelValue)
+    event.preventDefault()
+    event.stopPropagation()
+    emit('update:modelValue', !props.modelValue)
 }
 </script>
 

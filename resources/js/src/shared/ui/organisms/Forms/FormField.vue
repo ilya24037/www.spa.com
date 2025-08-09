@@ -27,26 +27,26 @@
 import { computed } from 'vue'
 
 const props = defineProps({
-  label: {
-    type: String,
-    default: ''
-  },
-  hint: {
-    type: String,
-    default: ''
-  },
-  error: {
-    type: String,
-    default: ''
-  },
-  required: {
-    type: Boolean,
-    default: false
-  },
-  fieldId: {
-    type: String,
-    default: () => `field-${Math.random().toString(36).substr(2, 9)}`
-  }
+    label: {
+        type: String,
+        default: ''
+    },
+    hint: {
+        type: String,
+        default: ''
+    },
+    error: {
+        type: String,
+        default: ''
+    },
+    required: {
+        type: Boolean,
+        default: false
+    },
+    fieldId: {
+        type: String,
+        default: () => `field-${Math.random().toString(36).substr(2, 9)}`
+    }
 })
 
 const hasError = computed(() => Boolean(props.error))

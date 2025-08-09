@@ -1,119 +1,147 @@
 <template>
-    <div class="time-slot-picker">
-        <!-- Р’С‹Р±РѕСЂ РґР°С‚С‹ -->
-        <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-                Р’С‹Р±РµСЂРёС‚Рµ РґР°С‚Сѓ
-            </label>
-            <div class="grid grid-cols-3 gap-2">
-                <button v-for="date in availableDates"
-                        :key="date.value"
-                        @click="selectedDate = date.value"
-                        :class="[
-                            'px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                            selectedDate === date.value
-                                ? 'bg-purple-600 text-white'
-                                : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                        ]">
-                    <div>{{ date.label }}</div>
-                    <div class="text-xs opacity-75">{{ date.weekday }}</div>
-                </button>
-            </div>
+  <div class="time-slot-picker">
+    <!-- Р’С‹Р±РѕСЂ РґР°С‚С‹ -->
+    <div class="mb-4">
+      <label class="block text-sm font-medium text-gray-500 mb-2">
+        Р’С‹Р±РµСЂРёС‚Рµ РґР°С‚Сѓ
+      </label>
+      <div class="grid grid-cols-3 gap-2">
+        <button
+          v-for="date in availableDates"
+          :key="date.value"
+          :class="[
+            'px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+            selectedDate === date.value
+              ? 'bg-purple-600 text-white'
+              : 'bg-gray-500 hover:bg-gray-500 text-gray-500'
+          ]"
+          @click="selectedDate = date.value"
+        >
+          <div>{{ date.label }}</div>
+          <div class="text-xs opacity-75">
+            {{ date.weekday }}
+          </div>
+        </button>
+      </div>
             
-            <!-- РљР°Р»РµРЅРґР°СЂСЊ РґР»СЏ РґСЂСѓРіРёС… РґР°С‚ -->
-            <button @click="showCalendar = true"
-                    class="mt-2 text-sm text-purple-600 hover:text-purple-700 font-medium">
-                Р’С‹Р±СЂР°С‚СЊ РґСЂСѓРіСѓСЋ РґР°С‚Сѓ в†’
-            </button>
-        </div>
-
-        <!-- Р’С‹Р±РѕСЂ РІСЂРµРјРµРЅРё -->
-        <div v-if="selectedDate">
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-                Р”РѕСЃС‚СѓРїРЅРѕРµ РІСЂРµРјСЏ
-            </label>
-            
-            <!-- Р—Р°РіСЂСѓР·РєР° -->
-            <div v-if="loadingSlots" class="py-8 text-center">
-                <div class="inline-flex items-center gap-2 text-gray-500">
-                    <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Р—Р°РіСЂСѓР¶Р°РµРј РґРѕСЃС‚СѓРїРЅРѕРµ РІСЂРµРјСЏ...
-                </div>
-            </div>
-            
-            <!-- РќРµС‚ СЃР»РѕС‚РѕРІ -->
-            <div v-else-if="!timeSlots.length" class="py-8 text-center">
-                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <p class="mt-2 text-gray-600">
-                    Рљ СЃРѕР¶Р°Р»РµРЅРёСЋ, РЅР° СЌС‚Сѓ РґР°С‚Сѓ РЅРµС‚ СЃРІРѕР±РѕРґРЅРѕРіРѕ РІСЂРµРјРµРЅРё
-                </p>
-                <button @click="selectedDate = null"
-                        class="mt-2 text-sm text-purple-600 hover:text-purple-700">
-                    Р’С‹Р±СЂР°С‚СЊ РґСЂСѓРіСѓСЋ РґР°С‚Сѓ
-                </button>
-            </div>
-            
-            <!-- РЎР»РѕС‚С‹ РІСЂРµРјРµРЅРё -->
-            <div v-else>
-                <!-- Р“СЂСѓРїРїРёСЂРѕРІРєР° РїРѕ РїРµСЂРёРѕРґР°Рј РґРЅСЏ -->
-                <div v-for="period in timePeriods" :key="period.key" class="mb-4">
-                    <h4 v-if="period.slots.length" class="text-xs font-medium text-gray-500 uppercase mb-2">
-                        {{ period.label }}
-                    </h4>
-                    <div class="grid grid-cols-3 gap-2">
-                        <button v-for="slot in period.slots"
-                                :key="slot.time"
-                                @click="selectTimeSlot(slot)"
-                                :disabled="!slot.available"
-                                :class="[
-                                    'px-3 py-2 rounded-lg text-sm font-medium transition-all',
-                                    selectedTime === slot.time
-                                        ? 'bg-purple-600 text-white ring-2 ring-purple-600 ring-offset-2'
-                                        : slot.available
-                                            ? 'bg-white border border-gray-300 hover:border-purple-400 hover:bg-purple-50 text-gray-700'
-                                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                ]">
-                            {{ slot.time }}
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Р›РµРіРµРЅРґР° -->
-                <div class="mt-4 flex items-center gap-4 text-xs text-gray-500">
-                    <div class="flex items-center gap-1">
-                        <div class="w-3 h-3 bg-white border border-gray-300 rounded"></div>
-                        <span>РЎРІРѕР±РѕРґРЅРѕ</span>
-                    </div>
-                    <div class="flex items-center gap-1">
-                        <div class="w-3 h-3 bg-gray-100 rounded"></div>
-                        <span>Р—Р°РЅСЏС‚Рѕ</span>
-                    </div>
-                    <div class="flex items-center gap-1">
-                        <div class="w-3 h-3 bg-purple-600 rounded"></div>
-                        <span>Р’С‹Р±СЂР°РЅРѕ</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- РњРѕРґР°Р»СЊРЅРѕРµ РѕРєРЅРѕ РєР°Р»РµРЅРґР°СЂСЏ -->
-        <Modal v-if="showCalendar" @close="showCalendar = false">
-            <div class="p-6">
-                <h3 class="text-lg font-semibold mb-4">Р’С‹Р±РµСЂРёС‚Рµ РґР°С‚Сѓ</h3>
-                <BookingCalendar 
-                    :available-dates="allAvailableDates"
-                    :selected-date="selectedDate"
-                    @select="handleDateSelect"
-                />
-            </div>
-        </Modal>
+      <!-- РљР°Р»РµРЅРґР°СЂСЊ РґР»СЏ РґСЂСѓРіРёС… РґР°С‚ -->
+      <button
+        class="mt-2 text-sm text-purple-600 hover:text-purple-700 font-medium"
+        @click="showCalendar = true"
+      >
+        Р’С‹Р±СЂР°С‚СЊ РґСЂСѓРіСѓСЋ РґР°С‚Сѓ в†’
+      </button>
     </div>
+
+    <!-- Р’С‹Р±РѕСЂ РІСЂРµРјРµРЅРё -->
+    <div v-if="selectedDate">
+      <label class="block text-sm font-medium text-gray-500 mb-2">
+        Р”РѕСЃС‚СѓРїРЅРѕРµ РІСЂРµРјСЏ
+      </label>
+            
+      <!-- Р—Р°РіСЂСѓР·РєР° -->
+      <div v-if="loadingSlots" class="py-8 text-center">
+        <div class="inline-flex items-center gap-2 text-gray-500">
+          <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            />
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          </svg>
+          Р—Р°РіСЂСѓР¶Р°РµРј РґРѕСЃС‚СѓРїРЅРѕРµ РІСЂРµРјСЏ...
+        </div>
+      </div>
+            
+      <!-- РќРµС‚ СЃР»РѕС‚РѕРІ -->
+      <div v-else-if="!timeSlots.length" class="py-8 text-center">
+        <svg
+          class="mx-auto h-12 w-12 text-gray-500"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2" 
+            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+        <p class="mt-2 text-gray-500">
+          Рљ СЃРѕР¶Р°Р»РµРЅРёСЋ, РЅР° СЌС‚Сѓ РґР°С‚Сѓ РЅРµС‚ СЃРІРѕР±РѕРґРЅРѕРіРѕ РІСЂРµРјРµРЅРё
+        </p>
+        <button
+          class="mt-2 text-sm text-purple-600 hover:text-purple-700"
+          @click="selectedDate = null"
+        >
+          Р’С‹Р±СЂР°С‚СЊ РґСЂСѓРіСѓСЋ РґР°С‚Сѓ
+        </button>
+      </div>
+            
+      <!-- РЎР»РѕС‚С‹ РІСЂРµРјРµРЅРё -->
+      <div v-else>
+        <!-- Р“СЂСѓРїРїРёСЂРѕРІРєР° РїРѕ РїРµСЂРёРѕРґР°Рј РґРЅСЏ -->
+        <div v-for="period in timePeriods" :key="period.key" class="mb-4">
+          <h4 v-if="period.slots.length" class="text-xs font-medium text-gray-500 uppercase mb-2">
+            {{ period.label }}
+          </h4>
+          <div class="grid grid-cols-3 gap-2">
+            <button
+              v-for="slot in period.slots"
+              :key="slot.time"
+              :disabled="!slot.available"
+              :class="[
+                'px-3 py-2 rounded-lg text-sm font-medium transition-all',
+                selectedTime === slot.time
+                  ? 'bg-purple-600 text-white ring-2 ring-purple-600 ring-offset-2'
+                  : slot.available
+                    ? 'bg-white border border-gray-500 hover:border-purple-400 hover:bg-purple-50 text-gray-500'
+                    : 'bg-gray-500 text-gray-500 cursor-not-allowed'
+              ]"
+              @click="selectTimeSlot(slot)"
+            >
+              {{ slot.time }}
+            </button>
+          </div>
+        </div>
+                
+        <!-- Р›РµРіРµРЅРґР° -->
+        <div class="mt-4 flex items-center gap-4 text-xs text-gray-500">
+          <div class="flex items-center gap-1">
+            <div class="w-3 h-3 bg-white border border-gray-500 rounded" />
+            <span>РЎРІРѕР±РѕРґРЅРѕ</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <div class="w-3 h-3 bg-gray-500 rounded" />
+            <span>Р—Р°РЅСЏС‚Рѕ</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <div class="w-3 h-3 bg-purple-600 rounded" />
+            <span>Р’С‹Р±СЂР°РЅРѕ</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- РњРѕРґР°Р»СЊРЅРѕРµ РѕРєРЅРѕ РєР°Р»РµРЅРґР°СЂСЏ -->
+    <Modal v-if="showCalendar" @close="showCalendar = false">
+      <div class="p-6">
+        <h3 class="text-lg font-semibold mb-4">
+          Р’С‹Р±РµСЂРёС‚Рµ РґР°С‚Сѓ
+        </h3>
+        <BookingCalendar 
+          :available-dates="allAvailableDates"
+          :selected-date="selectedDate"
+          @select="handleDateSelect"
+        />
+      </div>
+    </Modal>
+  </div>
 </template>
 
 <script setup>

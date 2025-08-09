@@ -102,7 +102,7 @@ export function useToast() {
     showToast('info', message, options)
 
   /**
-   * Заменители для alert(), confirm() и других JS методов
+   * Заменители для // Removed // Removed // Removed alert() - use toast notifications instead - use toast notifications instead - use toast notifications instead, confirm() и других JS методов
    */
   const alertSuccess = (message: string) => success(message, { duration: 3000 })
   const alertError = (message: string) => error(message, { duration: 5000 })
@@ -124,7 +124,7 @@ export function useToast() {
     warning,
     info,
     
-    // Заменители alert()
+    // Заменители // Removed // Removed // Removed alert() - use toast notifications instead - use toast notifications instead - use toast notifications instead
     alertSuccess,
     alertError,
     alertWarning,

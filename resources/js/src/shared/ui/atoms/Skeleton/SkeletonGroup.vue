@@ -1,5 +1,10 @@
 <template>
-  <div class="skeleton-group" :aria-busy="true" role="status" :aria-label="groupAriaLabel">
+  <div
+    class="skeleton-group"
+    :aria-busy="true"
+    role="status"
+    :aria-label="groupAriaLabel"
+  >
     <Skeleton
       v-for="(line, index) in linesArray"
       :key="`skeleton-${index}`"
@@ -19,47 +24,47 @@ import Skeleton from './Skeleton.vue'
 import type { SkeletonGroupProps, SkeletonProps } from './Skeleton.types'
 
 const props = withDefaults(defineProps<SkeletonGroupProps>(), {
-  lines: 3,
-  variant: 'text',
-  size: 'medium',
-  animated: true,
-  randomWidth: true
+    lines: 3,
+    variant: 'text',
+    size: 'medium',
+    animated: true,
+    randomWidth: true
 })
 
 const linesArray = computed(() => {
-  const lines: (SkeletonProps & { customClass?: string })[] = []
+    const lines: (SkeletonProps & { customClass?: string })[] = []
   
-  for (let i = 0; i < props.lines; i++) {
-    const line: SkeletonProps & { customClass?: string } = {
-      variant: props.variant,
-      size: props.size,
-      animated: props.animated
-    }
+    for (let i = 0; i < props.lines; i++) {
+        const line: SkeletonProps & { customClass?: string } = {
+            variant: props.variant,
+            size: props.size,
+            animated: props.animated
+        }
     
-    // РЎР»СѓС‡Р°Р№РЅР°СЏ С€РёСЂРёРЅР° РґР»СЏ Р±РѕР»РµРµ СЂРµР°Р»РёСЃС‚РёС‡РЅРѕРіРѕ РІРёРґР°
-    if (props.randomWidth && props.variant === 'text') {
-      const widths = ['85%', '92%', '76%', '88%', '95%', '82%', '90%']
-      line.width = widths[i % widths.length]
+        // РЎР»СѓС‡Р°Р№РЅР°СЏ С€РёСЂРёРЅР° РґР»СЏ Р±РѕР»РµРµ СЂРµР°Р»РёСЃС‚РёС‡РЅРѕРіРѕ РІРёРґР°
+        if (props.randomWidth && props.variant === 'text') {
+            const widths = ['85%', '92%', '76%', '88%', '95%', '82%', '90%']
+            line.width = widths[i % widths.length]
       
-      // РџРѕСЃР»РµРґРЅСЏСЏ СЃС‚СЂРѕРєР° С‡Р°СЃС‚Рѕ РєРѕСЂРѕС‡Рµ
-      if (i === props.lines - 1) {
-        line.width = ['60%', '65%', '58%', '72%'][Math.floor(Math.random() * 4)]
-      }
-    }
+            // РџРѕСЃР»РµРґРЅСЏСЏ СЃС‚СЂРѕРєР° С‡Р°СЃС‚Рѕ РєРѕСЂРѕС‡Рµ
+            if (i === props.lines - 1) {
+                line.width = ['60%', '65%', '58%', '72%'][Math.floor(Math.random() * 4)]
+            }
+        }
     
-    // Р”РѕР±Р°РІР»СЏРµРј РѕС‚СЃС‚СѓРї РјРµР¶РґСѓ СЃС‚СЂРѕРєР°РјРё
-    if (i < props.lines - 1) {
-      line.customClass = 'mb-2'
-    }
+        // Р”РѕР±Р°РІР»СЏРµРј РѕС‚СЃС‚СѓРї РјРµР¶РґСѓ СЃС‚СЂРѕРєР°РјРё
+        if (i < props.lines - 1) {
+            line.customClass = 'mb-2'
+        }
     
-    lines.push(line)
-  }
+        lines.push(line)
+    }
   
-  return lines
+    return lines
 })
 
 const groupAriaLabel = computed(() => 
-  `Р—Р°РіСЂСѓР·РєР° РіСЂСѓРїРїС‹ РёР· ${props.lines} СЌР»РµРјРµРЅС‚РѕРІ`
+    `Р—Р°РіСЂСѓР·РєР° РіСЂСѓРїРїС‹ РёР· ${props.lines} СЌР»РµРјРµРЅС‚РѕРІ`
 )
 </script>
 

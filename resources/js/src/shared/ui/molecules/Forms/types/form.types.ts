@@ -252,6 +252,7 @@ export interface AutoSaveConfig {
 export interface FormHookResult {
   formState: FormState
   updateField: (fieldName: string, value: any) => void
+  touchField: (fieldName: string) => void
   updateErrors: (errors: FormErrors) => void
   validateField: (fieldName: string) => Promise<boolean>
   validateForm: () => Promise<boolean>
@@ -260,5 +261,5 @@ export interface FormHookResult {
   isDirty: (fieldName?: string) => boolean
   isTouched: (fieldName?: string) => boolean
   hasError: (fieldName: string) => boolean
-  getFieldError: (fieldName: string) => string | undefined
+  getFieldError: (fieldName: string) => string
 }

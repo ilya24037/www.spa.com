@@ -1,4 +1,4 @@
-<!-- Р’С‹РїР°РґР°СЋС‰РёР№ РєР°С‚Р°Р»РѕРі СѓСЃР»СѓРі - FSD Feature -->
+<!-- Выпадающий каталог услуг - FSD Feature -->
 <template>
   <div 
     class="bg-white shadow-lg border-t relative z-50"
@@ -6,12 +6,12 @@
     :aria-hidden="!visible"
     @keydown.escape="handleClose"
   >
-    <!-- Loading СЃРѕСЃС‚РѕСЏРЅРёРµ -->
+    <!-- Loading состояние -->
     <div 
       v-if="isLoading && !categories.length" 
       class="container mx-auto px-4 py-8"
       aria-live="polite"
-      aria-label="Р—Р°РіСЂСѓР·РєР° РєР°С‚Р°Р»РѕРіР°"
+      aria-label="Загрузка категорий"
     >
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         <div 
@@ -20,46 +20,60 @@
           class="space-y-4"
           aria-hidden="true"
         >
-          <div class="h-6 bg-gray-200 rounded animate-pulse"></div>
+          <div class="h-6 bg-gray-500 rounded animate-pulse" />
           <div class="space-y-2">
             <div 
               v-for="j in 5" 
               :key="`skeleton-${i}-${j}`"
-              class="h-4 bg-gray-100 rounded animate-pulse"
-            ></div>
+              class="h-4 bg-gray-500 rounded animate-pulse"
+            />
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Error СЃРѕСЃС‚РѕСЏРЅРёРµ -->
+    <!-- Error состояние -->
     <div 
       v-else-if="error && !categories.length"
       class="container mx-auto px-4 py-8 text-center"
       role="alert"
     >
       <div class="text-red-600 mb-4">
-        <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+        <svg
+          class="w-12 h-12 mx-auto mb-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+          />
         </svg>
-        <p class="font-medium">РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё РєР°С‚Р°Р»РѕРіР°</p>
-        <p class="text-sm text-gray-500 mt-1">{{ error }}</p>
+        <p class="font-medium">
+          Ошибка загрузки категорий
+        </p>
+        <p class="text-sm text-gray-500 mt-1">
+          {{ error }}
+        </p>
       </div>
       <button
-        @click="handleRefresh"
         class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         type="button"
+        @click="handleRefresh"
       >
-        РџРѕРїСЂРѕР±РѕРІР°С‚СЊ СЃРЅРѕРІР°
+        Попробовать снова
       </button>
     </div>
 
-    <!-- РћСЃРЅРѕРІРЅРѕР№ РєРѕРЅС‚РµРЅС‚ -->
+    <!-- Основной контент -->
     <div 
       v-else
       class="container mx-auto px-4 py-8"
     >
-      <!-- РЎРµС‚РєР° РєР°С‚РµРіРѕСЂРёР№ -->
+      <!-- Сетка категорий -->
       <div 
         class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
         role="menubar"
@@ -70,40 +84,40 @@
           class="category-column"
           :class="{ 'hidden sm:block': index >= mobileVisibleCount && !showAllOnMobile }"
         >
-          <!-- Р—Р°РіРѕР»РѕРІРѕРє РєР°С‚РµРіРѕСЂРёРё -->
+          <!-- Заголовок категории -->
           <h3 
-            class="font-semibold text-gray-900 mb-4 flex items-center gap-2 group"
             :id="`category-${category.id}`"
+            class="font-semibold text-gray-500 mb-4 flex items-center gap-2 group"
             role="menuitem"
             tabindex="0"
             @keydown.enter="handleCategoryHeaderClick(category)"
             @keydown.space.prevent="handleCategoryHeaderClick(category)"
           >
-            <!-- РРєРѕРЅРєР° -->
+            <!-- Иконка -->
             <span 
               v-if="category.icon"
               class="text-2xl transition-transform group-hover:scale-110"
-              :aria-label="`РРєРѕРЅРєР° РєР°С‚РµРіРѕСЂРёРё ${category.name}`"
+              :aria-label="`Иконка категории ${category.name}`"
             >
               {{ category.icon }}
             </span>
             
-            <!-- РќР°Р·РІР°РЅРёРµ -->
+            <!-- Название -->
             <span class="transition-colors group-hover:text-blue-600">
               {{ category.name }}
             </span>
             
-            <!-- Р‘РµР№РґР¶ РґР»СЏ РЅРѕРІС‹С… РєР°С‚РµРіРѕСЂРёР№ -->
+            <!-- Бейдж для новых категорий -->
             <span
               v-if="category.featured"
               class="px-2 py-0.5 bg-blue-100 text-blue-600 text-xs rounded-full font-medium"
-              aria-label="РџРѕРїСѓР»СЏСЂРЅР°СЏ РєР°С‚РµРіРѕСЂРёСЏ"
+              aria-label="Популярная категория"
             >
-              РўРћРџ
+              ТОП
             </span>
           </h3>
 
-          <!-- РЎРїРёСЃРѕРє СѓСЃР»СѓРі РєР°С‚РµРіРѕСЂРёРё -->
+          <!-- Список услуг категории -->
           <ul 
             class="space-y-2"
             role="menu"
@@ -124,28 +138,28 @@
                 @click="handleItemClick(category, item)"
                 @keydown.enter="handleItemClick(category, item)"
               >
-                <!-- РќР°Р·РІР°РЅРёРµ СѓСЃР»СѓРіРё -->
+                <!-- Название услуги -->
                 <span>{{ item.name }}</span>
                 
-                <!-- Р‘РµР№РґР¶Рё -->
+                <!-- Бейджи -->
                 <div v-if="item.popular || item.new" class="flex gap-1 ml-auto">
                   <span
                     v-if="item.popular"
                     class="px-1.5 py-0.5 bg-orange-100 text-orange-600 text-xs rounded font-medium"
-                    aria-label="РџРѕРїСѓР»СЏСЂРЅР°СЏ СѓСЃР»СѓРіР°"
+                    aria-label="Популярная услуга"
                   >
-                    рџ”Ґ
+                    🔥
                   </span>
                   <span
                     v-if="item.new"
                     class="px-1.5 py-0.5 bg-green-100 text-green-600 text-xs rounded font-medium"
-                    aria-label="РќРѕРІР°СЏ СѓСЃР»СѓРіР°"
+                    aria-label="Новая услуга"
                   >
                     NEW
                   </span>
                 </div>
                 
-                <!-- РРєРѕРЅРєР° РІРЅРµС€РЅРµР№ СЃСЃС‹Р»РєРё -->
+                <!-- Иконка внешней ссылки -->
                 <svg
                   v-if="item.href.startsWith('http')"
                   class="w-3 h-3 ml-1 opacity-60"
@@ -154,7 +168,12 @@
                   viewBox="0 0 24 24"
                   aria-hidden="true"
                 >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  />
                 </svg>
               </component>
             </li>
@@ -162,31 +181,31 @@
         </div>
       </div>
 
-      <!-- РљРЅРѕРїРєР° "РџРѕРєР°Р·Р°С‚СЊ РІСЃРµ" РЅР° РјРѕР±РёР»СЊРЅС‹С… -->
+      <!-- Кнопка "Показать все" на мобильных -->
       <div 
         v-if="categories.length > mobileVisibleCount"
         class="block sm:hidden mt-6 text-center"
       >
         <button
-          @click="toggleMobileView"
           class="px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           type="button"
           :aria-expanded="showAllOnMobile"
+          @click="toggleMobileView"
         >
-          {{ showAllOnMobile ? 'РЎРєСЂС‹С‚СЊ' : `РџРѕРєР°Р·Р°С‚СЊ РµС‰Рµ ${categories.length - mobileVisibleCount}` }}
+          {{ showAllOnMobile ? 'Скрыть' : `Показать еще ${categories.length - mobileVisibleCount}` }}
         </button>
       </div>
 
-      <!-- РџРѕРїСѓР»СЏСЂРЅС‹Рµ Р·Р°РїСЂРѕСЃС‹ -->
+      <!-- Популярные теги -->
       <div 
         v-if="popularTags.length > 0"
         class="mt-8 pt-6 border-t"
       >
         <h4 
           id="popular-tags-heading"
-          class="text-sm font-semibold text-gray-700 mb-3"
+          class="text-sm font-semibold text-gray-500 mb-3"
         >
-          РџРѕРїСѓР»СЏСЂРЅС‹Рµ Р·Р°РїСЂРѕСЃС‹:
+          Популярные теги:
         </h4>
         
         <div 
@@ -195,9 +214,9 @@
           aria-labelledby="popular-tags-heading"
         >
           <component
+            :is="Link"
             v-for="tag in visibleTags"
             :key="tag.id"
-            :is="Link"
             :href="getTagHref(tag)"
             :class="tagClasses(tag)"
             role="listitem"
@@ -205,46 +224,46 @@
           >
             <span>{{ tag.name }}</span>
             
-            <!-- РЎС‡РµС‚С‡РёРє РїРѕРїСѓР»СЏСЂРЅРѕСЃС‚Рё -->
+            <!-- Счетчик популярности -->
             <span 
               v-if="tag.count && showTagCounts"
               class="ml-1 text-xs opacity-75"
-              :aria-label="`${tag.count} РјР°СЃС‚РµСЂРѕРІ`"
+              :aria-label="`${tag.count} мастеров`"
             >
               ({{ tag.count }})
             </span>
             
-            <!-- РРЅРґРёРєР°С‚РѕСЂ С‚СЂРµРЅРґР° -->
+            <!-- Иконка тренда -->
             <span
               v-if="tag.trending"
               class="ml-1"
-              aria-label="Р’ С‚СЂРµРЅРґРµ"
-              title="Р’ С‚СЂРµРЅРґРµ"
+              aria-label="В тренде"
+              title="В тренде"
             >
-              рџ“€
+              🔥
             </span>
           </component>
           
-          <!-- РџРѕРєР°Р·Р°С‚СЊ РµС‰Рµ С‚РµРіРё -->
+          <!-- Показать еще теги -->
           <button
             v-if="popularTags.length > visibleTagsCount && !showAllTags"
-            @click="showAllTags = true"
             class="px-3 py-1 text-blue-600 text-sm rounded-full border border-blue-200 hover:bg-blue-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
             type="button"
+            @click="showAllTags = true"
           >
-            +{{ popularTags.length - visibleTagsCount }} РµС‰Рµ
+            +{{ popularTags.length - visibleTagsCount }} еще
           </button>
         </div>
       </div>
 
-      <!-- РЎС‚Р°С‚РёСЃС‚РёРєР° (РµСЃР»Рё РІРєР»СЋС‡РµРЅР°) -->
+      <!-- Статистика (если включена) -->
       <div 
         v-if="showStats && !isLoading"
         class="mt-6 pt-4 border-t text-center text-sm text-gray-500"
       >
-        Р’СЃРµРіРѕ {{ totalItemsCount }} СѓСЃР»СѓРі РІ {{ categories.length }} РєР°С‚РµРіРѕСЂРёСЏС…
+        Всего {{ totalItemsCount }} услуг в {{ categories.length }} категориях
         <span v-if="lastUpdate" class="ml-2">
-          вЂў РћР±РЅРѕРІР»РµРЅРѕ {{ formatLastUpdate(lastUpdate) }}
+          вЂў Обновлено {{ formatLastUpdate(lastUpdate) }}
         </span>
       </div>
     </div>
@@ -256,7 +275,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Link } from '@inertiajs/vue3'
 import { useCatalogStore, type CatalogCategory, type CatalogItem, type PopularTag } from '../../model/catalog.store'
 
-// TypeScript РёРЅС‚РµСЂС„РµР№СЃС‹
+// TypeScript интерфейсы
 interface Props {
   visible?: boolean
   maxCategories?: number
@@ -270,18 +289,18 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  visible: true,
-  maxCategories: 0, // 0 = РїРѕРєР°Р·Р°С‚СЊ РІСЃРµ
-  maxTags: 8,
-  showTagCounts: false,
-  showStats: true,
-  mobileVisibleCount: 2,
-  autoClose: true,
-  closeDelay: 300,
-  customClass: ''
+    visible: true,
+    maxCategories: 0, // 0 = показать все
+    maxTags: 8,
+    showTagCounts: false,
+    showStats: true,
+    mobileVisibleCount: 2,
+    autoClose: true,
+    closeDelay: 300,
+    customClass: ''
 })
 
-// TypeScript С‚РёРїРёР·Р°С†РёСЏ emits
+// TypeScript типы emits
 const emit = defineEmits<{
   'close': []
   'category-click': [category: CatalogCategory, item?: CatalogItem]
@@ -292,12 +311,12 @@ const emit = defineEmits<{
 // Store
 const catalogStore = useCatalogStore()
 
-// Local state
+// Локальное состояние
 const showAllOnMobile = ref(false)
 const showAllTags = ref(false)
 const closeTimeout = ref<number>()
 
-// Computed
+// Вычисляемые свойства
 const categories = computed(() => catalogStore.categories)
 const popularTags = computed(() => catalogStore.popularTags)
 const isLoading = computed(() => catalogStore.isLoading)
@@ -306,142 +325,142 @@ const totalItemsCount = computed(() => catalogStore.totalItemsCount)
 const lastUpdate = computed(() => catalogStore.lastFetchTime)
 
 const visibleCategories = computed(() => {
-  if (props.maxCategories > 0) {
-    return categories.value.slice(0, props.maxCategories)
-  }
-  return categories.value
+    if (props.maxCategories > 0) {
+        return categories.value.slice(0, props.maxCategories)
+    }
+    return categories.value
 })
 
 const visibleTagsCount = computed(() => 
-  showAllTags.value ? popularTags.value.length : props.maxTags
+    showAllTags.value ? popularTags.value.length : props.maxTags
 )
 
 const visibleTags = computed(() => 
-  popularTags.value.slice(0, visibleTagsCount.value)
+    popularTags.value.slice(0, visibleTagsCount.value)
 )
 
 const linkClasses = (item: CatalogItem) => [
-  'text-gray-600 hover:text-blue-600 text-sm flex items-center justify-between py-1 px-2 -mx-2 rounded transition-all duration-200',
-  'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
-  {
-    'hover:bg-blue-50': !item.popular,
-    'hover:bg-orange-50 font-medium': item.popular,
-  }
+    'text-gray-500 hover:text-blue-600 text-sm flex items-center justify-between py-1 px-2 -mx-2 rounded transition-all duration-200',
+    'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+    {
+        'hover:bg-blue-50': !item.popular,
+        'hover:bg-orange-50 font-medium': item.popular,
+    }
 ]
 
 const tagClasses = (tag: PopularTag) => [
-  'inline-flex items-center px-3 py-1 text-sm rounded-full transition-all duration-200',
-  'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
-  {
-    'bg-gray-100 hover:bg-gray-200 text-gray-700': !tag.trending,
-    'bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium': tag.trending,
-  }
+    'inline-flex items-center px-3 py-1 text-sm rounded-full transition-all duration-200',
+    'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+    {
+        'bg-gray-500 hover:bg-gray-500 text-gray-500': !tag.trending,
+        'bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium': tag.trending,
+    }
 ]
 
-// Methods
+// Методы
 const handleClose = (): void => {
-  emit('close')
+    emit('close')
 }
 
 const handleItemClick = (category: CatalogCategory, item: CatalogItem): void => {
-  // РўСЂРµРєРёРЅРі РєР»РёРєР°
-  catalogStore.trackCategoryClick(category, item)
+    // Трекинг клика по категории
+    catalogStore.trackCategoryClick(category, item)
   
-  // РЈРІРµРґРѕРјР»РµРЅРёРµ СЂРѕРґРёС‚РµР»СЏ
-  emit('category-click', category, item)
+    // Уведомление о клике
+    emit('category-click', category, item)
   
-  // РђРІС‚РѕР·Р°РєСЂС‹С‚РёРµ СЃ Р·Р°РґРµСЂР¶РєРѕР№
-  if (props.autoClose) {
-    closeTimeout.value = setTimeout(() => {
-      handleClose()
-    }, props.closeDelay)
-  }
+    // Автозакрытие с задержкой
+    if (props.autoClose) {
+        closeTimeout.value = setTimeout(() => {
+            handleClose()
+        }, props.closeDelay)
+    }
 }
 
 const handleCategoryHeaderClick = (category: CatalogCategory): void => {
-  // РџРµСЂРµС…РѕРґ РЅР° СЃС‚СЂР°РЅРёС†Сѓ РєР°С‚РµРіРѕСЂРёРё (РµСЃР»Рё РµСЃС‚СЊ)
-  if (category.items.length > 0) {
-    const mainItem = category.items[0]
-    if (mainItem) {
-      handleItemClick(category, mainItem)
+    // Переход к странице категории (если есть)
+    if (category.items.length > 0) {
+        const mainItem = category.items[0]
+        if (mainItem) {
+            handleItemClick(category, mainItem)
+        }
     }
-  }
 }
 
 const handleTagClick = (tag: PopularTag): void => {
-  // РўСЂРµРєРёРЅРі РєР»РёРєР°
-  catalogStore.trackTagClick(tag)
+    // Трекинг клика по тегу
+    catalogStore.trackTagClick(tag)
   
-  // РЈРІРµРґРѕРјР»РµРЅРёРµ СЂРѕРґРёС‚РµР»СЏ
-  emit('tag-click', tag)
+    // Уведомление о клике
+    emit('tag-click', tag)
   
-  // РђРІС‚РѕР·Р°РєСЂС‹С‚РёРµ
-  if (props.autoClose) {
-    closeTimeout.value = setTimeout(() => {
-      handleClose()
-    }, props.closeDelay)
-  }
+    // Автозакрытие
+    if (props.autoClose) {
+        closeTimeout.value = setTimeout(() => {
+            handleClose()
+        }, props.closeDelay)
+    }
 }
 
 const handleRefresh = async (): Promise<void> => {
-  await catalogStore.refreshCatalog()
-  emit('refresh')
+    await catalogStore.refreshCatalog()
+    emit('refresh')
 }
 
 const toggleMobileView = (): void => {
-  showAllOnMobile.value = !showAllOnMobile.value
+    showAllOnMobile.value = !showAllOnMobile.value
 }
 
 const getTagHref = (tag: PopularTag): string => {
-  return `/search?q=${encodeURIComponent(tag.name)}`
+    return `/search?q=${encodeURIComponent(tag.name)}`
 }
 
 const formatLastUpdate = (date: Date): string => {
-  const now = new Date()
-  const diff = now.getTime() - date.getTime()
-  const minutes = Math.floor(diff / 60000)
+    const now = new Date()
+    const diff = now.getTime() - date.getTime()
+    const minutes = Math.floor(diff / 60000)
   
-  if (minutes < 1) return 'С‚РѕР»СЊРєРѕ С‡С‚Рѕ'
-  if (minutes < 60) return `${minutes} РјРёРЅ РЅР°Р·Р°Рґ`
+    if (minutes < 1) return 'только что'
+    if (minutes < 60) return `${minutes} минут назад`
   
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours} С‡ РЅР°Р·Р°Рґ`
+    const hours = Math.floor(minutes / 60)
+    if (hours < 24) return `${hours} час назад`
   
-  return date.toLocaleDateString('ru-RU')
+    return date.toLocaleDateString('ru-RU')
 }
 
-// Keyboard navigation
+// Навигация по клавиатуре
 const handleKeyboardNavigation = (event: KeyboardEvent): void => {
-  if (!props.visible) return
+    if (!props.visible) return
   
-  switch (event.key) {
+    switch (event.key) {
     case 'Escape':
-      handleClose()
-      break
+        handleClose()
+        break
     case 'Tab':
-      // РџРѕР·РІРѕР»СЏРµРј РЅР°С‚РёРІРЅСѓСЋ С‚Р°Р±СѓР»СЏС†РёСЋ
-      break
-  }
+        // Разрешаем переключение табов
+        break
+    }
 }
 
-// Lifecycle
+// Жизненный цикл
 onMounted(() => {
-  document.addEventListener('keydown', handleKeyboardNavigation)
+    document.addEventListener('keydown', handleKeyboardNavigation)
   
-  // РџСЂРµРґР·Р°РіСЂСѓР·РєР° РґР°РЅРЅС‹С…
-  if (categories.value.length === 0) {
-    catalogStore.loadCatalog()
-  }
+    // Загрузка данных
+    if (categories.value.length === 0) {
+        catalogStore.loadCatalog()
+    }
 })
 
 onUnmounted(() => {
-  document.removeEventListener('keydown', handleKeyboardNavigation)
-  clearTimeout(closeTimeout.value)
+    document.removeEventListener('keydown', handleKeyboardNavigation)
+    clearTimeout(closeTimeout.value)
 })
 </script>
 
 <style scoped>
-/* РђРЅРёРјР°С†РёРё РґР»СЏ loading СЃРѕСЃС‚РѕСЏРЅРёР№ */
+/* Анимации для состояний загрузки */
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
@@ -455,7 +474,7 @@ onUnmounted(() => {
   }
 }
 
-/* Hover СЌС„С„РµРєС‚С‹ РґР»СЏ РєР°С‚РµРіРѕСЂРёР№ */
+/* Hover эффекты для категорий */
 .category-column {
   transition: transform 0.2s ease-in-out;
 }
@@ -466,12 +485,12 @@ onUnmounted(() => {
   }
 }
 
-/* РЈР»СѓС‡С€РµРЅРЅС‹Рµ focus states */
+/* Улучшенные состояния фокуса */
 .focus\:ring-2:focus {
   box-shadow: 0 0 0 2px theme('colors.blue.500');
 }
 
-/* Accessibility improvements */
+/* Улучшения доступности */
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;
@@ -483,9 +502,9 @@ onUnmounted(() => {
   }
 }
 
-/* High contrast mode */
+/* Режим высокого контраста */
 @media (prefers-contrast: high) {
-  .text-gray-600 {
+  .text-gray-500 {
     color: #1f2937;
   }
   
@@ -493,27 +512,27 @@ onUnmounted(() => {
     color: #1d4ed8;
   }
   
-  .bg-gray-100 {
+  .bg-gray-500 {
     background-color: #f3f4f6;
     border: 1px solid #d1d5db;
   }
 }
 
-/* Dark mode РїРѕРґРґРµСЂР¶РєР° */
+/* Темный режим подложки */
 @media (prefers-color-scheme: dark) {
   .bg-white {
     background-color: theme('colors.gray.900');
   }
   
-  .text-gray-900 {
+  .text-gray-500 {
     color: theme('colors.gray.100');
   }
   
-  .text-gray-600 {
+  .text-gray-500 {
     color: theme('colors.gray.300');
   }
   
-  .text-gray-700 {
+  .text-gray-500 {
     color: theme('colors.gray.200');
   }
   
@@ -521,16 +540,16 @@ onUnmounted(() => {
     border-color: theme('colors.gray.700');
   }
   
-  .bg-gray-100 {
+  .bg-gray-500 {
     background-color: theme('colors.gray.800');
   }
   
-  .hover\:bg-gray-200:hover {
+  .hover\:bg-gray-500:hover {
     background-color: theme('colors.gray.700');
   }
 }
 
-/* Mobile optimizations */
+/* Оптимизация для мобильных */
 @media (max-width: 640px) {
   .container {
     padding-left: 1rem;
@@ -550,7 +569,7 @@ onUnmounted(() => {
   }
 }
 
-/* Print styles */
+/* Стили для печати */
 @media print {
   .category-column {
     break-inside: avoid;

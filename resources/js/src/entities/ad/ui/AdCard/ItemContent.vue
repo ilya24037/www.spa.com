@@ -21,33 +21,50 @@
     <template v-if="item.status !== 'draft'">
       <!-- РћРїРёСЃР°РЅРёРµ -->
       <div v-if="item.description" class="item-description">
-        <p class="description-text">{{ item.description }}</p>
+        <p class="description-text">
+          {{ item.description }}
+        </p>
       </div>
 
       <!-- Р”РѕСЃС‚СѓРїРЅРѕСЃС‚СЊ -->
       <div class="item-stock">
-        <p class="stock-text">Р”РѕСЃС‚СѓРїРµРЅ РґР»СЏ Р·Р°РїРёСЃРё</p>
+        <p class="stock-text">
+          Р”РѕСЃС‚СѓРїРµРЅ РґР»СЏ Р·Р°РїРёСЃРё
+        </p>
       </div>
 
       <!-- Р”РѕСЃС‚Р°РІРєР°/Р’С‹РµР·Рґ -->
       <div v-if="item.home_service" class="item-delivery">
         <div class="delivery-icon">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke="currentColor" stroke-width="1.5"/>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+          >
+            <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke="currentColor" stroke-width="1.5" />
           </svg>
         </div>
-        <p class="delivery-text">Р’С‹РµР·Рґ Рє РєР»РёРµРЅС‚Сѓ</p>
+        <p class="delivery-text">
+          Р’С‹РµР·Рґ Рє РєР»РёРµРЅС‚Сѓ
+        </p>
       </div>
 
       <!-- РќР°Р·РІР°РЅРёРµ РєРѕРјРїР°РЅРёРё/РјР°СЃС‚РµСЂР° -->
       <div class="item-company">
-        <p class="company-name">{{ item.company_name || 'РњР°СЃСЃР°Р¶РЅС‹Р№ СЃР°Р»РѕРЅ' }}</p>
+        <p class="company-name">
+          {{ item.company_name || 'РњР°СЃСЃР°Р¶РЅС‹Р№ СЃР°Р»РѕРЅ' }}
+        </p>
       </div>
 
       <!-- РђРґСЂРµСЃ -->
       <div class="item-location">
-        <p class="location-address">{{ item.address || item.city }}</p>
-        <p class="location-district">{{ item.district || 'Р¦РµРЅС‚СЂР°Р»СЊРЅС‹Р№ СЂР°Р№РѕРЅ' }}</p>
+        <p class="location-address">
+          {{ item.address || item.city }}
+        </p>
+        <p class="location-district">
+          {{ item.district || 'Р¦РµРЅС‚СЂР°Р»СЊРЅС‹Р№ СЂР°Р№РѕРЅ' }}
+        </p>
       </div>
     </template>
   </div>
@@ -55,18 +72,18 @@
 
 <script setup lang="ts">
 const _props = defineProps({
-  item: {
-    type: Object,
-    required: true
-  },
-  itemUrl: {
-    type: String,
-    required: true
-  }
+    item: {
+        type: Object,
+        required: true
+    },
+    itemUrl: {
+        type: String,
+        required: true
+    }
 })
 
 const formatPrice = (price: number) => {
-  return new Intl.NumberFormat('ru-RU').format(price)
+    return new Intl.NumberFormat('ru-RU').format(price)
 }
 </script>
 
@@ -80,7 +97,7 @@ const formatPrice = (price: number) => {
 }
 
 .item-title-text {
-  @apply text-lg font-medium text-gray-900;
+  @apply text-lg font-medium text-gray-500;
   /* Р”Р»СЏ С‡РµСЂРЅРѕРІРёРєРѕРІ - РјРЅРѕРіРѕСЃС‚СЂРѕС‡РЅС‹Р№ Р·Р°РіРѕР»РѕРІРѕРє */
   line-height: 1.4;
   display: -webkit-box;
@@ -95,7 +112,7 @@ const formatPrice = (price: number) => {
 }
 
 .description-text {
-  @apply text-sm text-gray-600 line-clamp-2;
+  @apply text-sm text-gray-500 line-clamp-2;
 }
 
 .item-price-section {
@@ -103,12 +120,12 @@ const formatPrice = (price: number) => {
 }
 
 .item-price {
-  @apply text-lg font-normal text-gray-900;
+  @apply text-lg font-normal text-gray-500;
   /* Р¦РµРЅР° РєР°Рє РЅР° СЃРєСЂРёРЅРµ - РѕР±С‹С‡РЅС‹Р№ С€СЂРёС„С‚ */
 }
 
 .price-negotiable {
-  @apply text-gray-600;
+  @apply text-gray-500;
 }
 
 .price-currency {
@@ -132,7 +149,7 @@ const formatPrice = (price: number) => {
 }
 
 .delivery-text {
-  @apply text-sm text-gray-600;
+  @apply text-sm text-gray-500;
 }
 
 .item-company {
@@ -140,11 +157,11 @@ const formatPrice = (price: number) => {
 }
 
 .company-name {
-  @apply text-sm font-medium text-gray-900;
+  @apply text-sm font-medium text-gray-500;
 }
 
 .item-location {
-  @apply text-sm text-gray-600;
+  @apply text-sm text-gray-500;
 }
 
 .location-address {

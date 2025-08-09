@@ -2,12 +2,12 @@
 <template>
   <div class="relative">
     <button 
-      @click="handleClick"
       :disabled="disabled || isLoading"
       :class="buttonClasses"
       :aria-label="buttonAriaLabel"
       :aria-expanded="dropdownOpen"
       :aria-haspopup="showDropdown"
+      @click="handleClick"
     >
       <!-- РРєРѕРЅРєР° РјРµСЃС‚РѕРїРѕР»РѕР¶РµРЅРёСЏ -->
       <svg 
@@ -39,9 +39,9 @@
       <!-- РРЅРґРёРєР°С‚РѕСЂ Р·Р°РіСЂСѓР·РєРё -->
       <div 
         v-if="isLoading"
-        class="w-3 h-3 border border-gray-300 border-t-blue-600 rounded-full animate-spin ml-1"
+        class="w-3 h-3 border border-gray-500 border-t-blue-600 rounded-full animate-spin ml-1"
         aria-hidden="true"
-      ></div>
+      />
       
       <!-- РЎС‚СЂРµР»РєР° (РµСЃР»Рё РµСЃС‚СЊ dropdown) -->
       <svg 
@@ -53,7 +53,12 @@
         viewBox="0 0 24 24"
         aria-hidden="true"
       >
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M19 9l-7 7-7-7"
+        />
       </svg>
     </button>
 
@@ -75,14 +80,16 @@
       >
         <!-- РџРѕРїСѓР»СЏСЂРЅС‹Рµ РіРѕСЂРѕРґР° -->
         <div class="p-2">
-          <div class="text-xs font-medium text-gray-500 mb-2">РџРѕРїСѓР»СЏСЂРЅС‹Рµ</div>
+          <div class="text-xs font-medium text-gray-500 mb-2">
+            РџРѕРїСѓР»СЏСЂРЅС‹Рµ
+          </div>
           <button
             v-for="city in popularCities.slice(0, maxDropdownItems)"
             :key="city.id"
-            @click="selectCity(city)"
             :class="dropdownItemClasses"
             :aria-selected="city.id === currentCity?.id"
             role="option"
+            @click="selectCity(city)"
           >
             <span class="truncate">{{ city.name }}</span>
             <svg
@@ -102,13 +109,23 @@
         </div>
 
         <!-- РљРЅРѕРїРєР° "Р’СЃРµ РіРѕСЂРѕРґР°" -->
-        <div class="border-t border-gray-100 p-2">
+        <div class="border-t border-gray-500 p-2">
           <button
-            @click="openModal"
             class="w-full px-3 py-2 text-left text-sm text-blue-600 hover:bg-blue-50 rounded transition-colors flex items-center"
+            @click="openModal"
           >
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <svg
+              class="w-4 h-4 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
             </svg>
             Р’СЃРµ РіРѕСЂРѕРґР°
           </button>
@@ -134,12 +151,12 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  variant: 'default',
-  disabled: false,
-  modalMode: false,
-  showDropdown: true,
-  maxDropdownItems: 6,
-  customClass: ''
+    variant: 'default',
+    disabled: false,
+    modalMode: false,
+    showDropdown: true,
+    maxDropdownItems: 6,
+    customClass: ''
 })
 
 // TypeScript С‚РёРїРёР·Р°С†РёСЏ emits
@@ -163,133 +180,133 @@ const popularCities = computed(() => cityStore.popularCities)
 const isLoading = computed(() => cityStore.isLoading)
 
 const displayCityName = computed(() => {
-  if (isLoading.value) return 'Р—Р°РіСЂСѓР·РєР°...'
-  return cityStore.currentCityName
+    if (isLoading.value) return 'Р—Р°РіСЂСѓР·РєР°...'
+    return cityStore.currentCityName
 })
 
 const buttonClasses = computed(() => [
-  'inline-flex items-center gap-1.5 font-medium transition-colors duration-200',
-  'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md',
-  {
+    'inline-flex items-center gap-1.5 font-medium transition-colors duration-200',
+    'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md',
+    {
     // Default variant
-    'text-gray-900 hover:text-blue-600 px-2 py-1': props.variant === 'default',
+        'text-gray-500 hover:text-blue-600 px-2 py-1': props.variant === 'default',
     
-    // Compact variant
-    'text-gray-700 hover:text-blue-600 px-1.5 py-0.5 text-sm': props.variant === 'compact',
+        // Compact variant
+        'text-gray-500 hover:text-blue-600 px-1.5 py-0.5 text-sm': props.variant === 'compact',
     
-    // Minimal variant
-    'text-gray-600 hover:text-gray-900 py-0.5': props.variant === 'minimal',
+        // Minimal variant
+        'text-gray-500 hover:text-gray-500 py-0.5': props.variant === 'minimal',
     
-    // Disabled state
-    'opacity-50 cursor-not-allowed': props.disabled || isLoading.value,
+        // Disabled state
+        'opacity-50 cursor-not-allowed': props.disabled || isLoading.value,
     
-    // Active state
-    'text-blue-600': dropdownOpen.value && !props.disabled
-  },
-  props.customClass
+        // Active state
+        'text-blue-600': dropdownOpen.value && !props.disabled
+    },
+    props.customClass
 ])
 
 const cityNameClasses = computed(() => [
-  'truncate',
-  {
-    'max-w-32': props.variant === 'default',
-    'max-w-24': props.variant === 'compact',
-    'max-w-20': props.variant === 'minimal'
-  }
+    'truncate',
+    {
+        'max-w-32': props.variant === 'default',
+        'max-w-24': props.variant === 'compact',
+        'max-w-20': props.variant === 'minimal'
+    }
 ])
 
 const dropdownClasses = computed(() => [
-  'absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 z-50',
-  'min-w-48 max-w-64'
+    'absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 z-50',
+    'min-w-48 max-w-64'
 ])
 
 const dropdownItemClasses = computed(() => [
-  'w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 transition-colors',
-  'flex items-center justify-between rounded'
+    'w-full px-3 py-2 text-left text-sm text-gray-500 hover:bg-gray-500 transition-colors',
+    'flex items-center justify-between rounded'
 ])
 
 const buttonAriaLabel = computed(() => {
-  if (props.modalMode) {
-    return `Р’С‹Р±СЂР°С‚СЊ РіРѕСЂРѕРґ, С‚РµРєСѓС‰РёР№: ${displayCityName.value}`
-  }
-  return `Р“РѕСЂРѕРґ ${displayCityName.value}, ${dropdownOpen.value ? 'Р·Р°РєСЂС‹С‚СЊ' : 'РѕС‚РєСЂС‹С‚СЊ'} СЃРїРёСЃРѕРє`
+    if (props.modalMode) {
+        return `Р’С‹Р±СЂР°С‚СЊ РіРѕСЂРѕРґ, С‚РµРєСѓС‰РёР№: ${displayCityName.value}`
+    }
+    return `Р“РѕСЂРѕРґ ${displayCityName.value}, ${dropdownOpen.value ? 'Р·Р°РєСЂС‹С‚СЊ' : 'РѕС‚РєСЂС‹С‚СЊ'} СЃРїРёСЃРѕРє`
 })
 
 const dropdownAriaLabel = computed(() => 
-  'РЎРїРёСЃРѕРє РїРѕРїСѓР»СЏСЂРЅС‹С… РіРѕСЂРѕРґРѕРІ РґР»СЏ Р±С‹СЃС‚СЂРѕРіРѕ РІС‹Р±РѕСЂР°'
+    'РЎРїРёСЃРѕРє РїРѕРїСѓР»СЏСЂРЅС‹С… РіРѕСЂРѕРґРѕРІ РґР»СЏ Р±С‹СЃС‚СЂРѕРіРѕ РІС‹Р±РѕСЂР°'
 )
 
 // Methods
 const handleClick = (): void => {
-  if (props.disabled || isLoading.value) return
+    if (props.disabled || isLoading.value) return
   
-  if (props.modalMode) {
-    openModal()
-  } else if (props.showDropdown) {
-    toggleDropdown()
-  }
+    if (props.modalMode) {
+        openModal()
+    } else if (props.showDropdown) {
+        toggleDropdown()
+    }
 }
 
 const toggleDropdown = (): void => {
-  if (dropdownOpen.value) {
-    closeDropdown()
-  } else {
-    openDropdown()
-  }
+    if (dropdownOpen.value) {
+        closeDropdown()
+    } else {
+        openDropdown()
+    }
 }
 
 const openDropdown = (): void => {
-  dropdownOpen.value = true
-  emit('dropdown-opened')
+    dropdownOpen.value = true
+    emit('dropdown-opened')
 }
 
 const closeDropdown = (): void => {
-  dropdownOpen.value = false
-  emit('dropdown-closed')
+    dropdownOpen.value = false
+    emit('dropdown-closed')
 }
 
 const selectCity = (city: City): void => {
-  cityStore.selectCity(city)
-  closeDropdown()
-  emit('city-selected', city)
+    cityStore.selectCity(city)
+    closeDropdown()
+    emit('city-selected', city)
 }
 
 const openModal = (): void => {
-  closeDropdown()
-  cityStore.openModal()
-  emit('modal-requested')
+    closeDropdown()
+    cityStore.openModal()
+    emit('modal-requested')
 }
 
 // Р—Р°РєСЂС‹С‚РёРµ РїСЂРё РєР»РёРєРµ РІРЅРµ РєРѕРјРїРѕРЅРµРЅС‚Р°
 const handleClickOutside = (event: MouseEvent): void => {
-  if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
-    closeDropdown()
-  }
+    if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
+        closeDropdown()
+    }
 }
 
 // Р—Р°РєСЂС‹С‚РёРµ РїСЂРё РЅР°Р¶Р°С‚РёРё Escape
 const handleEscapeKey = (event: KeyboardEvent): void => {
-  if (event.key === 'Escape' && dropdownOpen.value) {
-    closeDropdown()
-  }
+    if (event.key === 'Escape' && dropdownOpen.value) {
+        closeDropdown()
+    }
 }
 
 // Lifecycle
 onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
-  document.addEventListener('keydown', handleEscapeKey)
+    document.addEventListener('click', handleClickOutside)
+    document.addEventListener('keydown', handleEscapeKey)
 })
 
 onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
-  document.removeEventListener('keydown', handleEscapeKey)
+    document.removeEventListener('click', handleClickOutside)
+    document.removeEventListener('keydown', handleEscapeKey)
 })
 
 // Expose РґР»СЏ template ref
 defineExpose({
-  openModal,
-  closeDropdown,
-  selectCity
+    openModal,
+    closeDropdown,
+    selectCity
 })
 </script>
 
@@ -349,11 +366,11 @@ defineExpose({
     background-color: theme('colors.gray.800');
   }
   
-  .text-gray-900 {
+  .text-gray-500 {
     color: theme('colors.gray.100');
   }
   
-  .text-gray-700 {
+  .text-gray-500 {
     color: theme('colors.gray.200');
   }
   

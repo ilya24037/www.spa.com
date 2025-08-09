@@ -7,7 +7,7 @@ export { ProfileStats } from './ui/ProfileStats'
 export { UserProfile } from './ui/UserProfile'
 
 // === LEGACY API ===
-export { ProfileNavigationLegacy } from './ui/ProfileNavigationLegacy'
+// Removed ProfileNavigationLegacy - migrated to new ProfileTabs/ProfileStats/UserProfile components
 
 // === STORE ===
 export { useProfileNavigationStore } from './model/navigation.store'

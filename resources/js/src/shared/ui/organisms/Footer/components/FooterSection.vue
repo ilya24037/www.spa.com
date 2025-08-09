@@ -1,7 +1,7 @@
 <template>
   <div v-if="section" class="footer-section">
     <!-- Заголовок секции -->
-    <h3 class="font-semibold mb-4 text-gray-900">
+    <h3 class="font-semibold mb-4 text-gray-500">
       {{ section.title }}
     </h3>
     
@@ -15,7 +15,7 @@
           <Link
             v-if="!isExternalLink(link.href)"
             :href="link.href"
-            class="text-gray-600 hover:text-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md px-1 py-0.5 -mx-1"
+            class="text-gray-500 hover:text-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md px-1 py-0.5 -mx-1"
             :title="link.description || link.text"
           >
             {{ link.text }}
@@ -26,7 +26,7 @@
             :href="link.href"
             target="_blank"
             rel="noopener noreferrer"
-            class="inline-flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md px-1 py-0.5 -mx-1"
+            class="inline-flex items-center gap-1 text-gray-500 hover:text-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md px-1 py-0.5 -mx-1"
             :title="link.description || link.text"
           >
             {{ link.text }}
@@ -66,7 +66,7 @@ const props = defineProps<Props>()
 
 // Фильтруем только видимые ссылки
 const visibleLinks = computed(() => {
-  return filterVisibleLinks(props.section.links)
+    return filterVisibleLinks(props.section.links)
 })
 </script>
 

@@ -2,10 +2,10 @@
 <template>
   <div class="relative">
     <button
-      @click="handleClick"
       :class="buttonClasses"
       :aria-label="buttonAriaLabel"
       :aria-expanded="false"
+      @click="handleClick"
     >
       <!-- РРєРѕРЅРєР° РєРѕР»РѕРєРѕР»СЊС‡РёРєР° -->
       <svg
@@ -46,9 +46,9 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  count: 0,
-  maxCount: 99,
-  disabled: false
+    count: 0,
+    maxCount: 99,
+    disabled: false
 })
 
 // TypeScript С‚РёРїРёР·Р°С†РёСЏ emits
@@ -58,38 +58,38 @@ const emit = defineEmits<{
 
 // Computed properties
 const displayCount = computed(() => {
-  if (props.count > props.maxCount) {
-    return `${props.maxCount}+`
-  }
-  return props.count.toString()
+    if (props.count > props.maxCount) {
+        return `${props.maxCount}+`
+    }
+    return props.count.toString()
 })
 
 const buttonClasses = computed(() => [
-  'relative p-2 rounded-lg transition-colors duration-200 text-gray-600',
-  'hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
-  {
-    'opacity-50 cursor-not-allowed': props.disabled,
-    'text-blue-600': props.count > 0 && !props.disabled
-  }
+    'relative p-2 rounded-lg transition-colors duration-200 text-gray-500',
+    'hover:bg-gray-500 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+    {
+        'opacity-50 cursor-not-allowed': props.disabled,
+        'text-blue-600': props.count > 0 && !props.disabled
+    }
 ])
 
 const badgeClasses = computed(() => [
-  'absolute -top-1 -right-1 inline-flex items-center justify-center min-w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full',
-  'px-1.5 ring-2 ring-white'
+    'absolute -top-1 -right-1 inline-flex items-center justify-center min-w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full',
+    'px-1.5 ring-2 ring-white'
 ])
 
 const buttonAriaLabel = computed(() => {
-  if (props.count === 0) {
-    return 'РЈРІРµРґРѕРјР»РµРЅРёСЏ'
-  }
-  return `РЈРІРµРґРѕРјР»РµРЅРёСЏ (${props.count} РЅРµРїСЂРѕС‡РёС‚Р°РЅРЅС‹С…)`
+    if (props.count === 0) {
+        return 'РЈРІРµРґРѕРјР»РµРЅРёСЏ'
+    }
+    return `РЈРІРµРґРѕРјР»РµРЅРёСЏ (${props.count} РЅРµРїСЂРѕС‡РёС‚Р°РЅРЅС‹С…)`
 })
 
 // Methods
 const handleClick = (): void => {
-  if (!props.disabled) {
-    emit('click')
-  }
+    if (!props.disabled) {
+        emit('click')
+    }
 }
 </script>
 

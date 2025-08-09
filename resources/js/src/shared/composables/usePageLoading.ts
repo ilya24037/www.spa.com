@@ -33,7 +33,7 @@ export function usePageLoading(options: UsePageLoadingOptions = {}): UsePageLoad
     isLoading: false,
     progress: 0,
     message: '',
-    error: null,
+    error: undefined,
     startTime: 0,
     estimatedDuration: undefined
   })
@@ -47,7 +47,7 @@ export function usePageLoading(options: UsePageLoadingOptions = {}): UsePageLoad
   const isLoading = computed<boolean>(() => state.value.isLoading)
   const progress = computed<number>(() => state.value.progress)
   const message = computed<string>(() => state.value.message)
-  const error = computed<PageLoadingError | null>(() => state.value.error)
+  const error = computed<PageLoadingError | undefined>(() => state.value.error)
 
   // Получение дефолтного сообщения для типа страницы
   const getDefaultMessage = (pageType: PageLoaderType): string => {
@@ -84,7 +84,7 @@ export function usePageLoading(options: UsePageLoadingOptions = {}): UsePageLoad
         isLoading: true,
         progress: 0,
         message: customMessage || getDefaultMessage(type),
-        error: null,
+        error: undefined,
         startTime: Date.now(),
         estimatedDuration: undefined
       }

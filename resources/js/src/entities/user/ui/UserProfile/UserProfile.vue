@@ -3,10 +3,10 @@
     <!-- Loading состояние -->
     <div v-if="loading" class="animate-pulse">
       <div class="flex items-center space-x-4">
-        <div class="w-20 h-20 bg-gray-200 rounded-full"></div>
+        <div class="w-20 h-20 bg-gray-500 rounded-full" />
         <div class="flex-1 space-y-2">
-          <div class="h-4 bg-gray-200 rounded w-1/2"></div>
-          <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+          <div class="h-4 bg-gray-500 rounded w-1/2" />
+          <div class="h-4 bg-gray-500 rounded w-3/4" />
         </div>
       </div>
     </div>
@@ -19,9 +19,15 @@
         :size="80"
       />
       <div class="flex-1">
-        <h2 class="text-xl font-semibold text-gray-900">{{ user.name || 'Пользователь' }}</h2>
-        <p v-if="user.email" class="text-gray-600">{{ user.email }}</p>
-        <p v-if="user.phone" class="text-gray-600">{{ user.phone }}</p>
+        <h2 class="text-xl font-semibold text-gray-500">
+          {{ user.name || 'Пользователь' }}
+        </h2>
+        <p v-if="user.email" class="text-gray-500">
+          {{ user.email }}
+        </p>
+        <p v-if="user.phone" class="text-gray-500">
+          {{ user.phone }}
+        </p>
       </div>
     </div>
     
@@ -49,7 +55,7 @@ interface Props {
 }
 
 withDefaults(defineProps<Props>(), {
-  user: null,
-  loading: false
+    user: null,
+    loading: false
 })
 </script>

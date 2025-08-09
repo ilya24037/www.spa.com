@@ -16,40 +16,40 @@ import { computed } from 'vue'
 import type { SkeletonProps } from './Skeleton.types'
 
 const props = withDefaults(defineProps<SkeletonProps>(), {
-  variant: 'text',
-  size: 'medium',
-  animated: true,
-  rounded: false
+    variant: 'text',
+    size: 'medium',
+    animated: true,
+    rounded: false
 })
 
 const skeletonClasses = computed(() => [
-  'skeleton',
-  `skeleton--${props.variant}`,
-  `skeleton--${props.size}`,
-  {
-    'skeleton--animated': props.animated,
-    'skeleton--rounded': props.rounded,
-    'skeleton--circular': props.variant === 'circular'
-  },
-  props.customClass
+    'skeleton',
+    `skeleton--${props.variant}`,
+    `skeleton--${props.size}`,
+    {
+        'skeleton--animated': props.animated,
+        'skeleton--rounded': props.rounded,
+        'skeleton--circular': props.variant === 'circular'
+    },
+    props.customClass
 ])
 
 const customStyles = computed(() => {
-  const styles: Record<string, string> = {}
+    const styles: Record<string, string> = {}
   
-  if (props.width) {
-    styles.width = typeof props.width === 'number' ? `${props.width}px` : props.width
-  }
+    if (props.width) {
+        styles.width = typeof props.width === 'number' ? `${props.width}px` : props.width
+    }
   
-  if (props.height) {
-    styles.height = typeof props.height === 'number' ? `${props.height}px` : props.height
-  }
+    if (props.height) {
+        styles.height = typeof props.height === 'number' ? `${props.height}px` : props.height
+    }
   
-  return styles
+    return styles
 })
 
 const ariaLabel = computed(() => 
-  props.ariaLabel || `Р—Р°РіСЂСѓР·РєР° ${props.variant === 'text' ? 'С‚РµРєСЃС‚Р°' : 'РєРѕРЅС‚РµРЅС‚Р°'}...`
+    props.ariaLabel || `Р—Р°РіСЂСѓР·РєР° ${props.variant === 'text' ? 'С‚РµРєСЃС‚Р°' : 'РєРѕРЅС‚РµРЅС‚Р°'}...`
 )
 </script>
 

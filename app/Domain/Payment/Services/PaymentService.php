@@ -130,7 +130,7 @@ class PaymentService
     /**
      * Получить статистику платежей
      */
-    public function getPaymentStats(User $user = null): array
+    public function getPaymentStats(?User $user = null): array
     {
         if ($user) {
             return $this->paymentRepository->getUserStats($user->id);
@@ -145,7 +145,7 @@ class PaymentService
     public function getPaymentsByPeriod(
         \DateTime $from,
         \DateTime $to,
-        PaymentStatus $status = null
+        ?PaymentStatus $status = null
     ): Collection {
         return $this->paymentRepository->findByPeriod($from, $to, $status);
     }
@@ -177,7 +177,7 @@ class PaymentService
     /**
      * Отменить платёж
      */
-    public function cancelPayment(Payment $payment, string $reason = null): Payment
+    public function cancelPayment(Payment $payment, ?string $reason = null): Payment
     {
         if (!in_array($payment->status, [PaymentStatus::PENDING, PaymentStatus::PROCESSING])) {
             throw new \InvalidArgumentException('Можно отменить только ожидающие или обрабатываемые платежи');

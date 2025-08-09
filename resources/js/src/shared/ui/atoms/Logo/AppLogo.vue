@@ -55,56 +55,56 @@ interface AppLogoProps {
 }
 
 const props = withDefaults(defineProps<AppLogoProps>(), {
-  href: '/',
-  logoText: 'MASSAGIST',
-  variant: 'default',
-  size: 'medium',
-  showIcon: true,
-  showText: true,
-  customClass: ''
+    href: '/',
+    logoText: 'MASSAGIST',
+    variant: 'default',
+    size: 'medium',
+    showIcon: true,
+    showText: true,
+    customClass: ''
 })
 
 // Computed properties
 const logoClasses = computed(() => [
-  // Р‘Р°Р·РѕРІС‹Рµ СЃС‚РёР»Рё
-  'inline-flex items-center transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg',
+    // Р‘Р°Р·РѕРІС‹Рµ СЃС‚РёР»Рё
+    'inline-flex items-center transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg',
   
-  // Р Р°Р·РјРµСЂС‹
-  {
-    'text-lg': props.size === 'small',
-    'text-xl': props.size === 'medium', 
-    'text-2xl': props.size === 'large'
-  },
+    // Р Р°Р·РјРµСЂС‹
+    {
+        'text-lg': props.size === 'small',
+        'text-xl': props.size === 'medium', 
+        'text-2xl': props.size === 'large'
+    },
   
-  // Р¦РІРµС‚Р° РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
-  'text-blue-600 hover:text-blue-700',
+    // Р¦РІРµС‚Р° РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
+    'text-blue-600 hover:text-blue-700',
   
-  // РљР°СЃС‚РѕРјРЅС‹Р№ РєР»Р°СЃСЃ
-  props.customClass
+    // РљР°СЃС‚РѕРјРЅС‹Р№ РєР»Р°СЃСЃ
+    props.customClass
 ])
 
 const textClasses = computed(() => [
-  'font-bold select-none',
-  {
-    'text-sm': props.size === 'small',
-    'text-base': props.size === 'medium',
-    'text-lg': props.size === 'large'
-  }
+    'font-bold select-none',
+    {
+        'text-sm': props.size === 'small',
+        'text-base': props.size === 'medium',
+        'text-lg': props.size === 'large'
+    }
 ])
 
 const ariaLabel = computed(() => 
-  `${props.logoText} - РїРµСЂРµР№С‚Рё РЅР° РіР»Р°РІРЅСѓСЋ СЃС‚СЂР°РЅРёС†Сѓ`
+    `${props.logoText} - РїРµСЂРµР№С‚Рё РЅР° РіР»Р°РІРЅСѓСЋ СЃС‚СЂР°РЅРёС†Сѓ`
 )
 
 // Р’С‹С‡РёСЃР»СЏРµРј РїРѕРєР°Р·С‹РІР°С‚СЊ Р»Рё РёРєРѕРЅРєСѓ Рё С‚РµРєСЃС‚ РЅР° РѕСЃРЅРѕРІРµ РІР°СЂРёР°РЅС‚Р°
 const showIcon = computed(() => {
-  if (props.variant === 'text-only') return false
-  return props.showIcon
+    if (props.variant === 'text-only') return false
+    return props.showIcon
 })
 
 const showText = computed(() => {
-  if (props.variant === 'icon-only') return false
-  return props.showText
+    if (props.variant === 'icon-only') return false
+    return props.showText
 })
 </script>
 

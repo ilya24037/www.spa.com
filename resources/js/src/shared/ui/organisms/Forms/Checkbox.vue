@@ -1,12 +1,12 @@
 <template>
-    <input
-        :id="id"
-        type="checkbox"
-        :value="value"
-        :checked="checked"
-        @change="$emit('update:checked', $event.target.checked)"
-        class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
-    />
+  <input
+    :id="id"
+    type="checkbox"
+    :value="value"
+    :checked="checked"
+    class="rounded border-gray-500 text-indigo-600 shadow-sm focus:ring-indigo-500"
+    @change="$emit('update:checked', $event.target.checked)"
+  >
 </template>
 
 <script setup>

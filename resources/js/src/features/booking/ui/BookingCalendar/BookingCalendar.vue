@@ -86,10 +86,10 @@ import { useBookingStatus } from './composables/useBookingStatus'
 
 // Types
 import type {
-  BookingCalendarProps,
-  BookingCalendarEmits,
-  CalendarDay,
-  // DateBookingInfo
+    BookingCalendarProps,
+    BookingCalendarEmits,
+    CalendarDay,
+    // DateBookingInfo
 } from '../../model/calendar.types'
 
 // Props
@@ -110,29 +110,29 @@ interface Props extends BookingCalendarProps {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  availableDates: () => [],
-  minDate: () => new Date(),
-  maxDate: () => {
-    const date = new Date()
-    date.setMonth(date.getMonth() + 3)
-    return date
-  },
-  bookingData: () => ({}),
-  disabled: false,
-  loading: false,
-  locale: 'ru-RU',
-  showQuickNavigation: false,
-  showTodayButton: true,
-  showLegend: true,
-  showStatistics: false,
-  showBookingIndicators: true,
-  showMobileList: true,
-  showMobileAdditionalInfo: false,
-  keyboardNavigation: true,
-  compact: false,
-  maxMobileDates: 5,
-  mobileListTitle: 'Р‘Р»РёР¶Р°Р№С€РёРµ РґРѕСЃС‚СѓРїРЅС‹Рµ РґР°С‚С‹',
-  mobileEmptyText: 'РќРµС‚ РґРѕСЃС‚СѓРїРЅС‹С… РґР°С‚'
+    availableDates: () => [],
+    minDate: () => new Date(),
+    maxDate: () => {
+        const date = new Date()
+        date.setMonth(date.getMonth() + 3)
+        return date
+    },
+    bookingData: () => ({}),
+    disabled: false,
+    loading: false,
+    locale: 'ru-RU',
+    showQuickNavigation: false,
+    showTodayButton: true,
+    showLegend: true,
+    showStatistics: false,
+    showBookingIndicators: true,
+    showMobileList: true,
+    showMobileAdditionalInfo: false,
+    keyboardNavigation: true,
+    compact: false,
+    maxMobileDates: 5,
+    mobileListTitle: 'Р‘Р»РёР¶Р°Р№С€РёРµ РґРѕСЃС‚СѓРїРЅС‹Рµ РґР°С‚С‹',
+    mobileEmptyText: 'РќРµС‚ РґРѕСЃС‚СѓРїРЅС‹С… РґР°С‚'
 })
 
 // Emits
@@ -144,92 +144,92 @@ const bookingDataRef = toRefs(props).bookingData
 
 // РћСЃРЅРѕРІРЅС‹Рµ composables
 const {
-  state,
-  navigation,
-  calendarDays,
-  // monthNames,
-  weekDays,
-  goToPreviousMonth,
-  goToNextMonth,
-  goToMonth,
-  goToToday,
-  selectDate,
-  setHoveredDate,
-  initializeCalendar
+    state,
+    navigation,
+    calendarDays,
+    // monthNames,
+    weekDays,
+    goToPreviousMonth,
+    goToNextMonth,
+    goToMonth,
+    goToToday,
+    selectDate,
+    setHoveredDate,
+    initializeCalendar
 } = useCalendar(props)
 
 const {
-  nextAvailableDates,
-  // formatDateForDisplay,
-  // getAvailableSlotsText
-} = useDateSelection(availableDatesRef, bookingDataRef, computed(() => state.selectedDate))
+    nextAvailableDates,
+    // formatDateForDisplay,
+    // getAvailableSlotsText
+} = useDateSelection(availableDatesRef, bookingDataRef, computed(() => state.value.selectedDate))
 
 const {
-  getBookingStatus,
-  legendItems,
-  bookingStatistics
+    getBookingStatus,
+    legendItems,
+    bookingStatistics
 } = useBookingStatus(bookingDataRef)
 
 // Computed СЃРІРѕР№СЃС‚РІР°
-const selectedDate = computed(() => state.selectedDate)
+const selectedDate = computed(() => state.value.selectedDate)
 
 // РћР±СЂР°Р±РѕС‚С‡РёРєРё СЃРѕР±С‹С‚РёР№
 const handleDayClick = (day: CalendarDay) => {
-  selectDate(day.dateString)
-  emit('dateSelected', day.dateString)
+    selectDate(day.dateString)
+    emit('dateSelected', day.dateString)
 }
 
 const handleDayHover = (dateString: string | null) => {
-  setHoveredDate(dateString)
+    setHoveredDate(dateString)
 }
 
 const handleDayFocus = (_day: CalendarDay) => {
-  // РњРѕР¶РЅРѕ РґРѕР±Р°РІРёС‚СЊ Р»РѕРіРёРєСѓ РґР»СЏ С„РѕРєСѓСЃР°
+    // РњРѕР¶РЅРѕ РґРѕР±Р°РІРёС‚СЊ Р»РѕРіРёРєСѓ РґР»СЏ С„РѕРєСѓСЃР°
 }
 
 const handleDateSelect = (dateString: string) => {
-  emit('update:modelValue', dateString)
+    emit('update:modelValue', dateString)
 }
 
 const handleMobileDateSelect = (dateString: string) => {
-  selectDate(dateString)
-  emit('dateSelected', dateString)
-  emit('update:modelValue', dateString)
+    selectDate(dateString)
+    emit('dateSelected', dateString)
+    emit('update:modelValue', dateString)
   
-  // РџРµСЂРµРєР»СЋС‡Р°РµРј РєР°Р»РµРЅРґР°СЂСЊ РЅР° РјРµСЃСЏС† РІС‹Р±СЂР°РЅРЅРѕР№ РґР°С‚С‹
-  const date = new Date(dateString)
-  goToMonth(date.getFullYear(), date.getMonth())
+    // РџРµСЂРµРєР»СЋС‡Р°РµРј РєР°Р»РµРЅРґР°СЂСЊ РЅР° РјРµСЃСЏС† РІС‹Р±СЂР°РЅРЅРѕР№ РґР°С‚С‹
+    const date = new Date(dateString)
+    goToMonth(date.getFullYear(), date.getMonth())
 }
 
 // РњРµС‚РѕРґС‹ РґР»СЏ РјРѕР±РёР»СЊРЅРѕРіРѕ СЃРїРёСЃРєР°
 const getMobileAdditionalInfo = (dateString: string): string => {
-  const bookingInfo = props.bookingData[dateString]
-  if (!bookingInfo) return ''
+    const bookingInfo = props.bookingData[dateString]
+    if (!bookingInfo) return ''
   
-  const status = getBookingStatus(dateString)
-  const statusTexts = {
-    available: 'РњРЅРѕРіРѕ СЃРІРѕР±РѕРґРЅС‹С… РјРµСЃС‚',
-    busy: 'РњР°Р»Рѕ СЃРІРѕР±РѕРґРЅС‹С… РјРµСЃС‚', 
-    full: 'РџРѕС‡С‚Рё РІСЃРµ Р·Р°РЅСЏС‚Рѕ',
-    unavailable: 'РќРµРґРѕСЃС‚СѓРїРЅРѕ'
-  }
+    const status = getBookingStatus(dateString)
+    const statusTexts = {
+        available: 'РњРЅРѕРіРѕ СЃРІРѕР±РѕРґРЅС‹С… РјРµСЃС‚',
+        busy: 'РњР°Р»Рѕ СЃРІРѕР±РѕРґРЅС‹С… РјРµСЃС‚', 
+        full: 'РџРѕС‡С‚Рё РІСЃРµ Р·Р°РЅСЏС‚Рѕ',
+        unavailable: 'РќРµРґРѕСЃС‚СѓРїРЅРѕ'
+    }
   
-  return statusTexts[status] || ''
+    return statusTexts[status] || ''
 }
 
 // РћС‚СЃР»РµР¶РёРІР°РЅРёРµ РёР·РјРµРЅРµРЅРёР№ РјРµСЃСЏС†Р°
 watch([() => navigation.value.currentMonth, () => navigation.value.currentYear], 
-  ([month, year]) => {
-    emit('monthChanged', { month, year })
-  }
+    ([month, year]) => {
+        emit('monthChanged', { month, year })
+    }
 )
 
 // РЎРёРЅС…СЂРѕРЅРёР·Р°С†РёСЏ СЃ РІРЅРµС€РЅРёРј modelValue
 watch(() => props.modelValue, (newValue) => {
-  if (newValue && selectedDate.value !== newValue) {
-    const dateString = typeof newValue === 'string' ? newValue : newValue.toISOString().split('T')[0]
-    if (dateString) selectDate(dateString)
-  }
+    if (newValue && selectedDate.value !== newValue) {
+        const dateString = typeof newValue === 'string' ? newValue : newValue.toISOString().split('T')[0]
+        if (dateString) selectDate(dateString)
+    }
 }, { immediate: true })
 
 // РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ
@@ -238,7 +238,7 @@ initializeCalendar()
 
 <style scoped>
 .booking-calendar {
-  @apply w-full max-w-md mx-auto bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden;
+  @apply w-full max-w-md mx-auto bg-white rounded-lg shadow-sm border border-gray-500 overflow-hidden;
 }
 
 .booking-calendar--loading {
@@ -260,7 +260,7 @@ initializeCalendar()
 }
 
 .booking-calendar-footer {
-  @apply border-t border-gray-200 p-4;
+  @apply border-t border-gray-500 p-4;
 }
 
 /* РљРѕРјРїР°РєС‚РЅС‹Р№ СЂРµР¶РёРј */
@@ -302,18 +302,18 @@ initializeCalendar()
 /* РўРµРјРЅР°СЏ С‚РµРјР° */
 @media (prefers-color-scheme: dark) {
   .booking-calendar {
-    @apply bg-gray-900 border-gray-700;
+    @apply bg-gray-500 border-gray-500;
   }
   
   .booking-calendar-footer {
-    @apply border-gray-700;
+    @apply border-gray-500;
   }
 }
 
 /* Р’С‹СЃРѕРєРёР№ РєРѕРЅС‚СЂР°СЃС‚ */
 @media (prefers-contrast: high) {
   .booking-calendar {
-    @apply border-2 border-gray-800;
+    @apply border-2 border-gray-500;
   }
 }
 </style>

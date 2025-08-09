@@ -2,380 +2,240 @@
 <template>
   <Head title="Личный кабинет" />
   
-  <ProfileLayout 
-    :user="user"
-    :counts="counts"
-    :active-tab="activeTab"
-    @tab-change="handleTabChange"
-  >
-    <!-- Контент личного кабинета -->
-    <div class="space-y-6">
-      
-      <!-- Заголовок страницы -->
-      <div class="flex items-start justify-between">
-        <div>
-          <h1 class="text-2xl font-bold text-gray-900">{{ getPageTitle() }}</h1>
-          <p class="text-gray-600 mt-1">{{ getPageDescription() }}</p>
-        </div>
-        
-        <!-- Действия для текущей вкладки -->
-        <div v-if="showActions" class="flex gap-3">
-          <button
-            v-if="activeTab === 'ads'"
-            @click="goToCreateAd"
-            class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+  <div class="max-w-7xl mx-auto py-6 px-4">
+    <!-- Заголовок -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-500">
+        Личный кабинет
+      </h1>
+      <p class="text-gray-500 mt-2">
+        Управляйте своими объявлениями и настройками
+      </p>
+    </div>
+
+    <!-- Статистика -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-500">
+        <div class="flex items-center">
+          <div class="p-2 bg-blue-100 rounded-lg">
+            <svg
+              class="w-6 h-6 text-blue-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+              />
             </svg>
-            Создать объявление
-          </button>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">
+              Активные объявления
+            </p>
+            <p class="text-2xl font-bold text-gray-500">
+              {{ stats.activeAds }}
+            </p>
+          </div>
         </div>
       </div>
 
-      <!-- Контент вкладки -->
-      <div class="bg-white rounded-lg shadow-sm">
-        
-        <!-- Мои объявления -->
-        <div v-if="activeTab === 'ads'" class="p-6">
-          <div class="mb-6">
-            <h3 class="text-lg font-semibold mb-4">Мои объявления</h3>
-            <AdStatusFilter 
-              :current-status="adStatusFilter"
-              :counts="adStatusCounts"
-              @change="handleStatusFilterChange"
-            />
-          </div>
-          
-          <AdCardList 
-            :ads="filteredAds"
-            :loading="adsLoading"
-            layout="grid"
-            @edit="editAd"
-            @delete="deleteAd"
-            @duplicate="duplicateAd"
-            @status-change="handleAdStatusChange"
-          />
-          
-          <div v-if="filteredAds.length === 0 && !adsLoading" class="text-center py-8">
-            <p class="text-gray-500 mb-4">У вас пока нет объявлений</p>
-            <button
-              @click="goToCreateAd"
-              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-500">
+        <div class="flex items-center">
+          <div class="p-2 bg-green-100 rounded-lg">
+            <svg
+              class="w-6 h-6 text-green-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              Создать первое объявление
-            </button>
-          </div>
-        </div>
-        
-        <!-- Заказы -->
-        <div v-else-if="activeTab === 'bookings'" class="p-6">
-          <h3 class="text-lg font-semibold mb-4">Заказы</h3>
-          <BookingWidget 
-            :bookings="userBookings"
-            :loading="bookingsLoading"
-            mode="list"
-            @confirm="confirmBooking"
-            @cancel="cancelBooking" 
-            @complete="completeBooking"
-          />
-        </div>
-        
-        <!-- Отзывы -->
-        <div v-else-if="activeTab === 'reviews'" class="p-6">
-          <h3 class="text-lg font-semibold mb-4">Отзывы</h3>
-          <div class="space-y-4">
-            <div v-for="review in userReviews" :key="review.id" class="border rounded-lg p-4">
-              <div class="flex items-start justify-between">
-                <div>
-                  <h4 class="font-medium">{{ review.client_name }}</h4>
-                  <div class="flex items-center gap-2 mt-1">
-                    <StarRating :rating="review.rating" :Readonly="true" size="sm" />
-                    <span class="text-sm text-gray-600">{{ formatDate(review.created_at) }}</span>
-                  </div>
-                  <p class="text-gray-700 mt-2">{{ review.comment }}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Избранное -->
-        <div v-else-if="activeTab === 'favorites'" class="p-6">
-          <h3 class="text-lg font-semibold mb-4">Избранное</h3>
-          <MasterCardList 
-            :masters="userFavorites"
-            :loading="favoritesLoading"
-            layout="grid"
-            @click="goToMaster"
-            @favorite="removeFromFavorites"
-          />
-        </div>
-        
-        <!-- Сообщения -->
-        <div v-else-if="activeTab === 'messages'" class="p-6">
-          <h3 class="text-lg font-semibold mb-4">Сообщения</h3>
-          <div class="text-center py-8">
-            <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
-            <p class="text-gray-500">Сообщений пока нет</p>
           </div>
-        </div>
-        
-        <!-- Настройки -->
-        <div v-else-if="activeTab === 'settings'" class="p-6">
-          <h3 class="text-lg font-semibold mb-4">Настройки</h3>
-          <div class="space-y-6">
-            <div>
-              <h4 class="font-medium mb-2">Профиль</h4>
-              <p class="text-gray-600 text-sm mb-4">Управление информацией профиля</p>
-              <button 
-                @click="goToProfileEdit"
-                class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Редактировать профиль
-              </button>
-            </div>
-            
-            <div>
-              <h4 class="font-medium mb-2">Уведомления</h4>
-              <p class="text-gray-600 text-sm mb-4">Настройка уведомлений и оповещений</p>
-              <button 
-                @click="goToNotificationSettings"
-                class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Настройки уведомлений
-              </button>
-            </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">
+              Завершенные записи
+            </p>
+            <p class="text-2xl font-bold text-gray-500">
+              {{ stats.completedBookings }}
+            </p>
           </div>
         </div>
       </div>
-      
+
+      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-500">
+        <div class="flex items-center">
+          <div class="p-2 bg-yellow-100 rounded-lg">
+            <svg
+              class="w-6 h-6 text-yellow-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">
+              Ожидающие записи
+            </p>
+            <p class="text-2xl font-bold text-gray-500">
+              {{ stats.pendingBookings }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-500">
+        <div class="flex items-center">
+          <div class="p-2 bg-purple-100 rounded-lg">
+            <svg
+              class="w-6 h-6 text-purple-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+              />
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">
+              Избранные
+            </p>
+            <p class="text-2xl font-bold text-gray-500">
+              {{ stats.favorites }}
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
-  </ProfileLayout>
+
+    <!-- Быстрые действия -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <Link href="/ads/create" class="bg-white p-6 rounded-lg shadow-sm border border-gray-500 hover:shadow-md transition-shadow">
+        <div class="flex items-center">
+          <div class="p-2 bg-blue-100 rounded-lg">
+            <svg
+              class="w-6 h-6 text-blue-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+              />
+            </svg>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-lg font-semibold text-gray-500">
+              Создать объявление
+            </h3>
+            <p class="text-sm text-gray-500">
+              Разместите новое объявление о ваших услугах
+            </p>
+          </div>
+        </div>
+      </Link>
+
+      <Link href="/profile/bookings" class="bg-white p-6 rounded-lg shadow-sm border border-gray-500 hover:shadow-md transition-shadow">
+        <div class="flex items-center">
+          <div class="p-2 bg-green-100 rounded-lg">
+            <svg
+              class="w-6 h-6 text-green-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+            </svg>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-lg font-semibold text-gray-500">
+              Мои записи
+            </h3>
+            <p class="text-sm text-gray-500">
+              Управляйте записями клиентов
+            </p>
+          </div>
+        </div>
+      </Link>
+
+      <Link href="/profile/settings" class="bg-white p-6 rounded-lg shadow-sm border border-gray-500 hover:shadow-md transition-shadow">
+        <div class="flex items-center">
+          <div class="p-2 bg-gray-500 rounded-lg">
+            <svg
+              class="w-6 h-6 text-gray-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+              />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+            </svg>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-lg font-semibold text-gray-500">
+              Настройки
+            </h3>
+            <p class="text-sm text-gray-500">
+              Измените данные профиля
+            </p>
+          </div>
+        </div>
+      </Link>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { Head, router } from '@inertiajs/vue3'
+import { Head, Link } from '@inertiajs/vue3'
 
-// 🎯 FSD Импорты
-import ProfileLayout from '@/src/shared/layouts/ProfileLayout/ProfileLayout.vue'
-import StarRating from '@/src/shared/ui/organisms/StarRating/StarRating.vue'
-import AdCardList from '@/src/entities/ad/ui/AdCardList/AdCardList.vue'
-import AdStatusFilter from '@/src/entities/ad/ui/AdStatusFilter/AdStatusFilter.vue'
-import BookingWidget from '@/src/entities/booking/ui/BookingWidget/BookingWidget.vue' 
-import MasterCardList from '@/src/entities/master/ui/MasterCardList/MasterCardList.vue'
-
-// Props из Inertia
-const props = defineProps({
-  user: {
-    type: Object,
-    required: true
-  },
-  initialTab: {
-    type: String,
-    default: 'ads'
-  },
-  counts: {
-    type: Object,
-    default: () => ({
-      ads: 0,
-      bookings: 0,
-      reviews: 0,
-      favorites: 0
-    })
-  }
-})
-
-// Состояние
-const activeTab = ref(props.initialTab)
-const adsLoading = ref(false)
-const bookingsLoading = ref(false)
-const favoritesLoading = ref(false)
-const adStatusFilter = ref('all')
-
-// Данные
-const userAds = ref([])
-const userBookings = ref([])
-const userReviews = ref([])
-const userFavorites = ref([])
-
-// Вычисляемые свойства
-const showActions = computed(() => {
-  return ['ads', 'bookings'].includes(activeTab.value)
-})
-
-const adStatusCounts = computed(() => ({
-  all: props.counts.ads || 0,
-  active: 0,
-  draft: 0,
-  waiting_payment: 0,
-  archived: 0
-}))
-
-const filteredAds = computed(() => {
-  if (adStatusFilter.value === 'all') {
-    return userAds.value
-  }
-  return userAds.value.filter(ad => ad.status === adStatusFilter.value)
-})
-
-// Методы
-const handleTabChange = (tab) => {
-  activeTab.value = tab
-  loadTabData(tab)
-  
-  // Обновляем URL без перезагрузки
-  const url = new URL((window as any).location)
-  url.searchParams.set('tab', tab)
-  (window as any).history.replaceState({}, '', url)
-}
-
-const loadTabData = async (tab) => {
-  switch (tab) {
-    case 'ads':
-      await loadUserAds()
-      break
-    case 'bookings':
-      await loadUserBookings()
-      break
-    case 'favorites':
-      await loadUserFavorites()
-      break
-    case 'reviews':
-      await loadUserReviews()
-      break
-  }
-}
-
-const loadUserAds = async () => {
-  adsLoading.value = true
-  try {
-    // API вызов для загрузки объявлений
-    // const response = await api.getUserAds()
-    // userAds.value = response.data
-    
-    // Моковые данные
-    userAds.value = []
-  } finally {
-    adsLoading.value = false
-  }
-}
-
-const loadUserBookings = async () => {
-  bookingsLoading.value = true
-  try {
-    // API вызов для загрузки заказов
-    userBookings.value = []
-  } finally {
-    bookingsLoading.value = false
-  }
-}
-
-const loadUserFavorites = async () => {
-  favoritesLoading.value = true
-  try {
-    // API вызов для загрузки избранного
-    userFavorites.value = []
-  } finally {
-    favoritesLoading.value = false
-  }
-}
-
-const loadUserReviews = async () => {
-  try {
-    // API вызов для загрузки отзывов
-    userReviews.value = []
-  } finally {
-    // reviewsLoading.value = false
-  }
-}
-
-const getPageTitle = () => {
-  const titles = {
-    ads: 'Мои объявления',
-    bookings: 'Заказы',
-    reviews: 'Отзывы',
-    favorites: 'Избранное',
-    messages: 'Сообщения',
-    settings: 'Настройки'
-  }
-  return titles[activeTab.value] || 'Личный кабинет'
-}
-
-const getPageDescription = () => {
-  const descriptions = {
-    ads: 'Управляйте своими объявлениями',
-    bookings: 'Отслеживайте заказы и записи',
-    reviews: 'Просматривайте отзывы о ваших услугах',
-    favorites: 'Ваши избранные мастера',
-    messages: 'Переписка с клиентами',
-    settings: 'Настройки профиля и безопасности'
-  }
-  return descriptions[activeTab.value] || 'Добро пожаловать в личный кабинет'
-}
-
-const handleStatusFilterChange = (status) => {
-  adStatusFilter.value = status
-}
-
-const handleAdStatusChange = (ad, newStatus) => {
-  // Обновление статуса объявления
-}
-
-const editAd = (ad) => {
-  router.visit(`/ads/${ad.id}/edit`)
-}
-
-const deleteAd = (ad) => {
-  if ((window as any).confirm('Вы уверены, что хотите удалить объявление?')) {
-    // API вызов для удаления
-  }
-}
-
-const duplicateAd = (ad) => {
-  router.visit(`/ads/create?duplicate=${ad.id}`)
-}
-
-const confirmBooking = (booking) => {
-}
-
-const cancelBooking = (booking) => {
-  if ((window as any).confirm('Вы уверены, что хотите отменить запись?')) {
-  }
-}
-
-const completeBooking = (booking) => {
-}
-
-const goToMaster = (master) => {
-  router.visit(`/masters/${master.id}`)
-}
-
-const removeFromFavorites = (master) => {
-}
-
-const goToCreateAd = () => {
-  router.visit('/ads/create')
-}
-
-const goToProfileEdit = () => {
-  router.visit('/profile/edit')
-}
-
-const goToNotificationSettings = () => {
-  router.visit('/settings/notifications')
-}
-
-const formatDate = (date) => {
-  return new Date(date).toLocaleDateString('ru-RU')
-}
-
-// Жизненный цикл
-onMounted(() => {
-  loadTabData(activeTab.value)
+defineProps({
+    stats: {
+        type: Object,
+        default: () => ({
+            activeAds: 0,
+            completedBookings: 0,
+            pendingBookings: 0,
+            favorites: 0
+        })
+    }
 })
 </script>
 

@@ -17,7 +17,11 @@ interface Ad {
   location?: string
   price?: number
   is_favorite?: boolean
-  [key: string]: any
+  views?: number
+  created_at?: string
+  updated_at?: string
+  media?: Array<{ id: number; url: string; type: string }>
+  user_id?: number
 }
 
 interface AdFilters {
@@ -52,7 +56,13 @@ interface FetchAdsParams {
   page?: number
   per_page?: number
   search?: string
-  [key: string]: any
+  status?: string | null
+  category?: string | null
+  location?: string | null
+  priceFrom?: number | null
+  priceTo?: number | null
+  sortBy?: string
+  sortOrder?: 'asc' | 'desc'
 }
 
 export const useAdStore = defineStore('ad', () => {
@@ -176,7 +186,13 @@ export const useAdStore = defineStore('ad', () => {
   /**
    * Загрузить объявления
    */
-  const fetchAds = async (params: FetchAdsParams = {}): Promise<any> => {
+  const fetchAds = async (params: FetchAdsParams = {}): Promise<{
+    data: Ad[]
+    current_page: number
+    last_page: number
+    per_page: number
+    total: number
+  }> => {
     loading.value = true
     
     try {
@@ -219,7 +235,7 @@ export const useAdStore = defineStore('ad', () => {
   /**
    * Загрузить объявление по ID
    */
-  const fetchAd = async (id: any) => {
+  const fetchAd = async (id: number): Promise<Ad> => {
     loading.value = true
     
     try {
@@ -247,7 +263,7 @@ export const useAdStore = defineStore('ad', () => {
   /**
    * Создать объявление
    */
-  const createAd = async (data: any) => {
+  const createAd = async (data: Partial<Ad>): Promise<Ad> => {
     saving.value = true
     
     try {
@@ -273,7 +289,7 @@ export const useAdStore = defineStore('ad', () => {
   /**
    * Обновить объявление
    */
-  const updateAd = async (id: any, data: any) => {
+  const updateAd = async (id: number, data: Partial<Ad>): Promise<Ad> => {
     saving.value = true
     
     try {
@@ -302,7 +318,7 @@ export const useAdStore = defineStore('ad', () => {
   /**
    * Удалить объявление
    */
-  const deleteAd = async (id: any) => {
+  const deleteAd = async (id: number): Promise<void> => {
     saving.value = true
     
     try {
@@ -336,7 +352,7 @@ export const useAdStore = defineStore('ad', () => {
   /**
    * Изменить статус объявления
    */
-  const changeAdStatus = async (id: any, status: any) => {
+  const changeAdStatus = async (id: number, status: Ad['status']): Promise<Ad | undefined> => {
     saving.value = true
     
     try {
@@ -344,7 +360,7 @@ export const useAdStore = defineStore('ad', () => {
       
       // Обновляем в списке
       const index = ads.value.findIndex(ad => ad?.id === id)
-      if (index >= 0) {
+      if (index >= 0 && ads.value[index]) {
         const oldStatus = ads.value[index].status
         ads.value[index].status = status
         
@@ -369,7 +385,7 @@ export const useAdStore = defineStore('ad', () => {
   /**
    * Добавить/удалить из избранного
    */
-  const toggleFavorite = async (adId: any) => {
+  const toggleFavorite = async (adId: number): Promise<boolean | undefined> => {
     try {
       const ad = ads.value.find(a => a?.id === adId)
       if (!ad) return
@@ -430,7 +446,7 @@ export const useAdStore = defineStore('ad', () => {
   /**
    * Установить фильтры
    */
-  const setFilters = (newFilters: any) => {
+  const setFilters = (newFilters: Partial<AdFilters>): void => {
     Object.assign(filters, newFilters)
     pagination.current_page = 1 // Сбрасываем на первую страницу
   }
@@ -440,7 +456,10 @@ export const useAdStore = defineStore('ad', () => {
    */
   const clearFilters = () => {
     Object.keys(filters).forEach(key => {
-      (filters as any)[key] = null
+      const k = key as keyof AdFilters
+      if (k !== 'sortBy' && k !== 'sortOrder') {
+        (filters[k] as any) = null
+      }
     })
     filters.sortBy = 'created_at'
     filters.sortOrder = 'desc'
@@ -450,7 +469,7 @@ export const useAdStore = defineStore('ad', () => {
   /**
    * Установить поисковый запрос
    */
-  const setSearchQuery = (query: any) => {
+  const setSearchQuery = (query: string): void => {
     searchQuery.value = query
     pagination.current_page = 1 // Сбрасываем на первую страницу
   }

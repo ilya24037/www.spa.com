@@ -3,11 +3,14 @@
   <div class="input-container">
     <label v-if="label" class="input-label">{{ label }}</label>
     
-          <div class="input-wrapper" :class="{ 
+    <div
+      class="input-wrapper"
+      :class="{ 
         'has-error': error,
         'has-prefix': prefix,
         'has-suffix': suffix
-      }">
+      }"
+    >
       <input
         ref="inputRef"
         v-model="inputValue"
@@ -31,39 +34,52 @@
         @focus="handleFocus"
         @blur="handleBlur"
         @keydown.enter="$emit('enter')"
-      />
+      >
       
       <!-- РљРЅРѕРїРєР° РѕС‡РёСЃС‚РєРё -->
-             <button
-         v-if="clearable && inputValue && !disabled && !Readonly"
-         type="button"
-         class="clear-button"
-         @click="clearInput"
-         tabindex="-1"
-       >
-         <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
-           <path
-             d="M12 4L4 12M4 4L12 12"
-             stroke="currentColor"
-             stroke-width="2"
-             stroke-linecap="round"
-             stroke-linejoin="round"
-           />
-         </svg>
-       </button>
+      <button
+        v-if="clearable && inputValue && !disabled && !Readonly"
+        type="button"
+        class="clear-button"
+        tabindex="-1"
+        @click="clearInput"
+      >
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 16 16"
+          fill="none"
+        >
+          <path
+            d="M12 4L4 12M4 4L12 12"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
       
       <!-- РџСЂРµС„РёРєСЃ -->
-      <div v-if="prefix" class="input-prefix">{{ prefix }}</div>
+      <div v-if="prefix" class="input-prefix">
+        {{ prefix }}
+      </div>
       
       <!-- РЎСѓС„С„РёРєСЃ -->
-      <div v-if="suffix" class="input-suffix">{{ suffix }}</div>
+      <div v-if="suffix" class="input-suffix">
+        {{ suffix }}
+      </div>
     </div>
     
     <!-- РћС€РёР±РєР° -->
-    <div v-if="error" class="input-error">{{ error }}</div>
+    <div v-if="error" class="input-error">
+      {{ error }}
+    </div>
     
     <!-- РџРѕРґСЃРєР°Р·РєР° -->
-    <div v-if="hint && !error" class="input-hint">{{ hint }}</div>
+    <div v-if="hint && !error" class="input-hint">
+      {{ hint }}
+    </div>
     
     <!-- РЎС‡РµС‚С‡РёРє СЃРёРјРІРѕР»РѕРІ -->
     <div v-if="maxlength && showCounter" class="input-counter">
@@ -77,73 +93,73 @@ import { ref, computed, nextTick } from 'vue'
 
 // Props
 const props = defineProps({
-  modelValue: {
-    type: [String, Number],
-    default: ''
-  },
-  type: {
-    type: String,
-    default: 'text',
-    validator: (value) => [
-      'text', 'email', 'password', 'number', 
-      'tel', 'url', 'search'
-    ].includes(value)
-  },
-  label: {
-    type: String,
-    default: ''
-  },
-  placeholder: {
-    type: String,
-    default: ''
-  },
-  disabled: {
-    type: Boolean,
-    default: false
-  }, readonly: {
-    type: Boolean,
-    default: false
-  },
-  clearable: {
-    type: Boolean,
-    default: false
-  },
-  error: {
-    type: String,
-    default: ''
-  },
-  hint: {
-    type: String,
-    default: ''
-  },
-  maxlength: {
-    type: Number,
-    default: null
-  },
-  showCounter: {
-    type: Boolean,
-    default: false
-  },
-  min: {
-    type: [Number, String],
-    default: null
-  },
-  max: {
-    type: [Number, String],
-    default: null
-  },
-  step: {
-    type: [Number, String],
-    default: null
-  },
-  prefix: {
-    type: String,
-    default: ''
-  },
-  suffix: {
-    type: String,
-    default: ''
-  }
+    modelValue: {
+        type: [String, Number],
+        default: ''
+    },
+    type: {
+        type: String,
+        default: 'text',
+        validator: (value) => [
+            'text', 'email', 'password', 'number', 
+            'tel', 'url', 'search'
+        ].includes(value)
+    },
+    label: {
+        type: String,
+        default: ''
+    },
+    placeholder: {
+        type: String,
+        default: ''
+    },
+    disabled: {
+        type: Boolean,
+        default: false
+    }, readonly: {
+        type: Boolean,
+        default: false
+    },
+    clearable: {
+        type: Boolean,
+        default: false
+    },
+    error: {
+        type: String,
+        default: ''
+    },
+    hint: {
+        type: String,
+        default: ''
+    },
+    maxlength: {
+        type: Number,
+        default: null
+    },
+    showCounter: {
+        type: Boolean,
+        default: false
+    },
+    min: {
+        type: [Number, String],
+        default: null
+    },
+    max: {
+        type: [Number, String],
+        default: null
+    },
+    step: {
+        type: [Number, String],
+        default: null
+    },
+    prefix: {
+        type: String,
+        default: ''
+    },
+    suffix: {
+        type: String,
+        default: ''
+    }
 })
 
 // Events
@@ -154,101 +170,101 @@ const inputRef = ref(null)
 
 // Computed
 const inputValue = computed({
-  get() {
-    return props.modelValue
-  },
-  set(value) {
-    emit('update:modelValue', value)
-  }
+    get() {
+        return props.modelValue
+    },
+    set(value) {
+        emit('update:modelValue', value)
+    }
 })
 
 // Methods
 const handleInput = (event) => {
-  let value = event.target.value
+    let value = event.target.value
   
-  // Р”Р»СЏ С‡РёСЃР»РѕРІС‹С… РёРЅРїСѓС‚РѕРІ - Р±РѕР»РµРµ РјСЏРіРєР°СЏ РѕР±СЂР°Р±РѕС‚РєР°
-  if (props.type === 'number') {
+    // Р”Р»СЏ С‡РёСЃР»РѕРІС‹С… РёРЅРїСѓС‚РѕРІ - Р±РѕР»РµРµ РјСЏРіРєР°СЏ РѕР±СЂР°Р±РѕС‚РєР°
+    if (props.type === 'number') {
     // Р Р°Р·СЂРµС€Р°РµРј РїСѓСЃС‚РѕРµ Р·РЅР°С‡РµРЅРёРµ, РјРёРЅСѓСЃ, С‚РѕС‡РєСѓ Рё С†РёС„СЂС‹
-    if (value === '' || value === '-' || value === '.' || value === '-.') {
-      emit('update:modelValue', value)
-      return
-    }
-    
-    // РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ СЌС‚Рѕ РґРѕРїСѓСЃС‚РёРјРѕРµ С‡РёСЃР»Рѕ (РІРєР»СЋС‡Р°СЏ С‡Р°СЃС‚РёС‡РЅРѕ РІРІРµРґРµРЅРЅС‹Рµ)
-    if (/^-?\d*\.?\d*$/.test(value)) {
-      const numValue = parseFloat(value)
-      
-      // Р•СЃР»Рё СЌС‚Рѕ РїРѕР»РЅРѕРµ С‡РёСЃР»Рѕ, РїСЂРѕРІРµСЂСЏРµРј РѕРіСЂР°РЅРёС‡РµРЅРёСЏ
-      if (!isNaN(numValue)) {
-        if (props.min !== null && numValue < props.min) {
-          // РќРµ Р±Р»РѕРєРёСЂСѓРµРј РІРІРѕРґ, РїСЂРѕСЃС‚Рѕ РЅРµ РїСЂРёРјРµРЅСЏРµРј РѕРіСЂР°РЅРёС‡РµРЅРёРµ СЃСЂР°Р·Сѓ
-          emit('update:modelValue', value)
-          return
-        } else if (props.max !== null && numValue > props.max) {
-          // РќРµ Р±Р»РѕРєРёСЂСѓРµРј РІРІРѕРґ, РїСЂРѕСЃС‚Рѕ РЅРµ РїСЂРёРјРµРЅСЏРµРј РѕРіСЂР°РЅРёС‡РµРЅРёРµ СЃСЂР°Р·Сѓ
-          emit('update:modelValue', value)
-          return
+        if (value === '' || value === '-' || value === '.' || value === '-.') {
+            emit('update:modelValue', value)
+            return
         }
-      }
+    
+        // РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ СЌС‚Рѕ РґРѕРїСѓСЃС‚РёРјРѕРµ С‡РёСЃР»Рѕ (РІРєР»СЋС‡Р°СЏ С‡Р°СЃС‚РёС‡РЅРѕ РІРІРµРґРµРЅРЅС‹Рµ)
+        if (/^-?\d*\.?\d*$/.test(value)) {
+            const numValue = parseFloat(value)
       
-      emit('update:modelValue', value)
+            // Р•СЃР»Рё СЌС‚Рѕ РїРѕР»РЅРѕРµ С‡РёСЃР»Рѕ, РїСЂРѕРІРµСЂСЏРµРј РѕРіСЂР°РЅРёС‡РµРЅРёСЏ
+            if (!isNaN(numValue)) {
+                if (props.min !== null && numValue < props.min) {
+                    // РќРµ Р±Р»РѕРєРёСЂСѓРµРј РІРІРѕРґ, РїСЂРѕСЃС‚Рѕ РЅРµ РїСЂРёРјРµРЅСЏРµРј РѕРіСЂР°РЅРёС‡РµРЅРёРµ СЃСЂР°Р·Сѓ
+                    emit('update:modelValue', value)
+                    return
+                } else if (props.max !== null && numValue > props.max) {
+                    // РќРµ Р±Р»РѕРєРёСЂСѓРµРј РІРІРѕРґ, РїСЂРѕСЃС‚Рѕ РЅРµ РїСЂРёРјРµРЅСЏРµРј РѕРіСЂР°РЅРёС‡РµРЅРёРµ СЃСЂР°Р·Сѓ
+                    emit('update:modelValue', value)
+                    return
+                }
+            }
+      
+            emit('update:modelValue', value)
+        }
+        // Р•СЃР»Рё РїР°С‚С‚РµСЂРЅ РЅРµ РїРѕРґС…РѕРґРёС‚, РёРіРЅРѕСЂРёСЂСѓРµРј РІРІРѕРґ
+        return
     }
-    // Р•СЃР»Рё РїР°С‚С‚РµСЂРЅ РЅРµ РїРѕРґС…РѕРґРёС‚, РёРіРЅРѕСЂРёСЂСѓРµРј РІРІРѕРґ
-    return
-  }
   
-  emit('update:modelValue', value)
+    emit('update:modelValue', value)
 }
 
 const handleFocus = (event) => {
-  emit('focus', event)
+    emit('focus', event)
 }
 
 const handleBlur = (event) => {
-  // Р’Р°Р»РёРґР°С†РёСЏ С‡РёСЃР»РѕРІС‹С… Р·РЅР°С‡РµРЅРёР№ РїСЂРё РїРѕС‚РµСЂРµ С„РѕРєСѓСЃР°
-  if (props.type === 'number' && event.target.value !== '') {
-    const numValue = parseFloat(event.target.value)
+    // Р’Р°Р»РёРґР°С†РёСЏ С‡РёСЃР»РѕРІС‹С… Р·РЅР°С‡РµРЅРёР№ РїСЂРё РїРѕС‚РµСЂРµ С„РѕРєСѓСЃР°
+    if (props.type === 'number' && event.target.value !== '') {
+        const numValue = parseFloat(event.target.value)
     
-    if (!isNaN(numValue)) {
-      let finalValue = numValue
+        if (!isNaN(numValue)) {
+            let finalValue = numValue
       
-      // РџСЂРёРјРµРЅСЏРµРј РѕРіСЂР°РЅРёС‡РµРЅРёСЏ min/max
-      if (props.min !== null && numValue < props.min) {
-        finalValue = props.min
-      } else if (props.max !== null && numValue > props.max) {
-        finalValue = props.max
-      }
+            // РџСЂРёРјРµРЅСЏРµРј РѕРіСЂР°РЅРёС‡РµРЅРёСЏ min/max
+            if (props.min !== null && numValue < props.min) {
+                finalValue = props.min
+            } else if (props.max !== null && numValue > props.max) {
+                finalValue = props.max
+            }
       
-      // Р•СЃР»Рё Р·РЅР°С‡РµРЅРёРµ РёР·РјРµРЅРёР»РѕСЃСЊ, РѕР±РЅРѕРІР»СЏРµРј
-      if (finalValue !== numValue) {
-        emit('update:modelValue', finalValue)
-      }
+            // Р•СЃР»Рё Р·РЅР°С‡РµРЅРёРµ РёР·РјРµРЅРёР»РѕСЃСЊ, РѕР±РЅРѕРІР»СЏРµРј
+            if (finalValue !== numValue) {
+                emit('update:modelValue', finalValue)
+            }
+        }
     }
-  }
   
-  emit('blur', event)
+    emit('blur', event)
 }
 
 const clearInput = () => {
-  emit('update:modelValue', '')
-  emit('clear')
-  nextTick(() => {
-    inputRef.value?.focus()
-  })
+    emit('update:modelValue', '')
+    emit('clear')
+    nextTick(() => {
+        inputRef.value?.focus()
+    })
 }
 
 const focus = () => {
-  inputRef.value?.focus()
+    inputRef.value?.focus()
 }
 
 const blur = () => {
-  inputRef.value?.blur()
+    inputRef.value?.blur()
 }
 
 // Expose methods
 defineExpose({
-  focus,
-  blur
+    focus,
+    blur
 })
 </script>
 

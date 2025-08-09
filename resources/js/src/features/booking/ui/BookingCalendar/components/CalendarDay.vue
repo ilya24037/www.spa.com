@@ -55,7 +55,9 @@
       role="tooltip"
     >
       <div class="calendar-day-tooltip-content">
-        <div class="font-medium">{{ formatDate(day.date) }}</div>
+        <div class="font-medium">
+          {{ formatDate(day.date) }}
+        </div>
         <div class="text-sm">
           {{ getSlotText(day.bookingInfo) }}
         </div>
@@ -82,10 +84,10 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  disabled: false,
-  loading: false,
-  showBookingIndicators: true,
-  showTooltip: false
+    disabled: false,
+    loading: false,
+    showBookingIndicators: true,
+    showTooltip: false
 })
 
 const emit = defineEmits<{
@@ -97,94 +99,94 @@ const emit = defineEmits<{
 
 // РљР»Р°СЃСЃС‹ РґР»СЏ РґРЅСЏ РєР°Р»РµРЅРґР°СЂСЏ
 const dayClasses = computed(() => {
-  const classes = ['calendar-day']
+    const classes = ['calendar-day']
 
-  // Р‘Р°Р·РѕРІС‹Рµ СЃРѕСЃС‚РѕСЏРЅРёСЏ
-  if (props.day.isToday) classes.push('calendar-day--today')
-  if (props.day.isSelected) classes.push('calendar-day--selected')
-  if (props.day.isHovered) classes.push('calendar-day--hovered')
-  if (props.day.isWeekend) classes.push('calendar-day--weekend')
-  if (props.day.isPast) classes.push('calendar-day--past')
-  if (!props.day.isCurrentMonth) classes.push('calendar-day--other-month')
+    // Р‘Р°Р·РѕРІС‹Рµ СЃРѕСЃС‚РѕСЏРЅРёСЏ
+    if (props.day.isToday) classes.push('calendar-day--today')
+    if (props.day.isSelected) classes.push('calendar-day--selected')
+    if (props.day.isHovered) classes.push('calendar-day--hovered')
+    if (props.day.isWeekend) classes.push('calendar-day--weekend')
+    if (props.day.isPast) classes.push('calendar-day--past')
+    if (!props.day.isCurrentMonth) classes.push('calendar-day--other-month')
 
-  // РЎРѕСЃС‚РѕСЏРЅРёСЏ РґРѕСЃС‚СѓРїРЅРѕСЃС‚Рё
-  if (props.day.isAvailable) {
-    classes.push('calendar-day--available')
-    if (props.day.status) {
-      classes.push(`calendar-day--${props.day.status}`)
+    // РЎРѕСЃС‚РѕСЏРЅРёСЏ РґРѕСЃС‚СѓРїРЅРѕСЃС‚Рё
+    if (props.day.isAvailable) {
+        classes.push('calendar-day--available')
+        if (props.day.status) {
+            classes.push(`calendar-day--${props.day.status}`)
+        }
+    } else {
+        classes.push('calendar-day--unavailable')
     }
-  } else {
-    classes.push('calendar-day--unavailable')
-  }
 
-  // РЎРѕСЃС‚РѕСЏРЅРёСЏ РІР·Р°РёРјРѕРґРµР№СЃС‚РІРёСЏ
-  if (props.disabled || props.loading) {
-    classes.push('calendar-day--disabled')
-  }
+    // РЎРѕСЃС‚РѕСЏРЅРёСЏ РІР·Р°РёРјРѕРґРµР№СЃС‚РІРёСЏ
+    if (props.disabled || props.loading) {
+        classes.push('calendar-day--disabled')
+    }
 
-  return classes
+    return classes
 })
 
 // РџРѕР»СѓС‡РµРЅРёРµ РєР»Р°СЃСЃРѕРІ РґР»СЏ РёРЅРґРёРєР°С‚РѕСЂР° Р±СЂРѕРЅРёСЂРѕРІР°РЅРёСЏ
 const getIndicatorClasses = (status: DateAvailabilityStatus) => {
-  const statusClasses = {
-    available: 'bg-green-500',
-    busy: 'bg-yellow-500', 
-    full: 'bg-red-500',
-    unavailable: 'bg-gray-400'
-  }
+    const statusClasses = {
+        available: 'bg-green-500',
+        busy: 'bg-yellow-500', 
+        full: 'bg-red-500',
+        unavailable: 'bg-gray-500'
+    }
   
-  return statusClasses[status] || statusClasses.unavailable
+    return statusClasses[status] || statusClasses.unavailable
 }
 
 // Р’С‹С‡РёСЃР»РµРЅРёРµ С€РёСЂРёРЅС‹ РёРЅРґРёРєР°С‚РѕСЂР°
 const getIndicatorWidth = (bookingInfo: DateBookingInfo): number => {
-  if (!bookingInfo || bookingInfo.totalSlots === 0) return 100
+    if (!bookingInfo || bookingInfo.totalSlots === 0) return 100
   
-  const occupiedPercent = (bookingInfo.bookedSlots / bookingInfo.totalSlots) * 100
-  return Math.max(10, occupiedPercent) // РњРёРЅРёРјСѓРј 10% РґР»СЏ РІРёРґРёРјРѕСЃС‚Рё
+    const occupiedPercent = (bookingInfo.bookedSlots / bookingInfo.totalSlots) * 100
+    return Math.max(10, occupiedPercent) // РњРёРЅРёРјСѓРј 10% РґР»СЏ РІРёРґРёРјРѕСЃС‚Рё
 }
 
 // Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґР°С‚С‹ РґР»СЏ tooltip
 const formatDate = (date: Date): string => {
-  return date.toLocaleDateString('ru-RU', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long'
-  })
+    return date.toLocaleDateString('ru-RU', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long'
+    })
 }
 
 // РўРµРєСЃС‚ Рѕ СЃР»РѕС‚Р°С… РґР»СЏ tooltip
 const getSlotText = (bookingInfo: DateBookingInfo): string => {
-  const available = bookingInfo.availableSlots
-  const total = bookingInfo.totalSlots
+    const available = bookingInfo.availableSlots
+    const total = bookingInfo.totalSlots
   
-  if (available === 0) {
-    return 'Р’СЃРµ РјРµСЃС‚Р° Р·Р°РЅСЏС‚С‹'
-  } else if (available === 1) {
-    return '1 СЃРІРѕР±РѕРґРЅРѕРµ РјРµСЃС‚Рѕ'
-  } else {
-    return `${available} РёР· ${total} СЃРІРѕР±РѕРґРЅС‹С… РјРµСЃС‚`
-  }
+    if (available === 0) {
+        return 'Р’СЃРµ РјРµСЃС‚Р° Р·Р°РЅСЏС‚С‹'
+    } else if (available === 1) {
+        return '1 СЃРІРѕР±РѕРґРЅРѕРµ РјРµСЃС‚Рѕ'
+    } else {
+        return `${available} РёР· ${total} СЃРІРѕР±РѕРґРЅС‹С… РјРµСЃС‚`
+    }
 }
 
 // РўРµРєСЃС‚ СЃС‚Р°С‚СѓСЃР°
 const getStatusText = (status: DateAvailabilityStatus): string => {
-  const statusTexts = {
-    available: 'РњРЅРѕРіРѕ СЃРІРѕР±РѕРґРЅС‹С… РјРµСЃС‚',
-    busy: 'РњР°Р»Рѕ СЃРІРѕР±РѕРґРЅС‹С… РјРµСЃС‚',
-    full: 'РџРѕС‡С‚Рё РІСЃРµ Р·Р°РЅСЏС‚Рѕ',
-    unavailable: 'РќРµРґРѕСЃС‚СѓРїРЅРѕ'
-  }
+    const statusTexts = {
+        available: 'РњРЅРѕРіРѕ СЃРІРѕР±РѕРґРЅС‹С… РјРµСЃС‚',
+        busy: 'РњР°Р»Рѕ СЃРІРѕР±РѕРґРЅС‹С… РјРµСЃС‚',
+        full: 'РџРѕС‡С‚Рё РІСЃРµ Р·Р°РЅСЏС‚Рѕ',
+        unavailable: 'РќРµРґРѕСЃС‚СѓРїРЅРѕ'
+    }
   
-  return statusTexts[status] || ''
+    return statusTexts[status] || ''
 }
 
 // РћР±СЂР°Р±РѕС‚С‡РёРє РєР»РёРєР°
 const handleClick = () => {
-  if (!props.disabled && props.day.isAvailable) {
-    emit('click')
-  }
+    if (!props.disabled && props.day.isAvailable) {
+        emit('click')
+    }
 }
 </script>
 
@@ -195,11 +197,11 @@ const handleClick = () => {
 
 /* Р‘Р°Р·РѕРІС‹Рµ СЃРѕСЃС‚РѕСЏРЅРёСЏ */
 .calendar-day--available {
-  @apply text-gray-900 hover:bg-gray-100 cursor-pointer;
+  @apply text-gray-500 hover:bg-gray-500 cursor-pointer;
 }
 
 .calendar-day--unavailable {
-  @apply text-gray-400 cursor-not-allowed;
+  @apply text-gray-500 cursor-not-allowed;
 }
 
 .calendar-day--disabled {
@@ -207,7 +209,7 @@ const handleClick = () => {
 }
 
 .calendar-day--other-month {
-  @apply text-gray-300;
+  @apply text-gray-500;
 }
 
 /* РЎРѕСЃС‚РѕСЏРЅРёСЏ РІС‹Р±РѕСЂР° */
@@ -239,7 +241,7 @@ const handleClick = () => {
 
 /* РџСЂРѕС€РµРґС€РёРµ РґРЅРё */
 .calendar-day--past {
-  @apply text-gray-300 cursor-not-allowed;
+  @apply text-gray-500 cursor-not-allowed;
 }
 
 /* РЎС‚Р°С‚СѓСЃС‹ РґРѕСЃС‚СѓРїРЅРѕСЃС‚Рё */
@@ -262,7 +264,7 @@ const handleClick = () => {
 
 /* РРЅРґРёРєР°С‚РѕСЂ Р·Р°РіСЂСѓР¶РµРЅРЅРѕСЃС‚Рё */
 .calendar-day-indicator {
-  @apply absolute bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-1 bg-gray-200 rounded-full overflow-hidden;
+  @apply absolute bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-1 bg-gray-500 rounded-full overflow-hidden;
 }
 
 .calendar-day-indicator-bar {
@@ -293,7 +295,7 @@ const handleClick = () => {
 }
 
 .calendar-day-tooltip-content {
-  @apply bg-gray-900 text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-lg;
+  @apply bg-gray-500 text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-lg;
 }
 
 .calendar-day-tooltip-content::after {
@@ -349,7 +351,7 @@ const handleClick = () => {
 /* Р’С‹СЃРѕРєРёР№ РєРѕРЅС‚СЂР°СЃС‚ */
 @media (prefers-contrast: high) {
   .calendar-day {
-    @apply border-gray-400;
+    @apply border-gray-500;
   }
   
   .calendar-day--selected {
@@ -379,19 +381,19 @@ const handleClick = () => {
 /* РўРµРјРЅР°СЏ С‚РµРјР° */
 @media (prefers-color-scheme: dark) {
   .calendar-day--available {
-    @apply text-gray-100 hover:bg-gray-700;
+    @apply text-gray-500 hover:bg-gray-500;
   }
   
   .calendar-day--unavailable {
-    @apply text-gray-600;
+    @apply text-gray-500;
   }
   
   .calendar-day--other-month {
-    @apply text-gray-600;
+    @apply text-gray-500;
   }
   
   .calendar-day-tooltip-content {
-    @apply bg-gray-800 border border-gray-600;
+    @apply bg-gray-500 border border-gray-500;
   }
 }
 </style>

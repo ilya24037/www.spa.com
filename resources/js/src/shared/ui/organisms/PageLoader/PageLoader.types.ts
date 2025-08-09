@@ -112,7 +112,7 @@ export interface UsePageLoadingReturn {
   isLoading: import("vue").Ref<boolean>
   progress: import("vue").Ref<number>
   message: import("vue").Ref<string>
-  error: import("vue").Ref<PageLoadingError | null>
+  error: import("vue").Ref<PageLoadingError | undefined>
   startLoading: (message?: string) => void
   setProgress: (progress: number, message?: string) => void
   completeLoading: () => void

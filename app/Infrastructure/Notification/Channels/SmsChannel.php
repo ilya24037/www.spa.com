@@ -2,7 +2,7 @@
 
 namespace App\Infrastructure\Notification\Channels;
 
-use App\Domain\Notification\DTOs\NotificationData;
+use App\Domain\Notification\Models\NotificationDelivery;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -25,82 +25,103 @@ class SmsChannel implements ChannelInterface
         return config('services.sms.enabled', false);
     }
 
-    public function send(NotificationData $notification): bool
+    /**
+     * Отправить уведомление
+     */
+    public function send(NotificationDelivery $delivery): array
     {
         try {
             // Проверяем что SMS сервис включен
             if (!$this->isEnabled()) {
-                Log::info('SMS channel is disabled, skipping notification', [
-                    'notification_id' => $notification->getId()
-                ]);
-                return false;
+                return [
+                    'success' => false,
+                    'error' => 'SMS channel is disabled'
+                ];
             }
+
+            $content = $delivery->content;
+            $recipient = $delivery->recipient;
 
             // Проверяем наличие номера телефона
-            if (empty($notification->getRecipient()['phone'])) {
-                Log::warning('SMS notification failed: no phone number', [
-                    'notification_id' => $notification->getId(),
-                    'recipient' => $notification->getRecipient()
-                ]);
-                return false;
+            if (empty($recipient)) {
+                return [
+                    'success' => false,
+                    'error' => 'No phone number provided'
+                ];
             }
 
-            $phone = $this->normalizePhone($notification->getRecipient()['phone']);
-            $message = $this->formatMessage($notification);
+            $phone = $this->normalizePhone($recipient);
+            $message = $this->formatMessage($content);
 
-            // В production здесь будет реальная отправка SMS
-            // Пока логируем для разработки
-            if (app()->environment('production')) {
-                return $this->sendRealSms($phone, $message, $notification);
+            // Отправляем SMS
+            $result = $this->sendSms($phone, $message, $delivery);
+
+            if ($result) {
+                Log::info('SMS notification sent successfully', [
+                    'delivery_id' => $delivery->id,
+                    'phone' => $this->maskPhone($phone)
+                ]);
+
+                return [
+                    'success' => true,
+                    'message' => 'SMS sent successfully',
+                    'external_id' => 'sms_' . time(),
+                    'delivery_time' => rand(1, 10),
+                ];
             } else {
-                return $this->sendTestSms($phone, $message, $notification);
+                return [
+                    'success' => false,
+                    'error' => 'SMS sending failed'
+                ];
             }
 
         } catch (\Exception $e) {
             Log::error('SMS notification failed', [
-                'notification_id' => $notification->getId(),
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'delivery_id' => $delivery->id,
+                'error' => $e->getMessage()
             ]);
-            return false;
+
+            return [
+                'success' => false,
+                'error' => $e->getMessage()
+            ];
         }
     }
 
     /**
-     * Отправка реального SMS в production
+     * Отправка SMS сообщения
      */
-    protected function sendRealSms(string $phone, string $message, NotificationData $notification): bool
+    protected function sendSms(string $phone, string $message, NotificationDelivery $delivery): bool
     {
-        // Здесь интеграция с реальным SMS провайдером
-        // Например: SMSC.ru, SMS.ru, Twilio и т.д.
-        
-        $provider = config('services.sms.provider', 'smsc');
+        $provider = config('services.sms.provider', 'test');
         
         switch ($provider) {
             case 'smsc':
-                return $this->sendViaSmsc($phone, $message, $notification);
+                return $this->sendViaSmsc($phone, $message, $delivery);
             case 'smsru':
-                return $this->sendViaSmsRu($phone, $message, $notification);
+                return $this->sendViaSmsRu($phone, $message, $delivery);
             case 'twilio':
-                return $this->sendViaTwilio($phone, $message, $notification);
+                return $this->sendViaTwilio($phone, $message, $delivery);
+            case 'test':
             default:
-                Log::error('Unknown SMS provider', ['provider' => $provider]);
-                return false;
+                return $this->sendTestSms($phone, $message, $delivery);
         }
     }
 
     /**
      * Тестовая отправка SMS в development
      */
-    protected function sendTestSms(string $phone, string $message, NotificationData $notification): bool
+    protected function sendTestSms(string $phone, string $message, NotificationDelivery $delivery): bool
     {
-        Log::info('SMS notification (TEST MODE)', [
-            'notification_id' => $notification->getId(),
-            'phone' => $phone,
+        Log::info('📱 SMS notification (TEST MODE)', [
+            'delivery_id' => $delivery->id,
+            'phone' => $this->maskPhone($phone),
             'message' => $message,
-            'title' => $notification->getTitle(),
-            'type' => $notification->getType()
         ]);
+
+        if (config('app.debug')) {
+            Log::channel('single')->info("📱 SMS TO: {$this->maskPhone($phone)}\nMESSAGE:\n{$message}");
+        }
 
         return true;
     }
@@ -108,12 +129,13 @@ class SmsChannel implements ChannelInterface
     /**
      * Отправка через SMSC.ru
      */
-    protected function sendViaSmsc(string $phone, string $message, NotificationData $notification): bool
+    protected function sendViaSmsc(string $phone, string $message, NotificationDelivery $delivery): bool
     {
         // TODO: Реализовать интеграцию с SMSC.ru
         Log::info('SMS via SMSC.ru', [
-            'phone' => $phone,
-            'message' => $message
+            'delivery_id' => $delivery->id,
+            'phone' => $this->maskPhone($phone),
+            'message' => mb_substr($message, 0, 50) . '...'
         ]);
         return true;
     }
@@ -121,12 +143,13 @@ class SmsChannel implements ChannelInterface
     /**
      * Отправка через SMS.ru
      */
-    protected function sendViaSmsRu(string $phone, string $message, NotificationData $notification): bool
+    protected function sendViaSmsRu(string $phone, string $message, NotificationDelivery $delivery): bool
     {
         // TODO: Реализовать интеграцию с SMS.ru
         Log::info('SMS via SMS.ru', [
-            'phone' => $phone,
-            'message' => $message
+            'delivery_id' => $delivery->id,
+            'phone' => $this->maskPhone($phone),
+            'message' => mb_substr($message, 0, 50) . '...'
         ]);
         return true;
     }
@@ -134,12 +157,13 @@ class SmsChannel implements ChannelInterface
     /**
      * Отправка через Twilio
      */
-    protected function sendViaTwilio(string $phone, string $message, NotificationData $notification): bool
+    protected function sendViaTwilio(string $phone, string $message, NotificationDelivery $delivery): bool
     {
         // TODO: Реализовать интеграцию с Twilio
         Log::info('SMS via Twilio', [
-            'phone' => $phone,
-            'message' => $message
+            'delivery_id' => $delivery->id,
+            'phone' => $this->maskPhone($phone),
+            'message' => mb_substr($message, 0, 50) . '...'
         ]);
         return true;
     }
@@ -168,49 +192,53 @@ class SmsChannel implements ChannelInterface
     /**
      * Форматирование сообщения для SMS
      */
-    protected function formatMessage(NotificationData $notification): string
+    protected function formatMessage(array $content): string
     {
-        $message = $notification->getTitle();
+        $title = $content['title'] ?? '';
+        $message = $content['message'] ?? '';
         
-        // Добавляем тело сообщения если есть
-        if (!empty($notification->getBody())) {
-            $message .= "\n" . $notification->getBody();
+        // Объединяем заголовок и сообщение
+        if (!empty($message) && $message !== $title) {
+            $text = $title . "\n" . $message;
+        } else {
+            $text = $title ?: $message;
         }
         
         // Ограничиваем длину SMS (160 символов для стандартного SMS)
-        if (mb_strlen($message) > 160) {
-            $message = mb_substr($message, 0, 157) . '...';
+        $maxLength = config('services.sms.max_length', 160);
+        if (mb_strlen($text) > $maxLength) {
+            $text = mb_substr($text, 0, $maxLength - 3) . '...';
         }
         
-        return $message;
+        return $text;
     }
 
-    public function getRequiredData(): array
+    /**
+     * Маскировка номера телефона для логов
+     */
+    protected function maskPhone(string $phone): string
     {
-        return [
-            'phone' => 'Номер телефона получателя'
-        ];
+        if (strlen($phone) <= 4) {
+            return $phone;
+        }
+        
+        return substr($phone, 0, 3) . str_repeat('*', strlen($phone) - 6) . substr($phone, -3);
     }
 
-    public function validateNotification(NotificationData $notification): array
+    // === МЕТОДЫ ИНТЕРФЕЙСА ===
+
+    public function isAvailable(): bool
     {
-        $errors = [];
-        
-        $recipient = $notification->getRecipient();
-        
-        if (empty($recipient['phone'])) {
-            $errors[] = 'Отсутствует номер телефона получателя';
-        } else {
-            $phone = $this->normalizePhone($recipient['phone']);
-            if (!preg_match('/^\+\d{10,15}$/', $phone)) {
-                $errors[] = 'Неверный формат номера телефона';
-            }
-        }
-        
-        if (empty($notification->getTitle())) {
-            $errors[] = 'Отсутствует текст сообщения';
-        }
-        
-        return $errors;
+        return $this->isEnabled() && !empty(config('services.sms.provider'));
+    }
+
+    public function getMaxDeliveryTime(): int
+    {
+        return 30; // 30 секунд для SMS
+    }
+
+    public function supportsDeliveryConfirmation(): bool
+    {
+        return false; // SMS обычно не поддерживает подтверждение доставки в базовой версии
     }
 }

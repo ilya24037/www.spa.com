@@ -3,9 +3,9 @@
     <button
       v-for="(image, index) in images"
       :key="image.id"
-      @click="openViewer(index)"
-      class="aspect-square rounded-lg overflow-hidden bg-gray-200 hover:opacity-80 transition-opacity"
+      class="aspect-square rounded-lg overflow-hidden bg-gray-500 hover:opacity-80 transition-opacity"
       :aria-label="`РћС‚РєСЂС‹С‚СЊ РёР·РѕР±СЂР°Р¶РµРЅРёРµ ${index + 1}`"
+      @click="openViewer(index)"
     >
       <img
         :src="image.thumbnail || image.url"
@@ -32,6 +32,6 @@ const galleryStore = useGalleryStore()
 
 // Methods
 const openViewer = (index: number) => {
-  galleryStore.openGallery(props.images, index)
+    galleryStore.openGallery(props.images, index)
 }
 </script>

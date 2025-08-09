@@ -11,6 +11,7 @@
 
 import { defineAsyncComponent, type AsyncComponentLoader } from 'vue'
 import type { Component } from '@vue/runtime-core'
+import { logger } from '@/src/shared/utils/logger'
 
 export interface WidgetConfig {
   name: string
@@ -94,7 +95,7 @@ export abstract class BaseWidget {
    * Обрабатывает ошибки виджета изолированно
    */
   protected handleError(error: Error): void {
-    console.error(`[Widget ${this.config.name}] Error:`, error)
+    logger.error(`[Widget ${this.config.name}] Error:`, error)
     
     // Не пробрасываем ошибку наружу - изоляция
     // Можно отправить в систему логирования
@@ -113,8 +114,9 @@ export abstract class BaseWidget {
    * Отправляет метрики производительности
    */
   protected reportPerformance(): void {
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[Widget ${this.config.name}] Performance:`, this.performance)
+    // Проверяем режим разработки через import.meta.env для Vite
+    if (import.meta.env.DEV) {
+      // Removed console.log in production
     }
     
     // В production можно отправлять в analytics

@@ -1,15 +1,25 @@
 <template>
   <div class="service-provider">
-    <label class="block text-sm font-medium text-gray-700 mb-2">
+    <label class="block text-sm font-medium text-gray-500 mb-2">
       РўРёРї СѓСЃР»СѓРі
     </label>
     <div class="space-y-2">
       <label class="flex items-center">
-        <input type="radio" :value="'individual'" v-model="localValue" class="mr-2">
+        <input
+          v-model="localValue"
+          type="radio"
+          :value="'individual'"
+          class="mr-2"
+        >
         <span>РРЅРґРёРІРёРґСѓР°Р»СЊРЅС‹Р№</span>
       </label>
       <label class="flex items-center">
-        <input type="radio" :value="'salon'" v-model="localValue" class="mr-2">
+        <input
+          v-model="localValue"
+          type="radio"
+          :value="'salon'"
+          class="mr-2"
+        >
         <span>РЎР°Р»РѕРЅ</span>
       </label>
     </div>
@@ -28,8 +38,8 @@ const emit = defineEmits<{
 }>()
 
 const localValue = computed({
-  get: () => props.modelValue || 'individual',
-  set: (value) => emit('update:modelValue', value)
+    get: () => props.modelValue || 'individual',
+    set: (value) => emit('update:modelValue', value)
 })
 </script>
 

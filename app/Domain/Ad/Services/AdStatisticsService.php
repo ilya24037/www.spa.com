@@ -76,7 +76,10 @@ class AdStatisticsService
      */
     private function getFavoritesCount(Ad $ad): int
     {
-        return $ad->favorites()->count();
+        // Используем прямой запрос к таблице user_favorites
+        return \DB::table('user_favorites')
+            ->where('ad_id', $ad->id)
+            ->count();
     }
 
     /**

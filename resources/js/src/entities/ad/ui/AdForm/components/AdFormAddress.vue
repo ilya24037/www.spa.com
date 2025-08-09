@@ -1,14 +1,14 @@
 <template>
   <div class="adformaddress">
-    <label class="block text-sm font-medium text-gray-700 mb-2">
+    <label class="block text-sm font-medium text-gray-500 mb-2">
       {{ label }}
     </label>
     <input
-      type="text"
       v-model="localValue"
-      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      type="text"
+      class="w-full px-3 py-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
       :placeholder="placeholder"
-    />
+    >
   </div>
 </template>
 
@@ -20,8 +20,8 @@ const props = withDefaults(defineProps<{
   label?: string
   placeholder?: string
 }>(), {
-  label: 'Address',
-  placeholder: 'Р’РІРµРґРёС‚Рµ Р·РЅР°С‡РµРЅРёРµ'
+    label: 'Address',
+    placeholder: 'Р’РІРµРґРёС‚Рµ Р·РЅР°С‡РµРЅРёРµ'
 })
 
 const emit = defineEmits<{
@@ -29,8 +29,8 @@ const emit = defineEmits<{
 }>()
 
 const localValue = computed({
-  get: () => props.modelValue || '',
-  set: (value) => emit('update:modelValue', value)
+    get: () => props.modelValue || '',
+    set: (value) => emit('update:modelValue', value)
 })
 </script>
 

@@ -36,35 +36,57 @@
       <div v-if="showDetails && (error.details || error.code)" class="error-state__details">
         <button
           v-if="!state.showFullDetails"
-          @click="state.showFullDetails = true"
           class="error-state__details-toggle"
           aria-label="РџРѕРєР°Р·Р°С‚СЊ РґРµС‚Р°Р»Рё РѕС€РёР±РєРё"
+          @click="state.showFullDetails = true"
         >
-          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          <svg
+            class="w-4 h-4 mr-1"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
           </svg>
           РџРѕРґСЂРѕР±РЅРµРµ
         </button>
 
         <div v-else class="error-state__details-content">
           <button
-            @click="state.showFullDetails = false"
             class="error-state__details-toggle mb-2"
             aria-label="РЎРєСЂС‹С‚СЊ РґРµС‚Р°Р»Рё РѕС€РёР±РєРё"
+            @click="state.showFullDetails = false"
           >
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+            <svg
+              class="w-4 h-4 mr-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 15l7-7 7 7"
+              />
             </svg>
             РЎРєСЂС‹С‚СЊ РґРµС‚Р°Р»Рё
           </button>
           
           <div class="error-state__details-text">
-            <p v-if="error.details" class="mb-2">{{ error.details }}</p>
+            <p v-if="error.details" class="mb-2">
+              {{ error.details }}
+            </p>
             <div v-if="error.code" class="text-xs">
-              РљРѕРґ РѕС€РёР±РєРё: <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">{{ error.code }}</code>
+              РљРѕРґ РѕС€РёР±РєРё: <code class="font-mono bg-gray-500 px-1 py-0.5 rounded">{{ error.code }}</code>
             </div>
             <div v-if="error.requestId" class="text-xs mt-1">
-              ID Р·Р°РїСЂРѕСЃР°: <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">{{ error.requestId }}</code>
+              ID Р·Р°РїСЂРѕСЃР°: <code class="font-mono bg-gray-500 px-1 py-0.5 rounded">{{ error.requestId }}</code>
             </div>
           </div>
         </div>
@@ -75,7 +97,6 @@
         <button
           v-for="(action, index) in effectiveActions"
           :key="index"
-          @click="handleAction(action)"
           :disabled="action.loading || state.isRetrying"
           :class="[
             'error-state__action',
@@ -83,10 +104,18 @@
             { 'error-state__action--loading': action.loading || (index === 0 && state.isRetrying) }
           ]"
           :aria-label="action.label"
+          @click="handleAction(action)"
         >
           <span v-if="action.loading || (index === 0 && state.isRetrying)" class="error-state__action-spinner">
             <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              />
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
           </span>
@@ -111,12 +140,22 @@
     <!-- РљРЅРѕРїРєР° Р·Р°РєСЂС‹С‚РёСЏ -->
     <button
       v-if="dismissible"
-      @click="handleDismiss"
       class="error-state__dismiss"
       aria-label="Р—Р°РєСЂС‹С‚СЊ СЃРѕРѕР±С‰РµРЅРёРµ РѕР± РѕС€РёР±РєРµ"
+      @click="handleDismiss"
     >
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      <svg
+        class="w-5 h-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M6 18L18 6M6 6l12 12"
+        />
       </svg>
     </button>
   </div>
@@ -126,23 +165,23 @@
 import { logger } from '@/src/shared/lib/logger'
 import { computed, ref } from 'vue'
 import type {
-  ErrorStateProps,
-  ErrorStateEmits,
-  ErrorStateState,
-  ErrorTypeConfig,
-  ErrorAction
+    ErrorStateProps,
+    ErrorStateEmits,
+    ErrorStateState,
+    ErrorTypeConfig,
+    ErrorAction
 } from './ErrorState.types'
 import { DEFAULT_ERROR_CONFIGS } from './ErrorState.types'
 
 // Props
 const props = withDefaults(defineProps<ErrorStateProps>(), {
-  size: 'medium',
-  variant: 'card',
-  showDetails: true,
-  showIcon: true,
-  showActions: true,
-  retryable: true,
-  dismissible: false
+    size: 'medium',
+    variant: 'card',
+    showDetails: true,
+    showIcon: true,
+    showActions: true,
+    retryable: true,
+    dismissible: false
 })
 
 // Emits
@@ -150,100 +189,100 @@ const emit = defineEmits<ErrorStateEmits>()
 
 // РЎРѕСЃС‚РѕСЏРЅРёРµ РєРѕРјРїРѕРЅРµРЅС‚Р°
 const state = ref<ErrorStateState>({
-  isRetrying: false,
-  isDismissed: false,
-  showFullDetails: false,
-  reportSent: false
+    isRetrying: false,
+    isDismissed: false,
+    showFullDetails: false,
+    reportSent: false
 })
 
 // Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const errorConfig = computed<ErrorTypeConfig>(() => {
-  if (!props.error) {
-    return DEFAULT_ERROR_CONFIGS.generic
-  }
-  return DEFAULT_ERROR_CONFIGS[props.error.type] || DEFAULT_ERROR_CONFIGS.generic
+    if (!props.error) {
+        return DEFAULT_ERROR_CONFIGS.generic
+    }
+    return DEFAULT_ERROR_CONFIGS[props.error.type] || DEFAULT_ERROR_CONFIGS.generic
 })
 
 const effectiveActions = computed<ErrorAction[]>(() => {
-  if (props.actions && props.actions.length > 0) {
-    return props.actions
-  }
-
-  const defaultActions: ErrorAction[] = []
-  
-  // Р”РѕР±Р°РІР»СЏРµРј РєРЅРѕРїРєСѓ РїРѕРІС‚РѕСЂР° РµСЃР»Рё СЂР°Р·СЂРµС€РµРЅРѕ
-  if (props.retryable && errorConfig.value.defaultActions) {
-    const retryAction = errorConfig.value.defaultActions.find(a => a.label === 'РџРѕРІС‚РѕСЂРёС‚СЊ')
-    if (retryAction) {
-      defaultActions.push({
-        ...retryAction,
-        action: handleRetry
-      })
+    if (props.actions && props.actions.length > 0) {
+        return props.actions
     }
-  }
 
-  // Р”РѕР±Р°РІР»СЏРµРј РєРЅРѕРїРєСѓ РѕС‚С‡РµС‚Р° РµСЃР»Рё РѕС€РёР±РєР° СЂРµРїРѕСЂС‚Р°Р±РµР»СЊРЅР°СЏ
-  if (errorConfig.value.reportable && !state.reportSent) {
-    defaultActions.push({
-      label: 'РЎРѕРѕР±С‰РёС‚СЊ РѕР± РѕС€РёР±РєРµ',
-      variant: 'secondary',
-      action: handleReport
-    })
-  }
+    const defaultActions: ErrorAction[] = []
+  
+    // Р”РѕР±Р°РІР»СЏРµРј РєРЅРѕРїРєСѓ РїРѕРІС‚РѕСЂР° РµСЃР»Рё СЂР°Р·СЂРµС€РµРЅРѕ
+    if (props.retryable && errorConfig.value.defaultActions) {
+        const retryAction = errorConfig.value.defaultActions.find(a => a.label === 'РџРѕРІС‚РѕСЂРёС‚СЊ')
+        if (retryAction) {
+            defaultActions.push({
+                ...retryAction,
+                action: handleRetry
+            })
+        }
+    }
 
-  return defaultActions
+    // Р"РѕР±Р°РІР»СЏРµРј РєРЅРѕРїРєСѓ РѕС‚С‡РµС‚Р° РµСЃР»Рё РѕС€РёР±РєР° СЂРµРїРѕСЂС‚Р°Р±РµР»СЊРЅР°СЏ
+    if (errorConfig.value.reportable && !state.value.reportSent) {
+        defaultActions.push({
+            label: 'РЎРѕРѕР±С‰РёС‚СЊ РѕР± РѕС€РёР±РєРµ',
+            variant: 'secondary',
+            action: handleReport
+        })
+    }
+
+    return defaultActions
 })
 
 // РњРµС‚РѕРґС‹
 const getIcon = () => {
-  // Р’ СЂРµР°Р»СЊРЅРѕРј РїСЂРёР»РѕР¶РµРЅРёРё Р·РґРµСЃСЊ Р±С‹Р» Р±С‹ РёРјРїРѕСЂС‚ РёРєРѕРЅРѕРє
-  // Р”Р»СЏ РїСЂРёРјРµСЂР° РІРѕР·РІСЂР°С‰Р°РµРј SVG РєРѕРјРїРѕРЅРµРЅС‚
-  return {
-    template: `
+    // Р’ СЂРµР°Р»СЊРЅРѕРј РїСЂРёР»РѕР¶РµРЅРёРё Р·РґРµСЃСЊ Р±С‹Р» Р±С‹ РёРјРїРѕСЂС‚ РёРєРѕРЅРѕРє
+    // Р”Р»СЏ РїСЂРёРјРµСЂР° РІРѕР·РІСЂР°С‰Р°РµРј SVG РєРѕРјРїРѕРЅРµРЅС‚
+    return {
+        template: `
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
           d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
       </svg>
     `
-  }
+    }
 }
 
 const handleRetry = async (): Promise<void> => {
-  try {
-    state.isRetrying = true
-    emit('retry')
+    try {
+        state.value.isRetrying = true
+        emit('retry')
     
-    // РЎРёРјСѓР»СЏС†РёСЏ Р·Р°РґРµСЂР¶РєРё РґР»СЏ UX
-    await new Promise(resolve => setTimeout(resolve, 1000))
-  } finally {
-    state.isRetrying = false
-  }
+        // РЎРёРјСѓР»СЏС†РёСЏ Р·Р°РґРµСЂР¶РєРё РґР»СЏ UX
+        await new Promise(resolve => setTimeout(resolve, 1000))
+    } finally {
+        state.value.isRetrying = false
+    }
 }
 
 const handleDismiss = (): void => {
-  state.isDismissed = true
-  emit('dismiss')
+    state.value.isDismissed = true
+    emit('dismiss')
 }
 
 const handleAction = async (action: ErrorAction): Promise<void> => {
-  if (action.action) {
-    await action.action()
-  }
-  emit('action', action)
+    if (action.action) {
+        await action.action()
+    }
+    emit('action', action)
 }
 
 const handleReport = async (): Promise<void> => {
-  if (!props.error) return
+    if (!props.error) return
   
-  try {
-    emit('report', props.error)
-    state.reportSent = true
+    try {
+        emit('report', props.error)
+        state.value.reportSent = true
     
     // Р’ СЂРµР°Р»СЊРЅРѕРј РїСЂРёР»РѕР¶РµРЅРёРё Р·РґРµСЃСЊ Р±С‹Р» Р±С‹ API РІС‹Р·РѕРІ
     // Error reported
-  } catch (err) {
-    logger.error('Failed to report error:', err)
-  }
+    } catch (err) {
+        logger.error('Failed to report error:', err)
+    }
 }
 </script>
 
@@ -263,11 +302,11 @@ const handleReport = async (): Promise<void> => {
 }
 
 .error-state--modal {
-  @apply bg-white border-gray-200 shadow-xl;
+  @apply bg-white border-gray-500 shadow-xl;
 }
 
 .error-state--page {
-  @apply bg-gray-50 border-0 min-h-[400px] items-center justify-center text-center;
+  @apply bg-gray-500 border-0 min-h-[400px] items-center justify-center text-center;
 }
 
 /* Р Р°Р·РјРµСЂС‹ */
@@ -310,7 +349,7 @@ const handleReport = async (): Promise<void> => {
 }
 
 .error-state__title {
-  @apply font-semibold text-gray-900 mb-1;
+  @apply font-semibold text-gray-500 mb-1;
 }
 
 .error-state--small .error-state__title {
@@ -322,7 +361,7 @@ const handleReport = async (): Promise<void> => {
 }
 
 .error-state__message {
-  @apply text-gray-600;
+  @apply text-gray-500;
 }
 
 .error-state--small .error-state__message {
@@ -335,15 +374,15 @@ const handleReport = async (): Promise<void> => {
 }
 
 .error-state__details-toggle {
-  @apply inline-flex items-center text-sm text-gray-500 hover:text-gray-700 transition-colors;
+  @apply inline-flex items-center text-sm text-gray-500 hover:text-gray-500 transition-colors;
 }
 
 .error-state__details-content {
-  @apply mt-2 p-3 bg-gray-50 rounded-md;
+  @apply mt-2 p-3 bg-gray-500 rounded-md;
 }
 
 .error-state__details-text {
-  @apply text-sm text-gray-600;
+  @apply text-sm text-gray-500;
 }
 
 /* Р”РµР№СЃС‚РІРёСЏ */
@@ -361,7 +400,7 @@ const handleReport = async (): Promise<void> => {
 }
 
 .error-state__action--secondary {
-  @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+  @apply bg-gray-500 text-gray-500 hover:bg-gray-500;
 }
 
 .error-state__action--danger {
@@ -378,7 +417,7 @@ const handleReport = async (): Promise<void> => {
 
 /* РџРѕРјРѕС‰СЊ */
 .error-state__help {
-  @apply mt-3 pt-3 border-t border-gray-200;
+  @apply mt-3 pt-3 border-t border-gray-500;
 }
 
 .error-state__help-link {
@@ -387,7 +426,7 @@ const handleReport = async (): Promise<void> => {
 
 /* РљРЅРѕРїРєР° Р·Р°РєСЂС‹С‚РёСЏ */
 .error-state__dismiss {
-  @apply absolute top-2 right-2 p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all;
+  @apply absolute top-2 right-2 p-1 rounded-lg text-gray-500 hover:text-gray-500 hover:bg-gray-500 transition-all;
 }
 
 /* РђРЅРёРјР°С†РёРё */

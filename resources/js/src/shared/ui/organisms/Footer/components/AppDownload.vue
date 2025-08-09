@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white rounded-lg p-4 text-center shadow-sm border border-gray-100">
+  <div class="bg-white rounded-lg p-4 text-center shadow-sm border border-gray-500">
     <!-- QR код -->
     <div class="mb-4">
       <img 
@@ -9,7 +9,7 @@
         loading="lazy"
         @error="handleImageError"
       >
-      <p class="text-sm text-gray-600 mt-3">
+      <p class="text-sm text-gray-500 mt-3">
         Наведите камеру и скачайте приложение
       </p>
     </div>
@@ -73,27 +73,27 @@ const showFallback = ref(false)
 
 // Обработчик ошибки загрузки QR кода
 const handleImageError = () => {
-  showFallback.value = true
+    showFallback.value = true
 }
 
 // Обработчик ошибки загрузки иконок сторов
 const handleStoreImageError = (event: Event, store: AppStore) => {
-  const target = event.target as HTMLImageElement
-  target.style.display = 'none'
+    const target = event.target as HTMLImageElement
+    target.style.display = 'none'
   
-  // Можно добавить fallback текст или заменить на дефолтную иконку
-  const parent = target.parentNode as HTMLElement
-  if (parent && !parent.querySelector('.store-fallback')) {
-    const fallback = document.createElement('div')
-    fallback.className = 'store-fallback bg-gray-100 h-10 flex items-center justify-center rounded text-sm text-gray-600'
-    fallback.textContent = getStoreName(store.name)
-    parent.appendChild(fallback)
-  }
+    // Можно добавить fallback текст или заменить на дефолтную иконку
+    const parent = target.parentNode as HTMLElement
+    if (parent && !parent.querySelector('.store-fallback')) {
+        const fallback = document.createElement('div')
+        fallback.className = 'store-fallback bg-gray-500 h-10 flex items-center justify-center rounded text-sm text-gray-500'
+        fallback.textContent = getStoreName(store.name)
+        parent.appendChild(fallback)
+    }
 }
 
 // Получение читаемого названия стора
 const getStoreName = (storeName: 'appStore' | 'googlePlay'): string => {
-  return storeName === 'appStore' ? 'App Store' : 'Google Play'
+    return storeName === 'appStore' ? 'App Store' : 'Google Play'
 }
 </script>
 

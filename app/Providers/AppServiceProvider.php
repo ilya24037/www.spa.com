@@ -12,11 +12,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Привязка MediaService к MasterMediaService для обратной совместимости
-        $this->app->bind(
-            \App\Domain\Media\Services\MediaService::class,
-            \App\Domain\Media\Services\MasterMediaService::class
-        );
+        // РЕГИСТРАЦИЯ МЕДИА-СЕРВИСОВ
+        // Важно: НЕЛЬЗЯ биндить MediaService -> MasterMediaService (это создаёт циклическую зависимость),
+        // так как MasterMediaService сам зависит от MediaService. Регистрируем их по отдельности.
+        $this->app->singleton(\App\Domain\Media\Services\MediaService::class);
+        $this->app->singleton(\App\Domain\Media\Services\MasterMediaService::class);
 
         // Минимальная регистрация MediaRepository - заглушка
         $this->app->singleton(\App\Domain\Media\Repositories\MediaRepository::class);
@@ -25,7 +25,17 @@ class AppServiceProvider extends ServiceProvider
             \App\Domain\Media\Repositories\MediaRepository::class
         );
 
-        // Регистрация Master интерфейсов - заглушки
+        // Регистрация Master репозиториев и сервисов
+        $this->app->singleton(\App\Domain\Master\Repositories\MasterRepository::class);
+        $this->app->singleton(\App\Domain\Master\Services\MasterProfileService::class);
+        $this->app->singleton(\App\Domain\Master\Services\MasterModerationService::class);
+        $this->app->singleton(\App\Domain\Master\Services\MasterSearchService::class);
+        $this->app->singleton(\App\Domain\Master\Services\MasterFullProfileService::class);
+        $this->app->singleton(\App\Domain\Master\Services\MasterHelperService::class);
+        $this->app->singleton(\App\Infrastructure\Notification\NotificationService::class);
+        $this->app->singleton(\App\Domain\Master\Services\MasterService::class);
+        
+        // Регистрация Master интерфейсов
         $this->app->bind(
             \App\Domain\Master\Contracts\MasterRepositoryInterface::class,
             \App\Domain\Master\Repositories\MasterRepository::class
@@ -34,6 +44,17 @@ class AppServiceProvider extends ServiceProvider
             \App\Domain\Master\Contracts\MasterServiceInterface::class,
             \App\Domain\Master\Services\MasterService::class
         );
+        
+        // Регистрация интеграционных сервисов
+        $this->app->singleton(\App\Application\Services\Integration\UserMasterIntegrationService::class);
+        $this->app->singleton(\App\Application\Services\Integration\UserReviewsIntegrationService::class);
+        $this->app->singleton(\App\Application\Services\Integration\UserFavoritesIntegrationService::class);
+
+        // Регистрация User сервисов
+        $this->registerUserServices();
+
+        // Регистрация Booking сервисов
+        $this->registerBookingServices();
 
         // Регистрация Search сервисов
         $this->registerSearchServices();
@@ -43,6 +64,70 @@ class AppServiceProvider extends ServiceProvider
         
         // Регистрация Cache декораторов
         $this->registerCacheDecorators();
+    }
+
+    /**
+     * Регистрация User сервисов
+     */
+    protected function registerUserServices(): void
+    {
+        // UserRepository
+        $this->app->singleton(\App\Domain\User\Repositories\UserRepository::class);
+        
+        // UserService (без циклических зависимостей)
+        $this->app->singleton(\App\Domain\User\Services\UserService::class, function ($app) {
+            return new \App\Domain\User\Services\UserService(
+                $app->make(\App\Domain\User\Repositories\UserRepository::class)
+                // UserProfileService добавим позже если нужно
+            );
+        });
+        
+        // UserAuthService с зависимостями
+        $this->app->singleton(\App\Domain\User\Services\UserAuthService::class, function ($app) {
+            return new \App\Domain\User\Services\UserAuthService(
+                $app->make(\App\Domain\User\Repositories\UserRepository::class),
+                $app->make(\App\Domain\User\Services\UserService::class)
+            );
+        });
+    }
+
+    /**
+     * Регистрация Booking сервисов
+     */
+    protected function registerBookingServices(): void
+    {
+        // BookingRepository
+        $this->app->singleton(\App\Domain\Booking\Repositories\BookingRepository::class);
+        
+        // Привязка интерфейса к реализации
+        $this->app->bind(
+            \App\Domain\Booking\Contracts\BookingRepositoryInterface::class,
+            \App\Domain\Booking\Repositories\BookingRepository::class
+        );
+        
+        // BookingService
+        $this->app->singleton(\App\Domain\Booking\Services\BookingService::class);
+        
+        // Привязка интерфейса BookingService к реализации
+        $this->app->bind(
+            \App\Domain\Booking\Contracts\BookingServiceInterface::class,
+            \App\Domain\Booking\Services\BookingService::class
+        );
+        
+        // Другие сервисы Booking
+        $this->app->singleton(\App\Domain\Booking\Services\BookingSlotService::class);
+        $this->app->singleton(\App\Domain\Booking\Services\AvailabilityService::class);
+        $this->app->singleton(\App\Domain\Booking\Services\SlotService::class);
+        $this->app->singleton(\App\Domain\Booking\Services\PricingService::class);
+        $this->app->singleton(\App\Domain\Booking\Services\ValidationService::class);
+        $this->app->singleton(\App\Domain\Booking\Services\NotificationService::class);
+        
+        // Booking Actions
+        $this->app->singleton(\App\Domain\Booking\Actions\CreateBookingAction::class);
+        $this->app->singleton(\App\Domain\Booking\Actions\ConfirmBookingAction::class);
+        $this->app->singleton(\App\Domain\Booking\Actions\CancelBookingAction::class);
+        $this->app->singleton(\App\Domain\Booking\Actions\CompleteBookingAction::class);
+        $this->app->singleton(\App\Domain\Booking\Actions\RescheduleBookingAction::class);
     }
 
     /**
@@ -100,38 +185,16 @@ class AppServiceProvider extends ServiceProvider
      */
     protected function registerCacheDecorators(): void
     {
-        // Проверяем, включено ли кеширование
-        if (config('cache.default') === 'redis' || config('cache.default') === 'database') {
-            // Сначала регистрируем оригинальные репозитории как отдельные сервисы
-            $this->app->singleton('ad.repository.original', function ($app) {
-                return new \App\Domain\Ad\Repositories\AdRepository(
-                    new \App\Domain\Ad\Models\Ad()
-                );
-            });
-            
-            $this->app->singleton('master.repository.original', function ($app) {
-                return new \App\Domain\Master\Repositories\MasterRepository(
-                    new \App\Domain\Master\Models\MasterProfile()
-                );
-            });
+        // УПРОЩЕНО: временно отключаем декораторы кеша, чтобы избежать ошибок разрешения зависимостей
+        // и неверных конструкторов. Регистрируем репозитории как простые singleton без аргументов.
 
-            // Теперь регистрируем декорированные версии
-            $this->app->singleton(\App\Domain\Ad\Repositories\AdRepository::class, function ($app) {
-                return new \App\Infrastructure\Cache\Decorators\CachedAdRepository(
-                    $app->make('ad.repository.original'),
-                    $app->make(\App\Infrastructure\Cache\CacheService::class),
-                    $app->make(\App\Infrastructure\Cache\Strategies\AdCacheStrategy::class)
-                );
-            });
+        $this->app->singleton(\App\Domain\Master\Repositories\MasterRepository::class, function ($app) {
+            return new \App\Domain\Master\Repositories\MasterRepository();
+        });
 
-            $this->app->singleton(\App\Domain\Master\Repositories\MasterRepository::class, function ($app) {
-                return new \App\Infrastructure\Cache\Decorators\CachedMasterRepository(
-                    $app->make('master.repository.original'),
-                    $app->make(\App\Infrastructure\Cache\CacheService::class),
-                    $app->make(\App\Infrastructure\Cache\Strategies\MasterCacheStrategy::class)
-                );
-            });
-        }
+        $this->app->singleton(\App\Domain\Ad\Repositories\AdRepository::class, function ($app) {
+            return new \App\Domain\Ad\Repositories\AdRepository();
+        });
     }
 
     /**

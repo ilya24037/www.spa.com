@@ -1,5 +1,10 @@
 <template>
-  <div v-if="showLegend" class="calendar-legend" role="region" aria-label="Р›РµРіРµРЅРґР° РєР°Р»РµРЅРґР°СЂСЏ">
+  <div
+    v-if="showLegend"
+    class="calendar-legend"
+    role="region"
+    aria-label="Р›РµРіРµРЅРґР° РєР°Р»РµРЅРґР°СЂСЏ"
+  >
     <div class="calendar-legend-content">
       <div class="calendar-legend-items">
         <div
@@ -18,7 +23,9 @@
       
       <!-- Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ -->
       <div v-if="showStatistics && statistics" class="calendar-legend-stats">
-        <div class="calendar-legend-stats-title">РЎС‚Р°С‚РёСЃС‚РёРєР°:</div>
+        <div class="calendar-legend-stats-title">
+          РЎС‚Р°С‚РёСЃС‚РёРєР°:
+        </div>
         <div class="calendar-legend-stats-content">
           <span class="calendar-legend-stat">
             Р’СЃРµРіРѕ РґР°С‚: {{ statistics.total }}
@@ -56,36 +63,36 @@ interface Props {
 }
 
 const _props = withDefaults(defineProps<Props>(), {
-  showLegend: true,
-  showStatistics: false,
-  legendItems: () => [
-    {
-      id: 'available',
-      color: '#10B981',
-      label: 'РњРЅРѕРіРѕ СЃРІРѕР±РѕРґРЅС‹С… СЃР»РѕС‚РѕРІ',
-      status: 'available'
-    },
-    {
-      id: 'busy',
-      color: '#F59E0B',
-      label: 'Р•СЃС‚СЊ СЃРІРѕР±РѕРґРЅС‹Рµ СЃР»РѕС‚С‹',
-      status: 'busy'
-    },
-    {
-      id: 'full',
-      color: '#EF4444',
-      label: 'РџРѕС‡С‚Рё РІСЃРµ Р·Р°РЅСЏС‚Рѕ',
-      status: 'full'
-    }
-  ],
-  statistics: null,
-  compact: false
+    showLegend: true,
+    showStatistics: false,
+    legendItems: () => [
+        {
+            id: 'available',
+            color: '#10B981',
+            label: 'РњРЅРѕРіРѕ СЃРІРѕР±РѕРґРЅС‹С… СЃР»РѕС‚РѕРІ',
+            status: 'available'
+        },
+        {
+            id: 'busy',
+            color: '#F59E0B',
+            label: 'Р•СЃС‚СЊ СЃРІРѕР±РѕРґРЅС‹Рµ СЃР»РѕС‚С‹',
+            status: 'busy'
+        },
+        {
+            id: 'full',
+            color: '#EF4444',
+            label: 'РџРѕС‡С‚Рё РІСЃРµ Р·Р°РЅСЏС‚Рѕ',
+            status: 'full'
+        }
+    ],
+    statistics: null,
+    compact: false
 })
 </script>
 
 <style scoped>
 .calendar-legend {
-  @apply mt-4 pt-4 border-t border-gray-200;
+  @apply mt-4 pt-4 border-t border-gray-500;
 }
 
 .calendar-legend-content {
@@ -105,7 +112,7 @@ const _props = withDefaults(defineProps<Props>(), {
 }
 
 .calendar-legend-text {
-  @apply text-xs text-gray-600;
+  @apply text-xs text-gray-500;
 }
 
 .calendar-legend-stats {
@@ -159,7 +166,7 @@ const _props = withDefaults(defineProps<Props>(), {
 /* Р’С‹СЃРѕРєРёР№ РєРѕРЅС‚СЂР°СЃС‚ */
 @media (prefers-contrast: high) {
   .calendar-legend-dot {
-    @apply ring-2 ring-gray-800;
+    @apply ring-2 ring-gray-500;
   }
   
   .calendar-legend-text,

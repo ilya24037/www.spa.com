@@ -20,8 +20,8 @@
         class="w-full h-full object-cover"
         loading="lazy"
       />
-      <div v-else class="w-full h-full bg-gray-200 flex items-center justify-center">
-        <span class="text-gray-400 text-sm">Нет фото</span>
+      <div v-else class="w-full h-full bg-gray-500 flex items-center justify-center">
+        <span class="text-gray-500 text-sm">Нет фото</span>
       </div>
       
       <!-- Промо значок -->
@@ -93,8 +93,8 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  layout: 'grid',
-  isPromoted: false
+    layout: 'grid',
+    isPromoted: false
 })
 
 defineEmits<{
@@ -105,50 +105,50 @@ defineEmits<{
 // === COMPUTED STYLES ===
 
 const cardClasses = computed(() => [
-  'bg-white rounded-lg border transition-all duration-200 cursor-pointer',
-  'hover:shadow-lg hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500',
-  {
-    'flex': props.layout === 'list',
-    'flex-col': props.layout === 'grid',
-    'border-yellow-300 shadow-md': props.isPromoted
-  }
+    'bg-white rounded-lg border transition-all duration-200 cursor-pointer',
+    'hover:shadow-lg hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500',
+    {
+        'flex': props.layout === 'list',
+        'flex-col': props.layout === 'grid',
+        'border-yellow-300 shadow-md': props.isPromoted
+    }
 ])
 
 const imageClasses = computed(() => [
-  'relative overflow-hidden',
-  {
-    'w-32 h-32 flex-shrink-0 rounded-l-lg': props.layout === 'list',
-    'w-full h-48 rounded-t-lg': props.layout === 'grid'
-  }
+    'relative overflow-hidden',
+    {
+        'w-32 h-32 flex-shrink-0 rounded-l-lg': props.layout === 'list',
+        'w-full h-48 rounded-t-lg': props.layout === 'grid'
+    }
 ])
 
 const contentClasses = computed(() => [
-  'p-4 flex-1',
-  {
-    'flex flex-col justify-between': props.layout === 'list'
-  }
+    'p-4 flex-1',
+    {
+        'flex flex-col justify-between': props.layout === 'list'
+    }
 ])
 
 const titleClasses = computed(() => [
-  'font-medium text-gray-900 mb-2',
-  {
-    'text-sm': props.layout === 'list',
-    'text-base': props.layout === 'grid'
-  }
+    'font-medium text-gray-500 mb-2',
+    {
+        'text-sm': props.layout === 'list',
+        'text-base': props.layout === 'grid'
+    }
 ])
 
 const descriptionClasses = computed(() => [
-  'text-gray-600 mb-3 line-clamp-2',
-  {
-    'text-xs': props.layout === 'list',
-    'text-sm': props.layout === 'grid'
-  }
+    'text-gray-500 mb-3 line-clamp-2',
+    {
+        'text-xs': props.layout === 'list',
+        'text-sm': props.layout === 'grid'
+    }
 ])
 
 // === UTILS ===
 
 function formatPrice(price: number): string {
-  return `${price.toLocaleString('ru-RU')} ₽`
+    return `${price.toLocaleString('ru-RU')} ₽`
 }
 </script>
 

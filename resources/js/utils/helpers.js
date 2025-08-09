@@ -72,30 +72,30 @@ export function formatDate(date, format = 'short') {
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
     
     switch (format) {
-        case 'relative':
-            if (diffDays === 0) return 'Сегодня'
-            if (diffDays === 1) return 'Вчера'
-            if (diffDays < 7) return `${diffDays} ${pluralize(diffDays, ['день', 'дня', 'дней'])} назад`
-            if (diffDays < 30) return `${Math.floor(diffDays / 7)} ${pluralize(Math.floor(diffDays / 7), ['неделю', 'недели', 'недель'])} назад`
-            if (diffDays < 365) return `${Math.floor(diffDays / 30)} ${pluralize(Math.floor(diffDays / 30), ['месяц', 'месяца', 'месяцев'])} назад`
-            break
+    case 'relative':
+        if (diffDays === 0) return 'Сегодня'
+        if (diffDays === 1) return 'Вчера'
+        if (diffDays < 7) return `${diffDays} ${pluralize(diffDays, ['день', 'дня', 'дней'])} назад`
+        if (diffDays < 30) return `${Math.floor(diffDays / 7)} ${pluralize(Math.floor(diffDays / 7), ['неделю', 'недели', 'недель'])} назад`
+        if (diffDays < 365) return `${Math.floor(diffDays / 30)} ${pluralize(Math.floor(diffDays / 30), ['месяц', 'месяца', 'месяцев'])} назад`
+        break
             
-        case 'long':
-            return d.toLocaleDateString('ru-RU', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            })
+    case 'long':
+        return d.toLocaleDateString('ru-RU', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        })
             
-        case 'short':
-        default:
-            return d.toLocaleDateString('ru-RU', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-            })
+    case 'short':
+    default:
+        return d.toLocaleDateString('ru-RU', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        })
     }
 }
 

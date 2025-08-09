@@ -22,12 +22,21 @@ class UserReviewsIntegrationService
      */
     public function getUserReceivedReviews(int $userId): Collection
     {
-        // Временно используем прямой запрос до создания Review домена
-        return DB::table('reviews')
-            ->where('reviewed_user_id', $userId)
-            ->where('is_active', true)
+        // Получаем master_profile_id для пользователя
+        $masterProfileId = DB::table('master_profiles')
+            ->where('user_id', $userId)
+            ->value('id');
+            
+        if (!$masterProfileId) {
+            return new Collection();
+        }
+        
+        // Используем реальные колонки таблицы reviews
+        return new Collection(DB::table('reviews')
+            ->where('master_profile_id', $masterProfileId)
+            ->whereNull('deleted_at')
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->get());
     }
 
     /**
@@ -36,11 +45,12 @@ class UserReviewsIntegrationService
      */
     public function getUserWrittenReviews(int $userId): Collection
     {
-        return DB::table('reviews')
-            ->where('reviewer_user_id', $userId)
-            ->where('is_active', true)
+        // В таблице reviews client_id - это ID пользователя, который написал отзыв
+        return new Collection(DB::table('reviews')
+            ->where('client_id', $userId)
+            ->whereNull('deleted_at')
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->get());
     }
 
     /**
@@ -49,9 +59,17 @@ class UserReviewsIntegrationService
      */
     public function getUserReceivedReviewsCount(int $userId): int
     {
+        $masterProfileId = DB::table('master_profiles')
+            ->where('user_id', $userId)
+            ->value('id');
+            
+        if (!$masterProfileId) {
+            return 0;
+        }
+        
         return DB::table('reviews')
-            ->where('reviewed_user_id', $userId)
-            ->where('is_active', true)
+            ->where('master_profile_id', $masterProfileId)
+            ->whereNull('deleted_at')
             ->count();
     }
 
@@ -62,8 +80,8 @@ class UserReviewsIntegrationService
     public function getUserWrittenReviewsCount(int $userId): int
     {
         return DB::table('reviews')
-            ->where('reviewer_user_id', $userId)
-            ->where('is_active', true)
+            ->where('client_id', $userId)
+            ->whereNull('deleted_at')
             ->count();
     }
 
@@ -73,10 +91,18 @@ class UserReviewsIntegrationService
      */
     public function getUserAverageRating(int $userId): float
     {
+        $masterProfileId = DB::table('master_profiles')
+            ->where('user_id', $userId)
+            ->value('id');
+            
+        if (!$masterProfileId) {
+            return 0.0;
+        }
+        
         $average = DB::table('reviews')
-            ->where('reviewed_user_id', $userId)
-            ->where('is_active', true)
-            ->avg('rating');
+            ->where('master_profile_id', $masterProfileId)
+            ->whereNull('deleted_at')
+            ->avg('rating_overall');
 
         return (float) ($average ?? 0);
     }
@@ -114,7 +140,7 @@ class UserReviewsIntegrationService
 
         // Проверяем лимит отзывов в день (например, максимум 5)
         $todayReviewsCount = DB::table('reviews')
-            ->where('reviewer_user_id', $reviewerId)
+            ->where('client_id', $reviewerId)
             ->whereDate('created_at', today())
             ->count();
 
@@ -127,10 +153,19 @@ class UserReviewsIntegrationService
      */
     public function userHasReviewedUser(int $reviewerId, int $targetUserId): bool
     {
+        // Получаем master_profile_id для целевого пользователя
+        $masterProfileId = DB::table('master_profiles')
+            ->where('user_id', $targetUserId)
+            ->value('id');
+            
+        if (!$masterProfileId) {
+            return false;
+        }
+        
         return DB::table('reviews')
-            ->where('reviewer_user_id', $reviewerId)
-            ->where('reviewed_user_id', $targetUserId)
-            ->where('is_active', true)
+            ->where('client_id', $reviewerId)
+            ->where('master_profile_id', $masterProfileId)
+            ->whereNull('deleted_at')
             ->exists();
     }
 

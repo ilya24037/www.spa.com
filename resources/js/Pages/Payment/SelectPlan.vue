@@ -1,137 +1,95 @@
 <template>
-  <Head title="Р’С‹Р±РµСЂРёС‚Рµ СЃСЂРѕРє РїСѓР±Р»РёРєР°С†РёРё" />
+  <Head title="Выбор плана" />
   
-  <AuthLayout>
-    <div class="payment-select-plan">
-      <div class="container">
-        <!-- РљРЅРѕРїРєР° РЅР°Р·Р°Рґ -->
-        <div class="back-button-wrapper">
-          <Link 
-            :href="route('my-ads.index')" 
-            class="back-button"
-          >
-            <svg class="back-button__icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M15 10H5M5 10L10 15M5 10L10 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <span class="back-button__text">РќР°Р·Р°Рґ</span>
-          </Link>
-        </div>
+  <div class="max-w-4xl mx-auto py-12 px-4">
+    <!-- Заголовок -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-gray-500 mb-4">
+        Выберите план размещения
+      </h1>
+      <p class="text-lg text-gray-500">
+        Выберите подходящий план для вашего объявления
+      </p>
+    </div>
 
-        <!-- Р—Р°РіРѕР»РѕРІРѕРє -->
-        <h1 class="page-title">Р’С‹Р±РµСЂРёС‚Рµ СЃСЂРѕРє РїСѓР±Р»РёРєР°С†РёРё</h1>
-
-        <!-- РўР°СЂРёС„РЅС‹Рµ РїР»Р°РЅС‹ -->
-        <div class="plans-grid">
-          <!-- РџР»Р°РЅ 7 РґРЅРµР№ -->
-          <div 
-            class="plan-card" 
-            :class="{ 'plan-card--active': selectedPlan?.days === 7 }"
-            @click="selectPlan(getPlanByDays(7))"
-          >
-            <div class="plan-content">
-              <h3 class="plan-title">7 РґРЅРµР№</h3>
-              <div class="plan-price">{{ getPlanByDays(7)?.price || 1235 }} в‚Ѕ</div>
-              <p class="plan-description">
-                Р•СЃР»Рё РЅСѓР¶РЅРѕ Р±С‹СЃС‚СЂРѕ РїСЂРёРІР»РµС‡СЊ РІРЅРёРјР°РЅРёРµ Рє СЃРІРѕРµРјСѓ РѕР±СЉСЏРІР»РµРЅРёСЋ
-              </p>
-            </div>
+    <!-- Планы -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div v-for="plan in plans" :key="plan.id" class="bg-white border border-gray-500 rounded-lg p-6 hover:shadow-lg transition-shadow">
+        <!-- Заголовок плана -->
+        <div class="text-center mb-6">
+          <h3 class="text-xl font-semibold text-gray-500 mb-2">
+            {{ plan.name }}
+          </h3>
+          <div class="text-3xl font-bold text-blue-600 mb-1">
+            {{ plan.price }} ₽
           </div>
-
-          <!-- РџР»Р°РЅ 14 РґРЅРµР№ -->
-          <div 
-            class="plan-card" 
-            :class="{ 'plan-card--active': selectedPlan?.days === 14 }"
-            @click="selectPlan(getPlanByDays(14))"
-          >
-            <div class="plan-content">
-              <h3 class="plan-title">14 РґРЅРµР№</h3>
-              <div class="plan-price">{{ getPlanByDays(14)?.price || 253 }} в‚Ѕ</div>
-              <p class="plan-description">
-                РљРѕРіРґР° РЅСѓР¶РЅРѕ С‡СѓС‚СЊ Р±РѕР»СЊС€Рµ РІСЂРµРјРµРЅРё
-              </p>
-            </div>
-          </div>
-
-          <!-- РџР»Р°РЅ 30 РґРЅРµР№ (РІС‹Р±СЂР°РЅ) -->
-          <div 
-            class="plan-card" 
-            :class="{ 'plan-card--active': selectedPlan?.days === 30 }"
-            @click="selectPlan(getPlanByDays(30))"
-          >
-            <div class="plan-content">
-              <h3 class="plan-title">30 РґРЅРµР№</h3>
-              <div class="plan-price">{{ getPlanByDays(30)?.price || 389 }} в‚Ѕ</div>
-              <p class="plan-description">
-                РЎР°РјС‹Р№ РїРѕРїСѓР»СЏСЂРЅС‹Р№ РІР°СЂРёР°РЅС‚
-              </p>
-            </div>
+          <div class="text-sm text-gray-500">
+            {{ plan.duration }}
           </div>
         </div>
 
-        <!-- РРЅС„РѕСЂРјР°С†РёСЏ Рѕ РєРѕРЅС‚Р°РєС‚Р°С… -->
-        <div class="contacts-info">
-          <div class="contacts-info__content">
-            <div class="contacts-circle">
-              <svg class="contacts-circle__svg" width="52" height="52" viewBox="0 0 52 52" fill="none">
-                <circle cx="26" cy="26" r="23.5" stroke="#e8e8e8" stroke-width="5" fill="none"/>
-                <circle cx="26" cy="26" r="23.5" 
-                        stroke="#04e061" 
-                        stroke-width="5" 
-                        fill="none"
-                        stroke-dasharray="22.148228207808042 125.50662651091224"
-                        transform="rotate(-90 26 26)"/>
-              </svg>
-              <div class="contacts-circle__number">17</div>
-            </div>
-            
-            <p class="contacts-text">
-              РљРѕРіРґР° РѕР±СЉСЏРІР»РµРЅРёРµ СЃРѕР±РµСЂС‘С‚ СЃС‚РѕР»СЊРєРѕ РєРѕРЅС‚Р°РєС‚РѕРІ, РѕРЅРѕ РѕРїСѓСЃС‚РёС‚СЃСЏ РІ РїРѕРёСЃРєРµ
-            </p>
-
-            <button 
-              @click="proceedToCheckout"
-              :disabled="!selectedPlan"
-              class="continue-button"
+        <!-- Особенности -->
+        <ul class="space-y-3 mb-6">
+          <li v-for="feature in plan.features" :key="feature" class="flex items-center text-sm text-gray-500">
+            <svg
+              class="w-4 h-4 text-green-500 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              РџСЂРѕРґРѕР»Р¶РёС‚СЊ
-            </button>
-          </div>
-        </div>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+            {{ feature }}
+          </li>
+        </ul>
+
+        <!-- Кнопка выбора -->
+        <button 
+          class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+          @click="selectPlan(plan)"
+        >
+          Выбрать план
+        </button>
       </div>
     </div>
-  </AuthLayout>
+
+    <!-- Информация -->
+    <div class="mt-8 text-center">
+      <p class="text-sm text-gray-500">
+        Все планы включают базовое размещение объявления. 
+        Дополнительные услуги можно заказать отдельно.
+      </p>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { Head, Link, router } from '@inertiajs/vue3'
-import AuthLayout from '@/Layouts/AuthLayout.vue'
-import { route } from 'ziggy-js'
+import { Head } from '@inertiajs/vue3'
+import { router } from '@inertiajs/vue3'
 
-const props = defineProps({
-  ad: Object,
-  plans: Array
-})
-
-// РџРѕ СѓРјРѕР»С‡Р°РЅРёСЋ РІС‹Р±СЂР°РЅ РїР»Р°РЅ РЅР° 30 РґРЅРµР№
-const selectedPlan = ref(props.plans.find(p => p.days === 30))
-
-const getPlanByDays = (days) => {
-  return props.plans.find(p => p.days === days)
+interface Plan {
+  id: number
+  name: string
+  price: number
+  duration: string
+  features: string[]
 }
 
-const selectPlan = (plan) => {
-  if (plan) {
-    selectedPlan.value = plan
-  }
-}
+const props = defineProps<{
+  plans: Plan[]
+  adId?: number
+}>()
 
-const proceedToCheckout = () => {
-  if (!selectedPlan.value) return
-  
-  router.post(route('payment.checkout', { ad: props.ad.id }), {
-    plan_id: selectedPlan.value.id
-  })
+const selectPlan = (plan: any) => {
+    router.post('/payment/process', {
+        plan_id: plan.id,
+        ad_id: props.adId
+    })
 }
 </script>
 

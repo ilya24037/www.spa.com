@@ -12,12 +12,16 @@
         'disabled': disabled 
       }"
     >
-      <div v-if="isSelected" class="radio-dot"></div>
+      <div v-if="isSelected" class="radio-dot" />
     </div>
     
     <div v-if="label || $slots.default" class="radio-content">
-      <div v-if="label" class="radio-label">{{ label }}</div>
-      <div v-if="description" class="radio-description">{{ description }}</div>
+      <div v-if="label" class="radio-label">
+        {{ label }}
+      </div>
+      <div v-if="description" class="radio-description">
+        {{ description }}
+      </div>
       <slot />
     </div>
   </div>
@@ -28,26 +32,26 @@ import { computed } from 'vue'
 
 // Props
 const props = defineProps({
-  modelValue: {
-    type: [String, Number, Boolean],
-    default: null
-  },
-  value: {
-    type: [String, Number, Boolean],
-    required: true
-  },
-  label: {
-    type: String,
-    default: ''
-  },
-  description: {
-    type: String,
-    default: ''
-  },
-  disabled: {
-    type: Boolean,
-    default: false
-  }
+    modelValue: {
+        type: [String, Number, Boolean],
+        default: null
+    },
+    value: {
+        type: [String, Number, Boolean],
+        required: true
+    },
+    label: {
+        type: String,
+        default: ''
+    },
+    description: {
+        type: String,
+        default: ''
+    },
+    disabled: {
+        type: Boolean,
+        default: false
+    }
 })
 
 // Events
@@ -55,13 +59,13 @@ const emit = defineEmits(['update:modelValue'])
 
 // Computed
 const isSelected = computed(() => {
-  return props.modelValue === props.value
+    return props.modelValue === props.value
 })
 
 // Methods
 const select = () => {
-  if (props.disabled) return
-  emit('update:modelValue', props.value)
+    if (props.disabled) return
+    emit('update:modelValue', props.value)
 }
 </script>
 

@@ -6,21 +6,34 @@ use App\Domain\Booking\Models\Booking;
 use App\Domain\Booking\Models\BookingHistory;
 use App\Domain\Booking\Repositories\BookingRepository;
 use App\Domain\Booking\Enums\BookingStatus;
+use App\Domain\Booking\Services\CancellationValidationService;
+use App\Domain\Booking\Services\CancellationFeeService;
+use App\Domain\Booking\Services\BookingRefundService;
 use App\Domain\User\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
  * Action для отмены бронирования
+ * Использует специализированные сервисы для валидации, расчета штрафов и возвратов
  */
 class CancelBookingAction
 {
     private BookingRepository $bookingRepository;
+    private CancellationValidationService $validationService;
+    private CancellationFeeService $feeService;
+    private BookingRefundService $refundService;
 
     public function __construct(
-        BookingRepository $bookingRepository
+        BookingRepository $bookingRepository,
+        CancellationValidationService $validationService,
+        CancellationFeeService $feeService,
+        BookingRefundService $refundService
     ) {
         $this->bookingRepository = $bookingRepository;
+        $this->validationService = $validationService;
+        $this->feeService = $feeService;
+        $this->refundService = $refundService;
     }
 
     /**
@@ -30,373 +43,198 @@ class CancelBookingAction
     {
         try {
             return DB::transaction(function () use ($bookingId, $userId, $reason) {
+                // Получаем бронирование и пользователя
                 $booking = $this->bookingRepository->findById($bookingId);
-                
                 if (!$booking) {
-                    return [
-                        'success' => false,
-                        'message' => 'Бронирование не найдено',
-                    ];
+                    return $this->errorResponse('Бронирование не найдено');
                 }
 
-                // Проверяем права доступа
-                if (!$this->canCancel($booking, $userId)) {
-                    return [
-                        'success' => false,
-                        'message' => 'У вас нет прав для отмены этого бронирования',
-                    ];
+                $user = User::find($userId);
+                if (!$user) {
+                    return $this->errorResponse('Пользователь не найден');
                 }
 
-                // Проверяем статус
-                if (!in_array($booking->status, [BookingStatus::PENDING, BookingStatus::CONFIRMED])) {
-                    return [
-                        'success' => false,
-                        'message' => 'Невозможно отменить бронирование в текущем статусе',
-                    ];
+                // Валидация возможности отмены
+                $validation = $this->validationService->validate($booking, $user);
+                if (!$validation['valid']) {
+                    return $this->errorResponse($validation['message']);
                 }
 
-                // Проверяем время до начала
-                $hoursBeforeStart = now()->diffInHours($booking->start_at, false);
-                if ($hoursBeforeStart < 2) {
-                    return [
-                        'success' => false,
-                        'message' => 'Отмена возможна не позднее чем за 2 часа до начала',
-                    ];
-                }
-
-                // Отменяем бронирование
-                $previousStatus = $booking->status;
-                $booking->status = BookingStatus::CANCELLED;
-                $booking->cancelled_at = now();
-                $booking->cancellation_reason = $reason;
-                $booking->cancelled_by = $userId;
-                $booking->save();
-
-                // Логируем отмену в историю
-                BookingHistory::logStatusChange(
-                    $booking,
-                    $previousStatus,
-                    BookingStatus::CANCELLED->value,
-                    $reason,
-                    $userId
+                // Расчет штрафа
+                $feeCalculation = $this->feeService->calculate($booking, $user);
+                
+                // Обработка возврата
+                $refundResult = $this->refundService->processRefund(
+                    $booking, 
+                    $feeCalculation['fee_amount']
                 );
 
-                Log::info('Booking cancelled', [
-                    'booking_id' => $booking->id,
-                    'cancelled_by' => $userId,
-                    'reason' => $reason,
-                ]);
+                // Выполнение отмены
+                $this->performCancellation($booking, $user, $reason, $feeCalculation);
 
-                // TODO: Отправить уведомления
+                // Логирование
+                $this->logCancellation($booking, $user, $reason, $feeCalculation, $refundResult);
 
-                return [
-                    'success' => true,
-                    'message' => 'Бронирование успешно отменено',
-                    'booking' => $booking,
-                ];
+                return $this->successResponse($booking, $feeCalculation, $refundResult);
             });
         } catch (\Exception $e) {
             Log::error('Failed to cancel booking', [
                 'booking_id' => $bookingId,
                 'user_id' => $userId,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
-            return [
-                'success' => false,
-                'message' => 'Ошибка при отмене бронирования',
-            ];
+            return $this->errorResponse('Ошибка при отмене бронирования: ' . $e->getMessage());
         }
     }
 
     /**
-     * Проверить права на отмену
+     * Выполнить отмену бронирования
      */
-    private function canCancel(Booking $booking, int $userId): bool
-    {
-        return $booking->client_id === $userId || 
-               $booking->master_id === $userId;
-    }
-
-    /**
-     * Проверка статуса бронирования
-     */
-    protected function validateBookingStatus(Booking $booking): void
-    {
-        if ($booking->status instanceof BookingStatus) {
-            if (!$booking->status->canBeCancelled()) {
-                throw new \Exception(
-                    "Нельзя отменить бронирование в статусе: {$booking->status->getLabel()}"
-                );
-            }
-        } else {
-            // Совместимость со старым кодом
-            if (!in_array($booking->status, [
-                Booking::STATUS_PENDING, 
-                Booking::STATUS_CONFIRMED
-            ])) {
-                throw new \Exception('Бронирование нельзя отменить в текущем статусе');
-            }
-        }
-    }
-
-    /**
-     * Проверка времени отмены
-     */
-    protected function validateCancellationTime(Booking $booking, User $user): void
-    {
-        $bookingStart = $booking->start_time;
-        $hoursUntilStart = now()->diffInHours($bookingStart, false);
-
-        // Для клиентов - более строгие ограничения
-        if ($booking->client_id === $user->id) {
-            $minHours = $booking->type ? $booking->type->getMinAdvanceHours() : 2;
-            
-            if ($hoursUntilStart < $minHours) {
-                throw new \Exception(
-                    "Отмена возможна не позднее чем за {$minHours} часов до начала услуги"
-                );
-            }
-        }
-
-        // Для мастеров - можно отменить позже, но с увеличенным штрафом
-        if ($booking->master_id === $user->id && $hoursUntilStart < 1) {
-            throw new \Exception('Мастер не может отменить бронирование менее чем за час до начала');
-        }
-    }
-
-    /**
-     * Расчет штрафа за отмену
-     */
-    protected function calculateCancellationFee(Booking $booking, User $user): float
-    {
-        $baseAmount = $booking->total_price ?? 0;
-        
-        if ($baseAmount <= 0) {
-            return 0;
-        }
-
-        $hoursUntilStart = now()->diffInHours($booking->start_time, false);
-        $isClient = $booking->client_id === $user->id;
-
-        // Без штрафа при отмене за день
-        if ($hoursUntilStart >= 24) {
-            return 0;
-        }
-
-        // Базовый процент штрафа по типу бронирования
-        $feePercent = $booking->type ? $booking->type->getCancellationFeePercent() : 20;
-
-        // Увеличиваем штраф при поздней отмене
-        if ($hoursUntilStart < 4) {
-            $feePercent = min(100, $feePercent * 2); // Удваиваем штраф
-        }
-
-        // Для мастеров штраф больше (они подводят клиента)
-        if (!$isClient) {
-            $feePercent = min(100, $feePercent * 1.5);
-        }
-
-        return ($baseAmount * $feePercent) / 100;
-    }
-
-    /**
-     * Выполнение отмены
-     */
-    protected function performCancellation(
+    private function performCancellation(
         Booking $booking, 
         User $user, 
         string $reason, 
-        float $cancellationFee
-    ): array {
+        array $feeCalculation
+    ): void {
         $isClient = $booking->client_id === $user->id;
-        
+        $previousStatus = $booking->status;
+
         // Определяем новый статус
-        $newStatus = $isClient ? BookingStatus::CANCELLED_BY_CLIENT : BookingStatus::CANCELLED_BY_MASTER;
-        
-        // Обновляем бронирование
         if ($booking->status instanceof BookingStatus) {
-            $booking->status = $newStatus;
+            $booking->status = $isClient 
+                ? BookingStatus::CANCELLED_BY_CLIENT 
+                : BookingStatus::CANCELLED_BY_MASTER;
         } else {
-            $booking->status = Booking::STATUS_CANCELLED;
+            // Совместимость со старым кодом
+            $booking->status = Booking::STATUS_CANCELLED ?? 'cancelled';
         }
-        
+
+        // Обновляем поля отмены
         $booking->cancellation_reason = $reason;
         $booking->cancelled_at = now();
         $booking->cancelled_by = $user->id;
         
-        // Добавляем информацию о штрафе в метаданные
+        // Сохраняем информацию о штрафе
         $metadata = $booking->metadata ?? [];
         $metadata['cancellation'] = [
-            'fee_amount' => $cancellationFee,
-            'fee_percent' => $cancellationFee > 0 ? round(($cancellationFee / $booking->total_price) * 100, 2) : 0,
-            'hours_before_start' => now()->diffInHours($booking->start_time, false),
+            'fee_amount' => $feeCalculation['fee_amount'],
+            'fee_percent' => $feeCalculation['fee_percent'],
+            'hours_before_start' => $feeCalculation['hours_until_start'],
             'cancelled_by_role' => $isClient ? 'client' : 'master',
+            'reason' => $reason,
         ];
         $booking->metadata = $metadata;
+        
         $booking->save();
 
-        // Освобождаем временные слоты
+        // Освобождаем слоты
         $this->releaseBookingSlots($booking);
 
-        // Обрабатываем возврат средств
-        $refundResult = $this->processRefund($booking, $cancellationFee);
-
-        return [
-            'booking' => $booking,
-            'cancellation_fee' => $cancellationFee,
-            'refund_result' => $refundResult,
-        ];
+        // Записываем в историю
+        $this->recordHistory($booking, $previousStatus, $user, $reason);
     }
 
     /**
-     * Освобождение временных слотов
+     * Освободить временные слоты
      */
-    protected function releaseBookingSlots(Booking $booking): void
+    private function releaseBookingSlots(Booking $booking): void
     {
         // Удаляем связанные слоты
-        $booking->slots()->delete();
+        if ($booking->slots()->exists()) {
+            $booking->slots()->delete();
+        }
 
-        // Если есть дополнительные услуги, помечаем их как отмененные
-        $booking->bookingServices()->update([
-            'is_completed' => false,
-            'notes' => 'Отменено в связи с отменой основного бронирования',
+        // Отменяем дополнительные услуги
+        if ($booking->bookingServices()->exists()) {
+            $booking->bookingServices()->update([
+                'is_completed' => false,
+                'notes' => 'Отменено в связи с отменой основного бронирования',
+            ]);
+        }
+    }
+
+    /**
+     * Записать в историю
+     */
+    private function recordHistory(Booking $booking, $previousStatus, User $user, string $reason): void
+    {
+        try {
+            BookingHistory::create([
+                'booking_id' => $booking->id,
+                'user_id' => $user->id,
+                'action' => 'cancelled',
+                'old_status' => $previousStatus,
+                'new_status' => $booking->status,
+                'reason' => $reason,
+                'metadata' => [
+                    'cancelled_by' => $user->id,
+                    'cancellation_fee' => $booking->metadata['cancellation']['fee_amount'] ?? 0,
+                ],
+                'created_at' => now(),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to record booking history', [
+                'booking_id' => $booking->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Логирование отмены
+     */
+    private function logCancellation(
+        Booking $booking, 
+        User $user, 
+        string $reason, 
+        array $feeCalculation, 
+        array $refundResult
+    ): void {
+        Log::info('Booking cancelled', [
+            'booking_id' => $booking->id,
+            'cancelled_by' => $user->id,
+            'reason' => $reason,
+            'fee' => $feeCalculation,
+            'refund' => $refundResult,
         ]);
     }
 
     /**
-     * Обработка возврата средств
+     * Успешный ответ
      */
-    protected function processRefund(Booking $booking, float $cancellationFee): array
+    private function successResponse(Booking $booking, array $feeCalculation, array $refundResult): array
     {
-        $paidAmount = $booking->paid_amount ?? 0;
-        
-        if ($paidAmount <= 0) {
-            return [
-                'type' => 'no_payment',
-                'message' => 'Возврат не требуется - оплата не производилась',
-            ];
-        }
-
-        $refundAmount = max(0, $paidAmount - $cancellationFee);
-
-        if ($refundAmount <= 0) {
-            return [
-                'type' => 'no_refund',
-                'message' => 'Возврат не производится - весь платеж удержан в качестве штрафа',
-                'cancellation_fee' => $cancellationFee,
-            ];
-        }
-
-        try {
-            // TODO: Попытка автоматического возврата через платежную систему
-            // $refundResult = $this->paymentService->refund($booking->payment, $refundAmount);
-            $refundResult = ['success' => false, 'error' => 'Payment service not implemented'];
-            
-            if ($refundResult['success']) {
-                return [
-                    'type' => 'automatic_refund',
-                    'amount' => $refundAmount,
-                    'fee' => $cancellationFee,
-                    'transaction_id' => $refundResult['transaction_id'],
-                    'message' => "Возврат {$refundAmount} руб. будет зачислен в течение 3-5 рабочих дней",
-                ];
-            } else {
-                return [
-                    'type' => 'manual_refund_required',
-                    'amount' => $refundAmount,
-                    'fee' => $cancellationFee,
-                    'message' => 'Возврат будет обработан вручную в течение 24 часов',
-                    'error' => $refundResult['error'] ?? 'Неизвестная ошибка',
-                ];
-            }
-        } catch (\Exception $e) {
-            Log::error('Refund processing failed', [
-                'booking_id' => $booking->id,
-                'refund_amount' => $refundAmount,
-                'error' => $e->getMessage(),
-            ]);
-
-            return [
-                'type' => 'manual_refund_required',
-                'amount' => $refundAmount,
-                'fee' => $cancellationFee,
-                'message' => 'Возврат будет обработан вручную в течение 24 часов',
-                'error' => $e->getMessage(),
-            ];
-        }
+        return [
+            'success' => true,
+            'message' => 'Бронирование успешно отменено',
+            'booking' => $booking,
+            'cancellation_fee' => $feeCalculation,
+            'refund' => $refundResult,
+        ];
     }
 
     /**
-     * Отправка уведомлений об отмене
+     * Ответ с ошибкой
      */
-    protected function sendCancellationNotifications(Booking $booking, User $cancelledBy, float $fee): void
+    private function errorResponse(string $message): array
     {
-        try {
-            $isClient = $booking->client_id === $cancelledBy->id;
-
-            // TODO: Отправка уведомлений через NotificationService
-            // if ($isClient) {
-            //     $this->notificationService->sendBookingCancelledByClient($booking, $fee);
-            // } else {
-            //     $this->notificationService->sendBookingCancelledByMaster($booking, $fee);
-            // }
-            //
-            // if ($fee > 1000) {
-            //     $this->notificationService->sendHighFeeCancellationAlert($booking, $cancelledBy, $fee);
-            // }
-
-            Log::info('Cancellation notifications sent', [
-                'booking_id' => $booking->id,
-                'fee' => $fee,
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Failed to send cancellation notifications', [
-                'booking_id' => $booking->id,
-                'error' => $e->getMessage(),
-            ]);
-        }
+        return [
+            'success' => false,
+            'message' => $message,
+        ];
     }
 
     /**
-     * Массовая отмена бронирований (например, при недоступности мастера)
+     * Массовая отмена бронирований
+     * Делегирует работу в отдельный action
+     * 
+     * @deprecated Используйте BulkCancelBookingsAction
      */
     public function bulkCancel(array $bookingIds, User $user, string $reason): array
     {
-        $results = [];
-        $totalFees = 0;
-
-        foreach ($bookingIds as $bookingId) {
-            try {
-                $booking = Booking::findOrFail($bookingId);
-                $result = $this->execute($booking, $user, $reason, true); // Принудительная отмена
-                
-                $fee = $result->metadata['cancellation']['fee_amount'] ?? 0;
-                $totalFees += $fee;
-                
-                $results[] = [
-                    'booking_id' => $bookingId,
-                    'success' => true,
-                    'fee' => $fee,
-                ];
-            } catch (\Exception $e) {
-                $results[] = [
-                    'booking_id' => $bookingId,
-                    'success' => false,
-                    'error' => $e->getMessage(),
-                ];
-            }
-        }
-
-        Log::info('Bulk cancellation completed', [
-            'total_bookings' => count($bookingIds),
-            'successful' => count(array_filter($results, fn($r) => $r['success'])),
-            'total_fees' => $totalFees,
-        ]);
-
-        return [
-            'results' => $results,
-            'total_fees' => $totalFees,
-        ];
+        $bulkAction = app(BulkCancelBookingsAction::class);
+        return $bulkAction->execute($bookingIds, $user->id, $reason);
     }
 }

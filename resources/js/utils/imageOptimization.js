@@ -7,159 +7,159 @@
  * Генерирует адаптивные URL изображений
  */
 export function generateResponsiveImageUrls(baseUrl, sizes = [320, 640, 768, 1024, 1280, 1920]) {
-  if (!baseUrl) return {}
+    if (!baseUrl) return {}
   
-  const urls = {}
-  const extension = baseUrl.split('.').pop()
-  const baseWithoutExt = baseUrl.replace(`.${extension}`, '')
+    const urls = {}
+    const extension = baseUrl.split('.').pop()
+    const baseWithoutExt = baseUrl.replace(`.${extension}`, '')
   
-  sizes.forEach(size => {
-    urls[size] = `${baseWithoutExt}_${size}w.webp`
-    urls[`${size}_fallback`] = `${baseWithoutExt}_${size}w.${extension}`
-  })
+    sizes.forEach(size => {
+        urls[size] = `${baseWithoutExt}_${size}w.webp`
+        urls[`${size}_fallback`] = `${baseWithoutExt}_${size}w.${extension}`
+    })
   
-  return urls
+    return urls
 }
 
 /**
  * Создает srcset для адаптивных изображений
  */
 export function createSrcSet(imageUrls, format = 'webp') {
-  if (!imageUrls || typeof imageUrls !== 'object') return ''
+    if (!imageUrls || typeof imageUrls !== 'object') return ''
   
-  const entries = Object.entries(imageUrls)
-    .filter(([key]) => {
-      if (format === 'webp') return !key.includes('fallback')
-      return key.includes('fallback')
-    })
-    .map(([key, url]) => {
-      const width = key.replace('_fallback', '')
-      return `${url} ${width}w`
-    })
+    const entries = Object.entries(imageUrls)
+        .filter(([key]) => {
+            if (format === 'webp') return !key.includes('fallback')
+            return key.includes('fallback')
+        })
+        .map(([key, url]) => {
+            const width = key.replace('_fallback', '')
+            return `${url} ${width}w`
+        })
   
-  return entries.join(', ')
+    return entries.join(', ')
 }
 
 /**
  * Компонент адаптивного изображения
  */
 export const OptimizedImage = {
-  name: 'OptimizedImage',
+    name: 'OptimizedImage',
   
-  props: {
-    src: {
-      type: String,
-      required: true
+    props: {
+        src: {
+            type: String,
+            required: true
+        },
+        alt: {
+            type: String,
+            required: true
+        },
+        sizes: {
+            type: String,
+            default: '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
+        },
+        lazy: {
+            type: Boolean,
+            default: true
+        },
+        placeholder: {
+            type: String,
+            default: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PC9zdmc+'
+        },
+        aspectRatio: {
+            type: String,
+            default: 'auto'
+        },
+        objectFit: {
+            type: String,
+            default: 'cover'
+        }
     },
-    alt: {
-      type: String,
-      required: true
-    },
-    sizes: {
-      type: String,
-      default: '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
-    },
-    lazy: {
-      type: Boolean,
-      default: true
-    },
-    placeholder: {
-      type: String,
-      default: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PC9zdmc+'
-    },
-    aspectRatio: {
-      type: String,
-      default: 'auto'
-    },
-    objectFit: {
-      type: String,
-      default: 'cover'
-    }
-  },
   
-  data() {
-    return {
-      isLoaded: false,
-      hasError: false,
-      isIntersecting: false,
-      observer: null
-    }
-  },
-  
-  computed: {
-    imageUrls() {
-      return generateResponsiveImageUrls(this.src)
+    data() {
+        return {
+            isLoaded: false,
+            hasError: false,
+            isIntersecting: false,
+            observer: null
+        }
     },
+  
+    computed: {
+        imageUrls() {
+            return generateResponsiveImageUrls(this.src)
+        },
     
-    webpSrcSet() {
-      return createSrcSet(this.imageUrls, 'webp')
-    },
+        webpSrcSet() {
+            return createSrcSet(this.imageUrls, 'webp')
+        },
     
-    fallbackSrcSet() {
-      return createSrcSet(this.imageUrls, 'fallback')
-    },
+        fallbackSrcSet() {
+            return createSrcSet(this.imageUrls, 'fallback')
+        },
     
-    shouldLoadImage() {
-      return !this.lazy || this.isIntersecting
-    }
-  },
+        shouldLoadImage() {
+            return !this.lazy || this.isIntersecting
+        }
+    },
   
-  mounted() {
-    if (this.lazy) {
-      this.setupIntersectionObserver()
-    } else {
-      this.isIntersecting = true
-    }
-  },
+    mounted() {
+        if (this.lazy) {
+            this.setupIntersectionObserver()
+        } else {
+            this.isIntersecting = true
+        }
+    },
   
-  beforeUnmount() {
-    if (this.observer) {
-      this.observer.disconnect()
-    }
-  },
+    beforeUnmount() {
+        if (this.observer) {
+            this.observer.disconnect()
+        }
+    },
   
-  methods: {
-    setupIntersectionObserver() {
-      if ('IntersectionObserver' in window) {
-        this.observer = new IntersectionObserver(
-          (entries) => {
-            entries.forEach(entry => {
-              if (entry.isIntersecting) {
-                this.isIntersecting = true
-                this.observer.disconnect()
-              }
-            })
-          },
-          {
-            rootMargin: '50px 0px',
-            threshold: 0.1
-          }
-        )
+    methods: {
+        setupIntersectionObserver() {
+            if ('IntersectionObserver' in window) {
+                this.observer = new IntersectionObserver(
+                    (entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                this.isIntersecting = true
+                                this.observer.disconnect()
+                            }
+                        })
+                    },
+                    {
+                        rootMargin: '50px 0px',
+                        threshold: 0.1
+                    }
+                )
         
-        this.observer.observe(this.$refs.imageContainer)
-      } else {
-        // Fallback для старых браузеров
-        this.isIntersecting = true
-      }
-    },
+                this.observer.observe(this.$refs.imageContainer)
+            } else {
+                // Fallback для старых браузеров
+                this.isIntersecting = true
+            }
+        },
     
-    onImageLoad() {
-      this.isLoaded = true
-      this.$emit('load')
-    },
+        onImageLoad() {
+            this.isLoaded = true
+            this.$emit('load')
+        },
     
-    onImageError() {
-      this.hasError = true
-      this.$emit('error')
-    },
+        onImageError() {
+            this.hasError = true
+            this.$emit('error')
+        },
     
-    retry() {
-      this.hasError = false
-      this.isLoaded = false
-    }
-  },
+        retry() {
+            this.hasError = false
+            this.isLoaded = false
+        }
+    },
   
-  template: `
+    template: `
     <div 
       ref="imageContainer"
       class="optimized-image"
@@ -235,34 +235,34 @@ export const OptimizedImage = {
  * Компонент галереи с ленивой загрузкой
  */
 export const LazyImageGallery = {
-  name: 'LazyImageGallery',
+    name: 'LazyImageGallery',
   
-  props: {
-    images: {
-      type: Array,
-      required: true
+    props: {
+        images: {
+            type: Array,
+            required: true
+        },
+        columns: {
+            type: Number,
+            default: 3
+        },
+        gap: {
+            type: String,
+            default: 'var(--spacing-4)'
+        }
     },
-    columns: {
-      type: Number,
-      default: 3
+  
+    computed: {
+        gridStyle() {
+            return {
+                display: 'grid',
+                gridTemplateColumns: `repeat(${this.columns}, 1fr)`,
+                gap: this.gap
+            }
+        }
     },
-    gap: {
-      type: String,
-      default: 'var(--spacing-4)'
-    }
-  },
   
-  computed: {
-    gridStyle() {
-      return {
-        display: 'grid',
-        gridTemplateColumns: `repeat(${this.columns}, 1fr)`,
-        gap: this.gap
-      }
-    }
-  },
-  
-  template: `
+    template: `
     <div class="lazy-gallery" :style="gridStyle">
       <OptimizedImage
         v-for="(image, index) in images"
@@ -277,78 +277,78 @@ export const LazyImageGallery = {
     </div>
   `,
   
-  components: {
-    OptimizedImage
-  }
+    components: {
+        OptimizedImage
+    }
 }
 
 /**
  * Утилиты для работы с изображениями
  */
 export const ImageUtils = {
-  /**
+    /**
    * Предзагрузка критических изображений
    */
-  preloadImages(imageUrls) {
-    if (!Array.isArray(imageUrls)) return
+    preloadImages(imageUrls) {
+        if (!Array.isArray(imageUrls)) return
     
-    imageUrls.forEach(url => {
-      const link = document.createElement('link')
-      link.rel = 'preload'
-      link.as = 'image'
-      link.href = url
-      document.head.appendChild(link)
-    })
-  },
+        imageUrls.forEach(url => {
+            const link = document.createElement('link')
+            link.rel = 'preload'
+            link.as = 'image'
+            link.href = url
+            document.head.appendChild(link)
+        })
+    },
   
-  /**
+    /**
    * Проверка поддержки WebP
    */
-  supportsWebP() {
-    return new Promise((resolve) => {
-      const webP = new Image()
-      webP.onload = () => resolve(true)
-      webP.onerror = () => resolve(false)
-      webP.src = 'data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAACyAgCdASoCAAIALmk0mk0iIiIiIgBoSygABc6WWgAA/veff/0PP8bA//LwYAAA'
-    })
-  },
+    supportsWebP() {
+        return new Promise((resolve) => {
+            const webP = new Image()
+            webP.onload = () => resolve(true)
+            webP.onerror = () => resolve(false)
+            webP.src = 'data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAACyAgCdASoCAAIALmk0mk0iIiIiIgBoSygABc6WWgAA/veff/0PP8bA//LwYAAA'
+        })
+    },
   
-  /**
+    /**
    * Оптимизация изображений на клиенте
    */
-  async compressImage(file, maxWidth = 1920, quality = 0.8) {
-    return new Promise((resolve) => {
-      const canvas = document.createElement('canvas')
-      const ctx = canvas.getContext('2d')
-      const img = new Image()
+    async compressImage(file, maxWidth = 1920, quality = 0.8) {
+        return new Promise((resolve) => {
+            const canvas = document.createElement('canvas')
+            const ctx = canvas.getContext('2d')
+            const img = new Image()
       
-      img.onload = () => {
-        // Вычисляем новые размеры
-        let { width, height } = img
-        if (width > maxWidth) {
-          height = (height * maxWidth) / width
-          width = maxWidth
-        }
+            img.onload = () => {
+                // Вычисляем новые размеры
+                let { width, height } = img
+                if (width > maxWidth) {
+                    height = (height * maxWidth) / width
+                    width = maxWidth
+                }
         
-        canvas.width = width
-        canvas.height = height
+                canvas.width = width
+                canvas.height = height
         
-        // Рисуем изображение
-        ctx.drawImage(img, 0, 0, width, height)
+                // Рисуем изображение
+                ctx.drawImage(img, 0, 0, width, height)
         
-        // Конвертируем в blob
-        canvas.toBlob(resolve, 'image/jpeg', quality)
-      }
+                // Конвертируем в blob
+                canvas.toBlob(resolve, 'image/jpeg', quality)
+            }
       
-      img.src = URL.createObjectURL(file)
-    })
-  },
+            img.src = URL.createObjectURL(file)
+        })
+    },
   
-  /**
+    /**
    * Генерация placeholder для изображений
    */
-  generatePlaceholder(width = 320, height = 200, color = '#dddddd') {
-    const svg = `
+    generatePlaceholder(width = 320, height = 200, color = '#dddddd') {
+        const svg = `
       <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
         <rect width="100%" height="100%" fill="${color}"/>
         <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" 
@@ -358,19 +358,19 @@ export const ImageUtils = {
       </svg>
     `
     
-    return `data:image/svg+xml;base64,${btoa(svg)}`
-  }
+        return `data:image/svg+xml;base64,${btoa(svg)}`
+    }
 }
 
 /**
  * Vue плагин для глобальной регистрации компонентов
  */
 export const ImageOptimizationPlugin = {
-  install(app) {
-    app.component('OptimizedImage', OptimizedImage)
-    app.component('LazyImageGallery', LazyImageGallery)
+    install(app) {
+        app.component('OptimizedImage', OptimizedImage)
+        app.component('LazyImageGallery', LazyImageGallery)
     
-    // Глобальные свойства
-    app.config.globalProperties.$imageUtils = ImageUtils
-  }
+        // Глобальные свойства
+        app.config.globalProperties.$imageUtils = ImageUtils
+    }
 }

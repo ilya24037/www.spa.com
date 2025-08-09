@@ -29,16 +29,16 @@ interface Props {
 
 // Default Р·РЅР°С‡РµРЅРёСЏ РґР»СЏ РІСЃРµС… РѕРїС†РёРѕРЅР°Р»СЊРЅС‹С… props - Р§Р•Рљ-Р›РРЎРў CLAUDE.md вњ…
 const props = withDefaults(defineProps<Props>(), {
-  size: 24,
-  color: 'currentColor',
-  className: '',
-  ariaLabel: 'Icon'
+    size: 24,
+    color: 'currentColor',
+    className: '',
+    ariaLabel: 'Icon'
 })
 
 // Computed РґР»СЏ Р·Р°С‰РёС‚С‹ РѕС‚ undefined - Р§Р•Рљ-Р›РРЎРў CLAUDE.md вњ…
 const iconClasses = computed(() => [
-  'inline-block',
-  props.className
+    'inline-block',
+    props.className
 ].filter(Boolean).join(' '))
 
 const iconPath = computed(() => props.name ? `#icon-${props.name}` : null)

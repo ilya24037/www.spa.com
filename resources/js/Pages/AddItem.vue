@@ -1,55 +1,47 @@
-<!-- resources/js/Pages/AddItem.vue - FSD Refactored -->
 <template>
   <Head title="Новое объявление — Объявления на сайте Massagist" />
   
   <div class="min-h-screen bg-gray-50">
     <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-      
-      <!-- Навигация назад -->
-      <BackButton 
-        href="/" 
-        text="Назад"
-        class="mb-6"
-      />
+      <!-- Кнопка назад -->
+      <Link href="/" class="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6">
+        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        <span class="text-sm">Назад</span>
+      </Link>
 
-      <!-- Заголовок -->
-      <div class="mb-8">
-        <h1 class="text-2xl font-normal text-gray-900 mb-2">Новое объявление</h1>
-        
-        <!-- Хлебные крошки -->
-        <Breadcrumbs
-          :items="[
-            { title: 'Предложение услуг' },
-            { title: 'Красота' },
-            { title: 'Эротический массаж' }
-          ]"
-          separator=">"
-          class="text-sm"
-        />
+      <!-- Заголовок как у Avito -->
+      <h1 class="text-2xl font-normal text-gray-900 mb-2">Новое объявление</h1>
+      
+      <!-- Подзаголовок -->
+      <div class="text-sm text-gray-500 mb-8">
+        <span>Предложение услуг</span>
+        <span class="mx-1">›</span>
+        <span>Красота</span>
+        <span class="mx-1">›</span>
+        <span>Эротический массаж</span>
       </div>
 
-      <!-- FSD Entity: Форма объявления -->
+      <!-- Модульная форма -->
       <div class="bg-white rounded-lg shadow-sm">
-        <AdForm 
-          category="erotic"
-          :categories="categories"
-          :initial-data="initialData"
-          @success="handleSuccess"
-          @draft-saved="handleDraftSaved"
-        />
+        <div class="p-6">
+          <AdForm 
+            category="erotic"
+            :categories="categories"
+            :initial-data="initialData"
+            @success="handleSuccess"
+          />
+        </div>
       </div>
-      
     </div>
   </div>
 </template>
 
-<script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3'
+<script setup>
+import { Head, Link, router } from '@inertiajs/vue3'
 
-// 🎯 FSD Импорты
-import Breadcrumbs from '@/src/shared/ui/molecules/Breadcrumbs/Breadcrumbs.vue'
-import BackButton from '@/src/shared/ui/atoms/BackButton/BackButton.vue'
-import AdForm from '@/src/entities/ad/ui/AdForm/AdForm.vue'
+import AdForm from '@/src/widgets/AdForm/ui/AdForm.vue'
 
 // Категории (только эротический массаж)
 const categories = [
@@ -62,18 +54,13 @@ const initialData = {
   specialty: 'erotic_massage'
 }
 
-// Обработчики событий
-const handleSuccess = (response: any) => {
-  
+// Обработчик успешного создания
+const handleSuccess = (response) => {
   // Перенаправляем на страницу созданного объявления
   if (response.ad && response.ad.id) {
     router.visit(`/ads/${response.ad.id}`)
   } else {
     router.visit('/my-ads')
   }
-}
-
-const handleDraftSaved = (_draftData: any) => {
-  // Можно показать уведомление
 }
 </script> 

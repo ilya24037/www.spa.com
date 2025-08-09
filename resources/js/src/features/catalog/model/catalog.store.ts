@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import axios from 'axios'
+import { logger } from '@/src/shared/utils/logger'
 
 // TypeScript интерфейсы
 export interface CatalogCategory {
@@ -89,7 +90,7 @@ export const useCatalogStore = defineStore('catalog', () => {
       lastFetchTime.value = new Date()
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Ошибка загрузки каталога'
-      console.error('Failed to load catalog:', err)
+      logger.error('Failed to load catalog:', err)
       
       // Fallback на дефолтные данные
       categories.value = getDefaultCategories()
@@ -127,7 +128,7 @@ export const useCatalogStore = defineStore('catalog', () => {
         timestamp: new Date().toISOString()
       })
     } catch (err) {
-      console.warn('Failed to track category click:', err)
+      logger.warn('Failed to track category click:', err)
     }
   }
   
@@ -138,7 +139,7 @@ export const useCatalogStore = defineStore('catalog', () => {
         timestamp: new Date().toISOString()
       })
     } catch (err) {
-      console.warn('Failed to track tag click:', err)
+      logger.warn('Failed to track tag click:', err)
     }
   }
   

@@ -1,6 +1,8 @@
 <template>
   <div class="adformworkformat">
-    <h3 class="text-lg font-medium mb-4">{{ title }}</h3>
+    <h3 class="text-lg font-medium mb-4">
+      {{ title }}
+    </h3>
     <slot />
   </div>
 </template>

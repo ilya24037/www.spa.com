@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
-import { ref, computed, type Ref } from 'vue'
+import { ref, computed } from 'vue'
 import dayjs from 'dayjs'
+import { bookingApi } from '../api/bookingApi.js'
+import { logger } from '@/src/shared/utils/logger'
 
 // TypeScript интерфейсы
 interface Booking {
@@ -16,7 +18,8 @@ interface Booking {
   totalPrice: number
   duration: number
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled'
-  [key: string]: any
+  created_at?: string
+  updated_at?: string
 }
 
 interface BookingForm {
@@ -36,7 +39,8 @@ interface TimeSlot {
   time: string
   available: boolean
   price?: number
-  [key: string]: any
+  booked?: boolean
+  bookedBy?: string
 }
 
 export const useBookingStore = defineStore('booking', () => {
@@ -61,7 +65,13 @@ export const useBookingStore = defineStore('booking', () => {
   })
 
   // Состояние календаря
-  const masterSchedule = ref<any[]>([])
+  interface ScheduleDay {
+    date: string
+    available: boolean
+    timeSlots: TimeSlot[]
+  }
+  
+  const masterSchedule = ref<ScheduleDay[]>([])
   const availableTimeSlots = ref<TimeSlot[]>([])
   const selectedDate = ref<string | null>(null)
   const selectedTime = ref<string | null>(null)
@@ -101,7 +111,18 @@ export const useBookingStore = defineStore('booking', () => {
   /**
    * Инициализация формы бронирования
    */
-  const initializeBookingForm = (master: any, service: any = null) => {
+  interface Master {
+    id: number
+    name?: string
+  }
+  
+  interface Service {
+    id: number
+    price?: number
+    duration?: number
+  }
+  
+  const initializeBookingForm = (master: Master, service: Service | null = null) => {
     bookingForm.value = {
       masterId: master?.id,
       serviceId: service?.id || null,
@@ -121,7 +142,7 @@ export const useBookingStore = defineStore('booking', () => {
   /**
    * Обновление даты и времени
    */
-  const updateDateTime = (date: any, time: any) => {
+  const updateDateTime = (date: string, time: string) => {
     bookingForm.value.date = date
     bookingForm.value.time = time
     selectedDate.value = date
@@ -131,7 +152,14 @@ export const useBookingStore = defineStore('booking', () => {
   /**
    * Обновление данных клиента
    */
-  const updateClientData = (clientData: any) => {
+  interface ClientData {
+    name?: string
+    phone?: string
+    email?: string
+    notes?: string
+  }
+  
+  const updateClientData = (clientData: ClientData) => {
     Object.assign(bookingForm.value, {
       clientName: clientData?.name,
       clientPhone: clientData?.phone,
@@ -143,12 +171,12 @@ export const useBookingStore = defineStore('booking', () => {
   /**
    * Загрузка расписания мастера
    */
-  const loadMasterSchedule = async (masterId: number, startDate: string, endDate: string) => {
+  const loadMasterSchedule = async (_masterId: number, startDate: string, endDate: string) => {
     loading.value = true
     error.value = null
 
     try {
-      // Имитация API вызова
+      // Имитация API вызова - в будущем использовать _masterId
       await new Promise(resolve => setTimeout(resolve, 500))
       
       // Генерируем расписание на 30 дней
@@ -182,11 +210,11 @@ export const useBookingStore = defineStore('booking', () => {
   /**
    * Загрузка доступных временных слотов для даты
    */
-  const loadTimeSlots = async (masterId: number, date: string) => {
+  const loadTimeSlots = async (_masterId: number, date: string) => {
     loading.value = true
     
     try {
-      // Имитация API вызова
+      // Имитация API вызова - в будущем использовать _masterId
       await new Promise(resolve => setTimeout(resolve, 300))
       
       const slots = generateTimeSlots(dayjs(date))
@@ -204,8 +232,31 @@ export const useBookingStore = defineStore('booking', () => {
   /**
    * Создание бронирования
    */
-  const createBooking = async () => {
-    if (!isFormValid.value) {
+  interface BookingApiData {
+    master_id?: number
+    masterId?: number
+    service_id?: number
+    serviceId?: number
+    start_time?: string
+    date?: string
+    time?: string
+    duration_minutes?: number
+    duration?: number
+    total_price?: number
+    totalPrice?: number
+    client_name?: string
+    clientName?: string
+    client_phone?: string
+    clientPhone?: string
+    client_email?: string | null
+    clientEmail?: string | null
+    notes?: string | null
+  }
+  
+  const createBooking = async (bookingData?: BookingApiData) => {
+    const formData = bookingData || bookingForm.value
+    
+    if (!bookingData && !isFormValid.value) {
       throw new Error('Форма заполнена некорректно')
     }
 
@@ -214,38 +265,43 @@ export const useBookingStore = defineStore('booking', () => {
 
     try {
       // Подготовка данных для API
-      const bookingData = {
-        master_id: bookingForm.value.masterId,
-        service_id: bookingForm.value.serviceId,
-        start_time: `${bookingForm.value.date} ${bookingForm.value.time}:00`,
-        duration_minutes: bookingForm.value.duration,
-        total_price: bookingForm.value.totalPrice,
-        client_name: bookingForm.value.clientName,
-        client_phone: bookingForm.value.clientPhone,
-        client_email: bookingForm.value.clientEmail || null,
-        notes: bookingForm.value.notes || null,
-        status: 'pending'
+      const apiFormData = formData as BookingApiData
+      const apiData = {
+        masterId: apiFormData.masterId || apiFormData.master_id || 0,
+        serviceId: apiFormData.serviceId || apiFormData.service_id,
+        startTime: apiFormData.start_time || `${apiFormData.date} ${apiFormData.time}:00`,
+        duration: apiFormData.duration || apiFormData.duration_minutes || 60,
+        totalPrice: apiFormData.totalPrice || apiFormData.total_price || 0,
+        clientName: apiFormData.clientName || apiFormData.client_name || '',
+        clientPhone: apiFormData.clientPhone || apiFormData.client_phone || '',
+        clientEmail: apiFormData.clientEmail || apiFormData.client_email || null,
+        notes: apiFormData.notes || null
       }
 
-      // Имитация API вызова
-      await new Promise((resolve, reject) => {
-        setTimeout(() => {
-          if (Math.random() > 0.1) { // 90% успеха
-            resolve(undefined)
-          } else {
-            reject(new Error('Время уже занято другим клиентом'))
-          }
-        }, 1500)
-      })
+      // Реальный API вызов
+      const response = await bookingApi.createBooking(apiData)
+      
+      if (!response.success) {
+        throw new Error(response.error || 'Ошибка создания бронирования')
+      }
 
-      // Создаем объект бронирования
-      const newBooking = {
-        id: Date.now(),
-        bookingNumber: `BK-${Date.now().toString().slice(-6)}`,
-        ...bookingData,
-        startTime: bookingData.start_time,
-        endTime: dayjs(bookingData.start_time).add(bookingData.duration_minutes, 'minutes').format('YYYY-MM-DD HH:mm:ss'),
-        createdAt: dayjs().format('YYYY-MM-DD HH:mm:ss')
+      // Используем данные из ответа API
+      const booking = response.booking || response.data
+      const [dateStr, timeStr] = apiData.startTime.split(' ')
+      
+      const newBooking: Booking = {
+        id: booking.id || Date.now(),
+        masterId: apiData.masterId || 0,
+        serviceId: apiData.serviceId || undefined,
+        date: dateStr || '',
+        time: timeStr ? timeStr.substring(0, 5) : '', // убираем секунды
+        clientName: apiData.clientName,
+        clientPhone: apiData.clientPhone,
+        clientEmail: apiData.clientEmail || undefined,
+        notes: apiData.notes || undefined,
+        totalPrice: apiData.totalPrice,
+        duration: apiData.duration,
+        status: booking.status || 'pending'
       }
 
       // Добавляем в список бронирований
@@ -303,10 +359,15 @@ export const useBookingStore = defineStore('booking', () => {
 
       // Обновляем статус в локальном состоянии
       const bookingIndex = bookings.value.findIndex(b => b?.id === bookingId)
-      if (bookingIndex !== -1) {
-        bookings.value[bookingIndex].status = 'cancelled'
-        bookings.value[bookingIndex].cancellationReason = reason
-        bookings.value[bookingIndex].cancelledAt = dayjs().format('YYYY-MM-DD HH:mm:ss')
+      if (bookingIndex !== -1 && bookings.value[bookingIndex]) {
+        const booking = bookings.value[bookingIndex]
+        booking.status = 'cancelled'
+        // Дополнительная информация об отмене сохраняется в логах
+        logger.info('Booking cancelled', {
+          bookingId,
+          reason,
+          cancelledAt: dayjs().format('YYYY-MM-DD HH:mm:ss')
+        }, 'BookingStore')
       }
 
       return true
@@ -393,7 +454,7 @@ function generateTimeSlots(date: any) {
   const slots = []
   const startHour = 9
   const endHour = 21
-  const interval = 60 // минут
+  // const interval = 60 // минут - для будущего использования
 
   for (let hour = startHour; hour < endHour; hour++) {
     const timeString = `${hour.toString().padStart(2, '0')}:00`
@@ -414,28 +475,28 @@ function generateTimeSlots(date: any) {
 /**
  * Генерация тестовых бронирований
  */
-function generateMockBookings(userId: any) {
-  const bookings = []
-  const statuses = ['pending', 'confirmed', 'completed', 'cancelled']
+function generateMockBookings(_userId?: any): Booking[] {
+  const bookings: Booking[] = []
+  const statuses: Array<'pending' | 'confirmed' | 'completed' | 'cancelled'> = ['pending', 'confirmed', 'completed', 'cancelled']
   
   for (let i = 0; i < 5; i++) {
     const startTime = dayjs().add(i - 2, 'days').hour(10 + i).minute(0).second(0)
+    const dateStr = startTime.format('YYYY-MM-DD')
+    const timeStr = startTime.format('HH:mm:ss')
     
     bookings.push({
       id: 1000 + i,
-      bookingNumber: `BK-${(1000 + i).toString().slice(-6)}`,
       masterId: 1,
       serviceId: 1,
-      startTime: startTime.format('YYYY-MM-DD HH:mm:ss'),
-      endTime: startTime.add(60, 'minutes').format('YYYY-MM-DD HH:mm:ss'),
-      durationMinutes: 60,
-      totalPrice: 3000 + (i * 500),
+      date: dateStr,
+      time: timeStr,
       clientName: 'Иван Петров',
       clientPhone: '+7 (999) 123-45-67',
       clientEmail: 'ivan@example.com',
-      status: statuses[i % statuses.length],
-      notes: i % 2 === 0 ? 'Дополнительные пожелания' : null,
-      createdAt: dayjs().subtract(i, 'days').format('YYYY-MM-DD HH:mm:ss')
+      notes: i % 2 === 0 ? 'Дополнительные пожелания' : undefined,
+      totalPrice: 3000 + (i * 500),
+      duration: 60,
+      status: statuses[i % statuses.length] || 'pending'
     })
   }
 

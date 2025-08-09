@@ -4,8 +4,9 @@
  */
 
 import { defineAsyncComponent } from 'vue'
-import { BaseWidget } from '@/shared/classes/BaseWidget.ts'
+import { BaseWidget } from '../../shared/classes/BaseWidget'
 import type { MasterProfileWidgetProps } from './types/masterProfile.types'
+import { logger } from '@/src/shared/utils/logger'
 
 // Создаем класс виджета по принципу Ozon
 class MasterProfileWidget extends BaseWidget {
@@ -22,7 +23,7 @@ class MasterProfileWidget extends BaseWidget {
    * Создает ленивый компонент виджета
    */
   public createComponent() {
-    return this.createLazyComponent(
+    return defineAsyncComponent(
       () => import('./MasterProfile.vue')
     )
   }
@@ -35,8 +36,8 @@ class MasterProfileWidget extends BaseWidget {
   }
 }
 
-// Создаем синглтон экземпляр виджета
-const masterProfileWidget = new MasterProfileWidget()
+// Создаем синглтон экземпляр виджета (может быть использован для глобального управления)
+// const masterProfileWidget = new MasterProfileWidget()
 
 // Экспортируем ленивый компонент
 export default defineAsyncComponent({
@@ -84,7 +85,7 @@ export default defineAsyncComponent({
   timeout: 5000,
   
   onError(error, retry, fail, attempts) {
-    console.error(`[MasterProfileWidget] Load failed (attempt ${attempts}):`, error)
+    logger.error(`[MasterProfileWidget] Load failed (attempt ${attempts}):`, error)
     
     if (attempts <= 3) {
       // Retry with exponential backoff

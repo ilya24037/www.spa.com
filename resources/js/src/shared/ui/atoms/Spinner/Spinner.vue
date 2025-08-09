@@ -14,23 +14,23 @@
       <!-- Р’СЃС‚СЂРѕРµРЅРЅС‹Рµ РІР°СЂРёР°РЅС‚С‹ СЃРїРёРЅРЅРµСЂРѕРІ -->
       <template v-if="variant === 'ring'">
         <div class="spinner-ring">
-          <div></div><div></div><div></div><div></div>
+          <div /><div /><div /><div />
         </div>
       </template>
       
       <template v-else-if="variant === 'dots'">
         <div class="spinner-dots">
-          <div></div><div></div><div></div>
+          <div /><div /><div />
         </div>
       </template>
       
       <template v-else-if="variant === 'pulse'">
-        <div class="spinner-pulse"></div>
+        <div class="spinner-pulse" />
       </template>
       
       <template v-else-if="variant === 'bars'">
         <div class="spinner-bars">
-          <div></div><div></div><div></div><div></div><div></div>
+          <div /><div /><div /><div /><div />
         </div>
       </template>
       
@@ -53,15 +53,15 @@
       
       <!-- РљР°СЃС‚РѕРјРЅР°СЏ РёРєРѕРЅРєР° -->
       <component
-        v-else-if="customIcon"
         :is="customIcon"
+        v-else-if="customIcon"
         class="spinner-custom"
       />
       
       <!-- РџРѕ СѓРјРѕР»С‡Р°РЅРёСЋ - ring -->
       <template v-else>
         <div class="spinner-ring">
-          <div></div><div></div><div></div><div></div>
+          <div /><div /><div /><div />
         </div>
       </template>
     </div>
@@ -81,72 +81,72 @@ import { computed, useSlots } from 'vue'
 import type { SpinnerProps } from './Spinner.types'
 
 const props = withDefaults(defineProps<SpinnerProps>(), {
-  variant: 'ring',
-  size: 'medium',
-  color: 'primary',
-  centered: false,
-  overlay: false,
-  text: '',
-  ariaLabel: 'Р—Р°РіСЂСѓР·РєР°...'
+    variant: 'ring',
+    size: 'medium',
+    color: 'primary',
+    centered: false,
+    overlay: false,
+    text: '',
+    ariaLabel: 'Р—Р°РіСЂСѓР·РєР°...'
 })
 
 const slots = useSlots()
 
 const containerClasses = computed(() => [
-  'spinner-container',
-  {
-    'spinner-container--centered': props.centered,
-    'spinner-container--overlay': props.overlay,
-    'spinner-container--with-text': props.text || !!slots.default
-  },
-  props.customClass
+    'spinner-container',
+    {
+        'spinner-container--centered': props.centered,
+        'spinner-container--overlay': props.overlay,
+        'spinner-container--with-text': props.text || !!slots.default
+    },
+    props.customClass
 ])
 
 const containerStyle = computed(() => {
-  const styles: Record<string, string> = {}
+    const styles: Record<string, string> = {}
   
-  if (props.overlay && props.overlayColor) {
-    styles.backgroundColor = props.overlayColor
-  }
+    if (props.overlay && props.overlayColor) {
+        styles.backgroundColor = props.overlayColor
+    }
   
-  return styles
+    return styles
 })
 
 const spinnerClasses = computed(() => [
-  'spinner',
-  `spinner--${props.variant}`,
-  `spinner--${props.size}`,
-  `spinner--${props.color}`
+    'spinner',
+    `spinner--${props.variant}`,
+    `spinner--${props.size}`,
+    `spinner--${props.color}`
 ])
 
 const spinnerStyle = computed(() => {
-  const styles: Record<string, string> = {}
+    const styles: Record<string, string> = {}
   
-  if (props.customSize) {
-    const size = typeof props.customSize === 'number' 
-      ? `${props.customSize}px` 
-      : props.customSize
-    styles.width = size
-    styles.height = size
-  }
+    if (props.customSize) {
+        const size = typeof props.customSize === 'number' 
+            ? `${props.customSize}px` 
+            : props.customSize
+        styles.width = size
+        styles.height = size
+    }
   
-  if (props.customColor) {
-    styles.color = props.customColor
-  }
+    if (props.customColor) {
+        styles.color = props.customColor
+    }
   
-  return styles
+    return styles
 })
 
 const textClasses = computed(() => [
-  'spinner-text',
-  `spinner-text--${props.size}`
+    'spinner-text',
+    `spinner-text--${props.size}`
 ])
 
 const ariaLabel = computed(() => {
-  if (props.text) {
-    return `${props.ariaLabel}: ${props.text}`
-  }
-  return props.ariaLabel
+    if (props.text) {
+        return `${props.ariaLabel}: ${props.text}`
+    }
+    return props.ariaLabel
 })
 </script>
 

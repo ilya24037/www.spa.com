@@ -19,6 +19,14 @@ class PhotoRepository extends BaseRepository
     }
 
     /**
+     * Получить класс модели
+     */
+    protected function getModelClass(): string
+    {
+        return Photo::class;
+    }
+
+    /**
      * Создать новую фотографию
      */
     public function createPhoto(array $data): Photo

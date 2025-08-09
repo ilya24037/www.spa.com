@@ -3,14 +3,15 @@
 namespace App\Console\Commands\Performance;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
-use App\Services\Performance\CacheService;
+use App\Infrastructure\Monitoring\MetricsCollectorService;
+use App\Infrastructure\Monitoring\MetricsDisplayService;
+use App\Infrastructure\Monitoring\PerformanceReportService;
 
 /**
  * Команда мониторинга производительности
- * Проверяет скорость работы как у Wildberries
+ * Использует общие сервисы мониторинга для избежания дублирования
+ * 
+ * @deprecated Используйте app:monitor-performance вместо этой команды
  */
 class PerformanceMonitorCommand extends Command
 {
@@ -20,22 +21,26 @@ class PerformanceMonitorCommand extends Command
     protected $signature = 'performance:monitor 
                           {--url=/ : URL для проверки}
                           {--runs=5 : Количество прогонов}
-                          {--detailed : Подробный отчет}';
+                          {--detailed : Подробный отчет}
+                          {--report : Генерировать JSON отчет}
+                          {--realtime : Мониторинг в реальном времени}';
 
     /**
      * The console command description.
      */
-    protected $description = 'Мониторинг производительности приложения';
+    protected $description = '[DEPRECATED] Мониторинг производительности приложения. Используйте app:monitor-performance';
 
-    /**
-     * Сервис кеширования
-     */
-    private CacheService $cacheService;
+    private MetricsCollectorService $metricsCollector;
+    private MetricsDisplayService $metricsDisplay;
+    private PerformanceReportService $reportService;
 
-    public function __construct(CacheService $cacheService)
+    public function __construct()
     {
         parent::__construct();
-        $this->cacheService = $cacheService;
+        
+        $this->metricsCollector = new MetricsCollectorService();
+        $this->metricsDisplay = new MetricsDisplayService($this);
+        $this->reportService = new PerformanceReportService($this->metricsCollector, $this);
     }
 
     /**
@@ -43,369 +48,155 @@ class PerformanceMonitorCommand extends Command
      */
     public function handle(): int
     {
-        $this->info('🚀 Запуск мониторинга производительности SPA Platform');
+        // Предупреждение об устаревшей команде
+        $this->warn('⚠️  Эта команда устарела и будет удалена в следующей версии.');
+        $this->warn('Используйте вместо неё: php artisan app:monitor-performance');
         $this->newLine();
 
-        // Параметры
-        $url = $this->option('url');
-        $runs = (int) $this->option('runs');
-        $detailed = $this->option('detailed');
+        // Спрашиваем, хочет ли пользователь продолжить
+        if (!$this->confirm('Хотите продолжить с устаревшей командой?')) {
+            $this->info('Используйте: php artisan app:monitor-performance');
+            return Command::SUCCESS;
+        }
 
-        // Проверки
-        $results = [
-            'database' => $this->checkDatabasePerformance(),
-            'cache' => $this->checkCachePerformance(),
-            'http' => $this->checkHttpPerformance($url, $runs),
-            'memory' => $this->checkMemoryUsage(),
-            'disk' => $this->checkDiskUsage(),
-        ];
+        // Делегируем работу общим сервисам
+        if ($this->option('realtime')) {
+            return $this->runRealtimeMonitoring();
+        }
 
-        // Отображение результатов
-        $this->displayResults($results, $detailed);
+        if ($this->option('report')) {
+            return $this->generateReport();
+        }
 
-        // Рекомендации по оптимизации
-        $this->showOptimizationRecommendations($results);
+        if ($this->option('detailed')) {
+            return $this->showDetailedMetrics();
+        }
+
+        // Обычный режим - показываем текущие метрики
+        return $this->showCurrentMetrics();
+    }
+
+    /**
+     * Показать текущие метрики
+     */
+    private function showCurrentMetrics(): int
+    {
+        $this->info('🚀 Мониторинг производительности SPA Platform');
+        $this->newLine();
+
+        // Собираем метрики через общий сервис
+        $metrics = $this->metricsCollector->collectAllMetrics();
+        
+        // Отображаем через общий сервис
+        $this->metricsDisplay->displayMetrics($metrics);
+        
+        // Проверяем пороговые значения
+        $warnings = $this->reportService->checkThresholds($metrics);
+        if (!empty($warnings)) {
+            $this->newLine();
+            $this->error('Обнаружены проблемы производительности:');
+            foreach ($warnings as $warning) {
+                $this->warn($warning['message']);
+            }
+        }
+
+        // Показываем рекомендации
+        $recommendations = $this->reportService->generateRecommendations();
+        if (!empty($recommendations)) {
+            $this->newLine();
+            $this->comment('Рекомендации по оптимизации:');
+            foreach ($recommendations as $rec) {
+                $this->line("  • {$rec['message']}");
+            }
+        }
 
         return Command::SUCCESS;
     }
 
     /**
-     * Проверка производительности базы данных
+     * Показать детальные метрики
      */
-    private function checkDatabasePerformance(): array
+    private function showDetailedMetrics(): int
     {
-        $this->info('📊 Проверка производительности БД...');
+        $this->info('🚀 Детальный мониторинг производительности');
+        $this->newLine();
 
-        $startTime = microtime(true);
+        // Собираем детальные метрики
+        $metrics = $this->metricsCollector->collectDetailedMetrics();
         
-        // Тестовые запросы
-        $queries = [
-            'users_count' => fn() => DB::table('users')->count(),
-            'ads_count' => fn() => DB::table('ads')->count(),
-            'masters_active' => fn() => DB::table('master_profiles')
-                ->where('status', 'active')
-                ->count(),
-            'complex_join' => fn() => DB::table('ads')
-                ->join('master_profiles', 'ads.user_id', '=', 'master_profiles.user_id')
-                ->select('ads.id', 'master_profiles.display_name')
-                ->limit(10)
-                ->get(),
-        ];
-
-        $results = [];
-        $totalQueries = 0;
-
-        foreach ($queries as $name => $query) {
-            $queryStart = microtime(true);
-            
-            try {
-                $result = $query();
-                $duration = (microtime(true) - $queryStart) * 1000;
-                
-                $results[$name] = [
-                    'duration_ms' => round($duration, 2),
-                    'status' => 'success',
-                    'result_count' => is_countable($result) ? count($result) : (is_numeric($result) ? $result : 1)
-                ];
-                
-                $totalQueries++;
-                
-            } catch (\Exception $e) {
-                $results[$name] = [
-                    'duration_ms' => 0,
-                    'status' => 'error',
-                    'error' => $e->getMessage()
-                ];
+        // Отображаем детальные метрики
+        $this->metricsDisplay->displayDetailedMetrics($metrics);
+        
+        // Показываем топ медленных запросов
+        $slowQueries = $this->reportService->getTopSlowQueries();
+        if (!empty($slowQueries)) {
+            $this->newLine();
+            $this->comment('Топ медленных запросов:');
+            foreach ($slowQueries as $query) {
+                $this->line("  • {$query['query']} ({$query['time']}ms, {$query['count']} раз)");
             }
         }
 
-        $totalTime = (microtime(true) - $startTime) * 1000;
+        // Показываем топ потребителей памяти
+        $memoryConsumers = $this->reportService->getTopMemoryConsumers();
+        if (!empty($memoryConsumers)) {
+            $this->newLine();
+            $this->comment('Топ потребителей памяти:');
+            foreach ($memoryConsumers as $consumer) {
+                $this->line("  • {$consumer['component']}: {$consumer['memory_mb']} MB");
+            }
+        }
 
-        return [
-            'total_time_ms' => round($totalTime, 2),
-            'queries_count' => $totalQueries,
-            'avg_query_time_ms' => $totalQueries > 0 ? round($totalTime / $totalQueries, 2) : 0,
-            'queries' => $results,
-            'status' => $totalTime < 100 ? 'excellent' : ($totalTime < 500 ? 'good' : 'needs_optimization')
-        ];
+        return Command::SUCCESS;
     }
 
     /**
-     * Проверка производительности кеша
+     * Мониторинг в реальном времени
      */
-    private function checkCachePerformance(): array
+    private function runRealtimeMonitoring(): int
     {
-        $this->info('💾 Проверка производительности кеша...');
-
-        $startTime = microtime(true);
+        $this->metricsDisplay->showRealtimeHeader();
         
-        // Тестовые операции с кешем
-        $testKey = 'performance_test_' . time();
-        $testData = ['test' => 'data', 'timestamp' => time()];
-
-        $operations = [];
-
-        // Запись в кеш
-        $writeStart = microtime(true);
-        Cache::put($testKey, $testData, 300);
-        $operations['write'] = (microtime(true) - $writeStart) * 1000;
-
-        // Чтение из кеша
-        $readStart = microtime(true);
-        $cached = Cache::get($testKey);
-        $operations['read'] = (microtime(true) - $readStart) * 1000;
-
-        // Удаление из кеша
-        $deleteStart = microtime(true);
-        Cache::forget($testKey);
-        $operations['delete'] = (microtime(true) - $deleteStart) * 1000;
-
-        $totalTime = (microtime(true) - $startTime) * 1000;
-
-        // Статистика кеша
-        $cacheStats = $this->cacheService->getCacheStats();
-
-        return [
-            'total_time_ms' => round($totalTime, 2),
-            'operations' => array_map(fn($time) => round($time, 2), $operations),
-            'cache_stats' => $cacheStats,
-            'status' => $totalTime < 10 ? 'excellent' : ($totalTime < 50 ? 'good' : 'needs_optimization')
-        ];
-    }
-
-    /**
-     * Проверка HTTP производительности
-     */
-    private function checkHttpPerformance(string $url, int $runs): array
-    {
-        $this->info("🌐 Проверка HTTP производительности ({$runs} запросов)...");
-
-        $baseUrl = config('app.url');
-        $fullUrl = $baseUrl . $url;
-        
-        $times = [];
-        $errors = 0;
-
-        for ($i = 0; $i < $runs; $i++) {
-            $startTime = microtime(true);
+        while (true) {
+            $this->metricsDisplay->clearScreen();
             
-            try {
-                $response = Http::timeout(10)->get($fullUrl);
-                $duration = (microtime(true) - $startTime) * 1000;
-                
-                if ($response->successful()) {
-                    $times[] = $duration;
-                } else {
-                    $errors++;
+            // Собираем и отображаем метрики
+            $metrics = $this->metricsCollector->collectAllMetrics();
+            $this->metricsDisplay->displayMetrics($metrics);
+            
+            // Проверяем пороговые значения
+            $warnings = $this->reportService->checkThresholds($metrics);
+            if (!empty($warnings)) {
+                $this->newLine();
+                $this->error('Предупреждения:');
+                foreach ($warnings as $warning) {
+                    $this->warn($warning['message']);
                 }
-                
-            } catch (\Exception $e) {
-                $errors++;
             }
-        }
-
-        if (empty($times)) {
-            return [
-                'status' => 'error',
-                'error' => 'Все запросы завершились ошибкой',
-                'errors_count' => $errors
-            ];
-        }
-
-        $avgTime = array_sum($times) / count($times);
-        $minTime = min($times);
-        $maxTime = max($times);
-
-        return [
-            'url' => $url,
-            'runs' => $runs,
-            'avg_time_ms' => round($avgTime, 2),
-            'min_time_ms' => round($minTime, 2),
-            'max_time_ms' => round($maxTime, 2),
-            'errors_count' => $errors,
-            'success_rate' => round((count($times) / $runs) * 100, 1),
-            'status' => $avgTime < 100 ? 'excellent' : ($avgTime < 500 ? 'good' : 'needs_optimization')
-        ];
-    }
-
-    /**
-     * Проверка использования памяти
-     */
-    private function checkMemoryUsage(): array
-    {
-        $this->info('🧠 Проверка использования памяти...');
-
-        $memoryUsage = memory_get_usage(true);
-        $memoryPeak = memory_get_peak_usage(true);
-        $memoryLimit = $this->parseMemoryLimit(ini_get('memory_limit'));
-
-        return [
-            'current_mb' => round($memoryUsage / 1024 / 1024, 2),
-            'peak_mb' => round($memoryPeak / 1024 / 1024, 2),
-            'limit_mb' => round($memoryLimit / 1024 / 1024, 2),
-            'usage_percent' => round(($memoryPeak / $memoryLimit) * 100, 1),
-            'status' => ($memoryPeak / $memoryLimit) < 0.7 ? 'good' : 'high'
-        ];
-    }
-
-    /**
-     * Проверка использования диска
-     */
-    private function checkDiskUsage(): array
-    {
-        $this->info('💽 Проверка использования диска...');
-
-        $storagePath = storage_path();
-        $totalBytes = disk_total_space($storagePath);
-        $freeBytes = disk_free_space($storagePath);
-        $usedBytes = $totalBytes - $freeBytes;
-
-        return [
-            'total_gb' => round($totalBytes / 1024 / 1024 / 1024, 2),
-            'used_gb' => round($usedBytes / 1024 / 1024 / 1024, 2),
-            'free_gb' => round($freeBytes / 1024 / 1024 / 1024, 2),
-            'usage_percent' => round(($usedBytes / $totalBytes) * 100, 1),
-            'status' => ($usedBytes / $totalBytes) < 0.8 ? 'good' : 'warning'
-        ];
-    }
-
-    /**
-     * Отображение результатов
-     */
-    private function displayResults(array $results, bool $detailed): void
-    {
-        $this->newLine();
-        $this->info('📈 РЕЗУЛЬТАТЫ МОНИТОРИНГА ПРОИЗВОДИТЕЛЬНОСТИ');
-        $this->line('===============================================');
-
-        // База данных
-        $db = $results['database'];
-        $this->line("📊 База данных: {$this->getStatusEmoji($db['status'])} {$db['total_time_ms']}мс");
-        
-        if ($detailed) {
-            $this->line("   └── Запросов: {$db['queries_count']}");
-            $this->line("   └── Среднее время: {$db['avg_query_time_ms']}мс");
-        }
-
-        // Кеш
-        $cache = $results['cache'];
-        $this->line("💾 Кеш: {$this->getStatusEmoji($cache['status'])} {$cache['total_time_ms']}мс");
-        
-        if ($detailed) {
-            $this->line("   └── Драйвер: {$cache['cache_stats']['driver']}");
-            if (isset($cache['cache_stats']['memory_used'])) {
-                $this->line("   └── Память: {$cache['cache_stats']['memory_used']}");
-            }
-        }
-
-        // HTTP
-        $http = $results['http'];
-        if ($http['status'] !== 'error') {
-            $this->line("🌐 HTTP: {$this->getStatusEmoji($http['status'])} {$http['avg_time_ms']}мс");
             
-            if ($detailed) {
-                $this->line("   └── Мин/Макс: {$http['min_time_ms']}/{$http['max_time_ms']}мс");
-                $this->line("   └── Успешность: {$http['success_rate']}%");
-            }
-        } else {
-            $this->line("🌐 HTTP: ❌ Ошибка соединения");
+            // Ждем 5 секунд перед следующим обновлением
+            sleep(5);
         }
 
-        // Память
-        $memory = $results['memory'];
-        $this->line("🧠 Память: {$this->getStatusEmoji($memory['status'])} {$memory['current_mb']}МБ ({$memory['usage_percent']}%)");
-
-        // Диск
-        $disk = $results['disk'];
-        $this->line("💽 Диск: {$this->getStatusEmoji($disk['status'])} {$disk['used_gb']}ГБ использовано ({$disk['usage_percent']}%)");
-
-        $this->newLine();
-        $this->line('===============================================');
+        return Command::SUCCESS;
     }
 
     /**
-     * Рекомендации по оптимизации
+     * Генерировать отчет
      */
-    private function showOptimizationRecommendations(array $results): void
+    private function generateReport(): int
     {
-        $this->info('💡 РЕКОМЕНДАЦИИ ПО ОПТИМИЗАЦИИ');
-        $this->line('===============================');
-
-        $recommendations = [];
-
-        // БД рекомендации
-        if ($results['database']['status'] === 'needs_optimization') {
-            $recommendations[] = '📊 База данных медленная - добавьте индексы, оптимизируйте запросы';
-        }
-
-        // Кеш рекомендации
-        if ($results['cache']['status'] === 'needs_optimization') {
-            $recommendations[] = '💾 Кеш медленный - рассмотрите Redis вместо файлового кеша';
-        }
-
-        // HTTP рекомендации
-        if (isset($results['http']['status']) && $results['http']['status'] === 'needs_optimization') {
-            $recommendations[] = '🌐 HTTP медленный - включите сжатие, оптимизируйте изображения';
-            $recommendations[] = '⚡ Рассмотрите использование CDN для статичных ресурсов';
-        }
-
-        // Память рекомендации
-        if ($results['memory']['status'] === 'high') {
-            $recommendations[] = '🧠 Высокое потребление памяти - оптимизируйте запросы, используйте пагинацию';
-        }
-
-        // Диск рекомендации
-        if ($results['disk']['status'] === 'warning') {
-            $recommendations[] = '💽 Мало места на диске - очистите логи, настройте ротацию файлов';
-        }
-
-        // Общие рекомендации для достижения стандартов Wildberries
-        $recommendations[] = '🚀 Для достижения <100мс как у Wildberries:';
-        $recommendations[] = '   • Используйте Redis для кеширования';
-        $recommendations[] = '   • Настройте CDN для статики';
-        $recommendations[] = '   • Оптимизируйте изображения (WebP, адаптивность)';
-        $recommendations[] = '   • Включите HTTP/2 и сжатие';
-        $recommendations[] = '   • Используйте ленивую загрузку компонентов';
-
-        foreach ($recommendations as $recommendation) {
-            $this->line($recommendation);
-        }
-
-        $this->newLine();
+        $filename = $this->reportService->generateReport();
+        $this->info("✅ Отчет сохранен: {$filename}");
+        
+        return Command::SUCCESS;
     }
 
     /**
-     * Получение эмодзи статуса
+     * Получить имя команды для миграции
      */
-    private function getStatusEmoji(string $status): string
+    public function getMigrationCommand(): string
     {
-        return match ($status) {
-            'excellent' => '🟢',
-            'good' => '🟡',
-            'needs_optimization', 'high', 'warning' => '🔴',
-            'error' => '❌',
-            default => '⚪'
-        };
-    }
-
-    /**
-     * Парсинг лимита памяти
-     */
-    private function parseMemoryLimit(string $limit): int
-    {
-        $limit = trim($limit);
-        $last = strtolower($limit[strlen($limit) - 1]);
-        $limit = (int) $limit;
-
-        switch ($last) {
-            case 'g':
-                $limit *= 1024;
-            case 'm':
-                $limit *= 1024;
-            case 'k':
-                $limit *= 1024;
-        }
-
-        return $limit;
+        return 'app:monitor-performance';
     }
 }

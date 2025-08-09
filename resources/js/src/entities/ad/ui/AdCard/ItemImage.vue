@@ -23,7 +23,7 @@
         :key="n"
         class="slider-dot ozon-dot"
         :class="{ 'active': n === currentPhotoIndex + 1 }"
-      ></div>
+      />
     </div>
   </div>
 </template>
@@ -31,15 +31,15 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
-const _props = defineProps({
-  item: {
-    type: Object,
-    required: true
-  },
-  itemUrl: {
-    type: String,
-    required: true
-  }
+const props = defineProps({
+    item: {
+        type: Object,
+        required: true
+    },
+    itemUrl: {
+        type: String,
+        required: true
+    }
 })
 
 // РЎРѕСЃС‚РѕСЏРЅРёРµ РґР»СЏ РїСЂРѕРєСЂСѓС‚РєРё С„РѕС‚Рѕ
@@ -48,102 +48,104 @@ const currentPhotoIndex = ref(0)
 
 // РСЃРїРѕР»СЊР·СѓРµРј С‚Сѓ Р¶Рµ Р»РѕРіРёРєСѓ С‡С‚Рѕ Рё РІ PhotoGallery.vue
 const processedPhotos = computed(() => {
-  const photos = []
+    const photos = []
   
-  if (props.item.photos && props.item.photos.length) {
-    props.item.photos.forEach((photo: any, index: any) => {
-      let photoUrl = null
+    if (props.item.photos && props.item.photos.length) {
+        props.item.photos.forEach((photo: any, index: any) => {
+            let photoUrl = null
       
-      if (typeof photo === 'string') {
-        photoUrl = photo
-      } else if (photo && typeof photo === 'object') {
-        photoUrl = photo.preview || photo.url || photo.src || photo.path
-      }
+            if (typeof photo === 'string') {
+                photoUrl = photo
+            } else if (photo && typeof photo === 'object') {
+                photoUrl = photo.preview || photo.url || photo.src || photo.path
+            }
       
-      if (photoUrl && photoUrl !== 'undefined' && photoUrl !== 'null') {
-        photos.push({
-          url: photoUrl,
-          alt: photo.alt || `Р¤РѕС‚Рѕ ${index + 1}`
+            if (photoUrl && photoUrl !== 'undefined' && photoUrl !== 'null') {
+                photos.push({
+                    url: photoUrl,
+                    alt: photo.alt || `Р¤РѕС‚Рѕ ${index + 1}`
+                })
+            }
         })
-      }
-    })
-  }
-  
-  // Р•СЃР»Рё РЅРµС‚ С„РѕС‚Рѕ РІ РјР°СЃСЃРёРІРµ, РїСЂРѕРІРµСЂСЏРµРј РѕС‚РґРµР»СЊРЅС‹Рµ РїРѕР»СЏ
-  if (photos.length === 0) {
-    const possibleImages = [
-      props.item.avatar,
-      props.item.main_image,
-      props.item.image,
-      props.item.photo
-    ]
-    
-    for (const img of possibleImages) {
-      if (img && img !== 'null' && img !== 'undefined' && img !== '') {
-        photos.push({
-          url: img,
-          alt: props.item.name || 'Р¤РѕС‚Рѕ'
-        })
-        break
-      }
     }
-  }
   
-  // Fallback РЅР° С‚РµСЃС‚РѕРІРѕРµ РёР·РѕР±СЂР°Р¶РµРЅРёРµ
-  if (photos.length === 0) {
-    const demoNumber = (props.item.id % 4) + 1
-    photos.push({
-      url: `/images/masters/demo-${demoNumber}.jpg`,
-      alt: 'Р”РµРјРѕ С„РѕС‚Рѕ'
-    })
-  }
+    // Р•СЃР»Рё РЅРµС‚ С„РѕС‚Рѕ РІ РјР°СЃСЃРёРІРµ, РїСЂРѕРІРµСЂСЏРµРј РѕС‚РґРµР»СЊРЅС‹Рµ РїРѕР»СЏ
+    if (photos.length === 0) {
+        const possibleImages = [
+            props.item.avatar,
+            props.item.main_image,
+            props.item.image,
+            props.item.photo
+        ]
+    
+        for (const img of possibleImages) {
+            if (img && img !== 'null' && img !== 'undefined' && img !== '') {
+                photos.push({
+                    url: img,
+                    alt: props.item.name || 'Р¤РѕС‚Рѕ'
+                })
+                break
+            }
+        }
+    }
   
-  return photos
+    // Fallback РЅР° С‚РµСЃС‚РѕРІРѕРµ РёР·РѕР±СЂР°Р¶РµРЅРёРµ
+    if (photos.length === 0) {
+        const demoNumber = (props.item.id % 4) + 1
+        photos.push({
+            url: `/images/masters/demo-${demoNumber}.jpg`,
+            alt: 'Р”РµРјРѕ С„РѕС‚Рѕ'
+        })
+    }
+  
+    return photos
 })
 
 // URL С‚РµРєСѓС‰РµРіРѕ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
 const currentImageUrl = computed(() => {
-  return processedPhotos.value[currentPhotoIndex.value]?.url || '/images/masters/demo-1.jpg'
+    return processedPhotos.value[currentPhotoIndex.value]?.url || '/images/masters/demo-1.jpg'
 })
 
 // Р¤СѓРЅРєС†РёРё РґР»СЏ РїСЂРѕРєСЂСѓС‚РєРё С„РѕС‚Рѕ
 const startImagePreview = () => {
-  if (processedPhotos.value.length > 1) {
-    isHovering.value = true
-  }
+    if (processedPhotos.value.length > 1) {
+        isHovering.value = true
+    }
 }
 
 const stopImagePreview = () => {
-  isHovering.value = false
-  currentPhotoIndex.value = 0 // Р’РѕР·РІСЂР°С‰Р°РµРјСЃСЏ Рє РїРµСЂРІРѕРјСѓ С„РѕС‚Рѕ
+    isHovering.value = false
+    currentPhotoIndex.value = 0 // Р’РѕР·РІСЂР°С‰Р°РµРјСЃСЏ Рє РїРµСЂРІРѕРјСѓ С„РѕС‚Рѕ
 }
 
-const handleMouseMove = (_event) => {
-  if (!isHovering.value || processedPhotos.value.length <= 1) return
+const handleMouseMove = (event: MouseEvent) => {
+    if (!isHovering.value || processedPhotos.value.length <= 1) return
   
-  const rect = event.currentTarget.getBoundingClientRect()
-  const x = event.clientX - rect.left
-  const width = rect.width
+    const target = event.currentTarget as HTMLElement
+    const rect = target.getBoundingClientRect()
+    const x = event.clientX - rect.left
+    const width = rect.width
   
-  // РћРїСЂРµРґРµР»СЏРµРј РёРЅРґРµРєСЃ С„РѕС‚Рѕ РЅР° РѕСЃРЅРѕРІРµ РїРѕР·РёС†РёРё РјС‹С€Рё
-  const photoIndex = Math.floor((x / width) * processedPhotos.value.length)
-  const clampedIndex = Math.max(0, Math.min(photoIndex, processedPhotos.value.length - 1))
+    // РћРїСЂРµРґРµР»СЏРµРј РёРЅРґРµРєСЃ С„РѕС‚Рѕ РЅР° РѕСЃРЅРѕРІРµ РїРѕР·РёС†РёРё РјС‹С€Рё
+    const photoIndex = Math.floor((x / width) * processedPhotos.value.length)
+    const clampedIndex = Math.max(0, Math.min(photoIndex, processedPhotos.value.length - 1))
   
-  if (clampedIndex !== currentPhotoIndex.value) {
-    currentPhotoIndex.value = clampedIndex
-  }
+    if (clampedIndex !== currentPhotoIndex.value) {
+        currentPhotoIndex.value = clampedIndex
+    }
 }
 
-const handleImageError = (_event) => {
+const handleImageError = (event: Event) => {
+    const target = event.target as HTMLImageElement
   
-  // Р•СЃР»Рё СЌС‚Рѕ СѓР¶Рµ fallback РёР·РѕР±СЂР°Р¶РµРЅРёРµ, РїРѕРєР°Р·С‹РІР°РµРј placeholder
-  if (event.target.src.includes('demo-')) {
-    event.target.src = '/images/default-avatar.svg'
-  } else {
+    // Р•СЃР»Рё СЌС‚Рѕ СѓР¶Рµ fallback РёР·РѕР±СЂР°Р¶РµРЅРёРµ, РїРѕРєР°Р·С‹РІР°РµРј placeholder
+    if (target.src.includes('demo-')) {
+        target.src = '/images/default-avatar.svg'
+    } else {
     // РџСЂРѕР±СѓРµРј РґСЂСѓРіРѕРµ demo РёР·РѕР±СЂР°Р¶РµРЅРёРµ
-    const demoNumber = Math.floor(Math.random() * 4) + 1
-    event.target.src = `/images/masters/demo-${demoNumber}.jpg`
-  }
+        const demoNumber = Math.floor(Math.random() * 4) + 1
+        target.src = `/images/masters/demo-${demoNumber}.jpg`
+    }
 }
 </script>
 

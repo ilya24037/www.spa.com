@@ -5,10 +5,10 @@
     <component 
       :is="linkComponent"
       :href="href"
-      @click="handleClick"
       :disabled="disabled"
       :class="buttonClasses"
       :aria-label="buttonAriaLabel"
+      @click="handleClick"
     >
       <!-- РРєРѕРЅРєР° СЃРµСЂРґС†Р° -->
       <svg 
@@ -53,7 +53,7 @@
         v-if="isLoading"
         class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 rounded-lg"
       >
-        <div class="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+        <div class="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
       </div>
     </component>
     
@@ -72,16 +72,26 @@
         role="tooltip"
         :aria-hidden="!showTooltipState"
       >
-        <div class="text-xs font-medium mb-1">РР·Р±СЂР°РЅРЅРѕРµ</div>
-        <div class="text-xs text-gray-600">
-          <div v-if="stats.masterCount > 0">РњР°СЃС‚РµСЂР°: {{ stats.masterCount }}</div>
-          <div v-if="stats.serviceCount > 0">РЈСЃР»СѓРіРё: {{ stats.serviceCount }}</div>
-          <div v-if="stats.adCount > 0">РћР±СЉСЏРІР»РµРЅРёСЏ: {{ stats.adCount }}</div>
-          <div v-if="!hasFavorites" class="text-gray-500">РџСѓСЃС‚Рѕ</div>
+        <div class="text-xs font-medium mb-1">
+          РР·Р±СЂР°РЅРЅРѕРµ
+        </div>
+        <div class="text-xs text-gray-500">
+          <div v-if="stats.masterCount > 0">
+            Мастера: {{ stats.masterCount }}
+          </div>
+          <div v-if="stats.serviceCount > 0">
+            РЈСЃР»СѓРіРё: {{ stats.serviceCount }}
+          </div>
+          <div v-if="stats.adCount > 0">
+            РћР±СЉСЏРІР»РµРЅРёСЏ: {{ stats.adCount }}
+          </div>
+          <div v-if="!hasFavorites" class="text-gray-500">
+            РџСѓСЃС‚Рѕ
+          </div>
         </div>
         <!-- РЎС‚СЂРµР»РѕС‡РєР° tooltip -->
         <div class="absolute top-full left-1/2 -translate-x-1/2">
-          <div class="w-2 h-2 bg-gray-900 rotate-45 -mt-1"></div>
+          <div class="w-2 h-2 bg-gray-500 rotate-45 -mt-1" />
         </div>
       </div>
     </Transition>
@@ -108,16 +118,16 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  href: '/favorites',
-  variant: 'default',
-  size: 'medium',
-  compact: false,
-  showText: true,
-  showTooltip: true,
-  disabled: false,
-  maxCount: 99,
-  customClass: '',
-  buttonText: 'РР·Р±СЂР°РЅРЅРѕРµ'
+    href: '/favorites',
+    variant: 'default',
+    size: 'medium',
+    compact: false,
+    showText: true,
+    showTooltip: true,
+    disabled: false,
+    maxCount: 99,
+    customClass: '',
+    buttonText: 'РР·Р±СЂР°РЅРЅРѕРµ'
 })
 
 // TypeScript С‚РёРїРёР·Р°С†РёСЏ emits
@@ -143,120 +153,120 @@ const hasFavorites = computed(() => favoritesStore.hasFavorites)
 const displayCount = computed(() => Math.min(count.value, props.maxCount))
 
 const formattedCount = computed(() => {
-  if (count.value > props.maxCount) {
-    return `${props.maxCount}+`
-  }
-  return count.value.toString()
+    if (count.value > props.maxCount) {
+        return `${props.maxCount}+`
+    }
+    return count.value.toString()
 })
 
 const linkComponent = computed(() => props.href ? Link : 'button')
 
 const buttonClasses = computed(() => [
-  'relative inline-flex items-center gap-1.5 transition-colors duration-200',
-  'focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded-lg',
-  {
+    'relative inline-flex items-center gap-1.5 transition-colors duration-200',
+    'focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded-lg',
+    {
     // Size variants
-    'p-1.5': props.size === 'small',
-    'p-2': props.size === 'medium',
-    'p-2.5': props.size === 'large',
+        'p-1.5': props.size === 'small',
+        'p-2': props.size === 'medium',
+        'p-2.5': props.size === 'large',
     
-    // Color variants
-    'text-gray-700 hover:text-red-600': !props.disabled,
-    'opacity-50 cursor-not-allowed': props.disabled,
+        // Color variants
+        'text-gray-500 hover:text-red-600': !props.disabled,
+        'opacity-50 cursor-not-allowed': props.disabled,
     
-    // Compact mode
-    'px-1.5 py-1': props.compact,
+        // Compact mode
+        'px-1.5 py-1': props.compact,
     
-    // With count highlight
-    'text-red-600': count.value > 0 && !props.disabled
-  },
-  props.customClass
+        // With count highlight
+        'text-red-600': count.value > 0 && !props.disabled
+    },
+    props.customClass
 ])
 
 const heartIconClasses = computed(() => [
-  'transition-colors duration-200',
-  {
-    'w-4 h-4': props.size === 'small',
-    'w-5 h-5': props.size === 'medium',
-    'w-6 h-6': props.size === 'large',
-    'text-red-500': count.value > 0,
-    'text-current': count.value === 0
-  }
+    'transition-colors duration-200',
+    {
+        'w-4 h-4': props.size === 'small',
+        'w-5 h-5': props.size === 'medium',
+        'w-6 h-6': props.size === 'large',
+        'text-red-500': count.value > 0,
+        'text-current': count.value === 0
+    }
 ])
 
 const badgeClasses = computed(() => [
-  'absolute -top-1 -right-1 min-w-5 h-5 bg-red-500 text-white text-xs font-bold',
-  'flex items-center justify-center rounded-full px-1.5 ring-2 ring-white',
-  'leading-none'
+    'absolute -top-1 -right-1 min-w-5 h-5 bg-red-500 text-white text-xs font-bold',
+    'flex items-center justify-center rounded-full px-1.5 ring-2 ring-white',
+    'leading-none'
 ])
 
 const textClasses = computed(() => [
-  'font-medium transition-colors duration-200',
-  {
-    'text-xs': props.size === 'small',
-    'text-sm': props.size === 'medium',
-    'text-base': props.size === 'large',
-    'hidden sm:inline': props.compact
-  }
+    'font-medium transition-colors duration-200',
+    {
+        'text-xs': props.size === 'small',
+        'text-sm': props.size === 'medium',
+        'text-base': props.size === 'large',
+        'hidden sm:inline': props.compact
+    }
 ])
 
 const tooltipClasses = computed(() => [
-  'absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-10',
-  'bg-gray-900 text-white text-xs rounded-lg shadow-lg px-3 py-2',
-  'min-w-max max-w-xs'
+    'absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-10',
+    'bg-gray-500 text-white text-xs rounded-lg shadow-lg px-3 py-2',
+    'min-w-max max-w-xs'
 ])
 
 const buttonAriaLabel = computed(() => {
-  let label = props.buttonText
-  if (count.value > 0) {
-    label += ` (${count.value} СЌР»РµРјРµРЅС‚РѕРІ)`
-  }
-  return label
+    let label = props.buttonText
+    if (count.value > 0) {
+        label += ` (${count.value} СЌР»РµРјРµРЅС‚РѕРІ)`
+    }
+    return label
 })
 
 // Methods
 const handleClick = (event: Event): void => {
-  if (props.disabled) {
-    event.preventDefault()
-    return
-  }
+    if (props.disabled) {
+        event.preventDefault()
+        return
+    }
   
-  emit('click', event)
+    emit('click', event)
 }
 
 const showTooltip = (): void => {
-  if (!props.showTooltip) return
+    if (!props.showTooltip) return
   
-  clearTimeout(tooltipTimeout.value)
-  showTooltipState.value = true
-  emit('tooltip-show')
+    clearTimeout(tooltipTimeout.value)
+    showTooltipState.value = true
+    emit('tooltip-show')
 }
 
 const hideTooltip = (): void => {
-  if (!props.showTooltip) return
+    if (!props.showTooltip) return
   
-  tooltipTimeout.value = setTimeout(() => {
-    showTooltipState.value = false
-    emit('tooltip-hide')
-  }, 150)
+    tooltipTimeout.value = setTimeout(() => {
+        showTooltipState.value = false
+        emit('tooltip-hide')
+    }, 150)
 }
 
 const _handleMouseEnter = (): void => {
-  showTooltip()
+    showTooltip()
 }
 
 const handleMouseLeave = (): void => {
-  hideTooltip()
+    hideTooltip()
 }
 
 // Cleanup
 onUnmounted(() => {
-  clearTimeout(tooltipTimeout.value)
+    clearTimeout(tooltipTimeout.value)
 })
 </script>
 
 <style scoped>
-/* РђРЅРёРјР°С†РёРё РґР»СЏ heartbeat СЌС„С„РµРєС‚Р° РїСЂРё РґРѕР±Р°РІР»РµРЅРёРё */
+/* Анимации для heartbeat эффекта при добавлении */
 @keyframes heartbeat {
   0%, 100% {
     transform: scale(1);
@@ -270,7 +280,7 @@ onUnmounted(() => {
   animation: heartbeat 0.3s ease-in-out;
 }
 
-/* Hover СЌС„С„РµРєС‚С‹ */
+/* Hover эффекты */
 .favorites-button-hover {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -279,7 +289,7 @@ onUnmounted(() => {
   transform: translateY(-1px);
 }
 
-/* Pulse Р°РЅРёРјР°С†РёСЏ РґР»СЏ СЃС‡РµС‚С‡РёРєР° */
+/* Pulse анимация для счетчика */
 .badge-pulse {
   animation: pulse 1s infinite;
 }
@@ -300,7 +310,7 @@ onUnmounted(() => {
   }
 }
 
-/* Tooltip СЃС‚РёР»Рё */
+/* Tooltip стили */
 .tooltip-arrow::before {
   content: '';
   position: absolute;
@@ -308,7 +318,7 @@ onUnmounted(() => {
   left: 50%;
   transform: translateX(-50%);
   border: 4px solid transparent;
-  border-top-color: theme('colors.gray.900');
+  border-top-color: #374151;
 }
 
 /* Accessibility improvements */
@@ -330,18 +340,18 @@ onUnmounted(() => {
   }
 }
 
-/* Dark mode РїРѕРґРґРµСЂР¶РєР° */
+/* Dark mode поддержка */
 @media (prefers-color-scheme: dark) {
-  .text-gray-700 {
-    color: theme('colors.gray.200');
+  .text-gray-500 {
+    color: #d1d5db;
   }
   
   .hover\:text-red-600:hover {
-    color: theme('colors.red.400');
+    color: #f87171;
   }
   
-  .bg-gray-900 {
-    background-color: theme('colors.gray-700');
+  .bg-gray-500 {
+    background-color: #d1d5db;
   }
 }
 

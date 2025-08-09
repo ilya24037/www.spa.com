@@ -80,14 +80,14 @@ export interface ButtonProps {
 
 // Props СЃ РґРµС„РѕР»С‚РЅС‹РјРё Р·РЅР°С‡РµРЅРёСЏРјРё
 const props = withDefaults(defineProps<ButtonProps>(), {
-  variant: 'primary',
-  size: 'md',
-  fullWidth: false,
-  rounded: 'md',
-  loading: false,
-  loadingText: 'Р—Р°РіСЂСѓР·РєР°...',
-  disabled: false,
-  type: 'button'
+    variant: 'primary',
+    size: 'md',
+    fullWidth: false,
+    rounded: 'md',
+    loading: false,
+    loadingText: 'Р—Р°РіСЂСѓР·РєР°...',
+    disabled: false,
+    type: 'button'
 })
 
 // Emits
@@ -97,38 +97,38 @@ const emit = defineEmits<{
 
 // Computed РґР»СЏ РѕРїСЂРµРґРµР»РµРЅРёСЏ С‚РµРіР° РєРѕРјРїРѕРЅРµРЅС‚Р°
 const componentTag = computed(() => {
-  if (props.href) return 'a'
-  if (props.to) return Link
-  return 'button'
+    if (props.href) return 'a'
+    if (props.to) return Link
+    return 'button'
 })
 
 // РљР»Р°СЃСЃС‹ РґР»СЏ РєРЅРѕРїРєРё
 const buttonClasses = computed(() => {
-  const classes = [
-    'button',
-    `button--${props.variant}`,
-    `button--${props.size}`,
-    {
-      'button--full-width': props.fullWidth,
-      'button--loading': props.loading,
-      'button--disabled': props.disabled,
-      [`button--rounded-${props.rounded}`]: props.rounded !== true,
-      'button--rounded': props.rounded === true
-    }
-  ]
+    const classes = [
+        'button',
+        `button--${props.variant}`,
+        `button--${props.size}`,
+        {
+            'button--full-width': props.fullWidth,
+            'button--loading': props.loading,
+            'button--disabled': props.disabled,
+            [`button--rounded-${props.rounded}`]: props.rounded !== true,
+            'button--rounded': props.rounded === true
+        }
+    ]
   
-  return classes
+    return classes
 })
 
 // РћР±СЂР°Р±РѕС‚С‡РёРє РєР»РёРєР°
 const handleClick = (event: MouseEvent) => {
-  if (props.disabled || props.loading) {
-    event.preventDefault()
-    event.stopPropagation()
-    return
-  }
+    if (props.disabled || props.loading) {
+        event.preventDefault()
+        event.stopPropagation()
+        return
+    }
   
-  emit('click', event)
+    emit('click', event)
 }
 </script>
 
@@ -172,9 +172,9 @@ const handleClick = (event: MouseEvent) => {
 }
 
 .button--secondary {
-  @apply bg-gray-600 text-white hover:bg-gray-700;
+  @apply bg-gray-500 text-white hover:bg-gray-500;
   @apply focus:ring-gray-500;
-  @apply disabled:bg-gray-300;
+  @apply disabled:bg-gray-500;
 }
 
 .button--danger {
@@ -196,15 +196,15 @@ const handleClick = (event: MouseEvent) => {
 }
 
 .button--ghost {
-  @apply bg-transparent text-gray-700 hover:bg-gray-100;
+  @apply bg-transparent text-gray-500 hover:bg-gray-500;
   @apply focus:ring-gray-500;
-  @apply disabled:text-gray-400 disabled:hover:bg-transparent;
+  @apply disabled:text-gray-500 disabled:hover:bg-transparent;
 }
 
 .button--link {
   @apply bg-transparent text-blue-600 hover:text-blue-700 hover:underline;
   @apply focus:ring-blue-500 p-0;
-  @apply disabled:text-gray-400 disabled:no-underline;
+  @apply disabled:text-gray-500 disabled:no-underline;
 }
 
 /* РЎРєСЂСѓРіР»РµРЅРёРµ */

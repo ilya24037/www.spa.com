@@ -15,7 +15,7 @@
     <div class="input-container" :class="containerClasses">
       <!-- Prefix icon/text -->
       <span v-if="prefix || prefixIcon" class="input-prefix">
-        <component v-if="prefixIcon" :is="prefixIcon" class="w-5 h-5" />
+        <component :is="prefixIcon" v-if="prefixIcon" class="w-5 h-5" />
         <span v-else>{{ prefix }}</span>
       </span>
 
@@ -45,7 +45,7 @@
         @blur="handleBlur"
         @focus="handleFocus"
         @keydown="handleKeydown"
-      />
+      >
 
       <!-- Show/hide password button -->
       <button
@@ -55,12 +55,39 @@
         :aria-label="showPassword ? 'Скрыть пароль' : 'Показать пароль'"
         @click="togglePassword"
       >
-        <svg v-if="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        <svg
+          v-if="!showPassword"
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+          />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+          />
         </svg>
-        <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+        <svg
+          v-else
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+          />
         </svg>
       </button>
 
@@ -72,21 +99,38 @@
         aria-label="Очистить поле"
         @click="clearInput"
       >
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
       </button>
 
       <!-- Suffix icon/text -->
       <span v-if="suffix || suffixIcon" class="input-suffix">
-        <component v-if="suffixIcon" :is="suffixIcon" class="w-5 h-5" />
+        <component :is="suffixIcon" v-if="suffixIcon" class="w-5 h-5" />
         <span v-else>{{ suffix }}</span>
       </span>
 
       <!-- Loading spinner -->
       <span v-if="loading" class="input-loading">
         <svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          />
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
         </svg>
       </span>
@@ -98,7 +142,12 @@
     </p>
 
     <!-- Error message -->
-    <p v-if="hasError" :id="errorId" class="input-error" role="alert">
+    <p
+      v-if="hasError"
+      :id="errorId"
+      class="input-error"
+      role="alert"
+    >
       {{ error }}
     </p>
 
@@ -154,12 +203,12 @@ export interface InputProps {
 
 // Props
 const props = withDefaults(defineProps<InputProps>(), {
-  type: 'text',
-  size: 'md',
-  variant: 'outline',
-  clearable: false,
-  showCounter: false,
-  autocomplete: 'off'
+    type: 'text',
+    size: 'md',
+    variant: 'outline',
+    clearable: false,
+    showCounter: false,
+    autocomplete: 'off'
 })
 
 // Emits
@@ -187,99 +236,99 @@ const errorId = useId('error')
 const hasError = computed(() => !!props.error)
 
 const inputType = computed(() => {
-  if (props.type === 'password' && showPassword.value) {
-    return 'text'
-  }
-  return props.type
+    if (props.type === 'password' && showPassword.value) {
+        return 'text'
+    }
+    return props.type
 })
 
 const containerClasses = computed(() => [
-  'input-container',
-  `input-container--${props.size}`,
-  `input-container--${props.variant}`,
-  {
-    'input-container--focused': isFocused.value,
-    'input-container--error': hasError.value,
-    'input-container--disabled': props.disabled,
-    'input-container--loading': props.loading
-  }
+    'input-container',
+    `input-container--${props.size}`,
+    `input-container--${props.variant}`,
+    {
+        'input-container--focused': isFocused.value,
+        'input-container--error': hasError.value,
+        'input-container--disabled': props.disabled,
+        'input-container--loading': props.loading
+    }
 ])
 
 const inputClasses = computed(() => [
-  'input-field',
-  {
-    'pl-10': props.prefix || props.prefixIcon,
-    'pr-10': props.suffix || props.suffixIcon || props.clearable || props.loading
-  }
+    'input-field',
+    {
+        'pl-10': props.prefix || props.prefixIcon,
+        'pr-10': props.suffix || props.suffixIcon || props.clearable || props.loading
+    }
 ])
 
 // Methods
 const handleInput = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  const value = props.type === 'number' ? Number(target.value) : target.value
-  localValue.value = value
-  emit('update:modelValue', value)
-  emit('input', value)
+    const target = event.target as HTMLInputElement
+    const value = props.type === 'number' ? Number(target.value) : target.value
+    localValue.value = value
+    emit('update:modelValue', value)
+    emit('input', value)
 }
 
 const handleChange = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  const value = props.type === 'number' ? Number(target.value) : target.value
-  emit('change', value)
+    const target = event.target as HTMLInputElement
+    const value = props.type === 'number' ? Number(target.value) : target.value
+    emit('change', value)
 }
 
 const handleBlur = (event: FocusEvent) => {
-  isFocused.value = false
-  emit('blur', event)
+    isFocused.value = false
+    emit('blur', event)
 }
 
 const handleFocus = (event: FocusEvent) => {
-  isFocused.value = true
-  emit('focus', event)
+    isFocused.value = true
+    emit('focus', event)
 }
 
 const handleKeydown = (event: KeyboardEvent) => {
-  emit('keydown', event)
+    emit('keydown', event)
 }
 
 const clearInput = () => {
-  localValue.value = ''
-  emit('update:modelValue', '')
-  emit('clear')
-  inputRef.value?.focus()
+    localValue.value = ''
+    emit('update:modelValue', '')
+    emit('clear')
+    inputRef.value?.focus()
 }
 
 const togglePassword = () => {
-  showPassword.value = !showPassword.value
+    showPassword.value = !showPassword.value
 }
 
 // Focus method для внешнего использования
 const focus = () => {
-  inputRef.value?.focus()
+    inputRef.value?.focus()
 }
 
 // Blur method для внешнего использования
 const blur = () => {
-  inputRef.value?.blur()
+    inputRef.value?.blur()
 }
 
 // Watchers
 watch(() => props.modelValue, (newValue) => {
-  localValue.value = newValue
+    localValue.value = newValue
 })
 
 // Lifecycle
 onMounted(() => {
-  if (props.autofocus) {
-    focus()
-  }
+    if (props.autofocus) {
+        focus()
+    }
 })
 
 // Expose для родительских компонентов
 defineExpose({
-  focus,
-  blur,
-  inputRef
+    focus,
+    blur,
+    inputRef
 })
 </script>
 
@@ -291,7 +340,7 @@ defineExpose({
 
 /* Label */
 .input-label {
-  @apply block mb-1 text-sm font-medium text-gray-700;
+  @apply block mb-1 text-sm font-medium text-gray-500;
 }
 
 .input-label--required {
@@ -322,7 +371,7 @@ defineExpose({
 }
 
 .input-container--filled {
-  @apply border-0 bg-gray-100 rounded-md;
+  @apply border-0 bg-gray-500 rounded-md;
 }
 
 .input-container--underline {
@@ -339,13 +388,13 @@ defineExpose({
 }
 
 .input-container--disabled {
-  @apply opacity-50 cursor-not-allowed bg-gray-50;
+  @apply opacity-50 cursor-not-allowed bg-gray-500;
 }
 
 /* Input field */
 .input-field {
   @apply w-full px-3 py-2 bg-transparent border-0 focus:outline-none;
-  @apply placeholder-gray-400;
+  @apply placeholder-gray-500;
 }
 
 /* Size variations for input */
@@ -366,12 +415,12 @@ defineExpose({
 /* Buttons */
 .input-clear,
 .input-password-toggle {
-  @apply p-1 text-gray-400 hover:text-gray-600 focus:outline-none;
+  @apply p-1 text-gray-500 hover:text-gray-500 focus:outline-none;
 }
 
 /* Loading */
 .input-loading {
-  @apply absolute right-3 text-gray-400;
+  @apply absolute right-3 text-gray-500;
 }
 
 /* Helper text */
@@ -386,7 +435,7 @@ defineExpose({
 
 /* Counter */
 .input-counter {
-  @apply mt-1 text-xs text-gray-400 text-right;
+  @apply mt-1 text-xs text-gray-500 text-right;
 }
 
 /* Disabled state */

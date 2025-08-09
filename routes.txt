@@ -1,114 +1,0 @@
-  ( #" SPA PLATFORM
-================================
-
->A;54=55 >1=>2;5=85: 2025-08-02
-!B0BCA @5D0:B>@8=30: ' 6 - $8=0;L=0O ?@>25@:0
-
-## ) !""#!  ( #"
-
- #!( +:
-- A5 :>=B@>;;5@K 8A?>;L7CNB =>2K5 DDD namespace
-- App\Application\Http\Controllers\* - :>@@5:B=K5 ?CB8
-- Domain <>45;8 8A?>;L7CNB ?@028;L=K5 8<?>@BK
-
-## WEB  ( #"+ (routes/web.php)
-
-###  #!( + "  +:
-1. App\Application\Http\Controllers\Profile\ProfileController
-2. App\Application\Http\Controllers\HomeController  
-3. App\Application\Http\Controllers\MasterController
-4. App\Application\Http\Controllers\FavoriteController
-5. App\Application\Http\Controllers\CompareController
-6. App\Application\Http\Controllers\Booking\BookingController
-7. App\Application\Http\Controllers\SearchController
-8. App\Application\Http\Controllers\AddItemController
-9. App\Application\Http\Controllers\Ad\AdController
-10. App\Application\Http\Controllers\TestController
-11. App\Application\Http\Controllers\MyAdsController
-12. App\Application\Http\Controllers\PaymentController
-13. App\Application\Http\Controllers\WebhookController
-14. App\Application\Http\Controllers\Media\MasterPhotoController
-15. App\Application\Http\Controllers\Media\MediaUploadController
-16. App\Application\Http\Controllers\Media\MasterMediaController
-
-###  DOMAIN    ( #"%:
-- App\Domain\Master\Models\MasterProfile (AB@>:8 89, 317, 329)
-
-###  !+  #+  ( #":
-1. **C1;8G=K5 <0@H@CBK:**
-   - ;02=0O AB@0=8F0 (/)
-   - >8A: (/search) 
-   - 0@B>G:8 <0AB5@>2 (/masters/{slug}-{id})
-   - !@02=5=85 (/compare)
-   - "5AB>2K5 AB@0=8FK
-
-2. **API <0@H@CBK (/api):**
-   - C1;8G=K5: <0AB5@0, ?>8A:, ?@54;>65=8O
-   - 0I8I5==K5: ?>;L7>20B5;L, 871@0==>5, A;>BK 1@>=8@>20=8O
-
-3. **2B>@87>20==K5 <0@H@CBK:**
-   - 8G=K9 :018=5B (/profile)
-   - >8 >1JO2;5=8O (/my-ads)
-   - !8AB5<0 >?;0BK (/payment)
-   - #?@02;5=85 ?@>D8;5< <0AB5@0 (/masters)
-   - 71@0==>5 (/favorites)
-   - @>=8@>20=8O (/bookings)
-   - 5480D09;K (/media)
-   -  07<5I5=85 >1JO2;5=89 (/additem)
-
-4. **5480 <0@H@CBK:**
-   - 03@C7:0 D>B>/2845>
-   - #?@02;5=85 <5480D09;0<8
-   - C1;8G=K5 URL 4;O <5480
-
-## API  ( #"+ (routes/api.php)
-
-###  "  +:
-- App\Application\Http\Controllers\Booking\BookingController
-
-###  DOMAIN :
-- App\Domain\Master\Models\MasterProfile
-
-###  $#&,!",:
-1. **!8AB5<0 1@>=8@>20=8O:**
-   - >ABC?=K5 A;>BK (?C1;8G=>)
-   - CRUD 1@>=8@>20=89 (02B>@870F8O)
-   - #?@02;5=85 AB0BCA0<8
-   - !B0B8AB8:0
-
-2. **0AB5@0:**
-   - !?8A>: <0AB5@>2
-   - =D>@<0F8O > D>B>3@0D8OE
-   -  0A?8A0=85 8 A;>BK
-
-## !!",
-
- **>@@5:B=0O 02B>@870F8O:**
-- middleware('auth') 4;O ?@820B=KE @0745;>2
-- middleware('auth:sanctum') 4;O API
-- CSRF 70I8B0
-
- **0;840F8O ?0@0<5B@>2:**
-- whereNumber() 4;O ID
-- where() A @53C;O@=K<8 2K@065=8O<8
-
-## ++   ( #"
-
- **!  ( #"+ #!( +:**
-1. >=B@>;;5@K 8A?>;L7CNB DDD namespace
-2. Domain <>45;8 :>@@5:B=> 8<?>@B8@>20=K
-3. !B@C:BC@0 A>>B25BAB2C5B 0@E8B5:BC@5
-4. 57>?0A=>ABL A>1;N45=0
-5. $C=:F8>=0;L=>ABL A>E@0=5=0
-
-L **"&,+  +:**
-1. ><0=40 route:list =5 2K?>;=O5BAO G5@57 bash
-2. >7<>6=K ?@>1;5<K A 02B>703@C7:>9 2 Windows
-
-<¯ ** &:**
-1. @>25AB8 @CG=>5 B5AB8@>20=85 :;NG52KE <0@H@CB>2
-2. @>25@8BL @01>BC 02B>@870F88
-3. @>B5AB8@>20BL API endpoints
-4. #1548BLAO 2 703@C7:5 :>=B@>;;5@>2
-
-## !""#!:   ( #"+ "+  PRODUCTION

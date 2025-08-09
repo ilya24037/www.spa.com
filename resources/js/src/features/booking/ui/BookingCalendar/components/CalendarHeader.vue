@@ -9,8 +9,19 @@
         :aria-label="`РџСЂРµРґС‹РґСѓС‰РёР№ РјРµСЃСЏС†`"
         @click="$emit('previousMonth')"
       >
-        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 19l-7-7 7-7"
+          />
         </svg>
       </button>
 
@@ -63,8 +74,19 @@
         :aria-label="`РЎР»РµРґСѓСЋС‰РёР№ РјРµСЃСЏС†`"
         @click="$emit('nextMonth')"
       >
-        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 5l7 7-7 7"
+          />
         </svg>
       </button>
     </div>
@@ -104,18 +126,18 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  monthNames: () => [
-    'РЇРЅРІР°СЂСЊ', 'Р¤РµРІСЂР°Р»СЊ', 'РњР°СЂС‚', 'РђРїСЂРµР»СЊ', 'РњР°Р№', 'РСЋРЅСЊ',
-    'РСЋР»СЊ', 'РђРІРіСѓСЃС‚', 'РЎРµРЅС‚СЏР±СЂСЊ', 'РћРєС‚СЏР±СЂСЊ', 'РќРѕСЏР±СЂСЊ', 'Р”РµРєР°Р±СЂСЊ'
-  ],
-  disabled: false,
-  loading: false,
-  showQuickNavigation: false,
-  showActions: true,
-  showTodayButton: true,
-  announce: true,
-  minYear: () => new Date().getFullYear(),
-  maxYear: () => new Date().getFullYear() + 2
+    monthNames: () => [
+        'РЇРЅРІР°СЂСЊ', 'Р¤РµРІСЂР°Р»СЊ', 'РњР°СЂС‚', 'РђРїСЂРµР»СЊ', 'РњР°Р№', 'РСЋРЅСЊ',
+        'РСЋР»СЊ', 'РђРІРіСѓСЃС‚', 'РЎРµРЅС‚СЏР±СЂСЊ', 'РћРєС‚СЏР±СЂСЊ', 'РќРѕСЏР±СЂСЊ', 'Р”РµРєР°Р±СЂСЊ'
+    ],
+    disabled: false,
+    loading: false,
+    showQuickNavigation: false,
+    showActions: true,
+    showTodayButton: true,
+    announce: true,
+    minYear: () => new Date().getFullYear(),
+    maxYear: () => new Date().getFullYear() + 2
 })
 
 const emit = defineEmits<{
@@ -127,24 +149,24 @@ const emit = defineEmits<{
 
 // Р”РѕСЃС‚СѓРїРЅС‹Рµ РіРѕРґС‹ РґР»СЏ СЃРµР»РµРєС‚РѕСЂР°
 const availableYears = computed(() => {
-  const years: number[] = []
-  for (let year = props.minYear; year <= props.maxYear; year++) {
-    years.push(year)
-  }
-  return years
+    const years: number[] = []
+    for (let year = props.minYear; year <= props.maxYear; year++) {
+        years.push(year)
+    }
+    return years
 })
 
 // РћР±СЂР°Р±РѕС‚С‡РёРєРё РёР·РјРµРЅРµРЅРёСЏ РјРµСЃСЏС†Р°/РіРѕРґР°
 const handleMonthChange = (event: Event) => {
-  const target = event.target as HTMLSelectElement
-  const month = parseInt(target.value)
-  emit('goToMonth', props.navigation.currentYear, month)
+    const target = event.target as HTMLSelectElement
+    const month = parseInt(target.value)
+    emit('goToMonth', props.navigation.currentYear, month)
 }
 
 const handleYearChange = (event: Event) => {
-  const target = event.target as HTMLSelectElement
-  const year = parseInt(target.value)
-  emit('goToMonth', year, props.navigation.currentMonth)
+    const target = event.target as HTMLSelectElement
+    const year = parseInt(target.value)
+    emit('goToMonth', year, props.navigation.currentMonth)
 }
 </script>
 
@@ -158,15 +180,15 @@ const handleYearChange = (event: Event) => {
 }
 
 .calendar-nav-button {
-  @apply p-2 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1;
+  @apply p-2 rounded-lg hover:bg-gray-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1;
 }
 
 .calendar-nav-button:disabled {
-  @apply text-gray-400;
+  @apply text-gray-500;
 }
 
 .calendar-nav-button:hover:not(:disabled) {
-  @apply bg-gray-100;
+  @apply bg-gray-500;
 }
 
 .calendar-month-year {
@@ -174,7 +196,7 @@ const handleYearChange = (event: Event) => {
 }
 
 .calendar-title {
-  @apply text-lg font-semibold text-gray-900 whitespace-nowrap;
+  @apply text-lg font-semibold text-gray-500 whitespace-nowrap;
 }
 
 .calendar-quick-nav {
@@ -183,7 +205,7 @@ const handleYearChange = (event: Event) => {
 
 .calendar-month-select,
 .calendar-year-select {
-  @apply px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed;
+  @apply px-2 py-1 text-sm border border-gray-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-500 disabled:cursor-not-allowed;
 }
 
 .calendar-actions {
@@ -234,7 +256,7 @@ const handleYearChange = (event: Event) => {
 /* Р’С‹СЃРѕРєРёР№ РєРѕРЅС‚СЂР°СЃС‚ */
 @media (prefers-contrast: high) {
   .calendar-nav-button {
-    @apply border border-gray-600;
+    @apply border border-gray-500;
   }
   
   .calendar-today-button {

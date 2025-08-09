@@ -30,7 +30,12 @@
             stroke="currentColor" 
             viewBox="0 0 24 24"
           >
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
           </svg>
         </button>
       </div>
@@ -92,13 +97,13 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  modelValue: () => ({}),
-  errors: () => ({}),
-  collapsible: false,
-  collapsed: false,
-  required: false,
-  disabled: false,
-  readonly: false
+    modelValue: () => ({}),
+    errors: () => ({}),
+    collapsible: false,
+    collapsed: false,
+    required: false,
+    disabled: false,
+    readonly: false
 })
 
 const emit = defineEmits<{
@@ -113,49 +118,49 @@ const isCollapsed = ref(props.collapsed)
 
 // РњРµС‚РѕРґС‹
 const toggleCollapse = () => {
-  isCollapsed.value = !isCollapsed.value
-  emit('update:collapsed', isCollapsed.value)
-  emit('toggle', isCollapsed.value)
+    isCollapsed.value = !isCollapsed.value
+    emit('update:collapsed', isCollapsed.value)
+    emit('toggle', isCollapsed.value)
 }
 
 const updateField = (fieldName: string, value: any) => {
-  const newData = { ...props.modelValue, [fieldName]: value }
-  emit('update:modelValue', newData)
-  emit('field-change', fieldName, value)
+    const newData = { ...props.modelValue, [fieldName]: value }
+    emit('update:modelValue', newData)
+    emit('field-change', fieldName, value)
 }
 
 const getFieldError = (fieldName: string): string | undefined => {
-  const error = props.errors[fieldName]
-  if (Array.isArray(error)) {
-    return error[0]
-  }
-  return error
+    const error = props.errors[fieldName]
+    if (Array.isArray(error)) {
+        return error[0]
+    }
+    return error
 }
 
 // РђРЅРёРјР°С†РёРё
 const onEnter = (el: Element) => {
-  const htmlEl = el as HTMLElement
-  htmlEl.style.height = '0'
-  htmlEl.offsetHeight // force reflow
-  htmlEl.style.height = htmlEl.scrollHeight + 'px'
+    const htmlEl = el as HTMLElement
+    htmlEl.style.height = '0'
+    htmlEl.offsetHeight // force reflow
+    htmlEl.style.height = htmlEl.scrollHeight + 'px'
 }
 
 const onLeave = (el: Element) => {
-  const htmlEl = el as HTMLElement
-  htmlEl.style.height = htmlEl.scrollHeight + 'px'
-  htmlEl.offsetHeight // force reflow
-  htmlEl.style.height = '0'
+    const htmlEl = el as HTMLElement
+    htmlEl.style.height = htmlEl.scrollHeight + 'px'
+    htmlEl.offsetHeight // force reflow
+    htmlEl.style.height = '0'
 }
 
 // РћС‚СЃР»РµР¶РёРІР°РЅРёРµ РІРЅРµС€РЅРёС… РёР·РјРµРЅРµРЅРёР№ collapsed
 watch(() => props.collapsed, (newValue) => {
-  isCollapsed.value = newValue
+    isCollapsed.value = newValue
 })
 </script>
 
 <style scoped>
 .form-section {
-  @apply border border-gray-200 rounded-lg bg-white shadow-sm overflow-hidden;
+  @apply border border-gray-500 rounded-lg bg-white shadow-sm overflow-hidden;
 }
 
 .form-section--disabled {
@@ -163,11 +168,11 @@ watch(() => props.collapsed, (newValue) => {
 }
 
 .form-section--readonly {
-  @apply bg-gray-50;
+  @apply bg-gray-500;
 }
 
 .form-section-header {
-  @apply p-4 border-b border-gray-200 bg-gray-50;
+  @apply p-4 border-b border-gray-500 bg-gray-500;
 }
 
 .form-section--collapsed .form-section-header {
@@ -179,7 +184,7 @@ watch(() => props.collapsed, (newValue) => {
 }
 
 .form-section-title {
-  @apply text-base font-semibold text-gray-900 flex items-center gap-1;
+  @apply text-base font-semibold text-gray-500 flex items-center gap-1;
 }
 
 .form-section-required {
@@ -187,7 +192,7 @@ watch(() => props.collapsed, (newValue) => {
 }
 
 .form-section-toggle {
-  @apply p-1 text-gray-500 hover:text-gray-700 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1;
+  @apply p-1 text-gray-500 hover:text-gray-500 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1;
 }
 
 .form-section-toggle-icon {
@@ -195,7 +200,7 @@ watch(() => props.collapsed, (newValue) => {
 }
 
 .form-section-description {
-  @apply mt-2 text-sm text-gray-600 leading-relaxed;
+  @apply mt-2 text-sm text-gray-500 leading-relaxed;
 }
 
 .form-section-content {
@@ -207,7 +212,7 @@ watch(() => props.collapsed, (newValue) => {
 }
 
 .form-section-footer {
-  @apply px-4 pb-4 pt-0 border-t border-gray-100;
+  @apply px-4 pb-4 pt-0 border-t border-gray-500;
 }
 
 /* РђРЅРёРјР°С†РёРё */
@@ -243,11 +248,11 @@ watch(() => props.collapsed, (newValue) => {
 /* Р’С‹СЃРѕРєРёР№ РєРѕРЅС‚СЂР°СЃС‚ */
 @media (prefers-contrast: high) {
   .form-section {
-    @apply border-2 border-gray-800;
+    @apply border-2 border-gray-500;
   }
   
   .form-section-header {
-    @apply border-b-2 border-gray-800;
+    @apply border-b-2 border-gray-500;
   }
 }
 

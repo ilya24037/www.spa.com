@@ -28,7 +28,7 @@
               </button>
               <button
                 @click="reset"
-                class="bg-gray-100 text-gray-700 px-3 py-1 rounded text-xs hover:bg-gray-200 transition-colors"
+                class="bg-gray-500 text-gray-500 px-3 py-1 rounded text-xs hover:bg-gray-500 transition-colors"
               >
                 Сбросить
               </button>
@@ -52,6 +52,7 @@
  */
 
 import { ref, onErrorCaptured } from 'vue'
+import { logger } from '@/src/shared/utils/logger'
 
 interface Props {
   fallback?: string
@@ -59,8 +60,8 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  fallback: 'Произошла ошибка',
-  showDetails: false
+    fallback: 'Произошла ошибка',
+    showDetails: false
 })
 
 const emit = defineEmits<{
@@ -74,18 +75,18 @@ const retryKey = ref(0)
 
 // === ОБРАБОТКА ОШИБОК ===
 onErrorCaptured((error: Error) => {
-  hasError.value = true
-  errorMessage.value = props.showDetails 
-    ? error.message 
-    : props.fallback
+    hasError.value = true
+    errorMessage.value = props.showDetails 
+        ? error.message 
+        : props.fallback
   
-  // Emit error для внешней обработки
-  emit('error', error)
+    // Emit error для внешней обработки
+    emit('error', error)
   
-  console.error('[ErrorBoundary] Caught error:', error)
+    logger.error('[ErrorBoundary] Caught error:', error)
   
-  // Предотвращаем дальнейшее распространение ошибки
-  return false
+    // Предотвращаем дальнейшее распространение ошибки
+    return false
 })
 
 // === МЕТОДЫ ===
@@ -94,17 +95,17 @@ onErrorCaptured((error: Error) => {
  * Повтор - перерендер компонента
  */
 function retry() {
-  hasError.value = false
-  errorMessage.value = ''
-  retryKey.value++
+    hasError.value = false
+    errorMessage.value = ''
+    retryKey.value++
 }
 
 /**
  * Сброс состояния ошибки
  */
 function reset() {
-  hasError.value = false
-  errorMessage.value = ''
+    hasError.value = false
+    errorMessage.value = ''
 }
 </script>
 

@@ -17,9 +17,14 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class AdRepository extends BaseRepository
 {
-    public function __construct(Ad $model)
+    /**
+     * Указываем базовой реализации, с какой моделью работает репозиторий
+     *
+     * @return class-string<Ad>
+     */
+    protected function getModelClass(): string
     {
-        parent::__construct($model);
+        return Ad::class;
     }
     /**
      * Найти объявление по ID с загрузкой связей

@@ -8,6 +8,7 @@ use App\Domain\Booking\Handlers\BookingSearchHandler;
 use App\Domain\Booking\Handlers\BookingCalendarHandler;
 use App\Domain\Booking\Handlers\BookingAnalyticsHandler;
 use App\Domain\Common\Repositories\BaseRepository;
+use App\Domain\Booking\Contracts\BookingRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Carbon\Carbon;
@@ -18,7 +19,7 @@ use Carbon\Carbon;
  * 
  * @extends BaseRepository<Booking>
  */
-class BookingRepository extends BaseRepository
+class BookingRepository extends BaseRepository implements BookingRepositoryInterface
 {
     protected BookingCrudHandler $crudHandler;
     protected BookingSearchHandler $searchHandler;
@@ -254,5 +255,153 @@ class BookingRepository extends BaseRepository
     public function isBookingNumberUnique(string $bookingNumber, ?int $excludeId = null): bool
     {
         return $this->crudHandler->isBookingNumberUnique($bookingNumber, $excludeId);
+    }
+
+    // === МЕТОДЫ ИНТЕРФЕЙСА BookingRepositoryInterface ===
+
+    /**
+     * Получить все бронирования пользователя
+     */
+    public function getUserBookings(int $userId): Collection
+    {
+        return $this->model->where('client_id', $userId)
+            ->with(['master', 'service'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    /**
+     * Получить активные бронирования пользователя
+     */
+    public function getActiveUserBookings(int $userId): Collection
+    {
+        return $this->model->where('client_id', $userId)
+            ->whereIn('status', ['pending', 'confirmed', 'in_progress'])
+            ->with(['master', 'service'])
+            ->orderBy('start_time', 'asc')
+            ->get();
+    }
+
+    /**
+     * Получить завершенные бронирования пользователя
+     */
+    public function getCompletedUserBookings(int $userId): Collection
+    {
+        return $this->model->where('client_id', $userId)
+            ->where('status', 'completed')
+            ->with(['master', 'service'])
+            ->orderBy('end_time', 'desc')
+            ->get();
+    }
+
+    /**
+     * Получить бронирования мастера
+     */
+    public function getMasterBookings(int $masterId): Collection
+    {
+        return $this->model->where('master_profile_id', $masterId)
+            ->with(['client', 'service'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    /**
+     * Получить активные бронирования мастера
+     */
+    public function getActiveMasterBookings(int $masterId): Collection
+    {
+        return $this->model->where('master_profile_id', $masterId)
+            ->whereIn('status', ['pending', 'confirmed', 'in_progress'])
+            ->with(['client', 'service'])
+            ->orderBy('start_time', 'asc')
+            ->get();
+    }
+
+    /**
+     * Обновить статус бронирования
+     */
+    public function updateStatus(int $bookingId, string $status): bool
+    {
+        $booking = $this->findById($bookingId);
+        if (!$booking) {
+            return false;
+        }
+        return $booking->update(['status' => $status]);
+    }
+
+    /**
+     * Найти бронирование по ID (алиас для интерфейса)
+     */
+    public function findById(int $bookingId): ?Booking
+    {
+        return $this->find($bookingId);
+    }
+
+    /**
+     * Получить статистики бронирований пользователя
+     */
+    public function getUserBookingStats(int $userId): array
+    {
+        $bookings = $this->getUserBookings($userId);
+        
+        return [
+            'total' => $bookings->count(),
+            'completed' => $bookings->where('status', 'completed')->count(),
+            'cancelled' => $bookings->where('status', 'cancelled')->count(),
+            'upcoming' => $bookings->whereIn('status', ['pending', 'confirmed'])->count(),
+            'total_spent' => $bookings->where('status', 'completed')->sum('total_price'),
+        ];
+    }
+
+    /**
+     * Получить статистики бронирований мастера
+     */
+    public function getMasterBookingStats(int $masterId): array
+    {
+        $bookings = $this->getMasterBookings($masterId);
+        
+        return [
+            'total' => $bookings->count(),
+            'completed' => $bookings->where('status', 'completed')->count(),
+            'cancelled' => $bookings->where('status', 'cancelled')->count(),
+            'upcoming' => $bookings->whereIn('status', ['pending', 'confirmed'])->count(),
+            'total_earned' => $bookings->where('status', 'completed')->sum('total_price'),
+        ];
+    }
+
+    /**
+     * Проверить есть ли активные бронирования у пользователя
+     */
+    public function hasActiveBookings(int $userId): bool
+    {
+        return $this->model->where('client_id', $userId)
+            ->whereIn('status', ['pending', 'confirmed', 'in_progress'])
+            ->exists();
+    }
+
+    /**
+     * Получить последнее бронирование пользователя
+     */
+    public function getLastUserBooking(int $userId): ?Booking
+    {
+        return $this->model->where('client_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->first();
+    }
+
+    /**
+     * Удалить все бронирования пользователя
+     */
+    public function deleteUserBookings(int $userId): int
+    {
+        return $this->model->where('client_id', $userId)->delete();
+    }
+
+    /**
+     * Получить количество бронирований пользователя
+     */
+    public function getUserBookingsCount(int $userId): int
+    {
+        return $this->model->where('client_id', $userId)->count();
     }
 }

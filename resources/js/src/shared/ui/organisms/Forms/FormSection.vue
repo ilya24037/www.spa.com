@@ -31,39 +31,39 @@
 import { computed } from 'vue'
 
 const props = defineProps({
-  title: {
-    type: String,
-    default: ''
-  },
-  hint: {
-    type: String,
-    default: ''
-  },
-  required: {
-    type: Boolean,
-    default: false
-  },
-  errors: {
-    type: Object,
-    default: () => ({})
-  },
-  errorKeys: {
-    type: Array,
-    default: () => []
-  }
+    title: {
+        type: String,
+        default: ''
+    },
+    hint: {
+        type: String,
+        default: ''
+    },
+    required: {
+        type: Boolean,
+        default: false
+    },
+    errors: {
+        type: Object,
+        default: () => ({})
+    },
+    errorKeys: {
+        type: Array,
+        default: () => []
+    }
 })
 
 // Р’С‹С‡РёСЃР»СЏРµРј РѕС€РёР±РєРё РґР»СЏ РґР°РЅРЅРѕР№ СЃРµРєС†РёРё
 const sectionErrors = computed(() => {
-  if (!props.errorKeys.length) return []
+    if (!props.errorKeys.length) return []
   
-  const errors = []
-  props.errorKeys.forEach(key => {
-    if (props.errors[key]) {
-      errors.push(props.errors[key])
-    }
-  })
-  return errors
+    const errors = []
+    props.errorKeys.forEach(key => {
+        if (props.errors[key]) {
+            errors.push(props.errors[key])
+        }
+    })
+    return errors
 })
 
 const hasErrors = computed(() => sectionErrors.value.length > 0)

@@ -4,6 +4,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Domain\Master\Models\MasterProfile;
 use App\Application\Http\Controllers\Booking\BookingController;
+use App\Application\Http\Controllers\SearchController;
+use App\Application\Http\Controllers\MasterController;
+use App\Application\Http\Controllers\FavoriteController;
 
 Route::middleware('api')->group(function () {
     // Тестовый маршрут
@@ -49,9 +52,22 @@ Route::middleware('api')->group(function () {
     // Роуты для пользователей
     Route::middleware('auth:sanctum')->prefix('user')->group(function () {
         Route::get('/bookings', [BookingController::class, 'getUserBookings']); // Бронирования пользователя
+        
+        // =================== ИЗБРАННОЕ ===================
+        Route::prefix('favorites')->group(function () {
+            Route::get('/', [\App\Application\Http\Controllers\User\FavoritesController::class, 'index']); // Список избранного
+            Route::post('/', [\App\Application\Http\Controllers\User\FavoritesController::class, 'store']); // Добавить в избранное
+            Route::delete('/{favorite}', [\App\Application\Http\Controllers\User\FavoritesController::class, 'destroy']); // Удалить из избранного
+            Route::delete('/all', [\App\Application\Http\Controllers\User\FavoritesController::class, 'destroyAll']); // Очистить все
+            Route::delete('/type/{type}', [\App\Application\Http\Controllers\User\FavoritesController::class, 'destroyByType']); // Очистить по типу
+            Route::get('/export', [\App\Application\Http\Controllers\User\FavoritesController::class, 'export']); // Экспорт
+        });
     });
 
     // =================== МАСТЕРА (существующие) ===================
+    
+    // Поиск мастеров
+    Route::get('/masters/search', [SearchController::class, 'masters']);
     
     // Получить информацию о фотографиях мастера
     Route::get('/masters/{master}/photos', function ($masterId) {
@@ -107,5 +123,28 @@ Route::middleware('api')->group(function () {
                 'error' => 'Ошибка сервера: ' . $e->getMessage()
             ], 500);
         }
+    });
+
+    // Публичные API (ранее были в web.php под prefix('api'))
+    Route::get('/masters', [MasterController::class, 'apiIndex']);
+    Route::get('/masters/{master}', [MasterController::class, 'apiShow'])->whereNumber('master');
+    Route::get('/search/autocomplete', [SearchController::class, 'autocomplete']);
+    Route::get('/search/suggestions', [SearchController::class, 'suggestions']);
+    Route::get('/search/quick', [SearchController::class, 'quick']);
+    Route::get('/search/similar/{id}', [SearchController::class, 'similar']);
+    Route::post('/search/geo', [SearchController::class, 'geo']);
+    Route::get('/search/export', [SearchController::class, 'export']);
+
+    // Защищенные API
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/user', fn () => auth()->user()->load('masterProfile'));
+        // Исправлено: используем контроллер пользователя с существующим методом index
+        Route::get(
+            '/favorites',
+            [\App\Application\Http\Controllers\User\FavoritesController::class, 'index']
+        );
+        Route::post('/favorites/toggle', [FavoriteController::class, 'toggle']);
+        Route::get('/bookings/available-slots', [BookingController::class, 'availableSlots']);
+        Route::get('/search/statistics', [SearchController::class, 'statistics'])->middleware('can:viewSearchStatistics');
     });
 }); 

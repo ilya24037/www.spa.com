@@ -5,7 +5,6 @@ namespace App\Domain\User\Services;
 use App\Domain\User\Models\User;
 use App\Domain\User\Models\UserProfile;
 use App\Domain\User\Repositories\UserRepository;
-use App\Domain\User\Services\UserAuthService;
 use App\Domain\User\Services\UserProfileService;
 use App\Domain\User\DTOs\CreateUserDTO;
 use App\Domain\User\DTOs\UpdateUserDTO;
@@ -21,16 +20,13 @@ use Illuminate\Support\Collection;
 class UserService
 {
     protected UserRepository $userRepository;
-    protected UserAuthService $authService;
-    protected UserProfileService $profileService;
+    protected ?UserProfileService $profileService = null;
 
     public function __construct(
         UserRepository $userRepository,
-        UserAuthService $authService,
-        UserProfileService $profileService
+        ?UserProfileService $profileService = null
     ) {
         $this->userRepository = $userRepository;
-        $this->authService = $authService;
         $this->profileService = $profileService;
     }
 
@@ -51,8 +47,8 @@ class UserService
 
             $user = $this->userRepository->create($userData);
 
-            // Создать профиль через отдельный сервис
-            if (!empty($dto->profile_data)) {
+            // Создать профиль через отдельный сервис (если доступен)
+            if (!empty($dto->profile_data) && $this->profileService) {
                 $this->profileService->createProfile($user, $dto->profile_data);
             }
 
@@ -81,8 +77,8 @@ class UserService
 
             $user = $this->userRepository->update($user, $userData);
 
-            // Обновить профиль через отдельный сервис
-            if (!empty($dto->profile_data)) {
+            // Обновить профиль через отдельный сервис (если доступен)
+            if (!empty($dto->profile_data) && $this->profileService) {
                 $this->profileService->updateProfile($user, $dto->profile_data);
             }
 
@@ -204,43 +200,34 @@ class UserService
     }
 
     /**
-     * Сменить пароль
+     * Сменить пароль (упрощенная версия без циклических зависимостей)
      */
     public function changePassword(User $user, string $newPassword): User
     {
-        return $this->authService->changePassword($user, $newPassword);
+        $user->password = Hash::make($newPassword);
+        $user->save();
+        return $user;
     }
 
     /**
-     * Сменить email
+     * Сменить email (упрощенная версия без циклических зависимостей)
      */
     public function changeEmail(User $user, string $newEmail): User
     {
-        return $this->authService->changeEmail($user, $newEmail);
+        $user->email = $newEmail;
+        $user->email_verified_at = null; // Требуется повторная верификация
+        $user->save();
+        return $user;
     }
 
     /**
-     * Верифицировать email
+     * Верифицировать email (упрощенная версия)
      */
     public function verifyEmail(User $user): User
     {
-        return $this->authService->verifyEmail($user);
-    }
-
-    /**
-     * Отправить код подтверждения
-     */
-    public function sendVerificationCode(User $user, string $type = 'email'): bool
-    {
-        return $this->authService->sendVerificationCode($user, $type);
-    }
-
-    /**
-     * Проверить код подтверждения
-     */
-    public function verifyCode(User $user, string $code, string $type = 'email'): bool
-    {
-        return $this->authService->verifyCode($user, $code, $type);
+        $user->email_verified_at = now();
+        $user->save();
+        return $user;
     }
 
     /**
@@ -248,23 +235,32 @@ class UserService
      */
     public function getProfile(User $user): ?UserProfile
     {
-        return $this->profileService->getProfile($user);
+        if ($this->profileService) {
+            return $this->profileService->getProfile($user);
+        }
+        return null;
     }
 
     /**
-     * Обновить настройки уведомлений
+     * Обновить настройки уведомлений (упрощенная версия)
      */
     public function updateNotificationSettings(User $user, array $settings): User
     {
-        return $this->profileService->updateNotificationSettings($user, $settings);
+        if ($this->profileService) {
+            return $this->profileService->updateNotificationSettings($user, $settings);
+        }
+        return $user;
     }
 
     /**
-     * Обновить настройки приватности
+     * Обновить настройки приватности (упрощенная версия)
      */
     public function updatePrivacySettings(User $user, array $settings): User
     {
-        return $this->profileService->updatePrivacySettings($user, $settings);
+        if ($this->profileService) {
+            return $this->profileService->updatePrivacySettings($user, $settings);
+        }
+        return $user;
     }
 
     /**

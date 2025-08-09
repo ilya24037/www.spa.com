@@ -7,7 +7,7 @@
     <!-- Левая часть: информация и сортировка -->
     <div class="grid-controls__info">
       <div class="grid-controls__count">
-        <span class="text-sm text-gray-600">
+        <span class="text-sm text-gray-500">
           Показано {{ displayedCount }} из {{ totalCount }} {{ itemsLabel }}
         </span>
       </div>
@@ -15,42 +15,51 @@
       <div v-if="showSort" class="grid-controls__sort">
         <select 
           :value="currentSort"
+          class="text-sm border border-gray-500 rounded px-3 py-1 bg-white"
           @change="handleSortChange"
-          class="text-sm border border-gray-300 rounded px-3 py-1 bg-white"
         >
-          <option value="popular">По популярности</option>
-          <option value="price-asc">Цена: по возрастанию</option>
-          <option value="price-desc">Цена: по убыванию</option>
-          <option value="rating">По рейтингу</option>
-          <option value="date">По дате</option>
+          <option value="popular">
+            По популярности
+          </option>
+          <option value="price-asc">
+            Цена: по возрастанию
+          </option>
+          <option value="price-desc">
+            Цена: по убыванию
+          </option>
+          <option value="rating">
+            По рейтингу
+          </option>
+          <option value="date">
+            По дате
+          </option>
         </select>
       </div>
     </div>
     
     <!-- Правая часть: переключатели вида -->
     <div class="grid-controls__actions">
-      
       <!-- Переключатель вида: сетка/список -->
       <div v-if="showViewToggle" class="view-toggle">
         <button
           :class="['view-toggle__button', { 'view-toggle__button--active': currentView === 'grid' }]"
-          @click="handleViewChange('grid')"
           :aria-label="'Сеточный вид'"
           title="Сеточный вид"
+          @click="handleViewChange('grid')"
         >
           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+            <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
           </svg>
         </button>
         
         <button
           :class="['view-toggle__button', { 'view-toggle__button--active': currentView === 'list' }]"
-          @click="handleViewChange('list')"
           :aria-label="'Списочный вид'"
           title="Списочный вид"
+          @click="handleViewChange('list')"
         >
           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
+            <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
           </svg>
         </button>
       </div>
@@ -59,21 +68,21 @@
       <div v-if="showDensityToggle" class="density-toggle">
         <button
           :class="['density-toggle__button', { 'density-toggle__button--active': currentDensity === 'comfortable' }]"
-          @click="handleDensityChange('comfortable')"
           title="Комфортный вид"
+          @click="handleDensityChange('comfortable')"
         >
           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4z"/>
+            <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4z" />
           </svg>
         </button>
         
         <button
           :class="['density-toggle__button', { 'density-toggle__button--active': currentDensity === 'compact' }]"
-          @click="handleDensityChange('compact')"
           title="Компактный вид"
+          @click="handleDensityChange('compact')"
         >
           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M2 3a1 1 0 011-1h14a1 1 0 110 2H3a1 1 0 01-1-1zM2 7a1 1 0 011-1h14a1 1 0 110 2H3a1 1 0 01-1-1zM2 11a1 1 0 011-1h14a1 1 0 110 2H3a1 1 0 01-1-1zM2 15a1 1 0 011-1h14a1 1 0 110 2H3a1 1 0 01-1-1z"/>
+            <path d="M2 3a1 1 0 011-1h14a1 1 0 110 2H3a1 1 0 01-1-1zM2 7a1 1 0 011-1h14a1 1 0 110 2H3a1 1 0 01-1-1zM2 11a1 1 0 011-1h14a1 1 0 110 2H3a1 1 0 01-1-1zM2 15a1 1 0 011-1h14a1 1 0 110 2H3a1 1 0 01-1-1z" />
           </svg>
         </button>
       </div>
@@ -84,8 +93,8 @@
           Колонок:
           <select 
             :value="currentColumns"
+            class="text-sm border border-gray-500 rounded px-2 py-1 ml-2 bg-white"
             @change="handleColumnsChange"
-            class="text-sm border border-gray-300 rounded px-2 py-1 ml-2 bg-white"
           >
             <option value="auto">Авто</option>
             <option value="2">2</option>
@@ -96,7 +105,6 @@
           </select>
         </label>
       </div>
-      
     </div>
   </div>
 </template>
@@ -144,15 +152,15 @@ interface Emits {
 // === PROPS И EVENTS ===
 
 const props = withDefaults(defineProps<Props>(), {
-  itemsLabel: 'элементов',
-  currentView: 'grid',
-  currentDensity: 'comfortable',
-  currentSort: 'popular',
-  currentColumns: 'auto',
-  showViewToggle: true,
-  showDensityToggle: true,
-  showColumnControl: true,
-  showSort: true
+    itemsLabel: 'элементов',
+    currentView: 'grid',
+    currentDensity: 'comfortable',
+    currentSort: 'popular',
+    currentColumns: 'auto',
+    showViewToggle: true,
+    showDensityToggle: true,
+    showColumnControl: true,
+    showSort: true
 })
 
 const emit = defineEmits<Emits>()
@@ -168,36 +176,36 @@ const isDesktop = computed(() => screenWidth.value >= 1024)
 // === МЕТОДЫ ===
 
 function handleViewChange(view: GridView) {
-  emit('view-change', view)
+    emit('view-change', view)
 }
 
 function handleDensityChange(density: GridDensity) {
-  emit('density-change', density)
+    emit('density-change', density)
 }
 
 function handleSortChange(event: Event) {
-  const target = event.target as HTMLSelectElement
-  emit('sort-change', target.value as GridSort)
+    const target = event.target as HTMLSelectElement
+    emit('sort-change', target.value as GridSort)
 }
 
 function handleColumnsChange(event: Event) {
-  const target = event.target as HTMLSelectElement
-  const value = target.value === 'auto' ? 'auto' : parseInt(target.value)
-  emit('columns-change', value)
+    const target = event.target as HTMLSelectElement
+    const value = target.value === 'auto' ? 'auto' : parseInt(target.value)
+    emit('columns-change', value)
 }
 
 function handleResize() {
-  screenWidth.value = window.innerWidth
+    screenWidth.value = window.innerWidth
 }
 
 // === ЖИЗНЕННЫЙ ЦИКЛ ===
 
 onMounted(() => {
-  window.addEventListener('resize', handleResize)
+    window.addEventListener('resize', handleResize)
 })
 
 onUnmounted(() => {
-  window.removeEventListener('resize', handleResize)
+    window.removeEventListener('resize', handleResize)
 })
 </script>
 

@@ -37,23 +37,23 @@ const BASE_CLASSES = 'bg-white rounded-lg shadow-sm overflow-hidden'
 const CONTENT_PADDING = 'p-6'          // 24px - РІРµР·РґРµ РѕРґРёРЅР°РєРѕРІРѕ
 const HEADER_PADDING = 'px-6 py-4'     // 24px/16px - РІРµР·РґРµ РѕРґРёРЅР°РєРѕРІРѕ  
 const FOOTER_PADDING = 'px-6 py-4'     // 24px/16px - РІРµР·РґРµ РѕРґРёРЅР°РєРѕРІРѕ
-const TITLE_CLASSES = 'text-lg font-semibold text-gray-900'
+const TITLE_CLASSES = 'text-lg font-semibold text-gray-500'
 
 // РЈРїСЂРѕС‰РµРЅРЅС‹Рµ РїСЂРѕРїСЃС‹ (СѓР±СЂР°Р»Рё padding, noShadow, noRounded Рё С‚.Рґ.)
 const props = defineProps({
-  // HTML С‚РµРі
-  as: {
-    type: String,
-    default: 'div'
-  },
+    // HTML С‚РµРі
+    as: {
+        type: String,
+        default: 'div'
+    },
   
-  // Р—Р°РіРѕР»РѕРІРѕРє
-  title: String,
+    // Р—Р°РіРѕР»РѕРІРѕРє
+    title: String,
   
-  // РЈР±СЂР°С‚СЊ РѕС‚СЃС‚СѓРїС‹ Сѓ РєРѕРЅС‚РµРЅС‚Р° (РґР»СЏ РѕСЃРѕР±С‹С… СЃР»СѓС‡Р°РµРІ)
-  noPadding: Boolean,
+    // РЈР±СЂР°С‚СЊ РѕС‚СЃС‚СѓРїС‹ Сѓ РєРѕРЅС‚РµРЅС‚Р° (РґР»СЏ РѕСЃРѕР±С‹С… СЃР»СѓС‡Р°РµРІ)
+    noPadding: Boolean,
   
-  // РљР°СЃС‚РѕРјРЅС‹Рµ РєР»Р°СЃСЃС‹ (РґР»СЏ border, hover Рё С‚.Рґ.)
-  customClass: String
+    // РљР°СЃС‚РѕРјРЅС‹Рµ РєР»Р°СЃСЃС‹ (РґР»СЏ border, hover Рё С‚.Рґ.)
+    customClass: String
 })
 </script>

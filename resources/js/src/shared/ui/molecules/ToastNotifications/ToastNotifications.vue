@@ -1,46 +1,58 @@
 <!-- resources/js/Components/Common/ToastNotifications.vue -->
 <template>
-    <Teleport to="body">
-        <div class="fixed top-4 right-4 z-[100] space-y-2">
-            <TransitionGroup
-                name="toast"
-                tag="div"
-                enter-active-class="transition duration-300 ease-out"
-                enter-from-class="translate-x-full opacity-0"
-                enter-to-class="translate-x-0 opacity-100"
-                leave-active-class="transition duration-200 ease-in"
-                leave-from-class="translate-x-0 opacity-100"
-                leave-to-class="translate-x-full opacity-0"
+  <Teleport to="body">
+    <div class="fixed top-4 right-4 z-[100] space-y-2">
+      <TransitionGroup
+        name="toast"
+        tag="div"
+        enter-active-class="transition duration-300 ease-out"
+        enter-from-class="translate-x-full opacity-0"
+        enter-to-class="translate-x-0 opacity-100"
+        leave-active-class="transition duration-200 ease-in"
+        leave-from-class="translate-x-0 opacity-100"
+        leave-to-class="translate-x-full opacity-0"
+      >
+        <div
+          v-for="toast in toasts"
+          :key="toast.id"
+          :class="[
+            'min-w-[300px] max-w-[400px] p-4 rounded-lg shadow-lg flex items-start gap-3',
+            getToastClasses(toast.type)
+          ]"
+        >
+          <!-- Иконка -->
+          <div class="flex-shrink-0" v-html="getToastIcon(toast.type)" />
+                    
+          <!-- Текст -->
+          <div class="flex-1">
+            <p class="text-sm font-medium">
+              {{ toast.message }}
+            </p>
+          </div>
+                    
+          <!-- Кнопка закрытия -->
+          <button
+            class="flex-shrink-0 ml-2 text-current opacity-70 hover:opacity-100"
+            @click="removeToast(toast.id)"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
             >
-                <div
-                    v-for="toast in toasts"
-                    :key="toast.id"
-                    :class="[
-                        'min-w-[300px] max-w-[400px] p-4 rounded-lg shadow-lg flex items-start gap-3',
-                        getToastClasses(toast.type)
-                    ]"
-                >
-                    <!-- Иконка -->
-                    <div class="flex-shrink-0" v-html="getToastIcon(toast.type)"></div>
-                    
-                    <!-- Текст -->
-                    <div class="flex-1">
-                        <p class="text-sm font-medium">{{ toast.message }}</p>
-                    </div>
-                    
-                    <!-- Кнопка закрытия -->
-                    <button
-                        @click="removeToast(toast.id)"
-                        class="flex-shrink-0 ml-2 text-current opacity-70 hover:opacity-100"
-                    >
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-            </TransitionGroup>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
         </div>
-    </Teleport>
+      </TransitionGroup>
+    </div>
+  </Teleport>
 </template>
 
 <script setup>

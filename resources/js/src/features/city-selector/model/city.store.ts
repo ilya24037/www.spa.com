@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import axios from 'axios'
+import { logger } from '@/src/shared/utils/logger'
 
 // TypeScript интерфейсы
 export interface City {
@@ -126,7 +127,7 @@ export const useCityStore = defineStore('city-selector', () => {
         regions.value = response.data.regions
       }
     } catch (err) {
-      console.warn('Failed to load cities from API, using fallback:', err)
+      logger.warn('Failed to load cities from API, using fallback:', err)
       availableCities.value = defaultAllCities
       error.value = null // Не показываем ошибку пользователю, используем fallback
     } finally {
@@ -143,7 +144,7 @@ export const useCityStore = defineStore('city-selector', () => {
     try {
       localStorage.setItem('selectedCity', JSON.stringify(city))
     } catch (err) {
-      console.warn('Failed to save city to localStorage:', err)
+      logger.warn('Failed to save city to localStorage:', err)
     }
     
     // Отправить аналитику
@@ -154,7 +155,7 @@ export const useCityStore = defineStore('city-selector', () => {
       })
     } catch (err) {
       // Не критично, просто логируем
-      console.warn('Failed to send city change analytics:', err)
+      logger.warn('Failed to send city change analytics:', err)
     }
   }
   
@@ -168,7 +169,7 @@ export const useCityStore = defineStore('city-selector', () => {
         return
       }
     } catch (err) {
-      console.warn('Failed to load city from localStorage:', err)
+      logger.warn('Failed to load city from localStorage:', err)
     }
     
     // 2. Попробовать определить по IP
@@ -179,7 +180,7 @@ export const useCityStore = defineStore('city-selector', () => {
         return
       }
     } catch (err) {
-      console.warn('Failed to detect city by IP:', err)
+      logger.warn('Failed to detect city by IP:', err)
     }
     
     // 3. Fallback на Москву
@@ -218,7 +219,7 @@ export const useCityStore = defineStore('city-selector', () => {
       const response = await axios.get(`/api/cities/${id}/weather`)
       return response.data?.weather || null
     } catch (err) {
-      console.warn('Failed to load weather:', err)
+      logger.warn('Failed to load weather:', err)
       return null
     }
   }
@@ -231,7 +232,7 @@ export const useCityStore = defineStore('city-selector', () => {
       const response = await axios.get(`/api/cities/${id}/services`)
       return response.data?.services || []
     } catch (err) {
-      console.warn('Failed to load city services:', err)
+      logger.warn('Failed to load city services:', err)
       return []
     }
   }

@@ -18,7 +18,9 @@
       <!-- Р—Р°РіРѕР»РѕРІРѕРє РґРµСЃРєС‚РѕРї -->
       <div v-if="showDesktopHeader && ($slots.header || title)" :class="HEADER_CLASSES">
         <slot name="header">
-          <h2 v-if="title" :class="TITLE_CLASSES">{{ title }}</h2>
+          <h2 v-if="title" :class="TITLE_CLASSES">
+            {{ title }}
+          </h2>
         </slot>
       </div>
       
@@ -51,7 +53,9 @@
       <!-- Р—Р°РіРѕР»РѕРІРѕРє РґРµСЃРєС‚РѕРї -->
       <div v-if="showDesktopHeader && ($slots.header || title)" :class="HEADER_CLASSES">
         <slot name="header">
-          <h2 v-if="title" :class="TITLE_CLASSES">{{ title }}</h2>
+          <h2 v-if="title" :class="TITLE_CLASSES">
+            {{ title }}
+          </h2>
         </slot>
       </div>
       
@@ -87,14 +91,26 @@
         <div v-if="$slots.header || title" :class="mobileMode === 'bottom-sheet' ? MOBILE_BOTTOM_HEADER_CLASSES : MOBILE_HEADER_CLASSES">
           <div :class="MOBILE_HEADER_CONTENT_CLASSES">
             <slot name="header">
-              <h2 v-if="title" :class="TITLE_CLASSES">{{ title }}</h2>
+              <h2 v-if="title" :class="TITLE_CLASSES">
+                {{ title }}
+              </h2>
             </slot>
             <button 
-              @click="$emit('update:modelValue', false)"
               :class="MOBILE_CLOSE_BUTTON_CLASSES"
+              @click="$emit('update:modelValue', false)"
             >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -138,7 +154,7 @@ const MOBILE_PANEL_CLASSES = 'relative bg-white h-full shadow-xl overflow-y-auto
 const MOBILE_HEADER_CLASSES = 'px-6 py-4 border-b lg:hidden'
 const MOBILE_HEADER_CONTENT_CLASSES = 'flex items-center justify-between'
 const MOBILE_FOOTER_CLASSES = 'border-t p-6'
-const MOBILE_CLOSE_BUTTON_CLASSES = 'p-2 hover:bg-gray-100 rounded-lg'
+const MOBILE_CLOSE_BUTTON_CLASSES = 'p-2 hover:bg-gray-500 rounded-lg'
 
 // РњРѕР±РёР»СЊРЅС‹Рµ СЃС‚РёР»Рё - bottom sheet
 const MOBILE_BOTTOM_SHEET_CLASSES = 'fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-xl'
@@ -146,60 +162,60 @@ const MOBILE_BOTTOM_HEADER_CLASSES = 'px-6 py-4 border-b lg:hidden relative'
 
 // РЈРїСЂРѕС‰РµРЅРЅС‹Рµ РїСЂРѕРїСЃС‹
 const props = defineProps({
-  modelValue: {
-    type: Boolean,
-    default: false
-  },
+    modelValue: {
+        type: Boolean,
+        default: false
+    },
   
-  title: String,
+    title: String,
   
-  contentClass: {
-    type: String,
-    default: ''
-  },
+    contentClass: {
+        type: String,
+        default: ''
+    },
   
-  showDesktopHeader: {
-    type: Boolean,
-    default: false
-  },
+    showDesktopHeader: {
+        type: Boolean,
+        default: false
+    },
   
-  alwaysVisibleDesktop: {
-    type: Boolean,
-    default: false
-  },
+    alwaysVisibleDesktop: {
+        type: Boolean,
+        default: false
+    },
   
-  // РќРћР’Р«Р• РџР РћРџРЎР«
-  position: {
-    type: String,
-    default: 'left',
-    validator: (value) => ['left', 'right'].includes(value)
-  },
+    // РќРћР’Р«Р• РџР РћРџРЎР«
+    position: {
+        type: String,
+        default: 'left',
+        validator: (value) => ['left', 'right'].includes(value)
+    },
   
-  sticky: {
-    type: Boolean,
-    default: false
-  },
+    sticky: {
+        type: Boolean,
+        default: false
+    },
   
-  stickyTop: {
-    type: Number,
-    default: 64
-  },
+    stickyTop: {
+        type: Number,
+        default: 64
+    },
   
-  widthClass: {
-    type: String,
-    default: null // РµСЃР»Рё null, РёСЃРїРѕР»СЊР·СѓРµРј DESKTOP_WIDTH
-  },
+    widthClass: {
+        type: String,
+        default: null // РµСЃР»Рё null, РёСЃРїРѕР»СЊР·СѓРµРј DESKTOP_WIDTH
+    },
   
-  mobileMode: {
-    type: String,
-    default: 'overlay', // 'overlay' | 'bottom-sheet'
-    validator: (value) => ['overlay', 'bottom-sheet'].includes(value)
-  },
+    mobileMode: {
+        type: String,
+        default: 'overlay', // 'overlay' | 'bottom-sheet'
+        validator: (value) => ['overlay', 'bottom-sheet'].includes(value)
+    },
 
-  show: {
-    type: Boolean,
-    default: false
-  }
+    show: {
+        type: Boolean,
+        default: false
+    }
 })
 
 // РЎРѕР±С‹С‚РёСЏ
@@ -207,33 +223,33 @@ defineEmits(['update:modelValue'])
 
 // Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const desktopPositionClasses = computed(() => {
-  // Р’РђР–РќРћ: РќР• РґРѕР±Р°РІР»СЏРµРј order РєР»Р°СЃСЃС‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ!
-  // Р­С‚Рѕ РїРѕР·РІРѕР»РёС‚ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёРј РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏРј СЂР°Р±РѕС‚Р°С‚СЊ РєР°Рє СЂР°РЅСЊС€Рµ
-  if (props.position === 'right') {
-    return '' // РќРµ РґРѕР±Р°РІР»СЏРµРј order, РїРѕР·РёС†РёРѕРЅРёСЂРѕРІР°РЅРёРµ С‡РµСЂРµР· СЂРѕРґРёС‚РµР»СЊСЃРєРёР№ РєРѕРЅС‚РµР№РЅРµСЂ
-  }
-  return '' // РџРѕ СѓРјРѕР»С‡Р°РЅРёСЋ С‚РѕР¶Рµ Р±РµР· order
+    // Р’РђР–РќРћ: РќР• РґРѕР±Р°РІР»СЏРµРј order РєР»Р°СЃСЃС‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ!
+    // Р­С‚Рѕ РїРѕР·РІРѕР»РёС‚ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёРј РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏРј СЂР°Р±РѕС‚Р°С‚СЊ РєР°Рє СЂР°РЅСЊС€Рµ
+    if (props.position === 'right') {
+        return '' // РќРµ РґРѕР±Р°РІР»СЏРµРј order, РїРѕР·РёС†РёРѕРЅРёСЂРѕРІР°РЅРёРµ С‡РµСЂРµР· СЂРѕРґРёС‚РµР»СЊСЃРєРёР№ РєРѕРЅС‚РµР№РЅРµСЂ
+    }
+    return '' // РџРѕ СѓРјРѕР»С‡Р°РЅРёСЋ С‚РѕР¶Рµ Р±РµР· order
 })
 
 const stickyClass = computed(() => {
-  if (props.sticky) {
-    return `sticky top-[${props.stickyTop}px]`
-  }
-  return ''
+    if (props.sticky) {
+        return `sticky top-[${props.stickyTop}px]`
+    }
+    return ''
 })
 
 const mobileWidthClass = computed(() => {
-  if (props.mobileMode === 'bottom-sheet') {
-    return 'w-full'
-  }
-  return props.widthClass || MOBILE_WIDTH
+    if (props.mobileMode === 'bottom-sheet') {
+        return 'w-full'
+    }
+    return props.widthClass || MOBILE_WIDTH
 })
 
 // Р’С‹С‡РёСЃР»СЏРµРјРѕРµ СЃРІРѕР№СЃС‚РІРѕ РґР»СЏ РјРѕР±РёР»СЊРЅРѕР№ РїР°РЅРµР»Рё СЃ СѓС‡РµС‚РѕРј РїРѕР·РёС†РёРё
 const mobilePanelClasses = computed(() => {
-  if (props.position === 'right') {
-    return MOBILE_PANEL_CLASSES + ' right-0'
-  }
-  return MOBILE_PANEL_CLASSES + ' left-0'
+    if (props.position === 'right') {
+        return MOBILE_PANEL_CLASSES + ' right-0'
+    }
+    return MOBILE_PANEL_CLASSES + ' left-0'
 })
 </script>

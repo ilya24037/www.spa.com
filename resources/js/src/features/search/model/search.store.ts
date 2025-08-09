@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import axios from 'axios'
+import { logger } from '@/src/shared/utils/logger'
 
 // TypeScript интерфейсы
 export interface SearchSuggestion {
@@ -80,7 +81,7 @@ export const useSearchStore = defineStore('search', () => {
         )
         .slice(0, 6)
         
-      console.warn('Failed to load search suggestions from API, using fallback:', err)
+      logger.warn('Failed to load search suggestions from API, using fallback:', err)
     } finally {
       isLoading.value = false
     }
@@ -108,7 +109,7 @@ export const useSearchStore = defineStore('search', () => {
     try {
       localStorage.setItem('search_history', JSON.stringify(searchHistory.value))
     } catch (err) {
-      console.warn('Failed to save search history:', err)
+      logger.warn('Failed to save search history:', err)
     }
   }
   
@@ -117,7 +118,7 @@ export const useSearchStore = defineStore('search', () => {
     try {
       localStorage.removeItem('search_history')
     } catch (err) {
-      console.warn('Failed to clear search history:', err)
+      logger.warn('Failed to clear search history:', err)
     }
   }
   
@@ -128,7 +129,7 @@ export const useSearchStore = defineStore('search', () => {
       try {
         localStorage.setItem('search_history', JSON.stringify(searchHistory.value))
       } catch (err) {
-        console.warn('Failed to update search history:', err)
+        logger.warn('Failed to update search history:', err)
       }
     }
   }
@@ -140,7 +141,7 @@ export const useSearchStore = defineStore('search', () => {
         searchHistory.value = JSON.parse(saved)
       }
     } catch (err) {
-      console.warn('Failed to load search history:', err)
+      logger.warn('Failed to load search history:', err)
       searchHistory.value = []
     }
   }

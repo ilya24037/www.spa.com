@@ -30,6 +30,14 @@ class UnifiedMediaRepository extends BaseRepository
     }
 
     /**
+     * Получить класс модели
+     */
+    protected function getModelClass(): string
+    {
+        return Media::class;
+    }
+
+    /**
      * Получить все медиафайлы мастера (унифицированный метод)
      */
     public function findByMasterProfile(int $masterProfileId, ?MediaType $type = null): Collection

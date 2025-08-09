@@ -9,8 +9,8 @@
     >
       <div 
         class="custom-select-trigger"
-        @click="toggleDropdown"
         :tabindex="disabled ? -1 : 0"
+        @click="toggleDropdown"
         @keydown.enter="toggleDropdown"
         @keydown.space="toggleDropdown"
         @keydown.escape="isOpen = false"
@@ -57,8 +57,12 @@
       </Transition>
     </div>
     
-    <div v-if="error" class="select-error">{{ error }}</div>
-    <div v-if="hint" class="select-hint">{{ hint }}</div>
+    <div v-if="error" class="select-error">
+      {{ error }}
+    </div>
+    <div v-if="hint" class="select-hint">
+      {{ hint }}
+    </div>
   </div>
 </template>
 
@@ -67,39 +71,39 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 // Props
 const props = defineProps({
-  modelValue: {
-    type: [String, Number, Boolean],
-    default: null
-  },
-  options: {
-    type: Array,
-    required: true,
-    validator: (options) => {
-      return options.every(option => 
-        option && typeof option === 'object' && 'value' in option && 'label' in option
-      )
+    modelValue: {
+        type: [String, Number, Boolean],
+        default: null
+    },
+    options: {
+        type: Array,
+        required: true,
+        validator: (options) => {
+            return options.every(option => 
+                option && typeof option === 'object' && 'value' in option && 'label' in option
+            )
+        }
+    },
+    placeholder: {
+        type: String,
+        default: 'Р’С‹Р±РµСЂРёС‚Рµ...'
+    },
+    label: {
+        type: String,
+        default: ''
+    },
+    disabled: {
+        type: Boolean,
+        default: false
+    },
+    error: {
+        type: String,
+        default: ''
+    },
+    hint: {
+        type: String,
+        default: ''
     }
-  },
-  placeholder: {
-    type: String,
-    default: 'Р’С‹Р±РµСЂРёС‚Рµ...'
-  },
-  label: {
-    type: String,
-    default: ''
-  },
-  disabled: {
-    type: Boolean,
-    default: false
-  },
-  error: {
-    type: String,
-    default: ''
-  },
-  hint: {
-    type: String,
-    default: ''
-  }
 })
 
 // Events
@@ -110,34 +114,34 @@ const isOpen = ref(false)
 
 // Computed
 const selectedOption = computed(() => {
-  return props.options.find(option => option.value === props.modelValue)
+    return props.options.find(option => option.value === props.modelValue)
 })
 
 // Methods
 const toggleDropdown = () => {
-  if (props.disabled) return
-  isOpen.value = !isOpen.value
+    if (props.disabled) return
+    isOpen.value = !isOpen.value
 }
 
 const selectOption = (option) => {
-  emit('update:modelValue', option.value)
-  emit('change', option)
-  isOpen.value = false
+    emit('update:modelValue', option.value)
+    emit('change', option)
+    isOpen.value = false
 }
 
 const handleClickOutside = (event) => {
-  if (!event.target.closest('.custom-select-wrapper')) {
-    isOpen.value = false
-  }
+    if (!event.target.closest('.custom-select-wrapper')) {
+        isOpen.value = false
+    }
 }
 
 // Lifecycle
 onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
+    document.addEventListener('click', handleClickOutside)
 })
 
 onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
+    document.removeEventListener('click', handleClickOutside)
 })
 </script>
 

@@ -10,6 +10,7 @@ use App\Domain\Master\Services\MasterModerationService;
 use App\Domain\Master\Services\MasterSearchService;
 use App\Domain\Master\Services\MasterFullProfileService;
 use App\Domain\Master\Services\MasterHelperService;
+use App\Domain\Master\Contracts\MasterServiceInterface;
 use App\Infrastructure\Notification\NotificationService;
 use App\Domain\Master\DTOs\CreateMasterDTO;
 use App\Domain\Master\DTOs\UpdateMasterDTO;
@@ -19,7 +20,7 @@ use Illuminate\Support\Facades\DB;
 /**
  * Сервис мастеров - координатор
  */
-class MasterService
+class MasterService implements MasterServiceInterface
 {
     public function __construct(
         private MasterRepository $repository,

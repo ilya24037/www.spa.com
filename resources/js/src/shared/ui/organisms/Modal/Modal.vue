@@ -27,7 +27,8 @@
             leave-to-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
             <div
-              v-show="show" ref="modalRef"
+              v-show="show"
+              ref="modalRef"
               class="modal-content"
               :class="[maxWidthClass, customClass]"
               role="dialog"
@@ -54,8 +55,18 @@
                   :aria-label="closeLabel"
                   @click="close"
                 >
-                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
@@ -67,7 +78,9 @@
                 class="modal-body"
               >
                 <slot>
-                  <p v-if="message" class="text-gray-600">{{ message }}</p>
+                  <p v-if="message" class="text-gray-500">
+                    {{ message }}
+                  </p>
                 </slot>
               </div>
 
@@ -140,19 +153,19 @@ export interface ModalProps {
 
 // Props
 const props = withDefaults(defineProps<ModalProps>(), {
-  show: false,
-  maxWidth: '2xl',
-  showFooter: false,
-  showConfirmButton: true,
-  showCancelButton: true,
-  confirmText: 'РџРѕРґС‚РІРµСЂРґРёС‚СЊ',
-  cancelText: 'РћС‚РјРµРЅР°',
-  confirmVariant: 'primary',
-  closeable: true,
-  closeOnEscape: true,
-  closeOnBackdrop: true,
-  loading: false,
-  closeLabel: 'Р—Р°РєСЂС‹С‚СЊ РѕРєРЅРѕ'
+    show: false,
+    maxWidth: '2xl',
+    showFooter: false,
+    showConfirmButton: true,
+    showCancelButton: true,
+    confirmText: 'РџРѕРґС‚РІРµСЂРґРёС‚СЊ',
+    cancelText: 'РћС‚РјРµРЅР°',
+    confirmVariant: 'primary',
+    closeable: true,
+    closeOnEscape: true,
+    closeOnBackdrop: true,
+    loading: false,
+    closeLabel: 'Р—Р°РєСЂС‹С‚СЊ РѕРєРЅРѕ'
 })
 
 // Emits
@@ -173,124 +186,124 @@ const descriptionId = useId('modal-description')
 
 // Computed
 const maxWidthClass = computed(() => {
-  const widths = {
-    'sm': 'sm:max-w-sm',
-    'md': 'sm:max-w-md',
-    'lg': 'sm:max-w-lg',
-    'xl': 'sm:max-w-xl',
-    '2xl': 'sm:max-w-2xl',
-    '3xl': 'sm:max-w-3xl',
-    '4xl': 'sm:max-w-4xl',
-    '5xl': 'sm:max-w-5xl',
-    'full': 'sm:max-w-full'
-  }
-  return widths[props.maxWidth] || widths['2xl']
+    const widths = {
+        'sm': 'sm:max-w-sm',
+        'md': 'sm:max-w-md',
+        'lg': 'sm:max-w-lg',
+        'xl': 'sm:max-w-xl',
+        '2xl': 'sm:max-w-2xl',
+        '3xl': 'sm:max-w-3xl',
+        '4xl': 'sm:max-w-4xl',
+        '5xl': 'sm:max-w-5xl',
+        'full': 'sm:max-w-full'
+    }
+    return widths[props.maxWidth] || widths['2xl']
 })
 
 // РњРµС‚РѕРґС‹
 const close = () => {
-  emit('update:show', false)
-  emit('close')
+    emit('update:show', false)
+    emit('close')
 }
 
 const confirm = () => {
-  if (!props.loading) {
-    emit('confirm')
-  }
+    if (!props.loading) {
+        emit('confirm')
+    }
 }
 
 const cancel = () => {
-  emit('cancel')
-  close()
+    emit('cancel')
+    close()
 }
 
 const handleBackdropClick = () => {
-  if (props.closeOnBackdrop && props.closeable) {
-    emit('backdrop-click')
-    close()
-  }
+    if (props.closeOnBackdrop && props.closeable) {
+        emit('backdrop-click')
+        close()
+    }
 }
 
 // РћР±СЂР°Р±РѕС‚РєР° ESC
 const handleEscape = (event: KeyboardEvent) => {
-  if (event.key === 'Escape' && props.show && props.closeOnEscape && props.closeable) {
-    close()
-  }
+    if (event.key === 'Escape' && props.show && props.closeOnEscape && props.closeable) {
+        close()
+    }
 }
 
 // Focus trap
 const trapFocus = () => {
-  if (!modalRef.value) return
+    if (!modalRef.value) return
   
-  const focusableElements = modalRef.value.querySelectorAll(
-    'button, [h], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-  )
+    const focusableElements = modalRef.value.querySelectorAll(
+        'button, [h], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    )
   
-  const firstFocusable = focusableElements[0] as HTMLElement
-  const lastFocusable = focusableElements[focusableElements.length - 1] as HTMLElement
+    const firstFocusable = focusableElements[0] as HTMLElement
+    const lastFocusable = focusableElements[focusableElements.length - 1] as HTMLElement
   
-  const handleTab = (e: KeyboardEvent) => {
-    if (e.key !== 'Tab') return
+    const handleTab = (e: KeyboardEvent) => {
+        if (e.key !== 'Tab') return
     
-    if (e.shiftKey) {
-      if (document.activeElement === firstFocusable) {
-        e.preventDefault()
-        lastFocusable?.focus()
-      }
-    } else {
-      if (document.activeElement === lastFocusable) {
-        e.preventDefault()
-        firstFocusable?.focus()
-      }
+        if (e.shiftKey) {
+            if (document.activeElement === firstFocusable) {
+                e.preventDefault()
+                lastFocusable?.focus()
+            }
+        } else {
+            if (document.activeElement === lastFocusable) {
+                e.preventDefault()
+                firstFocusable?.focus()
+            }
+        }
     }
-  }
   
-  modalRef.value.addEventListener('keydown', handleTab)
+    modalRef.value.addEventListener('keydown', handleTab)
   
-  // Focus РїРµСЂРІС‹Р№ СЌР»РµРјРµРЅС‚
-  nextTick(() => {
-    firstFocusable?.focus()
-  })
+    // Focus РїРµСЂРІС‹Р№ СЌР»РµРјРµРЅС‚
+    nextTick(() => {
+        firstFocusable?.focus()
+    })
   
-  return () => {
-    modalRef.value?.removeEventListener('keydown', handleTab)
-  }
+    return () => {
+        modalRef.value?.removeEventListener('keydown', handleTab)
+    }
 }
 
 // Р‘Р»РѕРєРёСЂРѕРІРєР° СЃРєСЂРѕР»Р»Р° body
 const lockBodyScroll = () => {
-  const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
-  document.body.style.paddingRight = `${scrollbarWidth}px`
-  document.body.style.overflow = 'hidden'
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
+    document.body.style.paddingRight = `${scrollbarWidth}px`
+    document.body.style.overflow = 'hidden'
   
-  return () => {
-    document.body.style.paddingRight = ''
-    document.body.style.overflow = ''
-  }
+    return () => {
+        document.body.style.paddingRight = ''
+        document.body.style.overflow = ''
+    }
 }
 
 // Watch РґР»СЏ show
 watch(() => props.show, async (newValue) => {
-  if (newValue) {
-    await nextTick()
-    const unlockScroll = lockBodyScroll()
-    const removeFocusTrap = trapFocus()
+    if (newValue) {
+        await nextTick()
+        const unlockScroll = lockBodyScroll()
+        const removeFocusTrap = trapFocus()
     
-    // РЎРѕС…СЂР°РЅСЏРµРј С„СѓРЅРєС†РёРё РѕС‡РёСЃС‚РєРё
-    onUnmounted(() => {
-      unlockScroll()
-      removeFocusTrap?.()
-    })
-  }
+        // РЎРѕС…СЂР°РЅСЏРµРј С„СѓРЅРєС†РёРё РѕС‡РёСЃС‚РєРё
+        onUnmounted(() => {
+            unlockScroll()
+            removeFocusTrap?.()
+        })
+    }
 })
 
 // Lifecycle
 onMounted(() => {
-  document.addEventListener('keydown', handleEscape)
+    document.addEventListener('keydown', handleEscape)
 })
 
 onUnmounted(() => {
-  document.removeEventListener('keydown', handleEscape)
+    document.removeEventListener('keydown', handleEscape)
 })
 </script>
 
@@ -316,7 +329,7 @@ onUnmounted(() => {
 /* Header */
 .modal-header {
   @apply flex items-start justify-between;
-  @apply px-6 py-4 border-b border-gray-200;
+  @apply px-6 py-4 border-b border-gray-500;
 }
 
 .modal-header-content {
@@ -324,13 +337,13 @@ onUnmounted(() => {
 }
 
 .modal-title {
-  @apply text-lg font-semibold text-gray-900;
+  @apply text-lg font-semibold text-gray-500;
 }
 
 .modal-close {
   @apply ml-3 p-1 rounded-md;
-  @apply text-gray-400 hover:text-gray-500;
-  @apply hover:bg-gray-100 focus:bg-gray-100;
+  @apply text-gray-500 hover:text-gray-500;
+  @apply hover:bg-gray-500 focus:bg-gray-500;
   @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500;
   @apply transition-colors duration-200;
 }
@@ -343,8 +356,8 @@ onUnmounted(() => {
 
 /* Footer */
 .modal-footer {
-  @apply px-6 py-4 border-t border-gray-200;
-  @apply bg-gray-50 rounded-b-lg;
+  @apply px-6 py-4 border-t border-gray-500;
+  @apply bg-gray-500 rounded-b-lg;
 }
 
 .modal-footer-buttons {

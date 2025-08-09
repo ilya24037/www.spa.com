@@ -11,35 +11,47 @@
       @click.stop
     >
       <!-- Заголовок с кнопкой закрытия -->
-      <div class="flex items-center justify-between p-6 border-b border-gray-200">
-        <h2 class="text-2xl font-bold text-gray-900">Вход</h2>
+      <div class="flex items-center justify-between p-6 border-b border-gray-500">
+        <h2 class="text-2xl font-bold text-gray-500">
+          Вход
+        </h2>
         <button 
+          class="text-gray-500 hover:text-gray-500 transition-colors"
           @click="closeModal"
-          class="text-gray-400 hover:text-gray-600 transition-colors"
         >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
 
       <!-- Форма авторизации -->
       <div class="p-6">
-        <form @submit.prevent="submit" class="space-y-6">
+        <form class="space-y-6" @submit.prevent="submit">
           <!-- Email -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
+            <label class="block text-sm font-medium text-gray-500 mb-2">
               Email
             </label>
             <input
-              type="email"
               v-model="form.email"
+              type="email"
               required
               autocomplete="username"
               placeholder="Введите ваш email"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              class="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               :class="{ 'border-red-500': form.errors.email }"
-            />
+            >
             <p v-if="form.errors.email" class="mt-1 text-sm text-red-600">
               {{ form.errors.email }}
             </p>
@@ -47,18 +59,18 @@
 
           <!-- Пароль -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
+            <label class="block text-sm font-medium text-gray-500 mb-2">
               Пароль
             </label>
             <input
-              type="password"
               v-model="form.password"
+              type="password"
               required
               autocomplete="current-password"
               placeholder="Введите пароль"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              class="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               :class="{ 'border-red-500': form.errors.password }"
-            />
+            >
             <p v-if="form.errors.password" class="mt-1 text-sm text-red-600">
               {{ form.errors.password }}
             </p>
@@ -68,11 +80,11 @@
           <div class="flex items-center justify-between">
             <label class="flex items-center">
               <input
-                type="checkbox"
                 v-model="form.remember"
-                class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <span class="ml-2 text-sm text-gray-600">Запомнить пароль</span>
+                type="checkbox"
+                class="w-4 h-4 text-blue-600 border-gray-500 rounded focus:ring-blue-500"
+              >
+              <span class="ml-2 text-sm text-gray-500">Запомнить пароль</span>
             </label>
             <Link
               v-if="route().has('password.request')"
@@ -96,7 +108,7 @@
 
         <!-- Ссылка на регистрацию -->
         <div class="mt-6 text-center">
-          <p class="text-sm text-gray-600">
+          <p class="text-sm text-gray-500">
             Нет аккаунта? 
             <Link 
               :href="route('register')" 
@@ -128,7 +140,7 @@ interface Props {
 }
 
 const _props = withDefaults(defineProps<Props>(), {
-  show: false
+    show: false
 })
 
 interface Emits {
@@ -144,22 +156,22 @@ interface LoginForm {
 }
 
 const form = useForm<LoginForm>({
-  email: '',
-  password: '',
-  remember: false,
+    email: '',
+    password: '',
+    remember: false,
 })
 
 const submit = (): void => {
-  form.post(route('login'), {
-    onFinish: () => form.reset('password'),
-    onSuccess: () => {
-      closeModal()
-    }
-  })
+    form.post(route('login'), {
+        onFinish: () => form.reset('password'),
+        onSuccess: () => {
+            closeModal()
+        }
+    })
 }
 
 const closeModal = (): void => {
-  emit('close')
+    emit('close')
 }
 </script>
 

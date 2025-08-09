@@ -95,7 +95,7 @@ export const useMasterStore = defineStore('master', () => {
   })
   
   // РћС‚Р·С‹РІС‹ С‚РµРєСѓС‰РµРіРѕ РјР°СЃС‚РµСЂР°
-  const currentMasterReviews = ref([])
+  const currentMasterReviews = ref<any[]>([])
   
   // === Р’Р«Р§РРЎР›РЇР•РњР«Р• РЎР’РћР™РЎРўР’Рђ ===
   
@@ -131,7 +131,7 @@ export const useMasterStore = defineStore('master', () => {
     
     // Р¤РёР»СЊС‚СЂ РїРѕ СЂРµР№С‚РёРЅРіСѓ
     if (filters.rating) {
-      result = result.filter(master => (master?.rating || 0) >= filters.rating)
+      result = result.filter(master => (master?.rating || 0) >= (filters.rating || 0))
     }
     
     // Р¤РёР»СЊС‚СЂ РїРѕ РІРµСЂРёС„РёРєР°С†РёРё
@@ -168,7 +168,7 @@ export const useMasterStore = defineStore('master', () => {
    */
   const popularMasters = computed(() => 
     masters.value
-      .filter(master => master?.rating >= 4.5)
+      .filter(master => (master?.rating || 0) >= 4.5)
       .sort((a, b) => (b?.reviews_count || 0) - (a?.reviews_count || 0))
   )
   
@@ -416,10 +416,11 @@ export const useMasterStore = defineStore('master', () => {
    */
   const clearFilters = () => {
     Object.keys(filters).forEach(key => {
-      if (typeof filters[key] === 'boolean') {
-        filters[key] = false
-      } else {
-        filters[key] = null
+      const filterKey = key as keyof MasterFilters
+      if (typeof filters[filterKey] === 'boolean') {
+        (filters[filterKey] as boolean) = false
+      } else if (filterKey !== 'sortBy' && filterKey !== 'sortOrder') {
+        (filters[filterKey] as any) = null
       }
     })
     filters.sortBy = 'rating'

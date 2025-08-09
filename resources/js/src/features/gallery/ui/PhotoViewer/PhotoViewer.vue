@@ -4,46 +4,76 @@
     <div 
       v-if="isOpen" 
       class="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center"
+      tabindex="0"
       @click="close"
       @keyup.esc="close"
-      tabindex="0"
     >
       <!-- Overlay -->
-      <div class="absolute inset-0 bg-black opacity-90"></div>
+      <div class="absolute inset-0 bg-black opacity-90" />
       
       <!-- Viewer Content -->
       <div class="relative z-10 w-full h-full flex items-center justify-center p-4">
         <!-- Close Button -->
         <button
-          @click="close"
-          class="absolute top-4 right-4 text-white hover:text-gray-300 z-20"
+          class="absolute top-4 right-4 text-white hover:text-gray-500 z-20"
           aria-label="Закрыть просмотр"
+          @click="close"
         >
-          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          <svg
+            class="w-8 h-8"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
 
         <!-- Navigation Arrows -->
         <button
           v-if="hasPrev"
-          @click.stop="prevImage"
-          class="absolute left-4 text-white hover:text-gray-300 z-20"
+          class="absolute left-4 text-white hover:text-gray-500 z-20"
           aria-label="Предыдущее изображение"
+          @click.stop="prevImage"
         >
-          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          <svg
+            class="w-8 h-8"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 19l-7-7 7-7"
+            />
           </svg>
         </button>
 
         <button
           v-if="hasNext"
-          @click.stop="nextImage"
-          class="absolute right-4 text-white hover:text-gray-300 z-20"
+          class="absolute right-4 text-white hover:text-gray-500 z-20"
           aria-label="Следующее изображение"
+          @click.stop="nextImage"
         >
-          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          <svg
+            class="w-8 h-8"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 5l7 7-7 7"
+            />
           </svg>
         </button>
 
@@ -89,39 +119,39 @@ const hasPrev = computed(() => galleryStore.hasPrev)
 
 // Methods
 const close = () => {
-  galleryStore.closeViewer()
+    galleryStore.closeViewer()
 }
 
 const nextImage = () => {
-  galleryStore.nextImage()
+    galleryStore.nextImage()
 }
 
 const prevImage = () => {
-  galleryStore.prevImage()
+    galleryStore.prevImage()
 }
 
 // Keyboard navigation
 const handleKeydown = (event: KeyboardEvent) => {
-  if (!isOpen.value) return
+    if (!isOpen.value) return
   
-  switch (event.key) {
+    switch (event.key) {
     case 'Escape':
-      close()
-      break
+        close()
+        break
     case 'ArrowLeft':
-      prevImage()
-      break
+        prevImage()
+        break
     case 'ArrowRight':
-      nextImage()
-      break
-  }
+        nextImage()
+        break
+    }
 }
 
 onMounted(() => {
-  document.addEventListener('keydown', handleKeydown)
+    document.addEventListener('keydown', handleKeydown)
 })
 
 onUnmounted(() => {
-  document.removeEventListener('keydown', handleKeydown)
+    document.removeEventListener('keydown', handleKeydown)
 })
 </script>

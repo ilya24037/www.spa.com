@@ -45,53 +45,53 @@
 import { watchEffect } from 'vue'
 
 const props = defineProps({
-  modelValue: {
-    type: Array,
-    default: () => []
-  },
-  options: {
-    type: Array,
-    required: true
-  },
-  disabled: {
-    type: Boolean,
-    default: false
-  },
-  direction: {
-    type: String,
-    default: 'column',
-    validator: (value) => ['column', 'row'].includes(value)
-  }
+    modelValue: {
+        type: Array,
+        default: () => []
+    },
+    options: {
+        type: Array,
+        required: true
+    },
+    disabled: {
+        type: Boolean,
+        default: false
+    },
+    direction: {
+        type: String,
+        default: 'column',
+        validator: (value) => ['column', 'row'].includes(value)
+    }
 })
 
 const emit = defineEmits(['update:modelValue'])
 
 // РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РјР°СЃСЃРёРІР° (РёР· ClientsSection)
 const initializeValue = () => {
-  if (!Array.isArray(props.modelValue)) {
-    emit('update:modelValue', [])
-  }
+    if (!Array.isArray(props.modelValue)) {
+        emit('update:modelValue', [])
+    }
 }
 
 // РџСЂРѕРІРµСЂСЏРµРј РІС‹Р±СЂР°РЅ Р»Рё СЌР»РµРјРµРЅС‚
 const isSelected = (value) => {
-  return props.modelValue.includes(value)
+    return props.modelValue.includes(value)
 }
 
 // РџРµСЂРµРєР»СЋС‡Р°РµРј РІС‹Р±РѕСЂ СЌР»РµРјРµРЅС‚Р° (РёР· ClientsSection)
 const toggleOption = (value) => {
-  if (props.disabled) return
+    if (props.disabled) return
   
-  const currentValue = [...props.modelValue]
+    const currentValue = [...props.modelValue]
   
-  if (!currentValue.includes(value)) {
-    currentValue.push(value)
-  } else {
-    const index = currentValue.indexOf(value)
-    currentValue.splice(index, 1)
-  }
+    if (!currentValue.includes(value)) {
+        currentValue.push(value)
+    } else {
+        const index = currentValue.indexOf(value)
+        currentValue.splice(index, 1)
+    }
   
-  emit('update:modelValue', currentValue)
+    emit('update:modelValue', currentValue)
 }
 
 // РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ С‚РѕР»СЊРєРѕ РѕРґРёРЅ СЂР°Р·

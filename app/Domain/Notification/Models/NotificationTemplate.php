@@ -125,111 +125,53 @@ class NotificationTemplate extends Model
         return in_array($variable, array_keys($this->variables ?? []));
     }
 
+    /**
+     * @deprecated Используйте TemplateRenderingService::getRequiredVariables()
+     */
     public function getRequiredVariables(): array
     {
-        return array_keys(array_filter($this->variables ?? [], function($var) {
-            return $var['required'] ?? false;
-        }));
+        $renderingService = app(\App\Domain\Notification\Services\TemplateRenderingService::class);
+        return $renderingService->getRequiredVariables($this);
     }
 
+    /**
+     * @deprecated Используйте TemplateRenderingService::getOptionalVariables()
+     */
     public function getOptionalVariables(): array
     {
-        return array_keys(array_filter($this->variables ?? [], function($var) {
-            return !($var['required'] ?? false);
-        }));
+        $renderingService = app(\App\Domain\Notification\Services\TemplateRenderingService::class);
+        return $renderingService->getOptionalVariables($this);
     }
 
     /**
      * Обработка шаблона
+     * @deprecated Используйте TemplateRenderingService::render()
      */
     public function render(array $data = []): array
     {
-        // Проверить обязательные переменные
-        $required = $this->getRequiredVariables();
-        $missing = array_diff($required, array_keys($data));
-        
-        if (!empty($missing)) {
-            throw new \InvalidArgumentException(
-                "Missing required variables: " . implode(', ', $missing)
-            );
-        }
-
-        // Подготовить переменные с значениями по умолчанию
-        $variables = [];
-        foreach ($this->variables ?? [] as $key => $config) {
-            $variables[$key] = $data[$key] ?? $config['default'] ?? '';
-        }
-
-        return [
-            'title' => $this->renderString($this->title, $variables),
-            'subject' => $this->renderString($this->subject, $variables),
-            'content' => $this->renderString($this->content, $variables),
-            'variables' => $variables,
-        ];
-    }
-
-    /**
-     * Рендеринг строки с переменными
-     */
-    private function renderString(?string $template, array $variables): ?string
-    {
-        if (!$template) {
-            return null;
-        }
-
-        // Простая замена переменных в формате {{variable}}
-        return preg_replace_callback('/\{\{(\w+)\}\}/', function($matches) use ($variables) {
-            $key = $matches[1];
-            return $variables[$key] ?? $matches[0]; // Оставляем как есть, если переменная не найдена
-        }, $template);
+        $renderingService = app(\App\Domain\Notification\Services\TemplateRenderingService::class);
+        return $renderingService->render($this, $data);
     }
 
     /**
      * Валидация шаблона
+     * @deprecated Используйте TemplateValidationService::validate()
      */
     public function validate(): array
     {
-        $errors = [];
-
-        // Проверка обязательных полей
-        if (empty($this->name)) {
-            $errors[] = 'Название шаблона обязательно';
-        }
-
-        if (empty($this->title) && empty($this->content)) {
-            $errors[] = 'Должен быть заполнен заголовок или содержимое';
-        }
-
-        // Проверка переменных в контенте
-        $contentVariables = $this->extractVariablesFromContent();
-        $definedVariables = array_keys($this->variables ?? []);
-        $undefinedVariables = array_diff($contentVariables, $definedVariables);
-
-        if (!empty($undefinedVariables)) {
-            $errors[] = 'Неопределенные переменные в контенте: ' . implode(', ', $undefinedVariables);
-        }
-
-        // Проверка каналов
-        if (empty($this->channels)) {
-            $errors[] = 'Должен быть выбран хотя бы один канал уведомлений';
-        }
-
-        return $errors;
+        $validationService = app(\App\Domain\Notification\Services\TemplateValidationService::class);
+        return $validationService->validate($this);
     }
 
     /**
      * Извлечение переменных из контента
+     * @deprecated Используйте TemplateRenderingService::extractVariables()
      */
     private function extractVariablesFromContent(): array
     {
-        $variables = [];
+        $renderingService = app(\App\Domain\Notification\Services\TemplateRenderingService::class);
         $content = $this->title . ' ' . $this->subject . ' ' . $this->content;
-        
-        if (preg_match_all('/\{\{(\w+)\}\}/', $content, $matches)) {
-            $variables = array_unique($matches[1]);
-        }
-        
-        return $variables;
+        return $renderingService->extractVariables($content);
     }
 
     /**

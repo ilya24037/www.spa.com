@@ -26,18 +26,18 @@ const showModal = ref<boolean>(true)
 // }
 
 const closeModal = (): void => {
-  showModal.value = false
-  // РџРµСЂРµРЅР°РїСЂР°РІР»СЏРµРј РЅР° РіР»Р°РІРЅСѓСЋ СЃС‚СЂР°РЅРёС†Сѓ
-  window.location.href = '/'
+    showModal.value = false
+    // РџРµСЂРµРЅР°РїСЂР°РІР»СЏРµРј РЅР° РіР»Р°РІРЅСѓСЋ СЃС‚СЂР°РЅРёС†Сѓ
+    window.location.href = '/'
 }
 </script>
 
 <template>
-    <Head title="Р’С…РѕРґ" />
+  <Head title="Р’С…РѕРґ" />
 
-    <!-- РњРѕРґР°Р»СЊРЅРѕРµ РѕРєРЅРѕ Р°РІС‚РѕСЂРёР·Р°С†РёРё -->
-    <AuthModal 
-        :show="showModal" 
-        @close="closeModal"
-    />
+  <!-- РњРѕРґР°Р»СЊРЅРѕРµ РѕРєРЅРѕ Р°РІС‚РѕСЂРёР·Р°С†РёРё -->
+  <AuthModal 
+    :show="showModal" 
+    @close="closeModal"
+  />
 </template>

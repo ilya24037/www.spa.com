@@ -8,7 +8,7 @@ import type {
   ValidationResult,
   AutoSaveConfig,
   FormHookResult
-} from '../types/form?.types'
+} from '../types/form.types'
 
 /**
  * Основной composable для работы с формами
@@ -193,9 +193,12 @@ export function useForm(
   const getFieldError = (fieldName: string): string => {
     const error = formErrors?.value[fieldName]
     if (Array?.isArray(error)) {
-      return error[0] // Возвращаем первую ошибку
+      return error[0] || '' // Возвращаем первую ошибку
     }
-    return error
+    if (typeof error === 'string') {
+      return error
+    }
+    return ''
   }
 
   // Автосохранение
@@ -232,8 +235,9 @@ export function useForm(
   }
 
   return {
-    formState,
+    formState: formState.value,
     updateField,
+    touchField,
     updateErrors,
     validateField,
     validateForm,
@@ -269,13 +273,18 @@ export function useDynamicField<T = any>(
     if (toIndex < 0 || toIndex >= modelValue?.value.length) return
 
     const item = modelValue?.value.splice(fromIndex, 1)[0]
-    modelValue?.value.splice(toIndex, 0, item)
+    if (item !== undefined) {
+      modelValue?.value.splice(toIndex, 0, item)
+    }
   }
 
   const duplicateItem = (index: number): void => {
     if (index >= 0 && index < modelValue?.value.length) {
-      const item = { ...modelValue?.value[index] }
-      modelValue?.value.splice(index + 1, 0, item)
+      const item = modelValue?.value[index]
+      if (item !== undefined) {
+        const duplicatedItem = { ...item } as T
+        modelValue?.value.splice(index + 1, 0, duplicatedItem)
+      }
     }
   }
 

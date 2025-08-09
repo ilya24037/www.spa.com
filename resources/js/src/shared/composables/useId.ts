@@ -2,5 +2,5 @@
 let counter = 0
 
 export function useId(prefix = 'id') {
-  return `${prefix}-${++counter}-${Date.now()}`
+    return `${prefix}-${++counter}-${Date.now()}`
 }

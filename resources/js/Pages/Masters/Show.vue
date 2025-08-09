@@ -54,83 +54,83 @@ const props = defineProps<MasterProfileProps>()
 
 // РЈРїСЂР°РІР»РµРЅРёРµ Р·Р°РіСЂСѓР·РєРѕР№ СЃС‚СЂР°РЅРёС†С‹
 const pageLoader = usePageLoading({
-  type: 'profile',
-  autoStart: true,
-  timeout: 12000,
-  onStart: () => {
+    type: 'profile',
+    autoStart: true,
+    timeout: 12000,
+    onStart: () => {
     // Master profile loading started
-  },
-  onComplete: () => {
+    },
+    onComplete: () => {
     // Master profile loading completed
-  },
-  onError: (error) => {
-    logger.error('Master profile loading error:', error)
-  }
+    },
+    onError: (error) => {
+        logger.error('Master profile loading error:', error)
+    }
 })
 
 // РћР±СЂР°Р±РѕС‚С‡РёРєРё Р·Р°РіСЂСѓР·РєРё СЂР°Р·РЅС‹С… СЃРµРєС†РёР№ РїСЂРѕС„РёР»СЏ
 const handleProfileLoading = (): void => {
-  pageLoader.setProgress(25, 'Р—Р°РіСЂСѓР¶Р°РµРј РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РјР°СЃС‚РµСЂРµ...')
+    pageLoader.setProgress(25, 'Р—Р°РіСЂСѓР¶Р°РµРј РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РјР°СЃС‚РµСЂРµ...')
 }
 
 const handleGalleryLoading = (): void => {
-  pageLoader.setProgress(50, 'Р—Р°РіСЂСѓР¶Р°РµРј РіР°Р»РµСЂРµСЋ СЂР°Р±РѕС‚...')
+    pageLoader.setProgress(50, 'Р—Р°РіСЂСѓР¶Р°РµРј РіР°Р»РµСЂРµСЋ СЂР°Р±РѕС‚...')
 }
 
 const handleReviewsLoading = (): void => {
-  pageLoader.setProgress(75, 'Р—Р°РіСЂСѓР¶Р°РµРј РѕС‚Р·С‹РІС‹...')
+    pageLoader.setProgress(75, 'Р—Р°РіСЂСѓР¶Р°РµРј РѕС‚Р·С‹РІС‹...')
 }
 
 const handleContentLoaded = (): void => {
-  pageLoader.setProgress(95, 'Р¤РёРЅР°Р»РёР·Р°С†РёСЏ РїСЂРѕС„РёР»СЏ...')
-  setTimeout(() => {
-    pageLoader.completeLoading()
-  }, 300)
+    pageLoader.setProgress(95, 'Р¤РёРЅР°Р»РёР·Р°С†РёСЏ РїСЂРѕС„РёР»СЏ...')
+    setTimeout(() => {
+        pageLoader.completeLoading()
+    }, 300)
 }
 
 // Р›РѕРіРёРєР° Р·Р°РіСЂСѓР·РєРё РїСЂРё РјРѕРЅС‚РёСЂРѕРІР°РЅРёРё
 onMounted(() => {
-  // РџСЂРѕРІРµСЂСЏРµРј РЅР°Р»РёС‡РёРµ Р±Р°Р·РѕРІС‹С… РґР°РЅРЅС‹С… РјР°СЃС‚РµСЂР°
-  if (!props.master || !props.master.id) {
-    const noDataError = {
-      type: 'client' as const,
-      message: 'Р”Р°РЅРЅС‹Рµ РјР°СЃС‚РµСЂР° РЅРµ РЅР°Р№РґРµРЅС‹',
-      code: 404
+    // РџСЂРѕРІРµСЂСЏРµРј РЅР°Р»РёС‡РёРµ Р±Р°Р·РѕРІС‹С… РґР°РЅРЅС‹С… РјР°СЃС‚РµСЂР°
+    if (!props.master || !props.master.id) {
+        const noDataError = {
+            type: 'client' as const,
+            message: 'Р”Р°РЅРЅС‹Рµ РјР°СЃС‚РµСЂР° РЅРµ РЅР°Р№РґРµРЅС‹',
+            code: 404
+        }
+        pageLoader.errorLoading(noDataError)
+        return
     }
-    pageLoader.errorLoading(noDataError)
-    return
-  }
 
-  // РџРѕСЌС‚Р°РїРЅР°СЏ Р·Р°РіСЂСѓР·РєР° СЂР°Р·РЅС‹С… СЃРµРєС†РёР№
-  setTimeout(() => {
-    pageLoader.setProgress(20, 'РћР±СЂР°Р±Р°С‚С‹РІР°РµРј РґР°РЅРЅС‹Рµ РїСЂРѕС„РёР»СЏ...')
-  }, 400)
+    // РџРѕСЌС‚Р°РїРЅР°СЏ Р·Р°РіСЂСѓР·РєР° СЂР°Р·РЅС‹С… СЃРµРєС†РёР№
+    setTimeout(() => {
+        pageLoader.setProgress(20, 'РћР±СЂР°Р±Р°С‚С‹РІР°РµРј РґР°РЅРЅС‹Рµ РїСЂРѕС„РёР»СЏ...')
+    }, 400)
 
-  setTimeout(() => {
+    setTimeout(() => {
     // РџСЂРѕРІРµСЂСЏРµРј РЅР°Р»РёС‡РёРµ С„РѕС‚РѕРіСЂР°С„РёР№
-    if (props.master.photos && props.master.photos.length > 0) {
-      pageLoader.setProgress(45, 'Р—Р°РіСЂСѓР¶Р°РµРј С„РѕС‚РѕРіСЂР°С„РёРё...')
-    } else {
-      pageLoader.setProgress(45, 'РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј РїСЂРѕС„РёР»СЊ...')
-    }
-  }, 800)
+        if (props.master.photos && props.master.photos.length > 0) {
+            pageLoader.setProgress(45, 'Р—Р°РіСЂСѓР¶Р°РµРј С„РѕС‚РѕРіСЂР°С„РёРё...')
+        } else {
+            pageLoader.setProgress(45, 'РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј РїСЂРѕС„РёР»СЊ...')
+        }
+    }, 800)
 
-  setTimeout(() => {
+    setTimeout(() => {
     // РџСЂРѕРІРµСЂСЏРµРј РЅР°Р»РёС‡РёРµ РѕС‚Р·С‹РІРѕРІ
-    if (props.master.reviews_count && props.master.reviews_count > 0) {
-      pageLoader.setProgress(70, 'Р—Р°РіСЂСѓР¶Р°РµРј РѕС‚Р·С‹РІС‹ РєР»РёРµРЅС‚РѕРІ...')
-    } else {
-      pageLoader.setProgress(70, 'РћР±СЂР°Р±Р°С‚С‹РІР°РµРј СѓСЃР»СѓРіРё...')
-    }
-  }, 1200)
+        if (props.master.reviews_count && props.master.reviews_count > 0) {
+            pageLoader.setProgress(70, 'Р—Р°РіСЂСѓР¶Р°РµРј РѕС‚Р·С‹РІС‹ РєР»РёРµРЅС‚РѕРІ...')
+        } else {
+            pageLoader.setProgress(70, 'РћР±СЂР°Р±Р°С‚С‹РІР°РµРј СѓСЃР»СѓРіРё...')
+        }
+    }, 1200)
 
-  setTimeout(() => {
-    pageLoader.setProgress(90, 'РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј Рє РѕС‚РѕР±СЂР°Р¶РµРЅРёСЋ...')
-  }, 1600)
+    setTimeout(() => {
+        pageLoader.setProgress(90, 'РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј Рє РѕС‚РѕР±СЂР°Р¶РµРЅРёСЋ...')
+    }, 1600)
 
-  setTimeout(() => {
-    pageLoader.completeLoading()
-  }, 2000)
+    setTimeout(() => {
+        pageLoader.completeLoading()
+    }, 2000)
 })
 </script>
 

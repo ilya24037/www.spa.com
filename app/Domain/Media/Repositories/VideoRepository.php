@@ -19,6 +19,14 @@ class VideoRepository extends BaseRepository
     }
 
     /**
+     * Получить класс модели
+     */
+    protected function getModelClass(): string
+    {
+        return Video::class;
+    }
+
+    /**
      * Создать новое видео
      */
     public function createVideo(array $data): Video

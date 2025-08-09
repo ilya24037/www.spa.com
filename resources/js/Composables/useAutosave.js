@@ -4,7 +4,6 @@
  */
 
 import { ref, watch, onUnmounted } from 'vue'
-import { autosaveDraft } from '@/utils/adApi'
 
 export function useAutosave(form, options = {}) {
   const {
@@ -47,18 +46,18 @@ export function useAutosave(form, options = {}) {
     try {
       isSaving.value = true
       
-      const success = await autosaveDraft(form.value)
+      let success = false
+      if (onSave) {
+        success = await onSave()
+      }
       
       if (success) {
         lastSaved.value = new Date()
         hasUnsavedChanges.value = false
-        initialFormSnapshot = createFormSnapshot(form.value)
-        
-        if (onSave) {
-          onSave(lastSaved.value)
-        }
+        initialFormSnapshot = createFormSnapshot(form.value || form)
       }
     } catch (error) {
+      console.warn('Автосохранение не удалось:', error)
       
       if (onError) {
         onError(error)
@@ -105,7 +104,7 @@ export function useAutosave(form, options = {}) {
   const reset = () => {
     hasUnsavedChanges.value = false
     lastSaved.value = null
-    initialFormSnapshot = createFormSnapshot(form.value)
+    initialFormSnapshot = createFormSnapshot(form.value || form)
   }
 
   // Отслеживать изменения формы
@@ -154,4 +153,4 @@ export function useAutosave(form, options = {}) {
     forceSave,
     reset
   }
-} 
+}

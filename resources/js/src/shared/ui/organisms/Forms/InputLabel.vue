@@ -1,7 +1,7 @@
 <template>
-    <label :for="name" class="block text-sm font-medium text-gray-700 mb-1">
-        {{ value }}
-    </label>
+  <label :for="name" class="block text-sm font-medium text-gray-500 mb-1">
+    {{ value }}
+  </label>
 </template>
 
 <script setup>

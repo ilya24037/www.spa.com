@@ -11,6 +11,7 @@ import type {
   MasterPhoto
 } from '../types/masterProfile.types'
 import { useMasterProfileWidgetStore } from '../store/masterProfileStore'
+import { logger } from '@/src/shared/utils/logger'
 
 export function useMasterProfileWidget(props: MasterProfileWidgetProps) {
   const store = useMasterProfileWidgetStore()
@@ -43,7 +44,7 @@ export function useMasterProfileWidget(props: MasterProfileWidgetProps) {
     try {
       await store.loadMasterProfile(props.masterId, filters.value)
     } catch (error) {
-      console.error('[MasterProfileWidget] Initialization failed:', error)
+      logger.error('[MasterProfileWidget] Initialization failed:', error)
     }
   }
 

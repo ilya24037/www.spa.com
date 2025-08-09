@@ -6,6 +6,7 @@ use App\Domain\Master\Models\MasterProfile;
 use App\Domain\User\Models\User;
 use App\Enums\MasterStatus;
 use App\Domain\Common\Repositories\BaseRepository;
+use App\Domain\Master\Contracts\MasterRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -15,7 +16,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
  * 
  * @extends BaseRepository<MasterProfile>
  */
-class MasterRepository extends BaseRepository
+class MasterRepository extends BaseRepository implements MasterRepositoryInterface
 {
     private MasterQueryRepository $queryRepository;
     private MasterLocationRepository $locationRepository;
@@ -48,6 +49,58 @@ class MasterRepository extends BaseRepository
     public function find(int $id): ?MasterProfile
     {
         return $this->queryRepository->find($id);
+    }
+
+    /**
+     * Получить профиль мастера по ID пользователя
+     */
+    public function getUserMasterProfile(int $userId): ?MasterProfile
+    {
+        return MasterProfile::where('user_id', $userId)->first();
+    }
+
+    /**
+     * Получить все профили мастера пользователя
+     */
+    public function getUserMasterProfiles(int $userId): Collection
+    {
+        return MasterProfile::where('user_id', $userId)->get();
+    }
+
+    /**
+     * Получить основной профиль мастера
+     */
+    public function getMainMasterProfile(int $userId): ?MasterProfile
+    {
+        return MasterProfile::where('user_id', $userId)
+            ->where('is_main', true)
+            ->first() ?: $this->getUserMasterProfile($userId);
+    }
+
+    /**
+     * Проверить есть ли активный профиль мастера
+     */
+    public function hasActiveMasterProfile(int $userId): bool
+    {
+        return MasterProfile::where('user_id', $userId)
+            ->where('status', MasterStatus::ACTIVE)
+            ->exists();
+    }
+
+    /**
+     * Получить рейтинг мастера
+     */
+    public function getMasterRating(int $masterId): array
+    {
+        $master = $this->find($masterId);
+        if (!$master) {
+            return ['rating' => 0, 'reviews_count' => 0];
+        }
+        
+        return [
+            'rating' => $master->rating ?? 0,
+            'reviews_count' => $master->reviews_count ?? 0
+        ];
     }
     
     /**

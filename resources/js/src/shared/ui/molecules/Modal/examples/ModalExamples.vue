@@ -1,15 +1,19 @@
 <template>
   <div class="modal-examples p-8 space-y-6">
-    <h1 class="text-2xl font-bold mb-8">Примеры модальных окон</h1>
+    <h1 class="text-2xl font-bold mb-8">
+      Примеры модальных окон
+    </h1>
     
     <!-- Кнопки для демонстрации -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <!-- BaseModal -->
       <div class="space-y-2">
-        <h3 class="font-semibold">BaseModal</h3>
+        <h3 class="font-semibold">
+          BaseModal
+        </h3>
         <button
-          @click="baseModal.open()"
           class="w-full btn btn-primary"
+          @click="baseModal.open()"
         >
           Открыть BaseModal
         </button>
@@ -17,10 +21,12 @@
       
       <!-- ConfirmModal -->
       <div class="space-y-2">
-        <h3 class="font-semibold">ConfirmModal</h3>
+        <h3 class="font-semibold">
+          ConfirmModal
+        </h3>
         <button
-          @click="confirmModal.open()"
           class="w-full btn btn-warning"
+          @click="confirmModal.open()"
         >
           Открыть ConfirmModal
         </button>
@@ -28,10 +34,12 @@
       
       <!-- AlertModal -->
       <div class="space-y-2">
-        <h3 class="font-semibold">AlertModal</h3>
+        <h3 class="font-semibold">
+          AlertModal
+        </h3>
         <button
-          @click="alertModal.open()"
           class="w-full btn btn-info"
+          @click="alertModal.open()"
         >
           Открыть AlertModal
         </button>
@@ -39,30 +47,36 @@
       
       <!-- Программные модалки -->
       <div class="space-y-2">
-        <h3 class="font-semibold">Программный Confirm</h3>
+        <h3 class="font-semibold">
+          Программный Confirm
+        </h3>
         <button
-          @click="showProgrammaticConfirm"
           class="w-full btn btn-danger"
+          @click="showProgrammaticConfirm"
         >
           Подтвердить удаление
         </button>
       </div>
       
       <div class="space-y-2">
-        <h3 class="font-semibold">Программный Alert</h3>
+        <h3 class="font-semibold">
+          Программный Alert
+        </h3>
         <button
-          @click="showProgrammaticAlert"
           class="w-full btn btn-success"
+          @click="showProgrammaticAlert"
         >
           Показать уведомление
         </button>
       </div>
       
       <div class="space-y-2">
-        <h3 class="font-semibold">С подтверждением</h3>
+        <h3 class="font-semibold">
+          С подтверждением
+        </h3>
         <button
-          @click="showConfirmationModal"
           class="w-full btn btn-danger"
+          @click="showConfirmationModal"
         >
           Удалить с подтверждением
         </button>
@@ -70,7 +84,7 @@
     </div>
     
     <!-- Результаты действий -->
-    <div v-if="lastAction" class="mt-8 p-4 bg-gray-100 rounded-lg">
+    <div v-if="lastAction" class="mt-8 p-4 bg-gray-500 rounded-lg">
       <p><strong>Последнее действие:</strong> {{ lastAction }}</p>
     </div>
     
@@ -87,7 +101,7 @@
     >
       <div class="space-y-4">
         <p>Это пример базового модального окна с полной функциональностью.</p>
-        <p class="text-sm text-gray-600">
+        <p class="text-sm text-gray-500">
           Включает управление фокусом, закрытие по Escape, backdrop click и полную accessibility поддержку.
         </p>
         <div class="bg-blue-50 p-3 rounded">
@@ -126,12 +140,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import {
-  BaseModal,
-  ConfirmModal,
-  AlertModal,
-  useModal,
-  useConfirm,
-  useAlert
+    BaseModal,
+    ConfirmModal,
+    AlertModal,
+    useModal,
+    useConfirm,
+    useAlert
 } from '../index'
 
 // Модальные окна
@@ -148,62 +162,63 @@ const lastAction = ref('')
 
 // Обработчики событий
 const handleBaseConfirm = () => {
-  lastAction.value = 'BaseModal: Подтверждено'
+    lastAction.value = 'BaseModal: Подтверждено'
 }
 
 const handleBaseCancel = () => {
-  lastAction.value = 'BaseModal: Отменено'
+    lastAction.value = 'BaseModal: Отменено'
 }
 
 const handleConfirm = () => {
-  lastAction.value = 'ConfirmModal: Пользователь подтвердил действие'
+    lastAction.value = 'ConfirmModal: Пользователь подтвердил действие'
 }
 
 const handleCancel = () => {
-  lastAction.value = 'ConfirmModal: Пользователь отменил действие'
+    lastAction.value = 'ConfirmModal: Пользователь отменил действие'
 }
 
 const handleAlert = () => {
-  lastAction.value = 'AlertModal: Пользователь закрыл уведомление'
+    lastAction.value = 'AlertModal: Пользователь закрыл уведомление'
 }
 
 // Программные модальные окна
 const showProgrammaticConfirm = async () => {
-  const result = await confirm({
-    title: 'Удаление элемента',
-    message: 'Вы уверены, что хотите удалить этот элемент?',
-    description: 'Это действие необратимо. Все связанные данные будут потеряны.',
-    variant: 'danger',
-    confirmText: 'Удалить',
-    cancelText: 'Оставить'
-  })
+    const result = await confirm({
+        title: 'Удаление элемента',
+        message: 'Вы уверены, что хотите удалить этот элемент?',
+        description: 'Это действие необратимо. Все связанные данные будут потеряны.',
+        variant: 'danger',
+        confirmText: 'Удалить',
+        cancelText: 'Оставить'
+    })
   
-  lastAction.value = `Программный Confirm: ${result.confirmed ? 'Подтверждено' : 'Отменено'}`
+    lastAction.value = `Программный Confirm: ${result.confirmed ? 'Подтверждено' : 'Отменено'}`
 }
 
 const showProgrammaticAlert = async () => {
-  await alert({
-    title: 'Поздравляем!',
-    message: 'Ваш профиль успешно обновлен.',
-    variant: 'success',
-    buttonText: 'Отлично!'
-  })
+    // Используем toast.alert вместо нативного alert()
+    await toast.alert({
+        title: 'Поздравляем!',
+        message: 'Ваш профиль успешно обновлен.',
+        variant: 'success',
+        buttonText: 'Отлично!'
+    })
   
-  lastAction.value = 'Программный Alert: Показан и закрыт'
+    lastAction.value = 'Программный Alert: Показан и закрыт'
 }
 
 const showConfirmationModal = async () => {
-  const result = await confirm({
-    title: 'Критическое действие',
-    message: 'Для подтверждения введите "УДАЛИТЬ"',
-    description: 'Это действие удалит все данные безвозвратно.',
-    variant: 'danger',
-    requiresConfirmation: true,
-    confirmationText: 'УДАЛИТЬ',
-    confirmText: 'Подтвердить удаление'
-  })
+    const result = await confirm({
+        title: 'Критическое действие',
+        message: 'Для подтверждения введите "УДАЛИТЬ"',
+        description: 'Это действие удалит все данные безвозвратно.',
+        variant: 'danger',
+        requiresConfirmation: true,
+        confirmationText: 'УДАЛИТЬ',
+        confirmText: 'Подтвердить удаление'
+    })
   
-  lastAction.value = `Модалка с подтверждением: ${result.confirmed ? 'Подтверждено' : 'Отменено'}`
+    lastAction.value = `Модалка с подтверждением: ${result.confirmed ? 'Подтверждено' : 'Отменено'}`
 }
 </script>
 
@@ -221,7 +236,7 @@ const showConfirmationModal = async () => {
 }
 
 .btn-info {
-  @apply bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500;
+  @apply bg-gray-500 text-white hover:bg-gray-500 focus:ring-gray-500;
 }
 
 .btn-danger {

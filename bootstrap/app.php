@@ -18,6 +18,11 @@ return Application::configure(basePath: dirname(__DIR__))
             // \App\Application\Http\Middleware\PerformanceMiddleware::class, // Временно отключено
         ]);
 
+        // Регистрация middleware алиасов
+        $middleware->alias([
+            'guest' => \App\Application\Http\Middleware\RedirectIfAuthenticated::class,
+        ]);
+
         // Глобальные middleware (временно отключено)
         // $middleware->append([
         //     \App\Application\Http\Middleware\PerformanceMiddleware::class,

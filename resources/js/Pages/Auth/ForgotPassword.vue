@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { route } from 'ziggy-js'
 
-import AppLayout from '@/Layouts/AppLayout.vue'
 import { InputError, InputLabel, PrimaryButton, TextInput } from '@/src/shared/ui/atoms'
 import { Head, useForm } from '@inertiajs/vue3'
 
@@ -16,58 +15,58 @@ interface ForgotPasswordForm {
 }
 
 const form = useForm<ForgotPasswordForm>({
-  email: '',
+    email: '',
 })
 
 const submit = (): void => {
-  form.post(route('password.email'))
+    form.post(route('password.email'))
 }
 </script>
 
 <template>
-    <AppLayout>
-        <Head title="Forgot Password" />
+  <div>
+    <Head title="Forgot Password" />
 
-        <div class="mb-4 text-sm text-gray-600">
-            Forgot your password? No problem. Just let us know your email
-            address and we will email you a password reset link that will allow
-            you to choose a new one.
-        </div>
+    <div class="mb-4 text-sm text-gray-500">
+      Forgot your password? No problem. Just let us know your email
+      address and we will email you a password reset link that will allow
+      you to choose a new one.
+    </div>
 
-        <div
-            v-if="status"
-            class="mb-4 text-sm font-medium text-green-600"
+    <div
+      v-if="status"
+      class="mb-4 text-sm font-medium text-green-600"
+    >
+      {{ status }}
+    </div>
+
+    <form @submit.prevent="submit">
+      <div>
+        <InputLabel for="email" value="Email" />
+
+        <TextInput
+          id="email"
+          v-model="form.email"
+          type="email"
+          class="mt-1 block w-full"
+          required
+          autofocus
+          autocomplete="username"
+        />
+
+        <InputError class="mt-2" :message="form.errors.email" />
+      </div>
+
+      <div class="mt-4 flex items-center justify-end">
+        <PrimaryButton
+          :class="{ 'opacity-25': form.processing }"
+          :disabled="form.processing"
         >
-            {{ status }}
-        </div>
-
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="email" value="Email" />
-
-                <TextInput
-                    id="email"
-                    type="email"
-                    class="mt-1 block w-full"
-                    v-model="form.email"
-                    required
-                    autofocus
-                    autocomplete="username"
-                />
-
-                <InputError class="mt-2" :message="form.errors.email" />
-            </div>
-
-            <div class="mt-4 flex items-center justify-end">
-                <PrimaryButton
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                >
-                    Email Password Reset Link
-                </PrimaryButton>
-            </div>
-        </form>
-    </AppLayout>
+          Email Password Reset Link
+        </PrimaryButton>
+      </div>
+    </form>
+  </div>
 </template>
 
 

@@ -1,4 +1,5 @@
 <?php
+// chore: pre-commit test (не влияет на работу)
 
 use App\Application\Http\Controllers\Profile\ProfileController;
 use App\Application\Http\Controllers\HomeController;
@@ -51,29 +52,30 @@ Route::post('/payment/webmoney/callback', [PaymentController::class, 'webmoneyCa
 Route::post('/webhooks/payments/{gateway}', [WebhookController::class, 'handle'])->name('webhooks.payments');
 Route::post('/webhooks/test', [WebhookController::class, 'test'])->name('webhooks.test');
 
-// Тестовая страница для проверки навигации
-Route::get('/test', function() {
-    return Inertia::render('Test');
-})->name('test');
-
-// Демо интерактивной карты
-Route::get('/map-demo', function() {
-    return Inertia::render('MapDemo');
-})->name('map-demo');
-
-// Быстрый тест карты
-Route::get('/test-map', function() {
-    return Inertia::render('TestMap');
-})->name('test-map');
-
-// Тестовый маршрут для добавления фотографий
-Route::get('/test/add-photos', [TestController::class, 'addPhotos'])->name('test.add-photos');
-
-// Демонстрация компонента ItemCard
-Route::get('/demo/item-card', function() {
-    return Inertia::render('Demo/ItemCard');
-})->name('demo.item-card');
-Route::get('/test/add-local-photos', [TestController::class, 'addLocalPhotos'])->name('test.add-local-photos');
+// Dev/test/demo routes — only in non-production
+if (!app()->isProduction()) {
+    Route::get('/test', fn() => Inertia::render('Test'))->name('test');
+    Route::get('/map-demo', fn() => Inertia::render('MapDemo'))->name('map-demo');
+    Route::get('/test-map', fn() => Inertia::render('TestMap'))->name('test-map');
+    Route::get('/test/add-photos', [TestController::class, 'addPhotos'])->name('test.add-photos');
+    Route::get('/demo/item-card', fn() => Inertia::render('Demo/ItemCard'))->name('demo.item-card');
+    Route::get('/test/add-local-photos', [TestController::class, 'addLocalPhotos'])->name('test.add-local-photos');
+    // Публичный маршрут для тестовой загрузки фото мастера
+    Route::post('/masters/{master}/upload/photos/test', function(\Illuminate\Http\Request $request, $masterId) {
+        $master = \App\Domain\Master\Models\MasterProfile::findOrFail($masterId);
+        $request->validate([
+            'photos' => 'required|array|min:1|max:10',
+            'photos.*' => 'required|image|mimes:jpeg,png,webp|max:10240',
+        ]);
+        try {
+            $mediaService = new \App\Infrastructure\Media\MediaProcessingService();
+            $photos = $mediaService->uploadPhotos($master, $request->file('photos'));
+            return response()->json(['success' => true, 'count' => count($photos)]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    })->name('master.upload.photos.test');
+}
 
 // Управление фотографиями мастеров
 Route::prefix('masters/{master}/photos')->group(function () {
@@ -86,41 +88,7 @@ Route::prefix('masters/{master}/photos')->group(function () {
 // Добавление локальных фотографий
 Route::post('/master/photos/local', [MasterPhotoController::class, 'addLocalPhoto'])->name('master.photos.local');
 
-// Публичный маршрут для тестирования загрузки фотографий (без авторизации и CSRF)
-Route::post('/masters/{master}/upload/photos/test', function(\Illuminate\Http\Request $request, $masterId) {
-    $master = \App\Domain\Master\Models\MasterProfile::findOrFail($masterId);
-    
-    $request->validate([
-        'photos' => 'required|array|min:1|max:10',
-        'photos.*' => 'required|image|mimes:jpeg,png,webp|max:10240',
-    ]);
-
-    try {
-        $mediaService = new \App\Infrastructure\Media\MediaProcessingService();
-        $photos = $mediaService->uploadPhotos($master, $request->file('photos'));
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Загружено ' . count($photos) . ' фотографий',
-            'photos' => collect($photos)->map(function ($photo) {
-                return [
-                    'id' => $photo->id,
-                    'filename' => $photo->filename,
-                    'original_url' => $photo->original_url,
-                    'medium_url' => $photo->medium_url,
-                    'thumb_url' => $photo->thumb_url,
-                    'is_main' => $photo->is_main,
-                    'sort_order' => $photo->sort_order,
-                ];
-            }),
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'error' => 'Ошибка загрузки фотографий: ' . $e->getMessage()
-        ], 500);
-    }
-})->name('master.upload.photos.test');
+// Дублирующий тест-роут перенесён в dev-блок выше
 
 // Поисковые маршруты
 Route::get('/search', [SearchController::class, 'index'])->name('search');
@@ -144,36 +112,7 @@ Route::prefix('compare')->name('compare.')->group(function () {
         ->name('remove');
 });
 
-/*
-|--------------------------------------------------------------------------
-| API-маршруты (AJAX)
-|--------------------------------------------------------------------------
-*/
-Route::prefix('api')->group(function () {
-
-    /* публичные */
-    Route::get('/masters', [MasterController::class, 'apiIndex']);
-    Route::get('/masters/{master}', [MasterController::class, 'apiShow'])->whereNumber('master');
-    // Поисковые API маршруты
-    Route::get('/search/autocomplete', [SearchController::class, 'autocomplete']);
-    Route::get('/search/suggestions', [SearchController::class, 'suggestions']);
-    Route::get('/search/quick', [SearchController::class, 'quick']);
-    Route::get('/search/similar/{id}', [SearchController::class, 'similar']);
-    Route::post('/search/geo', [SearchController::class, 'geo']);
-    Route::get('/search/export', [SearchController::class, 'export']);
-
-    /* защищённые */
-    Route::middleware('auth')->group(function () {
-        Route::get('/user', fn () => auth()->user()->load('masterProfile'));
-        Route::get('/favorites', [FavoriteController::class, 'apiIndex']);
-        Route::post('/favorites/toggle', [FavoriteController::class, 'toggle']);
-        Route::get('/bookings/available-slots', [BookingController::class, 'availableSlots']);
-        
-        // Статистика поиска (только для админов)
-        Route::get('/search/statistics', [SearchController::class, 'statistics'])
-            ->middleware('can:viewSearchStatistics');
-    });
-});
+// API перенесены в routes/api.php
 
 /*
 |--------------------------------------------------------------------------
@@ -329,34 +268,8 @@ Route::prefix('masters/{master}/media')->group(function () {
         ->name('master.media.blur-settings');
 });
 
-// Публичные маршруты для медиафайлов
-Route::get('/masters/{master}/avatar', function($master) {
-    $masterProfile = \App\Domain\Master\Models\MasterProfile::findOrFail($master);
-    $disk = \Illuminate\Support\Facades\Storage::disk('masters_public');
-    $path = "{$masterProfile->folder_name}/avatar.jpg";
-    
-    if (!$disk->exists($path)) {
-        return response()->file(public_path('images/default-avatar.jpg'));
-    }
-    
-    return response()->file($disk->path($path));
-})->name('master.avatar');
-
-Route::get('/masters/{master}/avatar/thumb', function($master) {
-    $masterProfile = \App\Domain\Master\Models\MasterProfile::findOrFail($master);
-    $disk = \Illuminate\Support\Facades\Storage::disk('masters_public');
-    $path = "{$masterProfile->folder_name}/avatar_thumb.jpg";
-    
-    if (!$disk->exists($path)) {
-        return response()->file(public_path('images/default-avatar.jpg'));
-    }
-    
-    return response()->file($disk->path($path));
-})->name('master.avatar.thumb');
-
-// Удалены дублирующиеся маршруты - используются контроллеры ниже
-
-// Маршруты для медиа файлов мастеров
+// Public media routes — single source of truth (controller)
+// Master media
 Route::get('/masters/{master}/photo/{filename}', [MasterMediaController::class, 'photo'])->name('master.photo');
 Route::get('/masters/{master}/video/{filename}', [MasterMediaController::class, 'video'])->name('master.video');
 Route::get('/masters/{master}/video/poster/{filename}', [MasterMediaController::class, 'videoPoster'])->name('master.video.poster');

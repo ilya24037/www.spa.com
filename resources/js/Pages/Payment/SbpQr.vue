@@ -18,15 +18,21 @@
 
       <!-- Р—Р°РіРѕР»РѕРІРѕРє Рё СЃСѓРјРјР° -->
       <div class="payment-header">
-        <h1 class="payment-title">РћРїР»Р°С‚Р° СѓСЃР»СѓРі</h1>
-        <div class="payment-amount">{{ payment.formatted_amount }}</div>
+        <h1 class="payment-title">
+          РћРїР»Р°С‚Р° СѓСЃР»СѓРі
+        </h1>
+        <div class="payment-amount">
+          {{ payment.formatted_amount }}
+        </div>
       </div>
 
       <!-- QR-РєРѕРґ Р±Р»РѕРє -->
       <div class="qr-payment-box">
         <div class="qr-content">
           <div class="qr-text">
-            <h2 class="qr-title">РџРѕРґС‚РІРµСЂРґРёС‚Рµ РїР»Р°С‚С‘Р¶ РїРѕ РЎР‘Рџ</h2>
+            <h2 class="qr-title">
+              РџРѕРґС‚РІРµСЂРґРёС‚Рµ РїР»Р°С‚С‘Р¶ РїРѕ РЎР‘Рџ
+            </h2>
             <p class="qr-instruction">
               Р”Р»СЏ СЌС‚РѕРіРѕ РѕС‚СЃРєР°РЅРёСЂСѓР№С‚Рµ QR-РєРѕРґ РєР°РјРµСЂРѕР№ РёР»Рё РІ РїСЂРёР»РѕР¶РµРЅРёРё Р±Р°РЅРєР°
             </p>
@@ -35,25 +41,109 @@
           <div class="qr-code">
             <!-- QR-РєРѕРґ -->
             <div class="qr-code__image">
-              <svg width="200" height="200" viewBox="0 0 200 200" fill="none">
+              <svg
+                width="200"
+                height="200"
+                viewBox="0 0 200 200"
+                fill="none"
+              >
                 <!-- РџСЂРѕСЃС‚РѕР№ QR-РєРѕРґ (РІ СЂРµР°Р»СЊРЅРѕРј РїСЂРёР»РѕР¶РµРЅРёРё Р·РґРµСЃСЊ Р±СѓРґРµС‚ РіРµРЅРµСЂРёСЂРѕРІР°С‚СЊСЃСЏ РЅР°СЃС‚РѕСЏС‰РёР№ QR) -->
-                <rect width="200" height="200" fill="white"/>
-                <rect x="10" y="10" width="180" height="180" fill="black"/>
-                <rect x="20" y="20" width="160" height="160" fill="white"/>
-                <rect x="30" y="30" width="140" height="140" fill="black"/>
-                <rect x="40" y="40" width="120" height="120" fill="white"/>
-                <rect x="50" y="50" width="100" height="100" fill="black"/>
-                <rect x="60" y="60" width="80" height="80" fill="white"/>
-                <rect x="70" y="70" width="60" height="60" fill="black"/>
-                <rect x="80" y="80" width="40" height="40" fill="white"/>
-                <rect x="90" y="90" width="20" height="20" fill="black"/>
+                <rect width="200" height="200" fill="white" />
+                <rect
+                  x="10"
+                  y="10"
+                  width="180"
+                  height="180"
+                  fill="black"
+                />
+                <rect
+                  x="20"
+                  y="20"
+                  width="160"
+                  height="160"
+                  fill="white"
+                />
+                <rect
+                  x="30"
+                  y="30"
+                  width="140"
+                  height="140"
+                  fill="black"
+                />
+                <rect
+                  x="40"
+                  y="40"
+                  width="120"
+                  height="120"
+                  fill="white"
+                />
+                <rect
+                  x="50"
+                  y="50"
+                  width="100"
+                  height="100"
+                  fill="black"
+                />
+                <rect
+                  x="60"
+                  y="60"
+                  width="80"
+                  height="80"
+                  fill="white"
+                />
+                <rect
+                  x="70"
+                  y="70"
+                  width="60"
+                  height="60"
+                  fill="black"
+                />
+                <rect
+                  x="80"
+                  y="80"
+                  width="40"
+                  height="40"
+                  fill="white"
+                />
+                <rect
+                  x="90"
+                  y="90"
+                  width="20"
+                  height="20"
+                  fill="black"
+                />
                 
                 <!-- Р›РѕРіРѕС‚РёРї РІ С†РµРЅС‚СЂРµ -->
-                <circle cx="100" cy="100" r="15" fill="white"/>
-                <circle cx="100" cy="100" r="12" fill="#4285F4"/>
-                <circle cx="100" cy="100" r="8" fill="#34A853"/>
-                <circle cx="100" cy="100" r="4" fill="#FBBC05"/>
-                <circle cx="100" cy="100" r="2" fill="#EA4335"/>
+                <circle
+                  cx="100"
+                  cy="100"
+                  r="15"
+                  fill="white"
+                />
+                <circle
+                  cx="100"
+                  cy="100"
+                  r="12"
+                  fill="#4285F4"
+                />
+                <circle
+                  cx="100"
+                  cy="100"
+                  r="8"
+                  fill="#34A853"
+                />
+                <circle
+                  cx="100"
+                  cy="100"
+                  r="4"
+                  fill="#FBBC05"
+                />
+                <circle
+                  cx="100"
+                  cy="100"
+                  r="2"
+                  fill="#EA4335"
+                />
               </svg>
             </div>
           </div>
@@ -63,7 +153,7 @@
       <!-- РРЅС„РѕСЂРјР°С†РёСЏ Рѕ СЃС‚Р°С‚СѓСЃРµ -->
       <div class="payment-status">
         <div class="status-indicator">
-          <div class="status-dot"></div>
+          <div class="status-dot" />
           <span class="status-text">РћР¶РёРґР°РЅРёРµ РѕРїР»Р°С‚С‹...</span>
         </div>
       </div>
@@ -71,16 +161,16 @@
       <!-- РљРЅРѕРїРєРё РґРµР№СЃС‚РІРёР№ -->
       <div class="payment-actions">
         <button 
-          @click="checkPaymentStatus"
           :disabled="isChecking"
           class="check-button"
+          @click="checkPaymentStatus"
         >
           {{ isChecking ? 'РџСЂРѕРІРµСЂСЏРµРј...' : 'РџСЂРѕРІРµСЂРёС‚СЊ РѕРїР»Р°С‚Сѓ' }}
         </button>
         
         <button 
-          @click="cancelPayment"
           class="cancel-button"
+          @click="cancelPayment"
         >
           РћС‚РјРµРЅРёС‚СЊ
         </button>
@@ -102,9 +192,9 @@ import { Head, Link, router } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 
 const props = defineProps({
-  payment: Object,
-  ad: Object,
-  qrCode: String
+    payment: Object,
+    ad: Object,
+    qrCode: String
 })
 
 const isChecking = ref(false)
@@ -114,43 +204,44 @@ const paymentStatus = ref('pending')
 let statusInterval = null
 
 onMounted(() => {
-  // Р—Р°РїСѓСЃРєР°РµРј Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєСѓСЋ РїСЂРѕРІРµСЂРєСѓ
-  statusInterval = setInterval(checkPaymentStatus, 5000)
+    // Р—Р°РїСѓСЃРєР°РµРј Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєСѓСЋ РїСЂРѕРІРµСЂРєСѓ
+    statusInterval = setInterval(checkPaymentStatus, 5000)
 })
 
 const checkPaymentStatus = async () => {
-  if (isChecking.value) return
+    if (isChecking.value) return
   
-  isChecking.value = true
+    isChecking.value = true
   
-  try {
+    try {
     // Р—Р°РїСЂРѕСЃ Рє РЅР°С€РµРјСѓ API РґР»СЏ РїСЂРѕРІРµСЂРєРё СЃС‚Р°С‚СѓСЃР°
-    const response = await fetch(route('payment.check-status', { payment: props.payment.id }))
-    const data = await response.json()
+        const response = await fetch(route('payment.check-status', { payment: props.payment.id }))
+        const data = await response.json()
     
-    if (data.status === 'completed') {
-      paymentStatus.value = 'completed'
-      clearInterval(statusInterval)
+        if (data.status === 'completed') {
+            paymentStatus.value = 'completed'
+            clearInterval(statusInterval)
       
-      // РџРµСЂРµРЅР°РїСЂР°РІР»СЏРµРј РЅР° СЃС‚СЂР°РЅРёС†Сѓ СѓСЃРїРµС…Р°
-      router.visit(route('payment.success', { payment: props.payment.id }))
+            // РџРµСЂРµРЅР°РїСЂР°РІР»СЏРµРј РЅР° СЃС‚СЂР°РЅРёС†Сѓ СѓСЃРїРµС…Р°
+            router.visit(route('payment.success', { payment: props.payment.id }))
+        }
+    } catch (_error) {
+        // Ошибка обработки платежа
+    } finally {
+        isChecking.value = false
     }
-  } catch (error) {
-  } finally {
-    isChecking.value = false
-  }
 }
 
 const cancelPayment = () => {
-  clearInterval(statusInterval)
-  router.visit(route('payment.checkout', { ad: props.ad.id }))
+    clearInterval(statusInterval)
+    router.visit(route('payment.checkout', { ad: props.ad.id }))
 }
 
 // РћС‡РёС‰Р°РµРј РёРЅС‚РµСЂРІР°Р» РїСЂРё СЂР°Р·РјРѕРЅС‚РёСЂРѕРІР°РЅРёРё
 onUnmounted(() => {
-  if (statusInterval) {
-    clearInterval(statusInterval)
-  }
+    if (statusInterval) {
+        clearInterval(statusInterval)
+    }
 })
 </script>
 

@@ -9,8 +9,12 @@
   >
     <!-- Заголовок группы -->
     <div v-if="label || description" class="form-field-group-header">
-      <h4 v-if="label" class="form-field-group-label">{{ label }}</h4>
-      <p v-if="description" class="form-field-group-description">{{ description }}</p>
+      <h4 v-if="label" class="form-field-group-label">
+        {{ label }}
+      </h4>
+      <p v-if="description" class="form-field-group-description">
+        {{ description }}
+      </p>
     </div>
 
     <!-- Поля группы -->
@@ -35,10 +39,10 @@ interface Props {
 }
 
 withDefaults(defineProps<Props>(), {
-  layout: 'column',
-  responsive: true,
-  disabled: false,
-  readonly: false
+    layout: 'column',
+    responsive: true,
+    disabled: false,
+    readonly: false
 })
 </script>
 
@@ -52,11 +56,11 @@ withDefaults(defineProps<Props>(), {
 }
 
 .form-field-group-label {
-  @apply text-sm font-medium text-gray-900;
+  @apply text-sm font-medium text-gray-500;
 }
 
 .form-field-group-description {
-  @apply text-xs text-gray-600;
+  @apply text-xs text-gray-500;
 }
 
 .form-field-group-content {

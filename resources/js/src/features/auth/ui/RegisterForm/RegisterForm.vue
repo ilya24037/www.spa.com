@@ -1,5 +1,5 @@
 <template>
-  <form @submit.prevent="handleSubmit" class="space-y-4">
+  <form class="space-y-4" @submit.prevent="handleSubmit">
     <h2 class="text-2xl font-bold text-center mb-6">
       Р РµРіРёСЃС‚СЂР°С†РёСЏ
     </h2>
@@ -32,8 +32,8 @@ interface Props {
 }
 
 withDefaults(defineProps<Props>(), {
-  loading: false,
-  error: ''
+    loading: false,
+    error: ''
 })
 
 const emit = defineEmits<{
@@ -41,6 +41,6 @@ const emit = defineEmits<{
 }>()
 
 const handleSubmit = () => {
-  emit('submit')
+    emit('submit')
 }
 </script>

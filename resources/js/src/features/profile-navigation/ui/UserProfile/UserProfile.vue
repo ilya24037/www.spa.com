@@ -1,24 +1,26 @@
 <!-- resources/js/Components/Profile/UserProfile.vue -->
 <template>
-    <div class="p-6 border-b">
-        <div class="flex items-center space-x-3">
-            <!-- РђРІР°С‚Р°СЂ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ -->
-            <div 
-                class="w-12 h-12 rounded-full flex items-center justify-center text-white font-medium text-lg"
-                :style="{ backgroundColor: avatarColor }"
-            >
-                {{ userInitial }}
-            </div>
+  <div class="p-6 border-b">
+    <div class="flex items-center space-x-3">
+      <!-- РђРІР°С‚Р°СЂ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ -->
+      <div 
+        class="w-12 h-12 rounded-full flex items-center justify-center text-white font-medium text-lg"
+        :style="{ backgroundColor: avatarColor }"
+      >
+        {{ userInitial }}
+      </div>
             
-            <!-- РРЅС„РѕСЂРјР°С†РёСЏ Рѕ РїРѕР»СЊР·РѕРІР°С‚РµР»Рµ -->
-            <div>
-                <div class="font-medium text-gray-900">{{ userName }}</div>
-                <div class="text-sm text-gray-500">
-                    в… {{ userStats?.rating || 4.2 }} вЂў {{ userStats?.reviews_count || userStats?.reviewsCount || 5 }} РѕС‚Р·С‹РІРѕРІ
-                </div>
-            </div>
+      <!-- РРЅС„РѕСЂРјР°С†РёСЏ Рѕ РїРѕР»СЊР·РѕРІР°С‚РµР»Рµ -->
+      <div>
+        <div class="font-medium text-gray-500">
+          {{ userName }}
         </div>
+        <div class="text-sm text-gray-500">
+          в… {{ userStats?.rating || 4.2 }} вЂў {{ userStats?.reviews_count || userStats?.reviewsCount || 5 }} РѕС‚Р·С‹РІРѕРІ
+        </div>
+      </div>
     </div>
+  </div>
 </template>
 
 <script setup>

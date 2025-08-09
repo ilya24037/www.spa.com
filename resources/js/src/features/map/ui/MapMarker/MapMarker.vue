@@ -14,19 +14,21 @@
       </div>
       <!-- РЎС‚СЂРµР»РєР° -->
       <div v-if="mode !== 'mini'" :class="ARROW_CLASSES">
-        <div :class="ARROW_TRIANGLE_CLASSES"></div>
+        <div :class="ARROW_TRIANGLE_CLASSES" />
       </div>
     </div>
 
     <!-- РўСѓР»С‚РёРї РїСЂРё РЅР°РІРµРґРµРЅРёРё -->
     <div v-if="isHovered && hasTooltip" :class="TOOLTIP_CLASSES">
-      <div :class="TOOLTIP_TITLE_CLASSES">{{ marker.tooltip.title }}</div>
+      <div :class="TOOLTIP_TITLE_CLASSES">
+        {{ marker.tooltip.title }}
+      </div>
       <div v-if="marker.tooltip.subtitle" :class="TOOLTIP_SUBTITLE_CLASSES">
         {{ marker.tooltip.subtitle }}
       </div>
       <!-- РЎС‚СЂРµР»РєР° С‚СѓР»С‚РёРїР° -->
       <div :class="TOOLTIP_ARROW_CLASSES">
-        <div :class="TOOLTIP_ARROW_TRIANGLE_CLASSES"></div>
+        <div :class="TOOLTIP_ARROW_TRIANGLE_CLASSES" />
       </div>
     </div>
   </div>
@@ -45,59 +47,59 @@ const MARKER_CONTENT_VERIFIED_CLASSES = 'bg-green-600 text-white'
 const ARROW_CLASSES = 'absolute top-full left-1/2 transform -translate-x-1/2 -mt-1'
 const ARROW_TRIANGLE_CLASSES = 'w-0 h-0 border-l-2 border-r-2 border-t-2 border-transparent border-t-blue-600'
 const TOOLTIP_CLASSES = 'absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-white px-3 py-2 rounded-lg shadow-lg text-sm whitespace-nowrap z-10'
-const TOOLTIP_TITLE_CLASSES = 'font-medium text-gray-900'
-const TOOLTIP_SUBTITLE_CLASSES = 'text-gray-600'
+const TOOLTIP_TITLE_CLASSES = 'font-medium text-gray-500'
+const TOOLTIP_SUBTITLE_CLASSES = 'text-gray-500'
 const TOOLTIP_ARROW_CLASSES = 'absolute top-full left-1/2 transform -translate-x-1/2'
 const TOOLTIP_ARROW_TRIANGLE_CLASSES = 'w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white'
 
 const props = defineProps({
-  marker: {
-    type: Object,
-    required: true
-  },
-  position: {
-    type: Object,
-    required: true
-  },
-  mode: {
-    type: String,
-    default: 'full'
-  },
-  isHovered: {
-    type: Boolean,
-    default: false
-  }
+    marker: {
+        type: Object,
+        required: true
+    },
+    position: {
+        type: Object,
+        required: true
+    },
+    mode: {
+        type: String,
+        default: 'full'
+    },
+    isHovered: {
+        type: Boolean,
+        default: false
+    }
 })
 
 defineEmits(['click', 'hover'])
 
 // Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const markerLabel = computed(() => {
-  if (props.marker.price) {
-    return `${props.marker.price}в‚Ѕ`
-  }
-  if (props.marker.name) {
-    return props.marker.name
-  }
-  return props.marker.label || 'в—Џ'
+    if (props.marker.price) {
+        return `${props.marker.price}в‚Ѕ`
+    }
+    if (props.marker.name) {
+        return props.marker.name
+    }
+    return props.marker.label || 'в—Џ'
 })
 
 const hasTooltip = computed(() => 
-  props.marker.tooltip && (props.marker.tooltip.title || props.marker.tooltip.subtitle)
+    props.marker.tooltip && (props.marker.tooltip.title || props.marker.tooltip.subtitle)
 )
 
 // РњРµС‚РѕРґС‹
 const getMarkerContentClasses = () => {
-  const classes = [MARKER_CONTENT_BASE_CLASSES]
+    const classes = [MARKER_CONTENT_BASE_CLASSES]
   
-  if (props.marker.is_premium) {
-    classes.push(MARKER_CONTENT_PREMIUM_CLASSES)
-  } else if (props.marker.is_verified) {
-    classes.push(MARKER_CONTENT_VERIFIED_CLASSES)
-  } else {
-    classes.push(MARKER_CONTENT_DEFAULT_CLASSES)
-  }
+    if (props.marker.is_premium) {
+        classes.push(MARKER_CONTENT_PREMIUM_CLASSES)
+    } else if (props.marker.is_verified) {
+        classes.push(MARKER_CONTENT_VERIFIED_CLASSES)
+    } else {
+        classes.push(MARKER_CONTENT_DEFAULT_CLASSES)
+    }
   
-  return classes.join(' ')
+    return classes.join(' ')
 }
 </script>

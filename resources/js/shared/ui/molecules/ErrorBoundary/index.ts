@@ -2,5 +2,7 @@
  * ErrorBoundary компонент для изоляции ошибок
  */
 
-export { default } from './ErrorBoundary.vue'
-export type { default as ErrorBoundaryComponent } from './ErrorBoundary.vue'
+import ErrorBoundary from './ErrorBoundary.vue'
+
+export default ErrorBoundary
+export type ErrorBoundaryComponent = typeof ErrorBoundary

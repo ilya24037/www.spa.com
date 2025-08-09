@@ -178,9 +178,9 @@ export function useAdaptiveGrid(config: GridConfig = {}) {
     }
     
     try {
-      localStorage.setItem(storageKey, JSON.stringify(preferences))
-    } catch (error) {
-      console.warn('[useAdaptiveGrid] Failed to save preferences:', error)
+      window.localStorage.setItem(storageKey, JSON.stringify(preferences))
+    } catch (_error) {
+      // [useAdaptiveGrid] Failed to save preferences
     }
   }
 
@@ -188,7 +188,7 @@ export function useAdaptiveGrid(config: GridConfig = {}) {
     if (!saveToLocalStorage || typeof window === 'undefined') return
     
     try {
-      const stored = localStorage.getItem(storageKey)
+      const stored = window.localStorage.getItem(storageKey)
       if (!stored) return
       
       const preferences = JSON.parse(stored)
@@ -196,7 +196,7 @@ export function useAdaptiveGrid(config: GridConfig = {}) {
       // Проверяем что настройки не слишком старые (30 дней)
       const maxAge = 30 * 24 * 60 * 60 * 1000
       if (Date.now() - preferences.timestamp > maxAge) {
-        localStorage.removeItem(storageKey)
+        window.localStorage.removeItem(storageKey)
         return
       }
       
@@ -205,9 +205,9 @@ export function useAdaptiveGrid(config: GridConfig = {}) {
       if (preferences.sort) currentSort.value = preferences.sort
       if (preferences.columns) currentColumns.value = preferences.columns
       
-    } catch (error) {
-      console.warn('[useAdaptiveGrid] Failed to load preferences:', error)
-      localStorage.removeItem(storageKey)
+    } catch (_error) {
+      // [useAdaptiveGrid] Failed to load preferences
+      window.localStorage.removeItem(storageKey)
     }
   }
 

@@ -1,26 +1,31 @@
-// Footer configuration - centralized data
+// TypeScript интерфейсы
 export interface FooterLink {
-  id: string
+  id?: string
   text: string
   href: string
-  external?: boolean
   icon?: string
+  target?: string
+  visible?: boolean
   description?: string
+  external?: boolean
 }
 
 export interface FooterSection {
-  id: string
+  id?: string
   title: string
   links: FooterLink[]
-  order: number
+  order?: number
+  visible?: boolean
 }
 
 export interface SocialLink {
-  id: string
-  name: string
-  href: string
-  icon: string
-  color: string
+  id?: string
+  platform: string
+  name?: string
+  url: string
+  href?: string
+  icon?: string
+  color?: string
 }
 
 export interface AppStore {
@@ -32,182 +37,113 @@ export interface AppStore {
 }
 
 export interface FooterConfig {
-  sections: FooterSection[]
-  socialLinks: SocialLink[]
-  appStores: AppStore[]
-  companyInfo: {
+  company: {
     name: string
     description: string
-    logo: string
-    currentYear: number
+    year: number
   }
-  quickActions: FooterLink[]
-  legalLinks: FooterLink[]
-  accessibility: {
-    enabled: boolean
-    buttonText: string
-    callback?: () => void
+  companyInfo?: {
+    name: string
+    description: string
+    year: number
+  }
+  sections: FooterSection[]
+  social: Record<string, string>
+  accessibility?: {
+    ariaLabel?: string
+    role?: string
   }
 }
 
-// Default Footer Configuration
+// Конфигурация футера по умолчанию
 export const defaultFooterConfig: FooterConfig = {
+  company: {
+    name: 'SPA.COM',
+    description: 'Платформа для поиска мастеров массажа',
+    year: new Date().getFullYear()
+  },
   companyInfo: {
     name: 'SPA.COM',
-    description: 'Работа для мастеров',
-    logo: 'SPA.COM',
-    currentYear: new Date().getFullYear()
+    description: 'Платформа для поиска мастеров массажа',
+    year: new Date().getFullYear()
   },
-  
-  quickActions: [
-    {
-      id: 'become-master',
-      text: 'Стать мастером',
-      href: '/additem',
-      icon: 'user-plus',
-      description: 'Присоединяйтесь к нашей платформе'
-    },
-    {
-      id: 'pricing',
-      text: 'Тарифы',
-      href: '/pricing',
-      icon: 'currency'
-    },
-    {
-      id: 'benefits',
-      text: 'Преимущества',
-      href: '/masters/benefits',
-      icon: 'benefits'
-    },
-    {
-      id: 'support',
-      text: 'Поддержка',
-      href: '/support',
-      icon: 'chat'
-    }
-  ],
-  
   sections: [
     {
-      id: 'platform',
-      title: 'SPA.COM',
+      id: 'about',
+      title: 'О компании',
       order: 1,
+      visible: true,
       links: [
-        { id: 'about', text: 'О платформе', href: '/about' },
-        { id: 'how-it-works', text: 'Как это работает', href: '/how-it-works' },
-        { id: 'safety', text: 'Безопасность', href: '/safety' },
-        { id: 'blog', text: 'Блог о массаже', href: '/blog' },
-        { id: 'reviews', text: 'Отзывы о сервисе', href: '/reviews' },
-        { id: 'contacts', text: 'Контакты', href: '/contacts' }
+        { text: 'О нас', href: '/about' },
+        { text: 'Контакты', href: '/contacts' },
+        { text: 'Вакансии', href: '/careers' },
+        { text: 'Пресс-центр', href: '/press' }
       ]
     },
     {
-      id: 'clients',
-      title: 'Клиентам',
+      id: 'users',
+      title: 'Пользователям',
       order: 2,
+      visible: true,
       links: [
-        { id: 'search', text: 'Найти мастера', href: '/search' },
-        { id: 'categories', text: 'Виды массажа', href: '/categories' },
-        { id: 'gift-certificates', text: 'Подарочные сертификаты', href: '/gift-certificates' },
-        { id: 'loyalty', text: 'Программа лояльности', href: '/loyalty' },
-        { id: 'faq', text: 'Частые вопросы', href: '/faq' },
-        { id: 'booking-help', text: 'Как забронировать', href: '/booking-help' }
+        { text: 'Как это работает', href: '/how-it-works' },
+        { text: 'Гарантии', href: '/guarantees' },
+        { text: 'Отзывы', href: '/reviews' },
+        { text: 'Блог', href: '/blog' }
       ]
     },
     {
       id: 'masters',
       title: 'Мастерам',
       order: 3,
+      visible: true,
       links: [
-        { id: 'add-profile', text: 'Разместить анкету', href: '/additem' },
-        { id: 'pricing', text: 'Тарифы и цены', href: '/pricing' },
-        { id: 'promotion', text: 'Продвижение анкеты', href: '/promotion' },
-        { id: 'education', text: 'Обучение', href: '/education' },
-        { id: 'success', text: 'Истории успеха', href: '/masters/success' },
-        { id: 'rules', text: 'Правила платформы', href: '/rules' }
+        { text: 'Стать мастером', href: '/become-master' },
+        { text: 'Тарифы', href: '/pricing' },
+        { text: 'Обучение', href: '/education' },
+        { text: 'FAQ', href: '/faq' }
       ]
     },
     {
-      id: 'help',
-      title: 'Помощь',
+      id: 'support',
+      title: 'Поддержка',
       order: 4,
+      visible: true,
       links: [
-        { id: 'support', text: 'Служба поддержки', href: '/support' },
-        { id: 'payment-methods', text: 'Способы оплаты', href: '/payment-methods' },
-        { id: 'cancellation', text: 'Отмена и возврат', href: '/cancellation' },
-        { id: 'disputes', text: 'Решение споров', href: '/disputes' },
-        { id: 'mobile-app', text: 'Мобильное приложение', href: '/mobile-app' },
-        { id: 'api', text: 'API для бизнеса', href: '/api' }
+        { text: 'Помощь', href: '/help' },
+        { text: 'Правила', href: '/rules' },
+        { text: 'Конфиденциальность', href: '/privacy' },
+        { text: 'Условия использования', href: '/terms' }
       ]
     }
   ],
-  
-  socialLinks: [
-    {
-      id: 'vk',
-      name: 'VKontakte',
-      href: 'https://vk.com/spa_platform',
-      icon: 'vk',
-      color: '#0077FF'
-    },
-    {
-      id: 'telegram',
-      name: 'Telegram',
-      href: 'https://t.me/spa_platform',
-      icon: 'telegram',
-      color: '#2AABEE'
-    },
-    {
-      id: 'instagram',
-      name: 'Instagram',
-      href: 'https://instagram.com/spa_platform',
-      icon: 'instagram',
-      color: '#E4405F'
-    }
-  ],
-  
-  appStores: [
-    {
-      id: 'app-store',
-      name: 'appStore',
-      href: 'https://apps.apple.com/app/spa-platform',
-      image: '/images/app-store-badge.svg',
-      alt: 'Скачать в App Store'
-    },
-    {
-      id: 'google-play',
-      name: 'googlePlay',
-      href: 'https://play.google.com/store/apps/details?id=com.spa.platform',
-      image: '/images/google-play-badge.svg',
-      alt: 'Скачать в Google Play'
-    }
-  ],
-  
-  legalLinks: [
-    { id: 'privacy', text: 'Конфиденциальность', href: '/privacy' },
-    { id: 'terms', text: 'Условия использования', href: '/terms' },
-    { id: 'sitemap', text: 'Карта сайта', href: '/sitemap' }
-  ],
-  
+  social: {
+    telegram: 'https://t.me/spacom',
+    whatsapp: 'https://wa.me/1234567890',
+    vk: 'https://vk.com/spacom',
+    instagram: 'https://instagram.com/spacom'
+  },
   accessibility: {
-    enabled: true,
-    buttonText: 'Для слабовидящих'
+    ariaLabel: 'Подвал сайта',
+    role: 'contentinfo'
   }
 }
 
-// Utility functions for footer config
-export const getFooterSectionById = (sections: FooterSection[], id: string): FooterSection | null => {
-  return sections.find(section => section.id === id) || null
+// Вспомогательные функции
+export function getFooterSectionById(config: FooterConfig, id: string): FooterSection | undefined {
+  return config.sections.find(section => section.id === id)
 }
 
-export const getSortedFooterSections = (sections: FooterSection[]): FooterSection[] => {
-  return [...sections].sort((a, b) => a.order - b.order)
+export function getSortedFooterSections(config: FooterConfig): FooterSection[] {
+  return [...config.sections]
+    .filter(section => section.visible !== false)
+    .sort((a, b) => (a.order || 0) - (b.order || 0))
 }
 
-export const filterVisibleLinks = (links: FooterLink[]): FooterLink[] => {
-  return links.filter(link => link.href && link.text)
+export function filterVisibleLinks(links: FooterLink[]): FooterLink[] {
+  return links.filter(link => link.visible !== false)
 }
 
-export const isExternalLink = (href: string): boolean => {
-  return href.startsWith('http://') || href.startsWith('https://') || href.startsWith('//')
+export function isExternalLink(href: string): boolean {
+  return href.startsWith('http://') || href.startsWith('https://')
 }

@@ -1,36 +1,36 @@
 <!-- resources/js/Components/Profile/ProfileNavigation.vue -->
 <template>
-    <nav class="flex-1">
-        <div class="py-2">
-            <!-- РњРѕРё РѕР±СЉСЏРІР»РµРЅРёСЏ (РѕСЃРЅРѕРІРЅР°СЏ СЃРµРєС†РёСЏ) -->
-            <div class="px-4">
-                <Link 
-                    href="/profile/items/inactive/all"
-                    :class="menuItemClass(isAdsRoute)"
-                >
-                    <span>РњРѕРё РѕР±СЉСЏРІР»РµРЅРёСЏ</span>
-                    <span v-if="totalAds > 0" class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                        {{ totalAds }}
-                    </span>
-                </Link>
-            </div>
+  <nav class="flex-1">
+    <div class="py-2">
+      <!-- РњРѕРё РѕР±СЉСЏРІР»РµРЅРёСЏ (РѕСЃРЅРѕРІРЅР°СЏ СЃРµРєС†РёСЏ) -->
+      <div class="px-4">
+        <Link 
+          href="/profile/items/inactive/all"
+          :class="menuItemClass(isAdsRoute)"
+        >
+          <span>РњРѕРё РѕР±СЉСЏРІР»РµРЅРёСЏ</span>
+          <span v-if="totalAds > 0" class="text-xs bg-gray-500 text-gray-500 px-2 py-0.5 rounded-full">
+            {{ totalAds }}
+          </span>
+        </Link>
+      </div>
             
-            <!-- РћСЃС‚Р°Р»СЊРЅС‹Рµ РїСѓРЅРєС‚С‹ РјРµРЅСЋ -->
-            <div class="px-4 mt-2 space-y-1">
-                <Link 
-                    v-for="item in menuItems" 
-                    :key="item.href"
-                    :href="item.href"
-                    :class="menuItemClass(isCurrentRoute(item.href))"
-                >
-                    <span>{{ item.label }}</span>
-                    <span v-if="item.count > 0" class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                        {{ item.count }}
-                    </span>
-                </Link>
-            </div>
-        </div>
-    </nav>
+      <!-- РћСЃС‚Р°Р»СЊРЅС‹Рµ РїСѓРЅРєС‚С‹ РјРµРЅСЋ -->
+      <div class="px-4 mt-2 space-y-1">
+        <Link 
+          v-for="item in menuItems" 
+          :key="item.href"
+          :href="item.href"
+          :class="menuItemClass(isCurrentRoute(item.href))"
+        >
+          <span>{{ item.label }}</span>
+          <span v-if="item.count > 0" class="text-xs bg-gray-500 text-gray-500 px-2 py-0.5 rounded-full">
+            {{ item.count }}
+          </span>
+        </Link>
+      </div>
+    </div>
+  </nav>
 </template>
 
 <script setup>
@@ -90,6 +90,6 @@ const menuItemClass = (isActive) => [
     'flex items-center justify-between px-3 py-2 text-sm rounded-md transition-colors',
     isActive 
         ? 'bg-blue-50 text-blue-700 font-medium' 
-        : 'text-gray-700 hover:bg-gray-50'
+        : 'text-gray-500 hover:bg-gray-500'
 ]
 </script>

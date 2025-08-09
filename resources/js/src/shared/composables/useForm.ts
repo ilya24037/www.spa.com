@@ -66,7 +66,7 @@ export function useForm<T extends Record<string, any>>(options: FormOptions<T>) 
     
     const validationResult = validate(values.value)
     if (validationResult && validationResult[field as string]) {
-      errors.value[field as string] = validationResult[field as string]
+      errors.value[field as string] = validationResult[field as string] || ''
     } else {
       delete errors.value[field as string]
     }
@@ -135,7 +135,9 @@ export function useForm<T extends Record<string, any>>(options: FormOptions<T>) 
         onError: () => {
           // Обработка ошибок валидации от сервера
           Object.entries(validationErrors.value).forEach(([field, messages]) => {
-            errors.value[field] = messages[0]
+            if (messages && messages[0]) {
+              errors.value[field] = messages[0]
+            }
           })
         }
       }

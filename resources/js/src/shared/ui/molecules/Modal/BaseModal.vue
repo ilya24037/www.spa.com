@@ -145,21 +145,21 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  size: 'md',
-  variant: 'primary',
-  centered: true,
-  fullscreen: false,
-  closable: true,
-  closeOnBackdrop: true,
-  closeOnEscape: true,
-  showHeader: true,
-  showFooter: false,
-  showCancelButton: false,
-  showConfirmButton: false,
-  confirmText: 'РџРѕРґС‚РІРµСЂРґРёС‚СЊ',
-  cancelText: 'РћС‚РјРµРЅР°',
-  persistent: false,
-  zIndex: 50
+    size: 'md',
+    variant: 'primary',
+    centered: true,
+    fullscreen: false,
+    closable: true,
+    closeOnBackdrop: true,
+    closeOnEscape: true,
+    showHeader: true,
+    showFooter: false,
+    showCancelButton: false,
+    showConfirmButton: false,
+    confirmText: 'РџРѕРґС‚РІРµСЂРґРёС‚СЊ',
+    cancelText: 'РћС‚РјРµРЅР°',
+    persistent: false,
+    zIndex: 50
 })
 
 const emit = defineEmits<{
@@ -182,131 +182,131 @@ const contentId = generateUniqueId('modal-content')
 
 // Computed
 const sizeClasses = computed(() => {
-  const sizes = {
-    sm: 'modal-container--sm',
-    md: 'modal-container--md',
-    lg: 'modal-container--lg',
-    xl: 'modal-container--xl',
-    full: 'modal-container--full'
-  }
-  return sizes[props.size]
+    const sizes = {
+        sm: 'modal-container--sm',
+        md: 'modal-container--md',
+        lg: 'modal-container--lg',
+        xl: 'modal-container--xl',
+        full: 'modal-container--full'
+    }
+    return sizes[props.size]
 })
 
 // РњРµС‚РѕРґС‹
 const handleClose = () => {
-  if (!props.persistent) {
-    emit('update:modelValue', false)
-    emit('close')
-  }
+    if (!props.persistent) {
+        emit('update:modelValue', false)
+        emit('close')
+    }
 }
 
 const handleConfirm = () => {
-  emit('confirm')
-  if (!props.persistent) {
-    handleClose()
-  }
+    emit('confirm')
+    if (!props.persistent) {
+        handleClose()
+    }
 }
 
 const handleCancel = () => {
-  emit('cancel')
-  handleClose()
+    emit('cancel')
+    handleClose()
 }
 
 const handleBackdropClick = () => {
-  emit('backdrop')
-  if (props.closeOnBackdrop) {
-    handleClose()
-  }
+    emit('backdrop')
+    if (props.closeOnBackdrop) {
+        handleClose()
+    }
 }
 
 const handleEscapeKey = () => {
-  emit('escape')
-  if (props.closeOnEscape) {
-    handleClose()
-  }
+    emit('escape')
+    if (props.closeOnEscape) {
+        handleClose()
+    }
 }
 
 // Focus management
 const trapFocus = () => {
-  if (!modalRef.value) return
+    if (!modalRef.value) return
 
-  const focusableElements = modalRef.value.querySelectorAll(
-    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-  )
-  const firstElement = focusableElements[0] as HTMLElement
-  const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement
+    const focusableElements = modalRef.value.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    )
+    const firstElement = focusableElements[0] as HTMLElement
+    const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement
 
-  const handleTabKey = (e: KeyboardEvent) => {
-    if (e.key !== 'Tab') return
+    const handleTabKey = (e: KeyboardEvent) => {
+        if (e.key !== 'Tab') return
 
-    if (e.shiftKey) {
-      if (document.activeElement === firstElement) {
-        e.preventDefault()
-        lastElement?.focus()
-      }
-    } else {
-      if (document.activeElement === lastElement) {
-        e.preventDefault()
-        firstElement?.focus()
-      }
+        if (e.shiftKey) {
+            if (document.activeElement === firstElement) {
+                e.preventDefault()
+                lastElement?.focus()
+            }
+        } else {
+            if (document.activeElement === lastElement) {
+                e.preventDefault()
+                firstElement?.focus()
+            }
+        }
     }
-  }
 
-  modalRef.value.addEventListener('keydown', handleTabKey)
+    modalRef.value.addEventListener('keydown', handleTabKey)
   
-  return () => {
-    modalRef.value?.removeEventListener('keydown', handleTabKey)
-  }
+    return () => {
+        modalRef.value?.removeEventListener('keydown', handleTabKey)
+    }
 }
 
 const onEnter = async () => {
-  emit('open')
+    emit('open')
   
-  // РЎРѕС…СЂР°РЅСЏРµРј С‚РµРєСѓС‰РёР№ Р°РєС‚РёРІРЅС‹Р№ СЌР»РµРјРµРЅС‚
-  previousActiveElement.value = document.activeElement as HTMLElement
+    // РЎРѕС…СЂР°РЅСЏРµРј С‚РµРєСѓС‰РёР№ Р°РєС‚РёРІРЅС‹Р№ СЌР»РµРјРµРЅС‚
+    previousActiveElement.value = document.activeElement as HTMLElement
   
-  // РћС‚РєР»СЋС‡Р°РµРј СЃРєСЂРѕР»Р» body
-  document.body.style.overflow = 'hidden'
+    // РћС‚РєР»СЋС‡Р°РµРј СЃРєСЂРѕР»Р» body
+    document.body.style.overflow = 'hidden'
   
-  await nextTick()
+    await nextTick()
   
-  // Р¤РѕРєСѓСЃРёСЂСѓРµРјСЃСЏ РЅР° РїРµСЂРІС‹Р№ СЌР»РµРјРµРЅС‚ РјРѕРґР°Р»РєРё
-  const focusableElements = modalRef.value?.querySelectorAll(
-    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-  )
+    // Р¤РѕРєСѓСЃРёСЂСѓРµРјСЃСЏ РЅР° РїРµСЂРІС‹Р№ СЌР»РµРјРµРЅС‚ РјРѕРґР°Р»РєРё
+    const focusableElements = modalRef.value?.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    )
   
-  if (focusableElements && focusableElements.length > 0) {
-    (focusableElements[0] as HTMLElement).focus()
-  }
+    if (focusableElements && focusableElements.length > 0) {
+        (focusableElements[0] as HTMLElement).focus()
+    }
   
-  // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј trap focus
-  trapFocus()
+    // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј trap focus
+    trapFocus()
 }
 
 const onLeave = () => {
-  // Р’РѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµРј СЃРєСЂРѕР»Р» body
-  document.body.style.overflow = ''
+    // Р’РѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµРј СЃРєСЂРѕР»Р» body
+    document.body.style.overflow = ''
   
-  // Р’РѕР·РІСЂР°С‰Р°РµРј С„РѕРєСѓСЃ РЅР° РїСЂРµРґС‹РґСѓС‰РёР№ СЌР»РµРјРµРЅС‚
-  if (previousActiveElement.value) {
-    previousActiveElement.value.focus()
-  }
+    // Р’РѕР·РІСЂР°С‰Р°РµРј С„РѕРєСѓСЃ РЅР° РїСЂРµРґС‹РґСѓС‰РёР№ СЌР»РµРјРµРЅС‚
+    if (previousActiveElement.value) {
+        previousActiveElement.value.focus()
+    }
 }
 
 // РћС‚СЃР»РµР¶РёРІР°РµРј РёР·РјРµРЅРµРЅРёСЏ modelValue РґР»СЏ СѓРїСЂР°РІР»РµРЅРёСЏ С„РѕРєСѓСЃРѕРј
 watch(() => props.modelValue, (isOpen) => {
-  if (isOpen) {
-    nextTick(() => onEnter())
-  } else {
-    onLeave()
-  }
+    if (isOpen) {
+        nextTick(() => onEnter())
+    } else {
+        onLeave()
+    }
 })
 
 // Cleanup РїСЂРё СЂР°Р·РјРѕРЅС‚РёСЂРѕРІР°РЅРёРё
 onUnmounted(() => {
-  if (props.modelValue) {
-    document.body.style.overflow = ''
-  }
+    if (props.modelValue) {
+        document.body.style.overflow = ''
+    }
 })
 </script>
 
@@ -351,7 +351,7 @@ onUnmounted(() => {
 
 /* Р—Р°РіРѕР»РѕРІРѕРє */
 .modal-header {
-  @apply flex items-center justify-between p-6 border-b border-gray-200;
+  @apply flex items-center justify-between p-6 border-b border-gray-500;
 }
 
 .modal-header-content {
@@ -359,11 +359,11 @@ onUnmounted(() => {
 }
 
 .modal-title {
-  @apply text-lg font-semibold text-gray-900;
+  @apply text-lg font-semibold text-gray-500;
 }
 
 .modal-close-button {
-  @apply p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500;
+  @apply p-2 text-gray-500 hover:text-gray-500 rounded-lg hover:bg-gray-500 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500;
 }
 
 /* РљРѕРЅС‚РµРЅС‚ */
@@ -377,7 +377,7 @@ onUnmounted(() => {
 
 /* Р¤СѓС‚РµСЂ */
 .modal-footer {
-  @apply px-6 py-4 border-t border-gray-200 bg-gray-50;
+  @apply px-6 py-4 border-t border-gray-500 bg-gray-500;
 }
 
 .modal-actions {
@@ -390,7 +390,7 @@ onUnmounted(() => {
 }
 
 .modal-button--secondary {
-  @apply text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:ring-gray-500;
+  @apply text-gray-500 bg-white border border-gray-500 hover:bg-gray-500 focus:ring-gray-500;
 }
 
 .modal-button--primary {
@@ -462,7 +462,7 @@ onUnmounted(() => {
   }
   
   .modal-container {
-    @apply border-2 border-gray-800;
+    @apply border-2 border-gray-500;
   }
 }
 

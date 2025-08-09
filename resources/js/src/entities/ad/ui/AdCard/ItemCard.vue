@@ -6,22 +6,22 @@
 <template>
   <div 
     class="avito-item-snippet hover:shadow-lg transition-shadow" 
-    @click="handleContainerClick"
     role="article"
-    :aria-label="`РћР±СЉСЏРІР»РµРЅРёРµ: ${props.item.title || props.item.name || props.item.display_name}`"
+    :aria-label="`РћР±СЉСЏРІР»РµРЅРёРµ: ${item.title || item.name || item.display_name}`"
     data-testid="item-card"
+    @click="handleContainerClick"
   >
     <div class="item-snippet-content">
       <!-- РР·РѕР±СЂР°Р¶РµРЅРёРµ РІ СЃС‚РёР»Рµ Ozon -->
       <Link 
         :href="itemUrl" 
         class="item-image-container relative cursor-pointer"
-        :aria-label="`РџРѕСЃРјРѕС‚СЂРµС‚СЊ РѕР±СЉСЏРІР»РµРЅРёРµ ${props.item.title || props.item.name}`"
+        :aria-label="`РџРѕСЃРјРѕС‚СЂРµС‚СЊ РѕР±СЉСЏРІР»РµРЅРёРµ ${item.title || item.name}`"
         data-testid="item-image-link"
       >
         <ItemImage 
           :item="item"
-          :itemUrl="itemUrl"
+          :item-url="itemUrl"
         />
       </Link>
 
@@ -29,12 +29,12 @@
       <Link 
         :href="itemUrl" 
         class="item-content-link cursor-pointer"
-        :aria-label="`РћС‚РєСЂС‹С‚СЊ РѕР±СЉСЏРІР»РµРЅРёРµ ${props.item.title || props.item.name}`"
+        :aria-label="`РћС‚РєСЂС‹С‚СЊ РѕР±СЉСЏРІР»РµРЅРёРµ ${item.title || item.name}`"
         data-testid="item-content-link"
       >
         <ItemContent 
           :item="item"
-          :itemUrl="itemUrl"
+          :item-url="itemUrl"
         />
       </Link>
 
@@ -61,19 +61,19 @@
 
   <!-- РњРѕРґР°Р»СЊРЅРѕРµ РѕРєРЅРѕ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ СѓРґР°Р»РµРЅРёСЏ -->
   <ConfirmModal
-      :show="showDeleteModal"
-      title="РЈРґР°Р»РёС‚СЊ РѕР±СЉСЏРІР»РµРЅРёРµ?"
-      message="Р­С‚Рѕ РґРµР№СЃС‚РІРёРµ РЅРµР»СЊР·СЏ РѕС‚РјРµРЅРёС‚СЊ. РћР±СЉСЏРІР»РµРЅРёРµ Р±СѓРґРµС‚ СѓРґР°Р»РµРЅРѕ РЅР°РІСЃРµРіРґР°."
-      confirmText="РЈРґР°Р»РёС‚СЊ"
-      cancelText="РћС‚РјРµРЅР°"
-      @confirm="deleteItem"
-      @cancel="showDeleteModal = false"
-      data-testid="delete-modal"
-    />
+    :show="showDeleteModal"
+    title="РЈРґР°Р»РёС‚СЊ РѕР±СЉСЏРІР»РµРЅРёРµ?"
+    message="Р­С‚Рѕ РґРµР№СЃС‚РІРёРµ РЅРµР»СЊР·СЏ РѕС‚РјРµРЅРёС‚СЊ. РћР±СЉСЏРІР»РµРЅРёРµ Р±СѓРґРµС‚ СѓРґР°Р»РµРЅРѕ РЅР°РІСЃРµРіРґР°."
+    confirm-text="РЈРґР°Р»РёС‚СЊ"
+    cancel-text="РћС‚РјРµРЅР°"
+    data-testid="delete-modal"
+    @confirm="deleteItem"
+    @cancel="showDeleteModal = false"
+  />
 </template>
 
 <script setup lang="ts">
-import { ref, computed, withDefaults, type} from 'vue'
+import { ref, computed, withDefaults } from 'vue'
 import { router } from '@inertiajs/vue3'
 import ItemImage from './ItemImage.vue'
 import ItemContent from './ItemContent.vue'
@@ -83,106 +83,109 @@ import ConfirmModal from '@/src/shared/ui/organisms/Modal/Modal.vue'
 import { Link } from '@inertiajs/vue3'
 import { useToast } from '@/src/shared/composables/useToast'
 import type { 
-  ItemCardProps, 
-  ItemCardEmits,
-  ClickEvent
+    ItemCardProps, 
+    ItemCardEmits,
+    ClickEvent
 } from './ItemCard.types'
 
-// Toast РґР»СЏ Р·Р°РјРµРЅС‹ alert()
+// Toast РґР»СЏ Р·Р°РјРµРЅС‹ // Removed // Removed // Removed alert() - use toast notifications instead - use toast notifications instead - use toast notifications instead
 const toast = useToast()
 
 // Props
-const _props = withDefaults(defineProps<ItemCardProps>(), {})
+const props = withDefaults(defineProps<ItemCardProps>(), {})
 
 // Emits  
-const _emit = defineEmits<ItemCardEmits>()
+const emit = defineEmits<ItemCardEmits>()
+
+// Alias для удобства
+const { item } = props
 
 // РЎРѕСЃС‚РѕСЏРЅРёРµ РєРѕРјРїРѕРЅРµРЅС‚Р°
 const showDeleteModal = ref<boolean>(false)
 
 // Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
 const itemUrl = computed((): string => {
-  if (props.item.status === 'draft') {
-    return `/draft/${props.item.id}`
-  }
-  return `/ads/${props.item.id}`
+    if (props.item.status === 'draft') {
+        return `/draft/${props.item.id}`
+    }
+    return `/ads/${props.item.id}`
 })
 
 // РњРµС‚РѕРґС‹ РґРµР№СЃС‚РІРёР№
 const payItem = (): void => {
-  try {
-    router.visit(`/payment/select-plan?item_id=${props.item.id}`)
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР°'
-    toast.error('РћС€РёР±РєР° РѕРїР»Р°С‚С‹: ' + errorMessage)
-  }
+    try {
+        router.visit(`/payment/select-plan?item_id=${props.item.id}`)
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР°'
+        toast.error('РћС€РёР±РєР° РѕРїР»Р°С‚С‹: ' + errorMessage)
+    }
 }
 
 const promoteItem = (): void => {
-  try {
-    router.visit(`/payment/promotion?item_id=${props.item.id}`)
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР°'
-    toast.error('РћС€РёР±РєР° РїСЂРѕРґРІРёР¶РµРЅРёСЏ: ' + errorMessage)
-  }
+    try {
+        router.visit(`/payment/promotion?item_id=${props.item.id}`)
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР°'
+        toast.error('РћС€РёР±РєР° РїСЂРѕРґРІРёР¶РµРЅРёСЏ: ' + errorMessage)
+    }
 }
 
 const editItem = (): void => {
-  try {
+    try {
     
-    // Р•СЃР»Рё РјРѕРґР°Р»СЊРЅРѕРµ РѕРєРЅРѕ РѕС‚РєСЂС‹С‚Рѕ, РќР• СЂРµРґР°РєС‚РёСЂСѓРµРј
-    if (showDeleteModal.value) {
-      return
+        // Р•СЃР»Рё РјРѕРґР°Р»СЊРЅРѕРµ РѕРєРЅРѕ РѕС‚РєСЂС‹С‚Рѕ, РќР• СЂРµРґР°РєС‚РёСЂСѓРµРј
+        if (showDeleteModal.value) {
+            return
+        }
+    
+        // Р”Р»СЏ РІСЃРµС… РѕР±СЉСЏРІР»РµРЅРёР№ (РІРєР»СЋС‡Р°СЏ С‡РµСЂРЅРѕРІРёРєРё) РёСЃРїРѕР»СЊР·СѓРµРј РѕРґРёРЅ СЂРѕСѓС‚
+        router.visit(`/ads/${props.item.id}/edit`)
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР°'
+        toast.error('РћС€РёР±РєР° СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ: ' + errorMessage)
     }
-    
-    // Р”Р»СЏ РІСЃРµС… РѕР±СЉСЏРІР»РµРЅРёР№ (РІРєР»СЋС‡Р°СЏ С‡РµСЂРЅРѕРІРёРєРё) РёСЃРїРѕР»СЊР·СѓРµРј РѕРґРёРЅ СЂРѕСѓС‚
-    router.visit(`/ads/${props.item.id}/edit`)
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР°'
-    toast.error('РћС€РёР±РєР° СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ: ' + errorMessage)
-  }
 }
 
 const deactivateItem = async (): Promise<void> => {
-  try {
+    try {
     // РСЃРїРѕР»СЊР·СѓРµРј РїСЂР°РІРёР»СЊРЅС‹Р№ СЂРѕСѓС‚ С‡РµСЂРµР· router
-    await router.post(`/my-ads/${props.item.id}/deactivate`, {}, {
-      preserveState: true,
-      onSuccess: () => {
-        const updatedItem = { ...props.item, status: 'archived' as const }
-        emit('item-updated', updatedItem)
-        toast.success('РћР±СЉСЏРІР»РµРЅРёРµ РґРµР°РєС‚РёРІРёСЂРѕРІР°РЅРѕ')
-      },
-      onError: (errors) => {
-        const errorMessage = typeof errors === 'string' ? errors : 'РћС€РёР±РєР° РґРµР°РєС‚РёРІР°С†РёРё'
-        toast.error(errorMessage)
-      }
-    })
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР°'
-    toast.error('РћС€РёР±РєР° РґРµР°РєС‚РёРІР°С†РёРё: ' + errorMessage)
-  }
+        await router.post(`/my-ads/${props.item.id}/deactivate`, {}, {
+            preserveState: true,
+            onSuccess: () => {
+                const updatedItem = { ...props.item, status: 'archived' as const }
+                emit('item-updated', updatedItem)
+                toast.success('РћР±СЉСЏРІР»РµРЅРёРµ РґРµР°РєС‚РёРІРёСЂРѕРІР°РЅРѕ')
+            },
+            onError: (errors) => {
+                const errorMessage = typeof errors === 'string' ? errors : 'РћС€РёР±РєР° РґРµР°РєС‚РёРІР°С†РёРё'
+                toast.error(errorMessage)
+            }
+        })
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР°'
+        toast.error('РћС€РёР±РєР° РґРµР°РєС‚РёРІР°С†РёРё: ' + errorMessage)
+    }
 }
 
 const restoreItem = async (): Promise<void> => {
-  try {
+    try {
     // РСЃРїРѕР»СЊР·СѓРµРј РїСЂР°РІРёР»СЊРЅС‹Р№ СЂРѕСѓС‚ С‡РµСЂРµР· router
-    await router.post(`/my-ads/${props.item.id}/restore`, {}, {
-      preserveState: true,
-      onSuccess: () => {
-        const updatedItem = { ...props.item, status: 'active' as const }
-        emit('item-updated', updatedItem)
-        toast.success('РћР±СЉСЏРІР»РµРЅРёРµ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРѕ')
-      },
-      onError: (errors) => {
-        const errorMessage = typeof errors === 'string' ? errors : 'РћС€РёР±РєР° РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ'
-        toast.error(errorMessage)
-      }
-    })
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР°'
-    toast.error('РћС€РёР±РєР° РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ: ' + errorMessage)
-  }
+        await router.post(`/my-ads/${props.item.id}/restore`, {}, {
+            preserveState: true,
+            onSuccess: () => {
+                const updatedItem = { ...props.item, status: 'active' as const }
+                emit('item-updated', updatedItem)
+                toast.success('РћР±СЉСЏРІР»РµРЅРёРµ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРѕ')
+            },
+            onError: (errors) => {
+                const errorMessage = typeof errors === 'string' ? errors : 'РћС€РёР±РєР° РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ'
+                toast.error(errorMessage)
+            }
+        })
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР°'
+        toast.error('РћС€РёР±РєР° РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ: ' + errorMessage)
+    }
 }
 
 const handleContainerClick = (event: ClickEvent): void => {
@@ -190,62 +193,62 @@ const handleContainerClick = (event: ClickEvent): void => {
 
 const handleDeleteClick = (event: ClickEvent): void => {
   
-  // Р‘РµР·РѕРїР°СЃРЅРѕ РѕСЃС‚Р°РЅР°РІР»РёРІР°РµРј РІСЃРїР»С‹С‚РёРµ СЃРѕР±С‹С‚РёСЏ С‡С‚РѕР±С‹ РЅРµ СЃСЂР°Р±РѕС‚Р°Р» Link
-  if (event && typeof event.stopPropagation === 'function') {
-    event.stopPropagation()
-  }
-  if (event && typeof event.preventDefault === 'function') {
-    event.preventDefault()
-  }
+    // Р‘РµР·РѕРїР°СЃРЅРѕ РѕСЃС‚Р°РЅР°РІР»РёРІР°РµРј РІСЃРїР»С‹С‚РёРµ СЃРѕР±С‹С‚РёСЏ С‡С‚РѕР±С‹ РЅРµ СЃСЂР°Р±РѕС‚Р°Р» Link
+    if (event && typeof event.stopPropagation === 'function') {
+        event.stopPropagation()
+    }
+    if (event && typeof event.preventDefault === 'function') {
+        event.preventDefault()
+    }
   
-  showDeleteModal.value = true
+    showDeleteModal.value = true
 }
 
 const deleteItem = async (): Promise<void> => {
-  try {
+    try {
     
-    // Р’С‹Р±РёСЂР°РµРј РїСЂР°РІРёР»СЊРЅС‹Р№ СЂРѕСѓС‚ РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ С‚РёРїР° РѕР±СЉСЏРІР»РµРЅРёСЏ
-    const deleteUrl = props.item.status === 'draft' 
-      ? `/draft/${props.item.id}` 
-      : `/my-ads/${props.item.id}`
+        // Р’С‹Р±РёСЂР°РµРј РїСЂР°РІРёР»СЊРЅС‹Р№ СЂРѕСѓС‚ РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ С‚РёРїР° РѕР±СЉСЏРІР»РµРЅРёСЏ
+        const deleteUrl = props.item.status === 'draft' 
+            ? `/draft/${props.item.id}` 
+            : `/my-ads/${props.item.id}`
     
     
-    // РСЃРїРѕР»СЊР·СѓРµРј РїСЂР°РІРёР»СЊРЅС‹Р№ СЂРѕСѓС‚ С‡РµСЂРµР· router РґР»СЏ СѓРґР°Р»РµРЅРёСЏ
-    await router.delete(deleteUrl, {
-      preserveScroll: false,
-      preserveState: false,
-      onStart: () => {
-      },
-      onSuccess: (_page) => {
+        // РСЃРїРѕР»СЊР·СѓРµРј РїСЂР°РІРёР»СЊРЅС‹Р№ СЂРѕСѓС‚ С‡РµСЂРµР· router РґР»СЏ СѓРґР°Р»РµРЅРёСЏ
+        await router.delete(deleteUrl, {
+            preserveScroll: false,
+            preserveState: false,
+            onStart: () => {
+            },
+            onSuccess: (_page) => {
         
-        // Р­РјРёС‚РёРј СЃРѕР±С‹С‚РёРµ РґР»СЏ РѕР±РЅРѕРІР»РµРЅРёСЏ СЃРїРёСЃРєР°
-        emit('item-deleted', props.item.id)
+                // Р­РјРёС‚РёРј СЃРѕР±С‹С‚РёРµ РґР»СЏ РѕР±РЅРѕРІР»РµРЅРёСЏ СЃРїРёСЃРєР°
+                emit('item-deleted', props.item.id)
+                showDeleteModal.value = false
+                toast.success('РћР±СЉСЏРІР»РµРЅРёРµ СѓРґР°Р»РµРЅРѕ')
+            },
+            onError: (errors) => {
+        
+                const errorMessage = typeof errors === 'object' && errors !== null && 'message' in errors
+                    ? String(errors.message)
+                    : 'РћС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ РѕР±СЉСЏРІР»РµРЅРёСЏ'
+        
+                toast.error(errorMessage)
+                showDeleteModal.value = false
+            },
+            onFinish: () => {
+            }
+        })
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР°'
+        toast.error('РћС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ: ' + errorMessage)
         showDeleteModal.value = false
-        toast.success('РћР±СЉСЏРІР»РµРЅРёРµ СѓРґР°Р»РµРЅРѕ')
-      },
-      onError: (errors) => {
-        
-        const errorMessage = typeof errors === 'object' && errors !== null && 'message' in errors
-          ? String(errors.message)
-          : 'РћС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ РѕР±СЉСЏРІР»РµРЅРёСЏ'
-        
-        toast.error(errorMessage)
-        showDeleteModal.value = false
-      },
-      onFinish: () => {
-      }
-    })
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР°'
-    toast.error('РћС€РёР±РєР° СѓРґР°Р»РµРЅРёСЏ: ' + errorMessage)
-    showDeleteModal.value = false
-  }
+    }
 }
 </script>
 
 <style scoped>
 .avito-item-snippet {
-  @apply bg-white border border-gray-200 mb-4 relative;
+  @apply bg-white border border-gray-500 mb-4 relative;
   border-radius: 16px; /* РљР°Рє РЅР° Ozon */
   padding: 0; /* РЈР±РёСЂР°РµРј padding РєР°Рє РЅР° Ozon */
   height: fit-content; /* РЎС‚СЂРѕРіРѕ РїРѕ РєРѕРЅС‚РµРЅС‚Сѓ */

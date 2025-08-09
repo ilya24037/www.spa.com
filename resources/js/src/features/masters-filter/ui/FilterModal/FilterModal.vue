@@ -1,9 +1,9 @@
 <template>
   <Modal
     :model-value="modelValue"
-    @update:model-value="$emit('update:modelValue', $event)"
     title="Р¤РёР»СЊС‚СЂС‹"
     size="md"
+    @update:model-value="$emit('update:modelValue', $event)"
   >
     <FilterPanel @apply="handleApply" @reset="handleReset">
       <slot />
@@ -26,11 +26,11 @@ const emit = defineEmits<{
 }>()
 
 const handleApply = () => {
-  emit('apply')
-  emit('update:modelValue', false)
+    emit('apply')
+    emit('update:modelValue', false)
 }
 
 const handleReset = () => {
-  emit('reset')
+    emit('reset')
 }
 </script>

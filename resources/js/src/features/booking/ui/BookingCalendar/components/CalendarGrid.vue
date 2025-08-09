@@ -45,7 +45,7 @@
           :key="`skeleton-weekday-${n}`"
           class="calendar-weekday"
         >
-          <div class="animate-pulse h-4 bg-gray-200 rounded w-6"></div>
+          <div class="animate-pulse h-4 bg-gray-500 rounded w-6" />
         </div>
       </div>
       <div class="calendar-days">
@@ -54,7 +54,7 @@
           :key="`skeleton-day-${n}`"
           class="calendar-day-skeleton"
         >
-          <div class="animate-pulse h-8 bg-gray-200 rounded"></div>
+          <div class="animate-pulse h-8 bg-gray-500 rounded" />
         </div>
       </div>
     </div>
@@ -78,11 +78,11 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  weekDays: () => ['РџРЅ', 'Р’С‚', 'РЎСЂ', 'Р§С‚', 'РџС‚', 'РЎР±', 'Р’СЃ'],
-  disabled: false,
-  loading: false,
-  showBookingIndicators: true,
-  keyboardNavigation: true
+    weekDays: () => ['РџРЅ', 'Р’С‚', 'РЎСЂ', 'Р§С‚', 'РџС‚', 'РЎР±', 'Р’СЃ'],
+    disabled: false,
+    loading: false,
+    showBookingIndicators: true,
+    keyboardNavigation: true
 })
 
 const emit = defineEmits<{
@@ -97,125 +97,125 @@ const focusedDayIndex = ref<number>(-1)
 
 // РћР±СЂР°Р±РѕС‚С‡РёРєРё СЃРѕР±С‹С‚РёР№
 const handleDayClick = (day: CalendarDayType) => {
-  if (props.disabled || !day.isAvailable) return
+    if (props.disabled || !day.isAvailable) return
   
-  emit('dayClick', day)
-  emit('dateSelect', day.dateString)
+    emit('dayClick', day)
+    emit('dateSelect', day.dateString)
 }
 
 const handleDayHover = (dateString: string | null) => {
-  if (props.disabled) return
-  emit('dayHover', dateString)
+    if (props.disabled) return
+    emit('dayHover', dateString)
 }
 
 const handleDayFocus = (day: CalendarDayType, index: number) => {
-  focusedDayIndex.value = index
-  emit('dayFocus', day)
+    focusedDayIndex.value = index
+    emit('dayFocus', day)
 }
 
 // РџРѕР»СѓС‡РµРЅРёРµ ARIA label РґР»СЏ РґРЅСЏ
 const getDayAriaLabel = (day: CalendarDayType): string => {
-  let label = `${day.day} ${props.currentMonthName}`
+    let label = `${day.day} ${props.currentMonthName}`
   
-  if (!day.isCurrentMonth) {
-    const monthNames = [
-      'РЇРЅРІР°СЂСЊ', 'Р¤РµРІСЂР°Р»СЊ', 'РњР°СЂС‚', 'РђРїСЂРµР»СЊ', 'РњР°Р№', 'РСЋРЅСЊ',
-      'РСЋР»СЊ', 'РђРІРіСѓСЃС‚', 'РЎРµРЅС‚СЏР±СЂСЊ', 'РћРєС‚СЏР±СЂСЊ', 'РќРѕСЏР±СЂСЊ', 'Р”РµРєР°Р±СЂСЊ'
-    ]
-    label = `${day.day} ${monthNames[day.date.getMonth()]}`
-  }
+    if (!day.isCurrentMonth) {
+        const monthNames = [
+            'РЇРЅРІР°СЂСЊ', 'Р¤РµРІСЂР°Р»СЊ', 'РњР°СЂС‚', 'РђРїСЂРµР»СЊ', 'РњР°Р№', 'РСЋРЅСЊ',
+            'РСЋР»СЊ', 'РђРІРіСѓСЃС‚', 'РЎРµРЅС‚СЏР±СЂСЊ', 'РћРєС‚СЏР±СЂСЊ', 'РќРѕСЏР±СЂСЊ', 'Р”РµРєР°Р±СЂСЊ'
+        ]
+        label = `${day.day} ${monthNames[day.date.getMonth()]}`
+    }
   
-  if (day.isToday) label += ', СЃРµРіРѕРґРЅСЏ'
-  if (day.isSelected) label += ', РІС‹Р±СЂР°РЅРѕ'
-  if (day.isWeekend) label += ', РІС‹С…РѕРґРЅРѕР№'
-  if (!day.isAvailable) label += ', РЅРµРґРѕСЃС‚СѓРїРЅРѕ'
-  else if (day.bookingInfo) {
-    const slots = day.bookingInfo.availableSlots
-    if (slots === 0) label += ', РІСЃРµ Р·Р°РЅСЏС‚Рѕ'
-    else if (slots === 1) label += ', 1 СЃРІРѕР±РѕРґРЅРѕРµ РјРµСЃС‚Рѕ'
-    else label += `, ${slots} СЃРІРѕР±РѕРґРЅС‹С… РјРµСЃС‚`
-  }
+    if (day.isToday) label += ', СЃРµРіРѕРґРЅСЏ'
+    if (day.isSelected) label += ', РІС‹Р±СЂР°РЅРѕ'
+    if (day.isWeekend) label += ', РІС‹С…РѕРґРЅРѕР№'
+    if (!day.isAvailable) label += ', РЅРµРґРѕСЃС‚СѓРїРЅРѕ'
+    else if (day.bookingInfo) {
+        const slots = day.bookingInfo.availableSlots
+        if (slots === 0) label += ', РІСЃРµ Р·Р°РЅСЏС‚Рѕ'
+        else if (slots === 1) label += ', 1 СЃРІРѕР±РѕРґРЅРѕРµ РјРµСЃС‚Рѕ'
+        else label += `, ${slots} СЃРІРѕР±РѕРґРЅС‹С… РјРµСЃС‚`
+    }
   
-  return label
+    return label
 }
 
 // РџРѕР»СѓС‡РµРЅРёРµ tabindex РґР»СЏ РґРЅСЏ (РґР»СЏ РєР»Р°РІРёР°С‚СѓСЂРЅРѕР№ РЅР°РІРёРіР°С†РёРё)
 const getDayTabIndex = (day: CalendarDayType, index: number): string => {
-  if (!props.keyboardNavigation || props.disabled) return '-1'
+    if (!props.keyboardNavigation || props.disabled) return '-1'
   
-  // РџРµСЂРІС‹Р№ РґРѕСЃС‚СѓРїРЅС‹Р№ РґРµРЅСЊ РїРѕР»СѓС‡Р°РµС‚ tabindex="0"
-  if (focusedDayIndex.value === -1 && day.isCurrentMonth && day.isAvailable) {
-    return '0'
-  }
+    // РџРµСЂРІС‹Р№ РґРѕСЃС‚СѓРїРЅС‹Р№ РґРµРЅСЊ РїРѕР»СѓС‡Р°РµС‚ tabindex="0"
+    if (focusedDayIndex.value === -1 && day.isCurrentMonth && day.isAvailable) {
+        return '0'
+    }
   
-  // РЎС„РѕРєСѓСЃРёСЂРѕРІР°РЅРЅС‹Р№ РґРµРЅСЊ РїРѕР»СѓС‡Р°РµС‚ tabindex="0"
-  if (focusedDayIndex.value === index) return '0'
+    // РЎС„РѕРєСѓСЃРёСЂРѕРІР°РЅРЅС‹Р№ РґРµРЅСЊ РїРѕР»СѓС‡Р°РµС‚ tabindex="0"
+    if (focusedDayIndex.value === index) return '0'
   
-  return '-1'
+    return '-1'
 }
 
 // РљР»Р°РІРёР°С‚СѓСЂРЅР°СЏ РЅР°РІРёРіР°С†РёСЏ
 const handleKeyNavigation = async (event: KeyboardEvent) => {
-  if (!props.keyboardNavigation || props.disabled) return
+    if (!props.keyboardNavigation || props.disabled) return
   
-  const { key } = event
-  const currentIndex = focusedDayIndex.value
-  let newIndex = currentIndex
+    const { key } = event
+    const currentIndex = focusedDayIndex.value
+    let newIndex = currentIndex
 
-  switch (key) {
+    switch (key) {
     case 'ArrowLeft':
-      newIndex = Math.max(0, currentIndex - 1)
-      break
+        newIndex = Math.max(0, currentIndex - 1)
+        break
     case 'ArrowRight':
-      newIndex = Math.min(props.calendarDays.length - 1, currentIndex + 1)
-      break
+        newIndex = Math.min(props.calendarDays.length - 1, currentIndex + 1)
+        break
     case 'ArrowUp':
-      newIndex = Math.max(0, currentIndex - 7)
-      break
+        newIndex = Math.max(0, currentIndex - 7)
+        break
     case 'ArrowDown':
-      newIndex = Math.min(props.calendarDays.length - 1, currentIndex + 7)
-      break
+        newIndex = Math.min(props.calendarDays.length - 1, currentIndex + 7)
+        break
     case 'Home':
-      newIndex = 0
-      break
+        newIndex = 0
+        break
     case 'End':
-      newIndex = props.calendarDays.length - 1
-      break
+        newIndex = props.calendarDays.length - 1
+        break
     case 'Enter':
     case ' ':
-      if (currentIndex >= 0) {
-        const day = props.calendarDays[currentIndex]
-        if (day && day.isAvailable) {
-          if (day) handleDayClick(day)
+        if (currentIndex >= 0) {
+            const day = props.calendarDays[currentIndex]
+            if (day && day.isAvailable) {
+                if (day) handleDayClick(day)
+            }
         }
-      }
-      break
+        break
     default:
-      return // РќРµ РѕР±СЂР°Р±Р°С‚С‹РІР°РµРј РґСЂСѓРіРёРµ РєР»Р°РІРёС€Рё
-  }
-
-  if (newIndex !== currentIndex && newIndex >= 0 && newIndex < props.calendarDays.length) {
-    event.preventDefault()
-    focusedDayIndex.value = newIndex
-    
-    await nextTick()
-    
-    // Р¤РѕРєСѓСЃРёСЂСѓРµРјСЃСЏ РЅР° РЅРѕРІРѕРј РґРЅРµ
-    const dayElement = document.querySelector(`[data-day-index="${newIndex}"]`) as HTMLElement
-    if (dayElement) {
-      dayElement.focus()
+        return // РќРµ РѕР±СЂР°Р±Р°С‚С‹РІР°РµРј РґСЂСѓРіРёРµ РєР»Р°РІРёС€Рё
     }
-  }
+
+    if (newIndex !== currentIndex && newIndex >= 0 && newIndex < props.calendarDays.length) {
+        event.preventDefault()
+        focusedDayIndex.value = newIndex
+    
+        await nextTick()
+    
+        // Р¤РѕРєСѓСЃРёСЂСѓРµРјСЃСЏ РЅР° РЅРѕРІРѕРј РґРЅРµ
+        const dayElement = document.querySelector(`[data-day-index="${newIndex}"]`) as HTMLElement
+        if (dayElement) {
+            dayElement.focus()
+        }
+    }
 }
 
 // РќР°С…РѕРґРёРј С‚РµРєСѓС‰РёР№ РґРµРЅСЊ РґР»СЏ РЅР°С‡Р°Р»СЊРЅРѕР№ СѓСЃС‚Р°РЅРѕРІРєРё С„РѕРєСѓСЃР°
 const todayIndex = computed(() => {
-  return props.calendarDays.findIndex(day => day.isToday && day.isCurrentMonth)
+    return props.calendarDays.findIndex(day => day.isToday && day.isCurrentMonth)
 })
 
 // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј РЅР°С‡Р°Р»СЊРЅС‹Р№ С„РѕРєСѓСЃ РЅР° СЃРµРіРѕРґРЅСЏС€РЅРёР№ РґРµРЅСЊ
 if (todayIndex.value >= 0) {
-  focusedDayIndex.value = todayIndex.value
+    focusedDayIndex.value = todayIndex.value
 }
 </script>
 
@@ -233,7 +233,7 @@ if (todayIndex.value >= 0) {
 }
 
 .calendar-weekday-text {
-  @apply text-sm font-medium text-gray-700;
+  @apply text-sm font-medium text-gray-500;
 }
 
 .calendar-days {

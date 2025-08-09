@@ -64,7 +64,7 @@
             class="confirm-input"
             :placeholder="confirmationPlaceholder"
             @keydown.enter="handleConfirm"
-          />
+          >
         </div>
       </div>
     </div>
@@ -100,17 +100,17 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  title: 'РџРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ РґРµР№СЃС‚РІРёСЏ',
-  message: 'Р’С‹ СѓРІРµСЂРµРЅС‹, С‡С‚Рѕ С…РѕС‚РёС‚Рµ РїСЂРѕРґРѕР»Р¶РёС‚СЊ?',
-  variant: 'info',
-  size: 'sm',
-  confirmText: 'РџРѕРґС‚РІРµСЂРґРёС‚СЊ',
-  cancelText: 'РћС‚РјРµРЅР°',
-  persistent: false,
-  requiresConfirmation: false,
-  confirmationText: '',
-  confirmationLabel: 'Р’РІРµРґРёС‚Рµ РґР»СЏ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ:',
-  confirmationPlaceholder: 'Р’РІРµРґРёС‚Рµ С‚РµРєСЃС‚'
+    title: 'РџРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ РґРµР№СЃС‚РІРёСЏ',
+    message: 'Р’С‹ СѓРІРµСЂРµРЅС‹, С‡С‚Рѕ С…РѕС‚РёС‚Рµ РїСЂРѕРґРѕР»Р¶РёС‚СЊ?',
+    variant: 'info',
+    size: 'sm',
+    confirmText: 'РџРѕРґС‚РІРµСЂРґРёС‚СЊ',
+    cancelText: 'РћС‚РјРµРЅР°',
+    persistent: false,
+    requiresConfirmation: false,
+    confirmationText: '',
+    confirmationLabel: 'Р’РІРµРґРёС‚Рµ РґР»СЏ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ:',
+    confirmationPlaceholder: 'Р’РІРµРґРёС‚Рµ С‚РµРєСЃС‚'
 })
 
 const emit = defineEmits<{
@@ -126,119 +126,119 @@ const inputId = generateUniqueId('confirm-input')
 
 // Computed
 const iconWrapperClasses = computed(() => {
-  const classes = {
-    info: 'bg-blue-100 text-blue-600',
-    warning: 'bg-yellow-100 text-yellow-600',
-    danger: 'bg-red-100 text-red-600',
-    success: 'bg-green-100 text-green-600'
-  }
-  return classes[props.variant]
+    const classes = {
+        info: 'bg-blue-100 text-blue-600',
+        warning: 'bg-yellow-100 text-yellow-600',
+        danger: 'bg-red-100 text-red-600',
+        success: 'bg-green-100 text-green-600'
+    }
+    return classes[props.variant]
 })
 
 const iconClasses = computed(() => {
-  const classes = {
-    info: 'text-blue-600',
-    warning: 'text-yellow-600',
-    danger: 'text-red-600',
-    success: 'text-green-600'
-  }
-  return classes[props.variant]
+    const classes = {
+        info: 'text-blue-600',
+        warning: 'text-yellow-600',
+        danger: 'text-red-600',
+        success: 'text-green-600'
+    }
+    return classes[props.variant]
 })
 
 const messageClasses = computed(() => {
-  const classes = {
-    info: 'text-gray-900',
-    warning: 'text-gray-900',
-    danger: 'text-gray-900',
-    success: 'text-gray-900'
-  }
-  return classes[props.variant]
+    const classes = {
+        info: 'text-gray-500',
+        warning: 'text-gray-500',
+        danger: 'text-gray-500',
+        success: 'text-gray-500'
+    }
+    return classes[props.variant]
 })
 
 const iconComponent = computed(() => {
-  const icons = {
-    info: () => h('svg', {
-      fill: 'none',
-      stroke: 'currentColor',
-      viewBox: '0 0 24 24',
-      class: 'w-6 h-6'
-    }, [
-      h('path', {
-        'stroke-linecap': 'round',
-        'stroke-linejoin': 'round',
-        'stroke-width': '2',
-        d: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
-      })
-    ]),
+    const icons = {
+        info: () => h('svg', {
+            fill: 'none',
+            stroke: 'currentColor',
+            viewBox: '0 0 24 24',
+            class: 'w-6 h-6'
+        }, [
+            h('path', {
+                'stroke-linecap': 'round',
+                'stroke-linejoin': 'round',
+                'stroke-width': '2',
+                d: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
+            })
+        ]),
     
-    warning: () => h('svg', {
-      fill: 'none',
-      stroke: 'currentColor',
-      viewBox: '0 0 24 24',
-      class: 'w-6 h-6'
-    }, [
-      h('path', {
-        'stroke-linecap': 'round',
-        'stroke-linejoin': 'round',
-        'stroke-width': '2',
-        d: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'
-      })
-    ]),
+        warning: () => h('svg', {
+            fill: 'none',
+            stroke: 'currentColor',
+            viewBox: '0 0 24 24',
+            class: 'w-6 h-6'
+        }, [
+            h('path', {
+                'stroke-linecap': 'round',
+                'stroke-linejoin': 'round',
+                'stroke-width': '2',
+                d: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'
+            })
+        ]),
     
-    danger: () => h('svg', {
-      fill: 'none',
-      stroke: 'currentColor',
-      viewBox: '0 0 24 24',
-      class: 'w-6 h-6'
-    }, [
-      h('path', {
-        'stroke-linecap': 'round',
-        'stroke-linejoin': 'round',
-        'stroke-width': '2',
-        d: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'
-      })
-    ]),
+        danger: () => h('svg', {
+            fill: 'none',
+            stroke: 'currentColor',
+            viewBox: '0 0 24 24',
+            class: 'w-6 h-6'
+        }, [
+            h('path', {
+                'stroke-linecap': 'round',
+                'stroke-linejoin': 'round',
+                'stroke-width': '2',
+                d: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'
+            })
+        ]),
     
-    success: () => h('svg', {
-      fill: 'none',
-      stroke: 'currentColor',
-      viewBox: '0 0 24 24',
-      class: 'w-6 h-6'
-    }, [
-      h('path', {
-        'stroke-linecap': 'round',
-        'stroke-linejoin': 'round',
-        'stroke-width': '2',
-        d: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'
-      })
-    ])
-  }
+        success: () => h('svg', {
+            fill: 'none',
+            stroke: 'currentColor',
+            viewBox: '0 0 24 24',
+            class: 'w-6 h-6'
+        }, [
+            h('path', {
+                'stroke-linecap': 'round',
+                'stroke-linejoin': 'round',
+                'stroke-width': '2',
+                d: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'
+            })
+        ])
+    }
   
-  return icons[props.variant]
+    return icons[props.variant]
 })
 
 const canConfirm = computed(() => {
-  if (!props.requiresConfirmation) return true
-  return confirmationInput.value.trim() === props.confirmationText.trim()
+    if (!props.requiresConfirmation) return true
+    return confirmationInput.value.trim() === props.confirmationText.trim()
 })
 
 // Methods
 const handleConfirm = () => {
-  if (!canConfirm.value) return
+    if (!canConfirm.value) return
   
-  emit('confirm')
-  handleClose()
+    emit('confirm')
+    handleClose()
 }
 
 const handleCancel = () => {
-  emit('cancel')
-  handleClose()
+    emit('cancel')
+    handleClose()
 }
 
 const handleClose = () => {
-  confirmationInput.value = ''
-  emit('update:modelValue', false)
-  emit('close')
+    confirmationInput.value = ''
+    emit('update:modelValue', false)
+    emit('close')
 }
 </script>
 
@@ -260,11 +260,11 @@ const handleClose = () => {
 }
 
 .confirm-message {
-  @apply text-base font-medium text-gray-900 mb-2;
+  @apply text-base font-medium text-gray-500 mb-2;
 }
 
 .confirm-description {
-  @apply text-sm text-gray-600 mb-4;
+  @apply text-sm text-gray-500 mb-4;
 }
 
 .confirm-extra {
@@ -276,11 +276,11 @@ const handleClose = () => {
 }
 
 .confirm-input-label {
-  @apply block text-sm font-medium text-gray-700 mb-2;
+  @apply block text-sm font-medium text-gray-500 mb-2;
 }
 
 .confirm-input {
-  @apply w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+  @apply w-full px-3 py-2 border border-gray-500 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
 }
 
 .confirm-input:focus {
@@ -344,7 +344,7 @@ const handleClose = () => {
 /* Р’С‹СЃРѕРєРёР№ РєРѕРЅС‚СЂР°СЃС‚ */
 @media (prefers-contrast: high) {
   .confirm-input {
-    @apply border-2 border-gray-800;
+    @apply border-2 border-gray-500;
   }
 }
 </style>

@@ -22,36 +22,99 @@
         <div class="toast-content">
           <!-- РРєРѕРЅРєР° -->
           <div class="toast-icon">
-            <svg v-if="type === 'success'" width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M16.25 5.75L7.5 14.5L3.75 10.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg
+              v-if="type === 'success'"
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+            >
+              <path
+                d="M16.25 5.75L7.5 14.5L3.75 10.75"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
-            <svg v-else-if="type === 'error'" width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg
+              v-else-if="type === 'error'"
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+            >
+              <path
+                d="M15 5L5 15M5 5L15 15"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
-            <svg v-else-if="type === 'warning'" width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M10 6V10M10 14H10.01M18 10C18 14.4183 14.4183 18 10 18C5.58172 18 2 14.4183 2 10C2 5.58172 5.58172 2 10 2C14.4183 2 18 5.58172 18 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg
+              v-else-if="type === 'warning'"
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+            >
+              <path
+                d="M10 6V10M10 14H10.01M18 10C18 14.4183 14.4183 18 10 18C5.58172 18 2 14.4183 2 10C2 5.58172 5.58172 2 10 2C14.4183 2 18 5.58172 18 10Z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
-            <svg v-else width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M10 6V10M10 14H10.01M18 10C18 14.4183 14.4183 18 10 18C5.58172 18 2 14.4183 2 10C2 5.58172 5.58172 2 10 2C14.4183 2 18 5.58172 18 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg
+              v-else
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+            >
+              <path
+                d="M10 6V10M10 14H10.01M18 10C18 14.4183 14.4183 18 10 18C5.58172 18 2 14.4183 2 10C2 5.58172 5.58172 2 10 2C14.4183 2 18 5.58172 18 10Z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </div>
 
           <!-- РљРѕРЅС‚РµРЅС‚ -->
           <div class="toast-text">
-            <div v-if="title" class="toast-title">{{ title }}</div>
-            <div class="toast-message">{{ message }}</div>
+            <div v-if="title" class="toast-title">
+              {{ title }}
+            </div>
+            <div class="toast-message">
+              {{ message }}
+            </div>
           </div>
 
           <!-- РљРЅРѕРїРєР° Р·Р°РєСЂС‹С‚РёСЏ -->
           <button
             v-if="closable"
-            @click="close"
             class="toast-close"
             type="button"
             :aria-label="`Р—Р°РєСЂС‹С‚СЊ ${type} СѓРІРµРґРѕРјР»РµРЅРёРµ`"
+            @click="close"
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+            >
+              <path
+                d="M12 4L4 12M4 4L12 12"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </button>
         </div>
@@ -61,7 +124,7 @@
           <div 
             class="toast-progress-bar"
             :style="{ animationDuration: `${duration}ms` }"
-          ></div>
+          />
         </div>
       </div>
     </Transition>
@@ -73,11 +136,11 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import type { ToastProps, ToastEmits } from './Toast.types'
 
 const props = withDefaults(defineProps<ToastProps>(), {
-  type: 'info',
-  title: '',
-  duration: 4000,
-  position: 'top-right',
-  closable: true
+    type: 'info',
+    title: '',
+    duration: 4000,
+    position: 'top-right',
+    closable: true
 })
 
 const emit = defineEmits<ToastEmits>()
@@ -86,48 +149,48 @@ const visible = ref(false)
 let timeoutId: number | null = null
 
 const positionClass = computed(() => {
-  const classes = {
-    'top-left': 'toast-top-left',
-    'top-center': 'toast-top-center', 
-    'top-right': 'toast-top-right',
-    'bottom-left': 'toast-bottom-left',
-    'bottom-center': 'toast-bottom-center',
-    'bottom-right': 'toast-bottom-right'
-  }
-  return classes[props.position]
+    const classes = {
+        'top-left': 'toast-top-left',
+        'top-center': 'toast-top-center', 
+        'top-right': 'toast-top-right',
+        'bottom-left': 'toast-bottom-left',
+        'bottom-center': 'toast-bottom-center',
+        'bottom-right': 'toast-bottom-right'
+    }
+    return classes[props.position]
 })
 
 const show = () => {
-  visible.value = true
+    visible.value = true
   
-  if (props.duration > 0) {
-    timeoutId = setTimeout(close, props.duration)
-  }
+    if (props.duration > 0) {
+        timeoutId = setTimeout(close, props.duration)
+    }
 }
 
 const close = () => {
-  visible.value = false
-  if (timeoutId) {
-    clearTimeout(timeoutId)
-    timeoutId = null
-  }
-  emit('close')
+    visible.value = false
+    if (timeoutId) {
+        clearTimeout(timeoutId)
+        timeoutId = null
+    }
+    emit('close')
 }
 
 onMounted(() => {
-  show()
+    show()
 })
 
 onUnmounted(() => {
-  if (timeoutId) {
-    clearTimeout(timeoutId)
-    timeoutId = null
-  }
+    if (timeoutId) {
+        clearTimeout(timeoutId)
+        timeoutId = null
+    }
 })
 
 defineExpose({
-  show,
-  close
+    show,
+    close
 })
 </script>
 

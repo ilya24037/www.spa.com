@@ -1,4 +1,4 @@
-import { watch, ref } from 'vue'
+import { watch, ref, type Ref } from 'vue'
 import { logger } from '../lib/logger'
 
 /**
@@ -47,7 +47,7 @@ export function useLocalStorage<T>(
   
   // Инициализация значения
   const storedValue = read()
-  const data = ref<T>(storedValue)
+  const data = ref(storedValue) as Ref<T>
   
   // Синхронизация с localStorage при изменении
   watch(
@@ -108,7 +108,7 @@ export function useSessionStorage<T>(
   }
   
   const storedValue = read()
-  const data = ref<T>(storedValue)
+  const data = ref(storedValue) as Ref<T>
   
   watch(
     data,

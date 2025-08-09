@@ -7,73 +7,73 @@
     aria-hidden="true"
   >
     <!-- Заголовок формы -->
-    <div class="h-6 bg-gray-200 rounded w-64 mb-8" />
+    <div class="h-6 bg-gray-500 rounded w-64 mb-8" />
 
     <!-- Группа полей 1 -->
     <div class="mb-6">
-      <div class="h-4 bg-gray-200 rounded w-32 mb-2" />
-      <div class="h-10 bg-gray-200 rounded w-full" />
+      <div class="h-4 bg-gray-500 rounded w-32 mb-2" />
+      <div class="h-10 bg-gray-500 rounded w-full" />
     </div>
 
     <!-- Группа полей 2 -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
       <div>
-        <div class="h-4 bg-gray-200 rounded w-24 mb-2" />
-        <div class="h-10 bg-gray-200 rounded w-full" />
+        <div class="h-4 bg-gray-500 rounded w-24 mb-2" />
+        <div class="h-10 bg-gray-500 rounded w-full" />
       </div>
       <div>
-        <div class="h-4 bg-gray-200 rounded w-28 mb-2" />
-        <div class="h-10 bg-gray-200 rounded w-full" />
+        <div class="h-4 bg-gray-500 rounded w-28 mb-2" />
+        <div class="h-10 bg-gray-500 rounded w-full" />
       </div>
     </div>
 
     <!-- Текстовая область -->
     <div class="mb-6">
-      <div class="h-4 bg-gray-200 rounded w-20 mb-2" />
-      <div class="h-24 bg-gray-200 rounded w-full" />
+      <div class="h-4 bg-gray-500 rounded w-20 mb-2" />
+      <div class="h-24 bg-gray-500 rounded w-full" />
     </div>
 
     <!-- Чекбоксы/радио кнопки -->
     <div class="mb-6">
-      <div class="h-4 bg-gray-200 rounded w-36 mb-4" />
+      <div class="h-4 bg-gray-500 rounded w-36 mb-4" />
       <div class="space-y-3">
         <div class="flex items-center gap-3">
-          <div class="w-4 h-4 bg-gray-200 rounded" />
-          <div class="h-4 bg-gray-200 rounded w-48" />
+          <div class="w-4 h-4 bg-gray-500 rounded" />
+          <div class="h-4 bg-gray-500 rounded w-48" />
         </div>
         <div class="flex items-center gap-3">
-          <div class="w-4 h-4 bg-gray-200 rounded" />
-          <div class="h-4 bg-gray-200 rounded w-40" />
+          <div class="w-4 h-4 bg-gray-500 rounded" />
+          <div class="h-4 bg-gray-500 rounded w-40" />
         </div>
         <div class="flex items-center gap-3">
-          <div class="w-4 h-4 bg-gray-200 rounded" />
-          <div class="h-4 bg-gray-200 rounded w-56" />
+          <div class="w-4 h-4 bg-gray-500 rounded" />
+          <div class="h-4 bg-gray-500 rounded w-56" />
         </div>
       </div>
     </div>
 
     <!-- Селект -->
     <div class="mb-6">
-      <div class="h-4 bg-gray-200 rounded w-28 mb-2" />
-      <div class="h-10 bg-gray-200 rounded w-full" />
+      <div class="h-4 bg-gray-500 rounded w-28 mb-2" />
+      <div class="h-10 bg-gray-500 rounded w-full" />
     </div>
 
     <!-- Загрузка файлов -->
     <div class="mb-8">
-      <div class="h-4 bg-gray-200 rounded w-32 mb-3" />
-      <div class="border-2 border-dashed border-gray-200 rounded-lg p-8">
+      <div class="h-4 bg-gray-500 rounded w-32 mb-3" />
+      <div class="border-2 border-dashed border-gray-500 rounded-lg p-8">
         <div class="text-center">
-          <div class="w-12 h-12 bg-gray-200 rounded-full mx-auto mb-4" />
-          <div class="h-4 bg-gray-200 rounded w-48 mx-auto mb-2" />
-          <div class="h-3 bg-gray-200 rounded w-32 mx-auto" />
+          <div class="w-12 h-12 bg-gray-500 rounded-full mx-auto mb-4" />
+          <div class="h-4 bg-gray-500 rounded w-48 mx-auto mb-2" />
+          <div class="h-3 bg-gray-500 rounded w-32 mx-auto" />
         </div>
       </div>
     </div>
 
     <!-- Кнопки действий -->
     <div class="flex gap-3 justify-end">
-      <div class="h-10 bg-gray-200 rounded w-24" />
-      <div class="h-10 bg-gray-200 rounded w-32" />
+      <div class="h-10 bg-gray-500 rounded w-24" />
+      <div class="h-10 bg-gray-500 rounded w-32" />
     </div>
   </div>
 </template>

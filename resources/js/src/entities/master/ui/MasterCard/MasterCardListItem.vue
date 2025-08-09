@@ -16,7 +16,9 @@
       <div :class="INFO_CONTAINER_CLASSES">
         <div :class="INFO_HEADER_CLASSES">
           <div>
-            <h3 :class="NAME_CLASSES">{{ master.display_name || master.name }}</h3>
+            <h3 :class="NAME_CLASSES">
+              {{ master.display_name || master.name }}
+            </h3>
             <div :class="RATING_CONTAINER_CLASSES">
               <div :class="RATING_WRAPPER_CLASSES">
                 <svg :class="STAR_ICON_CLASSES" fill="currentColor" viewBox="0 0 20 20">
@@ -30,8 +32,12 @@
           
           <!-- Р¦РµРЅР° -->
           <div :class="PRICE_CONTAINER_CLASSES">
-            <div :class="PRICE_CLASSES">РѕС‚ {{ formatPrice(master.price_from || master.min_price) }} в‚Ѕ</div>
-            <div :class="PRICE_UNIT_CLASSES">Р·Р° СЃРµР°РЅСЃ</div>
+            <div :class="PRICE_CLASSES">
+              РѕС‚ {{ formatPrice(master.price_from || master.min_price) }} в‚Ѕ
+            </div>
+            <div :class="PRICE_UNIT_CLASSES">
+              Р·Р° СЃРµР°РЅСЃ
+            </div>
           </div>
         </div>
 
@@ -55,17 +61,27 @@
         <!-- Р”РµР№СЃС‚РІРёСЏ -->
         <div :class="ACTIONS_CONTAINER_CLASSES">
           <button 
-            @click.stop="openBooking"
             :class="BOOKING_BUTTON_CLASSES"
+            @click.stop="openBooking"
           >
             Р—Р°РїРёСЃР°С‚СЊСЃСЏ
           </button>
           <button 
-            @click.stop="toggleFavorite"
             :class="FAVORITE_BUTTON_CLASSES"
+            @click.stop="toggleFavorite"
           >
-            <svg :class="FAVORITE_ICON_CLASSES" :fill="isFavorite ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            <svg
+              :class="FAVORITE_ICON_CLASSES"
+              :fill="isFavorite ? 'currentColor' : 'none'"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+              />
             </svg>
           </button>
         </div>
@@ -95,18 +111,18 @@ const PRICE_CONTAINER_CLASSES = 'text-right'
 const PRICE_CLASSES = 'font-bold text-xl'
 const PRICE_UNIT_CLASSES = 'text-sm text-gray-500'
 const SERVICES_CONTAINER_CLASSES = 'mt-2 flex flex-wrap gap-1'
-const SERVICE_TAG_CLASSES = 'text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded'
+const SERVICE_TAG_CLASSES = 'text-xs bg-gray-500 text-gray-500 px-2 py-1 rounded'
 const MORE_SERVICES_CLASSES = 'text-xs text-gray-500 px-2 py-1'
 const ACTIONS_CONTAINER_CLASSES = 'mt-3 flex items-center gap-3'
 const BOOKING_BUTTON_CLASSES = 'flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium'
-const FAVORITE_BUTTON_CLASSES = 'p-2 text-gray-400 hover:text-red-500 transition-colors'
+const FAVORITE_BUTTON_CLASSES = 'p-2 text-gray-500 hover:text-red-500 transition-colors'
 const FAVORITE_ICON_CLASSES = 'w-5 h-5'
 
 const props = defineProps({
-  master: {
-    type: Object,
-    required: true
-  }
+    master: {
+        type: Object,
+        required: true
+    }
 })
 
 // РЎРѕСЃС‚РѕСЏРЅРёРµ
@@ -116,49 +132,49 @@ const imageError = ref(false)
 const isFavorite = computed(() => props.master.is_favorite || false)
 
 const masterPhoto = computed(() => {
-  if (imageError.value) {
-    return '/images/placeholder-avatar.jpg'
-  }
-  return props.master.avatar || 
+    if (imageError.value) {
+        return '/images/placeholder-avatar.jpg'
+    }
+    return props.master.avatar || 
          props.master.main_photo || 
          '/images/placeholder-avatar.jpg'
 })
 
 const displayServices = computed(() => {
-  if (!props.master.services || !Array.isArray(props.master.services)) {
-    return []
-  }
-  return props.master.services.slice(0, 3)
+    if (!props.master.services || !Array.isArray(props.master.services)) {
+        return []
+    }
+    return props.master.services.slice(0, 3)
 })
 
 const hasMoreServices = computed(() => {
-  return props.master.services && props.master.services.length > 3
+    return props.master.services && props.master.services.length > 3
 })
 
 // РњРµС‚РѕРґС‹
 const formatPrice = (price) => {
-  if (!price) return '0'
-  return new Intl.NumberFormat('ru-RU').format(price)
+    if (!price) return '0'
+    return new Intl.NumberFormat('ru-RU').format(price)
 }
 
 const handleImageError = () => {
-  imageError.value = true
+    imageError.value = true
 }
 
 const goToProfile = () => {
-  router.visit(`/masters/${props.master.id}`)
+    router.visit(`/masters/${props.master.id}`)
 }
 
 const toggleFavorite = () => {
-  router.post('/api/favorites/toggle', {
-    master_profile_id: props.master.id
-  }, {
-    preserveState: true,
-    preserveScroll: true
-  })
+    router.post('/api/favorites/toggle', {
+        master_profile_id: props.master.id
+    }, {
+        preserveState: true,
+        preserveScroll: true
+    })
 }
 
 const openBooking = () => {
-  router.visit(`/masters/${props.master.id}?booking=true`)
+    router.visit(`/masters/${props.master.id}?booking=true`)
 }
 </script>

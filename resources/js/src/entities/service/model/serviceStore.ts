@@ -3,12 +3,21 @@ import { logger } from '@/src/shared/lib/logger'
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
+interface Service {
+  id: number
+  name: string
+  price?: number
+  duration?: number
+  description?: string
+  [key: string]: any
+}
+
 export const useServiceStore = defineStore('service', () => {
   // State
-  const items = ref([])
-  const currentItem = ref(null)
+  const items = ref<Service[]>([])
+  const currentItem = ref<Service | null>(null)
   const loading = ref(false)
-  const error = ref(null)
+  const error = ref<string | null>(null)
   
   // Getters
   const itemsCount = computed(() => items.value.length)

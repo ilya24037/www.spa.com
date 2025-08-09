@@ -6,12 +6,13 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h } from 'vue';
 import { createPinia } from 'pinia';
 
-// Импорт системы ленивой загрузки (упрощенная версия)
-import { preloadCriticalComponents, preloadRouteComponents, ImageOptimizationPlugin } from './utils/lazyLoadingStub';
+// Импорт системы ленивой загрузки
+import { preloadCriticalComponents, preloadRouteComponents } from './utils/lazyLoadingOptimized';
 
 import { ZiggyVue } from 'ziggy-js';
 import { Ziggy } from './ziggy';
 import { route } from 'ziggy-js';
+import { logger } from '@/src/shared/utils/logger';
 
 // Делаем route доступным глобально
 window.route = route;
@@ -23,17 +24,17 @@ createInertiaApp({
     resolve: async (name) => {
         const page = await resolvePageComponent(
             `./Pages/${name}.vue`,
-            import.meta.glob('./Pages/**/*.vue'),
+            import.meta.glob('./Pages/**/*.vue')
         );
 
         // Применяем AppLayout только к страницам, которые его уже не имеют
         // Исключаем TestEncoding и страницы с явным AppLayout
         const pagesWithoutLayout = ['Home', 'TestEncoding'];
-        
+
         if (pagesWithoutLayout.includes(name.split('/').pop())) {
-            // Импортируем AppLayout динамически
-            const AppLayout = (await import('./Layouts/AppLayout.vue')).default;
-            page.default.layout = AppLayout;
+            // Импортируем единый FSD-лайаут динамически
+            const MainLayout = (await import('@/src/shared/layouts/MainLayout/MainLayout.vue')).default;
+            page.default.layout = MainLayout;
         }
         
         return page;
@@ -53,15 +54,14 @@ createInertiaApp({
         const app = createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(pinia)
-            .use(ZiggyVue, Ziggy)
-            .use(ImageOptimizationPlugin); // Плагин оптимизации изображений
+            .use(ZiggyVue, Ziggy);
             
         // Глобальные обработчики производительности
         app.config.performance = true;
         
         // Обработчик ошибок для ленивых компонентов
         app.config.errorHandler = (err, instance, info) => {
-            console.error('Vue error:', err, info);
+            logger.error('Vue error:', err, info);
             
             // Отправка ошибок в систему мониторинга
             if (typeof window !== 'undefined' && window.performance) {

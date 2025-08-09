@@ -11,35 +11,47 @@
       @click.stop
     >
       <!-- Заголовок с кнопкой закрытия -->
-      <div class="flex items-center justify-between p-6 border-b border-gray-200">
-        <h2 class="text-2xl font-bold text-gray-900">Регистрация</h2>
+      <div class="flex items-center justify-between p-6 border-b border-gray-500">
+        <h2 class="text-2xl font-bold text-gray-500">
+          Регистрация
+        </h2>
         <button 
+          class="text-gray-500 hover:text-gray-500 transition-colors"
           @click="closeModal"
-          class="text-gray-400 hover:text-gray-600 transition-colors"
         >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
 
       <!-- Форма регистрации -->
       <div class="p-6">
-        <form @submit.prevent="submit" class="space-y-6">
+        <form class="space-y-6" @submit.prevent="submit">
           <!-- Имя -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
+            <label class="block text-sm font-medium text-gray-500 mb-2">
               Имя
             </label>
             <input
-              type="text"
               v-model="form.name"
+              type="text"
               required
               autocomplete="name"
               placeholder="Введите ваше имя"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              class="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               :class="{ 'border-red-500': form.errors.name }"
-            />
+            >
             <p v-if="form.errors.name" class="mt-1 text-sm text-red-600">
               {{ form.errors.name }}
             </p>
@@ -47,18 +59,18 @@
 
           <!-- Email -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
+            <label class="block text-sm font-medium text-gray-500 mb-2">
               Email
             </label>
             <input
-              type="email"
               v-model="form.email"
+              type="email"
               required
               autocomplete="username"
               placeholder="Введите ваш email"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              class="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               :class="{ 'border-red-500': form.errors.email }"
-            />
+            >
             <p v-if="form.errors.email" class="mt-1 text-sm text-red-600">
               {{ form.errors.email }}
             </p>
@@ -66,18 +78,18 @@
 
           <!-- Пароль -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
+            <label class="block text-sm font-medium text-gray-500 mb-2">
               Пароль
             </label>
             <input
-              type="password"
               v-model="form.password"
+              type="password"
               required
               autocomplete="new-password"
               placeholder="Создайте пароль"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              class="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               :class="{ 'border-red-500': form.errors.password }"
-            />
+            >
             <p v-if="form.errors.password" class="mt-1 text-sm text-red-600">
               {{ form.errors.password }}
             </p>
@@ -85,18 +97,18 @@
 
           <!-- Подтверждение пароля -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
+            <label class="block text-sm font-medium text-gray-500 mb-2">
               Подтвердите пароль
             </label>
             <input
-              type="password"
               v-model="form.password_confirmation"
+              type="password"
               required
               autocomplete="new-password"
               placeholder="Повторите пароль"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              class="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               :class="{ 'border-red-500': form.errors.password_confirmation }"
-            />
+            >
             <p v-if="form.errors.password_confirmation" class="mt-1 text-sm text-red-600">
               {{ form.errors.password_confirmation }}
             </p>
@@ -115,7 +127,7 @@
 
         <!-- Ссылка на вход -->
         <div class="mt-6 text-center">
-          <p class="text-sm text-gray-600">
+          <p class="text-sm text-gray-500">
             Уже есть аккаунт? 
             <Link 
               :href="route('login')" 
@@ -147,7 +159,7 @@ interface Props {
 }
 
 const _props = withDefaults(defineProps<Props>(), {
-  show: false
+    show: false
 })
 
 interface Emits {
@@ -164,23 +176,23 @@ interface RegisterForm {
 }
 
 const form = useForm<RegisterForm>({
-  name: '',
-  email: '',
-  password: '',
-  password_confirmation: '',
+    name: '',
+    email: '',
+    password: '',
+    password_confirmation: '',
 })
 
 const submit = (): void => {
-  form.post(route('register'), {
-    onFinish: () => form.reset('password', 'password_confirmation'),
-    onSuccess: () => {
-      closeModal()
-    }
-  })
+    form.post(route('register'), {
+        onFinish: () => form.reset('password', 'password_confirmation'),
+        onSuccess: () => {
+            closeModal()
+        }
+    })
 }
 
 const closeModal = (): void => {
-  emit('close')
+    emit('close')
 }
 </script>
 

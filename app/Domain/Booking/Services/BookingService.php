@@ -12,16 +12,16 @@ use App\Domain\Booking\DTOs\BookingData;
 use App\Domain\Booking\Models\Booking;
 use App\Domain\Booking\Repositories\BookingRepository;
 use App\Domain\Booking\Services\NotificationService;
+use App\Domain\Booking\Contracts\BookingServiceInterface;
 use App\Domain\User\Models\User;
 use App\Enums\BookingType;
 use Carbon\Carbon;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
 /**
  * Главный сервис бронирования - координатор
  */
-class BookingService
+class BookingService implements BookingServiceInterface
 {
     public function __construct(
         private BookingRepository $bookingRepository,
@@ -63,9 +63,9 @@ class BookingService
     }
 
     /**
-     * Подтвердить бронирование
+     * Подтвердить бронирование (основной метод)
      */
-    public function confirmBooking(Booking $booking, User $master): Booking
+    public function confirmBookingByMaster(Booking $booking, User $master): Booking
     {
         $this->validationService->validateMasterPermission($booking, $master);
         $this->validationService->validateConfirmationAbility($booking);
@@ -82,9 +82,9 @@ class BookingService
     }
 
     /**
-     * Отменить бронирование
+     * Отменить бронирование (основной метод)
      */
-    public function cancelBooking(Booking $booking, User $user, ?string $reason = null): Booking
+    public function cancelBookingByUser(Booking $booking, User $user, ?string $reason = null): Booking
     {
         $this->validationService->validateCancellationPermission($booking, $user);
         
@@ -104,9 +104,9 @@ class BookingService
     }
 
     /**
-     * Завершить бронирование
+     * Завершить бронирование (основной метод)
      */
-    public function completeBooking(Booking $booking, User $master): Booking
+    public function completeBookingByMaster(Booking $booking, User $master): Booking
     {
         $this->validationService->validateMasterPermission($booking, $master);
         $this->validationService->validateCompletionAbility($booking);
@@ -193,5 +193,144 @@ class BookingService
                 'error' => $e->getMessage()
             ]);
         }
+    }
+
+    // === МЕТОДЫ ИНТЕРФЕЙСА BookingServiceInterface ===
+
+    /**
+     * Подтвердить бронирование (адаптер для интерфейса)
+     */
+    public function confirmBooking(int $bookingId): bool
+    {
+        try {
+            $booking = $this->bookingRepository->find($bookingId);
+            if (!$booking) {
+                return false;
+            }
+            $master = $booking->master->user ?? null;
+            if (!$master) {
+                return false;
+            }
+            $this->confirmBookingByMaster($booking, $master);
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Failed to confirm booking', ['booking_id' => $bookingId, 'error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    /**
+     * Отменить бронирование (адаптер для интерфейса)
+     */
+    public function cancelBooking(int $bookingId, int $cancelledBy, ?string $reason = null): bool
+    {
+        try {
+            $booking = $this->bookingRepository->find($bookingId);
+            if (!$booking) {
+                return false;
+            }
+            $user = app(\App\Domain\User\Models\User::class)->find($cancelledBy);
+            if (!$user) {
+                return false;
+            }
+            $this->cancelBookingByUser($booking, $user, $reason);
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Failed to cancel booking', ['booking_id' => $bookingId, 'error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    /**
+     * Завершить бронирование (адаптер для интерфейса)
+     */
+    public function completeBooking(int $bookingId, array $completionData = []): bool
+    {
+        try {
+            $booking = $this->bookingRepository->find($bookingId);
+            if (!$booking) {
+                return false;
+            }
+            $master = $booking->master->user ?? null;
+            if (!$master) {
+                return false;
+            }
+            $this->completeBookingByMaster($booking, $master);
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Failed to complete booking', ['booking_id' => $bookingId, 'error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    /**
+     * Получить доступные слоты для бронирования
+     */
+    public function getAvailableSlots(int $masterId, string $date): array
+    {
+        $dateCarbon = Carbon::parse($date);
+        return $this->availabilityService->getAvailableSlots($masterId, $dateCarbon);
+    }
+
+    /**
+     * Проверить возможность создания бронирования
+     */
+    public function canCreateBooking(int $clientId, int $masterId, array $bookingData): bool
+    {
+        try {
+            $bookingData['client_id'] = $clientId;
+            $bookingData['master_profile_id'] = $masterId;
+            $this->validationService->validateBookingData($bookingData);
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Получить бронирования с фильтрами
+     */
+    public function getBookingsWithFilters(array $filters): \Illuminate\Database\Eloquent\Collection
+    {
+        $items = $this->bookingRepository->search($filters)->items();
+        return new \Illuminate\Database\Eloquent\Collection($items);
+    }
+
+    /**
+     * Отправить уведомления о бронировании
+     */
+    public function sendBookingNotifications(Booking $booking, string $eventType): void
+    {
+        switch ($eventType) {
+            case 'created':
+                $this->notificationService->sendBookingCreated($booking);
+                break;
+            case 'confirmed':
+                $this->notificationService->sendBookingConfirmed($booking);
+                break;
+            case 'cancelled':
+                $this->notificationService->sendBookingCancelled($booking);
+                break;
+            case 'completed':
+                $this->notificationService->sendBookingCompleted($booking);
+                break;
+        }
+    }
+
+    /**
+     * Получить статистику бронирований
+     */
+    public function getBookingStatistics(array $filters = []): array
+    {
+        return $this->bookingRepository->getStatistics($filters);
+    }
+
+    /**
+     * Валидировать данные бронирования
+     */
+    public function validateBookingData(array $data): array
+    {
+        $this->validationService->validateBookingData($data);
+        return ['valid' => true, 'errors' => []];
     }
 }
