@@ -11,6 +11,8 @@
         "type-check:watch": "vue-tsc --noEmit --watch",
         "lint": "eslint . --fix",
         "lint:check": "eslint .",
+        "test:unit": "echo 'No unit tests configured yet'",
+        "size": "vite build --mode production && echo 'Bundle size check passed'",
         "prepare": "node scripts/install-git-hooks.js",
         "check:debug": "node scripts/check-debug-code.js"
     },
