@@ -1,13 +1,13 @@
 <template>
     <div class="service-provider-section">
         <h2 class="form-group-title">Кто оказывает услуги</h2>
-        <div class="checkbox-group">
-            <label v-for="option in providerOptions" :key="option.value" class="checkbox-label">
+        <div class="radio-group">
+            <label v-for="option in providerOptions" :key="option.value" class="radio-label">
                 <input 
-                    type="checkbox" 
+                    type="radio" 
                     :value="option.value" 
-                    v-model="localProviders" 
-                    @change="emitProviders"
+                    v-model="localProvider" 
+                    @change="emitProvider"
                 />
                 {{ option.label }}
             </label>
@@ -22,26 +22,27 @@
 import { ref, watch, computed } from 'vue'
 
 const props = defineProps({
-    serviceProvider: { type: Array, default: () => [] },
+    serviceProvider: { type: String, default: 'woman' },
     errors: { type: Object, default: () => ({}) }
 })
 
 const emit = defineEmits(['update:serviceProvider'])
 
-const localProviders = ref([...props.serviceProvider])
+const localProvider = ref(props.serviceProvider)
 
 watch(() => props.serviceProvider, (val) => {
-    localProviders.value = [...val]
+    localProvider.value = val
 })
 
-// Опции для CheckboxGroup
+// Опции для RadioGroup
 const providerOptions = computed(() => [
-    { value: 'women', label: 'Женщина' },
-    { value: 'men', label: 'Мужчина' }
+    { value: 'woman', label: 'Женщина' },
+    { value: 'man', label: 'Мужчина' },
+    { value: 'couple', label: 'Пара' }
 ])
 
-const emitProviders = () => {
-    emit('update:serviceProvider', [...localProviders.value])
+const emitProvider = () => {
+    emit('update:serviceProvider', localProvider.value)
 }
 </script>
 
@@ -58,13 +59,13 @@ const emitProviders = () => {
   line-height: 1.3;
 }
 
-.checkbox-group {
+.radio-group {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.checkbox-label {
+.radio-label {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -72,7 +73,7 @@ const emitProviders = () => {
   font-size: 16px;
 }
 
-.checkbox-label input[type="checkbox"] {
+.radio-label input[type="radio"] {
   width: 18px;
   height: 18px;
 }

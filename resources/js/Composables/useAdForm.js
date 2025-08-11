@@ -103,7 +103,7 @@ export function useAdForm(initialData = {}, options = {}) {
         return false
       }
     } catch (error) {
-      console.error('Ошибка валидации:', error)
+      // Validation error
       return false
     }
   }
@@ -122,7 +122,7 @@ export function useAdForm(initialData = {}, options = {}) {
         errors.value[fieldName] = validationResult.errors[fieldName]
       }
     } catch (error) {
-      console.error(`Ошибка валидации поля ${fieldName}:`, error)
+      // Field validation error
     }
   }
 
@@ -171,7 +171,7 @@ export function useAdForm(initialData = {}, options = {}) {
 
       return result
     } catch (error) {
-      console.error('Ошибка при отправке формы:', error)
+      // Form submission error
       
       // Вызываем колбэк ошибки
       if (onError) {
@@ -193,7 +193,7 @@ export function useAdForm(initialData = {}, options = {}) {
       Object.assign(form, draftData)
       return draftData
     } catch (error) {
-      console.error('Ошибка при загрузке черновика:', error)
+      // Draft loading error
       throw error
     }
   }
@@ -207,7 +207,7 @@ export function useAdForm(initialData = {}, options = {}) {
       const result = await saveDraft(formData)
       return result
     } catch (error) {
-      console.error('Ошибка при сохранении черновика:', error)
+      // Draft saving error
       throw error
     }
   }
@@ -253,7 +253,7 @@ export function useAdForm(initialData = {}, options = {}) {
         onSave: saveDraftForm
       })
     } catch (error) {
-      console.warn('Автосохранение недоступно:', error)
+      // Autosave unavailable
     }
   }
 

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed, type Ref } from 'vue'
 import axios, { AxiosError } from 'axios'
+import { useAuthStore } from './authStore'
 
 // =================== TYPES ===================
 export interface Master {
@@ -86,6 +87,14 @@ export const useFavoritesStore = defineStore('favorites', () => {
    * Загрузка избранных мастеров с сервера
    */
   async function loadFavorites(): Promise<void> {
+    // Проверяем авторизацию перед загрузкой
+    const authStore = useAuthStore()
+    if (!authStore.isAuthenticated) {
+      // Если пользователь не авторизован, просто очищаем избранное без ошибки
+      favorites.value = []
+      return
+    }
+
     try {
       loading.value = true
       error.value = null
@@ -94,11 +103,20 @@ export const useFavoritesStore = defineStore('favorites', () => {
       favorites.value = response.data.data || []
     } catch (err) {
       if (err instanceof AxiosError) {
-        error.value = err.response?.data?.message || 'Ошибка загрузки избранного'
+        // Если ошибка 401, значит пользователь не авторизован
+        if (err.response?.status === 401) {
+          favorites.value = []
+          // Не показываем ошибку для неавторизованных пользователей
+          error.value = null
+        } else {
+          error.value = err.response?.data?.message || 'Ошибка загрузки избранного'
+        }
       } else {
         error.value = 'Неизвестная ошибка при загрузке избранного'
       }
-      favorites.value = []
+      if (error.value) {
+        favorites.value = []
+      }
     } finally {
       loading.value = false
     }
@@ -108,6 +126,13 @@ export const useFavoritesStore = defineStore('favorites', () => {
    * Переключение мастера в избранном (добавить/удалить)
    */
   async function toggle(master: Master): Promise<FavoriteToggleResponse> {
+    // Проверяем авторизацию
+    const authStore = useAuthStore()
+    if (!authStore.isAuthenticated) {
+      error.value = 'Необходимо войти в систему для добавления в избранное'
+      throw new Error(error.value)
+    }
+
     try {
       error.value = null
       
@@ -128,8 +153,12 @@ export const useFavoritesStore = defineStore('favorites', () => {
       return response.data
     } catch (err) {
       if (err instanceof AxiosError) {
-        error.value = err.response?.data?.message || 'Ошибка при обновлении избранного'
-        throw new Error(error.value)
+        if (err.response?.status === 401) {
+          error.value = 'Необходимо войти в систему для добавления в избранное'
+        } else {
+          error.value = err.response?.data?.message || 'Ошибка при обновлении избранного'
+        }
+        throw new Error(error.value || 'Ошибка')
       }
       throw err
     }
@@ -248,7 +277,7 @@ export const useFavoritesStore = defineStore('favorites', () => {
   function updateMasterData(masterId: number, updates: Partial<Master>): void {
     const index = favorites.value.findIndex(master => master.id === masterId)
     if (index > -1) {
-      favorites.value[index] = { ...favorites.value[index], ...updates }
+      favorites.value[index] = { ...favorites.value[index], ...updates } as Master
     }
   }
 

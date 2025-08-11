@@ -168,7 +168,7 @@ export const useAuthStore = defineStore('auth', {
           this.error = error.response?.data?.message || 'Ошибка входа'
           return { 
             success: false, 
-            error: this.error 
+            error: this.error as string
           }
         }
         
@@ -204,7 +204,7 @@ export const useAuthStore = defineStore('auth', {
           
           return { 
             success: false, 
-            error: this.error,
+            error: this.error as string,
             errors: errorData?.errors
           }
         }
@@ -266,16 +266,5 @@ export const useAuthStore = defineStore('auth', {
         this.user.master_profile = { ...this.user.master_profile, ...profileData }
       }
     }
-  },
-
-  persist: {
-    enabled: true,
-    strategies: [
-      {
-        key: 'auth',
-        storage: localStorage,
-        paths: ['isAuthenticated']
-      }
-    ]
   }
 })

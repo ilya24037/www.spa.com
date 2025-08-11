@@ -10,23 +10,10 @@
       >
         <div 
           class="custom-checkbox"
-          :class="{ 'checked': isSelected(option.value) }"
+          :class="{ 'checked': localLocation.includes(option.value) }"
         >
-          <svg 
-            class="check-icon" 
-            v-if="isSelected(option.value)"
-            width="12" 
-            height="10" 
-            viewBox="0 0 10 8" 
-            fill="none" 
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path 
-              d="M1 4.35714L3.4 6.5L9 1.5" 
-              stroke="currentColor" 
-              stroke-width="2" 
-              stroke-linecap="round"
-            />
+          <svg v-if="localLocation.includes(option.value)" class="checkmark" viewBox="0 0 24 24">
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/>
           </svg>
         </div>
         <span class="checkbox-label">{{ option.label }}</span>
@@ -36,7 +23,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
+import { ref, watch } from 'vue'
 
 const props = defineProps({
   serviceLocation: { type: Array, default: () => [] },
@@ -49,7 +36,7 @@ const localLocation = ref([...props.serviceLocation])
 
 watch(() => props.serviceLocation, (val) => {
   localLocation.value = [...val]
-})
+}, { deep: true })
 
 // Опции для выбора локации
 const locationOptions = [
@@ -58,10 +45,6 @@ const locationOptions = [
   { value: 'В офисе', label: 'В офисе' }
 ]
 
-const isSelected = (value) => {
-  return localLocation.value.includes(value)
-}
-
 const toggleOption = (value) => {
   const index = localLocation.value.indexOf(value)
   if (index > -1) {
@@ -69,10 +52,6 @@ const toggleOption = (value) => {
   } else {
     localLocation.value.push(value)
   }
-  emitLocation()
-}
-
-const emitLocation = () => {
   emit('update:serviceLocation', [...localLocation.value])
 }
 </script>
@@ -105,6 +84,10 @@ const emitLocation = () => {
   user-select: none;
 }
 
+.checkbox-item:hover .custom-checkbox {
+  border-color: #8c8c8c;
+}
+
 .custom-checkbox {
   width: 20px;
   height: 20px;
@@ -119,19 +102,15 @@ const emitLocation = () => {
   cursor: pointer;
 }
 
-.custom-checkbox:hover {
-  border-color: #8c8c8c;
-}
-
 .custom-checkbox.checked {
-  background: #007bff;
   border-color: #007bff;
+  background: #007bff;
 }
 
-.check-icon {
-  width: 12px;
-  height: 10px;
-  color: #fff;
+.checkmark {
+  width: 14px;
+  height: 14px;
+  color: white;
 }
 
 .checkbox-label {

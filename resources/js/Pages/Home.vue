@@ -59,6 +59,7 @@ import { logger } from '@/src/shared/utils/logger'
 
 // Stores - используем основные TypeScript stores
 import { useFavoritesStore, type Master } from '@/stores/favorites'
+import { useAuthStore } from '@/stores/authStore'
 
 // Props из Inertia 
 interface HomePageProps {
@@ -81,12 +82,13 @@ interface Category {
 const props = withDefaults(defineProps<HomePageProps>(), {
   currentCity: 'Москва',
   categories: () => [],
-  masters: () => ({ data: [] }),
+  masters: () => ({ data: [] as Master[] }),
   districts: () => []
 })
 
 // Stores
 const favoritesStore = useFavoritesStore()
+const authStore = useAuthStore()
 
 // Local state
 const isLoading = ref(false)
@@ -155,9 +157,12 @@ const handleRetry = () => {
   window.location.reload()
 }
 
-// Initialize favorites on mount
+// Initialize favorites on mount (only if authenticated)
 onMounted(() => {
-  favoritesStore.loadFavorites()
+  // Загружаем избранное только для авторизованных пользователей
+  if (authStore.isAuthenticated) {
+    favoritesStore.loadFavorites()
+  }
 })
 </script>
 

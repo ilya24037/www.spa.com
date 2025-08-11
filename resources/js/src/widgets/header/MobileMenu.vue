@@ -133,6 +133,7 @@
 import { ref } from 'vue'
 import { Link, router } from '@inertiajs/vue3'
 import Logo from './Logo.vue'
+import QuickLinks from './QuickLinks.vue'
 
 // Props
 const props = defineProps({

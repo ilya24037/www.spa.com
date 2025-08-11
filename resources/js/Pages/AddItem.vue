@@ -41,7 +41,7 @@
 <script setup>
 import { Head, Link, router } from '@inertiajs/vue3'
 
-import AdForm from '@/src/widgets/AdForm/ui/AdForm.vue'
+import AdForm from '@/src/features/ad-creation/ui/AdForm.vue'
 
 // Категории (только эротический массаж)
 const categories = [

@@ -465,8 +465,8 @@ const getContactAvatar = computed(() => {
 })
 
 // Методы для статусов
-const getStatusBanner = (status) => {
-    const banners = {
+const getStatusBanner = (status: string) => {
+    const banners: Record<string, string> = {
         pending: 'p-4 rounded-lg bg-yellow-100 text-yellow-800',
         confirmed: 'p-4 rounded-lg bg-green-100 text-green-800',
         completed: 'p-4 rounded-lg bg-blue-100 text-blue-800',
@@ -476,8 +476,8 @@ const getStatusBanner = (status) => {
     return banners[status] || 'p-4 rounded-lg bg-gray-500 text-gray-500'
 }
 
-const getStatusIcon = (status) => {
-    const icons = {
+const getStatusIcon = (status: string) => {
+    const icons: Record<string, any> = {
         pending: ClockIcon,
         confirmed: CheckCircleIcon,
         completed: CheckCircleIcon,
@@ -487,8 +487,8 @@ const getStatusIcon = (status) => {
     return icons[status] || ExclamationTriangleIcon
 }
 
-const getStatusTitle = (status) => {
-    const titles = {
+const getStatusTitle = (status: string) => {
+    const titles: Record<string, string> = {
         pending: 'Ожидает подтверждения',
         confirmed: 'Бронирование подтверждено',
         completed: 'Услуга оказана',
@@ -498,9 +498,9 @@ const getStatusTitle = (status) => {
     return titles[status] || 'Неизвестный статус'
 }
 
-const getStatusDescription = (status) => {
+const getStatusDescription = (status: string) => {
     if (props.canManage) {
-        const descriptions = {
+        const descriptions: Record<string, string> = {
             pending: 'Примите или отклоните заказ',
             confirmed: 'Клиент ожидает вас в назначенное время',
             completed: 'Заказ успешно выполнен',
@@ -509,7 +509,7 @@ const getStatusDescription = (status) => {
         }
         return descriptions[status] || ''
     } else {
-        const descriptions = {
+        const descriptions: Record<string, string> = {
             pending: 'Мастер рассматривает вашу заявку',
             confirmed: 'Мастер подтвердил бронирование',
             completed: 'Спасибо за использование нашего сервиса!',
@@ -520,8 +520,8 @@ const getStatusDescription = (status) => {
     }
 }
 
-const getPaymentMethodLabel = (method) => {
-    const labels = {
+const getPaymentMethodLabel = (method: string) => {
+    const labels: Record<string, string> = {
         cash: 'Наличными',
         card: 'Картой мастеру',
         online: 'Онлайн на сайте',
@@ -530,8 +530,8 @@ const getPaymentMethodLabel = (method) => {
     return labels[method] || method
 }
 
-const getPaymentStatusLabel = (status) => {
-    const labels = {
+const getPaymentStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
         pending: 'Ожидает оплаты',
         paid: 'Оплачено',
         refunded: 'Возвращено'
@@ -540,15 +540,15 @@ const getPaymentStatusLabel = (status) => {
 }
 
 // Форматирование
-const formatDate = (date) => {
+const formatDate = (date: string | Date) => {
     return format(new Date(date), 'd MMMM yyyy', { locale: ru })
 }
 
-const formatDateTime = (datetime) => {
+const formatDateTime = (datetime: string | Date) => {
     return format(new Date(datetime), 'd MMMM yyyy, HH:mm', { locale: ru })
 }
 
-const formatPrice = (price) => {
+const formatPrice = (price: number) => {
     return new Intl.NumberFormat('ru-RU', {
         style: 'currency',
         currency: 'RUB',

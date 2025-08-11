@@ -1,289 +1,356 @@
 <template>
-  <PageSection title="География работы">
+  <div class="geography-section">
+    <h2 class="form-group-title">География работы</h2>
     <p class="section-description">
       Укажите, где вы работаете и куда готовы выезжать к клиентам.
     </p>
     
     <div class="geography-fields">
       <!-- Основной адрес -->
-      <GeoSuggest
-        v-model="form.address"
-        label="Основной адрес"
-        placeholder="Введите адрес салона или офиса"
-        :error="errors.address"
-        hint="Укажите точный адрес, где вы принимаете клиентов"
-        @select="handleAddressSelect"
-      />
+      <div class="field-group">
+        <label class="field-label">Основной адрес</label>
+        <input
+          type="text"
+          v-model="localAddress"
+          placeholder="Введите адрес салона или офиса"
+          class="form-input"
+          :class="{ 'error': errors?.address }"
+        />
+        <p class="field-hint">Укажите точный адрес, где вы принимаете клиентов</p>
+        <span v-if="errors?.address" class="error-message">
+          {{ errors.address[0] }}
+        </span>
+      </div>
 
       <!-- Районы выезда -->
-      <div class="travel-areas">
-        <h4 class="field-title">Куда выезжаете</h4>
+      <div class="field-group">
+        <h4 class="field-label">Куда выезжаете</h4>
         <p class="field-hint">Укажите все зоны выезда, чтобы клиенты понимали, доберётесь ли вы до них.</p>
         
-                 <div class="space-y-2">
-           <BaseRadio
-             v-for="option in travelAreaOptions"
-             :key="option.value"
-             v-model="form.travel_area"
-             :value="option.value"
-             :label="option.label"
-           />
-         </div>
-         <div v-if="errors.travel_area" class="mt-1 text-sm text-red-600">{{ errors.travel_area }}</div>
+        <div class="radio-group">
+          <label 
+            v-for="option in travelAreaOptions"
+            :key="option.value"
+            class="radio-option"
+          >
+            <input
+              type="radio"
+              v-model="localTravelArea"
+              :value="option.value"
+              class="radio-input"
+            />
+            <span class="radio-label">{{ option.label }}</span>
+          </label>
+        </div>
+        
+        <span v-if="errors?.travel_area" class="error-message">
+          {{ errors.travel_area[0] }}
+        </span>
 
-         <!-- Дополнительные районы -->
-         <div v-if="form.travel_area === 'custom'" class="custom-areas">
-           <label class="block text-sm font-medium text-gray-700 mb-3">Выберите районы</label>
-           <CheckboxGroup
-             v-model="form.custom_travel_areas"
-             :options="customTravelAreasOptions"
-           />
-           <div v-if="errors.custom_travel_areas" class="mt-1 text-sm text-red-600">{{ errors.custom_travel_areas }}</div>
-         </div>
+        <!-- Дополнительные районы -->
+        <div v-if="localTravelArea === 'custom'" class="custom-areas">
+          <label class="field-label mt-4">Выберите районы</label>
+          <div class="checkbox-group">
+            <label 
+              v-for="area in customTravelAreasOptions"
+              :key="area.value"
+              class="checkbox-option"
+            >
+              <input
+                type="checkbox"
+                :value="area.value"
+                v-model="localCustomTravelAreas"
+                class="checkbox-input"
+              />
+              <span class="checkbox-label">{{ area.label }}</span>
+            </label>
+          </div>
+          <span v-if="errors?.custom_travel_areas" class="error-message">
+            {{ errors.custom_travel_areas[0] }}
+          </span>
+        </div>
       </div>
 
       <!-- Радиус выезда -->
-             <div v-if="form.travel_area !== 'no_travel'" class="travel-radius">
-         <BaseSelect
-           v-model="form.travel_radius"
-           label="Радиус выезда"
-           placeholder="Выберите радиус"
-           :options="travelRadiusOptions"
-           :error="errors.travel_radius"
-         />
-       </div>
-
-      <!-- Доплата за выезд -->
-      <div v-if="form.travel_area !== 'no_travel'" class="travel-fee">
-        <PriceInput
-          id="travel_fee"
-          name="travel_fee"
-          label="Доплата за выезд"
-          placeholder="0"
-          v-model="form.travel_fee"
-          :error="errors.travel_fee"
-          :show-unit="false"
-          hint="Укажите дополнительную плату за выезд к клиенту"
-        />
+      <div v-if="localTravelArea !== 'no_travel'" class="field-group">
+        <label class="field-label">Радиус выезда</label>
+        <select 
+          v-model="localTravelRadius"
+          class="form-select"
+          :class="{ 'error': errors?.travel_radius }"
+        >
+          <option value="">Выберите радиус</option>
+          <option value="5">До 5 км</option>
+          <option value="10">До 10 км</option>
+          <option value="15">До 15 км</option>
+          <option value="20">До 20 км</option>
+          <option value="30">До 30 км</option>
+          <option value="50">До 50 км</option>
+          <option value="100">До 100 км</option>
+          <option value="unlimited">Без ограничений</option>
+        </select>
+        <span v-if="errors?.travel_radius" class="error-message">
+          {{ errors.travel_radius[0] }}
+        </span>
       </div>
 
-      <!-- Время в пути -->
-             <div v-if="form.travel_area !== 'no_travel'" class="travel-time">
-         <BaseSelect
-           v-model="form.travel_time"
-           label="Время в пути"
-           placeholder="Выберите время"
-           :options="travelTimeOptions"
-           :error="errors.travel_time"
-         />
-       </div>
+      <!-- Стоимость выезда -->
+      <div v-if="localTravelArea !== 'no_travel'" class="field-group">
+        <label class="field-label">Стоимость выезда</label>
+        <div class="price-input-group">
+          <input
+            type="number"
+            v-model="localTravelPrice"
+            placeholder="0"
+            class="form-input price-input"
+            :class="{ 'error': errors?.travel_price }"
+          />
+          <select 
+            v-model="localTravelPriceType"
+            class="form-select price-unit"
+          >
+            <option value="free">Бесплатно</option>
+            <option value="fixed">Фиксированная</option>
+            <option value="per_km">За километр</option>
+            <option value="negotiable">По договоренности</option>
+          </select>
+        </div>
+        <span v-if="errors?.travel_price" class="error-message">
+          {{ errors.travel_price[0] }}
+        </span>
+      </div>
 
-      <!-- Карта -->
-      <div class="map-container">
-        <h4 class="field-title">Карта</h4>
-        <UniversalMap 
-          mode="picker"
-          :height="200"
-          placeholder-text="Кликните для выбора места на карте"
-          @map-click="handleMapClick"
-        />
+      <!-- Карта (опционально) -->
+      <div class="field-group">
+        <label class="field-label">Отметьте на карте</label>
+        <div class="map-placeholder">
+          <p class="text-gray-500 text-center py-8">
+            Интеграция с картой будет добавлена позже
+          </p>
+        </div>
       </div>
     </div>
-  </PageSection>
+  </div>
 </template>
 
-<script>
-import PageSection from '@/Components/Layout/PageSection.vue'
-import GeoSuggest from '@/Components/Form/Geo/GeoSuggest.vue'
-import BaseRadio from '@/Components/UI/BaseRadio.vue'
-import CheckboxGroup from '@/Components/UI/CheckboxGroup.vue'
-import BaseSelect from '@/Components/UI/BaseSelect.vue'
-import PriceInput from '@/Components/Form/Controls/PriceInput.vue'
-import UniversalMap from '@/Components/Map/UniversalMap.vue'
+<script setup lang="ts">
+import { ref, watch } from 'vue'
 
-export default {
-  name: 'GeographySection',
-  components: {
-    PageSection,
-    GeoSuggest,
-    BaseRadio,
-    CheckboxGroup,
-    BaseSelect,
-    PriceInput,
-    UniversalMap
-  },
-  props: {
-    form: {
-      type: Object,
-      required: true
-    },
-    errors: {
-      type: Object,
-      default: () => ({})
-    }
-  },
-  data() {
-    return {
-      showMap: false,
-      travelAreaOptions: [
-        { value: 'no_travel', label: 'Не выезжаю' },
-        { value: 'nearby', label: 'Ближайшие районы' },
-        { value: 'city', label: 'По всему городу' },
-        { value: 'region', label: 'По области' },
-        { value: 'custom', label: 'Выбрать районы' }
-      ],
-      customTravelAreasOptions: [
-        { value: 'center', label: 'Центр' },
-        { value: 'north', label: 'Север' },
-        { value: 'south', label: 'Юг' },
-        { value: 'east', label: 'Восток' },
-        { value: 'west', label: 'Запад' },
-        { value: 'north_west', label: 'Северо-Запад' },
-        { value: 'north_east', label: 'Северо-Восток' },
-        { value: 'south_west', label: 'Юго-Запад' },
-        { value: 'south_east', label: 'Юго-Восток' }
-      ],
-      travelRadiusOptions: [
-        { value: '5', label: '5 км' },
-        { value: '10', label: '10 км' },
-        { value: '15', label: '15 км' },
-        { value: '20', label: '20 км' },
-        { value: '30', label: '30 км' },
-        { value: '50', label: '50 км' }
-      ],
-      travelTimeOptions: [
-        { value: '15', label: '15 минут' },
-        { value: '30', label: '30 минут' },
-        { value: '45', label: '45 минут' },
-        { value: '60', label: '1 час' },
-        { value: '90', label: '1.5 часа' },
-        { value: '120', label: '2 часа' }
-      ]
-    }
-  },
-  methods: {
-    handleAddressSelect(address) {
-      this.$emit('address-selected', address)
-    },
-    handleMapClick(data) {
-      // Здесь можно установить координаты в форму
-      this.$emit('map-location-selected', data)
-    }
-  }
+// Types
+interface Props {
+  address?: string
+  travelArea?: string
+  customTravelAreas?: string[]
+  travelRadius?: string | number
+  travelPrice?: number | null
+  travelPriceType?: string
+  errors?: Record<string, string[]>
 }
+
+// Props
+const props = withDefaults(defineProps<Props>(), {
+  address: '',
+  travelArea: 'no_travel',
+  customTravelAreas: () => [],
+  travelRadius: '',
+  travelPrice: null,
+  travelPriceType: 'free',
+  errors: () => ({})
+})
+
+// Emits
+const emit = defineEmits<{
+  'update:address': [value: string]
+  'update:travelArea': [value: string]
+  'update:customTravelAreas': [value: string[]]
+  'update:travelRadius': [value: string | number]
+  'update:travelPrice': [value: number | null]
+  'update:travelPriceType': [value: string]
+}>()
+
+// Options
+const travelAreaOptions = [
+  { value: 'no_travel', label: 'Не выезжаю' },
+  { value: 'nearby', label: 'Ближайшие районы' },
+  { value: 'city', label: 'По всему городу' },
+  { value: 'region', label: 'По области' },
+  { value: 'custom', label: 'Выбрать районы' }
+]
+
+const customTravelAreasOptions = [
+  { value: 'center', label: 'Центр' },
+  { value: 'north', label: 'Север' },
+  { value: 'south', label: 'Юг' },
+  { value: 'east', label: 'Восток' },
+  { value: 'west', label: 'Запад' },
+  { value: 'northeast', label: 'Северо-восток' },
+  { value: 'northwest', label: 'Северо-запад' },
+  { value: 'southeast', label: 'Юго-восток' },
+  { value: 'southwest', label: 'Юго-запад' }
+]
+
+// Local state
+const localAddress = ref(props.address)
+const localTravelArea = ref(props.travelArea)
+const localCustomTravelAreas = ref<string[]>([...props.customTravelAreas])
+const localTravelRadius = ref(props.travelRadius)
+const localTravelPrice = ref(props.travelPrice)
+const localTravelPriceType = ref(props.travelPriceType)
+
+// Watch for prop changes
+watch(() => props.address, (newVal) => {
+  localAddress.value = newVal
+})
+
+watch(() => props.travelArea, (newVal) => {
+  localTravelArea.value = newVal
+})
+
+watch(() => props.customTravelAreas, (newVal) => {
+  localCustomTravelAreas.value = [...newVal]
+}, { deep: true })
+
+watch(() => props.travelRadius, (newVal) => {
+  localTravelRadius.value = newVal
+})
+
+watch(() => props.travelPrice, (newVal) => {
+  localTravelPrice.value = newVal
+})
+
+watch(() => props.travelPriceType, (newVal) => {
+  localTravelPriceType.value = newVal
+})
+
+// Watch local changes and emit
+watch(localAddress, (newVal) => {
+  emit('update:address', newVal)
+})
+
+watch(localTravelArea, (newVal) => {
+  emit('update:travelArea', newVal)
+})
+
+watch(localCustomTravelAreas, (newVal) => {
+  emit('update:customTravelAreas', newVal)
+}, { deep: true })
+
+watch(localTravelRadius, (newVal) => {
+  emit('update:travelRadius', newVal)
+})
+
+watch(localTravelPrice, (newVal) => {
+  emit('update:travelPrice', newVal)
+})
+
+watch(localTravelPriceType, (newVal) => {
+  emit('update:travelPriceType', newVal)
+})
 </script>
 
 <style scoped>
+.geography-section {
+  @apply space-y-4;
+}
+
+.form-group-title {
+  @apply text-xl font-semibold text-gray-900 mb-2;
+}
+
 .section-description {
-  color: #666;
-  font-size: 14px;
-  margin-bottom: 20px;
-  line-height: 1.5;
+  @apply text-gray-600 mb-4;
 }
 
 .geography-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+  @apply space-y-6;
 }
 
-.travel-areas {
-  padding: 16px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
+.field-group {
+  @apply space-y-2;
 }
 
-.field-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #333;
-  margin: 0 0 8px 0;
+.field-label {
+  @apply block text-sm font-medium text-gray-700;
 }
 
 .field-hint {
-  color: #666;
-  font-size: 13px;
-  margin: 0 0 16px 0;
-  line-height: 1.4;
+  @apply text-sm text-gray-500;
 }
 
+.form-input {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors;
+}
+
+.form-input.error {
+  @apply border-red-500;
+}
+
+.form-select {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white;
+}
+
+.form-select.error {
+  @apply border-red-500;
+}
+
+.error-message {
+  @apply text-red-500 text-sm mt-1 block;
+}
+
+/* Radio группа */
+.radio-group {
+  @apply space-y-2;
+}
+
+.radio-option {
+  @apply flex items-center space-x-2 cursor-pointer;
+}
+
+.radio-input {
+  @apply w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500;
+}
+
+.radio-label {
+  @apply text-sm text-gray-700;
+}
+
+/* Checkbox группа */
+.checkbox-group {
+  @apply grid grid-cols-2 gap-3 mt-2;
+}
+
+.checkbox-option {
+  @apply flex items-center space-x-2 cursor-pointer;
+}
+
+.checkbox-input {
+  @apply w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500;
+}
+
+.checkbox-label {
+  @apply text-sm text-gray-700;
+}
+
+/* Custom areas */
 .custom-areas {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #e9ecef;
+  @apply mt-4 p-4 bg-gray-50 rounded-lg;
 }
 
-.travel-radius,
-.travel-fee,
-.travel-time {
-  padding: 16px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
+/* Цена */
+.price-input-group {
+  @apply flex gap-2;
 }
 
-.map-container {
-  padding: 16px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
+.price-input {
+  @apply w-32;
 }
 
+.price-unit {
+  @apply w-48;
+}
+
+/* Карта */
 .map-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 32px 16px;
-  background: white;
-  border-radius: 8px;
-  border: 2px dashed #ddd;
-  text-align: center;
-}
-
-.map-icon {
-  width: 48px;
-  height: 48px;
-  color: #666;
-  margin-bottom: 12px;
-}
-
-.map-icon svg {
-  width: 100%;
-  height: 100%;
-}
-
-.map-placeholder p {
-  color: #666;
-  font-size: 14px;
-  margin: 0 0 16px 0;
-}
-
-.btn {
-  padding: 8px 16px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  background: white;
-  color: #333;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn:hover {
-  background: #f8f9fa;
-  border-color: #007bff;
-  color: #007bff;
-}
-
-.btn-secondary {
-  background: #6c757d;
-  color: white;
-  border-color: #6c757d;
-}
-
-.btn-secondary:hover {
-  background: #5a6268;
-  border-color: #545b62;
+  @apply bg-gray-100 rounded-lg h-48 flex items-center justify-center;
 }
 </style>

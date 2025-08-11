@@ -366,6 +366,13 @@ export const useMasterStore = defineStore<'master', MasterState>('master', {
     },
 
     /**
+     * Проверка наличия в сравнении
+     */
+    isInCompare(masterId: number): boolean {
+      return this.compare.includes(masterId)
+    },
+
+    /**
      * Добавление в сравнение
      */
     addToCompare(masterId: number): boolean {
@@ -399,11 +406,11 @@ export const useMasterStore = defineStore<'master', MasterState>('master', {
     updateMasterInList(masterId: number, updates: Partial<Master>): void {
       const index = this.masters.findIndex(master => master.id === masterId)
       if (index > -1) {
-        this.masters[index] = { ...this.masters[index], ...updates }
+        this.masters[index] = { ...this.masters[index], ...updates } as Master
       }
       
       if (this.currentMaster?.id === masterId) {
-        this.currentMaster = { ...this.currentMaster, ...updates }
+        this.currentMaster = { ...this.currentMaster, ...updates } as Master
       }
     },
 

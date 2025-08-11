@@ -4,7 +4,11 @@
     <div class="features-list">
       <div v-for="feature in allFeatures" :key="feature.id" class="feature-item">
         <label>
-          <input type="checkbox" v-model="localFeatures[feature.id]" @change="emitFeatures" />
+          <input 
+            type="checkbox" 
+            :checked="isFeatureSelected(feature.id)"
+            @change="toggleFeature(feature.id)"
+          />
           {{ feature.label }}
         </label>
       </div>
@@ -20,7 +24,7 @@
 import { reactive, ref, watch } from 'vue'
 
 const props = defineProps({
-  features: { type: Object, default: () => ({}) },
+  features: { type: Array, default: () => [] },
   additionalFeatures: { type: String, default: '' },
   errors: { type: Object, default: () => ({}) }
 })
@@ -32,22 +36,40 @@ const allFeatures = [
   { id: 'kisses', label: 'Целуюсь' },
   { id: 'medical_certificate', label: 'Есть медсправка' },
   { id: 'works_during_period', label: 'Работаю в критические дни' },
-  // ...добавь остальные особенности по необходимости
+  { id: 'tattoos', label: 'Есть татуировки' },
+  { id: 'piercings', label: 'Есть пирсинг' },
+  { id: 'speaks_english', label: 'Говорю по-английски' },
+  { id: 'has_car', label: 'Есть автомобиль' },
+  { id: 'works_weekends', label: 'Работаю в выходные' }
 ]
 
-const localFeatures = reactive({ ...props.features })
+const localFeatures = ref([...props.features])
 const localAdditional = ref(props.additionalFeatures || '')
 
 watch(() => props.features, (val) => {
-  Object.assign(localFeatures, val || {})
+  localFeatures.value = [...(val || [])]
 }, { deep: true })
 
 watch(() => props.additionalFeatures, (val) => {
   localAdditional.value = val || ''
 })
 
+const isFeatureSelected = (featureId) => {
+  return localFeatures.value.includes(featureId)
+}
+
+const toggleFeature = (featureId) => {
+  const index = localFeatures.value.indexOf(featureId)
+  if (index > -1) {
+    localFeatures.value.splice(index, 1)
+  } else {
+    localFeatures.value.push(featureId)
+  }
+  emitFeatures()
+}
+
 const emitFeatures = () => {
-  emit('update:features', { ...localFeatures })
+  emit('update:features', [...localFeatures.value])
   emit('update:additionalFeatures', localAdditional.value)
 }
 </script>

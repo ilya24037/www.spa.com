@@ -5,6 +5,7 @@ import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h } from 'vue';
 import { createPinia } from 'pinia';
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 
 // Импорт системы ленивой загрузки
 import { preloadCriticalComponents, preloadRouteComponents } from './utils/lazyLoadingOptimized';
@@ -41,6 +42,7 @@ createInertiaApp({
     },
     setup({ el, App, props, plugin }) {
         const pinia = createPinia();
+        pinia.use(piniaPluginPersistedstate);
         
         // Запускаем предзагрузку критических компонентов
         preloadCriticalComponents();
@@ -65,11 +67,7 @@ createInertiaApp({
             
             // Отправка ошибок в систему мониторинга
             if (typeof window !== 'undefined' && window.performance) {
-                console.warn('Component error detected:', {
-                    error: err.message,
-                    component: instance?.$options.name || 'Unknown',
-                    info
-                });
+                // Component error logging removed for production
             }
         };
         

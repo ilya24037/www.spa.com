@@ -162,7 +162,8 @@
       "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" -l \"C:\\www.spa.com\\app\\Domain\\Search\\Sorters\\DistanceSorter.php\")",
       "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" -l \"C:\\www.spa.com\\app\\Domain\\Search\\Sorters\\PopularitySorter.php\")",
       "WebFetch(domain:habr.com)",
-      "Bash(C:www.spa.comai-context-ru.bat)"
+      "Bash(C:www.spa.comai-context-ru.bat)",
+      "Bash(C:/Users/user1/.config/herd/bin/composer.bat check-platform-reqs)"
     ],
     "deny": []
   }

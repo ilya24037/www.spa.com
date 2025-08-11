@@ -287,12 +287,7 @@ export const prepareFormData = (form) => {
   // Дополнительная отладка для фото
   if (form.photos && Array.isArray(form.photos)) {
     form.photos.forEach((photo, index) => {
-        hasId: !!photo.id,
-        hasFile: !!photo.file,
-        hasPreview: !!photo.preview,
-        fileName: photo.name,
-        size: photo.size
-      })
+      // Photo validation removed for production
     })
   }
   
@@ -382,13 +377,7 @@ export const prepareFormData = (form) => {
   
   // Детальная проверка первого фото
   if (data.photos && data.photos.length > 0) {
-      id: data.photos[0].id,
-      hasPreview: !!data.photos[0].preview,
-      previewLength: data.photos[0].preview ? data.photos[0].preview.length : 0,
-      name: data.photos[0].name,
-      size: data.photos[0].size,
-      rotation: data.photos[0].rotation
-    })
+    // First photo validation removed for production
   }
   
   return data

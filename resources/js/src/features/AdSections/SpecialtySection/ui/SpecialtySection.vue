@@ -1,11 +1,38 @@
 <template>
   <div class="specialty-section">
-    <h2 class="form-group-title">Специальность</h2>
+    <h2 class="form-group-title">Специальность или сфера</h2>
     <select v-model="localSpecialty" @change="emitSpecialty" class="form-select">
       <option value="">Выберите специальность</option>
-      <option value="erotic_massage">Эротический массаж</option>
-      <option value="classic_massage">Классический массаж</option>
-      <option value="relax_massage">Расслабляющий массаж</option>
+      <optgroup label="Массаж">
+        <option value="erotic_massage">Эротический массаж</option>
+        <option value="classic_massage">Классический массаж</option>
+        <option value="relax_massage">Расслабляющий массаж</option>
+        <option value="thai_massage">Тайский массаж</option>
+        <option value="tantric_massage">Тантрический массаж</option>
+        <option value="body_massage">Боди-массаж</option>
+        <option value="nuru_massage">Нуру массаж</option>
+      </optgroup>
+      <optgroup label="Косметология">
+        <option value="cosmetologist">Косметолог</option>
+        <option value="beautician">Визажист</option>
+        <option value="manicure">Мастер маникюра</option>
+        <option value="pedicure">Мастер педикюра</option>
+        <option value="eyebrows">Бровист</option>
+        <option value="depilation">Мастер депиляции</option>
+      </optgroup>
+      <optgroup label="Развлечения">
+        <option value="stripper">Стриптиз</option>
+        <option value="gogo">Go-go танцы</option>
+        <option value="escort">Эскорт</option>
+        <option value="model">Модель</option>
+        <option value="hostess">Хостес</option>
+      </optgroup>
+      <optgroup label="Другое">
+        <option value="photographer">Фотограф</option>
+        <option value="psychologist">Психолог</option>
+        <option value="coach">Тренер</option>
+        <option value="other">Другая специальность</option>
+      </optgroup>
     </select>
     <div v-if="errors.specialty" class="error-message">
       {{ errors.specialty }}

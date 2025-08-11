@@ -57,7 +57,7 @@ export function useAutosave(form, options = {}) {
         initialFormSnapshot = createFormSnapshot(form.value || form)
       }
     } catch (error) {
-      console.warn('Автосохранение не удалось:', error)
+      // Autosave failed
       
       if (onError) {
         onError(error)

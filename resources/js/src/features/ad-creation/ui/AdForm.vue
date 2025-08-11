@@ -126,18 +126,12 @@
                 />
             </div>
 
-            <!-- 11. Фотографии -->
+            <!-- 11. Медиа (Фото и Видео) -->
             <div class="form-group-section">
-                <PhotosSection 
+                <MediaSection 
                     v-model:photos="form.photos" 
-                    :errors="errors"
-                />
-            </div>
-
-            <!-- 11.2 Видео -->
-            <div class="form-group-section">
-                <VideosSection 
                     v-model:videos="form.videos" 
+                    v-model:media-settings="form.media_settings" 
                     :errors="errors"
                 />
             </div>
@@ -201,8 +195,7 @@ import DescriptionSection from '@/src/features/AdSections/DescriptionSection/ui/
 import PriceSection from '@/src/features/AdSections/PriceSection/ui/PriceSection.vue'
 import ParametersSection from '@/src/features/AdSections/ParametersSection/ui/ParametersSection.vue'
 import PromoSection from '@/src/features/AdSections/PromoSection/ui/PromoSection.vue'
-import PhotosSection from '@/src/features/AdSections/PhotosSection/ui/PhotosSection.vue'
-import VideosSection from '@/src/features/AdSections/VideosSection/ui/VideosSection.vue'
+import MediaSection from '@/src/features/AdSections/MediaSection/ui/MediaSection.vue'
 import GeoSection from '@/src/features/AdSections/GeoSection/ui/GeoSection.vue'
 import ContactsSection from '@/src/features/AdSections/ContactsSection/ui/ContactsSection.vue'
 

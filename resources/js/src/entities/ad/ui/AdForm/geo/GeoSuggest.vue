@@ -57,6 +57,35 @@
       </div>
     </div>
     
+    <!-- Выбранный адрес -->
+    <div v-if="selectedAddress" class="selected-address">
+      <div class="address-info">
+        <div class="address-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+        </div>
+        <div class="address-text">
+          <div class="address-title">{{ selectedAddress.title }}</div>
+          <div class="address-coords">
+            {{ selectedAddress.coords.lat.toFixed(6) }}, {{ selectedAddress.coords.lng.toFixed(6) }}
+          </div>
+        </div>
+        <button 
+          type="button"
+          class="clear-btn"
+          @click="clearSelection"
+          title="Очистить"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    
     <div v-if="error" class="error-message">{{ error }}</div>
     <div v-if="hint && !error" class="hint-text">{{ hint }}</div>
   </div>
@@ -89,6 +118,10 @@ export default {
     hint: {
       type: String,
       default: 'Укажите точный адрес для клиентов'
+    },
+    apiKey: {
+      type: String,
+      default: ''
     }
   },
   emits: ['update:modelValue', 'select'],
@@ -146,33 +179,39 @@ export default {
       this.showSuggestions = false
       
       try {
-        // TODO: Интеграция с Yandex Geocoder API
-        // Пока используем моковые данные
-        const mockSuggestions = [
-          {
-            id: 1,
-            title: `${query}, Москва`,
-            subtitle: 'Москва, Россия',
-            coords: { lat: 55.7558, lng: 37.6176 }
-          },
-          {
-            id: 2,
-            title: `${query}, Санкт-Петербург`,
-            subtitle: 'Санкт-Петербург, Россия', 
-            coords: { lat: 59.9311, lng: 30.3609 }
-          },
-          {
-            id: 3,
-            title: `${query}, Новосибирск`,
-            subtitle: 'Новосибирск, Россия',
-            coords: { lat: 55.0084, lng: 82.9357 }
-          }
-        ]
+        // Используем Yandex API если есть ключ, иначе моковые данные
+        let suggestions = []
         
-        // Имитация задержки API
-        await new Promise(resolve => setTimeout(resolve, 200))
+        if (this.apiKey) {
+          suggestions = await this.searchWithYandex(query)
+        } else {
+          // Моковые данные для разработки
+          suggestions = [
+            {
+              id: 1,
+              title: `${query}, Москва`,
+              subtitle: 'Москва, Россия',
+              coords: { lat: 55.7558, lng: 37.6176 }
+            },
+            {
+              id: 2,
+              title: `${query}, Санкт-Петербург`,
+              subtitle: 'Санкт-Петербург, Россия', 
+              coords: { lat: 59.9311, lng: 30.3609 }
+            },
+            {
+              id: 3,
+              title: `${query}, Новосибирск`,
+              subtitle: 'Новосибирск, Россия',
+              coords: { lat: 55.0084, lng: 82.9357 }
+            }
+          ]
+          
+          // Имитация задержки API
+          await new Promise(resolve => setTimeout(resolve, 200))
+        }
         
-        this.suggestions = mockSuggestions
+        this.suggestions = suggestions
         this.showSuggestions = true
         this.activeIndex = -1
       } catch (error) {
@@ -230,6 +269,54 @@ export default {
           this.activeIndex = -1
           break
       }
+    },
+    
+    clearSelection() {
+      this.selectedAddress = null
+      this.searchQuery = ''
+      this.showSuggestions = false
+      this.suggestions = []
+      
+      this.$emit('update:modelValue', null)
+      this.$refs.inputRef?.focus()
+    },
+    
+    // Метод для интеграции с Yandex Geocoder API
+    async searchWithYandex(query) {
+      if (!this.apiKey) {
+        console.warn('API ключ для Yandex Geocoder не указан')
+        return []
+      }
+      
+      try {
+        const response = await fetch(
+          `https://geocode-maps.yandex.ru/1.x/?apikey=${this.apiKey}&format=json&geocode=${encodeURIComponent(query)}&lang=ru_RU`
+        )
+        const data = await response.json()
+        return this.parseYandexResponse(data)
+      } catch (error) {
+        console.error('Ошибка Yandex API:', error)
+        return []
+      }
+    },
+    
+    parseYandexResponse(data) {
+      const features = data?.response?.GeoObjectCollection?.featureMember || []
+      
+      return features.map((feature, index) => {
+        const geoObject = feature.GeoObject
+        const coordinates = geoObject.Point.pos.split(' ')
+        
+        return {
+          id: index + 1,
+          title: geoObject.name,
+          subtitle: geoObject.description,
+          coords: {
+            lat: parseFloat(coordinates[1]),
+            lng: parseFloat(coordinates[0])
+          }
+        }
+      })
     }
   }
 }
@@ -381,5 +468,84 @@ export default {
   color: #666;
   font-size: 12px;
   margin-top: 4px;
+}
+
+/* Выбранный адрес */
+.selected-address {
+  margin-top: 8px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.address-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.address-icon {
+  width: 20px;
+  height: 20px;
+  color: #007bff;
+  flex-shrink: 0;
+}
+
+.address-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.address-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.address-title {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.address-coords {
+  font-size: 12px;
+  color: #666;
+}
+
+.clear-btn {
+  width: 24px;
+  height: 24px;
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.clear-btn:hover {
+  background: #e9ecef;
+  color: #dc3545;
+}
+
+.clear-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .suggestions-dropdown {
+    max-height: 150px;
+  }
+  
+  .suggestion-item {
+    padding: 10px;
+  }
 }
 </style>
