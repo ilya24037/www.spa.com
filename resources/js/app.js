@@ -72,10 +72,10 @@ createInertiaApp({
         if ('serviceWorker' in navigator && import.meta.env.PROD) {
             navigator.serviceWorker.register('/service-worker.js')
                 .then(registration => {
-                    console.log('Service Worker registered:', registration)
+                    // Service Worker registered successfully
                 })
                 .catch(error => {
-                    console.error('Service Worker registration failed:', error)
+                    // Service Worker registration failed
                 })
         }
         

@@ -77,12 +77,12 @@ const CACHE_STRATEGIES = {
 
 // Установка Service Worker
 self.addEventListener('install', event => {
-  console.log('[SW] Installing Service Worker')
+  // Installing Service Worker
   
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('[SW] Precaching app shell')
+        // Precaching app shell
         return cache.addAll(PRECACHE_URLS)
       })
       .then(() => self.skipWaiting())
@@ -91,7 +91,7 @@ self.addEventListener('install', event => {
 
 // Активация Service Worker
 self.addEventListener('activate', event => {
-  console.log('[SW] Activating Service Worker')
+  // Activating Service Worker
   
   event.waitUntil(
     // Очистка старых кешей
@@ -105,7 +105,7 @@ self.addEventListener('activate', event => {
                    name !== API_CACHE_NAME
           })
           .map(name => {
-            console.log('[SW] Deleting old cache:', name)
+            // Deleting old cache
             return caches.delete(name)
           })
       )
