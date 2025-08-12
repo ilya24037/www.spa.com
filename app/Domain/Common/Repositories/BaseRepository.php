@@ -54,11 +54,19 @@ abstract class BaseRepository
     }
 
     /**
-     * Удалить запись
+     * Удалить запись по ID
      */
     public function delete(int $id): bool
     {
         $model = $this->findOrFail($id);
+        return $model->delete();
+    }
+    
+    /**
+     * Удалить модель
+     */
+    public function deleteModel(Model $model): bool
+    {
         return $model->delete();
     }
 }

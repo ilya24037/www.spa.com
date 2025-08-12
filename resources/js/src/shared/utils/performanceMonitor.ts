@@ -190,7 +190,7 @@ class PerformanceMonitor {
       
       if (navEntry) {
         const ttfb = navEntry.responseStart - navEntry.requestStart
-        const pageLoadTime = navEntry.loadEventEnd - navEntry.navigationStart
+        const pageLoadTime = navEntry.loadEventEnd - navEntry.fetchStart  // ✅ Используем fetchStart вместо navigationStart
         
         this.recordMetric('TTFB', ttfb)
         this.recordMetric('pageLoadTime', pageLoadTime)

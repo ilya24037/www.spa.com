@@ -175,12 +175,17 @@ Route::middleware('auth')->group(function () {
         Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
         
         Route::prefix('items')->name('items.')->group(function () {
-            // Перенаправляем на my-ads с соответствующими табами
-            Route::get('/active/all', fn() => redirect()->route('my-ads.index', ['tab' => 'active']))->name('active');
-            Route::get('/draft/all', fn() => redirect()->route('my-ads.index', ['tab' => 'drafts']))->name('draft');
-            Route::get('/inactive/all', fn() => redirect()->route('my-ads.index', ['tab' => 'archived']))->name('inactive');
-            Route::get('/old/all', fn() => redirect()->route('my-ads.index', ['tab' => 'expired']))->name('old');
-            Route::get('/archive/all', fn() => redirect()->route('my-ads.index', ['tab' => 'archived']))->name('archive');
+            // Обрабатываем напрямую через ProfileController
+            Route::get('/active/all', [ProfileController::class, 'index'])->name('active');
+            Route::get('/draft/all', [ProfileController::class, 'index'])->name('draft');
+            Route::get('/inactive/all', [ProfileController::class, 'index'])->name('inactive');
+            Route::get('/old/all', [ProfileController::class, 'index'])->name('old');
+            Route::get('/archive/all', [ProfileController::class, 'index'])->name('archive');
+            
+            // Маршруты для удаления
+            Route::delete('/draft/{ad}', [MyAdsController::class, 'destroy'])->name('draft.destroy');
+            Route::delete('/active/{ad}', [MyAdsController::class, 'destroy'])->name('active.destroy');
+            Route::delete('/inactive/{ad}', [MyAdsController::class, 'destroy'])->name('inactive.destroy');
         });
     });
 
@@ -298,10 +303,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/ads/{ad}/edit', [AdController::class, 'edit'])->name('ads.edit');
     
     // Маршруты для черновиков
-            Route::get('/draft/{ad}', [AdController::class, 'showDraft'])->name('ads.draft.show');
-        Route::put('/draft/{ad}', [AdController::class, 'updateDraft'])->name('ads.draft.update');
-        Route::delete('/draft/{ad}', [MyAdsController::class, 'destroy'])->name('ads.draft.destroy');
-        // Удаление черновиков теперь через my-ads.destroy как и других объявлений
+    Route::get('/draft/{ad}', [AdController::class, 'showDraft'])->name('ads.draft.show');
+    Route::put('/draft/{ad}', [AdController::class, 'updateDraft'])->name('ads.draft.update');
+    Route::delete('/draft/{ad}', [MyAdsController::class, 'destroy'])->name('ads.draft.destroy');
+    // Удаление черновиков теперь через my-ads.destroy как и других объявлений
     Route::get('/ads/{ad}/data', [AdController::class, 'getData'])->name('ads.data');
     Route::put('/ads/{ad}', [AdController::class, 'update'])->name('ads.update');
     Route::delete('/ads/{ad}', [AdController::class, 'destroy'])->name('ads.destroy');

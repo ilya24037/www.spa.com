@@ -46,13 +46,17 @@ export interface FooterConfig {
     name: string
     description: string
     year: number
+    currentYear?: number
   }
   sections: FooterSection[]
   social: Record<string, string>
   accessibility?: {
     ariaLabel?: string
     role?: string
+    enabled?: boolean
+    callback?: () => void
   }
+  quickActions?: FooterLink[]
 }
 
 // Конфигурация футера по умолчанию

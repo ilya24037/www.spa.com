@@ -13,12 +13,30 @@
 
       <!-- Форма профиля -->
       <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-        <h2 class="text-xl font-semibold text-gray-500 mb-4">
-          Основная информация
-        </h2>
-        
         <form class="space-y-4" @submit.prevent="updateProfile">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Обо мне (физические параметры) - используем компонент -->
+          <div class="mb-6">
+            <ParametersSection 
+              v-model:age="form.age"
+              v-model:height="form.height"
+              v-model:weight="form.weight"
+              v-model:breast-size="form.breast_size"
+              :show-age="true"
+              :show-breast-size="true"
+              :show-hair-color="false"
+              :show-eye-color="false"
+              :show-nationality="false"
+              :errors="{}"
+            />
+          </div>
+
+          <!-- Основная информация -->
+          <div class="mb-6 border-t pt-6">
+            <h2 class="text-xl font-semibold text-gray-500 mb-4">
+              Основная информация
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-500 mb-1">
                 Имя
@@ -94,95 +112,6 @@
             </div>
           </div>
 
-          <!-- Физические параметры -->
-          <div class="border-t pt-4 mt-4">
-            <h3 class="text-lg font-medium text-gray-500 mb-4">
-              Физические параметры
-            </h3>
-            
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-500 mb-1">
-                  Возраст
-                </label>
-                <input 
-                  v-model="form.age"
-                  type="number"
-                  min="18"
-                  max="65"
-                  class="w-full px-3 py-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="34"
-                >
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-gray-500 mb-1">
-                  Рост (см)
-                </label>
-                <input 
-                  v-model="form.height"
-                  type="number"
-                  min="140"
-                  max="200"
-                  class="w-full px-3 py-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="161"
-                >
-                <div class="text-xs text-gray-500 mt-1">
-                  Ваш рост в сантиметрах
-                </div>
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-gray-500 mb-1">
-                  Вес (кг)
-                </label>
-                <input 
-                  v-model="form.weight"
-                  type="number"
-                  min="40"
-                  max="120"
-                  class="w-full px-3 py-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="56"
-                >
-                <div class="text-xs text-gray-500 mt-1">
-                  Ваш вес в килограммах
-                </div>
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-gray-500 mb-1">
-                  Размер груди
-                </label>
-                <select 
-                  v-model="form.breast_size"
-                  class="w-full px-3 py-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">
-                    Не указано
-                  </option>
-                  <option value="1">
-                    1
-                  </option>
-                  <option value="2">
-                    2
-                  </option>
-                  <option value="3">
-                    3
-                  </option>
-                  <option value="4">
-                    4
-                  </option>
-                  <option value="5">
-                    5
-                  </option>
-                  <option value="6">
-                    6
-                  </option>
-                </select>
-              </div>
-            </div>
-          </div>
-
           <div class="flex justify-end">
             <button 
               type="submit"
@@ -216,6 +145,7 @@
 import { ref, reactive } from 'vue'
 import { router } from '@inertiajs/vue3'
 import MediaUploader from '@/src/entities/ad/ui/AdForm/components/AdFormMediaUpload.vue'
+import ParametersSection from '@/src/features/AdSections/ParametersSection/ui/ParametersSection.vue'
 import { useToast } from '@/src/shared/composables/useToast'
 
 // Toast для замены (window as any).// Removed // Removed // Removed alert() - use toast notifications instead - use toast notifications instead - use toast notifications instead

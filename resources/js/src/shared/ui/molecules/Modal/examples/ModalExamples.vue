@@ -196,8 +196,8 @@ const showProgrammaticConfirm = async () => {
 }
 
 const showProgrammaticAlert = async () => {
-    // Используем toast.alert вместо нативного alert()
-    await toast.alert({
+    // ✅ Используем alert из useAlert вместо toast.alert
+    await alert({
         title: 'Поздравляем!',
         message: 'Ваш профиль успешно обновлен.',
         variant: 'success',

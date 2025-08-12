@@ -52,6 +52,9 @@ class AppServiceProvider extends ServiceProvider
 
         // Регистрация User сервисов
         $this->registerUserServices();
+        
+        // Регистрация Ad сервисов  
+        $this->registerAdServices();
 
         // Регистрация Booking сервисов
         $this->registerBookingServices();
@@ -64,6 +67,32 @@ class AppServiceProvider extends ServiceProvider
         
         // Регистрация Cache декораторов
         $this->registerCacheDecorators();
+    }
+
+    /**
+     * Регистрация Ad сервисов
+     */
+    protected function registerAdServices(): void
+    {
+        // AdRepository
+        $this->app->singleton(\App\Domain\Ad\Repositories\AdRepository::class);
+        
+        // AdService
+        $this->app->singleton(\App\Domain\Ad\Services\AdService::class);
+        
+        // AdProfileService
+        $this->app->singleton(\App\Domain\Ad\Services\AdProfileService::class);
+        
+        // AdDraftService
+        $this->app->singleton(\App\Domain\Ad\Services\AdDraftService::class);
+        
+        // AdModerationService
+        $this->app->singleton(\App\Domain\Ad\Services\AdModerationService::class);
+        
+        // Ad Actions
+        $this->app->singleton(\App\Domain\Ad\Actions\PublishAdAction::class);
+        $this->app->singleton(\App\Domain\Ad\Actions\ArchiveAdAction::class);
+        $this->app->singleton(\App\Domain\Ad\Actions\ModerateAdAction::class);
     }
 
     /**
@@ -135,6 +164,10 @@ class AppServiceProvider extends ServiceProvider
      */
     protected function registerSearchServices(): void
     {
+        // Search Repositories
+        $this->app->singleton(\App\Domain\Search\Repositories\AdSearchRepository::class);
+        $this->app->singleton(\App\Domain\Search\Repositories\MasterSearchRepository::class);
+        
         // SearchRepository
         $this->app->singleton(\App\Domain\Search\Repositories\SearchRepository::class);
 
@@ -145,15 +178,19 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(\App\Domain\Search\Services\GlobalSearchEngine::class);
         $this->app->singleton(\App\Domain\Search\Services\RecommendationEngine::class);
 
-        // SearchService с всеми зависимостями
+        // Search Handlers
+        $this->app->singleton(\App\Domain\Search\Services\Handlers\SearchEngineManager::class);
+        $this->app->singleton(\App\Domain\Search\Services\Handlers\SearchValidator::class);
+        $this->app->singleton(\App\Domain\Search\Services\Handlers\SearchAnalytics::class);
+        $this->app->singleton(\App\Domain\Search\Services\Handlers\SearchSuggestionProvider::class);
+
+        // SearchService с правильными зависимостями
         $this->app->singleton(\App\Domain\Search\Services\SearchService::class, function ($app) {
             return new \App\Domain\Search\Services\SearchService(
-                $app->make(\App\Domain\Search\Repositories\SearchRepository::class),
-                $app->make(\App\Domain\Search\Engines\AdSearchEngine::class),
-                $app->make(\App\Domain\Search\Engines\MasterSearchEngine::class),
-                $app->make(\App\Domain\Search\Services\ServiceSearchEngine::class),
-                $app->make(\App\Domain\Search\Services\GlobalSearchEngine::class),
-                $app->make(\App\Domain\Search\Services\RecommendationEngine::class)
+                $app->make(\App\Domain\Search\Services\Handlers\SearchEngineManager::class),
+                $app->make(\App\Domain\Search\Services\Handlers\SearchValidator::class),
+                $app->make(\App\Domain\Search\Services\Handlers\SearchAnalytics::class),
+                $app->make(\App\Domain\Search\Services\Handlers\SearchSuggestionProvider::class)
             );
         });
     }

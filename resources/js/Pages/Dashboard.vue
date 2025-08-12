@@ -1,302 +1,367 @@
-<!-- Панель управления - полная FSD миграция -->
+<!-- Dashboard - Личный кабинет в стиле Avito с полной FSD архитектурой -->
 <template>
-  <Head title="Панель управления" />
+  <Head title="Мои объявления" />
   
-  <!-- ProfileDashboard Widget - единая точка входа -->
-  <ProfileDashboard
-    :ads="ads"
-    :stats="dashboardStats"
-    :counts="counts"
-    @stats-loading="handleStatsLoading"
-    @data-loaded="handleDataLoaded"
-  >
-    <!-- Основной контент через slot -->
-    <div class="space-y-6">
-      <!-- Быстрые действия -->
-      <div class="bg-white rounded-lg shadow-sm border p-6">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">
-          Быстрые действия
-        </h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Link
-            href="/ads/create"
-            class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            Создать объявление
-          </Link>
-          
-          <Link
-            href="/profile/edit"
-            class="inline-flex items-center justify-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-          >
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-            Редактировать профиль
-          </Link>
-          
-          <Link
-            href="/bookings"
-            class="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-          >
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 0h6m-6 0L8 21l-2-2m6-16L14 21l2-2" />
-            </svg>
-            Мои записи
-          </Link>
-          
-          <Link
-            href="/messages"
-            class="inline-flex items-center justify-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-          >
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-            Сообщения
-            <span v-if="counts.unreadMessages > 0" class="ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-              {{ counts.unreadMessages }}
-            </span>
-          </Link>
-        </div>
-      </div>
-
-      <!-- Последние объявления -->
-      <div class="bg-white rounded-lg shadow-sm border p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold text-gray-900">
-            Последние объявления
-          </h2>
-          <Link
-            href="/ads"
-            class="text-blue-600 hover:text-blue-800 text-sm font-medium"
-          >
-            Посмотреть все →
-          </Link>
-        </div>
-        
-        <!-- Loading состояние -->
-        <div v-if="isLoading" class="space-y-4">
-          <div v-for="i in 3" :key="i" class="animate-pulse">
-            <div class="h-20 bg-gray-200 rounded-lg"></div>
+  <!-- Обертка с правильными отступами как в Home.vue -->
+  <div class="py-6 lg:py-8">
+    
+    <!-- Основной контент с гэпом между блоками -->
+    <div class="flex gap-6">
+      
+      <!-- Боковая панель через SidebarWrapper -->
+      <SidebarWrapper 
+        v-model="showSidebar"
+        content-class="p-0"
+        :show-desktop-header="false"
+        :always-visible-desktop="true"
+      >
+        <!-- Профиль пользователя -->
+        <div class="p-6 border-b">
+          <div class="flex items-center space-x-3">
+            <div 
+              class="w-12 h-12 rounded-full flex items-center justify-center text-white font-medium text-lg"
+              :style="{ backgroundColor: avatarColor }"
+            >
+              {{ userInitial }}
+            </div>
+            <div>
+              <div class="font-medium text-gray-900">{{ userName }}</div>
+              <div class="text-sm text-gray-500">★ {{ userStats.rating || 4.2 }} • {{ userStats.reviews_count || 5 }} отзывов</div>
+            </div>
           </div>
         </div>
         
-        <!-- Пустое состояние -->
-        <div v-else-if="!ads || ads.length === 0" class="text-center py-8">
-          <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          <p class="text-gray-500 text-lg mb-2">У вас пока нет объявлений</p>
-          <p class="text-gray-400 mb-4">Создайте первое объявление, чтобы начать получать клиентов</p>
-          <Link
-            href="/ads/create"
-            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Создать объявление
-          </Link>
+        <!-- Меню как на Авито -->
+        <nav class="flex-1">
+          <div class="py-2">
+            <!-- Мои объявления (основная секция) -->
+            <div class="px-4">
+              <Link 
+                href="/profile/items/inactive/all"
+                :class="[
+                  'flex items-center justify-between px-3 py-2 text-sm rounded-md transition-colors',
+                  isAdsRoute ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700 hover:bg-gray-50'
+                ]"
+              >
+                <span>Мои объявления</span>
+                <span v-if="totalAds > 0" class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{{ totalAds }}</span>
+              </Link>
+            </div>
+            
+            <!-- Остальные пункты меню -->
+            <div class="px-4 mt-2 space-y-1">
+              <Link 
+                href="/bookings"
+                class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+              >
+                Заказы
+              </Link>
+              
+              <Link 
+                href="/profile/reviews"
+                class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+              >
+                Мои отзывы
+              </Link>
+              
+              <Link 
+                href="/favorites"
+                class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+              >
+                Избранное
+              </Link>
+              
+              <Link 
+                href="/messages"
+                class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+              >
+                Сообщения
+              </Link>
+              
+              <Link 
+                href="/notifications"
+                class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+              >
+                Уведомления
+              </Link>
+              
+              <Link 
+                href="/wallet"
+                class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+              >
+                Кошелёк
+              </Link>
+              
+              <Link 
+                href="/profile/addresses"
+                class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+              >
+                Адреса
+              </Link>
+              
+              <Link 
+                href="/profile/edit"
+                class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+              >
+                Управление профилем
+              </Link>
+              
+              <Link 
+                href="/profile/security"
+                class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+              >
+                Защита профиля
+              </Link>
+              
+              <Link 
+                href="/settings"
+                class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+              >
+                Настройки
+              </Link>
+              
+              <Link 
+                href="/services"
+                class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+              >
+                Платные услуги
+              </Link>
+            </div>
+          </div>
+        </nav>
+      </SidebarWrapper>
+      
+      <!-- Контент справа -->
+      <section class="flex-1 space-y-6">
+        
+        <!-- Заголовок без фона -->
+        <div class="mb-6">
+          <h1 class="text-2xl font-bold text-gray-900 mb-4">Мои объявления</h1>
         </div>
         
-        <!-- Список объявлений -->
-        <div v-else class="space-y-4">
-          <AdCardListItem
-            v-for="ad in recentAds"
-            :key="ad.id"
-            :ad="ad"
-            :show-actions="true"
-            @edit="handleEdit"
-            @delete="handleDelete"
-            @toggle-status="handleToggleStatus"
-          />
+        <!-- Основной контент - белая карточка как на главной -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div class="p-6">
+            <!-- Навигация вкладок как на Авито -->
+            <div class="flex items-center space-x-8">
+              <Link 
+                href="/profile/items/inactive/all"
+                :class="[
+                  'pb-2 text-base font-medium border-b-2 transition-colors',
+                  activeTab === 'inactive' 
+                    ? 'text-gray-900 border-gray-900' 
+                    : 'text-gray-500 border-transparent hover:text-gray-700'
+                ]"
+              >
+                <span class="flex items-center gap-2">
+                  Ждут действий
+                  <sup v-if="counts.waiting_payment" class="text-sm font-normal">{{ counts.waiting_payment }}</sup>
+                </span>
+              </Link>
+              
+              <Link 
+                href="/profile/items/active/all"
+                :class="[
+                  'pb-2 text-base font-medium border-b-2 transition-colors',
+                  activeTab === 'active' 
+                    ? 'text-gray-900 border-gray-900' 
+                    : 'text-gray-500 border-transparent hover:text-gray-700'
+                ]"
+              >
+                <span class="flex items-center gap-2">
+                  Активные
+                  <sup v-if="counts.active" class="text-sm font-normal">{{ counts.active }}</sup>
+                </span>
+              </Link>
+              
+              <Link 
+                href="/profile/items/draft/all"
+                :class="[
+                  'pb-2 text-base font-medium border-b-2 transition-colors',
+                  activeTab === 'draft' 
+                    ? 'text-gray-900 border-gray-900' 
+                    : 'text-gray-500 border-transparent hover:text-gray-700'
+                ]"
+              >
+                <span class="flex items-center gap-2">
+                  Черновики
+                  <sup v-if="counts.draft" class="text-sm font-normal">{{ counts.draft }}</sup>
+                </span>
+              </Link>
+              
+              <Link 
+                href="/profile/items/archive/all"
+                :class="[
+                  'pb-2 text-base font-medium border-b-2 transition-colors',
+                  activeTab === 'archive' 
+                    ? 'text-gray-900 border-gray-900' 
+                    : 'text-gray-500 border-transparent hover:text-gray-700'
+                ]"
+              >
+                <span class="flex items-center gap-2">
+                  Архив
+                  <sup v-if="counts.archive" class="text-sm font-normal">{{ counts.archive }}</sup>
+                </span>
+              </Link>
+            </div>
+          </div>
+          
+          <!-- Контент вкладки -->
+          <div v-if="profiles && profiles.length > 0" class="space-y-6 p-6">
+            <ItemCard 
+              v-for="profile in profiles" 
+              :key="profile.id"
+              :item="profile"
+              @item-updated="handleItemUpdate"
+              @item-deleted="handleItemDelete"
+            />
+          </div>
+          
+          <!-- Пустое состояние как на Авито -->
+          <div v-else class="text-center py-16">
+            <div class="max-w-md mx-auto">
+              <div class="w-20 h-20 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+                <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <h3 class="text-xl font-medium text-gray-900 mb-3">{{ getEmptyStateTitle(activeTab) }}</h3>
+              <p class="text-gray-600 mb-8 leading-relaxed">{{ getEmptyStateDescription(activeTab) }}</p>
+            </div>
+          </div>
         </div>
-      </div>
-
-      <!-- Последние отзывы -->
-      <div v-if="recentReviews && recentReviews.length > 0" class="bg-white rounded-lg shadow-sm border p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold text-gray-900">
-            Последние отзывы
-          </h2>
-          <Link
-            href="/reviews"
-            class="text-blue-600 hover:text-blue-800 text-sm font-medium"
-          >
-            Посмотреть все →
-          </Link>
-        </div>
-        
-        <div class="space-y-4">
-          <ReviewCard
-            v-for="review in recentReviews"
-            :key="review.id"
-            :review="review"
-            :compact="true"
-          />
-        </div>
-      </div>
+      </section>
     </div>
-  </ProfileDashboard>
+  </div>
+  
+  <!-- Глобальные уведомления -->
+  <Toast
+    v-for="toast in toasts"
+    :key="toast.id"
+    :message="toast.message"
+    :type="toast.type"
+    :duration="toast.duration"
+    @close="removeToast(toast.id)"
+  />
 </template>
 
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3'
 import { ref, computed } from 'vue'
+import { Head, Link, usePage } from '@inertiajs/vue3'
 
 // FSD imports
-import { ProfileDashboard } from '@/src/widgets/profile-dashboard'
-import { AdCardListItem } from '@/src/entities/ad/ui/AdCard'
-import { ReviewCard } from '@/src/entities/review/ui/ReviewCard'
+import { SidebarWrapper } from '@/src/shared/ui/layouts/SidebarWrapper'
+import { ItemCard } from '@/src/entities/ad/ui/ItemCard'
+import { Toast } from '@/src/shared/ui/molecules/Toast'
+import type { AdItem } from '@/src/entities/ad/ui/ItemCard'
+import type { ToastType } from '@/src/shared/ui/molecules/Toast'
 
-// Stores
-import { useProfileNavigationStore } from '@/src/features/profile-navigation/model/navigation.store'
-
-// Props из Inertia
+// TypeScript интерфейсы
 interface DashboardPageProps {
-  ads?: Ad[]
-  stats?: DashboardStats
+  profiles?: AdItem[]
   counts?: {
-    totalAds: number
-    activeAds: number
-    waitingAds: number
-    completedAds: number
-    unreadMessages: number
-    totalViews: number
-    totalFavorites: number
+    active?: number
+    draft?: number
+    waiting_payment?: number
+    old?: number
+    archive?: number
+    unreadMessages?: number
   }
-  recentReviews?: Review[]
+  userStats?: {
+    rating?: number
+    reviews_count?: number
+  }
+  activeTab?: string
+  title?: string
 }
 
-interface Ad {
+interface ToastInstance {
   id: number
-  title: string
-  status: 'active' | 'pending' | 'archived'
-  created_at: string
-  views: number
-  favorites: number
-  [key: string]: any
+  message: string
+  type: ToastType
+  duration: number
 }
 
-interface Review {
-  id: number
-  rating: number
-  comment: string
-  created_at: string
-  client_name: string
-  [key: string]: any
-}
-
-interface DashboardStats {
-  views: number
-  favorites: number
-  messages: number
-  earnings: number
-  viewsTrend?: number
-  favoritesTrend?: number
-  messagesTrend?: number
-  earningsTrend?: number
-}
-
+// Props
 const props = withDefaults(defineProps<DashboardPageProps>(), {
-  ads: () => [],
-  recentReviews: () => [],
-  counts: () => ({
-    totalAds: 0,
-    activeAds: 0,
-    waitingAds: 0,
-    completedAds: 0,
-    unreadMessages: 0,
-    totalViews: 0,
-    totalFavorites: 0
-  }),
-  stats: () => ({
-    views: 0,
-    favorites: 0,
-    messages: 0,
-    earnings: 0
-  })
+  profiles: () => [],
+  counts: () => ({}),
+  userStats: () => ({}),
+  activeTab: 'inactive',
+  title: 'Мои объявления'
 })
 
-// Store
-const navigationStore = useProfileNavigationStore()
+// Состояние
+const showSidebar = ref(false)
+const toasts = ref<ToastInstance[]>([])
 
-// Local state
-const isLoading = ref(false)
+// Пользователь
+const page = usePage()
+const user = computed(() => (page.props.auth as any)?.user || {})
 
-// Computed
-const dashboardStats = computed<DashboardStats>(() => ({
-  views: props.counts?.totalViews || 0,
-  favorites: props.counts?.totalFavorites || 0,
-  messages: props.counts?.unreadMessages || 0,
-  earnings: 0, // Пока нет данных о заработке
-  viewsTrend: 5, // Примерный рост
-  favoritesTrend: 2,
-  messagesTrend: -1,
-  earningsTrend: 0
-}))
-
-const recentAds = computed(() => 
-  props.ads?.slice(0, 5) || []
-)
-
-const recentReviews = computed(() =>
-  props.recentReviews?.slice(0, 3) || []
-)
-
-// Methods
-const handleStatsLoading = () => {
-  isLoading.value = true
-}
-
-const handleDataLoaded = () => {
-  isLoading.value = false
-}
-
-const handleEdit = (adId: number) => {
-  window.location.href = `/ads/${adId}/edit`
-}
-
-const handleDelete = async (adId: number) => {
-  if (confirm('Вы уверены, что хотите удалить это объявление?')) {
-    try {
-      // API call to delete ad
-      await fetch(`/api/ads/${adId}`, { method: 'DELETE' })
-      window.location.reload()
-    } catch (error) {
-      logger.error('Error deleting ad:', error)
-    }
-  }
-}
-
-const handleToggleStatus = async (adId: number, newStatus: string) => {
-  try {
-    // API call to toggle status
-    await fetch(`/api/ads/${adId}/status`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: newStatus })
-    })
-    window.location.reload()
-  } catch (error) {
-    logger.error('Error toggling status:', error)
-  }
-}
-
-// Initialize navigation store
-import { onMounted } from 'vue'
-import { logger } from '@/src/shared/utils/logger'
-onMounted(() => {
-  // Обновить счетчики в табах
-  navigationStore.updateAllCounts({
-    waiting: props.counts?.waitingAds || 0,
-    active: props.counts?.activeAds || 0,
-    completed: props.counts?.completedAds || 0,
-    drafts: 0, // Нужно добавить в props
-    favorites: props.counts?.totalFavorites || 0,
-    settings: 0
-  })
+// Вычисляемые свойства для пользователя
+const userName = computed(() => user.value.name || 'Пользователь')
+const userInitial = computed(() => userName.value.charAt(0).toUpperCase())
+const avatarColor = computed(() => {
+  const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899']
+  const index = userName.value.charCodeAt(0) % colors.length
+  return colors[index]
 })
+
+// Проверка текущего роута для объявлений
+const isAdsRoute = computed(() => {
+  const currentRoute = page.url
+  return currentRoute.includes('/profile/items/')
+})
+
+// Общее количество объявлений
+const totalAds = computed(() => {
+  const counts = props.counts || {}
+  return (counts.active || 0) + (counts.draft || 0) + (counts.waiting_payment || 0) + (counts.old || 0) + (counts.archive || 0)
+})
+
+// Функции для заголовков и описаний
+
+const getEmptyStateTitle = (tab: string) => {
+  const titles: Record<string, string> = {
+    active: 'Нет активных объявлений',
+    draft: 'Нет черновиков',
+    inactive: 'Нет объявлений, ожидающих действий',
+    old: 'Нет старых объявлений',
+    archive: 'Архив пуст'
+  }
+  return titles[tab] || 'Нет объявлений'
+}
+
+const getEmptyStateDescription = (tab: string) => {
+  const descriptions: Record<string, string> = {
+    active: 'У вас пока нет активных объявлений. Разместите новое объявление, чтобы начать получать заказы.',
+    draft: 'У вас нет сохраненных черновиков. Создайте новое объявление или сохраните текущее как черновик.',
+    inactive: 'Здесь появятся объявления, которые требуют вашего внимания - например, истекающие или отклоненные.',
+    old: 'Здесь будут показаны ваши старые неактивные объявления.',
+    archive: 'Архивированные объявления не отображаются в поиске, но сохраняют всю информацию.'
+  }
+  return descriptions[tab] || 'Пока здесь пусто.'
+}
+
+// Обработчики событий
+const handleItemUpdate = (itemId: number) => {
+  addToast(`Объявление #${itemId} обновлено`, 'success')
+}
+
+const handleItemDelete = (itemId: number) => {
+  addToast(`Объявление #${itemId} удалено`, 'info')
+}
+
+// Управление Toast уведомлениями
+const addToast = (message: string, type: ToastType = 'success', duration = 5000) => {
+  const id = Date.now()
+  toasts.value.push({ id, message, type, duration })
+}
+
+const removeToast = (id: number) => {
+  toasts.value = toasts.value.filter(toast => toast.id !== id)
+}
 </script>
 
 <style scoped>

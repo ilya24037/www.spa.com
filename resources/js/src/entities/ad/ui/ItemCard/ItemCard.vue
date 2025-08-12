@@ -40,60 +40,25 @@
   </div>
 
   <!-- Модальное окно подтверждения удаления -->
-  <Teleport to="body">
-    <Transition
-      enter-active-class="transition ease-out duration-200"
-      enter-from-class="opacity-0"
-      enter-to-class="opacity-100"
-      leave-active-class="transition ease-in duration-150"
-      leave-from-class="opacity-100"
-      leave-to-class="opacity-0"
-    >
-      <div v-if="showDeleteModal" class="fixed inset-0 z-50 overflow-y-auto">
-        <div class="flex items-center justify-center min-h-screen px-4">
-          <!-- Backdrop -->
-          <div 
-            class="fixed inset-0 bg-black bg-opacity-50"
-            @click="showDeleteModal = false"
-          />
-          
-          <!-- Modal -->
-          <div class="relative bg-white rounded-lg max-w-md w-full p-6">
-            <h3 class="text-lg font-semibold mb-2">
-              Удалить объявление?
-            </h3>
-            <p class="text-gray-600 mb-6">
-              Это действие нельзя отменить. Объявление будет удалено навсегда.
-            </p>
-            
-            <div class="flex justify-end gap-3">
-              <button
-                @click="showDeleteModal = false"
-                class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                Отмена
-              </button>
-              <button
-                @click="deleteItem"
-                class="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
-              >
-                Удалить
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </Transition>
-  </Teleport>
+  <ConfirmModal
+    :show="showDeleteModal"
+    title="Удалить объявление?"
+    message="Это действие нельзя отменить. Объявление будет удалено навсегда."
+    confirm-text="Удалить"
+    cancel-text="Отмена"
+    @confirm="deleteItem"
+    @cancel="showDeleteModal = false"
+  />
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { router, Link } from '@inertiajs/vue3'
-import ItemImage from './components/ItemImage.vue'
-import ItemContent from './components/ItemContent.vue'
+import ItemImage from '@/src/shared/ui/molecules/ItemImage.vue'
+import ItemContent from '@/src/shared/ui/molecules/ItemContent.vue'
 import ItemStats from './components/ItemStats.vue'
 import ItemActions from './components/ItemActions.vue'
+import ConfirmModal from '@/src/shared/ui/organisms/ConfirmModal.vue'
 import type { AdItem, ItemCardEmits } from './ItemCard.types'
 
 interface Props {
@@ -126,6 +91,7 @@ const promoteItem = () => {
 }
 
 const editItem = () => {
+  // Для всех объявлений (включая черновики) используем один роут
   router.visit(`/ads/${props.item.id}/edit`)
   emit('edit', props.item.id)
 }
@@ -140,11 +106,22 @@ const deactivateItem = () => {
 }
 
 const deleteItem = () => {
-  router.delete(`/ads/${props.item.id}`, {
+  // Определяем правильный маршрут в зависимости от контекста
+  const deleteUrl = props.item.status === 'draft' 
+    ? `/profile/items/draft/${props.item.id}`
+    : `/my-ads/${props.item.id}`
+    
+  router.delete(deleteUrl, {
+    preserveState: false,
+    preserveScroll: true,
     onSuccess: () => {
       showDeleteModal.value = false
       emit('item-deleted', props.item.id)
       emit('delete', props.item.id)
+    },
+    onError: (errors) => {
+      console.error('Ошибка при удалении:', errors)
+      alert('Ошибка при удалении объявления')
     }
   })
 }

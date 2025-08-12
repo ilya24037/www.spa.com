@@ -1,4 +1,4 @@
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { useAuthStore } from '@/stores/authStore'
 
@@ -9,7 +9,7 @@ export interface AdFormData {
   clients: string[]
   service_location: string[]
   work_format: string
-  service_provider: string
+  service_provider: string[]
   experience: string
   description: string
   services: any[]
@@ -29,15 +29,17 @@ export interface AdFormData {
     price: number
     unit: string
   }>
+  age: string | number
   height: string
   weight: string
+  breast_size: string
   hair_color: string
   eye_color: string
   nationality: string
   new_client_discount: string
   gift: string
   photos: any[]
-  videos: any[]
+  video: any[]
   media_settings: string[]
   geo: any
   address: string
@@ -63,7 +65,7 @@ export function useAdFormModel(props: any, emit: any) {
     clients: props.initialData?.clients || [],
     service_location: props.initialData?.service_location || ['У заказчика дома'],
     work_format: props.initialData?.work_format || 'individual',
-    service_provider: props.initialData?.service_provider || 'woman',
+    service_provider: props.initialData?.service_provider || ['women'],
     experience: props.initialData?.experience || '',
     description: props.initialData?.description || '',
     services: props.initialData?.services || [],
@@ -79,15 +81,17 @@ export function useAdFormModel(props: any, emit: any) {
     main_service_price: props.initialData?.main_service_price || null,
     main_service_price_unit: props.initialData?.main_service_price_unit || 'hour',
     additional_services: props.initialData?.additional_services || [],
+    age: props.initialData?.age || '',
     height: props.initialData?.height || '',
     weight: props.initialData?.weight || '',
+    breast_size: props.initialData?.breast_size || '',
     hair_color: props.initialData?.hair_color || '',
     eye_color: props.initialData?.eye_color || '',
     nationality: props.initialData?.nationality || '',
     new_client_discount: props.initialData?.new_client_discount || '',
     gift: props.initialData?.gift || '',
     photos: props.initialData?.photos || [],
-    videos: props.initialData?.videos || [],
+    video: props.initialData?.video || [],
     media_settings: props.initialData?.media_settings || ['show_photos_in_gallery'],
     geo: props.initialData?.geo || {},
     address: props.initialData?.address || '',
@@ -107,6 +111,10 @@ export function useAdFormModel(props: any, emit: any) {
   
   // Состояние сохранения
   const saving = ref(false)
+  
+  // Режим редактирования
+  const isEditMode = computed(() => !!props.adId)
+  
 
   // Валидация формы
   const validateForm = (): boolean => {
@@ -144,77 +152,155 @@ export function useAdFormModel(props: any, emit: any) {
     
     saving.value = true
     
-    try {
-      // Подготовка данных для отправки
-      const formData = new FormData()
-      
-      // Добавляем все поля формы
-      Object.entries(form).forEach(([key, value]) => {
-        if (value !== null && value !== undefined) {
-          if (Array.isArray(value)) {
-            value.forEach((item, index) => {
-              if (typeof item === 'object' && item.file) {
-                formData.append(`${key}[${index}]`, item.file)
-              } else {
-                formData.append(`${key}[]`, item)
-              }
-            })
-          } else if (typeof value === 'object') {
-            formData.append(key, JSON.stringify(value))
-          } else {
-            formData.append(key, String(value))
+    // Подготовка данных для отправки
+    const submitData = {
+      ...form,
+      category: props.category
+    }
+    
+    // Если это редактирование существующего объявления
+    if (isEditMode.value) {
+      // Для черновиков используем PUT на /draft/{id}
+      if (props.initialData?.status === 'draft') {
+        router.put(`/draft/${props.adId}`, submitData, {
+          preserveScroll: true,
+          onSuccess: () => {
+            emit('success')
+          },
+          onError: (errorResponse: any) => {
+            console.error('Ошибка обновления черновика:', errorResponse)
+            errors.value = errorResponse
+          },
+          onFinish: () => {
+            saving.value = false
           }
-        }
-      })
-      
-      // Добавляем категорию
-      formData.append('category', props.category)
-      
-      // Отправка на сервер
-      router.post('/api/ads', formData, {
-        onSuccess: (response: any) => {
-          emit('success', response)
-        },
-        onError: (errors: any) => {
-          console.error('Ошибка создания объявления:', errors)
-          errors.value = errors
+        })
+      } else {
+        // Для обычных объявлений используем PUT на /ads/{id}
+        router.put(`/ads/${props.adId}`, submitData, {
+          preserveScroll: true,
+          onSuccess: () => {
+            emit('success')
+          },
+          onError: (errorResponse: any) => {
+            console.error('Ошибка обновления объявления:', errorResponse)
+            errors.value = errorResponse
+          },
+          onFinish: () => {
+            saving.value = false
+          }
+        })
+      }
+    } else {
+      // Создание нового объявления
+      router.post('/additem', submitData, {
+        preserveScroll: true,
+        onError: (errorResponse: any) => {
+          console.error('Ошибка создания объявления:', errorResponse)
+          errors.value = errorResponse
         },
         onFinish: () => {
           saving.value = false
         }
       })
-    } catch (error) {
-      console.error('Ошибка при отправке формы:', error)
-      saving.value = false
     }
   }
 
-  // Сохранение черновика
+  // Сохранение черновика (как в старой версии из Backup)
   const handleSaveDraft = async () => {
     saving.value = true
     
-    try {
-      const draftData = {
-        ...form,
-        category: props.category,
-        status: 'draft'
-      }
-      
-      router.post('/api/ads/draft', draftData, {
-        onSuccess: () => {
-          // Draft saved successfully
-        },
-        onError: (errors: any) => {
-          // Error saving draft
-        },
-        onFinish: () => {
-          saving.value = false
+    // Создаем FormData для отправки файлов
+    const formData = new FormData()
+    
+    // Добавляем все обычные поля
+    formData.append('category', props.category || '')
+    formData.append('title', form.title || '')
+    formData.append('specialty', form.specialty || '')
+    formData.append('work_format', form.work_format || '')
+    formData.append('experience', form.experience || '')
+    formData.append('description', form.description || '')
+    formData.append('services_additional_info', form.services_additional_info || '')
+    formData.append('additional_features', form.additional_features || '')
+    formData.append('schedule_notes', form.schedule_notes || '')
+    formData.append('price', form.price?.toString() || '')
+    formData.append('price_unit', form.price_unit || '')
+    formData.append('is_starting_price', form.is_starting_price ? '1' : '0')
+    formData.append('main_service_name', form.main_service_name || '')
+    formData.append('main_service_price', form.main_service_price?.toString() || '')
+    formData.append('main_service_price_unit', form.main_service_price_unit || '')
+    formData.append('age', form.age?.toString() || '')
+    formData.append('height', form.height || '')
+    formData.append('weight', form.weight || '')
+    formData.append('breast_size', form.breast_size || '')
+    formData.append('hair_color', form.hair_color || '')
+    formData.append('eye_color', form.eye_color || '')
+    formData.append('nationality', form.nationality || '')
+    formData.append('new_client_discount', form.new_client_discount || '')
+    formData.append('gift', form.gift || '')
+    formData.append('address', form.address || '')
+    formData.append('travel_area', form.travel_area || '')
+    formData.append('travel_radius', form.travel_radius?.toString() || '')
+    formData.append('travel_price', form.travel_price?.toString() || '')
+    formData.append('travel_price_type', form.travel_price_type || '')
+    formData.append('phone', form.phone || '')
+    formData.append('contact_method', form.contact_method || '')
+    formData.append('whatsapp', form.whatsapp || '')
+    formData.append('telegram', form.telegram || '')
+    
+    // Добавляем массивы как JSON
+    if (form.clients) formData.append('clients', JSON.stringify(form.clients))
+    if (form.service_location) formData.append('service_location', JSON.stringify(form.service_location))
+    if (form.service_provider) formData.append('service_provider', JSON.stringify(form.service_provider))
+    if (form.services) formData.append('services', JSON.stringify(form.services))
+    if (form.features) formData.append('features', JSON.stringify(form.features))
+    if (form.schedule) formData.append('schedule', JSON.stringify(form.schedule))
+    if (form.additional_services) formData.append('additional_services', JSON.stringify(form.additional_services))
+    if (form.media_settings) formData.append('media_settings', JSON.stringify(form.media_settings))
+    if (form.geo) formData.append('geo', JSON.stringify(form.geo))
+    if (form.custom_travel_areas) formData.append('custom_travel_areas', JSON.stringify(form.custom_travel_areas))
+    
+    // Обрабатываем фотографии
+    if (form.photos && form.photos.length > 0) {
+      form.photos.forEach((photo: any, index: number) => {
+        if (photo instanceof File) {
+          formData.append(`photos[${index}]`, photo)
+        } else if (typeof photo === 'string') {
+          formData.append(`photos[${index}]`, photo)
         }
       })
-    } catch (error) {
-      console.error('Ошибка при сохранении черновика:', error)
-      saving.value = false
+    } else {
+      // Если фото нет, отправляем пустой массив
+      formData.append('photos', '[]')
     }
+    
+    // Обрабатываем видео
+    if (form.video && form.video.length > 0) {
+      form.video.forEach((video: any, index: number) => {
+        if (video instanceof File) {
+          formData.append(`video[${index}]`, video)
+        } else if (typeof video === 'string') {
+          formData.append(`video[${index}]`, video)
+        }
+      })
+    } else {
+      // Если видео нет, отправляем пустой массив
+      formData.append('video', '[]')
+    }
+    
+    // Если редактируем существующий черновик - передаем его ID
+    if (isEditMode.value) {
+      formData.append('id', props.adId.toString())
+    }
+    
+    // Используем router.post с FormData
+    router.post('/ads/draft', formData as any, {
+      preserveScroll: true,
+      forceFormData: true,
+      onFinish: () => {
+        saving.value = false
+      }
+    })
   }
 
   // Публикация объявления
@@ -224,13 +310,35 @@ export function useAdFormModel(props: any, emit: any) {
       return
     }
     
-    await handleSubmit()
+    if (!validateForm()) {
+      return
+    }
+    
+    saving.value = true
+    
+    const publishData = {
+      ...form,
+      category: props.category
+    }
+    
+    // Отправляем на публикацию через Inertia
+    router.post('/ads/publish', publishData, {
+      preserveScroll: true,
+      onError: (errorResponse: any) => {
+        console.error('Ошибка публикации объявления:', errorResponse)
+        errors.value = errorResponse
+      },
+      onFinish: () => {
+        saving.value = false
+      }
+    })
   }
 
   return {
     form,
     errors,
     saving,
+    isEditMode,
     handleSubmit,
     handleSaveDraft,
     handlePublish

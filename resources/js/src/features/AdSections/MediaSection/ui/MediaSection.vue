@@ -5,501 +5,914 @@
       Добавьте качественные фото и видео ваших работ. Это поможет привлечь больше клиентов.
     </p>
     
-    <div class="media-fields">
-      <!-- Загрузка фотографий -->
-      <div class="photos-upload">
-        <h4 class="field-label">Фотографии работ</h4>
-        <p class="field-hint">Добавьте до 10 качественных фотографий ваших работ. Рекомендуемый формат 4:3</p>
-        
-        <div class="upload-area">
-          <input
-            type="file"
-            ref="photoInput"
-            multiple
-            accept="image/*"
-            @change="handlePhotoUpload"
-            class="hidden"
-          />
-          
-          <!-- Превью загруженных фото -->
-          <div v-if="localPhotos.length > 0" class="photo-grid">
-            <div 
-              v-for="(photo, index) in localPhotos" 
-              :key="photo.id || index"
-              class="photo-item"
-            >
+    <!-- Фотографии -->
+    <div class="photos-subsection">
+      <h4 class="field-label">Фотографии работ</h4>
+      <p class="field-hint">
+        Добавьте до 10 качественных фотографий ваших работ. Рекомендуемый формат 4:3
+      </p>
+      
+      <!-- Область загрузки с drag-and-drop -->
+      <div 
+        class="upload-zone"
+        :class="{ 
+          'drag-over': isDragOver && draggedIndex === null,
+          'has-photos': localPhotos.length > 0 
+        }"
+        @drop.prevent="handleDrop"
+        @dragover.prevent="handleDragOver"
+        @dragleave.prevent="handleDragLeave"
+      >
+        <!-- Скрытый input -->
+        <input
+          ref="photoInput"
+          type="file"
+          multiple
+          accept="image/*"
+          @change="handlePhotoUpload"
+          class="hidden"
+        />
+
+        <!-- Список фотографий с возможностью перетаскивания -->
+        <div v-if="localPhotos.length > 0" class="photo-grid">
+          <div 
+            v-for="(photo, index) in localPhotos" 
+            :key="photo.id || index"
+            class="photo-item"
+            :class="{ 
+              'drag-over': dragOverIndex === index && draggedIndex !== null && draggedIndex !== index,
+              'being-dragged': draggedIndex === index
+            }"
+            draggable="true"
+            @dragstart="handlePhotoStart($event, index)"
+            @dragover.prevent="handlePhotoDragOver($event, index)"
+            @drop.prevent="handlePhotoDrop($event, index)"
+            @dragend="handleDragEnd"
+            @dragleave.prevent="handlePhotoDragLeave($event, index)"
+          >
+            <div class="photo-wrapper">
               <img 
-                :src="photo.preview || photo.url" 
+                :src="getPhotoUrl(photo)" 
                 :alt="`Фото ${index + 1}`"
                 class="photo-preview"
+                :style="{ transform: `rotate(${photo.rotation || 0}deg)` }"
               />
-              <button 
-                type="button"
-                @click="removePhoto(index)"
-                class="photo-remove"
-                title="Удалить фото"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <line x1="18" y1="6" x2="6" y2="18" stroke-width="2"/>
-                  <line x1="6" y1="6" x2="18" y2="18" stroke-width="2"/>
-                </svg>
-              </button>
-            </div>
-            
-            <!-- Кнопка добавить еще -->
-            <div 
-              v-if="localPhotos.length < 10"
-              @click="photoInput?.click()"
-              class="add-photo-btn"
-            >
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <line x1="12" y1="5" x2="12" y2="19" stroke-width="2"/>
-                <line x1="5" y1="12" x2="19" y2="12" stroke-width="2"/>
-              </svg>
-              <span>Добавить фото</span>
-            </div>
-          </div>
-          
-          <!-- Пустое состояние -->
-          <div 
-            v-else
-            @click="photoInput?.click()"
-            class="empty-upload-area"
-          >
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="mx-auto mb-2">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-              <circle cx="8.5" cy="8.5" r="1.5"/>
-              <polyline points="21 15 16 10 5 21"/>
-            </svg>
-            <p class="text-gray-600">Нажмите для загрузки фотографий</p>
-            <p class="text-sm text-gray-500">или перетащите файлы сюда</p>
-          </div>
-        </div>
-        
-        <span v-if="errors?.photos" class="error-message">
-          {{ errors.photos[0] }}
-        </span>
-      </div>
-
-      <!-- Загрузка видео -->
-      <div class="video-upload">
-        <h4 class="field-label">Видео презентация</h4>
-        <p class="field-hint">Добавьте короткое видео (до 50MB) для демонстрации ваших услуг</p>
-        
-        <div class="upload-area">
-          <input
-            type="file"
-            ref="videoInput"
-            accept="video/*"
-            @change="handleVideoUpload"
-            class="hidden"
-          />
-          
-          <!-- Превью загруженных видео -->
-          <div v-if="localVideos.length > 0" class="video-list">
-            <div 
-              v-for="(video, index) in localVideos" 
-              :key="video.id || index"
-              class="video-item"
-            >
-              <div class="video-info">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <polygon points="5 3 19 12 5 21 5 3"/>
-                </svg>
-                <span>{{ video.name || `Видео ${index + 1}` }}</span>
-                <span class="video-size">{{ formatFileSize(video.size) }}</span>
+              
+              <!-- Контролы фото -->
+              <div class="photo-controls">
+                <button 
+                  type="button"
+                  @click.stop="rotatePhoto(index)"
+                  class="control-btn rotate-btn"
+                  title="Повернуть"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="23,4 23,10 17,10"/>
+                    <path d="M20.49,15a9,9,0,1,1-2.12-9.36L23,10"/>
+                  </svg>
+                </button>
+                
+                <button 
+                  type="button"
+                  @click.stop="removePhoto(index)"
+                  class="control-btn delete-btn"
+                  title="Удалить"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3,6 5,6 21,6"/>
+                    <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2v2"/>
+                  </svg>
+                </button>
               </div>
-              <button 
-                type="button"
-                @click="removeVideo(index)"
-                class="btn-remove"
-                title="Удалить видео"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <line x1="18" y1="6" x2="6" y2="18" stroke-width="2"/>
-                  <line x1="6" y1="6" x2="18" y2="18" stroke-width="2"/>
-                </svg>
-              </button>
+              
+              <!-- Метка основного фото -->
+              <div v-if="index === 0" class="main-photo-badge">
+                Основное
+              </div>
             </div>
           </div>
           
-          <!-- Кнопка добавить видео -->
-          <button
-            v-if="localVideos.length < 3"
-            type="button"
-            @click="videoInput?.click()"
-            class="btn-upload-video"
+          <!-- Кнопка добавить еще -->
+          <div 
+            v-if="localPhotos.length < 10" 
+            class="add-photo-btn"
+            @click="triggerPhotoInput"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <polygon points="5 3 19 12 5 21 5 3"/>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <line x1="12" y1="5" x2="12" y2="19" stroke-width="2"/>
+              <line x1="5" y1="12" x2="19" y2="12" stroke-width="2"/>
             </svg>
-            {{ localVideos.length > 0 ? 'Добавить еще видео' : 'Загрузить видео' }}
-          </button>
+            <span>Добавить фото</span>
+          </div>
         </div>
-        
-        <span v-if="errors?.videos" class="error-message">
-          {{ errors.videos[0] }}
-        </span>
-      </div>
 
-      <!-- Настройки медиа -->
-      <div class="media-settings">
-        <h4 class="field-label">Настройки отображения</h4>
-        
-        <div class="settings-options">
-          <label class="checkbox-option">
-            <input
-              type="checkbox"
-              value="show_photos_in_gallery"
-              v-model="localMediaSettings"
-              class="checkbox-input"
-            />
-            <span class="checkbox-label">Показывать фото в галерее на странице объявления</span>
-          </label>
-          
-          <label class="checkbox-option">
-            <input
-              type="checkbox"
-              value="allow_download_photos"
-              v-model="localMediaSettings"
-              class="checkbox-input"
-            />
-            <span class="checkbox-label">Разрешить клиентам скачивать фотографии</span>
-          </label>
-          
-          <label class="checkbox-option">
-            <input
-              type="checkbox"
-              value="watermark_photos"
-              v-model="localMediaSettings"
-              class="checkbox-input"
-            />
-            <span class="checkbox-label">Добавить водяной знак на фотографии</span>
-          </label>
+        <!-- Пустое состояние -->
+        <div v-else class="empty-upload" @click="triggerPhotoInput">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21,15 16,10 5,21"/>
+          </svg>
+          <p class="upload-text">Перетащите фото сюда или нажмите для выбора</p>
+          <p class="upload-hint">До 10 фото, формат JPG, PNG</p>
         </div>
-      </div>
 
-      <!-- Советы по медиа -->
-      <div class="media-tips">
-        <h4 class="tips-title">💡 Советы по качественным фото и видео</h4>
-        <ul class="tips-list">
-          <li>Используйте хорошее освещение</li>
-          <li>Делайте фото в высоком разрешении</li>
-          <li>Показывайте процесс работы</li>
-          <li>Добавляйте фото до и после</li>
-          <li>Видео должно быть не более 2-3 минут</li>
-        </ul>
+        <!-- Оверлей для drag-and-drop -->
+        <div v-if="isDragOver && draggedIndex === null" class="drag-overlay">
+          <div class="drag-content">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7,10 12,15 17,10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            <p class="drag-text">Перетащите сюда изображения</p>
+          </div>
+        </div>
       </div>
     </div>
+
+    <!-- Видео презентация -->
+    <div class="video-subsection">
+      <h4 class="field-label">Видео презентация</h4>
+      <p class="field-hint">Добавьте короткое видео (до 50MB) для демонстрации ваших услуг</p>
+      
+      <div class="video-grid">
+        <input
+          type="file"
+          ref="videoInput"
+          accept="video/*"
+          @change="handleVideoUpload"
+          class="hidden"
+        />
+        
+        <!-- Видео элемент в стиле фото -->
+        <div v-if="localVideos.length > 0" class="video-item">
+          <div class="video-wrapper">
+            <video 
+              v-for="(video, index) in localVideos" 
+              :key="index"
+              :src="video.preview || video.url" 
+              controls
+              class="video-element"
+            />
+            
+            <!-- Контролы видео -->
+            <div class="video-controls">
+              <button 
+                type="button"
+                @click="removeVideo(0)"
+                class="control-btn delete-btn"
+                title="Удалить видео"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                  <polyline points="3,6 5,6 21,6"/>
+                  <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2v2"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Кнопка добавления видео -->
+        <div 
+          v-else
+          class="add-video-btn"
+          @click="triggerVideoInput"
+        >
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <polygon points="23,7 16,12 23,17" stroke-width="2"/>
+            <rect x="1" y="5" width="15" height="14" rx="2" ry="2" stroke-width="2"/>
+          </svg>
+          <span>Добавить видео</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Настройки отображения -->
+    <div class="media-settings">
+      <h4 class="field-label">Настройки отображения</h4>
+      <label class="checkbox-label">
+        <input 
+          type="checkbox" 
+          v-model="showInGallery"
+          @change="updateSettings"
+        />
+        <span>Показывать фото в галерее на странице объявления</span>
+      </label>
+      <label class="checkbox-label">
+        <input 
+          type="checkbox" 
+          v-model="allowDownload"
+          @change="updateSettings"
+        />
+        <span>Разрешить клиентам скачивать фотографии</span>
+      </label>
+      <label class="checkbox-label">
+        <input 
+          type="checkbox" 
+          v-model="addWatermark"
+          @change="updateSettings"
+        />
+        <span>Добавить водяной знак на фотографии</span>
+      </label>
+    </div>
+
+    <!-- Ошибки -->
+    <div v-if="error" class="error-message">{{ error }}</div>
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, watch, nextTick } from 'vue'
+<script setup>
+import { ref, watch } from 'vue'
 
-// Types
-interface MediaFile {
-  id?: number
-  name?: string
-  size?: number
-  url?: string
-  preview?: string
-  file?: File
-}
-
-interface Props {
-  photos?: MediaFile[]
-  videos?: MediaFile[]
-  mediaSettings?: string[]
-  errors?: Record<string, string[]>
-}
-
-// Props
-const props = withDefaults(defineProps<Props>(), {
-  photos: () => [],
-  videos: () => [],
-  mediaSettings: () => ['show_photos_in_gallery'],
-  errors: () => ({})
+const props = defineProps({
+  photos: { type: Array, default: () => [] },
+  video: { type: Array, default: () => [] },
+  mediaSettings: { type: Array, default: () => ['show_photos_in_gallery'] },
+  errors: { type: Object, default: () => ({}) }
 })
 
-// Emits
-const emit = defineEmits<{
-  'update:photos': [value: MediaFile[]]
-  'update:videos': [value: MediaFile[]]
-  'update:mediaSettings': [value: string[]]
-}>()
+const emit = defineEmits(['update:photos', 'update:video', 'update:mediaSettings'])
 
 // Refs
-const photoInput = ref<HTMLInputElement>()
-const videoInput = ref<HTMLInputElement>()
+const photoInput = ref(null)
+const videoInput = ref(null)
 
-// Local state
-const localPhotos = ref<MediaFile[]>([...props.photos])
-const localVideos = ref<MediaFile[]>([...props.videos])
-const localMediaSettings = ref<string[]>([...props.mediaSettings])
+// State
+const localPhotos = ref([])
+const localVideos = ref([])
+const showInGallery = ref(true)
+const allowDownload = ref(false)
+const addWatermark = ref(true)
+const error = ref('')
 
-// Watch for prop changes only
-watch(() => props.photos, (newVal) => {
-  localPhotos.value = [...newVal]
+// Drag and drop state
+const isDragOver = ref(false)
+const draggedIndex = ref(null)
+const dragOverIndex = ref(null)
+
+// Initialize from props only once
+watch(() => props.photos, (newPhotos) => {
+  // Only update if localPhotos is empty (initial load)
+  if (localPhotos.value.length === 0 && newPhotos.length > 0) {
+    localPhotos.value = newPhotos.map((photo, index) => {
+      if (typeof photo === 'string') {
+        return {
+          id: `existing-${index}`,
+          url: photo,
+          preview: photo,
+          rotation: 0
+        }
+      }
+      return {
+        ...photo,
+        id: photo.id || `photo-${index}`,
+        rotation: photo.rotation || 0
+      }
+    })
+  }
+}, { immediate: true })
+
+watch(() => props.video, (newVideos) => {
+  // Only update if localVideos is empty (initial load)
+  if (localVideos.value.length === 0 && newVideos && newVideos.length > 0) {
+    localVideos.value = newVideos.map((video, index) => {
+      if (typeof video === 'string') {
+        return {
+          id: `video-${index}`,
+          url: video,
+          preview: video
+        }
+      }
+      return video
+    })
+  }
+}, { immediate: true })
+
+watch(() => props.mediaSettings, (settings) => {
+  showInGallery.value = settings.includes('show_photos_in_gallery')
+  allowDownload.value = settings.includes('allow_download_photos')
+  addWatermark.value = settings.includes('watermark_photos')
+}, { immediate: true })
+
+// Emit changes - emit full photo objects for proper saving
+watch(localPhotos, (newPhotos) => {
+  const photosToEmit = newPhotos.map(photo => {
+    // For new files, return the file object
+    if (photo.file) return photo.file
+    // For existing photos, return the URL
+    return photo.url || photo.preview || photo
+  })
+  emit('update:photos', photosToEmit)
 }, { deep: true })
 
-watch(() => props.videos, (newVal) => {
-  localVideos.value = [...newVal]
-}, { deep: true })
-
-watch(() => props.mediaSettings, (newVal) => {
-  localMediaSettings.value = [...newVal]
-}, { deep: true })
-
-// Watch local mediaSettings changes only (for checkboxes)
-watch(localMediaSettings, (newVal) => {
-  emit('update:mediaSettings', newVal)
+watch(localVideos, (newVideos) => {
+  const videosToEmit = newVideos.map(video => {
+    if (video.file) return video.file
+    return video.url || video.preview
+  })
+  emit('update:video', videosToEmit)
 }, { deep: true })
 
 // Methods
-const handlePhotoUpload = async (event: Event) => {
-  const input = event.target as HTMLInputElement
-  const files = input.files
-  
-  if (!files) return
-  
-  const remainingSlots = 10 - localPhotos.value.length
-  const filesToAdd = Math.min(files.length, remainingSlots)
-  
-  // Собираем все новые фото в временный массив
-  const newPhotos: MediaFile[] = []
-  const promises: Promise<void>[] = []
-  
-  Array.from(files).slice(0, filesToAdd).forEach((file, index) => {
-    const promise = new Promise<void>((resolve, reject) => {
-      const reader = new FileReader()
-      
-      reader.onload = (e) => {
-        const uniqueId = Date.now() + Math.random() * 1000 + index
-        newPhotos.push({
-          id: uniqueId,
-          name: file.name,
-          size: file.size,
-          preview: e.target?.result as string,
-          file: file
-        })
-        resolve()
-      }
-      
-      reader.onerror = (error) => {
-        console.error('Ошибка чтения файла:', error)
-        reject(error)
-      }
-      
-      reader.readAsDataURL(file)
-    })
-    
-    promises.push(promise)
-  })
-  
-  // Ждем загрузки всех файлов
-  try {
-    await Promise.all(promises)
-    
-    // Обновляем массив и эмитим изменения
-    const updatedPhotos = [...localPhotos.value, ...newPhotos]
-    localPhotos.value = updatedPhotos
-    emit('update:photos', updatedPhotos)
-  } catch (error) {
-    console.error('Ошибка при загрузке файлов:', error)
-  }
-  
-  // Clear input
-  input.value = ''
+const triggerPhotoInput = () => {
+  photoInput.value?.click()
 }
 
-const handleVideoUpload = (event: Event) => {
-  const input = event.target as HTMLInputElement
-  const files = input.files
+const triggerVideoInput = () => {
+  videoInput.value?.click()
+}
+
+const handlePhotoUpload = (event) => {
+  const files = Array.from(event.target.files)
+  processPhotos(files)
+  event.target.value = ''
+}
+
+const handleVideoUpload = (event) => {
+  const file = event.target.files[0]
+  if (file) {
+    processVideo(file)
+    event.target.value = ''
+  }
+}
+
+const processPhotos = (files) => {
+  error.value = ''
   
-  if (!files || files.length === 0) return
+  const imageFiles = files.filter(file => file.type.startsWith('image/'))
   
-  const file = files[0]
-  
-  // Check file size (50MB limit)
-  if (file.size > 50 * 1024 * 1024) {
-    alert('Видео не должно превышать 50MB')
-    input.value = ''
+  if (imageFiles.length === 0) {
+    error.value = 'Выберите изображения'
     return
   }
   
-  const uniqueId = Date.now() + Math.random() * 1000
-  const newVideo = {
-    id: uniqueId,
-    name: file.name,
-    size: file.size,
-    file: file
+  if (localPhotos.value.length + imageFiles.length > 10) {
+    error.value = 'Максимум 10 фотографий'
+    return
   }
   
-  // Обновляем массив и эмитим изменения
-  const updatedVideos = [...localVideos.value, newVideo]
-  localVideos.value = updatedVideos
-  emit('update:videos', updatedVideos)
-  
-  // Clear input
-  input.value = ''
+  imageFiles.forEach(file => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const photo = {
+        id: Date.now() + Math.random(),
+        file: file,
+        preview: e.target.result,
+        name: file.name,
+        rotation: 0
+      }
+      localPhotos.value = [...localPhotos.value, photo]
+    }
+    reader.readAsDataURL(file)
+  })
 }
 
-const removePhoto = (index: number) => {
-  // Создаем новый массив без удаленного элемента
-  const updatedPhotos = localPhotos.value.filter((_, i) => i !== index)
-  localPhotos.value = updatedPhotos
-  emit('update:photos', updatedPhotos)
+const processVideo = (file) => {
+  error.value = ''
+  
+  if (!file.type.startsWith('video/')) {
+    error.value = 'Выберите видео файл'
+    return
+  }
+  
+  if (file.size > 50 * 1024 * 1024) {
+    error.value = 'Максимальный размер видео 50MB'
+    return
+  }
+  
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    localVideos.value = [{
+      id: Date.now(),
+      file: file,
+      preview: e.target.result,
+      name: file.name
+    }]
+  }
+  reader.readAsDataURL(file)
 }
 
-const removeVideo = (index: number) => {
-  // Создаем новый массив без удаленного элемента
-  const updatedVideos = localVideos.value.filter((_, i) => i !== index)
-  localVideos.value = updatedVideos
-  emit('update:videos', updatedVideos)
+const removePhoto = (index) => {
+  const newPhotos = [...localPhotos.value]
+  newPhotos.splice(index, 1)
+  localPhotos.value = newPhotos
 }
 
-const formatFileSize = (bytes?: number): string => {
-  if (!bytes) return '0 KB'
+const removeVideo = (index) => {
+  localVideos.value = []
+}
+
+const rotatePhoto = (index) => {
+  if (index < 0 || index >= localPhotos.value.length) return
   
-  const sizes = ['Bytes', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(1024))
+  const newPhotos = [...localPhotos.value]
+  const currentRotation = newPhotos[index].rotation || 0
+  newPhotos[index] = {
+    ...newPhotos[index],
+    rotation: (currentRotation + 90) % 360
+  }
+  localPhotos.value = newPhotos
+}
+
+// Drag and drop handlers
+const handleDrop = (event) => {
+  event.preventDefault()
+  event.stopPropagation()
   
-  return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i]
+  // Only process files if we're not dragging a photo
+  if (draggedIndex.value === null) {
+    isDragOver.value = false
+    const files = Array.from(event.dataTransfer.files)
+    if (files.length > 0) {
+      processPhotos(files)
+    }
+  }
+}
+
+const handleDragOver = (event) => {
+  event.preventDefault()
+  // Only show drag over if we're not dragging existing photos
+  if (draggedIndex.value === null && event.dataTransfer.types.includes('Files')) {
+    isDragOver.value = true
+  }
+}
+
+const handleDragLeave = (event) => {
+  event.preventDefault()
+  // Only reset if leaving the entire zone
+  if (event.currentTarget === event.target) {
+    isDragOver.value = false
+  }
+}
+
+// Photo reordering
+const handlePhotoStart = (event, index) => {
+  draggedIndex.value = index
+  event.dataTransfer.effectAllowed = 'move'
+  // Store index in dataTransfer to prevent duplicates
+  event.dataTransfer.setData('photoIndex', index.toString())
+  event.target.classList.add('dragging')
+}
+
+const handlePhotoDragOver = (event, index) => {
+  event.preventDefault()
+  event.stopPropagation()
+  
+  // Only show drag over effect when dragging between photos
+  if (draggedIndex.value !== null && draggedIndex.value !== index) {
+    dragOverIndex.value = index
+  }
+}
+
+const handlePhotoDrop = (event, targetIndex) => {
+  event.preventDefault()
+  event.stopPropagation()
+  
+  const sourceIndex = draggedIndex.value
+  
+  // Don't process if dropping on the same position or if not dragging a photo
+  if (sourceIndex === null || sourceIndex === targetIndex) {
+    draggedIndex.value = null
+    dragOverIndex.value = null
+    return
+  }
+  
+  // Only reorder if we're dragging a photo (not files from outside)
+  if (event.dataTransfer.getData('photoIndex')) {
+    const newPhotos = [...localPhotos.value]
+    const [movedPhoto] = newPhotos.splice(sourceIndex, 1)
+    newPhotos.splice(targetIndex, 0, movedPhoto)
+    localPhotos.value = newPhotos
+  }
+  
+  // Reset drag state
+  draggedIndex.value = null
+  dragOverIndex.value = null
+}
+
+const handleDragEnd = (event) => {
+  event.target.classList.remove('dragging')
+  draggedIndex.value = null
+  dragOverIndex.value = null
+}
+
+const handlePhotoDragLeave = (event, index) => {
+  if (dragOverIndex.value === index) {
+    dragOverIndex.value = null
+  }
+}
+
+const getPhotoUrl = (photo) => {
+  if (!photo) return ''
+  if (typeof photo === 'string') return photo
+  if (photo.preview) return photo.preview
+  if (photo.url) return photo.url
+  if (photo.file && photo.file instanceof File) {
+    return URL.createObjectURL(photo.file)
+  }
+  return ''
+}
+
+const updateSettings = () => {
+  const settings = []
+  if (showInGallery.value) settings.push('show_photos_in_gallery')
+  if (allowDownload.value) settings.push('allow_download_photos')
+  if (addWatermark.value) settings.push('watermark_photos')
+  emit('update:mediaSettings', settings)
 }
 </script>
 
 <style scoped>
 .media-section {
-  @apply space-y-4;
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
 }
 
 .form-group-title {
-  @apply text-xl font-semibold text-gray-900 mb-2;
+  font-size: 20px;
+  font-weight: 600;
+  color: #000;
+  margin-bottom: 8px;
 }
 
 .section-description {
-  @apply text-gray-600 mb-4;
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 24px;
 }
 
-.media-fields {
-  @apply space-y-6;
+.photos-subsection,
+.video-subsection {
+  margin-bottom: 32px;
 }
 
 .field-label {
-  @apply block text-sm font-medium text-gray-700 mb-2;
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 8px;
 }
 
 .field-hint {
-  @apply text-sm text-gray-500 mb-3;
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 16px;
 }
 
-.error-message {
-  @apply text-red-500 text-sm mt-1 block;
+.upload-zone {
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  min-height: 200px;
+  position: relative;
+  transition: all 0.3s ease;
 }
 
-/* Photos upload */
-.photos-upload {
-  @apply space-y-3;
+.upload-zone.drag-over {
+  border-color: #007bff;
+  background-color: #f0f8ff;
 }
 
-.upload-area {
-  @apply space-y-4;
-}
-
-.photo-grid {
-  @apply grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4;
-}
-
-.photo-item {
-  @apply relative;
-}
-
-.photo-preview {
-  @apply w-full h-32 object-cover rounded-lg border border-gray-200;
-}
-
-.photo-remove {
-  @apply absolute top-2 right-2 p-1 bg-red-500 text-white rounded transition-opacity;
-  opacity: 0;
-}
-
-.photo-item:hover .photo-remove {
-  opacity: 1;
-}
-
-.add-photo-btn {
-  @apply flex flex-col items-center justify-center h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors;
-}
-
-.empty-upload-area {
-  @apply flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors;
-}
-
-/* Video upload */
-.video-upload {
-  @apply space-y-3;
-}
-
-.video-list {
-  @apply space-y-2;
-}
-
-.video-item {
-  @apply flex items-center justify-between p-3 bg-gray-50 rounded-lg;
-}
-
-.video-info {
-  @apply flex items-center gap-3;
-}
-
-.video-size {
-  @apply text-sm text-gray-500;
-}
-
-.btn-upload-video {
-  @apply flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors;
-}
-
-.btn-remove {
-  @apply p-1 text-red-500 hover:bg-red-50 rounded transition-colors;
-}
-
-/* Settings */
-.media-settings {
-  @apply p-4 bg-gray-50 rounded-lg;
-}
-
-.settings-options {
-  @apply space-y-2;
-}
-
-.checkbox-option {
-  @apply flex items-start space-x-2 cursor-pointer;
-}
-
-.checkbox-input {
-  @apply w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-0.5;
-}
-
-.checkbox-label {
-  @apply text-sm text-gray-700;
-}
-
-/* Tips */
-.media-tips {
-  @apply p-4 bg-blue-50 rounded-lg;
-}
-
-.tips-title {
-  @apply text-sm font-medium text-blue-900 mb-2;
-}
-
-.tips-list {
-  @apply list-disc list-inside space-y-1 text-sm text-blue-800;
+.upload-zone.has-photos {
+  border-style: solid;
+  padding: 16px;
 }
 
 .hidden {
-  @apply sr-only;
+  display: none;
+}
+
+.photo-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.photo-item {
+  position: relative;
+  width: 266px;
+  height: 200px;
+  cursor: move;
+  transition: all 0.3s ease;
+}
+
+.photo-item.being-dragged {
+  opacity: 0.5;
+}
+
+.photo-item.drag-over {
+  transform: scale(1.05);
+}
+
+.photo-item.dragging {
+  opacity: 0.5;
+}
+
+.photo-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+}
+
+.photo-item:first-child .photo-wrapper {
+  border: 2px solid #007bff;
+}
+
+.photo-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.photo-controls {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.photo-item:hover .photo-controls {
+  opacity: 1;
+}
+
+.control-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.control-btn:hover {
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.control-btn svg {
+  width: 18px;
+  height: 18px;
+  color: #666;
+}
+
+.rotate-btn:hover svg {
+  color: #007bff;
+}
+
+.delete-btn:hover svg {
+  color: #dc3545;
+}
+
+.main-photo-badge {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: #007bff;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.add-photo-btn {
+  width: 266px;
+  height: 200px;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #fafafa;
+}
+
+.add-photo-btn:hover {
+  border-color: #007bff;
+  background: #f0f8ff;
+}
+
+.add-photo-btn svg {
+  color: #666;
+}
+
+.add-photo-btn span {
+  font-size: 14px;
+  color: #666;
+}
+
+.empty-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  cursor: pointer;
+  padding: 32px;
+}
+
+.empty-upload svg {
+  color: #999;
+  margin-bottom: 16px;
+}
+
+.upload-text {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.upload-hint {
+  font-size: 14px;
+  color: #666;
+}
+
+.drag-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 123, 255, 0.1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.drag-content {
+  text-align: center;
+}
+
+.drag-content svg {
+  color: #007bff;
+  margin-bottom: 16px;
+}
+
+.drag-text {
+  font-size: 18px;
+  font-weight: 500;
+  color: #007bff;
+}
+
+
+
+.video-grid {
+  display: flex;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.video-item {
+  position: relative;
+  width: 400px;
+  height: 300px;
+  transition: all 0.3s ease;
+}
+
+.video-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #000;
+  border: 1px solid #e0e0e0;
+}
+
+.video-element {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+}
+
+.video-controls {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.video-item:hover .video-controls {
+  opacity: 1;
+}
+
+.add-video-btn {
+  width: 400px;
+  height: 300px;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #fafafa;
+}
+
+.add-video-btn:hover {
+  border-color: #007bff;
+  background: #f0f8ff;
+}
+
+.add-video-btn svg {
+  color: #666;
+}
+
+.add-video-btn span {
+  font-size: 14px;
+  color: #666;
+}
+
+
+.media-settings {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.checkbox-label span {
+  font-size: 14px;
+  color: #333;
+}
+
+.error-message {
+  margin-top: 12px;
+  padding: 12px;
+  background: #fee;
+  border: 1px solid #fcc;
+  border-radius: 6px;
+  color: #c00;
+  font-size: 14px;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 640px) {
+  .photo-grid,
+  .video-grid {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .photo-item,
+  .add-photo-btn {
+    width: 100%;
+    height: 150px;
+  }
+  
+  .video-item,
+  .add-video-btn {
+    width: 100%;
+    height: 200px;
+  }
+  
+  .control-btn {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .control-btn svg {
+    width: 16px;
+    height: 16px;
+  }
 }
 </style>

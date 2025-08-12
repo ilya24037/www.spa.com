@@ -1,7 +1,11 @@
 <template>
   <div class="parameters-section">
-    <h2 class="form-group-title">Физические параметры</h2>
+    <h2 class="form-group-title">Обо мне</h2>
     <div class="parameters-fields">
+      <div class="parameter-field" v-if="showAge">
+        <label>Возраст:</label>
+        <input type="number" min="18" max="65" v-model="localAge" @input="emitAll" placeholder="25" />
+      </div>
       <div class="parameter-field">
         <label>Рост (см):</label>
         <input type="number" min="100" max="250" v-model="localHeight" @input="emitAll" placeholder="170" />
@@ -10,7 +14,19 @@
         <label>Вес (кг):</label>
         <input type="number" min="30" max="200" v-model="localWeight" @input="emitAll" placeholder="60" />
       </div>
-      <div class="parameter-field">
+      <div class="parameter-field" v-if="showBreastSize">
+        <label>Размер груди:</label>
+        <select v-model="localBreastSize" @change="emitAll">
+          <option value="">Не указано</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+        </select>
+      </div>
+      <div class="parameter-field" v-if="showHairColor">
         <label>Цвет волос:</label>
         <select v-model="localHairColor" @change="emitAll">
           <option value="">Выберите цвет</option>
@@ -23,7 +39,7 @@
           <option value="colored">Цветные</option>
         </select>
       </div>
-      <div class="parameter-field">
+      <div class="parameter-field" v-if="showEyeColor">
         <label>Цвет глаз:</label>
         <select v-model="localEyeColor" @change="emitAll">
           <option value="">Выберите цвет</option>
@@ -35,7 +51,7 @@
           <option value="hazel">Ореховые</option>
         </select>
       </div>
-      <div class="parameter-field">
+      <div class="parameter-field" v-if="showNationality">
         <label>Национальность:</label>
         <select v-model="localNationality" @change="emitAll">
           <option value="">Выберите национальность</option>
@@ -63,27 +79,41 @@
 <script setup>
 import { ref, watch } from 'vue'
 const props = defineProps({
+  age: { type: [String, Number], default: '' },
   height: { type: [String, Number], default: '' },
   weight: { type: [String, Number], default: '' },
+  breastSize: { type: [String, Number], default: '' },
   hairColor: { type: String, default: '' },
   eyeColor: { type: String, default: '' },
   nationality: { type: String, default: '' },
-  errors: { type: Object, default: () => ({}) }
+  errors: { type: Object, default: () => ({}) },
+  // Опциональные props для управления видимостью полей
+  showAge: { type: Boolean, default: true },
+  showBreastSize: { type: Boolean, default: false },
+  showHairColor: { type: Boolean, default: true },
+  showEyeColor: { type: Boolean, default: true },
+  showNationality: { type: Boolean, default: true }
 })
-const emit = defineEmits(['update:height', 'update:weight', 'update:hairColor', 'update:eyeColor', 'update:nationality'])
+const emit = defineEmits(['update:age', 'update:height', 'update:weight', 'update:breastSize', 'update:hairColor', 'update:eyeColor', 'update:nationality'])
+const localAge = ref(props.age)
 const localHeight = ref(props.height)
 const localWeight = ref(props.weight)
+const localBreastSize = ref(props.breastSize)
 const localHairColor = ref(props.hairColor)
 const localEyeColor = ref(props.eyeColor)
 const localNationality = ref(props.nationality)
+watch(() => props.age, val => { localAge.value = val })
 watch(() => props.height, val => { localHeight.value = val })
 watch(() => props.weight, val => { localWeight.value = val })
+watch(() => props.breastSize, val => { localBreastSize.value = val })
 watch(() => props.hairColor, val => { localHairColor.value = val })
 watch(() => props.eyeColor, val => { localEyeColor.value = val })
 watch(() => props.nationality, val => { localNationality.value = val })
 const emitAll = () => {
+  emit('update:age', localAge.value)
   emit('update:height', localHeight.value)
   emit('update:weight', localWeight.value)
+  emit('update:breastSize', localBreastSize.value)
   emit('update:hairColor', localHairColor.value)
   emit('update:eyeColor', localEyeColor.value)
   emit('update:nationality', localNationality.value)

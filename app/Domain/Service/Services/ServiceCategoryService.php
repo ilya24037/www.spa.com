@@ -3,12 +3,11 @@
 namespace App\Domain\Service\Services;
 
 use App\Domain\Service\Models\MassageCategory;
-use App\Support\Services\BaseService;
 
 /**
  * Сервис для управления категориями услуг
  */
-class ServiceCategoryService extends BaseService
+class ServiceCategoryService
 {
     /**
      * Получить категории с подкатегориями

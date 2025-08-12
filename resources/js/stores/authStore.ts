@@ -168,7 +168,8 @@ export const useAuthStore = defineStore('auth', {
           this.error = error.response?.data?.message || 'Ошибка входа'
           return { 
             success: false, 
-            error: this.error as string
+            error: this.error,
+            errors: error.response?.data?.errors
           }
         }
         
@@ -180,7 +181,7 @@ export const useAuthStore = defineStore('auth', {
     },
 
     /**
-     * Регистрация нового пользователя
+     * Регистрация пользователя
      */
     async register(data: RegisterData): Promise<AuthResponse> {
       try {
@@ -199,13 +200,11 @@ export const useAuthStore = defineStore('auth', {
         return { success: true }
       } catch (error) {
         if (error instanceof AxiosError) {
-          const errorData = error.response?.data
-          this.error = errorData?.message || 'Ошибка регистрации'
-          
+          this.error = error.response?.data?.message || 'Ошибка регистрации'
           return { 
             success: false, 
-            error: this.error as string,
-            errors: errorData?.errors
+            error: this.error,
+            errors: error.response?.data?.errors
           }
         }
         
@@ -217,25 +216,22 @@ export const useAuthStore = defineStore('auth', {
     },
 
     /**
-     * Выход из системы
+     * Выход пользователя
      */
     async logout(): Promise<void> {
       try {
         await axios.post('/logout')
       } catch (error) {
-        // Игнорируем ошибки при выходе
+        console.error('Ошибка при выходе:', error)
       } finally {
         this.user = null
         this.isAuthenticated = false
         this.error = null
-        
-        // Перенаправляем на главную страницу
-        window.location.href = '/'
       }
     },
 
     /**
-     * Установка пользователя (например, после SSR)
+     * Установка пользователя
      */
     setUser(user: User | null): void {
       this.user = user
@@ -243,14 +239,14 @@ export const useAuthStore = defineStore('auth', {
     },
 
     /**
-     * Очистка ошибок
+     * Очистка ошибки
      */
     clearError(): void {
       this.error = null
     },
 
     /**
-     * Обновление профиля пользователя
+     * Обновление данных пользователя
      */
     updateUser(userData: Partial<User>): void {
       if (this.user) {

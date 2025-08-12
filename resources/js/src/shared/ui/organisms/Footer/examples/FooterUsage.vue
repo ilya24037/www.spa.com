@@ -23,32 +23,20 @@ import { Footer, useFooter, defaultFooterConfig } from '../index'
 const { config: footerConfig, handleAccessibilityToggle } = useFooter({
     // Можем кастомизировать конфигурацию
     companyInfo: {
-        ...defaultFooterConfig.companyInfo,
-        currentYear: new Date().getFullYear()
+        ...defaultFooterConfig.companyInfo
     },
     accessibility: {
-        ...defaultFooterConfig.accessibility,
-        callback: () => {
-            // Дополнительная логика для приложения
-        }
+        ...defaultFooterConfig.accessibility
     }
 })
 
 // Пример динамического изменения конфигурации
 const _handleCustomConfigUpdate = () => {
     // Можем обновить конфигурацию динамически
-    footerConfig.value = {
-        ...footerConfig.value,
-        quickActions: [
-            ...footerConfig.value.quickActions,
-            {
-                id: 'new-action',
-                text: 'Новое действие',
-                href: '/new-action',
-                icon: 'user-plus'
-            }
-        ]
-    }
+    // footerConfig.value = {
+    //     ...footerConfig.value,
+    //     // Добавляем новые секции или ссылки
+    // }
 }
 </script>
 

@@ -160,7 +160,7 @@ const compareStore = useCompareStore()
 
 // User data
 const user = computed(() => authStore.user)
-const fullName = computed(() => user.value?.display_name || user.value?.name || 'Пользователь')
+const fullName = computed(() => user.value?.name || 'Пользователь')  // ✅ Используем name вместо display_name
 const userName = computed(() => fullName.value.split(' ')[0])
 const userEmail = computed(() => user.value?.email || '')
 
@@ -189,8 +189,8 @@ const menuRef = ref<HTMLElement | null>(null)
 // Menu state
 const menuVisible = ref(false)
 const menuPosition = ref({ top: '0px', left: '0px' })
-let openTimer: NodeJS.Timeout | null = null
-let closeTimer: NodeJS.Timeout | null = null
+let openTimer: number | null = null  // ✅ Используем number вместо NodeJS.Timeout
+let closeTimer: number | null = null  // ✅ Используем number вместо NodeJS.Timeout
 
 // Calculate menu position
 const updateMenuPosition = async () => {
@@ -254,6 +254,7 @@ const handleMouseLeave = () => {
 const handleLogout = () => {
   router.post('/logout', {}, {
     onSuccess: () => {
+      // ✅ Используем правильный метод logout из store
       authStore.logout()
     }
   })

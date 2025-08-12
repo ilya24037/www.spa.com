@@ -13,16 +13,14 @@ use Illuminate\Support\Collection;
 /**
  * Глобальный движок поиска
  */
-class GlobalSearchEngine extends BaseSearchEngine
+class GlobalSearchEngine
 {
     public function __construct(
         protected \App\Domain\Search\Repositories\SearchRepository $repository,
-        protected AdSearchEngine $adEngine,
-        protected MasterSearchEngine $masterEngine,
+        protected \App\Domain\Search\Engines\AdSearchEngine $adEngine,
+        protected \App\Domain\Search\Engines\MasterSearchEngine $masterEngine,
         protected ServiceSearchEngine $serviceEngine
-    ) {
-        parent::__construct($repository);
-    }
+    ) {}
 
     public function search(
         string $query,

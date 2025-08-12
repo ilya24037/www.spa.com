@@ -32,6 +32,7 @@ class Ad extends Model
         'features',
         'additional_features',
         'services',
+        'services_additional_info',
         'schedule',
         'schedule_notes',
         'service_location',
@@ -46,6 +47,7 @@ class Ad extends Model
         'description',
         'price',
         'price_unit',
+        'is_starting_price',
         'price_per_hour',
         'outcall_price',
         'express_price',
@@ -76,7 +78,9 @@ class Ad extends Model
         'expires_at',
         'views_count',
         'contacts_shown',
-        'favorites_count'
+        'favorites_count',
+        'user_folder',
+        'media_paths'
     ];
 
     /**
@@ -92,12 +96,14 @@ class Ad extends Model
         'outcall_locations',
         'geo',
         'photos',
-        'video'
+        'video',
+        'media_paths'
     ];
 
     protected $casts = [
         // JSON поля обрабатываются через JsonFieldsTrait
         'has_girlfriend' => 'boolean',
+        'is_starting_price' => 'boolean',
         'show_photos_in_gallery' => 'boolean',
         'allow_download_photos' => 'boolean',
         'watermark_photos' => 'boolean',

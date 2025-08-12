@@ -22,6 +22,48 @@ class CreateAdDTO
         public readonly array $media = [],
     ) {}
 
+    public static function fromArray(array $data): self
+    {
+        // Упрощенный метод для создания DTO из массива (для черновиков)
+        $pricingData = [
+            'price' => $data['price'] ?? 0,
+            'discount_price' => $data['discount'] ?? null,
+            'currency' => 'RUB',
+            'price_type' => 'FIXED',
+            'min_order_amount' => null,
+            'additional_prices' => [],
+            'negotiable' => false
+        ];
+        
+        $locationData = [
+            'city' => $data['city'] ?? $data['geo']['city'] ?? 'Москва',
+            'district' => $data['district'] ?? null,
+            'metro_station' => null,
+            'address' => $data['address'] ?? null,
+            'latitude' => null,
+            'longitude' => null,
+            'home_service' => false,
+            'salon_service' => false,
+        ];
+        
+        return new self(
+            userId: $data['user_id'] ?? auth()->id(),
+            title: $data['title'] ?? 'Черновик',
+            category: $data['category'] ?? 'erotic',
+            specialty: $data['specialty'] ?? '',
+            clients: $data['clients'] ?? [],
+            description: $data['description'] ?? '',
+            pricing: AdPricingData::fromArray($pricingData),
+            location: AdLocationData::fromArray($locationData),
+            content: null,
+            services: $data['services'] ?? [],
+            media: [
+                'photos' => $data['photos'] ?? [],
+                'video' => $data['video'] ?? null
+            ],
+        );
+    }
+    
     public static function fromRequest(array $data): self
     {
         // Преобразуем плоскую структуру данных из запроса в структурированные DTO

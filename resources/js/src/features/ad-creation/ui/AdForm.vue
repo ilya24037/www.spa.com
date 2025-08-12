@@ -3,7 +3,26 @@
         <!-- Универсальная форма для всех категорий -->
         <form @submit.prevent="handleSubmit" novalidate>
             
-            <!-- 1. Подробности (title + specialty) -->
+            <!-- 1. Обо мне (физические параметры) -->
+            <div class="form-group-section">
+                <ParametersSection 
+                    v-model:age="form.age"
+                    v-model:height="form.height" 
+                    v-model:weight="form.weight" 
+                    v-model:breast-size="form.breast_size"
+                    v-model:hairColor="form.hair_color" 
+                    v-model:eyeColor="form.eye_color" 
+                    v-model:nationality="form.nationality" 
+                    :show-age="true"
+                    :show-breast-size="true"
+                    :show-hair-color="true"
+                    :show-eye-color="true"
+                    :show-nationality="true"
+                    :errors="errors"
+                />
+            </div>
+            
+            <!-- 2. Подробности (title + specialty) -->
             <div class="form-group-section">
                 <TitleSection 
                     v-model:title="form.title" 
@@ -105,18 +124,6 @@
                 />
             </div>
 
-            <!-- 9. Физические параметры -->
-            <div class="form-group-section">
-                <ParametersSection 
-                    v-model:height="form.height" 
-                    v-model:weight="form.weight" 
-                    v-model:hairColor="form.hair_color" 
-                    v-model:eyeColor="form.eye_color" 
-                    v-model:nationality="form.nationality" 
-                    :errors="errors"
-                />
-            </div>
-
             <!-- 10. Акции -->
             <div class="form-group-section">
                 <PromoSection 
@@ -130,7 +137,7 @@
             <div class="form-group-section">
                 <MediaSection 
                     v-model:photos="form.photos" 
-                    v-model:videos="form.videos" 
+                    v-model:video="form.video" 
                     v-model:media-settings="form.media_settings" 
                     :errors="errors"
                 />
@@ -157,22 +164,22 @@
 
             <!-- Кнопки действий -->
             <div class="form-actions">
-                <!-- Левая кнопка - Сохранить черновик -->
+                <!-- Левая кнопка - Сохранить объявление -->
                 <button 
                     type="button" 
                     @click="handleSaveDraft"
                     :disabled="saving"
                 >
-                    {{ saving ? 'Сохранение...' : 'Сохранить черновик' }}
+                    {{ saving ? 'Сохранение...' : 'Сохранить объявление' }}
                 </button>
                 
-                <!-- Правая кнопка - Разместить объявление -->
+                <!-- Правая кнопка - Разместить/Обновить объявление -->
                 <button 
                     type="button" 
                     @click="handlePublish"
                     :disabled="saving"
                 >
-                    {{ saving ? 'Публикация...' : 'Разместить объявление' }}
+                    {{ saving ? (isEditMode ? 'Обновление...' : 'Публикация...') : (isEditMode ? 'Обновить объявление' : 'Разместить объявление') }}
                 </button>
             </div>
         </form>
@@ -232,6 +239,7 @@ const {
     form,
     errors,
     saving,
+    isEditMode,
     handleSubmit,
     handleSaveDraft,
     handlePublish

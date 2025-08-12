@@ -39,7 +39,7 @@ export function useFooter(initialConfig?: Partial<FooterConfig>): UseFooterRetur
 
   // Computed свойство для проверки включенной доступности
   const isAccessibilityEnabled = computed(() => {
-    return globalFooterConfig.value.accessibility.enabled && globalAccessibilityEnabled.value
+    return globalFooterConfig.value.accessibility?.enabled && globalAccessibilityEnabled.value
   })
 
   // Метод для обновления конфигурации
@@ -74,7 +74,7 @@ export function useFooter(initialConfig?: Partial<FooterConfig>): UseFooterRetur
     toggleAccessibility()
     
     // Вызываем callback если он определен
-    if (globalFooterConfig.value.accessibility.callback) {
+    if (globalFooterConfig.value.accessibility?.callback) {
       globalFooterConfig.value.accessibility.callback()
     }
 

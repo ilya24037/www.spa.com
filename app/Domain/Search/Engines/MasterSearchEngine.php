@@ -26,6 +26,10 @@ class MasterSearchEngine extends BaseSearchEngine
         MasterResultFormatter $resultFormatter,
         MasterFacetCalculator $facetCalculator
     ) {
+        // Создаем экземпляр SearchRepository для родительского класса
+        $searchRepository = app(\App\Domain\Search\Repositories\SearchRepository::class);
+        parent::__construct($searchRepository);
+        
         $this->queryBuilder = $queryBuilder;
         $this->filterHandler = $filterHandler;
         $this->resultFormatter = $resultFormatter;

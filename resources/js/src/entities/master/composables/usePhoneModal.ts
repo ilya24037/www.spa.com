@@ -1,8 +1,16 @@
 import { ref } from 'vue'
 
+// Типы для телефонных данных
+interface PhoneData {
+  phone: string
+  whatsapp?: string
+  telegram?: string
+  masterName?: string
+}
+
 export function usePhoneModal() {
   const isOpen = ref(false)
-  const phoneData = ref({
+  const phoneData = ref<PhoneData>({
     phone: '',
     whatsapp: '',
     telegram: '',
@@ -59,13 +67,14 @@ export function usePhoneModal() {
   }
 
   // Открыть модалку
-  const openModal = (data: {
-    phone: string
-    whatsapp?: string
-    telegram?: string
-    masterName?: string
-  }) => {
-    phoneData.value = data
+  const openModal = (data: PhoneData) => {
+    // Нормализуем данные - заполняем пустые поля значениями по умолчанию
+    phoneData.value = {
+      phone: data.phone || '',
+      whatsapp: data.whatsapp || '',
+      telegram: data.telegram || '',
+      masterName: data.masterName || ''
+    }
     isOpen.value = true
   }
 

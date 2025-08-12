@@ -118,7 +118,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
           <span>{{ master.district }}</span>
-          <span v-if="master.metro">• {{ master.metro }}</span>
+          <span v-if="master.metro_station">• {{ master.metro_station }}</span>  <!-- ✅ Используем metro_station -->
         </div>
         <div v-if="master.experience_years">
           Опыт {{ master.experience_years }} лет
@@ -139,24 +139,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { router } from '@inertiajs/vue3'
-
-interface Master {
-  id: number
-  name?: string
-  display_name?: string
-  photo?: string
-  avatar?: string
-  rating?: number
-  reviews_count?: number
-  price_from?: number
-  services?: string[]
-  district?: string
-  metro?: string
-  experience_years?: number
-  is_verified?: boolean
-  is_premium?: boolean
-  is_online?: boolean
-}
+import type { Master } from '@/src/entities/master/model/types'
 
 interface Props {
   master: Master
@@ -181,7 +164,8 @@ const displayServices = computed(() => {
   if (!props.master.services || props.master.services.length === 0) {
     return ['Массаж']
   }
-  return props.master.services.slice(0, 2)
+  // ✅ Адаптируем под MasterService[]
+  return props.master.services.slice(0, 2).map(service => service.name)
 })
 
 // Methods

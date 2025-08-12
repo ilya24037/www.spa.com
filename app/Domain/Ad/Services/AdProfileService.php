@@ -4,13 +4,12 @@ namespace App\Domain\Ad\Services;
 
 use App\Domain\Ad\Models\Ad;
 use App\Domain\User\Models\User;
-use App\Support\Services\BaseService;
 use Illuminate\Support\Str;
 
 /**
  * Сервис для работы с объявлениями в профиле пользователя
  */
-class AdProfileService extends BaseService
+class AdProfileService
 {
     /**
      * Получить объявления пользователя по статусу

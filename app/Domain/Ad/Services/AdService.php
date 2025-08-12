@@ -128,6 +128,7 @@ class AdService
     {
         return DB::transaction(function () use ($ad, $data) {
             $adData = $this->prepareMainAdData($data);
+            $adData['status'] = AdStatus::DRAFT->value; // Убеждаемся что статус остается draft
             $ad = $this->adRepository->update($ad, $adData);
             $this->updateAdComponents($ad, $data);
             
@@ -164,8 +165,73 @@ class AdService
     {
         return DB::transaction(function () use ($ad) {
             $this->deleteAdComponents($ad);
-            return $this->adRepository->delete($ad);
+            return $this->adRepository->deleteModel($ad);
         });
+    }
+
+    /**
+     * Проверить, можно ли редактировать объявление
+     */
+    public function canEdit(Ad $ad): bool
+    {
+        // Редактировать можно черновики, архивные и ожидающие оплату объявления
+        return in_array($ad->status, [
+            AdStatus::DRAFT->value, 
+            AdStatus::ARCHIVED->value, 
+            AdStatus::WAITING_PAYMENT->value
+        ]);
+    }
+
+    /**
+     * Подготовить данные объявления для отображения
+     */
+    public function prepareAdDataForView(Ad $ad): array
+    {
+        return [
+            'id' => $ad->id,
+            'title' => $ad->title,
+            'description' => $ad->description,
+            'category' => $ad->category,
+            'specialty' => $ad->specialty,
+            'clients' => $ad->clients ?? [],
+            'service_location' => $ad->service_location ?? [],
+            'work_format' => $ad->work_format,
+            'service_provider' => $ad->service_provider,
+            'experience' => $ad->experience,
+            'services' => $ad->services ?? [],
+            'features' => $ad->features ?? [],
+            'additional_features' => $ad->additional_features,
+            'schedule' => $ad->schedule ?? [],
+            'schedule_notes' => $ad->schedule_notes,
+            'price' => $ad->price,
+            'price_unit' => $ad->price_unit,
+            'is_starting_price' => $ad->is_starting_price,
+            'discount' => $ad->discount,
+            'new_client_discount' => $ad->new_client_discount,
+            'gift' => $ad->gift,
+            'height' => $ad->height,
+            'weight' => $ad->weight,
+            'hair_color' => $ad->hair_color,
+            'eye_color' => $ad->eye_color,
+            'nationality' => $ad->nationality,
+            'photos' => $ad->photos ?? [],
+            'videos' => $ad->videos ?? [],
+            'media_settings' => $ad->media_settings ?? [],
+            'geo' => $ad->geo ?? [],
+            'address' => $ad->address,
+            'travel_area' => $ad->travel_area,
+            'custom_travel_areas' => $ad->custom_travel_areas ?? [],
+            'travel_radius' => $ad->travel_radius,
+            'travel_price' => $ad->travel_price,
+            'travel_price_type' => $ad->travel_price_type,
+            'phone' => $ad->phone,
+            'contact_method' => $ad->contact_method,
+            'whatsapp' => $ad->whatsapp,
+            'telegram' => $ad->telegram,
+            'status' => $ad->status,
+            'created_at' => $ad->created_at,
+            'updated_at' => $ad->updated_at,
+        ];
     }
 
     /**
@@ -175,19 +241,76 @@ class AdService
     {
         $adData = [];
         
-        // Основные поля
-        $mainFields = [
-            'title', 'description', 'category_id', 'subcategory_id',
-            'price_from', 'price_to', 'price_fixed', 'price_currency',
-            'service_location', 'address', 'latitude', 'longitude',
-            'photos', 'video', 'working_days', 'working_hours',
-            'metro_stations', 'phone', 'telegram', 'whatsapp'
+        // Основные поля объявления которые есть в таблице ads
+        // Маппинг полей из формы на поля в БД
+        $fieldMapping = [
+            'title' => 'title',
+            'description' => 'description',
+            'category' => 'category',
+            'specialty' => 'specialty',
+            'clients' => 'clients',
+            'service_provider' => 'service_provider',
+            'work_format' => 'work_format',
+            'experience' => 'experience',
+            'features' => 'features',
+            'additional_features' => 'additional_features',
+            'services' => 'services',
+            'services_additional_info' => 'services_additional_info',
+            'schedule' => 'schedule',
+            'schedule_notes' => 'schedule_notes',
+            'price' => 'price',
+            'price_unit' => 'price_unit',
+            'is_starting_price' => 'is_starting_price',
+            'main_service_name' => 'main_service_name',
+            'main_service_price' => 'main_service_price',
+            'main_service_price_unit' => 'main_service_price_unit',
+            'additional_services' => 'additional_services',
+            'height' => 'height',
+            'weight' => 'weight',
+            'hair_color' => 'hair_color',
+            'eye_color' => 'eye_color',
+            'nationality' => 'nationality',
+            'new_client_discount' => 'new_client_discount',
+            'gift' => 'gift',
+            'discount' => 'discount',
+            'address' => 'address',
+            'geo' => 'geo',
+            'travel_area' => 'travel_area',
+            'custom_travel_areas' => 'custom_travel_areas',
+            'travel_radius' => 'travel_radius',
+            'travel_price' => 'travel_price',
+            'travel_price_type' => 'travel_price_type',
+            'phone' => 'phone',
+            'contact_method' => 'contact_method',
+            'telegram' => 'telegram',
+            'whatsapp' => 'whatsapp',
+            'service_location' => 'service_location',
+            'photos' => 'photos',
+            'videos' => 'videos',
+            'video' => 'video',
+            'media_settings' => 'media_settings',
+            'status' => 'status',
+            'user_id' => 'user_id'
         ];
         
-        foreach ($mainFields as $field) {
-            if (isset($data[$field])) {
-                $adData[$field] = $data[$field];
+        foreach ($fieldMapping as $formField => $dbField) {
+            if (isset($data[$formField])) {
+                $value = $data[$formField];
+                // Преобразуем массивы в JSON для хранения
+                if (is_array($value)) {
+                    $value = json_encode($value);
+                }
+                $adData[$dbField] = $value;
             }
+        }
+        
+        // Убеждаемся что есть обязательные поля для черновика
+        if (!isset($adData['title']) || empty($adData['title'])) {
+            $adData['title'] = 'Черновик объявления';
+        }
+        
+        if (!isset($adData['category']) || empty($adData['category'])) {
+            $adData['category'] = 'erotic';
         }
         
         return $adData;

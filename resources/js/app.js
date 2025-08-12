@@ -30,9 +30,9 @@ createInertiaApp({
 
         // Применяем AppLayout только к страницам, которые его уже не имеют
         // Исключаем TestEncoding и страницы с явным AppLayout
-        const pagesWithoutLayout = ['Home', 'TestEncoding'];
+        const pagesWithLayout = ['Home', 'Dashboard', 'TestEncoding'];
 
-        if (pagesWithoutLayout.includes(name.split('/').pop())) {
+        if (pagesWithLayout.includes(name.split('/').pop())) {
             // Импортируем единый FSD-лайаут динамически
             const MainLayout = (await import('@/src/shared/layouts/MainLayout/MainLayout.vue')).default;
             page.default.layout = MainLayout;

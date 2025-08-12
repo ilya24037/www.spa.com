@@ -23,7 +23,10 @@ class AdSearchEngine extends BaseSearchEngine
 
     public function __construct()
     {
-        parent::__construct();
+        // Создаем экземпляр SearchRepository для родительского класса
+        $searchRepository = app(\App\Domain\Search\Repositories\SearchRepository::class);
+        parent::__construct($searchRepository);
+        
         $this->filterService = new AdFilterService();
         $this->similarityFilter = new AdSimilarityFilter();
         $this->facetCalculator = new AdFacetCalculator();

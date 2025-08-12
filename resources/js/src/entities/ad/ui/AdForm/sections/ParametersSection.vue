@@ -1,6 +1,6 @@
 <template>
   <div class="parameters-section">
-    <h2 class="form-group-title">Физические параметры</h2>
+    <h2 class="form-group-title">Обо мне</h2>
     <div class="parameters-fields">
       <label>Рост (см):
         <input type="number" min="100" max="250" v-model="localHeight" @input="emitAll" />

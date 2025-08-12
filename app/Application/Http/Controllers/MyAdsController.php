@@ -87,20 +87,34 @@ class MyAdsController extends Controller
      */
     public function destroy(Ad $ad)
     {
-        $this->authorize('delete', $ad);
+        // Проверяем, что пользователь владелец объявления
+        if ($ad->user_id !== auth()->id()) {
+            abort(403, 'У вас нет прав для удаления этого объявления');
+        }
         
         try {
-            $wasDraft = $ad->status === 'draft';
+            $wasDraft = $ad->status === 'draft' || $ad->status === \App\Domain\Ad\Enums\AdStatus::DRAFT;
             $this->adService->delete($ad);
             
             $message = $wasDraft ? 'Черновик удален' : 'Объявление удалено';
             
-            if (request()->header('X-Inertia') && $wasDraft) {
-                return redirect()->route('profile.items.draft')->with('success', $message);
+            // Возвращаем успешный ответ для Inertia
+            if (request()->header('X-Inertia')) {
+                return back()->with('success', $message);
             }
             
             return back()->with('success', $message);
         } catch (\Exception $e) {
+            \Log::error('Ошибка удаления объявления', [
+                'ad_id' => $ad->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            if (request()->header('X-Inertia')) {
+                return back()->withErrors(['error' => 'Ошибка при удалении: ' . $e->getMessage()]);
+            }
+            
             return back()->with('error', 'Ошибка при удалении: ' . $e->getMessage());
         }
     }
