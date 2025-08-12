@@ -1,7 +1,6 @@
 <template>
   <div class="services-module">
     <div class="module-header mb-6">
-      <h2 class="text-xl font-bold text-gray-900 mb-2">Услуги</h2>
       <div class="field-hint text-gray-600 text-sm">
         Выберите услуги, которые вы предоставляете. Укажите цены и дополнительную информацию для каждой услуги.
       </div>
@@ -19,28 +18,58 @@
       </div>
     </div>
     <div class="services-categories">
+      <!-- Основные услуги (всегда развернуты) -->
       <ServiceCategory
-        v-for="category in filteredCategories"
-        :key="category.id"
-        :category="category"
-        v-model="localServices[category.id]"
-        @update:modelValue="updateCategory(category.id, $event)"
+        v-if="mainCategory"
+        :key="mainCategory.id"
+        :category="mainCategory"
+        v-model="localServices[mainCategory.id]"
+        @update:modelValue="updateCategory(mainCategory.id, $event)"
       />
+      
+      <!-- Дополнительные услуги (свернуты по умолчанию) -->
+      <div v-if="additionalCategories.length > 0" class="additional-services-wrapper">
+        <div class="category-header cursor-pointer select-none" @click="toggleAdditionalServices">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+              <span class="text-2xl mr-2">➕</span>
+              Дополнительные услуги
+              <span v-if="totalAdditionalSelected > 0" class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded-full">
+                {{ totalAdditionalSelected }}
+              </span>
+            </h3>
+            <svg 
+              class="w-5 h-5 text-gray-500 transition-transform duration-200" 
+              :class="{ 'rotate-180': isAdditionalExpanded }"
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
+        
+        <div v-show="isAdditionalExpanded" class="mt-4 space-y-6">
+          <ServiceCategory
+            v-for="category in additionalCategories"
+            :key="category.id"
+            :category="category"
+            v-model="localServices[category.id]"
+            @update:modelValue="updateCategory(category.id, $event)"
+          />
+        </div>
+      </div>
     </div>
     <div class="additional-info mt-8">
-      <label class="block text-sm font-medium text-gray-700 mb-2">
-        Дополнительная информация об услугах
-      </label>
-      <textarea 
+      <BaseTextarea
         v-model="localAdditionalInfo"
-        @input="emitAll"
-        rows="3"
-        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        label="Дополнительная информация об услугах"
         placeholder="Укажите дополнительную информацию об ваших услугах, особые условия, скидки и т.д."
-      ></textarea>
-      <div class="text-xs text-gray-500 mt-1">
-        Эта информация будет видна клиентам в вашей анкете
-      </div>
+        hint="Эта информация будет видна клиентам в вашей анкете"
+        :rows="3"
+        @update:modelValue="emitAll"
+      />
     </div>
     <div class="services-stats mt-6 p-4 bg-gray-50 rounded-lg">
       <div class="flex items-center justify-between">
@@ -63,6 +92,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, reactive } from 'vue'
 import ServiceCategory from './components/ServiceCategory.vue'
+import BaseTextarea from '@/src/shared/ui/atoms/BaseTextarea/BaseTextarea.vue'
 import servicesConfig from './config/services.json'
 
 interface ServiceData {
@@ -118,6 +148,38 @@ const filteredCategories = computed(() => {
 
 const localServices = reactive<Record<string, Record<string, ServiceData>>>({})
 const localAdditionalInfo = ref(props.servicesAdditionalInfo || '')
+
+// Состояние раскрытия дополнительных услуг
+const isAdditionalExpanded = ref(false)
+
+// Основная категория (Основные услуги)
+const mainCategory = computed(() => {
+  return filteredCategories.value.find(cat => cat.id === 'intimate_services')
+})
+
+// Дополнительные категории (все остальные)
+const additionalCategories = computed(() => {
+  return filteredCategories.value.filter(cat => cat.id !== 'intimate_services')
+})
+
+// Подсчет выбранных дополнительных услуг
+const totalAdditionalSelected = computed(() => {
+  let count = 0
+  additionalCategories.value.forEach(category => {
+    const categoryServices = localServices[category.id]
+    if (categoryServices) {
+      Object.values(categoryServices).forEach(service => {
+        if (service?.enabled) count++
+      })
+    }
+  })
+  return count
+})
+
+// Функция переключения дополнительных услуг
+const toggleAdditionalServices = () => {
+  isAdditionalExpanded.value = !isAdditionalExpanded.value
+}
 
 const initializeServicesData = () => {
   filteredCategories.value.forEach(category => {
@@ -183,6 +245,7 @@ const emitAll = () => {
   emit('update:servicesAdditionalInfo', localAdditionalInfo.value)
 }
 
+
 // Инициализация
 if (props.services && typeof props.services === 'object') {
   Object.keys(props.services).forEach(categoryId => {
@@ -205,4 +268,20 @@ initializeServicesData()
 .services-categories {}
 .additional-info {}
 .services-stats {}
+
+.additional-services-wrapper {
+  margin-top: 24px;
+}
+
+.category-header {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px 16px;
+  background: #f9fafb;
+  transition: background-color 0.2s;
+}
+
+.category-header:hover {
+  background: #f3f4f6;
+}
 </style>

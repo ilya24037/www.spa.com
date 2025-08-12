@@ -10,8 +10,8 @@
     <!-- Цена -->
     <div class="item-price-section">
       <p class="item-price">
-        <span v-if="item.price_from" class="price-value">
-          от {{ formatPrice(item.price_from) }} ₽ за час
+        <span v-if="getMinPrice()" class="price-value">
+          от {{ formatPrice(getMinPrice()) }} ₽ за час
         </span>
         <span v-else class="price-negotiable">Цена договорная</span>
       </p>
@@ -59,6 +59,16 @@ interface Props {
     title?: string
     name?: string
     price_from?: number
+    prices?: {
+      apartments_express?: number
+      apartments_1h?: number
+      apartments_2h?: number
+      apartments_night?: number
+      outcall_1h?: number
+      outcall_2h?: number
+      outcall_night?: number
+      taxi_included?: boolean
+    }
     status?: string
     description?: string
     home_service?: boolean
@@ -74,6 +84,24 @@ const props = defineProps<Props>()
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('ru-RU').format(price)
+}
+
+// Берем цену за час как в черновике
+const getMinPrice = () => {
+  // Для черновиков используем часовую цену из prices
+  if (props.item.prices) {
+    const hourPrice = props.item.prices.apartments_1h || props.item.prices.outcall_1h
+    if (hourPrice) {
+      return hourPrice
+    }
+  }
+  
+  // Резервный вариант - используем price_from
+  if (props.item.price_from) {
+    return props.item.price_from
+  }
+  
+  return null
 }
 </script>
 

@@ -1,47 +1,19 @@
 <template>
   <div class="specialty-section">
-    <h2 class="form-group-title">Специальность или сфера</h2>
-    <select v-model="localSpecialty" @change="emitSpecialty" class="form-select">
-      <option value="">Выберите специальность</option>
-      <optgroup label="Массаж">
-        <option value="erotic_massage">Эротический массаж</option>
-        <option value="classic_massage">Классический массаж</option>
-        <option value="relax_massage">Расслабляющий массаж</option>
-        <option value="thai_massage">Тайский массаж</option>
-        <option value="tantric_massage">Тантрический массаж</option>
-        <option value="body_massage">Боди-массаж</option>
-        <option value="nuru_massage">Нуру массаж</option>
-      </optgroup>
-      <optgroup label="Косметология">
-        <option value="cosmetologist">Косметолог</option>
-        <option value="beautician">Визажист</option>
-        <option value="manicure">Мастер маникюра</option>
-        <option value="pedicure">Мастер педикюра</option>
-        <option value="eyebrows">Бровист</option>
-        <option value="depilation">Мастер депиляции</option>
-      </optgroup>
-      <optgroup label="Развлечения">
-        <option value="stripper">Стриптиз</option>
-        <option value="gogo">Go-go танцы</option>
-        <option value="escort">Эскорт</option>
-        <option value="model">Модель</option>
-        <option value="hostess">Хостес</option>
-      </optgroup>
-      <optgroup label="Другое">
-        <option value="photographer">Фотограф</option>
-        <option value="psychologist">Психолог</option>
-        <option value="coach">Тренер</option>
-        <option value="other">Другая специальность</option>
-      </optgroup>
-    </select>
-    <div v-if="errors.specialty" class="error-message">
-      {{ errors.specialty }}
-    </div>
+    <BaseSelect
+      v-model="localSpecialty"
+      label="Специальность или сфера"
+      placeholder="Выберите специальность"
+      :options="specialtyOptions"
+      :error="errors.specialty"
+      @update:modelValue="emitSpecialty"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
+import BaseSelect from '@/src/shared/ui/atoms/BaseSelect/BaseSelect.vue'
 
 const props = defineProps({
   specialty: { type: String, default: '' },
@@ -51,7 +23,60 @@ const props = defineProps({
 const emit = defineEmits(['update:specialty'])
 const localSpecialty = ref(props.specialty)
 
-watch(() => props.specialty, (val) => { localSpecialty.value = val })
+// Опции для селекта с группировкой
+const specialtyOptions = computed(() => [
+  { value: '', label: 'Выберите специальность' },
+  { 
+    label: 'Массаж',
+    group: true,
+    options: [
+      { value: 'erotic_massage', label: 'Эротический массаж' },
+      { value: 'classic_massage', label: 'Классический массаж' },
+      { value: 'relax_massage', label: 'Расслабляющий массаж' },
+      { value: 'thai_massage', label: 'Тайский массаж' },
+      { value: 'tantric_massage', label: 'Тантрический массаж' },
+      { value: 'body_massage', label: 'Боди-массаж' },
+      { value: 'nuru_massage', label: 'Нуру массаж' }
+    ]
+  },
+  {
+    label: 'Косметология',
+    group: true,
+    options: [
+      { value: 'cosmetologist', label: 'Косметолог' },
+      { value: 'beautician', label: 'Визажист' },
+      { value: 'manicure', label: 'Мастер маникюра' },
+      { value: 'pedicure', label: 'Мастер педикюра' },
+      { value: 'eyebrows', label: 'Бровист' },
+      { value: 'depilation', label: 'Мастер депиляции' }
+    ]
+  },
+  {
+    label: 'Развлечения',
+    group: true,
+    options: [
+      { value: 'stripper', label: 'Стриптиз' },
+      { value: 'gogo', label: 'Go-go танцы' },
+      { value: 'escort', label: 'Эскорт' },
+      { value: 'model', label: 'Модель' },
+      { value: 'hostess', label: 'Хостес' }
+    ]
+  },
+  {
+    label: 'Другое',
+    group: true,
+    options: [
+      { value: 'photographer', label: 'Фотограф' },
+      { value: 'psychologist', label: 'Психолог' },
+      { value: 'coach', label: 'Тренер' },
+      { value: 'other', label: 'Другая специальность' }
+    ]
+  }
+])
+
+watch(() => props.specialty, (val) => { 
+  localSpecialty.value = val 
+})
 
 const emitSpecialty = () => {
   emit('update:specialty', localSpecialty.value)
@@ -59,8 +84,9 @@ const emitSpecialty = () => {
 </script>
 
 <style scoped>
-.specialty-section { background: white; border-radius: 8px; padding: 20px; }
-.form-group-title { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 16px; }
-.form-select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 15px; }
-.error-message { color: #dc3545; font-size: 0.875rem; margin-top: 0.5rem; }
+.specialty-section { 
+  background: white; 
+  border-radius: 8px; 
+  padding: 20px; 
+}
 </style>

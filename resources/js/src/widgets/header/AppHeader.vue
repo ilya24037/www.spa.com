@@ -1,10 +1,10 @@
 <!-- Шапка сайта MASSAGIST как на скриншоте -->
 <template>
-  <header class="bg-white rounded-b-2xl overflow-visible shadow-sm relative app-header">
+  <header class="overflow-visible relative app-header">
     <!-- Десктопная версия -->
     <div class="hidden lg:block">
       <!-- Уровень 1: Основная навигация -->
-      <div class="border-b border-gray-200 px-4">
+      <div class="border-b border-gray-200 px-6">
         <div class="flex items-center justify-between h-16">
             <!-- Левая часть -->
             <div class="flex items-center flex-1">
@@ -76,7 +76,7 @@
       
       <!-- Вторая строка -->
       <div class="bg-gray-50 border-t border-gray-200">
-        <div class="px-4 lg:px-6">
+        <div class="px-6">
           <div class="flex items-center justify-between h-12">
             <button 
               class="flex items-center space-x-1 text-sm text-gray-600 hover:text-blue-600" 

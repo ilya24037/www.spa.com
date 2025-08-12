@@ -282,6 +282,7 @@ class AdController extends Controller
                     'price' => $request->price ? (float)$request->price : $ad->price,
                     'price_unit' => $request->price_unit ?: $ad->price_unit,
                     'is_starting_price' => $request->has('is_starting_price') ? (bool)$request->is_starting_price : $ad->is_starting_price,
+                    'prices' => !empty($request->prices) ? (is_string($request->prices) ? $request->prices : json_encode($request->prices)) : $ad->prices,
                     'new_client_discount' => $request->new_client_discount ?: $ad->new_client_discount,
                     'gift' => $request->gift ?: $ad->gift,
                     'age' => $request->age ?: $ad->age,
@@ -334,6 +335,7 @@ class AdController extends Controller
                 'price' => $request->price ? (float)$request->price : null,
                 'price_unit' => $request->price_unit ?: 'service',
                 'is_starting_price' => (bool)$request->is_starting_price,
+                'prices' => !empty($request->prices) ? (is_string($request->prices) ? $request->prices : json_encode($request->prices)) : null,
                 'new_client_discount' => $request->new_client_discount ?: null,
                 'gift' => $request->gift ?: null,
                 'age' => $request->age ?: null,
@@ -523,7 +525,7 @@ class AdController extends Controller
         $jsonFields = ['clients', 'service_location', 'service_provider', 'is_starting_price', 
                       'photos', 'video', 'show_photos_in_gallery', 'allow_download_photos', 'watermark_photos', 
                       'custom_travel_areas', 'working_days', 'working_hours', 'services', 'features', 'schedule', 
-                      'additional_services', 'geo', 'media_settings'];
+                      'additional_services', 'geo', 'media_settings', 'prices'];
         
         foreach ($jsonFields as $field) {
             if (isset($adData[$field]) && is_string($adData[$field])) {

@@ -17,7 +17,7 @@
         :type="type"
         :placeholder="placeholder"
         :disabled="disabled"
-        :Readonly="Readonly"
+        :readonly="readonly"
         :maxlength="maxlength"
         :min="min"
         :max="max"
@@ -25,7 +25,7 @@
         class="base-input"
         :class="{
           'disabled': disabled,
-          'Readonly': readonly,
+          'readonly': readonly,
           'has-clear': clearable && inputValue,
           'has-prefix': prefix,
           'has-suffix': suffix
@@ -38,7 +38,7 @@
       
       <!-- РљРЅРѕРїРєР° РѕС‡РёСЃС‚РєРё -->
       <button
-        v-if="clearable && inputValue && !disabled && !Readonly"
+        v-if="clearable && inputValue && !disabled && !readonly"
         type="button"
         class="clear-button"
         tabindex="-1"
@@ -303,7 +303,7 @@ defineExpose({
   color: #8c8c8c;
 }
 
-.base-input:hover:not(:disabled):not(:Readonly) {
+.base-input:hover:not(:disabled):not(.readonly) {
   border-color: #d0d0d0;
 }
 
@@ -319,7 +319,7 @@ defineExpose({
   color: #8c8c8c;
 }
 
-.base-input.Readonly {
+.base-input.readonly {
   cursor: default;
   background: #f9f9f9;
 }

@@ -39,53 +39,33 @@
       <div class="p-6">
         <form class="space-y-6" @submit.prevent="submit">
           <!-- Email -->
-          <div>
-            <label class="block text-sm font-medium text-gray-500 mb-2">
-              Email
-            </label>
-            <input
-              v-model="form.email"
-              type="email"
-              required
-              autocomplete="username"
-              placeholder="Введите ваш email"
-              class="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              :class="{ 'border-red-500': form.errors.email }"
-            >
-            <p v-if="form.errors.email" class="mt-1 text-sm text-red-600">
-              {{ form.errors.email }}
-            </p>
-          </div>
+          <BaseInput
+            v-model="form.email"
+            type="email"
+            label="Email"
+            placeholder="Введите ваш email"
+            autocomplete="username"
+            required
+            :error="form.errors.email"
+          />
 
           <!-- Пароль -->
-          <div>
-            <label class="block text-sm font-medium text-gray-500 mb-2">
-              Пароль
-            </label>
-            <input
-              v-model="form.password"
-              type="password"
-              required
-              autocomplete="current-password"
-              placeholder="Введите пароль"
-              class="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              :class="{ 'border-red-500': form.errors.password }"
-            >
-            <p v-if="form.errors.password" class="mt-1 text-sm text-red-600">
-              {{ form.errors.password }}
-            </p>
-          </div>
+          <BaseInput
+            v-model="form.password"
+            type="password"
+            label="Пароль"
+            placeholder="Введите пароль"
+            autocomplete="current-password"
+            required
+            :error="form.errors.password"
+          />
 
           <!-- Запомнить пароль и забыли пароль -->
           <div class="flex items-center justify-between">
-            <label class="flex items-center">
-              <input
-                v-model="form.remember"
-                type="checkbox"
-                class="w-4 h-4 text-blue-600 border-gray-500 rounded focus:ring-blue-500"
-              >
-              <span class="ml-2 text-sm text-gray-500">Запомнить пароль</span>
-            </label>
+            <BaseCheckbox
+              v-model="form.remember"
+              label="Запомнить пароль"
+            />
             <Link
               v-if="route().has('password.request')"
               :href="route('password.request')"
@@ -96,14 +76,14 @@
           </div>
 
           <!-- Кнопка входа -->
-          <button
+          <PrimaryButton
             type="submit"
             :disabled="form.processing"
-            class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            :loading="form.processing"
+            class="w-full"
           >
-            <span v-if="form.processing">Вход...</span>
-            <span v-else>Войти</span>
-          </button>
+            {{ form.processing ? 'Вход...' : 'Войти' }}
+          </PrimaryButton>
         </form>
 
         <!-- Ссылка на регистрацию -->
@@ -134,6 +114,9 @@
 <script setup lang="ts">
 import { Link, useForm } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
+import BaseInput from '@/src/shared/ui/atoms/BaseInput/BaseInput.vue'
+import BaseCheckbox from '@/src/shared/ui/atoms/BaseCheckbox/BaseCheckbox.vue'
+import PrimaryButton from '@/src/shared/ui/atoms/PrimaryButton/PrimaryButton.vue'
 
 interface Props {
   show?: boolean

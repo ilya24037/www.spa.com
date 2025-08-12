@@ -86,43 +86,16 @@
               </div>
             </div>
 
-            <!-- Р’С‹Р±РѕСЂ СѓСЃР»СѓРіРё -->
+            <!-- Р'С‹Р±РѕСЂ СѓСЃР»СѓРіРё -->
             <div class="mb-6">
-              <label 
-                for="service-select"
-                class="block text-sm font-medium text-gray-500 mb-2"
-              >
-                Р’С‹Р±РµСЂРёС‚Рµ СѓСЃР»СѓРіСѓ *
-              </label>
-              <select 
-                id="service-select"
+              <BaseSelect
                 v-model="form.service_id"
-                class="w-full border-gray-500 rounded-lg"
-                :class="{ 'border-red-500': formErrors.service_id }"
+                label="Р'С‹Р±РµСЂРёС‚Рµ СѓСЃР»СѓРіСѓ *"
+                :options="serviceOptions"
+                :error="formErrors.service_id"
                 data-testid="service-select"
                 required
-                aria-describedby="service-error"
-              >
-                <option value="">
-                  Р’С‹Р±РµСЂРёС‚Рµ СѓСЃР»СѓРіСѓ
-                </option>
-                <option 
-                  v-for="service in master.services"
-                  :key="service.id"
-                  :value="service.id"
-                >
-                  {{ service.name }} - {{ service.price }}в‚Ѕ ({{ service.duration }} РјРёРЅ)
-                </option>
-              </select>
-              <p 
-                v-if="formErrors.service_id"
-                id="service-error"
-                class="mt-1 text-sm text-red-600"
-                data-testid="service-error"
-                role="alert"
-              >
-                {{ formErrors.service_id }}
-              </p>
+              />
             </div>
 
             <!-- Р”Р°С‚Р° Рё РІСЂРµРјСЏ -->
@@ -160,132 +133,65 @@
               </div>
                             
               <div>
-                <label 
-                  for="time-select"
-                  class="block text-sm font-medium text-gray-500 mb-2"
-                >
-                  Р’СЂРµРјСЏ *
-                </label>
-                <select 
-                  id="time-select"
+                <BaseSelect
                   v-model="form.start_time"
-                  class="w-full border-gray-500 rounded-lg"
-                  :class="{ 'border-red-500': formErrors.start_time }"
+                  label="Р'СЂРµРјСЏ *"
+                  :options="timeSlotOptions"
                   :disabled="!form.booking_date || state.loadingSlots"
+                  :error="formErrors.start_time"
                   data-testid="time-select"
                   required
-                  aria-describedby="time-error"
-                >
-                  <option value="">
-                    {{ state.loadingSlots ? 'Р—Р°РіСЂСѓР·РєР°...' : 'Р’С‹Р±РµСЂРёС‚Рµ РІСЂРµРјСЏ' }}
-                  </option>
-                  <option 
-                    v-for="slot in state.availableSlots"
-                    :key="slot"
-                    :value="slot"
-                  >
-                    {{ slot }}
-                  </option>
-                </select>
-                <p 
-                  v-if="formErrors.start_time"
-                  id="time-error"
-                  class="mt-1 text-sm text-red-600"
-                  data-testid="time-error"
-                  role="alert"
-                >
-                  {{ formErrors.start_time }}
-                </p>
+                />
               </div>
             </div>
 
             <!-- РўРёРї СѓСЃР»СѓРіРё -->
             <div class="mb-6">
               <label class="block text-sm font-medium text-gray-500 mb-2">
-                Р“РґРµ РїСЂРѕРІРµСЃС‚Рё СЃРµР°РЅСЃ?
+                Р"РґРµ РїСЂРѕРІРµСЃС‚Рё СЃРµР°РЅСЃ?
               </label>
-              <div class="grid grid-cols-2 gap-4">
-                <label 
+              <div class="space-y-2">
+                <BaseRadio
                   v-if="master.home_service"
-                  class="relative flex items-center p-4 border rounded-lg cursor-pointer"
-                  :class="{ 'border-indigo-500 bg-indigo-50': form.is_home_service }"
-                >
-                  <input 
-                    v-model="form.is_home_service"
-                    type="radio"
-                    :value="true"
-                    class="sr-only"
-                  >
-                  <div>
-                    <p class="font-medium">Р’С‹РµР·Рґ РЅР° РґРѕРј</p>
-                    <p class="text-sm text-gray-500">+500в‚Ѕ Рє СЃС‚РѕРёРјРѕСЃС‚Рё</p>
-                  </div>
-                </label>
-                                
-                <label 
+                  v-model="form.is_home_service"
+                  :value="true"
+                  label="Р'С‹РµР·Рґ РЅР° РґРѕРј (+500в‚Ѕ Рє СЃС‚РѕРёРјРѕСЃС‚Рё)"
+                />
+                <BaseRadio
                   v-if="master.salon_service"
-                  class="relative flex items-center p-4 border rounded-lg cursor-pointer"
-                  :class="{ 'border-indigo-500 bg-indigo-50': !form.is_home_service }"
-                >
-                  <input 
-                    v-model="form.is_home_service"
-                    type="radio"
-                    :value="false"
-                    class="sr-only"
-                  >
-                  <div>
-                    <p class="font-medium">Р’ СЃР°Р»РѕРЅРµ</p>
-                    <p class="text-sm text-gray-500">{{ master.salon_address }}</p>
-                  </div>
-                </label>
+                  v-model="form.is_home_service"
+                  :value="false"
+                  :label="`Р' СЃР°Р»РѕРЅРµ (${master.salon_address || 'Р°РґСЂРµСЃ СЃР°Р»РѕРЅР°'})`"
+                />
               </div>
             </div>
 
             <!-- РђРґСЂРµСЃ (РґР»СЏ РІС‹РµР·РґР°) -->
             <div v-if="form.is_home_service" class="mb-6">
-              <label class="block text-sm font-medium text-gray-500 mb-2">
-                РђРґСЂРµСЃ *
-              </label>
-              <input 
+              <BaseInput
                 v-model="form.address"
                 type="text"
-                class="w-full border-gray-500 rounded-lg"
+                label="РђРґСЂРµСЃ *"
                 placeholder="РЈР»РёС†Р°, РґРѕРј, РєРІР°СЂС‚РёСЂР°"
+                :error="formErrors.address"
                 required
-              >
+              />
             </div>
 
             <!-- РљРѕРЅС‚Р°РєС‚РЅС‹Рµ РґР°РЅРЅС‹Рµ -->
             <div class="grid grid-cols-2 gap-4 mb-6">
               <div>
-                <label 
-                  for="client-name"
-                  class="block text-sm font-medium text-gray-500 mb-2"
-                >
-                  Р’Р°С€Рµ РёРјСЏ *
-                </label>
-                <input 
-                  id="client-name"
+                <BaseInput
                   v-model="form.client_name"
                   type="text"
-                  class="w-full border-gray-500 rounded-lg"
-                  :class="{ 'border-red-500': formErrors.client_name }"
+                  label="Р'Р°С€Рµ РёРјСЏ *"
+                  placeholder="Р'РІРµРґРёС‚Рµ РІР°С€Рµ РёРјСЏ"
+                  :error="formErrors.client_name"
                   data-testid="client-name-input"
-                  placeholder="Р’РІРµРґРёС‚Рµ РІР°С€Рµ РёРјСЏ"
                   required
-                  aria-describedby="name-error"
                   minlength="2"
                   maxlength="50"
-                >
-                <p 
-                  v-if="formErrors.client_name"
-                  id="name-error"
-                  class="mt-1 text-sm text-red-600"
-                  data-testid="name-error"
-                  role="alert"
-                >
-                  {{ formErrors.client_name }}
-                </p>
+                />
               </div>
                             
               <div>
@@ -320,27 +226,22 @@
 
             <!-- Email -->
             <div class="mb-6">
-              <label class="block text-sm font-medium text-gray-500 mb-2">
-                Email
-              </label>
-              <input 
+              <BaseInput
                 v-model="form.client_email"
                 type="email"
-                class="w-full border-gray-500 rounded-lg"
-                placeholder="Р”Р»СЏ РѕС‚РїСЂР°РІРєРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ"
-              >
+                label="Email"
+                placeholder="Р"Р»СЏ РѕС‚РїСЂР°РІРєРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ"
+                :error="formErrors.client_email"
+              />
             </div>
 
             <!-- РљРѕРјРјРµРЅС‚Р°СЂРёР№ -->
             <div class="mb-6">
-              <label class="block text-sm font-medium text-gray-500 mb-2">
-                РџРѕР¶РµР»Р°РЅРёСЏ
-              </label>
-              <textarea 
+              <BaseTextarea
                 v-model="form.client_comment"
-                rows="3"
-                class="w-full border-gray-500 rounded-lg"
+                label="РџРѕР¶РµР»Р°РЅРёСЏ"
                 placeholder="РћСЃРѕР±С‹Рµ РїРѕР¶РµР»Р°РЅРёСЏ РёР»Рё РІРѕРїСЂРѕСЃС‹"
+                :rows="3"
               />
             </div>
 
@@ -349,21 +250,14 @@
               <label class="block text-sm font-medium text-gray-500 mb-2">
                 РЎРїРѕСЃРѕР± РѕРїР»Р°С‚С‹
               </label>
-              <div class="grid grid-cols-3 gap-3">
-                <label 
+              <div class="space-y-2">
+                <BaseRadio
                   v-for="method in paymentMethods"
                   :key="method.value"
-                  class="relative flex items-center justify-center p-3 border rounded-lg cursor-pointer"
-                  :class="{ 'border-indigo-500 bg-indigo-50': form.payment_method === method.value }"
-                >
-                  <input 
-                    v-model="form.payment_method"
-                    type="radio"
-                    :value="method.value"
-                    class="sr-only"
-                  >
-                  <span class="text-sm font-medium">{{ method.label }}</span>
-                </label>
+                  v-model="form.payment_method"
+                  :value="method.value"
+                  :label="method.label"
+                />
               </div>
             </div>
 
@@ -398,39 +292,23 @@
 
             <!-- РљРЅРѕРїРєРё -->
             <div class="flex gap-3" data-testid="form-actions">
-              <button 
+              <PrimaryButton
                 type="submit"
                 :disabled="state.loading || !isFormValid"
-                class="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                :loading="state.loading"
                 data-testid="submit-button"
-                :aria-label="state.loading ? 'РћС‚РїСЂР°РІРєР° С„РѕСЂРјС‹' : 'РћС‚РїСЂР°РІРёС‚СЊ Р·Р°СЏРІРєСѓ РЅР° Р±СЂРѕРЅРёСЂРѕРІР°РЅРёРµ'"
+                class="flex-1"
               >
-                <span v-if="state.loading" class="flex items-center justify-center gap-2">
-                  <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                    <circle
-                      class="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      stroke-width="4"
-                    />
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  РћС‚РїСЂР°РІРєР°...
-                </span>
-                <span v-else>Р—Р°РїРёСЃР°С‚СЊСЃСЏ</span>
-              </button>
-              <button 
+                {{ state.loading ? 'РћС‚РїСЂР°РІРєР°...' : 'Р—Р°РїРёСЃР°С‚СЊСЃСЏ' }}
+              </PrimaryButton>
+              <SecondaryButton
                 type="button"
-                class="px-6 py-3 border border-gray-500 rounded-lg hover:bg-gray-500 transition-colors"
-                data-testid="cancel-button"
                 :disabled="state.loading"
-                aria-label="РћС‚РјРµРЅРёС‚СЊ Р±СЂРѕРЅРёСЂРѕРІР°РЅРёРµ"
+                data-testid="cancel-button"
                 @click="closeModal"
               >
                 РћС‚РјРµРЅР°
-              </button>
+              </SecondaryButton>
             </div>
           </form>
         </div>
@@ -446,6 +324,12 @@ import { XMarkIcon } from '@heroicons/vue/24/outline'
 import type { AxiosResponse } from 'axios'
 import axios from 'axios'
 import { useToast } from '@/src/shared/composables/useToast'
+import BaseInput from '@/src/shared/ui/atoms/BaseInput/BaseInput.vue'
+import BaseSelect from '@/src/shared/ui/atoms/BaseSelect/BaseSelect.vue'
+import BaseTextarea from '@/src/shared/ui/atoms/BaseTextarea/BaseTextarea.vue'
+import BaseRadio from '@/src/shared/ui/atoms/BaseRadio/BaseRadio.vue'
+import PrimaryButton from '@/src/shared/ui/atoms/PrimaryButton/PrimaryButton.vue'
+import SecondaryButton from '@/src/shared/ui/atoms/SecondaryButton/SecondaryButton.vue'
 import type {
     BookingModalProps,
     BookingModalEmits,
@@ -494,10 +378,35 @@ const formErrors = ref<BookingFormErrors>({})
 
 // РњРµС‚РѕРґС‹ РѕРїР»Р°С‚С‹
 const paymentMethods: PaymentMethodOption[] = [
-    { value: 'cash', label: 'РќР°Р»РёС‡РЅС‹Рµ' },
-    { value: 'card', label: 'РљР°СЂС‚РѕР№' },
-    { value: 'online', label: 'РћРЅР»Р°Р№РЅ' }
+    { value: 'cash', label: 'Наличные' },
+    { value: 'card', label: 'Картой' },
+    { value: 'online', label: 'Онлайн' }
 ]
+
+// Computed для опций селектов
+const serviceOptions = computed(() => {
+    const options = [{ value: '', label: 'Выберите услугу' }]
+    if (props.master.services) {
+        props.master.services.forEach(service => {
+            options.push({
+                value: service.id.toString(),
+                label: `${service.name} - ${service.price}₽ (${service.duration} мин)`
+            })
+        })
+    }
+    return options
+})
+
+const timeSlotOptions = computed(() => {
+    const options = [{ 
+        value: '', 
+        label: state.value.loadingSlots ? 'Загрузка...' : 'Выберите время' 
+    }]
+    state.value.availableSlots.forEach(slot => {
+        options.push({ value: slot, label: slot })
+    })
+    return options
+})
 
 // Computed СЃРІРѕР№СЃС‚РІР° РґР»СЏ СЂР°СЃС‡РµС‚Р° СЃС‚РѕРёРјРѕСЃС‚Рё
 const selectedServicePrice = computed<number>(() => {

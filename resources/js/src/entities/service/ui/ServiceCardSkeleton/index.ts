@@ -1,0 +1,1 @@
+export { default as ServiceCardSkeleton } from './ServiceCardSkeleton.vue'

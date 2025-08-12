@@ -1,7 +1,10 @@
 <!-- Карточка мастера -->
 <template>
   <article 
-    class="master-card bg-white rounded-lg shadow hover:shadow-lg transition-all duration-300 overflow-hidden cursor-pointer"
+    ref="cardElement"
+    v-hover-lift="{ lift: 6, scale: 1.02 }"
+    v-fade-in="{ delay: index * 50, direction: 'up' }"
+    class="master-card bg-white rounded-lg shadow overflow-hidden cursor-pointer"
     role="button"
     tabindex="0"
     :aria-label="`Профиль мастера ${master.name}`"
@@ -50,13 +53,15 @@
 
     <!-- Изображение -->
     <div class="relative h-48 bg-gray-200">
-      <img 
+      <ImageWithBlur
         :src="masterPhoto"
+        :placeholder="masterPlaceholder"
         :alt="master.name || 'Мастер массажа'"
-        class="w-full h-full object-cover"
+        :fallback-src="'/images/no-photo.svg'"
+        container-class="w-full h-full"
+        image-class="w-full h-full object-cover"
         loading="lazy"
-        @error="handleImageError"
-      >
+      />
       <!-- Онлайн статус -->
       <div 
         v-if="master.is_online"
@@ -125,39 +130,74 @@
         </div>
       </div>
 
-      <!-- Кнопка действия -->
-      <button 
-        class="w-full mt-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
-        @click.stop="handleBooking"
-      >
-        Записаться
-      </button>
+      <!-- Кнопки действий -->
+      <div class="flex gap-2 mt-4">
+        <button
+          v-ripple="{ color: '#6b7280' }"
+          type="button"
+          class="flex-1 py-2 px-4 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors"
+          @click.stop="handleQuickView"
+        >
+          Быстрый просмотр
+        </button>
+        <PrimaryButton 
+          v-ripple
+          type="button"
+          class="flex-1"
+          @click.stop="handleBooking"
+        >
+          Записаться
+        </PrimaryButton>
+      </div>
     </div>
   </article>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { router } from '@inertiajs/vue3'
 import type { Master } from '@/src/entities/master/model/types'
+import PrimaryButton from '@/src/shared/ui/atoms/PrimaryButton/PrimaryButton.vue'
+import { ImageWithBlur } from '@/src/shared/ui/molecules/ImageWithBlur'
+import { useImagePreloader } from '@/src/shared/composables/useImagePreloader'
+import ImageCacheService from '@/src/shared/services/ImageCacheService'
 
 interface Props {
   master: Master
   isFavorite?: boolean
+  index?: number // Для stagger анимации
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  isFavorite: false
+  isFavorite: false,
+  index: 0
 })
 
 const emit = defineEmits<{
   'toggle-favorite': [id: number]
   'booking': [master: Master]
+  'quick-view': [master: Master]
 }>()
+
+// Image preloader
+const { addToQueue, observeElements } = useImagePreloader({
+  rootMargin: '100px',
+  priority: 'auto'
+})
+
+// Refs
+const cardElement = ref<HTMLElement>()
+const cachedImageUrl = ref<string>('')
 
 // Computed
 const masterPhoto = computed(() => {
-  return props.master.photo || props.master.avatar || '/images/no-photo.svg'
+  // Используем кешированный URL если есть
+  return cachedImageUrl.value || props.master.photo || props.master.avatar || '/images/no-photo.svg'
+})
+
+const masterPlaceholder = computed(() => {
+  // Если есть placeholder URL или base64 версия
+  return props.master.photo_placeholder || props.master.avatar_placeholder || ''
 })
 
 const displayServices = computed(() => {
@@ -177,11 +217,6 @@ const formatPrice = (price: number): string => {
   return new Intl.NumberFormat('ru-RU').format(price)
 }
 
-const handleImageError = (event: Event) => {
-  const img = event.target as HTMLImageElement
-  img.src = '/images/no-photo.svg'
-}
-
 const goToProfile = () => {
   router.visit(`/masters/${props.master.id}`)
 }
@@ -193,6 +228,40 @@ const toggleFavorite = () => {
 const handleBooking = () => {
   emit('booking', props.master)
 }
+
+const handleQuickView = () => {
+  emit('quick-view', props.master)
+  
+  // Предзагружаем дополнительные изображения для Quick View
+  if (props.master.gallery && props.master.gallery.length > 0) {
+    const galleryUrls = props.master.gallery.map(img => ({
+      url: img.url,
+      priority: 'high' as const
+    }))
+    addToQueue(galleryUrls)
+  }
+}
+
+// Загрузка изображения из кеша при монтировании
+onMounted(async () => {
+  // Загружаем основное изображение из кеша
+  if (props.master.photo) {
+    try {
+      const cached = await ImageCacheService.getImage(props.master.photo)
+      cachedImageUrl.value = cached
+    } catch (error) {
+      console.error('Failed to load cached image:', error)
+    }
+  }
+  
+  // Предзагружаем изображения галереи при наведении
+  if (cardElement.value && props.master.gallery) {
+    const preloadUrls = props.master.gallery.slice(0, 3).map(img => img.url)
+    cardElement.value.addEventListener('mouseenter', () => {
+      addToQueue(preloadUrls.map(url => ({ url, priority: 'low' as const })))
+    }, { once: true })
+  }
+})
 </script>
 
 <style scoped>

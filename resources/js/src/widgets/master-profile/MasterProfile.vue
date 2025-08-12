@@ -1,13 +1,7 @@
 <template>
   <div class="master-profile">
-    <!-- Loading -->
-    <div v-if="loading" class="animate-pulse">
-      <div class="h-64 bg-gray-500 rounded-lg mb-6" />
-      <div class="space-y-4">
-        <div class="h-4 bg-gray-500 rounded w-3/4" />
-        <div class="h-4 bg-gray-500 rounded w-1/2" />
-      </div>
-    </div>
+    <!-- Loading с детальным skeleton -->
+    <MasterProfileSkeleton v-if="loading" />
     
     <!-- Profile -->
     <div v-else-if="master">
@@ -82,6 +76,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import StarRating from '@/src/shared/ui/organisms/StarRating/StarRating.vue'
+import MasterProfileSkeleton from './MasterProfileSkeleton.vue'
 
 // Gallery imports
 import { PhotoThumbnails, PhotoViewer } from '@/src/features/gallery'

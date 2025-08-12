@@ -63,7 +63,7 @@ class ProfileController extends Controller
         $ads = Ad::where('user_id', $user->id)
             ->where('status', $status)
             ->select([
-                'id', 'title', 'status', 'price', 'address', 'travel_area',
+                'id', 'title', 'status', 'price', 'prices', 'address', 'travel_area',
                 'specialty', 'description', 'phone', 'contact_method',
                 'photos', 'service_location', 'views_count',
                 'created_at', 'updated_at'
@@ -106,6 +106,16 @@ class ProfileController extends Controller
             }
             $serviceLocation = is_array($serviceLocation) ? $serviceLocation : [];
             
+            // Берем цену за час из нового поля prices (как с фото - простая логика)
+            $prices = $ad->prices;
+            if (is_string($prices)) {
+                $prices = json_decode($prices, true) ?? [];
+            }
+            $prices = is_array($prices) ? $prices : [];
+            
+            // Простая логика: берем цену за час из черновика
+            $finalPrice = $prices['apartments_1h'] ?? $prices['outcall_1h'] ?? 0;
+            
             return [
                 'id' => $ad->id,
                 'slug' => Str::slug($ad->title),
@@ -113,8 +123,9 @@ class ProfileController extends Controller
                 'title' => $ad->title,
                 'status' => $ad->status,
                 'is_active' => $ad->status === 'active',
-                'price' => $ad->price,
-                'price_from' => $ad->price ?? 0,
+                'price' => $finalPrice,
+                'price_from' => $finalPrice,
+                'prices' => $prices,
                 'views_count' => $ad->views_count ?? 0,
                 'photos_count' => $photosCount,
                 'avatar' => $mainImage,

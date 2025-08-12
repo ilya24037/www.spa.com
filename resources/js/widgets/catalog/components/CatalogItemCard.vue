@@ -69,9 +69,9 @@
           {{ formatPrice(item.price) }}
         </span>
         
-        <button class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors">
+        <PrimaryButton class="text-sm px-3 py-1">
           Выбрать
-        </button>
+        </PrimaryButton>
       </div>
     </div>
   </div>
@@ -84,6 +84,7 @@
  */
 
 import { computed } from 'vue'
+import PrimaryButton from '@/src/shared/ui/atoms/PrimaryButton/PrimaryButton.vue'
 import type { CatalogItem } from '../types/catalog.types'
 
 interface Props {

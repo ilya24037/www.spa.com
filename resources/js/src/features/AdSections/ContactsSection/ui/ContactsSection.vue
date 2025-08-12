@@ -2,57 +2,54 @@
   <div class="contacts-section">
     <h2 class="form-group-title">Контакты</h2>
     <div class="contacts-fields">
-      <div class="contact-field">
-        <label>Телефон:</label>
-        <input 
-          type="tel" 
-          v-model="localPhone" 
-          @input="emitAll" 
-          placeholder="+7 (999) 999-99-99"
-          pattern="[+]7\s?[\(]?[0-9]{3}[\)]?\s?[0-9]{3}[-]?[0-9]{2}[-]?[0-9]{2}"
-        />
-        <span class="field-hint">Основной номер для связи</span>
-      </div>
+      <BaseInput
+        v-model="localPhone"
+        type="tel"
+        label="Телефон"
+        placeholder="+7 (999) 999-99-99"
+        hint="Основной номер для связи"
+        pattern="[+]7\s?[\(]?[0-9]{3}[\)]?\s?[0-9]{3}[-]?[0-9]{2}[-]?[0-9]{2}"
+        :error="errors.phone"
+        @update:modelValue="emitAll"
+      />
       
-      <div class="contact-field">
-        <label>WhatsApp:</label>
-        <input 
-          type="tel" 
-          v-model="localWhatsapp" 
-          @input="emitAll" 
-          placeholder="+7 (999) 999-99-99"
-        />
-        <span class="field-hint">Оставьте пустым, если совпадает с телефоном</span>
-      </div>
+      <BaseInput
+        v-model="localWhatsapp"
+        type="tel"
+        label="WhatsApp"
+        placeholder="+7 (999) 999-99-99"
+        hint="Оставьте пустым, если совпадает с телефоном"
+        :error="errors.whatsapp"
+        @update:modelValue="emitAll"
+      />
       
-      <div class="contact-field">
-        <label>Telegram:</label>
-        <input 
-          type="text" 
-          v-model="localTelegram" 
-          @input="emitAll" 
-          placeholder="@username или +7 (999) 999-99-99"
-        />
-        <span class="field-hint">Ник или номер телефона</span>
-      </div>
+      <BaseInput
+        v-model="localTelegram"
+        type="text"
+        label="Telegram"
+        placeholder="@username или +7 (999) 999-99-99"
+        hint="Ник или номер телефона"
+        :error="errors.telegram"
+        @update:modelValue="emitAll"
+      />
       
-      <div class="contact-field">
-        <label>Способ связи:</label>
-        <select v-model="localContactMethod" @change="emitAll">
-          <option value="phone">Только звонки</option>
-          <option value="whatsapp">Только WhatsApp</option>
-          <option value="telegram">Только Telegram</option>
-          <option value="messages">Сообщения (любой мессенджер)</option>
-          <option value="any">Любой способ</option>
-        </select>
-        <span class="field-hint">Как клиенты могут с вами связаться</span>
-      </div>
+      <BaseSelect
+        v-model="localContactMethod"
+        label="Способ связи"
+        :options="contactMethodOptions"
+        hint="Как клиенты могут с вами связаться"
+        :error="errors.contactMethod"
+        @update:modelValue="emitAll"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
+import BaseInput from '@/src/shared/ui/atoms/BaseInput/BaseInput.vue'
+import BaseSelect from '@/src/shared/ui/atoms/BaseSelect/BaseSelect.vue'
+
 const props = defineProps({
   phone: { type: String, default: '' },
   contactMethod: { type: String, default: 'any' },
@@ -60,15 +57,28 @@ const props = defineProps({
   telegram: { type: String, default: '' },
   errors: { type: Object, default: () => ({}) }
 })
+
 const emit = defineEmits(['update:phone', 'update:contactMethod', 'update:whatsapp', 'update:telegram'])
+
 const localPhone = ref(props.phone)
 const localContactMethod = ref(props.contactMethod)
 const localWhatsapp = ref(props.whatsapp)
 const localTelegram = ref(props.telegram)
+
+// Опции для способа связи
+const contactMethodOptions = computed(() => [
+  { value: 'phone', label: 'Только звонки' },
+  { value: 'whatsapp', label: 'Только WhatsApp' },
+  { value: 'telegram', label: 'Только Telegram' },
+  { value: 'messages', label: 'Сообщения (любой мессенджер)' },
+  { value: 'any', label: 'Любой способ' }
+])
+
 watch(() => props.phone, val => { localPhone.value = val })
 watch(() => props.contactMethod, val => { localContactMethod.value = val })
 watch(() => props.whatsapp, val => { localWhatsapp.value = val })
 watch(() => props.telegram, val => { localTelegram.value = val })
+
 const emitAll = () => {
   emit('update:phone', localPhone.value)
   emit('update:contactMethod', localContactMethod.value)
@@ -95,41 +105,5 @@ const emitAll = () => {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
-}
-
-.contact-field {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.contact-field label {
-  font-size: 14px;
-  font-weight: 500;
-  color: #333;
-}
-
-.contact-field input,
-.contact-field select {
-  padding: 10px 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  font-family: inherit;
-  background-color: #fff;
-  transition: border-color 0.2s;
-}
-
-.contact-field input:focus,
-.contact-field select:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
-}
-
-.field-hint {
-  font-size: 12px;
-  color: #8c8c8c;
-  margin-top: -4px;
 }
 </style> 

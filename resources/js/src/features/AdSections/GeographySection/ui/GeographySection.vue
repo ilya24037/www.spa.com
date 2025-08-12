@@ -7,20 +7,14 @@
     
     <div class="geography-fields">
       <!-- Основной адрес -->
-      <div class="field-group">
-        <label class="field-label">Основной адрес</label>
-        <input
-          type="text"
-          v-model="localAddress"
-          placeholder="Введите адрес салона или офиса"
-          class="form-input"
-          :class="{ 'error': errors?.address }"
-        />
-        <p class="field-hint">Укажите точный адрес, где вы принимаете клиентов</p>
-        <span v-if="errors?.address" class="error-message">
-          {{ errors.address[0] }}
-        </span>
-      </div>
+      <BaseInput
+        v-model="localAddress"
+        type="text"
+        label="Основной адрес"
+        placeholder="Введите адрес салона или офиса"
+        hint="Укажите точный адрес, где вы принимаете клиентов"
+        :error="errors?.address?.[0]"
+      />
 
       <!-- Районы выезда -->
       <div class="field-group">
@@ -28,19 +22,13 @@
         <p class="field-hint">Укажите все зоны выезда, чтобы клиенты понимали, доберётесь ли вы до них.</p>
         
         <div class="radio-group">
-          <label 
+          <BaseRadio
             v-for="option in travelAreaOptions"
             :key="option.value"
-            class="radio-option"
-          >
-            <input
-              type="radio"
-              v-model="localTravelArea"
-              :value="option.value"
-              class="radio-input"
-            />
-            <span class="radio-label">{{ option.label }}</span>
-          </label>
+            v-model="localTravelArea"
+            :value="option.value"
+            :label="option.label"
+          />
         </div>
         
         <span v-if="errors?.travel_area" class="error-message">
@@ -51,19 +39,13 @@
         <div v-if="localTravelArea === 'custom'" class="custom-areas">
           <label class="field-label mt-4">Выберите районы</label>
           <div class="checkbox-group">
-            <label 
+            <BaseCheckbox
               v-for="area in customTravelAreasOptions"
               :key="area.value"
-              class="checkbox-option"
-            >
-              <input
-                type="checkbox"
-                :value="area.value"
-                v-model="localCustomTravelAreas"
-                class="checkbox-input"
-              />
-              <span class="checkbox-label">{{ area.label }}</span>
-            </label>
+              :model-value="localCustomTravelAreas.includes(area.value)"
+              :label="area.label"
+              @update:modelValue="toggleCustomArea(area.value, $event)"
+            />
           </div>
           <span v-if="errors?.custom_travel_areas" class="error-message">
             {{ errors.custom_travel_areas[0] }}
@@ -72,52 +54,31 @@
       </div>
 
       <!-- Радиус выезда -->
-      <div v-if="localTravelArea !== 'no_travel'" class="field-group">
-        <label class="field-label">Радиус выезда</label>
-        <select 
-          v-model="localTravelRadius"
-          class="form-select"
-          :class="{ 'error': errors?.travel_radius }"
-        >
-          <option value="">Выберите радиус</option>
-          <option value="5">До 5 км</option>
-          <option value="10">До 10 км</option>
-          <option value="15">До 15 км</option>
-          <option value="20">До 20 км</option>
-          <option value="30">До 30 км</option>
-          <option value="50">До 50 км</option>
-          <option value="100">До 100 км</option>
-          <option value="unlimited">Без ограничений</option>
-        </select>
-        <span v-if="errors?.travel_radius" class="error-message">
-          {{ errors.travel_radius[0] }}
-        </span>
-      </div>
+      <BaseSelect
+        v-if="localTravelArea !== 'no_travel'"
+        v-model="localTravelRadius"
+        label="Радиус выезда"
+        :options="travelRadiusOptions"
+        :error="errors?.travel_radius?.[0]"
+      />
 
       <!-- Стоимость выезда -->
       <div v-if="localTravelArea !== 'no_travel'" class="field-group">
         <label class="field-label">Стоимость выезда</label>
         <div class="price-input-group">
-          <input
-            type="number"
+          <BaseInput
             v-model="localTravelPrice"
+            type="number"
             placeholder="0"
-            class="form-input price-input"
-            :class="{ 'error': errors?.travel_price }"
+            :error="errors?.travel_price?.[0]"
+            class="price-input"
           />
-          <select 
+          <BaseSelect
             v-model="localTravelPriceType"
-            class="form-select price-unit"
-          >
-            <option value="free">Бесплатно</option>
-            <option value="fixed">Фиксированная</option>
-            <option value="per_km">За километр</option>
-            <option value="negotiable">По договоренности</option>
-          </select>
+            :options="travelPriceTypeOptions"
+            class="price-unit"
+          />
         </div>
-        <span v-if="errors?.travel_price" class="error-message">
-          {{ errors.travel_price[0] }}
-        </span>
       </div>
 
       <!-- Карта (опционально) -->
@@ -134,7 +95,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
+import BaseInput from '@/src/shared/ui/atoms/BaseInput/BaseInput.vue'
+import BaseSelect from '@/src/shared/ui/atoms/BaseSelect/BaseSelect.vue'
+import BaseRadio from '@/src/shared/ui/atoms/BaseRadio/BaseRadio.vue'
+import BaseCheckbox from '@/src/shared/ui/atoms/BaseCheckbox/BaseCheckbox.vue'
 
 // Types
 interface Props {
@@ -188,6 +153,26 @@ const customTravelAreasOptions = [
   { value: 'southeast', label: 'Юго-восток' },
   { value: 'southwest', label: 'Юго-запад' }
 ]
+
+// Опции для селектов
+const travelRadiusOptions = computed(() => [
+  { value: '', label: 'Выберите радиус' },
+  { value: '5', label: 'До 5 км' },
+  { value: '10', label: 'До 10 км' },
+  { value: '15', label: 'До 15 км' },
+  { value: '20', label: 'До 20 км' },
+  { value: '30', label: 'До 30 км' },
+  { value: '50', label: 'До 50 км' },
+  { value: '100', label: 'До 100 км' },
+  { value: 'unlimited', label: 'Без ограничений' }
+])
+
+const travelPriceTypeOptions = computed(() => [
+  { value: 'free', label: 'Бесплатно' },
+  { value: 'fixed', label: 'Фиксированная' },
+  { value: 'per_km', label: 'За километр' },
+  { value: 'negotiable', label: 'По договоренности' }
+])
 
 // Local state
 const localAddress = ref(props.address)
@@ -246,6 +231,20 @@ watch(localTravelPrice, (newVal) => {
 watch(localTravelPriceType, (newVal) => {
   emit('update:travelPriceType', newVal)
 })
+
+// Функция для чекбоксов
+const toggleCustomArea = (value: string, checked: boolean) => {
+  if (checked) {
+    if (!localCustomTravelAreas.value.includes(value)) {
+      localCustomTravelAreas.value.push(value)
+    }
+  } else {
+    const index = localCustomTravelAreas.value.indexOf(value)
+    if (index > -1) {
+      localCustomTravelAreas.value.splice(index, 1)
+    }
+  }
+}
 </script>
 
 <style scoped>
@@ -277,22 +276,6 @@ watch(localTravelPriceType, (newVal) => {
   @apply text-sm text-gray-500;
 }
 
-.form-input {
-  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors;
-}
-
-.form-input.error {
-  @apply border-red-500;
-}
-
-.form-select {
-  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white;
-}
-
-.form-select.error {
-  @apply border-red-500;
-}
-
 .error-message {
   @apply text-red-500 text-sm mt-1 block;
 }
@@ -302,33 +285,9 @@ watch(localTravelPriceType, (newVal) => {
   @apply space-y-2;
 }
 
-.radio-option {
-  @apply flex items-center space-x-2 cursor-pointer;
-}
-
-.radio-input {
-  @apply w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500;
-}
-
-.radio-label {
-  @apply text-sm text-gray-700;
-}
-
 /* Checkbox группа */
 .checkbox-group {
   @apply grid grid-cols-2 gap-3 mt-2;
-}
-
-.checkbox-option {
-  @apply flex items-center space-x-2 cursor-pointer;
-}
-
-.checkbox-input {
-  @apply w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500;
-}
-
-.checkbox-label {
-  @apply text-sm text-gray-700;
 }
 
 /* Custom areas */

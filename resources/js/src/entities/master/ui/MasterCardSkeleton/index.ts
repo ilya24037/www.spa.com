@@ -1,0 +1,1 @@
+export { default as MasterCardSkeleton } from './MasterCardSkeleton.vue'

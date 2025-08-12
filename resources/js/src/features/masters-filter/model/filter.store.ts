@@ -70,6 +70,33 @@ export const useFilterStore = defineStore('masters-filter', () => {
     districts: [],
     metros: []
   })
+  
+  // Счётчики для фильтров (показывают количество результатов)
+  const filterCounts = ref<Record<string, number>>({
+    // Счётчики для услуг
+    services: {},
+    // Счётчики для районов
+    districts: {},
+    // Счётчики для метро
+    metros: {},
+    // Счётчики для других опций
+    serviceLocation: {
+      home: 0,
+      salon: 0
+    },
+    availability: {
+      today: 0,
+      tomorrow: 0,
+      thisWeek: 0
+    },
+    rating: {
+      '4+': 0,
+      '3+': 0,
+      withReviews: 0
+    },
+    // Общее количество результатов
+    total: 0
+  })
 
   // История примененных фильтров для кнопки "Назад"
   const filterHistory = ref<FilterState[]>([])
@@ -305,6 +332,58 @@ export const useFilterStore = defineStore('masters-filter', () => {
     }
   }
 
+  // 🎯 Обновить счётчики фильтров
+  async function updateFilterCounts() {
+    try {
+      isLoading.value = true
+      
+      // Запрос к API для получения счётчиков
+      // В реальном приложении это будет API запрос
+      // const response = await fetch('/api/masters/filter-counts', {
+      //   method: 'POST',
+      //   body: JSON.stringify(filters.value)
+      // })
+      // const data = await response.json()
+      
+      // Пока используем моковые данные
+      const mockData = {
+        services: {
+          '1': 24,  // Классический массаж
+          '2': 18,  // Тайский массаж
+          '3': 12,  // Лечебный массаж
+          '4': 15,  // Спортивный массаж
+          '5': 8,   // Антицеллюлитный
+          '6': 22,  // Расслабляющий
+          '7': 10,  // Массаж лица
+          '8': 14   // Лимфодренажный
+        },
+        serviceLocation: {
+          home: 45,
+          salon: 38
+        },
+        availability: {
+          today: 12,
+          tomorrow: 28,
+          thisWeek: 56
+        },
+        rating: {
+          '4+': 67,
+          '3+': 89,
+          withReviews: 95
+        },
+        total: 103
+      }
+      
+      // Обновляем счётчики
+      filterCounts.value = mockData
+      
+    } catch (err) {
+      logger.error('Ошибка при обновлении счётчиков фильтров:', err)
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   // 🔍 Получить строку запроса для API
   function getQueryParams(): Record<string, any> {
     const params: Record<string, any> = {}
@@ -399,9 +478,14 @@ export const useFilterStore = defineStore('masters-filter', () => {
     filters,
     () => {
       saveFiltersToStorage()
+      // Обновляем счётчики при изменении фильтров
+      updateFilterCounts()
     },
     { deep: true }
   )
+  
+  // Обновляем счётчики при инициализации
+  updateFilterCounts()
 
   // =================== ВОЗВРАЩАЕМ ИНТЕРФЕЙС ===================
 
@@ -412,6 +496,7 @@ export const useFilterStore = defineStore('masters-filter', () => {
     error,
     options,
     filterHistory,
+    filterCounts,
 
     // Вычисляемые
     activeFiltersCount,
@@ -439,6 +524,7 @@ export const useFilterStore = defineStore('masters-filter', () => {
     goBack,
     getQueryParams,
     saveFiltersToStorage,
-    loadFiltersFromStorage
+    loadFiltersFromStorage,
+    updateFilterCounts
   }
 })

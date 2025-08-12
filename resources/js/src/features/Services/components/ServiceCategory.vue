@@ -1,32 +1,64 @@
 <template>
   <div class="service-category mb-8">
     <!-- Заголовок категории -->
-    <div class="category-header mb-4">
-      <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-        <span class="text-2xl mr-2">{{ category.icon }}</span>
-        {{ category.name }}
-        <span v-if="selectedCount > 0" class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded-full">
-          {{ selectedCount }}
-        </span>
-      </h3>
-      <p v-if="category.description" class="text-sm text-gray-600 mt-1">
+    <div class="category-header mb-4 cursor-pointer select-none" @click="toggleExpanded">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+          <span class="text-2xl mr-2">{{ category.icon }}</span>
+          {{ category.name }}
+          <span v-if="selectedCount > 0" class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded-full">
+            {{ selectedCount }}
+          </span>
+        </h3>
+        <svg 
+          class="w-5 h-5 text-gray-500 transition-transform duration-200" 
+          :class="{ 'rotate-180': isExpanded }"
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </div>
+      <p v-if="category.description && isExpanded" class="text-sm text-gray-600 mt-1">
         {{ category.description }}
       </p>
     </div>
 
-    <!-- Список услуг -->
-    <div class="services-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <ServiceItem
-        v-for="service in category.services"
-        :key="service.id"
-        :service="service"
-        v-model="serviceValues[service.id]"
-        @update:modelValue="updateService(service.id, $event)"
-      />
+    <!-- Список услуг в виде таблицы -->
+    <div v-show="isExpanded" class="services-table mt-4">
+      <table class="w-full">
+        <thead>
+          <tr class="text-left text-xs text-gray-500 uppercase tracking-wider">
+            <th class="py-2 px-2 w-10"></th>
+            <th class="py-2 px-2">Услуга</th>
+            <th class="py-2 px-2 w-48">Доплата</th>
+            <th class="py-2 px-2">Комментарий</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ServiceItem
+            v-for="service in category.services"
+            :key="service.id"
+            :service="service"
+            v-model="serviceValues[service.id]"
+            @update:modelValue="updateService(service.id, $event)"
+          />
+        </tbody>
+      </table>
+      <!-- Подсказка под таблицей -->
+      <div class="px-2 py-2 text-xs text-gray-500 bg-gray-50 border-t border-gray-100">
+        <div class="flex">
+          <div class="w-10"></div>
+          <div class="flex-1"></div>
+          <div class="w-48"></div>
+          <div class="flex-1">(комментарий к услуге, макс 100 символов)</div>
+        </div>
+      </div>
     </div>
 
     <!-- Кнопки управления (показываются только если есть услуги) -->
-    <div v-if="category.services.length > 0" class="category-controls mt-4 flex space-x-2">
+    <div v-if="category.services.length > 0 && isExpanded" class="category-controls mt-4 flex space-x-2">
       <button
         @click="selectAll"
         type="button"
@@ -46,7 +78,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, reactive } from 'vue'
+import { ref, computed, watch, reactive, onMounted, nextTick } from 'vue'
 import ServiceItem from './ServiceItem.vue'
 
 const props = defineProps({
@@ -64,6 +96,22 @@ const emit = defineEmits(['update:modelValue'])
 
 // Локальное состояние для всех услуг категории
 const serviceValues = reactive({})
+
+// Состояние раскрытия - "Основные услуги" развернуты по умолчанию
+const isExpanded = ref(props.category.id === 'intimate_services')
+
+// Функция переключения состояния раскрытия
+const toggleExpanded = () => {
+  isExpanded.value = !isExpanded.value
+}
+
+// При монтировании убеждаемся, что "Основные услуги" развернуты
+onMounted(async () => {
+  await nextTick()
+  if (props.category.id === 'intimate_services') {
+    isExpanded.value = true
+  }
+})
 
 // Инициализируем состояние услуг
 const initializeServices = () => {
@@ -133,17 +181,39 @@ initializeServices()
 }
 
 .category-header {
-  border-bottom: 1px solid #e5e7eb;
-  padding-bottom: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px 16px;
+  background: #f9fafb;
+  transition: background-color 0.2s;
 }
 
-.services-grid {
-  /* Адаптивная сетка */
+.category-header:hover {
+  background: #f3f4f6;
+}
+
+.services-table {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.services-table table {
+  border-collapse: collapse;
+}
+
+.services-table thead {
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 @media (max-width: 768px) {
-  .services-grid {
-    grid-template-columns: 1fr;
+  .services-table {
+    overflow-x: auto;
+  }
+  
+  .services-table table {
+    min-width: 500px;
   }
 }
 

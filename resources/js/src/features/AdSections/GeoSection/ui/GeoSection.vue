@@ -1,12 +1,12 @@
 <template>
   <div class="geo-section">
     <h2 class="form-group-title">География</h2>
-    <input 
-      type="text" 
-      v-model="localGeo" 
-      @input="emitGeo" 
-      placeholder="Введите город, район или метро..." 
-      class="geo-input" 
+    <BaseInput
+      v-model="localGeo"
+      type="text"
+      placeholder="Введите город, район или метро..."
+      @update:modelValue="emitGeo"
+      :error="errors?.geo?.[0]"
     />
     
     <!-- Отладочная информация (только в dev режиме) -->
@@ -20,6 +20,7 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
+import BaseInput from '@/src/shared/ui/atoms/BaseInput/BaseInput.vue'
 
 // Типы
 interface Props {

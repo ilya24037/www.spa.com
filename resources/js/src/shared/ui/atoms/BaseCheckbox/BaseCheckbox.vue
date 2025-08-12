@@ -26,11 +26,13 @@
     </div>
     
     <span 
-      v-if="label" 
+      v-if="label || $slots.label" 
       class="checkbox-label"
       :class="{ 'disabled': disabled }"
     >
-      {{ label }}
+      <slot name="label">
+        {{ label }}
+      </slot>
     </span>
     
     <slot />
@@ -68,12 +70,13 @@ const toggle = (event: MouseEvent): void => {
 
 <style scoped>
 .checkbox-container {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  gap: 12px;
-  padding: 8px 0;
-  user-select: none;
+  display: flex !important;
+  align-items: center !important;
+  cursor: pointer !important;
+  gap: 8px !important;
+  padding: 4px 0 !important;
+  user-select: none !important;
+  min-height: 26px !important;
 }
 
 .checkbox-container.disabled {
@@ -82,26 +85,27 @@ const toggle = (event: MouseEvent): void => {
 }
 
 .custom-checkbox {
-  width: 20px;
-  height: 20px;
-  border: 2px solid #d9d9d9;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  background: #fff;
-  flex-shrink: 0;
-  cursor: pointer;
+  width: 18px !important;
+  height: 18px !important;
+  border: 2px solid #d1d5db !important;
+  border-radius: 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s ease !important;
+  background: #ffffff !important;
+  flex-shrink: 0 !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
 }
 
 .custom-checkbox:hover:not(.disabled) {
-  border-color: #8c8c8c;
+  border-color: #9ca3af !important;
 }
 
 .custom-checkbox.checked {
-  background: #007bff;
-  border-color: #007bff;
+  background: #6b7280 !important;
+  border-color: #6b7280 !important;
 }
 
 .custom-checkbox.disabled {
@@ -122,12 +126,12 @@ const toggle = (event: MouseEvent): void => {
 }
 
 .checkbox-label {
-  font-size: 16px;
-  color: #1a1a1a;
-  font-weight: 400;
-  line-height: 1.4;
-  cursor: pointer;
-  user-select: none;
+  font-size: 14px !important;
+  color: #374151 !important;
+  font-weight: 400 !important;
+  line-height: 1.4 !important;
+  cursor: pointer !important;
+  user-select: none !important;
 }
 
 .checkbox-label.disabled {

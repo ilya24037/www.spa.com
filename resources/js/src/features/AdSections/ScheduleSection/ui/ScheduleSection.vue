@@ -3,43 +3,55 @@
         <h2 class="form-group-title">График работы</h2>
         <div class="schedule-container">
             <div class="quick-actions" style="margin-bottom: 20px;">
-                <button type="button" @click="setFullWeek" class="quick-btn">Круглосуточно всю неделю</button>
-                <button type="button" @click="setWorkdays" class="quick-btn">Будни 9:00-18:00</button>
-                <button type="button" @click="clearAll" class="quick-btn">Очистить всё</button>
+                <SecondaryButton @click="setFullWeek">
+                    Круглосуточно всю неделю
+                </SecondaryButton>
+                <SecondaryButton @click="setWorkdays">
+                    Будни 9:00-18:00
+                </SecondaryButton>
+                <SecondaryButton @click="clearAll">
+                    Очистить всё
+                </SecondaryButton>
             </div>
             <div class="days-list">
                 <div v-for="day in days" :key="day.id" class="day-item">
                     <div class="day-name">{{ day.name }}</div>
                     <div class="day-schedule">
                         <div class="work-toggle">
-                            <label class="toggle-switch">
-                                <input type="checkbox" v-model="localSchedule[day.id].enabled" @change="toggleDay(day.id)">
-                                <span class="toggle-slider"></span>
-                            </label>
-                            <span class="toggle-label">{{ localSchedule[day.id].enabled ? 'Работаю' : 'Выходной' }}</span>
+                            <BaseCheckbox
+                                v-model="localSchedule[day.id].enabled"
+                                :label="localSchedule[day.id].enabled ? 'Работаю' : 'Выходной'"
+                                @update:modelValue="toggleDay(day.id)"
+                            />
                         </div>
                         <div v-if="localSchedule[day.id].enabled" class="time-selection">
-                            <div class="time-field">
-                                <label>С:</label>
-                                <select v-model="localSchedule[day.id].from" @change="emitSchedule" class="time-select">
-                                    <option value="">--:--</option>
-                                    <option v-for="t in times" :key="t" :value="t">{{ t === '24:00' ? 'Круглосуточно' : t }}</option>
-                                </select>
-                            </div>
-                            <div class="time-field" v-if="localSchedule[day.id].from !== '24:00'">
-                                <label>До:</label>
-                                <select v-model="localSchedule[day.id].to" @change="emitSchedule" class="time-select">
-                                    <option value="">--:--</option>
-                                    <option v-for="t in timesTo" :key="t" :value="t">{{ t }}</option>
-                                </select>
-                            </div>
+                            <BaseSelect
+                                v-model="localSchedule[day.id].from"
+                                label="С"
+                                :options="timeOptionsFrom"
+                                @update:modelValue="emitSchedule"
+                                class="time-field"
+                            />
+                            <BaseSelect
+                                v-if="localSchedule[day.id].from !== '24:00'"
+                                v-model="localSchedule[day.id].to"
+                                label="До"
+                                :options="timeOptionsTo"
+                                @update:modelValue="emitSchedule"
+                                class="time-field"
+                            />
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="additional-info" style="margin-top: 20px;">
-                <label class="additional-label">Дополнительная информация о графике работы:</label>
-                <textarea v-model="localNotes" @input="emitNotes" placeholder="Например: возможны изменения графика по договоренности, предварительная запись обязательна и т.д." class="additional-textarea" rows="3"></textarea>
+            <div class="additional-info">
+                <BaseTextarea
+                    v-model="localNotes"
+                    label="Дополнительная информация о графике работы"
+                    placeholder="Например: возможны изменения графика по договоренности, предварительная запись обязательна и т.д."
+                    :rows="3"
+                    @update:modelValue="emitNotes"
+                />
             </div>
         </div>
     </div>
@@ -47,6 +59,10 @@
 
 <script setup>
 import { ref, reactive, watch, computed } from 'vue'
+import BaseSelect from '@/src/shared/ui/atoms/BaseSelect/BaseSelect.vue'
+import BaseTextarea from '@/src/shared/ui/atoms/BaseTextarea/BaseTextarea.vue'
+import BaseCheckbox from '@/src/shared/ui/atoms/BaseCheckbox/BaseCheckbox.vue'
+import SecondaryButton from '@/src/shared/ui/atoms/SecondaryButton/SecondaryButton.vue'
 
 const props = defineProps({
     schedule: { type: Object, default: () => ({}) },
@@ -68,6 +84,23 @@ const times = [
     '00:00','00:30','01:00','01:30','02:00','02:30','03:00','03:30','04:00','04:30','05:00','05:30','06:00','06:30','07:00','07:30','08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30','21:00','21:30','22:00','22:30','23:00','23:30','24:00'
 ]
 const timesTo = times.filter(t => t !== '00:00')
+
+// Опции для селектов времени
+const timeOptionsFrom = computed(() => [
+    { value: '', label: '--:--' },
+    ...times.map(t => ({
+        value: t,
+        label: t === '24:00' ? 'Круглосуточно' : t
+    }))
+])
+
+const timeOptionsTo = computed(() => [
+    { value: '', label: '--:--' },
+    ...timesTo.map(t => ({
+        value: t,
+        label: t
+    }))
+])
 
 const initSchedule = () => {
     const initial = {}
@@ -260,64 +293,17 @@ input:checked + .toggle-slider:before {
 .time-selection {
     display: flex;
     gap: 12px;
-    align-items: center;
+    align-items: flex-end;
 }
 
 .time-field {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.time-field label {
-    font-size: 14px;
-    color: #666;
-    min-width: 25px;
-}
-
-.time-select {
-    padding: 6px 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-    background: white;
-    min-width: 80px;
-}
-
-.time-select:focus {
-    outline: none;
-    border-color: #4CAF50;
-    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+    min-width: 120px;
 }
 
 .additional-info {
     border-top: 1px solid #e5e5e5;
-    padding-top: 16px;
-}
-
-.additional-label {
-    display: block;
-    font-size: 14px;
-    font-weight: 500;
-    color: #333;
-    margin-bottom: 8px;
-}
-
-.additional-textarea {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 14px;
-    font-family: inherit;
-    resize: vertical;
-    min-height: 80px;
-}
-
-.additional-textarea:focus {
-    outline: none;
-    border-color: #4CAF50;
-    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+    padding-top: 20px;
+    margin-top: 20px;
 }
 
 /* Мобильная адаптация */

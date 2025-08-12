@@ -1,6 +1,6 @@
-<!-- Р‘Р°Р·РѕРІС‹Р№ СЃРµР»РµРєС‚ РІ СЃС‚РёР»Рµ РђРІРёС‚Рѕ -->
+<!-- Р'Р°Р·РѕРІС‹Р№ СЃРµР»РµРєС‚ РІ СЃС‚РёР»Рµ РђРІРёС‚Рѕ -->
 <template>
-  <div class="select-container">
+  <div class="select-container" ref="selectRef">
     <label v-if="label" class="select-label">{{ label }}</label>
     
     <div 
@@ -10,7 +10,7 @@
       <div 
         class="custom-select-trigger"
         :tabindex="disabled ? -1 : 0"
-        @click="toggleDropdown"
+        @click.stop="toggleDropdown"
         @keydown.enter="toggleDropdown"
         @keydown.space="toggleDropdown"
         @keydown.escape="isOpen = false"
@@ -44,15 +44,22 @@
         leave-to-class="transform opacity-0 scale-95"
       >
         <div v-if="isOpen" class="custom-select-dropdown">
-          <div
-            v-for="option in options"
-            :key="option.value"
-            class="dropdown-option"
-            :class="{ 'selected': option.value === modelValue }"
-            @click="selectOption(option)"
-          >
-            {{ option.label }}
-          </div>
+          <template v-for="(option, index) in flatOptions" :key="index">
+            <div v-if="option.isGroup" class="dropdown-group">
+              {{ option.label }}
+            </div>
+            <div
+              v-else
+              class="dropdown-option"
+              :class="{ 
+                'selected': option.value === modelValue,
+                'grouped': option.grouped 
+              }"
+              @click.stop="selectOption(option)"
+            >
+              {{ option.label }}
+            </div>
+          </template>
         </div>
       </Transition>
     </div>
@@ -67,7 +74,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 
 // Props
 const props = defineProps({
@@ -79,9 +86,15 @@ const props = defineProps({
         type: Array,
         required: true,
         validator: (options) => {
-            return options.every(option => 
-                option && typeof option === 'object' && 'value' in option && 'label' in option
-            )
+            return options.every(option => {
+                if (!option || typeof option !== 'object') return false
+                // Проверяем обычную опцию или группу
+                if (option.group) {
+                    return 'label' in option && Array.isArray(option.options)
+                } else {
+                    return 'value' in option && 'label' in option
+                }
+            })
         }
     },
     placeholder: {
@@ -111,16 +124,55 @@ const emit = defineEmits(['update:modelValue', 'change'])
 
 // State
 const isOpen = ref(false)
+const selectRef = ref(null)
 
 // Computed
-const selectedOption = computed(() => {
-    return props.options.find(option => option.value === props.modelValue)
+const flatOptions = computed(() => {
+    const result = []
+    props.options.forEach(option => {
+        if (option.group) {
+            // Добавляем заголовок группы
+            result.push({ label: option.label, isGroup: true })
+            // Добавляем опции группы с пометкой, что они в группе
+            option.options?.forEach(subOption => {
+                result.push({ ...subOption, grouped: true })
+            })
+        } else {
+            // Обычная опция
+            result.push(option)
+        }
+    })
+    return result
 })
 
-// Methods
+const selectedOption = computed(() => {
+    // Ищем во всех опциях, включая вложенные в группы
+    for (const option of props.options) {
+        if (option.group && option.options) {
+            const found = option.options.find(o => o.value === props.modelValue)
+            if (found) return found
+        } else if (option.value === props.modelValue) {
+            return option
+        }
+    }
+    return null
+})
+
+// Methods  
 const toggleDropdown = () => {
     if (props.disabled) return
-    isOpen.value = !isOpen.value
+    
+    // Если открываем - сначала закрываем все другие
+    if (!isOpen.value) {
+        // Простой способ - кликаем по body чтобы закрыть все
+        document.body.click()
+        // Небольшая задержка чтобы другие успели закрыться
+        nextTick(() => {
+            isOpen.value = true
+        })
+    } else {
+        isOpen.value = false
+    }
 }
 
 const selectOption = (option) => {
@@ -130,7 +182,8 @@ const selectOption = (option) => {
 }
 
 const handleClickOutside = (event) => {
-    if (!event.target.closest('.custom-select-wrapper')) {
+    // Проверяем, был ли клик вне нашего select
+    if (selectRef.value && !selectRef.value.contains(event.target)) {
         isOpen.value = false
     }
 }
@@ -234,8 +287,8 @@ onUnmounted(() => {
   border: 2px solid #2196f3;
   border-top: none;
   border-radius: 0 0 8px 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 100; /* Поднимаем выше всех секций */
   max-height: 300px;
   overflow-y: auto;
 }
@@ -261,6 +314,22 @@ onUnmounted(() => {
   background-color: #e3f2fd;
   color: #2196f3;
   font-weight: 500;
+}
+
+/* Стили для групп */
+.dropdown-group {
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #999;
+  text-transform: uppercase;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+/* Стили для опций в группе */
+.dropdown-option.grouped {
+  padding-left: 24px;
 }
 
 .select-error {

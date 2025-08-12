@@ -48,6 +48,7 @@ class Ad extends Model
         'price',
         'price_unit',
         'is_starting_price',
+        'prices',
         'price_per_hour',
         'outcall_price',
         'express_price',
@@ -97,7 +98,8 @@ class Ad extends Model
         'geo',
         'photos',
         'video',
-        'media_paths'
+        'media_paths',
+        'prices'
     ];
 
     protected $casts = [

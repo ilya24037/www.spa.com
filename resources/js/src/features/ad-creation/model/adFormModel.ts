@@ -21,6 +21,16 @@ export interface AdFormData {
   price: number | null
   price_unit: string
   is_starting_price: boolean
+  prices?: {
+    apartments_express?: number | null
+    apartments_1h?: number | null
+    apartments_2h?: number | null
+    apartments_night?: number | null
+    outcall_1h?: number | null
+    outcall_2h?: number | null
+    outcall_night?: number | null
+    taxi_included?: boolean
+  }
   main_service_name: string
   main_service_price: number | null
   main_service_price_unit: string
@@ -58,6 +68,17 @@ export interface AdFormData {
 export function useAdFormModel(props: any, emit: any) {
   const authStore = useAuthStore()
   
+  // Попытка восстановить данные из localStorage
+  let savedFormData = null
+  try {
+    const saved = localStorage.getItem('adFormData')
+    if (saved) {
+      savedFormData = JSON.parse(saved)
+    }
+  } catch (e) {
+    console.error('Error restoring form data:', e)
+  }
+  
   // Состояние формы
   const form = reactive<AdFormData>({
     title: props.initialData?.title || '',
@@ -77,6 +98,16 @@ export function useAdFormModel(props: any, emit: any) {
     price: props.initialData?.price || null,
     price_unit: props.initialData?.price_unit || 'hour',
     is_starting_price: props.initialData?.is_starting_price || false,
+    prices: savedFormData?.prices || props.initialData?.prices || {
+      apartments_express: null,
+      apartments_1h: null,
+      apartments_2h: null,
+      apartments_night: null,
+      outcall_1h: null,
+      outcall_2h: null,
+      outcall_night: null,
+      taxi_included: false
+    },
     main_service_name: props.initialData?.main_service_name || '',
     main_service_price: props.initialData?.main_service_price || null,
     main_service_price_unit: props.initialData?.main_service_price_unit || 'hour',
@@ -226,6 +257,18 @@ export function useAdFormModel(props: any, emit: any) {
     formData.append('price', form.price?.toString() || '')
     formData.append('price_unit', form.price_unit || '')
     formData.append('is_starting_price', form.is_starting_price ? '1' : '0')
+    
+    // Добавляем новые поля ценообразования
+    if (form.prices) {
+      formData.append('prices[apartments_express]', form.prices.apartments_express?.toString() || '')
+      formData.append('prices[apartments_1h]', form.prices.apartments_1h?.toString() || '')
+      formData.append('prices[apartments_2h]', form.prices.apartments_2h?.toString() || '')
+      formData.append('prices[apartments_night]', form.prices.apartments_night?.toString() || '')
+      formData.append('prices[outcall_1h]', form.prices.outcall_1h?.toString() || '')
+      formData.append('prices[outcall_2h]', form.prices.outcall_2h?.toString() || '')
+      formData.append('prices[outcall_night]', form.prices.outcall_night?.toString() || '')
+      formData.append('prices[taxi_included]', form.prices.taxi_included ? '1' : '0')
+    }
     formData.append('main_service_name', form.main_service_name || '')
     formData.append('main_service_price', form.main_service_price?.toString() || '')
     formData.append('main_service_price_unit', form.main_service_price_unit || '')

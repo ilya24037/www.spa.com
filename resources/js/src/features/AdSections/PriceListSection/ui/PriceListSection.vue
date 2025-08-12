@@ -10,35 +10,27 @@
       <div class="main-service">
         <h4 class="field-title">Основная услуга</h4>
         <div class="service-row">
-          <input
-            type="text"
+          <BaseInput
             v-model="localMainServiceName"
+            type="text"
             placeholder="Название услуги"
-            class="form-input"
-            :class="{ 'error': errors?.main_service_name }"
+            :error="errors?.main_service_name?.[0]"
           />
           <div class="price-input-group">
-            <input
-              type="number"
+            <BaseInput
               v-model="localMainServicePrice"
+              type="number"
               placeholder="0"
-              class="form-input price-input"
-              :class="{ 'error': errors?.main_service_price }"
+              :error="errors?.main_service_price?.[0]"
+              class="price-input"
             />
-            <select 
-              v-model="localMainServicePriceUnit" 
-              class="form-select price-unit"
-            >
-              <option value="hour">за час</option>
-              <option value="session">за сеанс</option>
-              <option value="day">за день</option>
-              <option value="service">за услугу</option>
-            </select>
+            <BaseSelect
+              v-model="localMainServicePriceUnit"
+              :options="priceUnitOptions"
+              class="price-unit"
+            />
           </div>
         </div>
-        <span v-if="errors?.main_service_name" class="error-message">
-          {{ errors.main_service_name[0] }}
-        </span>
       </div>
 
       <!-- Дополнительные услуги -->
@@ -84,41 +76,35 @@
             </div>
             
             <div class="service-fields">
-              <input
-                type="text"
+              <BaseInput
                 v-model="service.name"
+                type="text"
                 placeholder="Название услуги"
-                class="form-input"
-                @input="updateServices"
+                @update:modelValue="updateServices"
               />
               
               <div class="price-input-group">
-                <input
-                  type="number"
+                <BaseInput
                   v-model="service.price"
+                  type="number"
                   placeholder="0"
-                  class="form-input price-input"
-                  @input="updateServices"
+                  class="price-input"
+                  @update:modelValue="updateServices"
                 />
-                <select 
-                  v-model="service.unit" 
-                  class="form-select price-unit"
-                  @change="updateServices"
-                >
-                  <option value="hour">за час</option>
-                  <option value="session">за сеанс</option>
-                  <option value="day">за день</option>
-                  <option value="service">за услугу</option>
-                </select>
+                <BaseSelect
+                  v-model="service.unit"
+                  :options="priceUnitOptions"
+                  class="price-unit"
+                  @update:modelValue="updateServices"
+                />
               </div>
               
-              <textarea
+              <BaseTextarea
                 v-model="service.description"
                 placeholder="Описание услуги (необязательно)"
-                class="form-textarea"
-                rows="2"
-                @input="updateServices"
-              ></textarea>
+                :rows="2"
+                @update:modelValue="updateServices"
+              />
             </div>
           </div>
         </div>
@@ -129,6 +115,9 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
+import BaseInput from '@/src/shared/ui/atoms/BaseInput/BaseInput.vue'
+import BaseSelect from '@/src/shared/ui/atoms/BaseSelect/BaseSelect.vue'
+import BaseTextarea from '@/src/shared/ui/atoms/BaseTextarea/BaseTextarea.vue'
 
 // Types
 interface ServiceItem {
@@ -155,6 +144,14 @@ const props = withDefaults(defineProps<Props>(), {
   additionalServices: () => [],
   errors: () => ({})
 })
+
+// Опции для единиц стоимости
+const priceUnitOptions = computed(() => [
+  { value: 'hour', label: 'за час' },
+  { value: 'session', label: 'за сеанс' },
+  { value: 'day', label: 'за день' },
+  { value: 'service', label: 'за услугу' }
+])
 
 // Emits
 const emit = defineEmits<{

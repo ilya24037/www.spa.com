@@ -9,13 +9,13 @@
         v-model="textareaValue"
         :placeholder="placeholder"
         :disabled="disabled"
-        :Readonly="Readonly"
+        :readonly="readonly"
         :rows="rows"
         :maxlength="maxlength"
         class="base-textarea"
         :class="{
           'disabled': disabled,
-          'Readonly': readonly,
+          'readonly': readonly,
           'resizable': resizable
         }"
         @input="handleInput"
@@ -192,7 +192,7 @@ defineExpose({
   box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.1);
 }
 
-.base-textarea:hover:not(:focus):not(.disabled):not(.Readonly) {
+.base-textarea:hover:not(:focus):not(.disabled):not(.readonly) {
   border-color: #bec5cc;
 }
 
@@ -203,7 +203,7 @@ defineExpose({
   border-color: #e1e5ea;
 }
 
-.base-textarea.Readonly {
+.base-textarea.readonly {
   background-color: #f8f9fa;
   cursor: default;
   border-color: #e1e5ea;
@@ -286,7 +286,7 @@ defineExpose({
     border-color: #333333;
   }
   
-  .base-textarea.Readonly {
+  .base-textarea.readonly {
     background-color: #1f1f1f;
     border-color: #333333;
   }

@@ -87,7 +87,7 @@ const select = () => {
 .custom-radio {
   width: 20px;
   height: 20px;
-  border: 2px solid #d9d9d9;
+  border: 2px solid #d1d5db;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -99,11 +99,11 @@ const select = () => {
 }
 
 .custom-radio:hover:not(.disabled) {
-  border-color: #8c8c8c;
+  border-color: #9ca3af;
 }
 
 .custom-radio.checked {
-  border-color: #000;
+  border-color: #6b7280;
 }
 
 .custom-radio.disabled {
@@ -114,7 +114,7 @@ const select = () => {
 .radio-dot {
   width: 8px;
   height: 8px;
-  background: #000;
+  background: #6b7280;
   border-radius: 50%;
   transition: all 0.2s ease;
 }

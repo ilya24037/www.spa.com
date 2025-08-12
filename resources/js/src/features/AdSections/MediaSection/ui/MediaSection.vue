@@ -191,30 +191,23 @@
     <!-- Настройки отображения -->
     <div class="media-settings">
       <h4 class="field-label">Настройки отображения</h4>
-      <label class="checkbox-label">
-        <input 
-          type="checkbox" 
+      <div class="space-y-3">
+        <BaseCheckbox
           v-model="showInGallery"
-          @change="updateSettings"
+          label="Показывать фото в галерее на странице объявления"
+          @update:modelValue="updateSettings"
         />
-        <span>Показывать фото в галерее на странице объявления</span>
-      </label>
-      <label class="checkbox-label">
-        <input 
-          type="checkbox" 
+        <BaseCheckbox
           v-model="allowDownload"
-          @change="updateSettings"
+          label="Разрешить клиентам скачивать фотографии"
+          @update:modelValue="updateSettings"
         />
-        <span>Разрешить клиентам скачивать фотографии</span>
-      </label>
-      <label class="checkbox-label">
-        <input 
-          type="checkbox" 
+        <BaseCheckbox
           v-model="addWatermark"
-          @change="updateSettings"
+          label="Добавить водяной знак на фотографии"
+          @update:modelValue="updateSettings"
         />
-        <span>Добавить водяной знак на фотографии</span>
-      </label>
+      </div>
     </div>
 
     <!-- Ошибки -->
@@ -224,6 +217,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import BaseCheckbox from '@/src/shared/ui/atoms/BaseCheckbox/BaseCheckbox.vue'
 
 const props = defineProps({
   photos: { type: Array, default: () => [] },
@@ -856,23 +850,8 @@ const updateSettings = () => {
   border-top: 1px solid #e0e0e0;
 }
 
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-  cursor: pointer;
-}
-
-.checkbox-label input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-}
-
-.checkbox-label span {
-  font-size: 14px;
-  color: #333;
+.space-y-3 > * + * {
+  margin-top: 12px;
 }
 
 .error-message {

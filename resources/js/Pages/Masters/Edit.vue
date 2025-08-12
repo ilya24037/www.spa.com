@@ -37,89 +37,62 @@
             </h2>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-500 mb-1">
-                Имя
-              </label>
-              <input 
+              <BaseInput
                 v-model="form.name"
                 type="text"
-                class="w-full px-3 py-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                label="Имя"
                 required
-              >
-            </div>
-            
-            <div>
-              <label class="block text-sm font-medium text-gray-500 mb-1">
-                Специализация
-              </label>
-              <input 
+              />
+              
+              <BaseInput
                 v-model="form.specialization"
                 type="text"
-                class="w-full px-3 py-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                label="Специализация"
                 placeholder="Например: Массаж спины, расслабляющий массаж"
-              >
+              />
             </div>
-          </div>
 
-          <div>
-            <label class="block text-sm font-medium text-gray-500 mb-1">
-              Описание
-            </label>
-            <textarea 
+            <BaseTextarea
               v-model="form.description"
-              rows="4"
-              class="w-full px-3 py-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              label="Описание"
               placeholder="Расскажите о своем опыте и услугах..."
+              :rows="4"
             />
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-500 mb-1">
-                Опыт работы (лет)
-              </label>
-              <input 
-                v-model="form.experience_years"
-                type="number"
-                min="0"
-                max="50"
-                class="w-full px-3 py-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-            </div>
+            <BaseInput
+              v-model="form.experience_years"
+              type="number"
+              label="Опыт работы (лет)"
+              :min="0"
+              :max="50"
+            />
             
-            <div>
-              <label class="block text-sm font-medium text-gray-500 mb-1">
-                Стоимость (руб/час)
-              </label>
-              <input 
-                v-model="form.hourly_rate"
-                type="number"
-                min="0"
-                class="w-full px-3 py-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-            </div>
+            <BaseInput
+              v-model="form.hourly_rate"
+              type="number"
+              label="Стоимость (руб/час)"
+              :min="0"
+              suffix="₽"
+            />
             
-            <div>
-              <label class="block text-sm font-medium text-gray-500 mb-1">
-                Город
-              </label>
-              <input 
-                v-model="form.city"
-                type="text"
-                class="w-full px-3 py-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-            </div>
+            <BaseInput
+              v-model="form.city"
+              type="text"
+              label="Город"
+              placeholder="Название города"
+            />
           </div>
 
           <div class="flex justify-end">
-            <button 
+            <PrimaryButton
               type="submit"
               :disabled="updating"
-              class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+              :loading="updating"
             >
               {{ updating ? 'Сохранение...' : 'Сохранить профиль' }}
-            </button>
+            </PrimaryButton>
           </div>
         </form>
       </div>
@@ -146,6 +119,9 @@ import { ref, reactive } from 'vue'
 import { router } from '@inertiajs/vue3'
 import MediaUploader from '@/src/entities/ad/ui/AdForm/components/AdFormMediaUpload.vue'
 import ParametersSection from '@/src/features/AdSections/ParametersSection/ui/ParametersSection.vue'
+import BaseInput from '@/src/shared/ui/atoms/BaseInput/BaseInput.vue'
+import BaseTextarea from '@/src/shared/ui/atoms/BaseTextarea/BaseTextarea.vue'
+import PrimaryButton from '@/src/shared/ui/atoms/PrimaryButton/PrimaryButton.vue'
 import { useToast } from '@/src/shared/composables/useToast'
 
 // Toast для замены (window as any).// Removed // Removed // Removed alert() - use toast notifications instead - use toast notifications instead - use toast notifications instead

@@ -1,4 +1,5 @@
 import '../css/app.css';
+import './src/shared/styles/variables.css'; // CSS переменные для дизайн-системы
 import './bootstrap';
 
 import { createInertiaApp } from '@inertiajs/vue3';
@@ -6,6 +7,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h } from 'vue';
 import { createPinia } from 'pinia';
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
+import { hoverLift, fadeIn, ripple } from '@/src/shared/directives';
 
 // Импорт системы ленивой загрузки
 import { preloadCriticalComponents, preloadRouteComponents } from './utils/lazyLoadingOptimized';
@@ -58,8 +60,24 @@ createInertiaApp({
             .use(pinia)
             .use(ZiggyVue, Ziggy);
             
+        // Регистрируем глобальные директивы
+        app.directive('hover-lift', hoverLift);
+        app.directive('fade-in', fadeIn);
+        app.directive('ripple', ripple);
+            
         // Глобальные обработчики производительности
         app.config.performance = true;
+        
+        // Регистрация Service Worker для кеширования
+        if ('serviceWorker' in navigator && import.meta.env.PROD) {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(registration => {
+                    console.log('Service Worker registered:', registration)
+                })
+                .catch(error => {
+                    console.error('Service Worker registration failed:', error)
+                })
+        }
         
         // Обработчик ошибок для ленивых компонентов
         app.config.errorHandler = (err, instance, info) => {

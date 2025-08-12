@@ -163,7 +163,17 @@
       "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" -l \"C:\\www.spa.com\\app\\Domain\\Search\\Sorters\\PopularitySorter.php\")",
       "WebFetch(domain:habr.com)",
       "Bash(C:www.spa.comai-context-ru.bat)",
-      "Bash(C:/Users/user1/.config/herd/bin/composer.bat check-platform-reqs)"
+      "Bash(C:/Users/user1/.config/herd/bin/composer.bat check-platform-reqs)",
+      "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" artisan make:migration add_prices_to_ads_table)",
+      "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" artisan migrate)",
+      "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" artisan migrate --path=database/migrations/2025_08_12_132552_add_prices_to_ads_table.php)",
+      "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" artisan optimize:clear)",
+      "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" artisan cache:clear)",
+      "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" artisan config:clear)",
+      "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" artisan route:clear)",
+      "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" artisan view:clear)",
+      "Bash(Get-Content \"C:\\www.spa.com\\storage\\logs\\laravel.log\" -Tail 20)",
+      "Bash(read)"
     ],
     "deny": []
   }

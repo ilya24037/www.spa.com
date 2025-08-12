@@ -3,7 +3,15 @@
   <div class="filter-panel bg-white rounded-lg shadow-sm">
     <!-- Заголовок -->
     <div class="px-6 py-4 border-b border-gray-200">
-      <h2 class="text-xl font-semibold">Фильтры</h2>
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-semibold">Фильтры</h2>
+        <span 
+          v-if="filterStore.filterCounts?.total" 
+          class="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full"
+        >
+          {{ filterStore.filterCounts.total }} мастеров
+        </span>
+      </div>
     </div>
 
     <div class="p-6 space-y-8">
@@ -11,21 +19,21 @@
       <div>
         <h3 class="text-base font-semibold mb-4">Цена, ₽</h3>
         <div class="flex items-center gap-2">
-          <input
-            v-model.number="filters.priceFrom"
+          <BaseInput
+            v-model="filters.priceFrom"
             type="number"
             placeholder="58"
-            min="0"
-            class="flex-1 min-w-0 px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-          >
+            :min="0"
+            class="flex-1"
+          />
           <span class="text-gray-400 flex-shrink-0">—</span>
-          <input
-            v-model.number="filters.priceTo"
+          <BaseInput
+            v-model="filters.priceTo"
             type="number"
             placeholder="167037"
-            min="0"
-            class="flex-1 min-w-0 px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-          >
+            :min="0"
+            class="flex-1"
+          />
         </div>
       </div>
 
@@ -33,15 +41,24 @@
       <div>
         <h3 class="text-base font-semibold mb-4">Вид массажа</h3>
         <div class="space-y-3">
-          <label v-for="type in massageTypes" :key="type.value" class="flex items-center">
-            <input
-              v-model="filters.massageTypes"
-              :value="type.value"
-              type="checkbox"
-              class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            >
-            <span class="ml-3 text-sm text-gray-700">{{ type.label }}</span>
-          </label>
+          <BaseCheckbox
+            v-for="type in massageTypes"
+            :key="type.value"
+            :model-value="filters.massageTypes.includes(type.value)"
+            @update:modelValue="toggleMassageType(type.value, $event)"
+          >
+            <template #label>
+              <span class="flex items-center justify-between w-full">
+                <span>{{ type.label }}</span>
+                <span 
+                  v-if="getServiceCount(type.value)" 
+                  class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full ml-2"
+                >
+                  {{ getServiceCount(type.value) }}
+                </span>
+              </span>
+            </template>
+          </BaseCheckbox>
         </div>
       </div>
 
@@ -49,15 +66,24 @@
       <div>
         <h3 class="text-base font-semibold mb-4">Дополнительно</h3>
         <div class="space-y-3">
-          <label v-for="option in additionalOptions" :key="option.value" class="flex items-center">
-            <input
-              v-model="filters.additional"
-              :value="option.value"
-              type="checkbox"
-              class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            >
-            <span class="ml-3 text-sm text-gray-700">{{ option.label }}</span>
-          </label>
+          <BaseCheckbox
+            v-for="option in additionalOptions"
+            :key="option.value"
+            :model-value="filters.additional.includes(option.value)"
+            @update:modelValue="toggleAdditional(option.value, $event)"
+          >
+            <template #label>
+              <span class="flex items-center justify-between w-full">
+                <span>{{ option.label }}</span>
+                <span 
+                  v-if="getAdditionalCount(option.value)" 
+                  class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full ml-2"
+                >
+                  {{ getAdditionalCount(option.value) }}
+                </span>
+              </span>
+            </template>
+          </BaseCheckbox>
         </div>
       </div>
 
@@ -65,38 +91,37 @@
       <div>
         <h3 class="text-base font-semibold mb-4">Рейтинг</h3>
         <div class="space-y-3">
-          <label v-for="rating in ratingOptions" :key="rating.value" class="flex items-center">
-            <input
-              v-model="filters.rating"
-              :value="rating.value"
-              type="radio"
-              name="rating"
-              class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-            >
-            <div class="ml-3 flex items-center gap-1">
+          <BaseRadio
+            v-for="rating in ratingOptions"
+            :key="rating.value"
+            :model-value="filters.rating"
+            :value="rating.value"
+            @update:modelValue="filters.rating = $event"
+          >
+            <div class="flex items-center gap-1">
               <!-- Звезды -->
               <span v-for="i in rating.stars" :key="i" class="text-yellow-400">★</span>
               <span v-for="i in (5 - rating.stars)" :key="`empty-${i}`" class="text-gray-300">★</span>
               <span class="ml-2 text-sm text-gray-700">{{ rating.label }}</span>
             </div>
-          </label>
+          </BaseRadio>
         </div>
       </div>
 
       <!-- Кнопки действий -->
       <div class="pt-4 space-y-3">
-        <button
+        <PrimaryButton
           @click="applyFilters"
-          class="w-full py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+          class="w-full"
         >
           Показать результаты
-        </button>
-        <button
+        </PrimaryButton>
+        <SecondaryButton
           @click="resetFilters"
-          class="w-full py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+          class="w-full"
         >
           Сбросить фильтры
-        </button>
+        </SecondaryButton>
       </div>
     </div>
   </div>
@@ -104,6 +129,12 @@
 
 <script setup lang="ts">
 import { reactive, computed } from 'vue'
+import BaseInput from '@/src/shared/ui/atoms/BaseInput/BaseInput.vue'
+import BaseCheckbox from '@/src/shared/ui/atoms/BaseCheckbox/BaseCheckbox.vue'
+import BaseRadio from '@/src/shared/ui/atoms/BaseRadio/BaseRadio.vue'
+import PrimaryButton from '@/src/shared/ui/atoms/PrimaryButton/PrimaryButton.vue'
+import SecondaryButton from '@/src/shared/ui/atoms/SecondaryButton/SecondaryButton.vue'
+import { useFilterStore } from '../../model/filter.store'
 
 interface Filters {
   priceFrom: number | null
@@ -116,6 +147,9 @@ interface Filters {
 const props = defineProps<{
   modelValue?: Filters
 }>()
+
+// Подключаем store для получения счётчиков
+const filterStore = useFilterStore()
 
 const emit = defineEmits<{
   'update:modelValue': [filters: Filters]
@@ -156,6 +190,33 @@ const ratingOptions = [
   { value: 3, stars: 3, label: 'и выше' }
 ]
 
+// Методы для работы с массивами чекбоксов
+const toggleMassageType = (value: string, checked: boolean) => {
+  if (checked) {
+    if (!filters.massageTypes.includes(value)) {
+      filters.massageTypes.push(value)
+    }
+  } else {
+    const index = filters.massageTypes.indexOf(value)
+    if (index > -1) {
+      filters.massageTypes.splice(index, 1)
+    }
+  }
+}
+
+const toggleAdditional = (value: string, checked: boolean) => {
+  if (checked) {
+    if (!filters.additional.includes(value)) {
+      filters.additional.push(value)
+    }
+  } else {
+    const index = filters.additional.indexOf(value)
+    if (index > -1) {
+      filters.additional.splice(index, 1)
+    }
+  }
+}
+
 // Методы
 const applyFilters = () => {
   emit('update:modelValue', { ...filters })
@@ -170,6 +231,34 @@ const resetFilters = () => {
   filters.rating = null
   emit('reset')
   applyFilters()
+}
+
+// Функции для получения счётчиков
+const getServiceCount = (serviceValue: string): number => {
+  // Маппинг служб на ID
+  const serviceIdMap: Record<string, string> = {
+    'classic': '1',
+    'sport': '4', 
+    'thai': '2',
+    'medical': '3',
+    'anti-cellulite': '5',
+    'relaxing': '6',
+    'facial': '7',
+    'lymphatic': '8'
+  }
+  
+  const serviceId = serviceIdMap[serviceValue]
+  return filterStore.filterCounts?.services?.[serviceId] || 0
+}
+
+const getAdditionalCount = (optionValue: string): number => {
+  const countMap: Record<string, number> = {
+    'home': filterStore.filterCounts?.serviceLocation?.home || 0,
+    'online': 0, // Нет данных в моке
+    'certificate': filterStore.filterCounts?.rating?.withReviews || 0
+  }
+  
+  return countMap[optionValue] || 0
 }
 </script>
 

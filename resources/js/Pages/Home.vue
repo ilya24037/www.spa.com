@@ -3,36 +3,43 @@
   <div>
     <Head :title="`Массаж в ${currentCity} — найти мастера`" />
     
-    <!-- Заголовок -->
-    <div class="mb-6">
-      <h1 class="text-3xl font-bold text-gray-900">
-        Мастера массажа в {{ currentCity }}
-      </h1>
-      <p class="text-gray-600 mt-2">
-        Найдите лучших мастеров массажа в вашем городе
-      </p>
-    </div>
-    
-    <!-- MastersCatalog Widget - единая точка входа -->
-    <MastersCatalog
-      :masters="masters?.data || []"
+    <div>
+      <!-- Заголовок -->
+      <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">
+          Мастера массажа в {{ currentCity }}
+        </h1>
+        <p class="text-gray-600 mt-2">
+          Найдите лучших мастеров массажа в вашем городе
+        </p>
+      </div>
+      
+      <!-- MastersCatalog Widget - единая точка входа -->
+      <MastersCatalog
+      :masters="allMasters"
       :categories="categories"
       :districts="districts"
       :current-city="currentCity"
       :loading="isLoading"
       :error="error"
+      :enable-virtual-scroll="enableVirtualScroll"
+      :virtual-scroll-height="800"
       @filters-applied="handleFiltersApplied"
       @master-favorited="handleMasterFavorited"
       @booking-requested="handleBookingRequested"
+      @sorting-changed="handleSortingChanged"
       @retry="handleRetry"
+      @load-more="handleLoadMore"
     >
       <!-- Кастомный master card через slot -->
-      <template #master="{ master }">
+      <template #master="{ master, index }">
         <MasterCard 
           :master="master"
+          :index="index"
           :is-favorite="isFavorite(master.id)"
           @toggle-favorite="toggleFavorite"
           @booking="() => handleBooking(master.id)"
+          @quick-view="openQuickView"
         />
       </template>
       
@@ -43,7 +50,47 @@
           :links="masters.links" 
         />
       </template>
-    </MastersCatalog>
+      </MastersCatalog>
+      
+      <!-- Персонализированные рекомендации -->
+      <RecommendedSection
+        v-if="allMasters.length > 0"
+        :masters="allMasters"
+        title="Рекомендуем для вас"
+        subtitle="На основе ваших предпочтений"
+        section-id="personalized"
+        type="personalized"
+        :is-favorite="isFavorite"
+        @toggle-favorite="toggleFavorite"
+        @booking="handleBooking"
+        @quick-view="openQuickView"
+      />
+      
+      <!-- Популярные мастера -->
+      <RecommendedSection
+        v-if="allMasters.length > 0"
+        :masters="allMasters"
+        title="Популярные мастера"
+        subtitle="Выбор наших пользователей"
+        section-id="popular"
+        type="popular"
+        :show-indicators="true"
+        :is-favorite="isFavorite"
+        @toggle-favorite="toggleFavorite"
+        @booking="handleBooking"
+        @quick-view="openQuickView"
+      />
+      
+      <!-- Quick View Modal -->
+      <QuickViewModal
+        :is-open="quickView.isOpen.value"
+        :master="quickView.currentMaster.value"
+        :is-favorite="quickView.currentMaster.value ? isFavorite(quickView.currentMaster.value.id) : false"
+        @close="quickView.closeQuickView"
+        @toggle-favorite="toggleFavorite"
+        @booking="handleBooking"
+      />
+    </div>
   </div>
 </template>
 
@@ -53,8 +100,11 @@ import { ref, computed, onMounted } from 'vue'
 
 // FSD imports
 import { MastersCatalog } from '@/src/widgets/masters-catalog'
+import { RecommendedSection } from '@/src/widgets/recommended-section'
 import { MasterCard } from '@/src/entities/master/ui/MasterCard'
 import { Pagination } from '@/src/shared/ui/molecules/Pagination'
+import { QuickViewModal, useQuickView } from '@/src/features/quick-view'
+import RecommendationService from '@/src/shared/services/RecommendationService'
 import { logger } from '@/src/shared/utils/logger'
 
 // Stores - используем основные TypeScript stores
@@ -90,9 +140,15 @@ const props = withDefaults(defineProps<HomePageProps>(), {
 const favoritesStore = useFavoritesStore()
 const authStore = useAuthStore()
 
+// Quick View
+const quickView = useQuickView()
+
 // Local state
 const isLoading = ref(false)
 const error = ref<string | null>(null)
+const enableVirtualScroll = ref(true) // Включить виртуальный скроллинг для больших списков
+const allMasters = ref<Master[]>(props.masters?.data || []) // Все загруженные мастера
+const currentPage = ref(1) // Текущая страница для виртуального скролла
 
 // Computed
 const favoriteIds = computed(() => favoritesStore.favoriteIds)
@@ -104,9 +160,12 @@ const isFavorite = (masterId: number): boolean => {
 
 const toggleFavorite = async (masterId: number) => {
   try {
-    const master = props.masters?.data.find(m => m.id === masterId)
+    const master = allMasters.value.find(m => m.id === masterId) || 
+                  props.masters?.data.find(m => m.id === masterId)
     if (master) {
       await favoritesStore.toggle(master)
+      // Отслеживаем для рекомендаций
+      RecommendationService.trackFavorite(masterId, !isFavorite(masterId))
     }
   } catch (err) {
     logger.error('Error toggling favorite:', err)
@@ -114,9 +173,25 @@ const toggleFavorite = async (masterId: number) => {
   }
 }
 
-const handleBooking = (masterId: number) => {
-  // Переход на страницу мастера с модальным окном бронирования
-  window.location.href = `/masters/${masterId}?booking=true`
+const handleBooking = (masterOrId: number | Master) => {
+  const masterId = typeof masterOrId === 'number' ? masterOrId : masterOrId.id
+  
+  // Отслеживаем намерение бронирования
+  RecommendationService.trackBooking(masterId)
+  
+  if (typeof masterOrId === 'number') {
+    // Переход на страницу мастера с модальным окном бронирования
+    window.location.href = `/masters/${masterOrId}?booking=true`
+  } else {
+    // Из Quick View передается объект Master
+    window.location.href = `/masters/${masterOrId.id}?booking=true`
+  }
+}
+
+const openQuickView = (master: Master) => {
+  quickView.openQuickView(master)
+  // Отслеживаем просмотр для рекомендаций
+  RecommendationService.trackMasterView(master)
 }
 
 const handleFiltersApplied = (filters: any) => {
@@ -155,6 +230,52 @@ const handleBookingRequested = (masterId: number) => {
 const handleRetry = () => {
   error.value = null
   window.location.reload()
+}
+
+const handleLoadMore = async () => {
+  // Симуляция загрузки новых мастеров для виртуального скролла
+  logger.info('Loading more masters for virtual scroll')
+  
+  // В реальном приложении здесь будет API запрос
+  // const response = await fetch(`/api/masters?page=${currentPage.value + 1}`)
+  // const newMasters = await response.json()
+  
+  // Для демо добавляем фиктивные данные
+  setTimeout(() => {
+    const newMasters = Array(20).fill(null).map((_, i) => ({
+      id: allMasters.value.length + i + 1,
+      name: `Мастер ${allMasters.value.length + i + 1}`,
+      photo: '/images/master-placeholder.jpg',
+      rating: 4.5 + Math.random() * 0.5,
+      reviews_count: Math.floor(Math.random() * 100),
+      price_from: 2000 + Math.floor(Math.random() * 3000),
+      services: [{ id: 1, name: 'Классический массаж' }],
+      district: 'Центральный',
+      is_online: Math.random() > 0.5,
+      is_premium: Math.random() > 0.7,
+      is_verified: Math.random() > 0.5
+    }))
+    
+    allMasters.value = [...allMasters.value, ...newMasters]
+    currentPage.value++
+  }, 500)
+}
+
+const handleSortingChanged = (sortingType: string) => {
+  // Обработка смены сортировки
+  isLoading.value = true
+  
+  const url = new URL(window.location.href)
+  url.searchParams.set('sort', sortingType)
+  
+  // В реальном приложении здесь будет Inertia.get() для обновления данных
+  window.history.pushState({}, '', url.toString())
+  
+  // Имитируем загрузку для демо
+  setTimeout(() => {
+    isLoading.value = false
+    logger.info('Сортировка изменена на:', sortingType)
+  }, 500)
 }
 
 // Initialize favorites on mount (only if authenticated)

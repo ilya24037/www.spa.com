@@ -39,90 +39,58 @@
       <div class="p-6">
         <form class="space-y-6" @submit.prevent="submit">
           <!-- Имя -->
-          <div>
-            <label class="block text-sm font-medium text-gray-500 mb-2">
-              Имя
-            </label>
-            <input
-              v-model="form.name"
-              type="text"
-              required
-              autocomplete="name"
-              placeholder="Введите ваше имя"
-              class="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              :class="{ 'border-red-500': form.errors.name }"
-            >
-            <p v-if="form.errors.name" class="mt-1 text-sm text-red-600">
-              {{ form.errors.name }}
-            </p>
-          </div>
+          <BaseInput
+            v-model="form.name"
+            type="text"
+            label="Имя"
+            placeholder="Введите ваше имя"
+            autocomplete="name"
+            required
+            :error="form.errors.name"
+          />
 
           <!-- Email -->
-          <div>
-            <label class="block text-sm font-medium text-gray-500 mb-2">
-              Email
-            </label>
-            <input
-              v-model="form.email"
-              type="email"
-              required
-              autocomplete="username"
-              placeholder="Введите ваш email"
-              class="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              :class="{ 'border-red-500': form.errors.email }"
-            >
-            <p v-if="form.errors.email" class="mt-1 text-sm text-red-600">
-              {{ form.errors.email }}
-            </p>
-          </div>
+          <BaseInput
+            v-model="form.email"
+            type="email"
+            label="Email"
+            placeholder="Введите ваш email"
+            autocomplete="username"
+            required
+            :error="form.errors.email"
+          />
 
           <!-- Пароль -->
-          <div>
-            <label class="block text-sm font-medium text-gray-500 mb-2">
-              Пароль
-            </label>
-            <input
-              v-model="form.password"
-              type="password"
-              required
-              autocomplete="new-password"
-              placeholder="Создайте пароль"
-              class="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              :class="{ 'border-red-500': form.errors.password }"
-            >
-            <p v-if="form.errors.password" class="mt-1 text-sm text-red-600">
-              {{ form.errors.password }}
-            </p>
-          </div>
+          <BaseInput
+            v-model="form.password"
+            type="password"
+            label="Пароль"
+            placeholder="Создайте пароль"
+            autocomplete="new-password"
+            required
+            :error="form.errors.password"
+          />
 
           <!-- Подтверждение пароля -->
-          <div>
-            <label class="block text-sm font-medium text-gray-500 mb-2">
-              Подтвердите пароль
-            </label>
-            <input
-              v-model="form.password_confirmation"
-              type="password"
-              required
-              autocomplete="new-password"
-              placeholder="Повторите пароль"
-              class="w-full px-4 py-3 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              :class="{ 'border-red-500': form.errors.password_confirmation }"
-            >
-            <p v-if="form.errors.password_confirmation" class="mt-1 text-sm text-red-600">
-              {{ form.errors.password_confirmation }}
-            </p>
-          </div>
+          <BaseInput
+            v-model="form.password_confirmation"
+            type="password"
+            label="Подтвердите пароль"
+            placeholder="Повторите пароль"
+            autocomplete="new-password"
+            required
+            :error="form.errors.password_confirmation"
+          />
 
           <!-- Кнопка регистрации -->
-          <button
+          <PrimaryButton
             type="submit"
             :disabled="form.processing"
-            class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            :loading="form.processing"
+            class="w-full"
           >
-            <span v-if="form.processing">Регистрация...</span>
-            <span v-else>Зарегистрироваться</span>
-          </button>
+            {{ form.processing ? 'Регистрация...' : 'Зарегистрироваться' }}
+          </PrimaryButton>
         </form>
 
         <!-- Ссылка на вход -->
@@ -153,6 +121,8 @@
 <script setup lang="ts">
 import { Link, useForm } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
+import BaseInput from '@/src/shared/ui/atoms/BaseInput/BaseInput.vue'
+import PrimaryButton from '@/src/shared/ui/atoms/PrimaryButton/PrimaryButton.vue'
 
 interface Props {
   show?: boolean

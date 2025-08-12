@@ -12,9 +12,9 @@
       <p class="text-red-500 mb-4">
         {{ error }}
       </p>
-      <button class="px-4 py-2 bg-blue-600 text-white rounded-lg" @click="$emit('retry')">
+      <PrimaryButton @click="$emit('retry')">
         Попробовать снова
-      </button>
+      </PrimaryButton>
     </div>
     
     <!-- Empty state -->
@@ -47,6 +47,7 @@
 </template>
 
 <script setup lang="ts">
+import PrimaryButton from '@/src/shared/ui/atoms/PrimaryButton/PrimaryButton.vue'
 interface Props {
   items?: any[]
   loading?: boolean

@@ -6,27 +6,24 @@
     isAuthPage ? 'bg-gray-50' : 'bg-gray-100'
   ]">
     
-    <!-- Контейнер с фиксированной шириной для всего сайта -->
-    <div class="max-w-[1400px] mx-auto min-h-screen flex flex-col w-full">
+    <!-- Обертка для ограничения ширины всего контента -->
+    <div class="max-w-[1400px] mx-auto w-full flex flex-col min-h-screen px-4">
+      <!-- Header с отступами и закруглением как у Ozon -->
+      <header v-if="!isAuthPage" class="sticky top-0 z-50 -mx-4 px-4 pb-4 header-sticky">
+        <div class="bg-white rounded-b-[24px] shadow-lg border border-gray-100 overflow-hidden" style="box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);">
+          <AppHeader :user="user" :is-authenticated="isAuthenticated" />
+        </div>
+      </header>
       
-      <!-- НОВОЕ: Единая обертка с отступами для ВСЕГО контента -->
-      <div class="site-padding flex-1 flex flex-col">
-        
-        <!-- Шапка с компенсацией отступов (скрыта для авторизации) -->
-        <header v-if="!isAuthPage" class="sticky top-0 z-50 negative-margin">
-          <div class="site-padding">
-            <AppHeader :user="user" :is-authenticated="isAuthenticated" />
-          </div>
-        </header>
-        
-        <!-- Основной контент уже имеет отступы от обертки -->
-        <main class="flex-1">
-          <slot />
-        </main>
-        
-        <!-- Footer (скрыт для авторизации) -->
-        <AppFooter v-if="!isAuthPage" :config="footerConfig" />
-      </div>
+      <!-- Main контент -->
+      <main class="flex-1">
+        <slot />
+      </main>
+      
+      <!-- Footer -->
+      <footer v-if="!isAuthPage" class="mt-auto">
+        <AppFooter :config="footerConfig" />
+      </footer>
     </div>
          
     <!-- Глобальные уведомления (вне контейнера) -->
@@ -69,28 +66,14 @@ const footerConfig = defaultFooterConfig
 </script>
 
 <style scoped>
-/* Стили из старого AppLayout.vue */
-.site-padding {
-  padding-left: 1rem;
-  padding-right: 1rem;
+/* Улучшенный sticky header с тенью и фоном */
+.header-sticky {
+  padding-top: 0;
+  transition: padding-top 0.2s ease-in-out;
 }
 
-@media (min-width: 1024px) {
-  .site-padding {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-  }
-}
-
-.negative-margin {
-  margin-left: -1rem;
-  margin-right: -1rem;
-}
-
-@media (min-width: 1024px) {
-  .negative-margin {
-    margin-left: -1.5rem;
-    margin-right: -1.5rem;
-  }
+/* Добавляем отступ сверху при скролле для визуального отделения */
+.header-sticky.scrolled {
+  padding-top: 8px;
 }
 </style>

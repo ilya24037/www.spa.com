@@ -2,26 +2,30 @@
   <div class="features-section">
     <h2 class="form-group-title">Особенности мастера</h2>
     <div class="features-list">
-      <div v-for="feature in allFeatures" :key="feature.id" class="feature-item">
-        <label>
-          <input 
-            type="checkbox" 
-            :checked="isFeatureSelected(feature.id)"
-            @change="toggleFeature(feature.id)"
-          />
-          {{ feature.label }}
-        </label>
-      </div>
+      <BaseCheckbox
+        v-for="feature in allFeatures"
+        :key="feature.id"
+        :model-value="isFeatureSelected(feature.id)"
+        :label="feature.label"
+        @update:modelValue="toggleFeature(feature.id)"
+      />
     </div>
-    <div class="additional-info" style="margin-top: 20px;">
-      <label class="additional-label">Дополнительные особенности:</label>
-      <textarea v-model="localAdditional" @input="emitFeatures" placeholder="Опишите другие особенности, если есть..." class="additional-textarea" rows="2"></textarea>
+    <div class="additional-info">
+      <BaseTextarea
+        v-model="localAdditional"
+        label="Дополнительные особенности"
+        placeholder="Опишите другие особенности, если есть..."
+        :rows="2"
+        @update:modelValue="emitFeatures"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
 import { reactive, ref, watch } from 'vue'
+import BaseCheckbox from '@/src/shared/ui/atoms/BaseCheckbox/BaseCheckbox.vue'
+import BaseTextarea from '@/src/shared/ui/atoms/BaseTextarea/BaseTextarea.vue'
 
 const props = defineProps({
   features: { type: Array, default: () => [] },
@@ -87,32 +91,13 @@ const emitFeatures = () => {
   margin-bottom: 16px;
 }
 .features-list {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 12px;
-}
-.feature-item {
-  min-width: 160px;
 }
 .additional-info {
   border-top: 1px solid #e5e5e5;
-  padding-top: 16px;
-}
-.additional-label {
-  display: block;
-  font-size: 14px;
-  font-weight: 500;
-  color: #333;
-  margin-bottom: 8px;
-}
-.additional-textarea {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  font-family: inherit;
-  resize: vertical;
-  min-height: 50px;
+  padding-top: 20px;
+  margin-top: 20px;
 }
 </style>

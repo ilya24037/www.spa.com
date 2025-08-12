@@ -1,8 +1,8 @@
 <!-- Упрощенный Footer компонент -->
 <template>
-  <footer role="contentinfo">
+  <footer role="contentinfo" class="bg-gray-50 border-t border-gray-200 -mx-4 px-4 mt-8">
     <!-- Основной контент футера -->
-    <div class="py-8 px-4">
+    <div class="py-8">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <!-- Секции футера -->
           <div v-for="section in config.sections" :key="section.title" class="space-y-3">

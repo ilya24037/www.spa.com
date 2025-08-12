@@ -168,7 +168,7 @@ export const useAuthStore = defineStore('auth', {
           this.error = error.response?.data?.message || 'Ошибка входа'
           return { 
             success: false, 
-            error: this.error,
+            error: this.error || undefined,
             errors: error.response?.data?.errors
           }
         }
@@ -203,7 +203,7 @@ export const useAuthStore = defineStore('auth', {
           this.error = error.response?.data?.message || 'Ошибка регистрации'
           return { 
             success: false, 
-            error: this.error,
+            error: this.error || undefined,
             errors: error.response?.data?.errors
           }
         }
