@@ -30,3 +30,28 @@ Thumbs.db
 yarn-error.log
 /storage/ai-sessions/*
 !/storage/ai-sessions/.gitkeep
+
+# Резервные копии
+/Backap/
+/Backup/
+*.backup
+*.bak
+
+# Chrome и браузерные файлы
+*.dll
+chrome.dll
+*.exe
+/chrome-win64/
+/.cache/puppeteer/
+
+# Временные файлы
+*.tmp
+*.temp
+
+# Большие медиа файлы
+*.mp4
+*.avi
+*.mov
+*.zip
+*.rar
+*.7z

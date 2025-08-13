@@ -68,15 +68,22 @@ export interface AdFormData {
 export function useAdFormModel(props: any, emit: any) {
   const authStore = useAuthStore()
   
-  // Попытка восстановить данные из localStorage
+  // Попытка восстановить данные из localStorage ТОЛЬКО для новых объявлений
   let savedFormData = null
-  try {
-    const saved = localStorage.getItem('adFormData')
-    if (saved) {
-      savedFormData = JSON.parse(saved)
+  const isNewAd = !props.adId && !props.initialData?.id
+  
+  if (isNewAd) {
+    try {
+      const saved = localStorage.getItem('adFormData')
+      if (saved) {
+        savedFormData = JSON.parse(saved)
+      }
+    } catch (e) {
+      console.error('Error restoring form data:', e)
     }
-  } catch (e) {
-    console.error('Error restoring form data:', e)
+  } else {
+    // Для существующих объявлений очищаем localStorage чтобы не было конфликтов
+    localStorage.removeItem('adFormData')
   }
   
   // Состояние формы
@@ -98,16 +105,32 @@ export function useAdFormModel(props: any, emit: any) {
     price: props.initialData?.price || null,
     price_unit: props.initialData?.price_unit || 'hour',
     is_starting_price: props.initialData?.is_starting_price || false,
-    prices: savedFormData?.prices || props.initialData?.prices || {
-      apartments_express: null,
-      apartments_1h: null,
-      apartments_2h: null,
-      apartments_night: null,
-      outcall_1h: null,
-      outcall_2h: null,
-      outcall_night: null,
-      taxi_included: false
-    },
+    prices: (() => {
+      // Если prices есть в initialData
+      if (props.initialData?.prices) {
+        // Если это строка - парсим JSON
+        if (typeof props.initialData.prices === 'string') {
+          try {
+            return JSON.parse(props.initialData.prices)
+          } catch (e) {
+            console.error('Error parsing prices JSON:', e)
+          }
+        }
+        // Если это уже объект - используем как есть
+        return props.initialData.prices
+      }
+      // Если это новое объявление - используем сохраненные данные
+      return savedFormData?.prices || {
+        apartments_express: null,
+        apartments_1h: null,
+        apartments_2h: null,
+        apartments_night: null,
+        outcall_1h: null,
+        outcall_2h: null,
+        outcall_night: null,
+        taxi_included: false
+      }
+    })(),
     main_service_name: props.initialData?.main_service_name || '',
     main_service_price: props.initialData?.main_service_price || null,
     main_service_price_unit: props.initialData?.main_service_price_unit || 'hour',

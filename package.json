@@ -4,7 +4,7 @@
     "scripts": {
         "dev": "vite",
         "build": "vite build",
-    "build-strict": "vue-tsc --noEmit --project tsconfig.build.json && vite build",
+        "build-strict": "vue-tsc --noEmit --project tsconfig.build.json && vite build",
         "build:fast": "vite build",
         "build:skip-types": "vite build",
         "preview": "vite preview",
@@ -52,6 +52,7 @@
         "maska": "^3.1.1",
         "pinia": "^2.3.1",
         "pinia-plugin-persistedstate": "^3.2.1",
+        "puppeteer": "^24.16.1",
         "vue-tel-input": "^8.3.1",
         "vue-toastification": "^2.0.0-rc.5",
         "vue3-google-map": "^0.18.0",

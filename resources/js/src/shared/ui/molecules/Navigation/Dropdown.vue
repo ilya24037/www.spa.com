@@ -33,9 +33,12 @@ onUnmounted(() => document.removeEventListener('keydown', closeOnEscape));
 // Computed СЃРІРѕР№СЃС‚РІР° СЃ С‚РёРїРёР·Р°С†РёРµР№
 const widthClass = computed((): string => {
     const widthMap: Record<string, string> = {
-        48: 'w-48',
+        '48': 'w-48',
+        '56': 'w-56',
+        '64': 'w-64',
+        '200': 'w-[200px]',
     };
-    return widthMap[props.width] || 'w-48';
+    return widthMap[props.width] || `w-[${props.width}px]`;
 });
 
 const alignmentClasses = computed((): string => {
@@ -76,7 +79,6 @@ const alignmentClasses = computed((): string => {
         v-show="open"
         class="absolute z-50 mt-2 rounded-md shadow-lg"
         :class="[widthClass, alignmentClasses]"
-        style="display: none"
         @click="open = false"
       >
         <div

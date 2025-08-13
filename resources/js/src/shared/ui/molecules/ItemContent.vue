@@ -17,8 +17,18 @@
       </p>
     </div>
 
-    <!-- Остальная информация только для НЕ черновиков -->
-    <template v-if="item.status !== 'draft'">
+    <!-- Для черновиков показываем упрощенную информацию -->
+    <template v-if="item.status === 'draft'">
+      <!-- Услуга и локация -->
+      <div class="item-service-info">
+        <p class="service-type">{{ item.company_name || 'Массажный салон' }}</p>
+        <p class="service-location">{{ item.city || 'Москва' }}</p>
+        <p class="service-district">{{ item.district || 'Центральный район' }}</p>
+      </div>
+    </template>
+    
+    <!-- Для остальных статусов (включая waiting_payment) показываем полную информацию -->
+    <template v-else>
       <!-- Описание -->
       <div v-if="item.description" class="item-description">
         <p class="description-text">{{ item.description }}</p>
@@ -160,6 +170,23 @@ const getMinPrice = () => {
 
 .item-delivery {
   @apply flex items-center gap-2 mb-2;
+}
+
+/* Стили для черновиков */
+.item-service-info {
+  @apply text-sm text-gray-600 mt-2;
+}
+
+.service-type {
+  @apply font-medium text-gray-900 mb-1;
+}
+
+.service-location {
+  @apply text-gray-600;
+}
+
+.service-district {
+  @apply text-gray-500 text-xs;
 }
 
 .delivery-icon {

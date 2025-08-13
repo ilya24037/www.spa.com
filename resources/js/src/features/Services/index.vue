@@ -1,10 +1,6 @@
 <template>
   <div class="services-module">
-    <div class="module-header mb-6">
-      <div class="field-hint text-gray-600 text-sm">
-        Выберите услуги, которые вы предоставляете. Укажите цены и дополнительную информацию для каждой услуги.
-      </div>
-    </div>
+
     <div v-if="allowedCategories.length > 0 && allowedCategories.length < allCategories.length" class="category-filters mb-6">
       <div class="text-sm text-gray-700 mb-2">Доступные категории:</div>
       <div class="flex flex-wrap gap-2">
@@ -13,7 +9,7 @@
           :key="category.id"
           class="inline-flex items-center px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-full"
         >
-          {{ category.icon }} {{ category.name }}
+          {{ category.name }}
         </span>
       </div>
     </div>
@@ -32,7 +28,6 @@
         <div class="category-header cursor-pointer select-none" @click="toggleAdditionalServices">
           <div class="flex items-center justify-between">
             <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-              <span class="text-2xl mr-2">➕</span>
               Дополнительные услуги
               <span v-if="totalAdditionalSelected > 0" class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded-full">
                 {{ totalAdditionalSelected }}
@@ -61,16 +56,6 @@
         </div>
       </div>
     </div>
-    <div class="additional-info mt-8">
-      <BaseTextarea
-        v-model="localAdditionalInfo"
-        label="Дополнительная информация об услугах"
-        placeholder="Укажите дополнительную информацию об ваших услугах, особые условия, скидки и т.д."
-        hint="Эта информация будет видна клиентам в вашей анкете"
-        :rows="3"
-        @update:modelValue="emitAll"
-      />
-    </div>
     <div class="services-stats mt-6 p-4 bg-gray-50 rounded-lg">
       <div class="flex items-center justify-between">
         <span class="text-sm text-gray-700">
@@ -92,7 +77,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, reactive } from 'vue'
 import ServiceCategory from './components/ServiceCategory.vue'
-import BaseTextarea from '@/src/shared/ui/atoms/BaseTextarea/BaseTextarea.vue'
 import servicesConfig from './config/services.json'
 
 interface ServiceData {
@@ -120,10 +104,6 @@ const props = defineProps({
     type: Object, 
     default: () => ({}) 
   },
-  servicesAdditionalInfo: { 
-    type: String, 
-    default: '' 
-  },
   allowedCategories: { 
     type: Array as () => string[], 
     default: () => [] 
@@ -134,7 +114,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:services', 'update:servicesAdditionalInfo'])
+const emit = defineEmits(['update:services'])
 
 const allCategories = servicesConfig.categories as Category[]
 const filteredCategories = computed(() => {
@@ -147,7 +127,6 @@ const filteredCategories = computed(() => {
 })
 
 const localServices = reactive<Record<string, Record<string, ServiceData>>>({})
-const localAdditionalInfo = ref(props.servicesAdditionalInfo || '')
 
 // Состояние раскрытия дополнительных услуг
 const isAdditionalExpanded = ref(false)

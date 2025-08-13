@@ -192,7 +192,7 @@ class BookingSlot extends Model
         return $secondSlot;
     }
 
-    public function block(string $reason = null): self
+    public function block(?string $reason = null): self
     {
         $this->is_blocked = true;
         if ($reason) {

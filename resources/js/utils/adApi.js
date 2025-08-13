@@ -87,10 +87,9 @@ export const saveDraft = async (formData, draftId = null) => {
     
     const result = await response.json()
     
-    // Редирект на страницу черновиков после успешного сохранения
-    if (result.redirect || result.success) {
-      const redirectUrl = result.redirect || '/my-ads?tab=drafts'
-      router.visit(redirectUrl)
+    // Используем редирект от сервера
+    if (result.redirect) {
+      router.visit(result.redirect)
     }
     
     return result

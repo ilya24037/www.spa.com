@@ -251,18 +251,21 @@ class AdController extends Controller
             }
         }
         
-        // Если передан ID - обновляем существующий черновик
+        // Если передан ID - обновляем существующий черновик или объявление waiting_payment
         if ($request->id) {
             $ad = Ad::where('id', $request->id)
                     ->where('user_id', Auth::id())
-                    ->where('status', 'draft')
+                    ->whereIn('status', ['draft', 'waiting_payment'])
                     ->first();
                     
             if ($ad) {
                 // Устанавливаем путь к папке пользователя
                 $userFolder = PathGenerator::getUserBasePath(Auth::id());
                 
-                // Обновляем существующий черновик
+                // Сохраняем текущий статус перед обновлением
+                $currentStatus = $ad->status;
+                
+                // Обновляем существующий черновик, но сохраняем статус
                 $ad->update([
                     'category' => $request->category ?: $ad->category,
                     'title' => $request->title ?: $ad->title,
@@ -282,7 +285,7 @@ class AdController extends Controller
                     'price' => $request->price ? (float)$request->price : $ad->price,
                     'price_unit' => $request->price_unit ?: $ad->price_unit,
                     'is_starting_price' => $request->has('is_starting_price') ? (bool)$request->is_starting_price : $ad->is_starting_price,
-                    'prices' => !empty($request->prices) ? (is_string($request->prices) ? $request->prices : json_encode($request->prices)) : $ad->prices,
+                    'prices' => $request->has('prices') ? (is_string($request->prices) ? $request->prices : json_encode($request->prices)) : $ad->prices,
                     'new_client_discount' => $request->new_client_discount ?: $ad->new_client_discount,
                     'gift' => $request->gift ?: $ad->gift,
                     'age' => $request->age ?: $ad->age,
@@ -335,7 +338,7 @@ class AdController extends Controller
                 'price' => $request->price ? (float)$request->price : null,
                 'price_unit' => $request->price_unit ?: 'service',
                 'is_starting_price' => (bool)$request->is_starting_price,
-                'prices' => !empty($request->prices) ? (is_string($request->prices) ? $request->prices : json_encode($request->prices)) : null,
+                'prices' => $request->has('prices') ? (is_string($request->prices) ? $request->prices : json_encode($request->prices)) : null,
                 'new_client_discount' => $request->new_client_discount ?: null,
                 'gift' => $request->gift ?: null,
                 'age' => $request->age ?: null,
@@ -365,8 +368,32 @@ class AdController extends Controller
             ]);
         }
 
-        // Всегда возвращаем редирект для Inertia (как в Backup)
-        return redirect('/profile/items/draft/all')->with('success', 'Черновик сохранен!');
+        // Определяем URL для редиректа в зависимости от статуса
+        $redirectUrl = '/profile/items/draft/all';
+        
+        // Для существующих объявлений проверяем исходный статус
+        if ($request->id) {
+            // Загружаем объявление заново, чтобы получить актуальный статус
+            $checkAd = Ad::find($request->id);
+            if ($checkAd && $checkAd->status === AdStatus::WAITING_PAYMENT) {
+                $redirectUrl = '/profile/items/inactive/all';
+            }
+        }
+        
+        // Проверяем тип запроса
+        if ($request->header('X-Inertia')) {
+            \Log::info('Inertia request detected, redirecting to: ' . $redirectUrl);
+            // Для Inertia запросов возвращаем redirect
+            return redirect($redirectUrl)->with('success', 'Изменения сохранены!');
+        }
+        
+        // Для обычных AJAX запросов возвращаем JSON
+        return response()->json([
+            'success' => true,
+            'message' => 'Изменения сохранены!',
+            'redirect' => $redirectUrl,
+            'ad_id' => $ad->id ?? null
+        ]);
     }
     
     /**
@@ -386,7 +413,7 @@ class AdController extends Controller
         $jsonFields = ['clients', 'service_location', 'service_provider', 'is_starting_price', 
                       'photos', 'video', 'show_photos_in_gallery', 'allow_download_photos', 'watermark_photos', 
                       'custom_travel_areas', 'working_days', 'working_hours', 'services', 'features', 'schedule', 
-                      'additional_services', 'geo', 'media_settings'];
+                      'additional_services', 'geo', 'media_settings', 'prices'];
         
         foreach ($jsonFields as $field) {
             if (isset($adData[$field]) && is_string($adData[$field])) {
@@ -452,7 +479,12 @@ class AdController extends Controller
         $ad->update($validated);
 
         // Определяем URL для редиректа в зависимости от статуса
-        $redirectUrl = $ad->status === 'draft' ? '/profile/items/draft/all' : '/profile/items/active/all';
+        $redirectUrl = match($ad->status) {
+            'draft' => '/profile/items/draft/all',
+            'waiting_payment' => '/profile/items/inactive/all',
+            'active' => '/profile/items/active/all',
+            default => '/profile/items/inactive/all'
+        };
 
         return redirect($redirectUrl)->with('success', 'Объявление обновлено!');
     }

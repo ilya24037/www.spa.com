@@ -55,6 +55,7 @@ Route::post('/webhooks/test', [WebhookController::class, 'test'])->name('webhook
 // Dev/test/demo routes — only in non-production
 if (!app()->isProduction()) {
     Route::get('/test', fn() => Inertia::render('Test'))->name('test');
+    Route::get('/test-tooltip', fn() => Inertia::render('Test/SimpleTooltipTest'))->name('test.tooltip');
     Route::get('/map-demo', fn() => Inertia::render('MapDemo'))->name('map-demo');
     Route::get('/test-map', fn() => Inertia::render('TestMap'))->name('test-map');
     Route::get('/test/add-photos', [TestController::class, 'addPhotos'])->name('test.add-photos');

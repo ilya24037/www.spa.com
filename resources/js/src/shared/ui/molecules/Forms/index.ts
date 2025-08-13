@@ -7,6 +7,11 @@ export { default as FormSection } from './FormSection.vue'
 export { default as FormFieldGroup } from './components/FormFieldGroup.vue'
 export { default as DynamicFieldList } from './components/DynamicFieldList.vue'
 
+// Новые компоненты для AdForm
+export { default as FormProgress } from './components/FormProgress.vue'
+export { default as FormControls } from './components/FormControls.vue'
+export { default as FormActions } from './components/FormActions.vue'
+
 // Специализированные формы
 export { default as EducationForm } from './features/EducationForm.vue'
 export { default as MediaForm } from './features/MediaForm.vue'

@@ -32,18 +32,7 @@
         </button>
       </div>
       
-      <!-- AlertModal -->
-      <div class="space-y-2">
-        <h3 class="font-semibold">
-          AlertModal
-        </h3>
-        <button
-          class="w-full btn btn-info"
-          @click="alertModal.open()"
-        >
-          Открыть AlertModal
-        </button>
-      </div>
+
       
       <!-- Программные модалки -->
       <div class="space-y-2">
@@ -125,15 +114,7 @@
       @cancel="handleCancel"
     />
     
-    <!-- AlertModal Example -->
-    <AlertModal
-      v-model="alertModal.isOpen.value"
-      title="Информация"
-      message="Операция выполнена успешно!"
-      variant="success"
-      button-text="Понятно"
-      @close="handleAlert"
-    />
+    <!-- AlertModal Example - теперь только программный вызов -->
   </div>
 </template>
 
@@ -142,7 +123,6 @@ import { ref } from 'vue'
 import {
     BaseModal,
     ConfirmModal,
-    AlertModal,
     useModal,
     useConfirm,
     useAlert
@@ -151,7 +131,6 @@ import {
 // Модальные окна
 const baseModal = useModal()
 const confirmModal = useModal()
-const alertModal = useModal()
 
 // Программные модалки
 const { confirm } = useConfirm()
@@ -177,9 +156,7 @@ const handleCancel = () => {
     lastAction.value = 'ConfirmModal: Пользователь отменил действие'
 }
 
-const handleAlert = () => {
-    lastAction.value = 'AlertModal: Пользователь закрыл уведомление'
-}
+
 
 // Программные модальные окна
 const showProgrammaticConfirm = async () => {

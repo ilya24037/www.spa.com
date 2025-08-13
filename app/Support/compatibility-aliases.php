@@ -38,6 +38,7 @@ class_alias('App\Domain\Payment\Actions\ProcessPaymentAction', 'App\Actions\Proc
 class_alias('App\Domain\Payment\Actions\RefundPaymentAction', 'App\Actions\RefundPaymentAction');
 
 // User domain aliases
+class_alias('App\Domain\User\Models\User', 'App\Models\User');
 class_alias('App\Domain\User\Models\User', 'App\Models\BaseUser');
 class_alias('App\Domain\User\Models\UserProfile', 'App\Models\UserProfile');
 class_alias('App\Domain\User\Models\UserSettings', 'App\Models\UserSettings');
@@ -100,12 +101,34 @@ class_alias('App\Application\Http\Requests\ProfileUpdateRequest', 'App\Http\Requ
 class_alias('App\Application\Http\Requests\Auth\LoginRequest', 'App\Http\Requests\Auth\LoginRequest');
 
 // Master domain aliases
+class_alias('App\Domain\Master\Models\MasterProfile', 'App\Models\MasterProfile');
 class_alias('App\Domain\Master\Models\MasterProfile', 'App\Models\BaseMasterProfile');
 class_alias('App\Domain\Master\Models\MasterMedia', 'App\Models\MasterMedia');
 class_alias('App\Domain\Master\Models\MasterSchedule', 'App\Models\MasterSchedule');
+class_alias('App\Domain\Master\Models\Schedule', 'App\Models\Schedule');
+class_alias('App\Domain\Master\Models\WorkZone', 'App\Models\WorkZone');
 
 // Ad domain aliases
+class_alias('App\Domain\Ad\Models\Ad', 'App\Models\Ad');
 class_alias('App\Domain\Ad\Models\Ad', 'App\Models\BaseAd');
 class_alias('App\Domain\Ad\Models\AdMedia', 'App\Models\AdMedia');
 class_alias('App\Domain\Ad\Models\AdPricing', 'App\Models\AdPricing');
 class_alias('App\Domain\Ad\Models\AdLocation', 'App\Models\AdLocation');
+
+// Booking domain aliases
+class_alias('App\Domain\Booking\Models\Booking', 'App\Models\Booking');
+class_alias('App\Domain\Booking\Models\BookingSlot', 'App\Models\BookingSlot');
+
+// Payment domain aliases
+class_alias('App\Domain\Payment\Models\Payment', 'App\Models\Payment');
+
+// Review domain aliases
+class_alias('App\Domain\Review\Models\Review', 'App\Models\Review');
+
+// Service domain aliases
+class_alias('App\Domain\Service\Models\Service', 'App\Models\Service');
+class_alias('App\Domain\Service\Models\MassageCategory', 'App\Models\MassageCategory');
+
+// User additional models
+class_alias('App\Domain\User\Models\UserBalance', 'App\Models\UserBalance');
+class_alias('App\Domain\User\Models\UserFavorite', 'App\Models\UserFavorite');

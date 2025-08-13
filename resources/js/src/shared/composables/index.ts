@@ -29,6 +29,10 @@ export type { AsyncActionOptions } from './useAsyncAction'
 export { useForm } from './useForm'
 export type { FormField, FormOptions } from './useForm'
 
+// РЈРїСЂР°РІР»РµРЅРёРµ СЃРµРєС†РёСЏРјРё С„РѕСЂРј
+export { useFormSections } from './useFormSections'
+export type { SectionState, SectionConfig } from './useFormSections'
+
 // РџР°РіРёРЅР°С†РёСЏ
 export { usePagination } from './usePagination'
 export type { PaginationOptions, PaginationMeta } from './usePagination'

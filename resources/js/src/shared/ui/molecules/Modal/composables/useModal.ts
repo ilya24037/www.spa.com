@@ -1,4 +1,6 @@
 import { ref, type Ref } from 'vue'
+import BaseModal from '../BaseModal.vue'
+import ConfirmModal from '../ConfirmModal.vue'
 
 interface ModalState {
   isOpen: Ref<boolean>
@@ -76,49 +78,47 @@ export function useConfirm() {
       mountElement.id = modalId
       document.body.appendChild(mountElement)
       
-      // Импортируем компонент динамически
-      import('../ConfirmModal.vue').then(({ default: ConfirmModal }) => {
-        import('vue').then(({ createApp }) => {
-          const app = createApp(ConfirmModal, {
-            modelValue: true,
-            title: options.title || 'Подтверждение',
-            message: options.message || 'Вы уверены?',
-            description: options.description,
-            variant: options.variant || 'info',
-            confirmText: options.confirmText || 'Да',
-            cancelText: options.cancelText || 'Отмена',
-            requiresConfirmation: options.requiresConfirmation || false,
-            confirmationText: options.confirmationText || '',
-            persistent: true,
-            onConfirm: () => {
-              cleanup()
-              resolve({ confirmed: true })
-            },
-            onCancel: () => {
+      // Используем статический импорт ConfirmModal
+      import('vue').then(({ createApp }) => {
+        const app = createApp(ConfirmModal, {
+          modelValue: true,
+          title: options.title || 'Подтверждение',
+          message: options.message || 'Вы уверены?',
+          description: options.description,
+          variant: options.variant || 'info',
+          confirmText: options.confirmText || 'Да',
+          cancelText: options.cancelText || 'Отмена',
+          requiresConfirmation: options.requiresConfirmation || false,
+          confirmationText: options.confirmationText || '',
+          persistent: true,
+          onConfirm: () => {
+            cleanup()
+            resolve({ confirmed: true })
+          },
+          onCancel: () => {
+            cleanup()
+            resolve({ confirmed: false })
+          },
+          onClose: () => {
+            cleanup()
+            resolve({ confirmed: false })
+          },
+          'onUpdate:modelValue': (value: boolean) => {
+            if (!value) {
               cleanup()
               resolve({ confirmed: false })
-            },
-            onClose: () => {
-              cleanup()
-              resolve({ confirmed: false })
-            },
-            'onUpdate:modelValue': (value: boolean) => {
-              if (!value) {
-                cleanup()
-                resolve({ confirmed: false })
-              }
-            }
-          })
-          
-          const cleanup = () => {
-            app.unmount()
-            if (mountElement.parentNode) {
-              mountElement.parentNode.removeChild(mountElement)
             }
           }
-          
-          app.mount(mountElement)
         })
+        
+        const cleanup = () => {
+          app.unmount()
+          if (mountElement.parentNode) {
+            mountElement.parentNode.removeChild(mountElement)
+          }
+        }
+        
+        app.mount(mountElement)
       })
     })
   }
@@ -145,48 +145,47 @@ export function useAlert() {
       mountElement.id = modalId
       document.body.appendChild(mountElement)
       
-      import('../BaseModal.vue').then(({ default: BaseModal }) => {
-        import('vue').then(({ createApp, h }) => {
-          const app = createApp({
-            render() {
-              return h(BaseModal, {
-                modelValue: true,
-                title: options.title || 'Уведомление',
-                variant: options.variant || 'info',
-                size: 'sm',
-                showFooter: true,
-                showConfirmButton: true,
-                confirmText: options.buttonText || 'ОК',
-                persistent: true,
-                onConfirm: () => {
+      // Используем статический импорт BaseModal
+      import('vue').then(({ createApp, h }) => {
+        const app = createApp({
+          render() {
+            return h(BaseModal, {
+              modelValue: true,
+              title: options.title || 'Уведомление',
+              variant: options.variant || 'info',
+              size: 'sm',
+              showFooter: true,
+              showConfirmButton: true,
+              confirmText: options.buttonText || 'ОК',
+              persistent: true,
+              onConfirm: () => {
+                cleanup()
+                resolve()
+              },
+              onClose: () => {
+                cleanup()
+                resolve()
+              },
+              'onUpdate:modelValue': (value: boolean) => {
+                if (!value) {
                   cleanup()
                   resolve()
-                },
-                onClose: () => {
-                  cleanup()
-                  resolve()
-                },
-                'onUpdate:modelValue': (value: boolean) => {
-                  if (!value) {
-                    cleanup()
-                    resolve()
-                  }
                 }
-              }, {
-                default: () => h('p', { class: 'text-gray-700' }, options.message || 'Уведомление')
-              })
-            }
-          })
-          
-          const cleanup = () => {
-            app.unmount()
-            if (mountElement.parentNode) {
-              mountElement.parentNode.removeChild(mountElement)
-            }
+              }
+            }, {
+              default: () => h('p', { class: 'text-gray-700' }, options.message || 'Уведомление')
+            })
           }
-          
-          app.mount(mountElement)
         })
+        
+        const cleanup = () => {
+          app.unmount()
+          if (mountElement.parentNode) {
+            mountElement.parentNode.removeChild(mountElement)
+          }
+        }
+        
+        app.mount(mountElement)
       })
     })
   }

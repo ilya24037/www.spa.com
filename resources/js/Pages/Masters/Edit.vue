@@ -103,11 +103,9 @@
           Фотографии и видео
         </h2>
         
-        <MediaUploader 
-          :master-id="master.id"
-          :master-name="master.name"
-          :initial-photos="master.photos || []"
-          :initial-video="master.video || null"
+        <MediaForm 
+          v-model:photos="master.photos"
+          v-model:video="master.video"
         />
       </div>
     </div>
@@ -117,7 +115,7 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { router } from '@inertiajs/vue3'
-import MediaUploader from '@/src/entities/ad/ui/AdForm/components/AdFormMediaUpload.vue'
+import MediaForm from '@/src/shared/ui/molecules/Forms/features/MediaForm/MediaForm.vue'
 import ParametersSection from '@/src/features/AdSections/ParametersSection/ui/ParametersSection.vue'
 import BaseInput from '@/src/shared/ui/atoms/BaseInput/BaseInput.vue'
 import BaseTextarea from '@/src/shared/ui/atoms/BaseTextarea/BaseTextarea.vue'

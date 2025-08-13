@@ -4,7 +4,6 @@
     <div class="category-header mb-4 cursor-pointer select-none" @click="toggleExpanded">
       <div class="flex items-center justify-between">
         <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-          <span class="text-2xl mr-2">{{ category.icon }}</span>
           {{ category.name }}
           <span v-if="selectedCount > 0" class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded-full">
             {{ selectedCount }}
@@ -33,7 +32,9 @@
             <th class="py-2 px-2 w-10"></th>
             <th class="py-2 px-2">Услуга</th>
             <th class="py-2 px-2 w-48">Доплата</th>
-            <th class="py-2 px-2">Комментарий</th>
+            <th class="py-2 px-2">
+              Комментарий
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -52,7 +53,7 @@
           <div class="w-10"></div>
           <div class="flex-1"></div>
           <div class="w-48"></div>
-          <div class="flex-1">(комментарий к услуге, макс 100 символов)</div>
+          <div class="flex-1">Максимум 100 символов</div>
         </div>
       </div>
     </div>

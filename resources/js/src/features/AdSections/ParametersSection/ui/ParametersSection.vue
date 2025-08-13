@@ -1,6 +1,5 @@
 <template>
   <div class="parameters-section">
-    <h2 class="form-group-title">Обо мне</h2>
     <div class="parameters-fields">
       <BaseInput
         v-if="showAge"

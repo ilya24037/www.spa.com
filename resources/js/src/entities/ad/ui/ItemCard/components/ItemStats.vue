@@ -8,20 +8,20 @@
 
     <!-- Чаты с радио-кнопкой -->
     <div class="item-chats">
-      <input 
-        type="radio" 
-        class="chat-radio"
-        :checked="!item.new_messages_count"
+      <BaseRadio 
+        :model-value="chatRadioValue"
+        :value="true"
+        :label="chatLabel"
         disabled
+        class="chat-radio-wrapper"
       />
-      <span class="chat-text">
-        {{ item.new_messages_count > 0 ? `${item.new_messages_count} новых чатов` : 'Нет новых чатов' }}
-      </span>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import BaseRadio from '@/src/shared/ui/atoms/BaseRadio/BaseRadio.vue'
 import type { AdItem } from '../ItemCard.types'
 
 interface Props {
@@ -29,6 +29,16 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+
+// Значение для радио-кнопки (выбрана если нет новых сообщений)
+const chatRadioValue = computed(() => !props.item.new_messages_count)
+
+// Текст для радио-кнопки
+const chatLabel = computed(() => {
+  return props.item.new_messages_count > 0 
+    ? `${props.item.new_messages_count} новых чатов` 
+    : 'Нет новых чатов'
+})
 
 // Вычисление дней до удаления черновика (30 дней с момента создания)
 const getDraftDaysLeft = () => {
@@ -87,20 +97,27 @@ const getDaysWord = (days: number) => {
 .item-chats {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: #000000;
 }
 
-.chat-radio {
-  width: 16px;
-  height: 16px;
-  margin: 0;
+/* Кастомизация обертки радио-кнопки */
+.chat-radio-wrapper :deep(.radio-container) {
+  padding: 0;
   cursor: default;
 }
 
-.chat-text {
-  font-weight: 400;
+.chat-radio-wrapper :deep(.custom-radio) {
+  width: 16px;
+  height: 16px;
+}
+
+.chat-radio-wrapper :deep(.radio-dot) {
+  width: 6px;
+  height: 6px;
+}
+
+.chat-radio-wrapper :deep(.radio-label) {
+  font-size: 14px;
   color: #000000;
+  font-weight: 400;
 }
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div class="description-section">
-    <h2 class="form-group-title">Описание</h2>
+    <h2 class="form-group-title">О себе</h2>
     <BaseTextarea
       v-model="localDescription"
       placeholder="Расскажите о себе, услугах, особенностях..."

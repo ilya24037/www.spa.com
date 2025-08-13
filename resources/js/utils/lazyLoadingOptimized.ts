@@ -35,7 +35,7 @@ const ROUTE_COMPONENTS = {
   ],
   'dashboard': [
     { name: 'ProfileDashboard', loader: () => import('@/src/widgets/profile-dashboard/ProfileDashboard.vue') },
-    { name: 'AdForm', loader: () => import('@/src/entities/ad/ui/AdForm/AdForm.vue') }
+    { name: 'AdForm', loader: () => import('@/src/features/ad-creation/ui/AdForm.vue') }
   ]
 }
 
@@ -122,7 +122,7 @@ export const LazyComponents = {
   ),
 
   AdForm: createLazyComponent(
-    () => import('@/src/entities/ad/ui/AdForm/AdForm.vue'),
+    () => import('@/src/features/ad-creation/ui/AdForm.vue'),
     'AdForm'
   ),
 

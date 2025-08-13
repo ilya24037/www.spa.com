@@ -1,7 +1,7 @@
-// Main modal components export
+// Main modal components export - для использования в шаблонах
 export { default as BaseModal } from './BaseModal.vue'
 export { default as ConfirmModal } from './ConfirmModal.vue'
-export { default as AlertModal } from './AlertModal.vue'
+// AlertModal используется только программно через useAlert
 
 // Modal composables export
 export {

@@ -173,7 +173,12 @@
       "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" artisan route:clear)",
       "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" artisan view:clear)",
       "Bash(Get-Content \"C:\\www.spa.com\\storage\\logs\\laravel.log\" -Tail 20)",
-      "Bash(read)"
+      "Bash(read)",
+      "Bash(git push:*)",
+      "Bash(where chromium)",
+      "Bash(npx @puppeteer/browsers install:*)",
+      "Bash(\"C:\\Users\\user1\\.cache\\puppeteer\\chrome\\win64-139.0.7258.66\\chrome-win64\\chrome.exe\" --version)",
+      "Bash(Get-Content \"C:\\www.spa.com\\storage\\logs\\laravel.log\" -Tail 30)"
     ],
     "deny": []
   }

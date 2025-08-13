@@ -52,4 +52,5 @@ export interface ItemCardEmits {
   (e: 'edit', itemId: number): void
   (e: 'deactivate', itemId: number): void
   (e: 'delete', itemId: number): void
+  (e: 'mark-irrelevant', itemId: number): void
 }

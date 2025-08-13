@@ -53,8 +53,8 @@ import { Link } from '@inertiajs/vue3'
 
 // TypeScript С‚РёРїС‹ РґР»СЏ props
 export interface ButtonProps {
-  // Р’РЅРµС€РЅРёР№ РІРёРґ
-  variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'warning' | 'ghost' | 'link'
+  // Р'РЅРµС€РЅРёР№ РІРёРґ
+  variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'warning' | 'ghost' | 'link' | 'light'
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   fullWidth?: boolean
   rounded?: boolean | 'sm' | 'md' | 'lg' | 'full'
@@ -205,6 +205,12 @@ const handleClick = (event: MouseEvent) => {
   @apply bg-transparent text-blue-600 hover:text-blue-700 hover:underline;
   @apply focus:ring-blue-500 p-0;
   @apply disabled:text-gray-500 disabled:no-underline;
+}
+
+.button--light {
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+  @apply focus:ring-gray-400;
+  @apply disabled:bg-gray-50 disabled:text-gray-400;
 }
 
 /* РЎРєСЂСѓРіР»РµРЅРёРµ */

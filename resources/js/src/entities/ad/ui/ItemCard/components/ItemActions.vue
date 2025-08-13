@@ -1,102 +1,113 @@
 <!-- ItemActions - действия с объявлением -->
 <template>
   <div class="item-actions">
-    <!-- Кнопка "Оплатить" для ожидающих оплаты -->
-    <button 
-      v-if="item.waiting_payment"
-      @click="$emit('pay')"
-      class="action-btn btn-pay"
-    >
-      Оплатить
-    </button>
+    <!-- Кнопки для ожидающих оплаты -->
+    <template v-if="item.waiting_payment || item.status === 'waiting_payment'">
+      <Button 
+        @click="$emit('pay')"
+        variant="success"
+        size="sm"
+      >
+        Оплатить размещение
+      </Button>
+      
+      <!-- Dropdown меню с дополнительными действиями -->
+      <ActionDropdown aria-label="Дополнительные действия">
+        <ActionDropdownItem 
+          text="Оплатить размещение"
+          @click="$emit('pay')"
+        />
+        <ActionDropdownItem 
+          text="Уже не актуально"
+          @click="$emit('mark-irrelevant')"
+        />
+        <div class="dropdown-divider" />
+        <ActionDropdownItem 
+          text="Редактировать"
+          @click="$emit('edit')"
+        />
+        <ActionDropdownItem 
+          text="Удалить"
+          variant="danger"
+          @click="$emit('delete')"
+        />
+      </ActionDropdown>
+    </template>
     
     <!-- Кнопки для активных объявлений -->
     <template v-else-if="item.status === 'active'">
-      <button 
+      <Button 
         @click="$emit('promote')"
-        class="action-btn btn-promote"
+        variant="primary"
+        size="sm"
       >
         Продвинуть
-      </button>
-      <button 
+      </Button>
+      <Button 
         @click="$emit('edit')"
-        class="action-btn btn-edit"
+        variant="light"
+        size="sm"
       >
         Редактировать
-      </button>
-      <button 
+      </Button>
+      <Button 
         @click="$emit('deactivate')"
-        class="action-btn btn-deactivate"
+        variant="secondary"
+        size="sm"
       >
         Снять
-      </button>
+      </Button>
     </template>
     
     <!-- Кнопки для черновиков -->
     <template v-else-if="item.status === 'draft'">
-      <button 
+      <Button 
         @click="$emit('edit')"
-        class="action-btn btn-edit-primary"
+        variant="light"
+        size="sm"
+        class="btn-edit-draft"
       >
         Редактировать
-      </button>
+      </Button>
       
-      <!-- Кнопка меню с тремя точками -->
-      <div class="action-menu">
-        <button 
-          @click="toggleMenu"
-          class="action-btn btn-menu"
-          ref="menuButton"
-        >
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <circle cx="10" cy="4" r="1.5" fill="currentColor"/>
-            <circle cx="10" cy="10" r="1.5" fill="currentColor"/>
-            <circle cx="10" cy="16" r="1.5" fill="currentColor"/>
-          </svg>
-        </button>
-        
-        <!-- Выпадающее меню -->
-        <div 
-          v-if="showMenu" 
-          class="dropdown-menu"
-          ref="dropdownMenu"
-        >
-          <button 
-            @click="handleEdit"
-            class="menu-item"
-          >
-            Редактировать
-          </button>
-          <button 
-            @click="handleDelete"
-            class="menu-item"
-          >
-            Удалить
-          </button>
-        </div>
-      </div>
+      <!-- Dropdown меню с дополнительными действиями -->
+      <ActionDropdown aria-label="Дополнительные действия">
+        <ActionDropdownItem 
+          text="Редактировать"
+          @click="$emit('edit')"
+        />
+        <div class="dropdown-divider" />
+        <ActionDropdownItem 
+          text="Удалить"
+          variant="danger"
+          @click="$emit('delete')"
+        />
+      </ActionDropdown>
     </template>
     
-    <!-- Кнопки для неактивных -->
-    <template v-else>
-      <button 
+    <!-- Кнопки для неактивных и прочих статусов -->
+    <template v-else-if="item.status === 'inactive' || item.status === 'archived' || item.status === 'old'">
+      <Button 
         @click="$emit('edit')"
-        class="action-btn btn-edit"
+        variant="light"
+        size="sm"
       >
         Редактировать
-      </button>
-      <button 
+      </Button>
+      <Button 
         @click="$emit('delete')"
-        class="action-btn btn-delete"
+        variant="danger"
+        size="sm"
       >
         Удалить
-      </button>
+      </Button>
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import Button from '@/src/shared/ui/atoms/Button/Button.vue'
+import { ActionDropdown, ActionDropdownItem } from '@/src/shared/ui/molecules/ActionDropdown'
 import type { AdItem } from '../ItemCard.types'
 
 interface Props {
@@ -105,53 +116,14 @@ interface Props {
 
 defineProps<Props>()
 
-const emit = defineEmits<{
+defineEmits<{
   pay: []
   promote: []
   edit: []
   deactivate: []
   delete: []
+  'mark-irrelevant': []
 }>()
-
-// Состояние меню
-const showMenu = ref(false)
-const menuButton = ref<HTMLElement | null>(null)
-const dropdownMenu = ref<HTMLElement | null>(null)
-
-// Функция переключения меню
-const toggleMenu = () => {
-  showMenu.value = !showMenu.value
-}
-
-// Обработчики действий
-const handleEdit = () => {
-  showMenu.value = false
-  emit('edit')
-}
-
-const handleDelete = () => {
-  showMenu.value = false
-  emit('delete')
-}
-
-// Закрытие меню при клике вне его
-const handleClickOutside = (event: MouseEvent) => {
-  if (menuButton.value && dropdownMenu.value) {
-    const target = event.target as Node
-    if (!menuButton.value.contains(target) && !dropdownMenu.value.contains(target)) {
-      showMenu.value = false
-    }
-  }
-}
-
-// Добавляем и удаляем слушатель событий
-onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
-})
 </script>
 
 <style scoped>
@@ -161,132 +133,21 @@ onUnmounted(() => {
   margin-top: 12px;
 }
 
-.action-btn {
-  padding: 6px 12px;
-  font-size: 13px;
-  font-weight: 500;
-  border-radius: 6px;
-  border: 1px solid transparent;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
+/* Кастомизация для кнопки редактирования черновика */
+.btn-edit-draft {
+  padding-left: 16px !important;
+  padding-right: 16px !important;
 }
 
-.btn-pay {
-  background: #00a55b;
-  color: white;
-  border-color: #00a55b;
+/* Разделитель в dropdown */
+.dropdown-divider {
+  @apply my-1 border-t border-gray-200;
 }
 
-.btn-pay:hover {
-  background: #008548;
-}
-
-.btn-promote {
-  background: #0066ff;
-  color: white;
-  border-color: #0066ff;
-}
-
-.btn-promote:hover {
-  background: #0052cc;
-}
-
-.btn-edit {
-  background: white;
-  color: #333;
-  border-color: #d5d5d5;
-}
-
-.btn-edit:hover {
-  background: #f5f5f5;
-}
-
-.btn-deactivate {
-  background: white;
-  color: #666;
-  border-color: #d5d5d5;
-}
-
-.btn-deactivate:hover {
-  background: #f5f5f5;
-}
-
-.btn-delete {
-  background: white;
-  color: #d32f2f;
-  border-color: #d5d5d5;
-}
-
-.btn-delete:hover {
-  background: #ffebee;
-  border-color: #d32f2f;
-}
-
-/* Стили для кнопки Редактировать черновика */
-.btn-edit-primary {
-  background: #f5f5f5;
-  color: #333;
-  border-color: #d5d5d5;
-  padding: 8px 16px;
-  font-size: 14px;
-}
-
-.btn-edit-primary:hover {
-  background: #e6e6e6;
-}
-
-/* Стили для меню */
-.action-menu {
-  position: relative;
-}
-
-.btn-menu {
-  background: white;
-  color: #666;
-  border-color: #d5d5d5;
-  padding: 4px 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 36px;
-}
-
-.btn-menu:hover {
-  background: #f5f5f5;
-}
-
-.dropdown-menu {
-  position: absolute;
-  top: calc(100% + 4px);
-  right: 0;
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  min-width: 160px;
-  z-index: 1000;
-  overflow: hidden;
-}
-
-.menu-item {
-  display: block;
-  width: 100%;
-  padding: 10px 16px;
-  text-align: left;
-  font-size: 14px;
-  color: #333;
-  background: none;
-  border: none;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.menu-item:hover {
-  background: #f5f5f5;
-}
-
-.menu-item:not(:last-child) {
-  border-bottom: 1px solid #f0f0f0;
+/* Мобильная адаптация */
+@media (max-width: 640px) {
+  .item-actions {
+    flex-wrap: wrap;
+  }
 }
 </style>

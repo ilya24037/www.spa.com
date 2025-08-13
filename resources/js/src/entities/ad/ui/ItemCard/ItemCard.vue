@@ -33,6 +33,7 @@
             @edit="editItem"
             @deactivate="deactivateItem"
             @delete="showDeleteModal = true"
+            @mark-irrelevant="markIrrelevant"
           />
         </div>
       </div>
@@ -58,7 +59,7 @@ import ItemImage from '@/src/shared/ui/molecules/ItemImage.vue'
 import ItemContent from '@/src/shared/ui/molecules/ItemContent.vue'
 import ItemStats from './components/ItemStats.vue'
 import ItemActions from './components/ItemActions.vue'
-import ConfirmModal from '@/src/shared/ui/organisms/ConfirmModal.vue'
+import ConfirmModal from '@/src/shared/ui/molecules/Modal/ConfirmModal.vue'
 import type { AdItem, ItemCardEmits } from './ItemCard.types'
 
 interface Props {
@@ -101,6 +102,19 @@ const deactivateItem = () => {
     onSuccess: () => {
       emit('item-updated', props.item.id, { status: 'inactive' })
       emit('deactivate', props.item.id)
+    }
+  })
+}
+
+const markIrrelevant = () => {
+  router.post(`/ads/${props.item.id}/mark-irrelevant`, {}, {
+    onSuccess: () => {
+      emit('item-updated', props.item.id, { status: 'archived' })
+      emit('mark-irrelevant', props.item.id)
+    },
+    onError: (errors) => {
+      console.error('Ошибка при пометке как неактуальное:', errors)
+      alert('Ошибка при обновлении статуса объявления')
     }
   })
 }

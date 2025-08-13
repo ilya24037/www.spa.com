@@ -79,7 +79,7 @@ import ItemImage from './ItemImage.vue'
 import ItemContent from './ItemContent.vue'
 import ItemStats from './ItemStats.vue'
 import ItemActions from './ItemActions.vue'
-import ConfirmModal from '@/src/shared/ui/organisms/Modal/Modal.vue'
+import ConfirmModal from '@/src/shared/ui/molecules/Modal/ConfirmModal.vue'
 import { Link } from '@inertiajs/vue3'
 import { useToast } from '@/src/shared/composables/useToast'
 import type { 
