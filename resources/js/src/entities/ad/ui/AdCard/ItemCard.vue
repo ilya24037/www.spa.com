@@ -61,19 +61,19 @@
 
   <!-- РњРѕРґР°Р»СЊРЅРѕРµ РѕРєРЅРѕ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ СѓРґР°Р»РµРЅРёСЏ -->
   <ConfirmModal
-    :show="showDeleteModal"
+    v-model="showDeleteModal"
     title="РЈРґР°Р»РёС‚СЊ РѕР±СЉСЏРІР»РµРЅРёРµ?"
     message="Р­С‚Рѕ РґРµР№СЃС‚РІРёРµ РЅРµР»СЊР·СЏ РѕС‚РјРµРЅРёС‚СЊ. РћР±СЉСЏРІР»РµРЅРёРµ Р±СѓРґРµС‚ СѓРґР°Р»РµРЅРѕ РЅР°РІСЃРµРіРґР°."
     confirm-text="РЈРґР°Р»РёС‚СЊ"
     cancel-text="РћС‚РјРµРЅР°"
     data-testid="delete-modal"
+    variant="danger"
     @confirm="deleteItem"
-    @cancel="showDeleteModal = false"
   />
 </template>
 
 <script setup lang="ts">
-import { ref, computed, withDefaults } from 'vue'
+import { ref, computed } from 'vue'
 import { router } from '@inertiajs/vue3'
 import ItemImage from './ItemImage.vue'
 import ItemContent from './ItemContent.vue'

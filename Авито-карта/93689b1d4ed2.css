@@ -1,0 +1,1 @@
+.fIIQh{position:fixed;background:var(--theme-palette-white);border-radius:50%;padding:12px;box-sizing:border-box;box-shadow:0 4px 24px 0 #0000001f,0 1px 3px 0 #0000000d;cursor:pointer;z-index:calc(infinity);transition:transform 300ms}.fIIQh:hover,.fIIQh[data-moving=true]{transform:scale(1.2)}.fIIQh svg{display:block}.fIIQh svg path{fill:var(--theme-palette-black)}

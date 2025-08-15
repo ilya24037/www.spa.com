@@ -21,11 +21,11 @@
     >
       <!-- Уровень образования -->
       <div class="form-field">
-        <label class="form-field-label" for="education_level">
+        <label class="form-field-label" :for="`${componentId}-education-level`">
           Уровень образования <span class="text-red-500">*</span>
         </label>
         <select
-          id="education_level"
+          :id="`${componentId}-education-level`"
           :value="formData?.education_level"
           :disabled="disabled || readonly"
           class="form-field-input"
@@ -65,11 +65,11 @@
 
       <!-- Университет/учебное заведение -->
       <div class="form-field">
-        <label class="form-field-label" for="university">
+        <label class="form-field-label" :for="`${componentId}-university`">
           Учебное заведение <span class="text-red-500">*</span>
         </label>
         <input
-          id="university"
+          :id="`${componentId}-university`"
           type="text"
           :value="formData?.university"
           :disabled="disabled || readonly"
@@ -90,11 +90,11 @@
 
       <!-- Специальность -->
       <div class="form-field">
-        <label class="form-field-label" for="specialization">
+        <label class="form-field-label" :for="`${componentId}-specialization`">
           Специальность <span class="text-red-500">*</span>
         </label>
         <input
-          id="specialization"
+          :id="`${componentId}-specialization`"
           type="text"
           :value="formData?.specialization"
           :disabled="disabled || readonly"
@@ -116,11 +116,11 @@
       <!-- Год окончания -->
       <FormFieldGroup layout="row" responsive>
         <div class="form-field">
-          <label class="form-field-label" for="graduation_year">
+          <label class="form-field-label" :for="`${componentId}-graduation-year`">
             Год окончания <span class="text-red-500">*</span>
           </label>
           <input
-            id="graduation_year"
+            :id="`${componentId}-graduation-year`"
             type="number"
             :value="formData?.graduation_year"
             :disabled="disabled || readonly"
@@ -142,11 +142,11 @@
         </div>
 
         <div class="form-field">
-          <label class="form-field-label" for="experience_years">
+          <label class="form-field-label" :for="`${componentId}-experience-years`">
             Опыт работы <span class="text-red-500">*</span>
           </label>
           <select
-            id="experience_years"
+            :id="`${componentId}-experience-years`"
             :value="formData?.experience_years"
             :disabled="disabled || readonly"
             class="form-field-input"
@@ -463,11 +463,11 @@
       layout="column"
     >
       <div class="form-field">
-        <label class="form-field-label" for="work_history">
+        <label class="form-field-label" :for="`${componentId}-work-history`">
           Описание опыта работы
         </label>
         <textarea
-          id="work_history"
+          :id="`${componentId}-work-history`"
           :value="formData?.work_history"
           :disabled="disabled || readonly"
           :readonly="readonly"
@@ -500,12 +500,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, withDefaults } from 'vue'
+import { ref, computed, watch } from 'vue'
 import FormSection from '../FormSection.vue'
 import FormFieldGroup from '../components/FormFieldGroup.vue'
 import DynamicFieldList from '../components/DynamicFieldList.vue'
 import { useForm as _useForm } from '../composables/useForm'
 import type { EducationFormData, Course, FormErrors } from '../types/form.types'
+
+// Уникальный ID для экземпляра компонента
+const componentId = `education-form-${Math.random().toString(36).substr(2, 9)}`
 
 interface Props {
   modelValue: EducationFormData

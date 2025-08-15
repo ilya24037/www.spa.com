@@ -243,7 +243,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, withDefaults } from 'vue'
+import { ref, computed } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { useToast } from '@/src/shared/composables/useToast'
 import { useErrorHandler } from '@/src/shared/composables/useErrorHandler'

@@ -38,10 +38,10 @@ const submit = (): void => {
 
     <form @submit.prevent="submit">
       <div>
-        <InputLabel for="email" value="Email" />
+        <InputLabel for="reset-email" value="Email" />
 
         <TextInput
-          id="email"
+          id="reset-email"
           v-model="form.email"
           type="email"
           class="mt-1 block w-full"
@@ -54,10 +54,10 @@ const submit = (): void => {
       </div>
 
       <div class="mt-4">
-        <InputLabel for="password" value="Password" />
+        <InputLabel for="reset-password" value="Password" />
 
         <TextInput
-          id="password"
+          id="reset-password"
           v-model="form.password"
           type="password"
           class="mt-1 block w-full"
@@ -70,12 +70,12 @@ const submit = (): void => {
 
       <div class="mt-4">
         <InputLabel
-          for="password_confirmation"
+          for="reset-password-confirmation"
           value="Confirm Password"
         />
 
         <TextInput
-          id="password_confirmation"
+          id="reset-password-confirmation"
           v-model="form.password_confirmation"
           type="password"
           class="mt-1 block w-full"

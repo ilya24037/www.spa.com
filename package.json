@@ -29,6 +29,7 @@
         "axios": "^1.6.5",
         "eslint": "^9.32.0",
         "eslint-plugin-vue": "^10.4.0",
+        "eslint-plugin-vuejs-accessibility": "^2.2.0",
         "glob": "^11.0.3",
         "laravel-vite-plugin": "^1.0.1",
         "postcss": "^8.5.5",

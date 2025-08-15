@@ -447,7 +447,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, withDefaults } from 'vue'
+import { ref, computed, watch } from 'vue'
 import FormSection from '../FormSection.vue'
 import FormFieldGroup from '../components/FormFieldGroup.vue'
 import type { MediaFormData, FormErrors } from '../types/form.types'

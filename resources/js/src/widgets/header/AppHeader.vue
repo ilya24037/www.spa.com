@@ -158,12 +158,12 @@
 
     <!-- Модальные окна авторизации -->
     <AuthModal 
-      v-if="showLoginModal"
+      :show="showLoginModal"
       @close="showLoginModal = false"
     />
     
     <RegisterModal 
-      v-if="showRegisterModal"
+      :show="showRegisterModal"
       @close="showRegisterModal = false"
     />
 

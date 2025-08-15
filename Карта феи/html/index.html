@@ -1,0 +1,564 @@
+<!DOCTYPE html><html lang="ru"><head>
+  	<meta charset="utf-8">
+<title>Добавление анкеты</title>
+<meta name="description" content="Добавление анкеты">
+
+
+
+<script async="" src="assets/bce81b10b847.js"></script><script src="/engine/classes/js/jquery.js,qv=25.pagespeed.jm.pJg2D_p7ze.js"></script>
+<script src="/engine/classes/js/jqueryui.js,qv=25.pagespeed.ce.Io25-HBlMi.js" defer=""></script>
+<script src="/engine/classes/js/dle_js.js,qv=25.pagespeed.jm.s3W1Bz-VtQ.js" defer=""></script>
+    <meta name="format-detection" content="telephone=no">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+    <meta name="theme-color" content="#272727">
+	<link rel="icon" href="/templates/Feipiter/xfavicon.png.pagespeed.ic.yc3W5JVK-A.webp" type="image/png">
+	<link rel="icon" href="/templates/Feipiter/favicon.svg" type="image/svg+xml">
+    <link rel="shortcut icon" href="/templates/Feipiter/favicon.svg" type="image/x-icon">
+	<meta name="yandex-verification" content="0e2943c73d76a1fe">
+	<meta name="yandex-verification" content="4a0d9354cc836551">
+    <style>@media (max-width:575px){.main-section{background-image:url(/templates/Feipiter/img/xbg-main-mobile.jpg.pagespeed.ic.0nTvRD6AhT.webp)!important}}</style>
+    <link rel="stylesheet" type="text/css" href="/templates/Feipiter/css/A.style.css,,q4+engine.css,Mcc.NhxKVTXCh7.css.pagespeed.cf.hUA6QQpUxp.css">
+    
+    <link rel="canonical" href="https://feipiter.in/addnews.html">
+    
+    <style>.catalog-item__statuses{display:flex;flex-direction:column;align-items:flex-end;position:absolute;top:10px;right:-10px;z-index:1}.catalog-item__vip,.catalog-item__checked,.catalog-item__video,.catalog-item__indi,.catalog-item__top{display:block;width:66px;height:66px;margin-bottom:-6px}.catalog-item__vip{background: url('/templates/Feipiter/img/icon-vip-full.svg') no-repeat center / contain}.catalog-item__top{background: url('/templates/Feipiter/img/icon_vip-blue-2.svg') no-repeat center / contain}.catalog-item__checked{background: url('/templates/Feipiter/img/icon-checked-full.svg') no-repeat center / contain}.catalog-item__video{background: url('/templates/Feipiter/img/icon-video-full.svg') no-repeat center / contain}.catalog-item__agency{background: url('/templates/Feipiter/img/icon-agency.svg') no-repeat center / contain}.catalog-item__indi{background: url('/templates/Feipiter/img/icon-indi-full.svg') no-repeat center / contain}.product-services a::before,.dopuslugi span.alink::before{background: url('/templates/Feipiter/img/services-check-icon.svg') no-repeat center / contain}.catalog-list-info .photo::before{background:url(/templates/Feipiter/img/photo-checked-icon.svg) no-repeat}.catalog-list-info .indi::before{background:url(/templates/Feipiter/img/indi-icon.svg) no-repeat}@media (max-width:575px){.catalog-item__statuses{top:2px;right:-2px}.catalog-item__vip,.catalog-item__checked,.catalog-item__video,.catalog-item__indi,.catalog-item__top{width:33px;height:33px;margin-bottom:-3px}.catalog-item__agency{width:33px;height:33px;margin-right:-1px;margin-bottom:-3px}.product-photo-block .catalog-item__vip,.product-photo-block .catalog-item__checked,.product-photo-block .catalog-item__video,.product-photo-block .catalog-item__indi,.product-photo-block .catalog-item__top{width:55px;height:55px;margin-bottom:-6px}.catalog-list-info .viewed-status{background:url(/templates/Feipiter/img/viewed-icon-dark.svg) no-repeat center}}</style>
+
+  <style>body { margin: 0px; padding: 0px; font-family: "PF DinDisplay Pro", sans-serif; background-color: rgb(255, 255, 255); height: 100%; line-height: 1; position: relative; -webkit-font-smoothing: antialiased; font-size: 1.6rem !important; }
+a, abbr, acronym, address, applet, article, aside, audio, b, big, blockquote, body, canvas, caption, center, cite, code, dd, del, details, dfn, div, dl, dt, em, embed, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, html, i, iframe, img, ins, kbd, label, legend, li, mark, menu, nav, object, ol, output, p, pre, q, ruby, s, samp, section, small, span, strike, strong, sub, summary, sup, table, tbody, td, tfoot, th, thead, time, tr, tt, u, ul, var, video { margin: 0px; padding: 0px; border: 0px; font-size: 100%; }
+html { height: 100%; text-size-adjust: none; font-size: 62.5%; }
+*, ::after, ::before { box-sizing: border-box; }
+.Zebra_DatePicker *, .Zebra_DatePicker::after, .Zebra_DatePicker::before { box-sizing: content-box !important; }
+.Zebra_DatePicker * { padding: 0px; }
+.Zebra_DatePicker .dp_body .dp_not_in_month { color: rgb(102, 102, 102); }
+.Zebra_DatePicker .dp_body .dp_time_controls_condensed td { width: 25%; }
+.Zebra_DatePicker .dp_body .dp_current { color: rgb(58, 135, 173); }
+.Zebra_DatePicker .dp_body .dp_selected { background: rgb(51, 122, 183); color: rgb(255, 255, 255); }
+.Zebra_DatePicker .dp_body .dp_disabled { color: rgb(187, 187, 187); cursor: text; }
+.Zebra_DatePicker .dp_body .dp_disabled.dp_current { color: rgb(180, 213, 230); }
+.Zebra_DatePicker .dp_body .dp_hover { background: rgb(222, 222, 222); }
+.Zebra_DatePicker .dp_body .dp_hover.dp_time_control { background-color: rgb(222, 222, 222); }
+.filter__head-item:first-child .filter__body { padding-bottom: 10px; }
+.filter__body { background-color: rgb(255, 255, 255); padding: 40px 46px; box-shadow: rgba(0, 0, 0, 0.13) 0px 1px 24.65px 4.35px; position: relative; }
+.filter__body--hidden { display: none; position: absolute; top: 43px; left: 0px; z-index: 99; width: 100%; min-height: 350px; }
+@media only screen and (max-width: 991px) {
+  .filter__body { padding: 24px 20px 80px; }
+  .filter__submit { bottom: 40px; right: 20px; }
+  .filter-item--big, .filter-item--small, .filter__checkbox .list-checkbox__item { width: 50%; }
+  .filter__list--columned { column-count: 3; }
+  .filter-metro { max-height: 839px; margin-left: 0px; }
+  .filter-close { right: 20px; bottom: 40px; }
+  .filter__head-item { width: 165px; flex: 0 0 165px; }
+  .filter-additional-phone-col { margin-top: 0px; }
+  .nationality-list { height: auto; }
+}
+@media only screen and (max-width: 767px) {
+  .filter { position: absolute; top: 0px; left: 0px; width: 100%; z-index: 99; padding-top: 0px; display: none; }
+  .popup-filter .filter { display: none; }
+  .popup-filter .filter.opened { display: block !important; }
+  .filter__head { flex-grow: 0; flex-shrink: 0; position: relative; box-shadow: rgba(0, 0, 0, 0.32) 0px 1px 13.6px 2.4px; }
+  .filter__head-item { width: calc(33.3333%); flex: 1 1 auto; }
+  .filter__trigger { padding: 19px 10px 17px; width: 100%; background-color: rgb(58, 58, 58); border-bottom: none; position: relative; z-index: 999999; }
+  .filter__body, .filter__body--hidden { padding: 19px 20px 10px; }
+  .filter__body { box-shadow: none; }
+  .filter__body--hidden { position: fixed; inset: 50px 0px 0px; width: 100%; min-height: unset; box-shadow: rgba(0, 0, 0, 0.13) 0px 1px 24.65px 4.35px; overflow-y: auto; }
+  .filter__list { width: 100%; max-height: none; overflow-y: auto; margin-bottom: 0px; }
+  .filter__list--columned { column-count: 1; }
+  .filter__list--inline li { flex: 1 0 110px; }
+  .filter__list--inline .text { width: 100%; text-align: center; }
+  .filter__list label { display: flex; align-items: flex-start; position: relative; }
+  .filter__list .jq-checkbox { position: relative; top: auto; left: auto; width: 36px; height: 36px; flex-shrink: 0; margin-right: 9px; border: 1px solid rgb(211, 211, 211); z-index: 999; margin-bottom: 5px; }
+  .filter__list .jq-checkbox__div { display: block; width: 100%; height: 100%; position: absolute; top: 0px; left: 0px; background: url("../img/icon-check.svg") 50% center / auto no-repeat; opacity: 0; transition: 0.3s linear; }
+  .filter__list .jq-checkbox.checked .jq-checkbox__div { opacity: 1; }
+  .filter__list .jq-checkbox ~ .text { padding-top: 10px; margin-bottom: 5px; }
+  .filter__submit { position: relative; bottom: auto; right: auto; justify-content: center; flex-wrap: wrap; margin-top: 0px; display: none; }
+  .popup-filter-wrapper { display: flex; flex-direction: column; height: 100%; padding-left: 50px; background-color: rgba(0, 0, 0, 0.8); position: fixed; left: 0px; right: 0px; top: 0px; }
+  .popup-filter-close { display: block; width: 50px; height: 50px; background: url("https://c.feipiter.in/templates/Feipiter/img/icon-close-main.svg") center center no-repeat rgb(58, 58, 58); position: absolute; left: 0px; top: 0px; z-index: 999999; }
+  .popup-filter-main { flex-grow: 1; flex-shrink: 1; overflow: auto; margin-left: -50px; }
+  .filter__submit--mobile { display: flex; flex-grow: 0; flex-shrink: 0; padding: 20px; background-color: rgb(255, 255, 255); margin-left: -50px; }
+  .filter__submit--mobile .main-button { margin-right: 10px; }
+  .filter__submit--mobile .main-button--dark { margin-right: 0px; }
+  .filter__submit .main-button { flex: 1 1 180px; margin-top: 10px; }
+  .filter__checkbox { flex-wrap: wrap; }
+  .filter__checkbox .list-checkbox__item { width: 100%; }
+  .filter-mobile { display: block; }
+  .filter-mobile__button { text-transform: none; width: 206px; font-size: 1.4rem; font-weight: 600; }
+  .filter-item--big, .filter-item--small { width: 100%; }
+  .filter-close { position: relative; right: auto; bottom: auto; margin: 20px auto 0px; }
+  .filter-district__item { flex-direction: column; margin-bottom: 0px; }
+  .filter-district .filter__title { flex: 0 0 auto; margin-bottom: 10px; }
+  .filter-metro { max-height: none; overflow-y: auto; }
+  .filter-metro .filter__list { max-height: unset; }
+  .check-link-list li { position: relative; margin-bottom: 4px; }
+  .additional-head-item { display: none; }
+  .popup-filter-main .additional-head-item { display: block; width: 100%; }
+  .popup-filter-main .additional-head-item .filter__trigger { display: none; }
+  .popup-filter-main .additional-head-item .filter__body--hidden { position: static; box-shadow: none; display: block !important; }
+  .additional-head-item .filter__body--hidden { width: auto; padding: 0px; margin: 0px -20px; }
+  .filter-additional .flex-container { margin: 0px; }
+  .filter-additional .flex-container .flex-sm-12 { padding: 0px; }
+  .filter-additional__item { border-bottom: 1px solid rgba(39, 39, 39, 0.1); }
+  .filter-additional-col:first-child .filter-additional__item { border-top: 1px solid rgba(39, 39, 39, 0.1); }
+  .filter-additional__item .filter__title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0px; padding: 19px 20px; }
+  .filter-additional__item .filter__title::after { content: ""; display: block; width: 17px; height: 10px; background-image: url("https://c.feipiter.in/templates/Feipiter/img/icon-dropdown.svg"); background-repeat: no-repeat; background-position: 50% center; background-size: contain; margin-top: -4px; transition: 0.3s linear; opacity: 0; }
+  .filter-additional__item .filter__title.active::after { transform: scaleY(-1); }
+  .filter-additional__item .filter__list { display: none; padding: 0px 20px 15px; }
+  .filter-additional-phone-col .filter-additional__item { border-bottom: none; }
+  .filter-additional-phone-col .filter__title { padding-bottom: 5px; font-family: "PF DinDisplay Pro", sans-serif; font-weight: 400; font-size: 1.4rem; text-transform: none; }
+  .filter-additional-phone-col .filter__title::after { display: none; }
+  .filter-additional-phone-col .box-field { margin-bottom: 0px; }
+  .filter-additional-phone-col .box-field__input { padding: 0px 20px; margin: 0px; }
+  .nationality-list .nationality { column-count: 1; }
+  .m-filter-region .filter__list { width: auto; }
+  .m-filter-region .filter__list--inline li { flex: 1 1 auto; }
+  .m-filter-region .filter__list label { display: block; }
+  .m-filter-region .filter__list .jq-checkbox { position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; border: none; margin-right: 0px; margin-bottom: 0px; z-index: 0; }
+  .m-filter-region .filter__list .jq-checkbox ~ .text { padding: 4px 10px; margin-bottom: 0px; }
+  .m-filter-region .filter__list .jq-checkbox__div { background-image: none; background-color: rgb(223, 213, 193); }
+}
+.sidebar-titled__body { width: 100%; height: 100%; flex-grow: 1; padding: 24px 32px; background-color: rgb(244, 244, 244); }
+.profiles-category-body { padding: 20px 19px; }
+.account-profile__body { background-color: rgb(244, 244, 244); padding: 20px; display: flex; flex-wrap: wrap; }
+@media only screen and (max-width: 575px) {
+  .account-profile { margin: 0px -20px 20px; }
+  .account-profile:last-child { margin-bottom: 0px; }
+  .account-profile__head { flex-wrap: wrap; padding: 14px 20px; }
+  .account-profile__functionals { width: 100%; margin-top: 0px; justify-content: flex-start; }
+  .account-profile__links { flex-wrap: wrap; margin-bottom: 8px; }
+  .account-profile__links .link { margin-bottom: 18px; }
+  .account-profile__links .link--delete { margin-left: auto; }
+  .account-profile__list { column-count: 1; }
+  .account-profile__buttons { flex-direction: column; align-items: center; width: 100%; }
+  .account-profile__buttons .main-button { margin-right: 0px; }
+  .profiles-category-title { font-size: 1.8rem; margin: 0px 10px; }
+  .profiles-category-body { padding: 10px 5px; }
+  .account-profile { margin: 0px 0px 20px; }
+  .account-profile__head { padding: 10px; }
+  .account-profile__body { padding: 10px; }
+  .account-profile__image { flex: 0 0 100%; }
+  .account-profile__functionals .jq-selectbox { margin-left: 0px; margin-top: 10px; }
+  .account-profile__status .top { display: block; margin-top: 12px; }
+}
+.m-filter-body .small-checkbox-list.cols-2 { display: flex; flex-wrap: wrap; padding-top: 0px; margin-left: -8px; margin-right: -8px; margin-top: -20px; }
+.m-filter-body .small-checkbox-list.cols-2 li { width: 50%; padding-left: 8px; padding-right: 8px; margin-top: 20px; margin-bottom: 0px; }
+.m-filter-body .small-checkbox-list.cols-2 label { align-items: center; }
+.m-filter-body .small-checkbox-list.cols-2 .label-text span { display: block; }
+.m-filter-body { flex-grow: 1; padding: 0px 15px; overflow: auto; margin-top: 32px; position: relative; }
+.m-filter-body-item { margin-bottom: 13px; }
+.m-filter-body .small-checkbox-list { padding-top: 14px; }
+.m-filter-body .small-checkbox-list li { margin-bottom: 18px; }
+.m-filter-body .jq-checkbox-own { width: 18px; height: 18px; border: 1px solid rgb(192, 172, 131); margin-right: 17px; }
+.m-filter-body .small-checkbox-list .list-checkbox__label .label-text { padding-top: 0px; margin-top: 0px; }
+.modal-body { padding: 20px 50px 30px; }
+@media (max-width: 767px) {
+  .modal-body { padding: 20px 15px 30px; }
+}
+.product-prices-table tbody tr { border-bottom: 1px solid rgb(231, 231, 231); }
+@media (max-width: 575px) {
+  .bl-block { padding: 0px; border: none; margin-top: 30px; }
+  .bl-block .info { max-width: 100%; margin: 0px 0px 30px; }
+  .bl-form { margin-bottom: 25px; }
+  .bl-form-panel .main-button { width: 100%; }
+  .bl-form-message { margin-top: 5px; }
+  .bl-table thead { display: none; }
+  .bl-table table, .bl-table tbody, .bl-table td { display: block; }
+  .bl-table tr { display: flex; flex-wrap: wrap; margin-bottom: 15px; }
+  .bl-table td { width: 100%; border-width: 0px; }
+  .bl-table td::before { content: attr(data-title); display: block; padding: 8px 16px; background-color: rgba(191, 171, 130, 0.33); margin: -8px -16px 8px; }
+  .bl-table td:nth-child(1), .bl-table td:nth-child(2) { width: 50%; }
+  .bl-table td:last-child { border-top: 1px solid rgb(255, 255, 255); }
+  .bl-table td:last-child::before { display: none; }
+}
+* html .ui-helper-clearfix { height: 1%; }
+* html .ui-autocomplete { width: 1px; }
+[class^="bb-btn"], [class*=" bb-btn"] { font-family: bb-editor-font; speak: none; font-style: normal; font-weight: normal; font-variant: normal; text-transform: none; line-height: 1; font-size: 14px; -webkit-font-smoothing: antialiased; }
+:root { --f-spinner-width: 36px; --f-spinner-height: 36px; --f-spinner-color-1: rgba(0, 0, 0, 0.1); --f-spinner-color-2: rgba(17, 24, 28, 0.8); --f-spinner-stroke: 2.75; }
+.f-spinner svg * { stroke-width: var(--f-spinner-stroke); fill: none; }
+@keyframes f-throwOutUp { 
+  100% { transform: translate3d(0, calc(var(--f-throw-out-distance, 150px) * -1), 0); opacity: 0; }
+}
+.f-crossfadeOut { animation: calc(var(--f-transition-duration, 0.2s)*.5) linear .1s both f-crossfadeOut; z-index: 1; }
+:root { --f-button-width: 40px; --f-button-height: 40px; --f-button-border: 0; --f-button-border-radius: 0; --f-button-color: #374151; --f-button-bg: #f8f8f8; --f-button-hover-bg: #e0e0e0; --f-button-active-bg: #d0d0d0; --f-button-shadow: none; --f-button-transition: all 0.15s ease; --f-button-transform: none; --f-button-svg-width: 20px; --f-button-svg-height: 20px; --f-button-svg-stroke-width: 1.5; --f-button-svg-fill: none; --f-button-svg-filter: none; --f-button-svg-disabled-opacity: 0.65; }
+html.with-fancybox { width: auto; overflow: visible; scroll-behavior: auto; }
+html.with-fancybox body { touch-action: none; }
+html.with-fancybox body.hide-scrollbar { width: auto; margin-right: calc(var(--fancybox-body-margin, 0px) + var(--fancybox-scrollbar-compensate, 0px)); overscroll-behavior-y: none; overflow: hidden !important; }
+.fancybox__container *, .fancybox__container ::before, .fancybox__container ::after { box-sizing: inherit; }
+.fancybox__slide.has-iframe, .fancybox__slide.has-video, .fancybox__slide.has-html5video { overflow: hidden; }
+.fancybox__slide > .f-spinner { position: absolute; top: 50%; left: 50%; margin: var(--f-spinner-top, calc(var(--f-spinner-width) * -0.5)) 0 0 var(--f-spinner-left, calc(var(--f-spinner-height) * -0.5)); z-index: 30; cursor: pointer; }
+.has-iframe .fancybox__content, .has-map .fancybox__content, .has-pdf .fancybox__content, .has-youtube .fancybox__content, .has-vimeo .fancybox__content, .has-html5video .fancybox__content { max-width: 100%; flex-shrink: 1; min-height: 1px; overflow: visible; }
+.has-youtube .fancybox__content, .has-vimeo .fancybox__content, .has-html5video .fancybox__content { width: 960px; height: 540px; max-width: 100%; max-height: 100%; }
+.has-map .fancybox__content, .has-pdf .fancybox__content, .has-youtube .fancybox__content, .has-vimeo .fancybox__content, .has-html5video .fancybox__content { padding: 0px; background: rgba(24, 24, 27, 0.9); color: rgb(255, 255, 255); }
+.fancybox__html5video, .fancybox__iframe { border: 0px; display: block; height: 100%; width: 100%; background: rgba(0, 0, 0, 0); }
+.is-modern .f-thumbs__track::before { content: ""; position: absolute; top: 0px; bottom: 0px; left: calc((var(--f-thumb-clip-width, 0))*-0.5); width: calc(var(--width, 0)*1px + var(--f-thumb-clip-width, 0)); cursor: pointer; }
+.is-modern .f-thumbs__slide { width: var(--f-thumb-clip-width); transform: translate3d(calc(var(--shift, 0) * -1px), 0, 0); transition: none; pointer-events: none; }
+.is-modern .f-thumbs__slide__button { --clip-path: inset( 0 calc( ((var(--f-thumb-width, 0) - var(--f-thumb-clip-width, 0))) * (1 - var(--progress, 0)) * 0.5 ) round var(--f-thumb-border-radius, 0) ); clip-path: var(--clip-path); }
+:root { --swiper-theme-color: #007aff; }
+:root { --swiper-navigation-size: 44px; }
+.swiper-button-next, .swiper-button-prev { position: absolute; top: var(--swiper-navigation-top-offset,50%); width: calc(var(--swiper-navigation-size)/ 44 * 27); height: var(--swiper-navigation-size); margin-top: calc(0px - (var(--swiper-navigation-size)/ 2)); z-index: 10; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--swiper-navigation-color,var(--swiper-theme-color)); }
+.swiper-horizontal > .swiper-scrollbar, .swiper-scrollbar.swiper-scrollbar-horizontal { position: absolute; left: var(--swiper-scrollbar-sides-offset,1%); bottom: var(--swiper-scrollbar-bottom,4px); top: var(--swiper-scrollbar-top,auto); z-index: 50; height: var(--swiper-scrollbar-size,4px); width: calc(100% - 2 * var(--swiper-scrollbar-sides-offset,1%)); }
+.swiper-scrollbar.swiper-scrollbar-vertical, .swiper-vertical > .swiper-scrollbar { position: absolute; left: var(--swiper-scrollbar-left,auto); right: var(--swiper-scrollbar-right,4px); top: var(--swiper-scrollbar-sides-offset,1%); z-index: 50; width: var(--swiper-scrollbar-size,4px); height: calc(100% - 2 * var(--swiper-scrollbar-sides-offset,1%)); }</style></head>
+  <body class="web">
+
+  	<script>var dle_root='/';var dle_admin='';var dle_login_hash='d9d786b98a58248774892fdcbb049486cbdd53ff';var dle_group=5;var dle_skin='Feipiter';var dle_wysiwyg='0';var quick_wysiwyg='0';var dle_act_lang=["Да","Нет","Ввод","Отмена","Сохранить","Удалить","Загрузка. Пожалуйста, подождите..."];var menu_short='Быстрое редактирование';var menu_full='Полное редактирование';var menu_profile='Просмотр профиля';var menu_send='Отправить сообщение';var menu_uedit='Админцентр';var dle_info='Информация';var dle_confirm='Подтверждение';var dle_prompt='Ввод информации';var dle_req_field='Заполните все необходимые поля';var dle_del_agree='Вы действительно хотите удалить эту анкету? Данное действие невозможно будет отменить';var dle_spam_agree='Вы действительно хотите отметить пользователя как спамера? Это приведёт к удалению всех его комментариев';var dle_complaint='Укажите текст Вашей жалобы для администрации:';var dle_big_text='Выделен слишком большой участок текста.';var dle_orfo_title='Укажите комментарий для администрации к найденной ошибке на странице';var dle_p_send='Отправить';var dle_p_send_ok='Уведомление успешно отправлено';var dle_save_ok='Изменения успешно сохранены. Обновить страницу?';var dle_reply_title='Ответ на комментарий';var dle_tree_comm='0';var dle_del_news='Удалить статью';var dle_sub_agree='Вы действительно хотите подписаться на комментарии к данной публикации?';var allow_dle_delete_news=false;</script>
+    <div class="main-wrapper">
+      <header class="header">
+        <div class="wrapper">
+          <div class="header-container">
+            <div class="header-logo">
+              <a href="/">
+              <script data-pagespeed-no-defer="">(function(){for(var g="function"==typeof Object.defineProperties?Object.defineProperty:function(b,c,a){if(a.get||a.set)throw new TypeError("ES3 does not support getters and setters.");b!=Array.prototype&&b!=Object.prototype&&(b[c]=a.value)},h="undefined"!=typeof window&&window===this?this:"undefined"!=typeof global&&null!=global?global:this,k=["String","prototype","repeat"],l=0;l<k.length-1;l++){var m=k[l];m in h||(h[m]={});h=h[m]}var n=k[k.length-1],p=h[n],q=p?p:function(b){var c;if(null==this)throw new TypeError("The 'this' value for String.prototype.repeat must not be null or undefined");c=this+"";if(0>b||1342177279<b)throw new RangeError("Invalid count value");b|=0;for(var a="";b;)if(b&1&&(a+=c),b>>>=1)c+=c;return a};q!=p&&null!=q&&g(h,n,{configurable:!0,writable:!0,value:q});var t=this;function u(b,c){var a=b.split("."),d=t;a[0]in d||!d.execScript||d.execScript("var "+a[0]);for(var e;a.length&&(e=a.shift());)a.length||void 0===c?d[e]?d=d[e]:d=d[e]={}:d[e]=c};function v(b){var c=b.length;if(0<c){for(var a=Array(c),d=0;d<c;d++)a[d]=b[d];return a}return[]};function w(b){var c=window;if(c.addEventListener)c.addEventListener("load",b,!1);else if(c.attachEvent)c.attachEvent("onload",b);else{var a=c.onload;c.onload=function(){b.call(this);a&&a.call(this)}}};var x;function y(b,c,a,d,e){this.h=b;this.j=c;this.l=a;this.f=e;this.g={height:window.innerHeight||document.documentElement.clientHeight||document.body.clientHeight,width:window.innerWidth||document.documentElement.clientWidth||document.body.clientWidth};this.i=d;this.b={};this.a=[];this.c={}}function z(b,c){var a,d,e=c.getAttribute("data-pagespeed-url-hash");if(a=e&&!(e in b.c))if(0>=c.offsetWidth&&0>=c.offsetHeight)a=!1;else{d=c.getBoundingClientRect();var f=document.body;a=d.top+("pageYOffset"in window?window.pageYOffset:(document.documentElement||f.parentNode||f).scrollTop);d=d.left+("pageXOffset"in window?window.pageXOffset:(document.documentElement||f.parentNode||f).scrollLeft);f=a.toString()+","+d;b.b.hasOwnProperty(f)?a=!1:(b.b[f]=!0,a=a<=b.g.height&&d<=b.g.width)}a&&(b.a.push(e),b.c[e]=!0)}y.prototype.checkImageForCriticality=function(b){b.getBoundingClientRect&&z(this,b)};u("pagespeed.CriticalImages.checkImageForCriticality",function(b){x.checkImageForCriticality(b)});u("pagespeed.CriticalImages.checkCriticalImages",function(){A(x)});function A(b){b.b={};for(var c=["IMG","INPUT"],a=[],d=0;d<c.length;++d)a=a.concat(v(document.getElementsByTagName(c[d])));if(a.length&&a[0].getBoundingClientRect){for(d=0;c=a[d];++d)z(b,c);a="oh="+b.l;b.f&&(a+="&n="+b.f);if(c=!!b.a.length)for(a+="&ci="+encodeURIComponent(b.a[0]),d=1;d<b.a.length;++d){var e=","+encodeURIComponent(b.a[d]);131072>=a.length+e.length&&(a+=e)}b.i&&(e="&rd="+encodeURIComponent(JSON.stringify(B())),131072>=a.length+e.length&&(a+=e),c=!0);C=a;if(c){d=b.h;b=b.j;var f;if(window.XMLHttpRequest)f=new XMLHttpRequest;else if(window.ActiveXObject)try{f=new ActiveXObject("Msxml2.XMLHTTP")}catch(r){try{f=new ActiveXObject("Microsoft.XMLHTTP")}catch(D){}}f&&(f.open("POST",d+(-1==d.indexOf("?")?"?":"&")+"url="+encodeURIComponent(b)),f.setRequestHeader("Content-Type","application/x-www-form-urlencoded"),f.send(a))}}}function B(){var b={},c;c=document.getElementsByTagName("IMG");if(!c.length)return{};var a=c[0];if(!("naturalWidth"in a&&"naturalHeight"in a))return{};for(var d=0;a=c[d];++d){var e=a.getAttribute("data-pagespeed-url-hash");e&&(!(e in b)&&0<a.width&&0<a.height&&0<a.naturalWidth&&0<a.naturalHeight||e in b&&a.width>=b[e].o&&a.height>=b[e].m)&&(b[e]={rw:a.width,rh:a.height,ow:a.naturalWidth,oh:a.naturalHeight})}return b}var C="";u("pagespeed.CriticalImages.getBeaconData",function(){return C});u("pagespeed.CriticalImages.Run",function(b,c,a,d,e,f){var r=new y(b,c,a,e,f);x=r;d&&w(function(){window.setTimeout(function(){A(r)},0)})});})();pagespeed.CriticalImages.Run('/ngx_pagespeed_beacon','assets/f9696f1d5df4.bin','udxWdsb7xC',true,false,'2Xzlycvpc5Y');</script><img src="/templates/Feipiter/img/logo.svg" data-pagespeed-url-hash="2910061164" onload="pagespeed.CriticalImages.checkImageForCriticality(this);">
+              </a>
+            </div>
+            <nav class="header-nav hidden-lg">
+              <ul class="header-nav__list">
+                <li><a href="/latest-card/">Новые</a></li>
+                <li><a href="/girls-video/">С видео</a></li>
+                <li><a href="/individualki/">Инди</a></li>
+                <li><a href="/proverennye/">Проверенные</a></li>
+                <li><a href="/agencies/">Агентства</a></li>
+                <li><a href="/otzyvy/">Отзывы</a></li>
+                <li><a href="/intim-maps-spb.html">Карта</a></li>
+                <li><a href="/metro-map.html">Метро</a></li>
+              </ul>
+            </nav>
+            <div class="header-functionals hidden-lg">
+              <a href="/favorites/" class="to-wish-list" style="background-image: url(&quot;assets/a41a7c79be97.svg&quot;);"></a>
+              
+
+
+<a href="#" class="js-authorization">Войти <span>/</span> Регистрация</a>
+<div class="header-functionals__auth js-header-functionals__auth">
+  <form class="header-functionals__auth-form" method="post">
+    <div class="box-field box-field--inlined">
+      <label class="box-field__label">Email <span>*</span></label>
+      <div class="box-field__input">
+        <input placeholder="Email / Логин" class="form-control" type="text" name="login_name" id="login_name" style="">
+      </div>
+    </div>
+    <div class="box-field box-field--inlined">
+      <label class="box-field__label">Пароль: <span>*</span></label>
+      <div class="box-field__input box-field__input">
+        <input placeholder="Пароль" type="password" class="form-control" name="login_password" id="login_password" style="">
+      </div>
+    </div>
+    <button class="main-button main-button--right" type="submit" style="background-image: linear-gradient(rgb(190, 120, 94) 0%, rgb(254, 195, 122) 100%);">
+      <div class="text">Вход</div>
+    </button>
+    <!-- <a href="https://c.feipiter.in/index.php?do=lostpassword" class="auth-forgotten">Забыли пароль?</a> -->
+    <!-- <a href="/registration/" class="auth-forgotten">Регистрация</a> -->
+    <a href="#forgot-popup" class="auth-forgotten open-popup">Забыли пароль?</a>
+    <a href="#registration-popup" class="auth-forgotten open-popup">Регистрация</a>
+    <input name="login" type="hidden" id="login" value="submit" style="">
+  </form>
+</div>
+
+            </div>
+
+            <div class="header-search">
+              <div class="search-button"></div>
+              <div class="search-block">
+                <form action="/"><input type="hidden" name="mod" value="filter" style="">
+                  <div class="search-field-block">
+                    <input type="text" class="search-field" name="phone" placeholder="Поиск по телефону или имени" style="">
+                    <input type="submit" value="Поиск" class="search-submit" style="">
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <div class="header-favorite">
+              <a href="/favorites/" class="to-wish-list"></a>
+            </div>
+
+            <button class="nav-mobile-trigger js-nav-mobile-trigger"></button>
+            
+            <nav class="nav-mobile js-nav-mobile">
+              
+              <div class="nav-mobile__head">
+                <a href="#" class="js-authorization copy_auth">Войти</a><div class="header-functionals__auth js-header-functionals__auth">
+  <form class="header-functionals__auth-form" method="post">
+    <div class="box-field box-field--inlined">
+      <label class="box-field__label">Email <span>*</span></label>
+      <div class="box-field__input">
+        <input placeholder="Email / Логин" class="form-control" type="text" name="login_name" id="login_name" style="">
+      </div>
+    </div>
+    <div class="box-field box-field--inlined">
+      <label class="box-field__label">Пароль: <span>*</span></label>
+      <div class="box-field__input box-field__input">
+        <input placeholder="Пароль" type="password" class="form-control" name="login_password" id="login_password" style="">
+      </div>
+    </div>
+    <button class="main-button main-button--right" type="submit" style="background-image: linear-gradient(rgb(190, 120, 94) 0%, rgb(254, 195, 122) 100%);">
+      <div class="text">Вход</div>
+    </button>
+    <!-- <a href="https://c.feipiter.in/index.php?do=lostpassword" class="auth-forgotten">Забыли пароль?</a> -->
+    <!-- <a href="/registration/" class="auth-forgotten">Регистрация</a> -->
+    <a href="#forgot-popup" class="auth-forgotten open-popup">Забыли пароль?</a>
+    <a href="#registration-popup" class="auth-forgotten open-popup">Регистрация</a>
+    <input name="login" type="hidden" id="login" value="submit" style="">
+  </form>
+</div>
+                <a href="#registration-popup" class="nav-mobile-registration open-popup">Регистрация</a>
+                <script>$(function(){$(".copy_auth").after($(".header-functionals__auth").clone())})</script>
+
+              </div>
+              
+
+              
+
+              
+
+              
+
+              <ul class="nav-mobile__list">
+                <li><a href="/latest-card/">Новые</a></li>
+                <li><a href="/girls-video/">С видео</a></li>
+                <li><a href="/individualki/">Индивидуалки</a></li>
+                <li><a href="/proverennye/">Проверенные</a></li>
+                <li><a href="/agencies/">Агентства</a></li>
+                <li><a href="/otzyvy/">Отзывы</a></li>
+                <li><a href="/intim-maps-spb.html">Интим карта</a></li>
+                <li><a href="/metro-map.html">Схема метро</a></li>
+                <li><a href="https://t.me/feipiter_official" target="_blank">@feipiter_official</a></li>
+                
+              </ul>
+              
+            </nav>
+          </div>
+        </div>
+      </header>
+      
+        
+      
+
+
+			
+
+			<main class="main page ">
+
+        
+		
+			  
+
+        
+        
+
+<script>$(function(){DLEalert('К сожалению, у Вас нет прав для публикации статей на нашем сайте.<br /><a href="javascript:history.go(-1)">Вернуться назад</a>',dle_info)})</script>
+
+        
+		    
+        
+		
+        
+
+        
+
+			  
+        
+        
+      
+			</main>
+      
+			
+
+      
+      
+      <footer class="footer">
+        <div class="wrapper">
+          <div class="footer-text text-center">
+            <span>2019-2025 Copyright by FEIPITER</span><br>
+            <span><a href="mailto:info@feipiter.in">info@feipiter.in</a> | <a href="/sitemap/">Карта</a> | <a href="/agreement.html" target="_blank">Пользовательское соглашение</a></span>
+            <span>Сайт предназначен только для лиц старше 18 лет!</span>
+            <span>Администрация не несет ответственности за размещенную пользователями информацию.</span>
+          </div>
+        </div>
+      </footer>
+      
+      
+    </div>
+    <div class="scroll-top js-scroll-top">Наверх</div>
+    <div class="icon-load"></div>
+
+    
+    <script src="/templates/Feipiter/js/jquery.formstyler.js"></script>
+	
+    
+
+    
+
+    <script src="/templates/Feipiter/js/jquery.magnific-popup.js"></script>
+
+    
+
+      <script src="/templates/Feipiter/js/fancyapps-ui/fancybox.umd.js"></script>
+      <link rel="stylesheet" href="/templates/Feipiter/js/fancyapps-ui,_fancybox.css+swiper,_swiper-bundle.min.css.pagespeed.cc.uXgsaosz3S.css">
+
+      
+      <script src="/templates/Feipiter/js/swiper/swiper-bundle.min.js"></script>
+      
+    
+
+<script src="/templates/Feipiter/js/jquery.mask.min.js"></script>
+<script src="/templates/Feipiter/js/ion.rangeSlider.min.js?1"></script>
+<script src="/templates/Feipiter/js/main.js?5"></script>
+      
+
+
+
+
+<div class="mfp-hide auth-popup registration-popup" id="registration-popup">
+  <form class="adv-client-form">
+    <div class="registration-popup-decor-1" style="background-image: url(&quot;https://c.feipiter.in/templates/Feipiter/img/xreg-popup-image-1.png.pagespeed.ic.EpKsZjjxfx.webp&quot;);"></div>
+    <div class="registration-popup-decor-2" style="background-image: url(&quot;https://c.feipiter.in/templates/Feipiter/img/xreg-popup-image-2.png.pagespeed.ic.jreettz1GR.webp&quot;);"></div>
+    <div class="auth-popup-close close-popup">Назад</div>
+    <h2 class="auth-popup-title">ВЫБЕРИТЕ ПРОФИЛЬ</h2>
+    <div class="adv-client-row">
+        <label class="adv-client-item">
+            <div class="adv-client-header">
+                <div class="jq-radio js-styled"><input type="radio" name="user-type" value="1" class="js-styled" style=""><div class="jq-radio__div" style="background-image: url(&quot;https://c.feipiter.in/templates/Feipiter/img/adv-client-checkbox.svg&quot;);"></div></div>
+                <h3 class="adv-client-title">Рекламодатель</h3>
+            </div>
+            <ul class="adv-client-list">
+                <li>Большая аудитория</li>
+                <li>Добавление анкет</li>
+                <li>Личный кабинет</li>
+            </ul>
+        </label>
+        <label class="adv-client-item">
+            <div class="adv-client-header">
+                <div class="jq-radio js-styled"><input type="radio" name="user-type" value="2" class="js-styled" style=""><div class="jq-radio__div" style="background-image: url(&quot;https://c.feipiter.in/templates/Feipiter/img/adv-client-checkbox.svg&quot;);"></div></div>
+                <h3 class="adv-client-title">Клиент</h3>
+            </div>
+            <ul class="adv-client-list">
+                <li>Добавление отзывов</li>
+                <li>Управление избранными анкетами</li>
+                <li>Личный кабинет</li>
+            </ul>
+        </label>
+    </div>
+    <button type="submit" class="main-button" onclick="if( !$('[name=user-type]:checked').length ) {DLEalert('Выберите тип пользователя', 'Информация');return false;}else{if( $('[name=user-type]:checked').val() == 2 ) {$('[name=client]').val(1);$('.register_client input[name=fullname]').prop('required', true );$('.register_client').show();$('.register_rekl').hide();} else if( $('[name=user-type]:checked').val() == 1 ) {$('[name=client]').val(2);$('.register_client input[name=fullname]').prop('required', false );$('.register_client').hide();$('.register_rekl').show();} else {$('.register_client input[name=fullname]').prop('required', false );$('[name=client]').val('');$('.register_client').hide();}$('.adv-client-form').hide();$('.register_form').show();return false;}" style="background-image: linear-gradient(rgb(190, 120, 94) 0%, rgb(254, 195, 122) 100%);"><span class="text">Следующий шаг</span></button>
+  </form>
+
+  <div class="register_form" style="display:none;">
+    <form class="" method="post" name="registration" id="registration">
+        <input name="submit_reg" type="hidden" id="submit_reg" value="submit_reg" style="">
+        <input name="do" type="hidden" id="do" value="register" style="">
+        <input type="hidden" name="client" value="" style="">
+        <input type="hidden" name="tr" value="" style="">
+        
+        <section class="page-registration">
+            <div class="page_form__form page-registration__form" style="background: #fff;">
+                <div class="auth-popup-close registration-back">Назад</div>
+                <h3 class="reg-type-title auth-popup-title"><span>?</span></h3>
+    
+                <div class="box-field box-field--inlined box-field--result">
+                    <label class="box-field__label"></label>
+                    <div class="box-field__input">
+                        <div id="result-registration" class="result-registration"></div>
+                    </div>
+                </div>
+
+                
+
+                <div class="box-field box-field--inlined register_client" style="display:none;">
+                    <label class="box-field__label">Ник (для отзывов): <span>*</span></label>
+                    <div class="box-field__input">
+                    <input type="text" name="fullname" id="fullname" class="form-control" maxlength="16" required="" style="">
+                    <button class="main-button main-button--center" title="Проверить" onclick="CheckLogin2(); return false;" style="background-image: linear-gradient(rgb(190, 120, 94) 0%, rgb(254, 195, 122) 100%);"><div class="text">Проверить</div></button>
+                    </div>
+                </div>
+
+                <script>$(function(){var options={onComplete:function(cep,el){$(el.currentTarget).addClass("complete");},onChange:function(cep,el){$(el.currentTarget).removeClass("complete");},};$("#phone_reg").mask('+7 (000) 000-0000',options);})</script>
+
+                
+
+                <div class="box-field box-field--inlined box-field--result">
+                    <label class="box-field__label"></label>
+                    <div class="box-field__input">
+                        <div id="result-registration2" class="result-registration"></div>
+                    </div>
+                </div>
+        
+                <div class="box-field box-field--inlined">
+                    <label class="box-field__label">Email: <span>*</span></label>
+                    <div class="box-field__input">
+                    <input type="text" name="email" id="email" class="form-control" required="" style="">
+                    </div>
+                </div>
+        
+                <div class="box-field box-field--inlined">
+                    <label class="box-field__label">Пароль: <span>*</span></label>
+                    <div class="box-field__input">
+                    <input type="text" name="password1" id="password1" class="form-control" required="" style="">
+                    </div>
+                </div>
+
+                <div class="box-field box-field--inlined">
+                    <label class="box-field__label">Повторите пароль: <span>*</span></label>
+                    <div class="box-field__input">
+                    <input type="text" name="password2" id="password2" class="form-control" required="" style="">
+                    </div>
+                </div>
+
+                
+                
+                <input type="hidden" name="result_json" value="1" style="">
+                <input type="hidden" name="tr" value="1" style="">
+
+                <div class="form_submit">
+                  <button class="main-button main-button--center" name="submit" type="submit" onclick="$('[name=tr]').val(0);" style="background-image: linear-gradient(rgb(190, 120, 94) 0%, rgb(254, 195, 122) 100%);"><div class="text">Регистрация</div></button>
+                </div>
+            </div>
+        </section>
+    </form>
+  </div>
+
+</div>
+
+<script>$(function(){function advClientSwitch(){$('.adv-client-item').each(function(){const jqRadio=$(this).find('.jq-radio.checked').length;if(jqRadio){$(this).addClass('active');}else{$(this).removeClass('active');}});}advClientSwitch();$('.adv-client-item').on('click',function(){advClientSwitch();});$('.adv-client-form .main-button').on('click',function(){if($('[name=user-type]:checked').val()==1){$('.reg-type-title span').html('Рекламодатель');}else if($('[name=user-type]:checked').val()==2){$('.reg-type-title span').html('Клиент');}else if($('[name=user-type]:checked').val()==3){$('.reg-type-title span').html('Салон');}});$('.registration-back').on('click',function(){$(this).parents('.register_form').hide();$('.adv-client-form').show();});if(location.href.indexOf('?client_start=1')!==-1){$('[name=client]').val(1);$('.register_client input[name=fullname]').prop('required',true);$('.register_client').show();$('.adv-client-form').hide();$('.register_form').show();$('.reg-type-title span').html('Клиент');}})
+function CheckLogin2(){var a=document.getElementById("fullname").value;ShowLoading("");$.post(dle_root+"engine/ajax/controller.php?mod=registration",{name2:a,user_hash:dle_login_hash},function(a){HideLoading("");$("#result-registration2").html(a)});return!1}</script>
+
+
+<div class="mfp-hide auth-popup forgot-popup" id="forgot-popup">
+  <form method="post" name="registration_lost" action="?do=lostpassword">
+    <div class="auth-popup-close close-popup">Назад</div>
+    <h3 class="auth-popup-title">ВОССТАНОВЛЕНИЕ ДОСТУПА</h3>
+    <div class="auth-popup-text auth-popup-text-main">Если вы забыли пароль, введите Email или Логин своего аккаунта.</div>
+    <div class="box-field">
+      <label class="box-field__label">Логин или E-mail: <span>*</span></label>
+      <div class="box-field__input">
+        <input type="text" name="lostname" id="lostname" class="form-control" required="" style="">
+      </div>
+    </div>
+    <div class="auth-popup-text">Если не пришло письмо для сброса пароля, напишите нам в телеграм, с указанием сайта и емаила/логина аккаунта, мы для вас сгенерируем новый пароль.</div>
+    <div class="auth-popup-submit">
+      <button type="submit" class="main-button" style="background-image: linear-gradient(rgb(190, 120, 94) 0%, rgb(254, 195, 122) 100%);">
+        <div class="text">Выслать</div>
+      </button>
+    </div>
+    <input type="hidden" name="result_json" value="1" style="">
+    <input type="hidden" name="submit_lost" value="1" style="">
+  </form>
+</div>
+
+<script>$('[name="registration"]').on("submit",function(){DLEconfirm('Вы подтверждаете что вам есть 18 лет?',dle_confirm,function(){$("[name=tr]").val(1);$.post(location.href,$("#registration").serializeArray(),function(data){var json=data.split("||")
+if(json[0]=='json'){var json=$.parseJSON(json[1]);if(json.error){DLEalert(json.error,dle_info)}else if(json.success){DLEalert(json.success,dle_info);setTimeout(function(){$(".ui-dialog-buttonpane button").on("click",function(){$.magnificPopup.close();$(".ui-dialog-buttonpane button").off("click");return false;})},200)
+if(json.location){setTimeout(function(){location.href=json.location;},2000);}}}})})
+return false;})
+$('[name="registration_lost"]').on("submit",function(){$.post('/index.php?do=lostpassword',$('[name="registration_lost"]').serializeArray(),function(data){var json=data.split("||")
+if(json[0]=='json'){var json=$.parseJSON(json[1])
+var html=json.error.split("<br />")
+DLEalert(html[0],dle_info)
+reload();}else if(json[0]=='success'){DLEalert(json[1],dle_info)}else{DLEalert(data,dle_info)}})
+return false;})</script>
+
+
+
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for(var j=0;j<document.scripts.length;j++){if(document.scripts[j].src===r){return;}}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window,document,"script","assets/bce81b10b847.js","ym");ym(87081121,"init",{clickmap:true,trackLinks:true,accurateTrackBounce:true});</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/87081121" style="position:absolute; left:-9999px;" alt="" data-pagespeed-url-hash="2475756962"/></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+
+</body></html>

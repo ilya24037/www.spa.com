@@ -14,7 +14,7 @@
           
           <!-- Toggle switch (как на скриншоте) -->
           <label class="switch">
-            <input type="checkbox" v-model="promoEnabled">
+            <input type="checkbox" id="promo-toggle" name="promo-toggle" v-model="promoEnabled">
             <span class="slider"></span>
           </label>
         </div>
@@ -92,7 +92,7 @@
             </template>
           </Tooltip>
         </label>
-        <input type="text" class="form-input" placeholder="от 2000 ₽">
+        <input type="text" id="price-field" name="price" class="form-input" placeholder="от 2000 ₽">
       </div>
     </div>
 

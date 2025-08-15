@@ -408,6 +408,182 @@
           "id": "shower_together",
           "name": "Помывка в душе",
           "price_placeholder": "Укажите цену, комментарий"
+        },
+        {
+          "id": "sex_in_car",
+          "name": "Секс в авто",
+          "price_placeholder": "Укажите цену, комментарий"
+        }
+      ]
+    },
+    {
+      "id": "hygiene_amenities",
+      "name": "Гигиена",
+      "icon": "",
+      "description": "",
+      "is_amenity": true,
+      "services": [
+        {
+          "id": "shower_before",
+          "name": "Душ до встречи",
+          "popular": true
+        },
+        {
+          "id": "shower_after",
+          "name": "Душ после встречи",
+          "popular": true
+        },
+        {
+          "id": "shower_together",
+          "name": "Душ вместе"
+        },
+        {
+          "id": "bathtub",
+          "name": "Ванна"
+        },
+        {
+          "id": "jacuzzi",
+          "name": "Джакузи"
+        },
+        {
+          "id": "sauna",
+          "name": "Сауна"
+        },
+        {
+          "id": "towels",
+          "name": "Полотенца",
+          "popular": true
+        },
+        {
+          "id": "hygiene_products",
+          "name": "Средства гигиены"
+        },
+        {
+          "id": "bathrobes",
+          "name": "Халаты"
+        },
+        {
+          "id": "slippers",
+          "name": "Тапочки"
+        }
+      ]
+    },
+    {
+      "id": "entertainment_amenities",
+      "name": "Развлечения",
+      "icon": "",
+      "description": "",
+      "is_amenity": true,
+      "services": [
+        {
+          "id": "music",
+          "name": "Музыка",
+          "popular": true
+        },
+        {
+          "id": "tv",
+          "name": "Телевизор"
+        },
+        {
+          "id": "karaoke",
+          "name": "Караоке"
+        },
+        {
+          "id": "pole_dance",
+          "name": "Пилон"
+        },
+        {
+          "id": "mirrors",
+          "name": "Зеркала"
+        },
+        {
+          "id": "wifi",
+          "name": "Wi-Fi",
+          "popular": true
+        },
+        {
+          "id": "games",
+          "name": "Игры"
+        },
+        {
+          "id": "books",
+          "name": "Книги"
+        },
+        {
+          "id": "movies",
+          "name": "Фильмы"
+        }
+      ]
+    },
+    {
+      "id": "conditions_amenities",
+      "name": "Условия",
+      "icon": "",
+      "description": "",
+      "is_amenity": true,
+      "services": [
+        {
+          "id": "parking",
+          "name": "Парковка",
+          "popular": true
+        },
+        {
+          "id": "air_conditioning",
+          "name": "Кондиционер",
+          "popular": true
+        },
+        {
+          "id": "heating",
+          "name": "Отопление"
+        },
+        {
+          "id": "kitchen",
+          "name": "Кухня"
+        },
+        {
+          "id": "fridge",
+          "name": "Холодильник"
+        },
+        {
+          "id": "minibar",
+          "name": "Мини-бар"
+        },
+        {
+          "id": "tea_coffee",
+          "name": "Чай/Кофе",
+          "popular": true
+        },
+        {
+          "id": "alcohol",
+          "name": "Алкоголь"
+        },
+        {
+          "id": "snacks",
+          "name": "Закуски"
+        },
+        {
+          "id": "smoking_allowed",
+          "name": "Можно курить"
+        },
+        {
+          "id": "balcony",
+          "name": "Балкон"
+        },
+        {
+          "id": "terrace",
+          "name": "Терраса"
+        },
+        {
+          "id": "pets_allowed",
+          "name": "Можно с животными"
+        },
+        {
+          "id": "security",
+          "name": "Охрана"
+        },
+        {
+          "id": "video_surveillance",
+          "name": "Видеонаблюдение"
         }
       ]
     }

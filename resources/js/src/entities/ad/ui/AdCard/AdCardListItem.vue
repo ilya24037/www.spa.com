@@ -163,7 +163,7 @@
 
 <script setup lang="ts">
 import { logger } from '@/src/shared/lib/logger'
-import { ref, computed, withDefaults } from 'vue'
+import { ref, computed } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { useToast } from '@/src/shared/composables/useToast'
 import type {

@@ -21,13 +21,14 @@
         :category="mainCategory"
         v-model="localServices[mainCategory.id]"
         @update:modelValue="updateCategory(mainCategory.id, $event)"
+        :is-subcategory="false"
       />
       
       <!-- Дополнительные услуги (свернуты по умолчанию) -->
-      <div v-if="additionalCategories.length > 0" class="additional-services-wrapper">
-        <div class="category-header cursor-pointer select-none" @click="toggleAdditionalServices">
+      <div v-if="additionalCategories.length > 0" class="service-category mb-6">
+        <div class="category-header mb-3 cursor-pointer select-none hover:bg-gray-50 rounded-lg p-2 -mx-2 transition-colors" @click="toggleAdditionalServices">
           <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+            <h3 class="text-base font-semibold text-gray-900 flex items-center">
               Дополнительные услуги
               <span v-if="totalAdditionalSelected > 0" class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded-full">
                 {{ totalAdditionalSelected }}
@@ -45,16 +46,18 @@
           </div>
         </div>
         
-        <div v-show="isAdditionalExpanded" class="mt-4 space-y-6">
+        <div v-show="isAdditionalExpanded" class="mt-4 space-y-4 pl-6">
           <ServiceCategory
             v-for="category in additionalCategories"
             :key="category.id"
             :category="category"
             v-model="localServices[category.id]"
             @update:modelValue="updateCategory(category.id, $event)"
+            :is-subcategory="true"
           />
         </div>
       </div>
+      
     </div>
     <div class="services-stats mt-6 p-4 bg-gray-50 rounded-lg">
       <div class="flex items-center justify-between">
@@ -97,6 +100,7 @@ interface Category {
   icon: string
   description: string
   services: Service[]
+  is_amenity?: boolean
 }
 
 const props = defineProps({
@@ -117,11 +121,14 @@ const props = defineProps({
 const emit = defineEmits(['update:services'])
 
 const allCategories = servicesConfig.categories as Category[]
+
+// Фильтруем только категории услуг (без удобств)
 const filteredCategories = computed(() => {
+  const serviceCategories = allCategories.filter(cat => !cat.is_amenity)
   if (props.allowedCategories.length === 0) {
-    return allCategories
+    return serviceCategories
   }
-  return allCategories.filter(category => 
+  return serviceCategories.filter(category => 
     props.allowedCategories.includes(category.id)
   )
 })
@@ -136,7 +143,7 @@ const mainCategory = computed(() => {
   return filteredCategories.value.find(cat => cat.id === 'intimate_services')
 })
 
-// Дополнительные категории (все остальные)
+// Дополнительные категории (все остальные услуги, кроме основных)
 const additionalCategories = computed(() => {
   return filteredCategories.value.filter(cat => cat.id !== 'intimate_services')
 })
@@ -215,15 +222,9 @@ watch(() => props.services, (val) => {
   }
 }, { deep: true })
 
-watch(() => props.servicesAdditionalInfo, (val) => {
-  localAdditionalInfo.value = val || ''
-})
-
 const emitAll = () => {
   emit('update:services', JSON.parse(JSON.stringify(localServices)))
-  emit('update:servicesAdditionalInfo', localAdditionalInfo.value)
 }
-
 
 // Инициализация
 if (props.services && typeof props.services === 'object') {
@@ -233,9 +234,6 @@ if (props.services && typeof props.services === 'object') {
       localServices[categoryId][serviceId] = { ...props.services[categoryId][serviceId] }
     })
   })
-}
-if (props.servicesAdditionalInfo) {
-  localAdditionalInfo.value = props.servicesAdditionalInfo
 }
 initializeServicesData()
 </script>

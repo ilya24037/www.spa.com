@@ -86,6 +86,20 @@
         />
       </CollapsibleSection>
 
+      <!-- Комфорт -->
+      <CollapsibleSection
+        title="Комфорт"
+        :is-open="sectionsState.comfort"
+        :is-required="false"
+        :is-filled="checkSectionFilled('comfort')"
+        @toggle="toggleSection('comfort')"
+      >
+        <ComfortSection 
+          v-model="form.services"
+          :errors="errors"
+        />
+      </CollapsibleSection>
+
       <!-- Фото и видео -->
       <CollapsibleSection
         title="Фото и видео"
@@ -118,20 +132,6 @@
         />
       </CollapsibleSection>
 
-      <!-- Контакты -->
-      <CollapsibleSection
-        title="Контакты"
-        :is-open="sectionsState.contacts"
-        :is-required="true"
-        :is-filled="checkSectionFilled('contacts')"
-        @toggle="toggleSection('contacts')"
-      >
-        <ContactsSection 
-          v-model:contacts="form.contacts" 
-          :errors="errors"
-        />
-      </CollapsibleSection>
-
       <!-- График работы (необязательная) -->
       <CollapsibleSection
         title="График работы"
@@ -143,6 +143,7 @@
         <ScheduleSection 
           v-model:schedule="form.schedule" 
           v-model:schedule-notes="form.schedule_notes" 
+          v-model:online-booking="form.online_booking"
           :errors="errors"
         />
       </CollapsibleSection>
@@ -171,6 +172,20 @@
       >
         <PromoSection 
           v-model:promo="form.promo" 
+          :errors="errors"
+        />
+      </CollapsibleSection>
+
+      <!-- Контакты (в самом низу) -->
+      <CollapsibleSection
+        title="Контакты"
+        :is-open="sectionsState.contacts"
+        :is-required="true"
+        :is-filled="checkSectionFilled('contacts')"
+        @toggle="toggleSection('contacts')"
+      >
+        <ContactsSection 
+          v-model:contacts="form.contacts" 
           :errors="errors"
         />
       </CollapsibleSection>
@@ -205,6 +220,7 @@ import { useAdFormModel } from '../model/adFormModel'
 import ParametersSection from '@/src/features/AdSections/ParametersSection/ui/ParametersSection.vue'
 import PricingSection from '@/src/features/AdSections/PricingSection/ui/PricingSection.vue'
 import ServicesModule from '@/src/features/Services/index.vue'
+import ComfortSection from '@/src/features/Services/ComfortSection.vue'
 import MediaSection from '@/src/features/AdSections/MediaSection/ui/MediaSection.vue'
 import GeoSection from '@/src/features/AdSections/GeoSection/ui/GeoSection.vue'
 import ContactsSection from '@/src/features/AdSections/ContactsSection/ui/ContactsSection.vue'
@@ -269,6 +285,12 @@ const sectionsConfig = [
     fields: ['services', 'services_additional_info']
   },
   {
+    key: 'comfort',
+    title: 'Комфорт',
+    required: false,
+    fields: []
+  },
+  {
     key: 'media',
     title: 'Фото и видео',
     required: true,
@@ -281,16 +303,10 @@ const sectionsConfig = [
     fields: ['geo']
   },
   {
-    key: 'contacts',
-    title: 'Контакты',
-    required: true,
-    fields: ['contacts']
-  },
-  {
     key: 'schedule',
     title: 'График работы',
     required: false,
-    fields: ['schedule', 'schedule_notes']
+    fields: ['schedule', 'schedule_notes', 'online_booking']
   },
   {
     key: 'features',
@@ -303,6 +319,12 @@ const sectionsConfig = [
     title: 'Акции и скидки',
     required: false,
     fields: ['promo']
+  },
+  {
+    key: 'contacts',
+    title: 'Контакты',
+    required: true,
+    fields: ['contacts']
   }
 ]
 

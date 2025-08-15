@@ -1,6 +1,4 @@
 // useId.ts - Generate unique IDs
-let counter = 0
-
-export function useId(prefix = 'id') {
-    return `${prefix}-${++counter}-${Date.now()}`
+export function useId(prefix = 'field') {
+    return `${prefix}-${Math.random().toString(36).slice(2, 8)}`
 }

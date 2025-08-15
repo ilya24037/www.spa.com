@@ -42,13 +42,13 @@
 
   <!-- Модальное окно подтверждения удаления -->
   <ConfirmModal
-    :show="showDeleteModal"
+    v-model="showDeleteModal"
     title="Удалить объявление?"
     message="Это действие нельзя отменить. Объявление будет удалено навсегда."
     confirm-text="Удалить"
     cancel-text="Отмена"
+    variant="danger"
     @confirm="deleteItem"
-    @cancel="showDeleteModal = false"
   />
 </template>
 

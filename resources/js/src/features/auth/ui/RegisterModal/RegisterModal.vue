@@ -1,7 +1,7 @@
 <template>
   <!-- Затемнение фона -->
   <div 
-    v-if="show"
+    v-if="props.show"
     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     @click="closeModal"
   >
@@ -128,7 +128,7 @@ interface Props {
   show?: boolean
 }
 
-const _props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
     show: false
 })
 

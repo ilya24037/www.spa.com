@@ -1,7 +1,7 @@
 <!-- Р‘Р°Р·РѕРІС‹Р№ РёРЅРїСѓС‚ РІ СЃС‚РёР»Рµ РђРІРёС‚Рѕ -->
 <template>
   <div class="input-container">
-    <label v-if="label" class="input-label">{{ label }}</label>
+    <label v-if="label" :for="inputId" class="input-label">{{ label }}</label>
     
     <div
       class="input-wrapper"
@@ -12,10 +12,15 @@
       }"
     >
       <input
+        :id="inputId"
         ref="inputRef"
         v-model="inputValue"
         :type="type"
+        :name="inputName"
         :placeholder="placeholder"
+        :aria-label="!label && placeholder ? placeholder : undefined"
+        :aria-invalid="!!error"
+        :aria-describedby="error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined"
         :disabled="disabled"
         :readonly="readonly"
         :maxlength="maxlength"
@@ -72,12 +77,12 @@
     </div>
     
     <!-- РћС€РёР±РєР° -->
-    <div v-if="error" class="input-error">
+    <div v-if="error" :id="`${inputId}-error`" class="input-error" role="alert">
       {{ error }}
     </div>
     
     <!-- РџРѕРґСЃРєР°Р·РєР° -->
-    <div v-if="hint && !error" class="input-hint">
+    <div v-if="hint && !error" :id="`${inputId}-hint`" class="input-hint">
       {{ hint }}
     </div>
     
@@ -90,12 +95,28 @@
 
 <script setup>
 import { ref, computed, nextTick } from 'vue'
+import { useId } from '@/src/shared/composables/useId'
 
 // Props
 const props = defineProps({
     modelValue: {
         type: [String, Number],
         default: ''
+    },
+    id: {
+        type: String,
+        default: ''
+    },
+    name: {
+        type: String,
+        default: '',
+        validator: (value, props) => {
+            // Предупреждение если нет name (но не блокируем работу)
+            if (!value && !props.id) {
+                console.warn('[BaseInput] Рекомендуется указать name или id для доступности и автозаполнения')
+            }
+            return true
+        }
     },
     type: {
         type: String,
@@ -164,6 +185,22 @@ const props = defineProps({
 
 // Events
 const emit = defineEmits(['update:modelValue', 'focus', 'blur', 'enter', 'clear'])
+
+// Generate unique ID if not provided
+const inputId = computed(() => props.id || useId('base-input'))
+
+// Auto-generate name from id or label if not provided
+const inputName = computed(() => {
+    if (props.name) return props.name
+    if (props.id) return props.id
+    if (props.label) {
+        // Преобразуем label в snake_case для name
+        return props.label.toLowerCase()
+            .replace(/[^\w\s]/g, '')
+            .replace(/\s+/g, '_')
+    }
+    return inputId.value
+})
 
 // Refs
 const inputRef = ref(null)

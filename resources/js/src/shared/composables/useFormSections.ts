@@ -15,10 +15,62 @@ export interface SectionConfig {
  * Composable для управления секциями формы
  */
 export function useFormSections(sections: SectionConfig[], formData: any) {
+  // Вспомогательная функция для получения вложенных значений
+  const getNestedValue = (obj: any, path: string): any => {
+    return path.split('.').reduce((current, key) => current?.[key], obj)
+  }
+  
+  // Функция проверки заполненности секции при инициализации
+  const checkInitialSectionFilled = (section: SectionConfig): boolean => {
+    const sectionKey = section.key
+    
+    // Специальная логика для услуг и комфорта (они используют общие данные)
+    if (sectionKey === 'services' || sectionKey === 'comfort') {
+      const services = formData.services
+      if (services && typeof services === 'object') {
+        // Для секции Комфорт проверяем только категории с is_amenity
+        // Для секции Услуги проверяем категории без is_amenity
+        // Но поскольку у нас нет доступа к конфигу здесь, проверяем все
+        for (const categoryServices of Object.values(services)) {
+          if (categoryServices && typeof categoryServices === 'object') {
+            for (const service of Object.values(categoryServices) as any[]) {
+              if (service?.enabled || service?.comment) return true
+            }
+          }
+        }
+      }
+      return false
+    }
+    
+    // Специальная логика для удобств (старый код, если останется)
+    if (sectionKey === 'amenities') {
+      const amenities = formData.amenities
+      if (amenities && typeof amenities === 'object') {
+        for (const categoryAmenities of Object.values(amenities)) {
+          if (categoryAmenities && typeof categoryAmenities === 'object') {
+            for (const amenity of Object.values(categoryAmenities) as any[]) {
+              if (amenity?.enabled) return true
+            }
+          }
+        }
+      }
+      return false
+    }
+    
+    // Для остальных секций проверяем поля
+    return section.fields.some(field => {
+      const value = getNestedValue(formData, field)
+      return value !== null && value !== undefined && value !== '' && 
+             (Array.isArray(value) ? value.length > 0 : true)
+    })
+  }
+  
   // Состояние секций (открыт/закрыт)
+  // Инициализируем с учетом заполненных данных
   const sectionsState = ref<SectionState>(
     sections.reduce((acc, section) => {
-      acc[section.key] = section.required // Обязательные секции открыты по умолчанию
+      // Секция открыта если она обязательная ИЛИ в ней есть заполненные данные
+      acc[section.key] = section.required || checkInitialSectionFilled(section)
       return acc
     }, {} as SectionState)
   )
@@ -51,6 +103,36 @@ export function useFormSections(sections: SectionConfig[], formData: any) {
     const section = sections.find(s => s.key === sectionKey)
     if (!section) return false
 
+    // Специальная логика для услуг
+    if (sectionKey === 'services') {
+      const services = formData.services
+      if (services && typeof services === 'object') {
+        for (const categoryServices of Object.values(services)) {
+          if (categoryServices && typeof categoryServices === 'object') {
+            for (const service of Object.values(categoryServices) as any[]) {
+              if (service?.enabled) return true
+            }
+          }
+        }
+      }
+      return false
+    }
+
+    // Специальная логика для удобств
+    if (sectionKey === 'amenities') {
+      const amenities = formData.amenities
+      if (amenities && typeof amenities === 'object') {
+        for (const categoryAmenities of Object.values(amenities)) {
+          if (categoryAmenities && typeof categoryAmenities === 'object') {
+            for (const amenity of Object.values(categoryAmenities) as any[]) {
+              if (amenity?.enabled) return true
+            }
+          }
+        }
+      }
+      return false
+    }
+
     return section.fields.some(field => {
       const value = getNestedValue(formData, field)
       return value !== null && value !== undefined && value !== '' && 
@@ -62,6 +144,38 @@ export function useFormSections(sections: SectionConfig[], formData: any) {
   const getFilledCount = (sectionKey: string): number => {
     const section = sections.find(s => s.key === sectionKey)
     if (!section) return 0
+
+    // Специальная логика для услуг
+    if (sectionKey === 'services') {
+      let count = 0
+      const services = formData.services
+      if (services && typeof services === 'object') {
+        Object.values(services).forEach((categoryServices: any) => {
+          if (categoryServices && typeof categoryServices === 'object') {
+            Object.values(categoryServices).forEach((service: any) => {
+              if (service?.enabled) count++
+            })
+          }
+        })
+      }
+      return count
+    }
+
+    // Специальная логика для удобств
+    if (sectionKey === 'amenities') {
+      let count = 0
+      const amenities = formData.amenities
+      if (amenities && typeof amenities === 'object') {
+        Object.values(amenities).forEach((categoryAmenities: any) => {
+          if (categoryAmenities && typeof categoryAmenities === 'object') {
+            Object.values(categoryAmenities).forEach((amenity: any) => {
+              if (amenity?.enabled) count++
+            })
+          }
+        })
+      }
+      return count
+    }
 
     return section.fields.filter(field => {
       const value = getNestedValue(formData, field)
@@ -77,11 +191,6 @@ export function useFormSections(sections: SectionConfig[], formData: any) {
     
     return totalFields > 0 ? Math.round((filledFields / totalFields) * 100) : 0
   })
-
-  // Вспомогательная функция для получения вложенных значений
-  const getNestedValue = (obj: any, path: string): any => {
-    return path.split('.').reduce((current, key) => current?.[key], obj)
-  }
 
   return {
     sectionsState,

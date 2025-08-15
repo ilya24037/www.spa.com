@@ -1,7 +1,8 @@
 <template>
   <div class="videos-section">
     <h2 class="form-group-title">Видео</h2>
-    <input type="file" multiple accept="video/*" @change="onFilesChange" />
+    <label for="video-upload" class="sr-only">Загрузить видео</label>
+    <input type="file" id="video-upload" name="videos[]" multiple accept="video/*" @change="onFilesChange" />
     <div class="videos-preview">
       <video v-for="(video, idx) in localVideos" :key="idx" :src="videoUrl(video)" class="video-thumb" controls />
     </div>

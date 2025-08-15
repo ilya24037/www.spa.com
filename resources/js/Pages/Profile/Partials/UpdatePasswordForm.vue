@@ -45,10 +45,10 @@ const updatePassword = () => {
 
     <form class="mt-6 space-y-6" @submit.prevent="updatePassword">
       <div>
-        <InputLabel for="current_password" value="Current Password" />
+        <InputLabel for="update-current-password" value="Current Password" />
 
         <TextInput
-          id="current_password"
+          id="update-current-password"
           ref="currentPasswordInput"
           v-model="form.current_password"
           type="password"
@@ -63,10 +63,10 @@ const updatePassword = () => {
       </div>
 
       <div>
-        <InputLabel for="password" value="New Password" />
+        <InputLabel for="update-new-password" value="New Password" />
 
         <TextInput
-          id="password"
+          id="update-new-password"
           ref="passwordInput"
           v-model="form.password"
           type="password"
@@ -79,12 +79,12 @@ const updatePassword = () => {
 
       <div>
         <InputLabel
-          for="password_confirmation"
+          for="update-password-confirmation"
           value="Confirm Password"
         />
 
         <TextInput
-          id="password_confirmation"
+          id="update-password-confirmation"
           v-model="form.password_confirmation"
           type="password"
           class="mt-1 block w-full"

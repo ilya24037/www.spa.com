@@ -1,17 +1,25 @@
 <template>
-  <div class="service-category mb-8">
+  <div :class="isSubcategory ? 'service-category mb-4' : 'service-category mb-6'">
     <!-- Заголовок категории -->
-    <div class="category-header mb-4 cursor-pointer select-none" @click="toggleExpanded">
+    <div class="category-header mb-3 cursor-pointer select-none hover:bg-gray-50 rounded-lg p-2 -mx-2 transition-colors" @click="toggleExpanded">
       <div class="flex items-center justify-between">
-        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+        <h3 :class="[
+          'flex items-center',
+          isSubcategory 
+            ? 'text-sm font-normal text-gray-600' 
+            : 'text-base font-semibold text-gray-900'
+        ]">
           {{ category.name }}
           <span v-if="selectedCount > 0" class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded-full">
             {{ selectedCount }}
           </span>
         </h3>
         <svg 
-          class="w-5 h-5 text-gray-500 transition-transform duration-200" 
-          :class="{ 'rotate-180': isExpanded }"
+          :class="[
+            'text-gray-500 transition-transform duration-200',
+            { 'rotate-180': isExpanded },
+            isSubcategory ? 'w-4 h-4' : 'w-5 h-5'
+          ]"
           fill="none" 
           stroke="currentColor" 
           viewBox="0 0 24 24"
@@ -90,6 +98,10 @@ const props = defineProps({
   modelValue: {
     type: Object,
     default: () => ({})
+  },
+  isSubcategory: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -98,18 +110,25 @@ const emit = defineEmits(['update:modelValue'])
 // Локальное состояние для всех услуг категории
 const serviceValues = reactive({})
 
+// Проверяем, есть ли в категории выбранные услуги при инициализации
+const hasSelectedServices = () => {
+  if (!props.modelValue) return false
+  return Object.values(props.modelValue).some(service => service?.enabled)
+}
+
 // Состояние раскрытия - "Основные услуги" развернуты по умолчанию
-const isExpanded = ref(props.category.id === 'intimate_services')
+// Также раскрываем категории с выбранными услугами
+const isExpanded = ref(props.category.id === 'intimate_services' || hasSelectedServices())
 
 // Функция переключения состояния раскрытия
 const toggleExpanded = () => {
   isExpanded.value = !isExpanded.value
 }
 
-// При монтировании убеждаемся, что "Основные услуги" развернуты
+// При монтировании проверяем, нужно ли раскрыть категорию
 onMounted(async () => {
   await nextTick()
-  if (props.category.id === 'intimate_services') {
+  if (props.category.id === 'intimate_services' || hasSelectedServices()) {
     isExpanded.value = true
   }
 })

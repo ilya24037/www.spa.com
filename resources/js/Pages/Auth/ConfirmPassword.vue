@@ -30,9 +30,9 @@ const submit = (): void => {
 
     <form @submit.prevent="submit">
       <div>
-        <InputLabel for="password" value="Password" />
+        <InputLabel for="confirm-password" value="Password" />
         <TextInput
-          id="password"
+          id="confirm-password"
           v-model="form.password"
           type="password"
           class="mt-1 block w-full"

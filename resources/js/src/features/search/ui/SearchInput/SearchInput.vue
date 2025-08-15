@@ -1,9 +1,12 @@
 <!-- Поле ввода поиска -->
 <template>
   <div class="flex-1 relative flex items-center">
+    <label :for="inputId" class="sr-only">{{ placeholder || 'Поиск' }}</label>
     <input 
+      :id="inputId"
       ref="inputRef"
       type="search"
+      name="search"
       :value="modelValue"
       :placeholder="placeholder"
       :disabled="disabled"
@@ -99,6 +102,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue'
+import { useId } from '@/src/shared/composables/useId'
 import type { SearchInputProps, SearchInputEmits } from '../../model/search.types'
 
 // Props
@@ -121,6 +125,7 @@ const emit = defineEmits<SearchInputEmits>()
 // Refs
 const inputRef = ref<HTMLInputElement>()
 const isFocused = ref(false)
+const inputId = useId('search-input')
 
 // Computed
 const inputClasses = computed(() => {
@@ -230,6 +235,18 @@ defineExpose({
 </script>
 
 <style scoped>
+/* Скрытие элементов визуально, но оставляя доступными для скринридеров */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
 /* Убираем стандартную кнопку очистки в Safari */
 input[type="search"]::-webkit-search-cancel-button,
 input[type="search"]::-webkit-search-decoration,

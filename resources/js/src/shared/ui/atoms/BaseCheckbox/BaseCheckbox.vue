@@ -1,6 +1,18 @@
-<!-- Р‘Р°Р·РѕРІС‹Р№ С‡РµРєР±РѕРєСЃ РґР»СЏ Boolean Р·РЅР°С‡РµРЅРёР№ (РєР°Рє РЅР° РђРІРёС‚Рѕ) -->
+<!-- Р'Р°Р·РѕРІС‹Р№ С‡РµРєР±РѕРєСЃ РґР»СЏ Boolean Р·РЅР°С‡РµРЅРёР№ (РєР°Рє РЅР° РђРІРёС‚Рѕ) -->
 <template>
   <div class="checkbox-container" @click="toggle">
+    <!-- Скрытый input для форм -->
+    <input 
+      :id="checkboxId"
+      type="checkbox"
+      :name="checkboxName"
+      :checked="modelValue"
+      :disabled="disabled"
+      :aria-label="!label && $slots.label ? 'Checkbox' : undefined"
+      :aria-checked="modelValue"
+      class="sr-only"
+      @change="toggle"
+    >
     <div 
       class="custom-checkbox"
       :class="{ 
@@ -25,33 +37,62 @@
       </svg>
     </div>
     
-    <span 
+    <label 
       v-if="label || $slots.label" 
+      :for="checkboxId"
       class="checkbox-label"
       :class="{ 'disabled': disabled }"
     >
       <slot name="label">
         {{ label }}
       </slot>
-    </span>
+    </label>
     
     <slot />
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useId } from '@/src/shared/composables/useId'
+
 // TypeScript РёРЅС‚РµСЂС„РµР№СЃС‹
 interface BaseCheckboxProps {
   modelValue?: boolean
+  id?: string
+  name?: string
   label?: string
   disabled?: boolean
 }
 
 const props = withDefaults(defineProps<BaseCheckboxProps>(), {
     modelValue: false,
+    name: '',
     label: '',
     disabled: false
 });
+
+// Generate unique ID if not provided
+const checkboxId = computed(() => props.id || useId('checkbox'))
+
+// Auto-generate name from label if not provided
+const checkboxName = computed(() => {
+    if (props.name) return props.name
+    if (props.label) {
+        // Преобразуем label в snake_case для name
+        return props.label.toLowerCase()
+            .replace(/[^\w\s]/g, '')
+            .replace(/\s+/g, '_')
+    }
+    return checkboxId.value
+})
+
+// Предупреждение в dev режиме
+if (process.env.NODE_ENV !== 'production') {
+    if (!props.name && !props.label) {
+        console.warn('[BaseCheckbox] Рекомендуется указать name или label для доступности')
+    }
+}
 
 // TypeScript С‚РёРїРёР·Р°С†РёСЏ emits
 const emit = defineEmits<{
@@ -137,6 +178,19 @@ const toggle = (event: MouseEvent): void => {
 .checkbox-label.disabled {
   color: #8c8c8c;
   cursor: not-allowed;
+}
+
+/* Класс для скрытия элемента (screen reader only) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
 </style> 
 

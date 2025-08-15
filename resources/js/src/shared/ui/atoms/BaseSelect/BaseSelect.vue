@@ -1,7 +1,27 @@
-<!-- Р'Р°Р·РѕРІС‹Р№ СЃРµР»РµРєС‚ РІ СЃС‚РёР»Рµ РђРІРёС‚Рѕ -->
+<!-- Базовый селект в стиле Авито -->
 <template>
   <div class="select-container" ref="selectRef">
-    <label v-if="label" class="select-label">{{ label }}</label>
+    <label v-if="label" :for="selectId" class="select-label">{{ label }}</label>
+    
+    <!-- Скрытый select для форм -->
+    <select 
+      :id="selectId"
+      :value="modelValue"
+      :disabled="disabled"
+      class="sr-only"
+      tabindex="-1"
+      @change="$emit('update:modelValue', $event.target.value)"
+    >
+      <option v-if="placeholder" value="">{{ placeholder }}</option>
+      <option 
+        v-for="(option, index) in flatOptions" 
+        :key="index"
+        v-show="!option.isGroup"
+        :value="option.value"
+      >
+        {{ option.label }}
+      </option>
+    </select>
     
     <div 
       class="custom-select-wrapper" 
@@ -75,12 +95,17 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { useId } from '@/src/shared/composables/useId'
 
 // Props
 const props = defineProps({
     modelValue: {
         type: [String, Number, Boolean],
         default: null
+    },
+    id: {
+        type: String,
+        default: ''
     },
     options: {
         type: Array,
@@ -99,7 +124,7 @@ const props = defineProps({
     },
     placeholder: {
         type: String,
-        default: 'Р’С‹Р±РµСЂРёС‚Рµ...'
+        default: 'Выберите...'
     },
     label: {
         type: String,
@@ -121,6 +146,9 @@ const props = defineProps({
 
 // Events
 const emit = defineEmits(['update:modelValue', 'change'])
+
+// Generate unique ID if not provided
+const selectId = computed(() => props.id || useId('select'))
 
 // State
 const isOpen = ref(false)
@@ -199,6 +227,19 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* Класс для скрытия элемента (screen reader only) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
 .select-container {
   width: 100%;
 }
@@ -346,7 +387,7 @@ onUnmounted(() => {
   line-height: 1.4;
 }
 
-/* РЎРєСЂРѕР»Р»Р±Р°СЂ РґР»СЏ dropdown */
+/* Скроллбар для dropdown */
 .custom-select-dropdown::-webkit-scrollbar {
   width: 6px;
 }

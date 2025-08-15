@@ -1,0 +1,18 @@
+{
+  "url": "https://mc.yandex.com/metrika/metrika_match.html",
+  "saved_at": "2025-08-15T12:18:42.944394",
+  "assets_count": 27,
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "frameworks_detected": {
+    "vue": false,
+    "react": false,
+    "angular": false,
+    "jquery": true,
+    "bootstrap": false,
+    "tailwind": false
+  },
+  "custom_elements": []
+}

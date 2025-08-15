@@ -28,11 +28,11 @@
     <form class="space-y-6" @submit.prevent="handleSubmit">
       <!-- Имя клиента -->
       <div>
-        <label for="clientName" class="block text-sm font-medium text-gray-500 mb-2">
+        <label :for="`${componentId}-name`" class="block text-sm font-medium text-gray-500 mb-2">
           Ваше имя <span class="text-red-500">*</span>
         </label>
         <input
-          id="clientName"
+          :id="`${componentId}-name`"
           v-model="form.clientName"
           type="text"
           placeholder="Введите ваше имя"
@@ -51,11 +51,11 @@
 
       <!-- Телефон клиента -->
       <div>
-        <label for="clientPhone" class="block text-sm font-medium text-gray-500 mb-2">
+        <label :for="`${componentId}-phone`" class="block text-sm font-medium text-gray-500 mb-2">
           Телефон <span class="text-red-500">*</span>
         </label>
         <input
-          id="clientPhone"
+          :id="`${componentId}-phone`"
           v-model="form.clientPhone"
           type="tel"
           placeholder="+7 (___) ___-__-__"
@@ -75,11 +75,11 @@
 
       <!-- Email клиента (необязательно) -->
       <div>
-        <label for="clientEmail" class="block text-sm font-medium text-gray-500 mb-2">
+        <label :for="`${componentId}-email`" class="block text-sm font-medium text-gray-500 mb-2">
           Email (необязательно)
         </label>
         <input
-          id="clientEmail"
+          :id="`${componentId}-email`"
           v-model="form.clientEmail"
           type="email"
           placeholder="example@email.com"
@@ -98,11 +98,11 @@
 
       <!-- Дополнительные заметки -->
       <div>
-        <label for="notes" class="block text-sm font-medium text-gray-500 mb-2">
+        <label :for="`${componentId}-notes`" class="block text-sm font-medium text-gray-500 mb-2">
           Дополнительные пожелания
         </label>
         <textarea
-          id="notes"
+          :id="`${componentId}-notes`"
           v-model="form.notes"
           rows="3"
           placeholder="Опишите особые пожелания или уточнения..."
@@ -115,7 +115,7 @@
         <div class="flex items-start">
           <div class="flex items-center h-5">
             <input
-              id="dataProcessingConsent"
+              :id="`${componentId}-consent`"
               v-model="form.dataProcessingConsent"
               type="checkbox"
               :class="[
@@ -229,9 +229,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, withDefaults, defineProps, defineEmits } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useErrorHandler } from '@/src/shared/composables/useErrorHandler'
 import { ErrorState } from '@/src/shared/ui/molecules/ErrorState'
+
+// Уникальный ID для экземпляра компонента
+const componentId = `booking-form-${Math.random().toString(36).substr(2, 9)}`
 
 // Типы
 interface BookingService {

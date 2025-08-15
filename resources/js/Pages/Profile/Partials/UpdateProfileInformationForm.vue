@@ -38,10 +38,10 @@ const form = useForm({
       @submit.prevent="form.patch(route('profile.update'))"
     >
       <div>
-        <InputLabel for="name" value="Name" />
+        <InputLabel for="profile-name" value="Name" />
 
         <TextInput
-          id="name"
+          id="profile-name"
           v-model="form.name"
           type="text"
           class="mt-1 block w-full"
@@ -54,10 +54,10 @@ const form = useForm({
       </div>
 
       <div>
-        <InputLabel for="email" value="Email" />
+        <InputLabel for="profile-email" value="Email" />
 
         <TextInput
-          id="email"
+          id="profile-email"
           v-model="form.email"
           type="email"
           class="mt-1 block w-full"

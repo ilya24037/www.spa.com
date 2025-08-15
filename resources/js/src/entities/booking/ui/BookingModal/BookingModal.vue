@@ -5,7 +5,7 @@
       data-testid="booking-modal-wrapper"
       role="dialog"
       aria-modal="true"
-      aria-labelledby="booking-modal-title"
+      :aria-labelledby="`${componentId}-title`"
       @keydown="handleKeydown"
     >
       <div class="flex items-center justify-center min-h-screen p-4">
@@ -24,7 +24,7 @@
           <!-- Header -->
           <div class="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
             <h3 
-              id="booking-modal-title"
+              :id="`${componentId}-title`"
               class="text-lg font-semibold"
               data-testid="booking-modal-title"
             >
@@ -102,13 +102,13 @@
             <div class="grid grid-cols-2 gap-4 mb-6">
               <div>
                 <label 
-                  for="booking-date"
+                  :for="`${componentId}-date`"
                   class="block text-sm font-medium text-gray-500 mb-2"
                 >
                   Р”Р°С‚Р° *
                 </label>
                 <VueDatePicker 
-                  id="booking-date"
+                  :id="`${componentId}-date`"
                   v-model="form.booking_date"
                   :min-date="new Date()"
                   :disabled-dates="state.disabledDates"
@@ -118,12 +118,12 @@
                   :enable-time-picker="false"
                   data-testid="date-picker"
                   :class="{ 'border-red-500': formErrors.booking_date }"
-                  aria-describedby="date-error"
+                  :aria-describedby="`${componentId}-date-error`"
                   @update:model-value="fetchAvailableSlots"
                 />
                 <p 
                   v-if="formErrors.booking_date"
-                  id="date-error"
+                  :id="`${componentId}-date-error`"
                   class="mt-1 text-sm text-red-600"
                   data-testid="date-error"
                   role="alert"
@@ -196,25 +196,25 @@
                             
               <div>
                 <label 
-                  for="client-phone"
+                  :for="`${componentId}-phone`"
                   class="block text-sm font-medium text-gray-500 mb-2"
                 >
                   РўРµР»РµС„РѕРЅ *
                 </label>
                 <vue-tel-input
-                  id="client-phone"
+                  :id="`${componentId}-phone`"
                   v-model="form.client_phone"
                   :preferred-countries="['ru', 'ua', 'by']"
                   :only-countries="['ru', 'ua', 'by', 'kz']"
                   mode="international"
                   data-testid="client-phone-input"
                   :class="{ 'border-red-500': formErrors.client_phone }"
-                  aria-describedby="phone-error"
+                  :aria-describedby="`${componentId}-phone-error`"
                   required
                 />
                 <p 
                   v-if="formErrors.client_phone"
-                  id="phone-error"
+                  :id="`${componentId}-phone-error`"
                   class="mt-1 text-sm text-red-600"
                   data-testid="phone-error"
                   role="alert"
@@ -342,6 +342,9 @@ import type {
     BookingFormValidation,
     BookingFormErrors
 } from './BookingModal.types'
+
+// Уникальный ID для экземпляра компонента
+const componentId = `booking-modal-${Math.random().toString(36).substr(2, 9)}`
 
 // Props Рё emits СЃ TypeScript С‚РёРїРёР·Р°С†РёРµР№
 const props = defineProps<BookingModalProps>()

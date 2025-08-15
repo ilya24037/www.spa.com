@@ -4,6 +4,10 @@ import vue from '@vitejs/plugin-vue';
 import { resolve } from 'path';
 
 export default defineConfig({
+    define: {
+        // Передаем переменные окружения в клиентский код
+        'import.meta.env.VITE_YANDEX_MAPS_API_KEY': JSON.stringify(process.env.YANDEX_MAPS_API_KEY || '23ff8acc-835f-4e99-8b19-d33c5d346e18')
+    },
     plugins: [
         laravel({
             input: 'resources/js/app.js',
@@ -45,6 +49,8 @@ export default defineConfig({
     },
     // Настройки сервера разработки
     server: {
+        port: 5173,
+        strictPort: false, // Если порт занят, использовать следующий доступный
         hmr: {
             host: 'localhost',
         },

@@ -5,10 +5,11 @@
       <h3 class="pricing-block-title">В апартаментах</h3>
       <div class="pricing-grid">
         <div class="price-item">
-          <label class="price-label">Экспресс (30 мин)</label>
           <BaseInput
             v-model="localPrices.apartments_express"
             type="number"
+            name="apartments_express"
+            label="Экспресс (30 мин)"
             placeholder="0"
             :min="0"
             @update:modelValue="updatePrices"
@@ -17,10 +18,11 @@
           </BaseInput>
         </div>
         <div class="price-item">
-          <label class="price-label">1 час</label>
           <BaseInput
             v-model="localPrices.apartments_1h"
             type="number"
+            name="apartments_1h"
+            label="1 час"
             placeholder="0"
             :min="0"
             @update:modelValue="updatePrices"
@@ -29,10 +31,11 @@
           </BaseInput>
         </div>
         <div class="price-item">
-          <label class="price-label">2 часа</label>
           <BaseInput
             v-model="localPrices.apartments_2h"
             type="number"
+            name="apartments_2h"
+            label="2 часа"
             placeholder="0"
             :min="0"
             @update:modelValue="updatePrices"
@@ -41,10 +44,11 @@
           </BaseInput>
         </div>
         <div class="price-item">
-          <label class="price-label">Ночь</label>
           <BaseInput
             v-model="localPrices.apartments_night"
             type="number"
+            name="apartments_night"
+            label="Ночь"
             placeholder="0"
             :min="0"
             @update:modelValue="updatePrices"
@@ -60,10 +64,11 @@
       <h3 class="pricing-block-title">Выезд к клиенту</h3>
       <div class="pricing-grid">
         <div class="price-item">
-          <label class="price-label">Экспресс (30 мин)</label>
           <BaseInput
             v-model="localPrices.outcall_express"
             type="number"
+            name="outcall_express"
+            label="Экспресс (30 мин)"
             placeholder="0"
             :min="0"
             @update:modelValue="updatePrices"
@@ -72,10 +77,11 @@
           </BaseInput>
         </div>
         <div class="price-item">
-          <label class="price-label">1 час</label>
           <BaseInput
             v-model="localPrices.outcall_1h"
             type="number"
+            name="outcall_1h"
+            label="1 час"
             placeholder="0"
             :min="0"
             @update:modelValue="updatePrices"
@@ -84,10 +90,11 @@
           </BaseInput>
         </div>
         <div class="price-item">
-          <label class="price-label">2 часа</label>
           <BaseInput
             v-model="localPrices.outcall_2h"
             type="number"
+            name="outcall_2h"
+            label="2 часа"
             placeholder="0"
             :min="0"
             @update:modelValue="updatePrices"
@@ -96,10 +103,11 @@
           </BaseInput>
         </div>
         <div class="price-item">
-          <label class="price-label">Ночь</label>
           <BaseInput
             v-model="localPrices.outcall_night"
             type="number"
+            name="outcall_night"
+            label="Ночь"
             placeholder="0"
             :min="0"
             @update:modelValue="updatePrices"
@@ -135,26 +143,31 @@
             <div class="checkbox-list">
               <BaseCheckbox
                 v-model="localPrices.outcall_apartment"
+                name="outcall_apartment"
                 label="На квартиру"
                 @update:modelValue="updatePrices"
               />
               <BaseCheckbox
                 v-model="localPrices.outcall_hotel"
+                name="outcall_hotel"
                 label="В гостиницу"
                 @update:modelValue="updatePrices"
               />
               <BaseCheckbox
                 v-model="localPrices.outcall_house"
+                name="outcall_house"
                 label="В загородный дом"
                 @update:modelValue="updatePrices"
               />
               <BaseCheckbox
                 v-model="localPrices.outcall_sauna"
+                name="outcall_sauna"
                 label="В сауну"
                 @update:modelValue="updatePrices"
               />
               <BaseCheckbox
                 v-model="localPrices.outcall_office"
+                name="outcall_office"
                 label="В офис"
                 @update:modelValue="updatePrices"
               />

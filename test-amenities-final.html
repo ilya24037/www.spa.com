@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Финальный тест удобств</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .info { color: blue; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f4f4f4; padding: 10px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>Финальный тест сохранения удобств</h1>
+    
+    <div>
+        <button onclick="simulateAmenitySelection()">Симулировать выбор удобств</button>
+        <button onclick="checkSavedData()">Проверить сохраненные данные</button>
+        <button onclick="clearData()">Очистить localStorage</button>
+    </div>
+    
+    <div id="result"></div>
+    
+    <script>
+        function simulateAmenitySelection() {
+            // Симулируем структуру данных как будет сохранять наша форма
+            const testData = {
+                title: "Тестовое объявление",
+                services: {
+                    "intimate_services": {
+                        "classic": {
+                            enabled: true,
+                            price_comment: "5000 за час"
+                        }
+                    }
+                },
+                amenities: {
+                    "hygiene_amenities": {
+                        "shower_before": {
+                            enabled: true,
+                            price_comment: ""
+                        },
+                        "shower_after": {
+                            enabled: true,
+                            price_comment: "500 доплата"
+                        }
+                    },
+                    "entertainment_amenities": {
+                        "music": {
+                            enabled: true,
+                            price_comment: ""
+                        },
+                        "tv": {
+                            enabled: false,
+                            price_comment: ""
+                        }
+                    },
+                    "conditions_amenities": {
+                        "air_conditioning": {
+                            enabled: true,
+                            price_comment: "1000 за кондиционер"
+                        }
+                    }
+                }
+            };
+            
+            localStorage.setItem('adFormData', JSON.stringify(testData));
+            
+            document.getElementById('result').innerHTML = `
+                <div class="success">✅ Данные сохранены в localStorage!</div>
+                <h3>Сохраненная структура:</h3>
+                <pre>${JSON.stringify(testData, null, 2)}</pre>
+            `;
+        }
+        
+        function checkSavedData() {
+            const data = localStorage.getItem('adFormData');
+            const resultEl = document.getElementById('result');
+            
+            if (!data) {
+                resultEl.innerHTML = '<div class="error">❌ Нет данных в localStorage</div>';
+                return;
+            }
+            
+            try {
+                const parsed = JSON.parse(data);
+                let html = '<h3>Анализ сохраненных данных:</h3>';
+                
+                // Проверяем структуру amenities
+                if (parsed.amenities && typeof parsed.amenities === 'object') {
+                    html += '<div class="success">✅ Удобства найдены и имеют правильный тип (object)</div>';
+                    
+                    // Подсчитываем включенные удобства
+                    let totalEnabled = 0;
+                    let details = '<h4>Детали удобств:</h4><ul>';
+                    
+                    for (const [categoryId, category] of Object.entries(parsed.amenities)) {
+                        details += `<li><strong>${categoryId}:</strong><ul>`;
+                        for (const [itemId, item] of Object.entries(category)) {
+                            if (item.enabled) {
+                                totalEnabled++;
+                                const price = item.price_comment || '(без доплаты)';
+                                details += `<li class="success">✅ ${itemId}: ${price}</li>`;
+                            } else {
+                                details += `<li class="info">○ ${itemId}: выключено</li>`;
+                            }
+                        }
+                        details += '</ul></li>';
+                    }
+                    details += '</ul>';
+                    
+                    html += `<div class="success">Всего включено удобств: ${totalEnabled}</div>`;
+                    html += details;
+                    
+                    // Проверяем соответствие структуры с services
+                    if (parsed.services) {
+                        const servicesStructure = getDataStructure(parsed.services);
+                        const amenitiesStructure = getDataStructure(parsed.amenities);
+                        
+                        if (servicesStructure === amenitiesStructure) {
+                            html += '<div class="success">✅ Структура amenities идентична services!</div>';
+                        } else {
+                            html += '<div class="error">❌ Структура amenities отличается от services</div>';
+                            html += `<div>Services: ${servicesStructure}</div>`;
+                            html += `<div>Amenities: ${amenitiesStructure}</div>`;
+                        }
+                    }
+                } else {
+                    html += '<div class="error">❌ Удобства не найдены или имеют неверную структуру</div>';
+                }
+                
+                html += '<h4>Полные данные:</h4>';
+                html += `<pre>${JSON.stringify(parsed, null, 2)}</pre>`;
+                
+                resultEl.innerHTML = html;
+            } catch (e) {
+                resultEl.innerHTML = `<div class="error">❌ Ошибка парсинга: ${e.message}</div>`;
+            }
+        }
+        
+        function getDataStructure(data) {
+            // Получаем структуру первого элемента для сравнения
+            for (const category of Object.values(data)) {
+                for (const item of Object.values(category)) {
+                    return Object.keys(item).sort().join(',');
+                }
+            }
+            return 'empty';
+        }
+        
+        function clearData() {
+            localStorage.removeItem('adFormData');
+            document.getElementById('result').innerHTML = '<div class="success">✅ localStorage очищен</div>';
+        }
+        
+        // Автоматически проверяем при загрузке страницы
+        window.onload = () => {
+            checkSavedData();
+        };
+    </script>
+</body>
+</html>

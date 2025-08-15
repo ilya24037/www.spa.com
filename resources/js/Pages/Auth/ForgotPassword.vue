@@ -42,10 +42,10 @@ const submit = (): void => {
 
     <form @submit.prevent="submit">
       <div>
-        <InputLabel for="email" value="Email" />
+        <InputLabel for="forgot-email" value="Email" />
 
         <TextInput
-          id="email"
+          id="forgot-email"
           v-model="form.email"
           type="email"
           class="mt-1 block w-full"

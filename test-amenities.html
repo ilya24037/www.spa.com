@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест сохранения удобств</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .section h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .warning {
+            color: orange;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Тест сохранения удобств в localStorage</h1>
+
+    <div class="section">
+        <h2>1. Текущие данные в localStorage</h2>
+        <button onclick="loadData()">Загрузить данные</button>
+        <button onclick="clearData()">Очистить localStorage</button>
+        <pre id="currentData">Нажмите "Загрузить данные"</pre>
+    </div>
+
+    <div class="section">
+        <h2>2. Анализ структуры данных</h2>
+        <div id="analysis">Загрузите данные для анализа</div>
+    </div>
+
+    <div class="section">
+        <h2>3. Проверка удобств (amenities)</h2>
+        <div id="amenitiesCheck">Загрузите данные для проверки</div>
+    </div>
+
+    <div class="section">
+        <h2>4. Сравнение с услугами (services)</h2>
+        <div id="servicesComparison">Загрузите данные для сравнения</div>
+    </div>
+
+    <script>
+        function loadData() {
+            const data = localStorage.getItem('adFormData');
+            const currentDataEl = document.getElementById('currentData');
+            const analysisEl = document.getElementById('analysis');
+            const amenitiesCheckEl = document.getElementById('amenitiesCheck');
+            const servicesComparisonEl = document.getElementById('servicesComparison');
+
+            if (data) {
+                try {
+                    const parsed = JSON.parse(data);
+                    currentDataEl.textContent = JSON.stringify(parsed, null, 2);
+                    
+                    // Анализ структуры
+                    let analysisHTML = '<h3>Структура данных:</h3><ul>';
+                    analysisHTML += `<li>Всего полей: ${Object.keys(parsed).length}</li>`;
+                    analysisHTML += `<li>Тип services: ${typeof parsed.services}</li>`;
+                    analysisHTML += `<li>Тип amenities: ${typeof parsed.amenities}</li>`;
+                    
+                    if (parsed.services) {
+                        const servicesKeys = Object.keys(parsed.services);
+                        analysisHTML += `<li>Категорий услуг: ${servicesKeys.length}</li>`;
+                        if (servicesKeys.length > 0) {
+                            analysisHTML += `<li>Категории услуг: ${servicesKeys.join(', ')}</li>`;
+                        }
+                    }
+                    
+                    if (parsed.amenities) {
+                        const amenitiesKeys = Object.keys(parsed.amenities);
+                        analysisHTML += `<li>Категорий удобств: ${amenitiesKeys.length}</li>`;
+                        if (amenitiesKeys.length > 0) {
+                            analysisHTML += `<li>Категории удобств: ${amenitiesKeys.join(', ')}</li>`;
+                        }
+                    }
+                    analysisHTML += '</ul>';
+                    analysisEl.innerHTML = analysisHTML;
+                    
+                    // Проверка удобств
+                    let amenitiesHTML = '<h3>Детали удобств:</h3>';
+                    if (parsed.amenities && typeof parsed.amenities === 'object') {
+                        amenitiesHTML += '<ul>';
+                        let totalEnabled = 0;
+                        for (const [categoryId, categoryData] of Object.entries(parsed.amenities)) {
+                            amenitiesHTML += `<li><strong>${categoryId}:</strong><ul>`;
+                            if (typeof categoryData === 'object' && categoryData !== null) {
+                                for (const [amenityId, amenityData] of Object.entries(categoryData)) {
+                                    if (amenityData && typeof amenityData === 'object') {
+                                        const enabled = amenityData.enabled ? '✅' : '❌';
+                                        const priceComment = amenityData.price_comment || '(пусто)';
+                                        amenitiesHTML += `<li>${amenityId}: ${enabled} | price_comment: "${priceComment}"</li>`;
+                                        if (amenityData.enabled) totalEnabled++;
+                                    }
+                                }
+                            }
+                            amenitiesHTML += '</ul></li>';
+                        }
+                        amenitiesHTML += '</ul>';
+                        amenitiesHTML += `<p class="success">Всего включено удобств: ${totalEnabled}</p>`;
+                    } else {
+                        amenitiesHTML += '<p class="warning">Удобства не найдены или имеют неверный формат</p>';
+                    }
+                    amenitiesCheckEl.innerHTML = amenitiesHTML;
+                    
+                    // Сравнение с услугами
+                    let comparisonHTML = '<h3>Сравнение структуры Services vs Amenities:</h3>';
+                    comparisonHTML += '<table border="1" cellpadding="5" style="border-collapse: collapse; width: 100%;">';
+                    comparisonHTML += '<tr><th>Параметр</th><th>Services</th><th>Amenities</th><th>Статус</th></tr>';
+                    
+                    // Проверка типов данных
+                    const servicesType = typeof parsed.services;
+                    const amenitiesType = typeof parsed.amenities;
+                    comparisonHTML += `<tr><td>Тип данных</td><td>${servicesType}</td><td>${amenitiesType}</td>`;
+                    comparisonHTML += `<td>${servicesType === amenitiesType ? '✅ Совпадает' : '❌ Не совпадает'}</td></tr>`;
+                    
+                    // Проверка структуры элементов
+                    if (parsed.services && parsed.amenities) {
+                        // Берем первый элемент для сравнения
+                        let servicesSample = null;
+                        let amenitiesSample = null;
+                        
+                        for (const category of Object.values(parsed.services)) {
+                            if (category && typeof category === 'object') {
+                                for (const item of Object.values(category)) {
+                                    if (item) {
+                                        servicesSample = item;
+                                        break;
+                                    }
+                                }
+                                if (servicesSample) break;
+                            }
+                        }
+                        
+                        for (const category of Object.values(parsed.amenities)) {
+                            if (category && typeof category === 'object') {
+                                for (const item of Object.values(category)) {
+                                    if (item) {
+                                        amenitiesSample = item;
+                                        break;
+                                    }
+                                }
+                                if (amenitiesSample) break;
+                            }
+                        }
+                        
+                        if (servicesSample && amenitiesSample) {
+                            const servicesFields = Object.keys(servicesSample).sort().join(', ');
+                            const amenitiesFields = Object.keys(amenitiesSample).sort().join(', ');
+                            comparisonHTML += `<tr><td>Поля элемента</td><td>${servicesFields}</td><td>${amenitiesFields}</td>`;
+                            comparisonHTML += `<td>${servicesFields === amenitiesFields ? '✅ Совпадает' : '❌ Не совпадает'}</td></tr>`;
+                        }
+                    }
+                    
+                    comparisonHTML += '</table>';
+                    servicesComparisonEl.innerHTML = comparisonHTML;
+                    
+                } catch (e) {
+                    currentDataEl.textContent = 'Ошибка парсинга JSON: ' + e.message;
+                    analysisEl.innerHTML = '<p class="error">Ошибка анализа данных</p>';
+                }
+            } else {
+                currentDataEl.textContent = 'localStorage.adFormData не найден';
+                analysisEl.innerHTML = '<p class="warning">Нет данных для анализа</p>';
+                amenitiesCheckEl.innerHTML = '<p class="warning">Нет данных для проверки</p>';
+                servicesComparisonEl.innerHTML = '<p class="warning">Нет данных для сравнения</p>';
+            }
+        }
+
+        function clearData() {
+            if (confirm('Вы уверены, что хотите очистить localStorage?')) {
+                localStorage.removeItem('adFormData');
+                document.getElementById('currentData').textContent = 'localStorage очищен';
+                document.getElementById('analysis').innerHTML = '<p class="success">Данные удалены</p>';
+                document.getElementById('amenitiesCheck').innerHTML = '<p class="success">Данные удалены</p>';
+                document.getElementById('servicesComparison').innerHTML = '<p class="success">Данные удалены</p>';
+            }
+        }
+
+        // Автозагрузка при открытии страницы
+        window.onload = function() {
+            loadData();
+        };
+    </script>
+</body>
+</html>

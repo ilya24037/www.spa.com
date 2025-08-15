@@ -61,6 +61,9 @@ if (!app()->isProduction()) {
     Route::get('/test/add-photos', [TestController::class, 'addPhotos'])->name('test.add-photos');
     Route::get('/demo/item-card', fn() => Inertia::render('Demo/ItemCard'))->name('demo.item-card');
     Route::get('/test/add-local-photos', [TestController::class, 'addLocalPhotos'])->name('test.add-local-photos');
+    
+    // Тестовая страница для секции География
+    Route::get('/test-geo', fn() => Inertia::render('TestGeo'))->name('test.geo');
     // Публичный маршрут для тестовой загрузки фото мастера
     Route::post('/masters/{master}/upload/photos/test', function(\Illuminate\Http\Request $request, $masterId) {
         $master = \App\Domain\Master\Models\MasterProfile::findOrFail($masterId);
@@ -103,6 +106,10 @@ Route::get('/search/advanced', [SearchController::class, 'advanced'])->name('sea
 Route::get('/masters/{slug}-{master}', [MasterController::class, 'show'])
     ->where(['master' => '[0-9]+', 'slug' => '.*'])
     ->name('masters.show');
+
+/*  Карта мастеров  */
+Route::get('/masters/map', fn() => Inertia::render('masters/MastersMap'))
+    ->name('masters.map');
 
 /*  Сравнение (доступно без авторизации)  */
 Route::prefix('compare')->name('compare.')->group(function () {

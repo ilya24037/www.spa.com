@@ -25,13 +25,17 @@
       
       <!-- Поле поиска с белым фоном -->
       <div class="flex-1 h-11 relative flex items-center bg-white rounded-md mx-1 my-auto">
+        <label :for="searchInputId" class="sr-only">Поиск по сайту</label>
         <input
+          :id="searchInputId"
           ref="searchInputRef"
           v-model="searchQuery"
           type="search"
+          name="site-search"
           :placeholder="placeholder"
           :disabled="disabled"
           :autofocus="autofocus"
+          :aria-label="placeholder"
           class="w-full h-full bg-transparent border-none outline-none text-gray-700 placeholder-gray-500 px-4"
           @input="handleInput"
           @keydown.enter="handleSearch"
@@ -117,6 +121,7 @@ import SearchDropdownContent from '../SearchDropdown/SearchDropdownContent.vue'
 import { useGlobalSearchHistory } from '../../lib/useSearchHistory'
 import { useSearchSuggestions } from '../../lib/useSearchSuggestions'
 import { useSearchKeyboard } from '../../lib/useSearchKeyboard'
+import { useId } from '@/src/shared/composables/useId'
 
 // Types
 import type { 
@@ -152,7 +157,8 @@ const emit = defineEmits<{
 
 // Refs
 const containerRef = ref<HTMLElement>()
-const searchInputRef = ref<InstanceType<typeof SearchInput>>()
+const searchInputRef = ref<HTMLInputElement>()
+const searchInputId = useId('search-input')
 
 // State
 const searchQuery = ref(props.modelValue)
@@ -384,6 +390,18 @@ defineExpose({
 </script>
 
 <style scoped>
+/* Скрытие элементов визуально, но оставляя доступными для скринридеров */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
 /* Убираем стандартную кнопку очистки в поле поиска */
 input[type="search"]::-webkit-search-cancel-button,
 input[type="search"]::-webkit-search-decoration,

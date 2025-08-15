@@ -1,10 +1,11 @@
-<!-- Р‘Р°Р·РѕРІС‹Р№ textarea РІ СЃС‚РёР»Рµ РђРІРёС‚Рѕ -->
+<!-- Р'Р°Р·РѕРІС‹Р№ textarea РІ СЃС‚РёР»Рµ РђРІРёС‚Рѕ -->
 <template>
   <div class="textarea-container">
-    <label v-if="label" class="textarea-label">{{ label }}</label>
+    <label v-if="label" :for="textareaId" class="textarea-label">{{ label }}</label>
     
     <div class="textarea-wrapper" :class="{ 'has-error': error }">
       <textarea
+        :id="textareaId"
         ref="textareaRef"
         v-model="textareaValue"
         :placeholder="placeholder"
@@ -44,10 +45,15 @@
 
 <script setup>
 import { ref, computed, nextTick } from 'vue'
+import { useId } from '@/src/shared/composables/useId'
 
 // Props
 const props = defineProps({
     modelValue: {
+        type: String,
+        default: ''
+    },
+    id: {
         type: String,
         default: ''
     },
@@ -94,6 +100,9 @@ const props = defineProps({
 
 // Events
 const emit = defineEmits(['update:modelValue', 'focus', 'blur', 'enter'])
+
+// Generate unique ID if not provided
+const textareaId = computed(() => props.id || useId('textarea'))
 
 // Refs
 const textareaRef = ref(null)

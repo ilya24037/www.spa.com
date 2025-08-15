@@ -4,9 +4,11 @@
     <td class="py-3 px-2 w-10">
       <div class="flex items-center h-8">
         <input 
-          :id="service.id"
+          :id="checkboxId"
           v-model="enabled"
+          :name="`service_enabled_${service.id}`"
           type="checkbox"
+          :aria-label="`Включить услугу ${service.name}`"
           class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
         >
       </div>
@@ -16,7 +18,7 @@
     <td class="py-3 px-2">
       <div class="flex items-center h-8">
         <label 
-          :for="service.id" 
+          :for="checkboxId" 
           class="text-sm font-medium text-gray-700 cursor-pointer inline-flex items-center"
         >
           {{ service.name }}
@@ -93,11 +95,15 @@
           </svg>
         </button>
         <div class="relative flex items-center">
+          <label :for="priceInputId" class="sr-only">Доплата за {{ service.name }}</label>
           <input 
+            :id="priceInputId"
             v-model="serviceData.price"
+            :name="`service_price_${service.id}`"
             @input="emitUpdate"
             type="number"
             placeholder="0"
+            :aria-label="`Доплата за ${service.name}`"
             :class="[
               'w-24 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-8',
               serviceData.price && serviceData.price > 0 ? 'pr-12' : 'pr-6'
@@ -142,11 +148,15 @@
         <!-- Поле комментария -->
         <div v-else class="w-full flex items-center gap-2">
           <div class="relative flex-1 flex items-center">
+            <label :for="commentInputId" class="sr-only">Комментарий к {{ service.name }}</label>
             <input 
+              :id="commentInputId"
               v-model="serviceData.comment"
+              :name="`service_comment_${service.id}`"
               @input="emitUpdate"
               type="text"
               placeholder="Максимум 100 символов"
+              :aria-label="`Комментарий к ${service.name}`"
               :class="[
                 'w-full px-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-8',
                 serviceData.comment ? 'pr-12' : 'pr-3'
@@ -186,7 +196,8 @@
 import { ref, computed, watch } from 'vue'
 import Tooltip from '@/src/shared/ui/molecules/Tooltip/Tooltip.vue'
 import InfoIcon from '@/src/shared/ui/atoms/InfoIcon/InfoIcon.vue'
-import { getCharacteristicInfo } from '@/src/shared/config/characteristicsInfo'
+import { getCharacteristicInfo, hasServiceTooltip } from '@/src/shared/config/characteristicsInfo'
+import { useId } from '@/src/shared/composables/useId'
 
 const props = defineProps({
   service: {
@@ -201,6 +212,11 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
+// Генерируем уникальные ID для полей формы
+const checkboxId = useId(`service-${props.service.id}`)
+const priceInputId = useId(`service-price-${props.service.id}`)
+const commentInputId = useId(`service-comment-${props.service.id}`)
+
 // Получаем информацию о подсказке для услуги
 const serviceInfo = computed(() => {
   // Проверяем есть ли информация для этой услуги
@@ -209,8 +225,8 @@ const serviceInfo = computed(() => {
 
 // Проверяем нужно ли показывать подсказку
 const hasTooltip = computed(() => {
-  // Показываем подсказку только для определенных услуг
-  return !!serviceInfo.value && ['sex_in_car'].includes(props.service.id)
+  // Показываем подсказку для всех услуг, у которых есть информация
+  return hasServiceTooltip(props.service.id)
 })
 
 // Картинка с fallback, если пользовательский файл отсутствует
@@ -230,8 +246,8 @@ const serviceData = ref({
   comment: props.modelValue?.comment || ''
 })
 
-// Состояние показа комментария
-const showComment = ref(false)
+// Состояние показа комментария - если есть комментарий, показываем сразу
+const showComment = ref(!!serviceData.value.comment)
 
 // Парсим price_comment если нужно (для обратной совместимости)
 if (!serviceData.value.price && !serviceData.value.comment && props.modelValue?.price_comment) {
@@ -243,6 +259,11 @@ if (!serviceData.value.price && !serviceData.value.comment && props.modelValue?.
   } else {
     // Если не число в начале - всё в комментарий
     serviceData.value.comment = props.modelValue.price_comment
+  }
+  
+  // Если есть комментарий после парсинга - показываем поле
+  if (serviceData.value.comment) {
+    showComment.value = true
   }
 }
 
@@ -273,9 +294,11 @@ const resetPrice = () => {
   emitUpdate()
 }
 
-// Функция скрытия комментария
+// Функция скрытия комментария (только если комментарий пустой)
 const hideComment = () => {
-  showComment.value = false
+  if (!serviceData.value.comment) {
+    showComment.value = false
+  }
 }
 
 // Функция сброса комментария
@@ -325,6 +348,11 @@ watch(() => props.modelValue, (newValue) => {
         serviceData.value.comment = newValue.price_comment
       }
     }
+
+    // Если появился комментарий - показываем поле
+    if (serviceData.value.comment) {
+      showComment.value = true
+    }
   }
 }, { deep: true })
 
@@ -337,6 +365,18 @@ watch(() => serviceData.value.enabled, (newValue) => {
 </script>
 
 <style scoped>
+/* Скрытие элементов визуально, но оставляя доступными для скринридеров */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
 .service-item {
   transition: background-color 0.2s;
 }

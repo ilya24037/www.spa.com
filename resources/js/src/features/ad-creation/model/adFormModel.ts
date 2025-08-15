@@ -1,4 +1,4 @@
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { useAuthStore } from '@/stores/authStore'
 
@@ -12,12 +12,13 @@ export interface AdFormData {
   service_provider: string[]
   experience: string
   description: string
-  services: any[]
+  services: any
   services_additional_info: string
   features: string[]
   additional_features: string
   schedule: any
   schedule_notes: string
+  online_booking: boolean
   price: number | null
   price_unit: string
   is_starting_price: boolean
@@ -88,24 +89,29 @@ export function useAdFormModel(props: any, emit: any) {
   
   // Состояние формы
   const form = reactive<AdFormData>({
-    title: props.initialData?.title || '',
-    specialty: props.initialData?.specialty || '',
-    clients: props.initialData?.clients || [],
-    service_location: props.initialData?.service_location || ['У заказчика дома'],
-    work_format: props.initialData?.work_format || 'individual',
-    service_provider: props.initialData?.service_provider || ['women'],
-    experience: props.initialData?.experience || '',
-    description: props.initialData?.description || '',
-    services: props.initialData?.services || [],
-    services_additional_info: props.initialData?.services_additional_info || '',
-    features: props.initialData?.features || [],
-    additional_features: props.initialData?.additional_features || '',
-    schedule: props.initialData?.schedule || {},
-    schedule_notes: props.initialData?.schedule_notes || '',
-    price: props.initialData?.price || null,
-    price_unit: props.initialData?.price_unit || 'hour',
-    is_starting_price: props.initialData?.is_starting_price || false,
+    title: savedFormData?.title || props.initialData?.title || '',
+    specialty: savedFormData?.specialty || props.initialData?.specialty || '',
+    clients: savedFormData?.clients || props.initialData?.clients || [],
+    service_location: savedFormData?.service_location || props.initialData?.service_location || ['У заказчика дома'],
+    work_format: savedFormData?.work_format || props.initialData?.work_format || 'individual',
+    service_provider: savedFormData?.service_provider || props.initialData?.service_provider || ['women'],
+    experience: savedFormData?.experience || props.initialData?.experience || '',
+    description: savedFormData?.description || props.initialData?.description || '',
+    services: savedFormData?.services || props.initialData?.services || {},
+    services_additional_info: savedFormData?.services_additional_info || props.initialData?.services_additional_info || '',
+    features: savedFormData?.features || props.initialData?.features || [],
+    additional_features: savedFormData?.additional_features || props.initialData?.additional_features || '',
+    schedule: savedFormData?.schedule || props.initialData?.schedule || {},
+    schedule_notes: savedFormData?.schedule_notes || props.initialData?.schedule_notes || '',
+    online_booking: savedFormData?.online_booking || props.initialData?.online_booking || false,
+    price: savedFormData?.price || props.initialData?.price || null,
+    price_unit: savedFormData?.price_unit || props.initialData?.price_unit || 'hour',
+    is_starting_price: savedFormData?.is_starting_price || props.initialData?.is_starting_price || false,
     prices: (() => {
+      // Сначала проверяем сохраненные данные
+      if (savedFormData?.prices) {
+        return savedFormData.prices
+      }
       // Если prices есть в initialData
       if (props.initialData?.prices) {
         // Если это строка - парсим JSON
@@ -119,8 +125,8 @@ export function useAdFormModel(props: any, emit: any) {
         // Если это уже объект - используем как есть
         return props.initialData.prices
       }
-      // Если это новое объявление - используем сохраненные данные
-      return savedFormData?.prices || {
+      // По умолчанию
+      return {
         apartments_express: null,
         apartments_1h: null,
         apartments_2h: null,
@@ -398,6 +404,17 @@ export function useAdFormModel(props: any, emit: any) {
         saving.value = false
       }
     })
+  }
+
+  // Автосохранение в localStorage для новых объявлений
+  if (isNewAd) {
+    watch(form, (newValue) => {
+      try {
+        localStorage.setItem('adFormData', JSON.stringify(newValue))
+      } catch (e) {
+        console.error('Error saving form data:', e)
+      }
+    }, { deep: true })
   }
 
   return {

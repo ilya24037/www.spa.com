@@ -1,6 +1,33 @@
 <template>
     <div class="schedule-section">
         <h2 class="form-group-title">График работы</h2>
+        
+        <!-- Онлайн запись -->
+        <div class="online-booking-section">
+            <h3 class="subsection-title">Онлайн запись</h3>
+            <p class="subsection-description">
+                Разрешить клиентам записываться к вам онлайн через сайт
+            </p>
+            <div class="radio-group">
+                <BaseRadio
+                    v-model="localOnlineBooking"
+                    :value="true"
+                    name="online_booking"
+                    label="Да"
+                    description="Клиенты смогут записываться онлайн"
+                    @update:modelValue="emitOnlineBooking"
+                />
+                <BaseRadio
+                    v-model="localOnlineBooking"
+                    :value="false"
+                    name="online_booking"
+                    label="Нет"
+                    description="Только запись по телефону"
+                    @update:modelValue="emitOnlineBooking"
+                />
+            </div>
+        </div>
+
         <div class="schedule-container">
             <div class="quick-actions" style="margin-bottom: 20px;">
                 <SecondaryButton @click="setFullWeek">
@@ -62,14 +89,16 @@ import { ref, reactive, watch, computed } from 'vue'
 import BaseSelect from '@/src/shared/ui/atoms/BaseSelect/BaseSelect.vue'
 import BaseTextarea from '@/src/shared/ui/atoms/BaseTextarea/BaseTextarea.vue'
 import BaseCheckbox from '@/src/shared/ui/atoms/BaseCheckbox/BaseCheckbox.vue'
+import BaseRadio from '@/src/shared/ui/atoms/BaseRadio/BaseRadio.vue'
 import SecondaryButton from '@/src/shared/ui/atoms/SecondaryButton/SecondaryButton.vue'
 
 const props = defineProps({
     schedule: { type: Object, default: () => ({}) },
     scheduleNotes: { type: String, default: '' },
+    onlineBooking: { type: Boolean, default: false },
     errors: { type: Object, default: () => ({}) }
 })
-const emit = defineEmits(['update:schedule', 'update:scheduleNotes'])
+const emit = defineEmits(['update:schedule', 'update:scheduleNotes', 'update:onlineBooking'])
 
 const days = [
     { id: 'monday', name: 'Понедельник' },
@@ -112,6 +141,7 @@ const initSchedule = () => {
 
 const localSchedule = reactive({ ...initSchedule(), ...props.schedule })
 const localNotes = ref(props.scheduleNotes || '')
+const localOnlineBooking = ref(props.onlineBooking)
 
 // Флаг для предотвращения рекурсивных обновлений
 let isUpdatingFromProps = false
@@ -139,8 +169,16 @@ watch(() => props.scheduleNotes, (val) => {
     localNotes.value = val || ''
 })
 
+watch(() => props.onlineBooking, (val) => {
+    localOnlineBooking.value = val
+})
+
 const emitNotes = () => {
     emit('update:scheduleNotes', localNotes.value)
+}
+
+const emitOnlineBooking = () => {
+    emit('update:onlineBooking', localOnlineBooking.value)
 }
 
 const toggleDay = (dayId) => {
@@ -184,6 +222,42 @@ const clearAll = () => {
     font-weight: 600;
     color: #333;
     margin-bottom: 16px;
+}
+
+.online-booking-section {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.subsection-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.subsection-title::before {
+    content: "📅";
+    font-size: 18px;
+}
+
+.subsection-description {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 16px;
+    line-height: 1.4;
+}
+
+.radio-group {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
 }
 
 .quick-actions {

@@ -1,7 +1,7 @@
 <template>
   <!-- Затемнение фона -->
   <div 
-    v-if="show"
+    v-if="props.show"
     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     @click="closeModal"
   >
@@ -114,6 +114,7 @@
 <script setup lang="ts">
 import { Link, useForm } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
+import { onMounted } from 'vue'
 import BaseInput from '@/src/shared/ui/atoms/BaseInput/BaseInput.vue'
 import BaseCheckbox from '@/src/shared/ui/atoms/BaseCheckbox/BaseCheckbox.vue'
 import PrimaryButton from '@/src/shared/ui/atoms/PrimaryButton/PrimaryButton.vue'
@@ -122,7 +123,7 @@ interface Props {
   show?: boolean
 }
 
-const _props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
     show: false
 })
 
@@ -144,7 +145,27 @@ const form = useForm<LoginForm>({
     remember: false,
 })
 
-const submit = (): void => {
+// Получаем CSRF токен при монтировании компонента
+onMounted(async () => {
+    if (window.axios) {
+        try {
+            await window.axios.get('/sanctum/csrf-cookie')
+        } catch (error) {
+            console.error('Failed to get CSRF token:', error)
+        }
+    }
+})
+
+const submit = async (): Promise<void> => {
+    // Получаем CSRF токен перед отправкой формы
+    if (window.axios) {
+        try {
+            await window.axios.get('/sanctum/csrf-cookie')
+        } catch (error) {
+            console.error('Failed to get CSRF token:', error)
+        }
+    }
+    
     form.post(route('login'), {
         onFinish: () => form.reset('password'),
         onSuccess: () => {
