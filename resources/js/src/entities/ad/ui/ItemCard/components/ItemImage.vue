@@ -10,7 +10,7 @@
       >
         <img 
           :src="currentImageUrl"
-          :alt="item.name || item.title || 'Изображение'"
+          :alt="item.title || 'Изображение'"
           class="item-image"
           @error="handleImageError"
         >

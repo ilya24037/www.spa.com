@@ -68,6 +68,45 @@
             :show-counter="true"
             :enable-lightbox="true"
           />
+
+          <!-- Видео секция -->
+          <div class="bg-white rounded-lg p-6 shadow-sm mt-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">
+              Видео (отладка)
+            </h2>
+            
+            <!-- Отладочная информация -->
+            <div class="mb-4 p-4 bg-gray-100 rounded text-sm">
+              <p><strong>ad.video существует:</strong> {{ !!ad.video }}</p>
+              <p><strong>ad.video тип:</strong> {{ typeof ad.video }}</p>
+              <p><strong>ad.video массив:</strong> {{ Array.isArray(ad.video) }}</p>
+              <p><strong>ad.video длина:</strong> {{ ad.video?.length }}</p>
+              <p><strong>ad.video содержимое:</strong> {{ JSON.stringify(ad.video) }}</p>
+            </div>
+            
+            <div v-if="ad.video && ad.video.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div v-for="(videoUrl, index) in ad.video" :key="index" class="relative">
+                <p class="text-xs text-gray-500 mb-2">URL: {{ videoUrl }}</p>
+                <video 
+                  :src="videoUrl" 
+                  class="w-full h-64 object-cover rounded-lg bg-black" 
+                  controls 
+                  preload="metadata"
+                  @error="console.error('Video error:', $event)"
+                  @loadedmetadata="() => {}"
+                >
+                  Ваш браузер не поддерживает воспроизведение видео
+                </video>
+                <div class="mt-2 text-sm text-gray-600">
+                  Видео {{ index + 1 }}
+                </div>
+              </div>
+            </div>
+            
+            <div v-else class="text-gray-500">
+              Нет видео для отображения
+            </div>
+          </div>
           
           <!-- РћСЃРЅРѕРІРЅР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ -->
           <div class="bg-white rounded-lg p-6 shadow-sm mt-6">
@@ -286,6 +325,7 @@ const route = (window as any).route || ((name, params) => {
 const props = defineProps({
     ad: Object
 })
+
 
 // РЎРѕСЃС‚РѕСЏРЅРёРµ
 const showDeleteModal = ref(false)

@@ -102,28 +102,6 @@ Route::middleware('api')->group(function () {
         }
     });
     
-    // Получить список всех мастеров
-    Route::get('/masters', function () {
-        try {
-            $masters = MasterProfile::select('id', 'display_name')
-                ->orderBy('display_name')
-                ->get()
-                ->map(function ($master) {
-                    return [
-                        'id' => $master->id,
-                        'name' => $master->display_name,
-                        'folder' => $master->folder_name,
-                        'photos_count' => $master->photos()->count()
-                    ];
-                });
-                
-            return response()->json($masters);
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Ошибка сервера: ' . $e->getMessage()
-            ], 500);
-        }
-    });
 
     // Публичные API (ранее были в web.php под prefix('api'))
     Route::get('/masters', [MasterController::class, 'apiIndex']);

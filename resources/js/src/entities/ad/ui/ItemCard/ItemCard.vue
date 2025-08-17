@@ -34,6 +34,7 @@
             @deactivate="deactivateItem"
             @delete="showDeleteModal = true"
             @mark-irrelevant="markIrrelevant"
+            @book="bookItem"
           />
         </div>
       </div>
@@ -117,6 +118,11 @@ const markIrrelevant = () => {
       alert('Ошибка при обновлении статуса объявления')
     }
   })
+}
+
+const bookItem = () => {
+  router.visit(`/ads/${props.item.id}?booking=true`)
+  emit('book', props.item.id)
 }
 
 const deleteItem = () => {

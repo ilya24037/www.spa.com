@@ -41,6 +41,7 @@
           <!-- Email -->
           <BaseInput
             v-model="form.email"
+            name="email"
             type="email"
             label="Email"
             placeholder="Введите ваш email"
@@ -52,6 +53,7 @@
           <!-- Пароль -->
           <BaseInput
             v-model="form.password"
+            name="password"
             type="password"
             label="Пароль"
             placeholder="Введите пароль"
@@ -64,6 +66,7 @@
           <div class="flex items-center justify-between">
             <BaseCheckbox
               v-model="form.remember"
+              name="remember"
               label="Запомнить пароль"
             />
             <Link

@@ -154,12 +154,14 @@
                 <BaseRadio
                   v-if="master.home_service"
                   v-model="form.is_home_service"
+                  name="service_location"
                   :value="true"
                   label="Р'С‹РµР·Рґ РЅР° РґРѕРј (+500в‚Ѕ Рє СЃС‚РѕРёРјРѕСЃС‚Рё)"
                 />
                 <BaseRadio
                   v-if="master.salon_service"
                   v-model="form.is_home_service"
+                  name="service_location"
                   :value="false"
                   :label="`Р' СЃР°Р»РѕРЅРµ (${master.salon_address || 'Р°РґСЂРµСЃ СЃР°Р»РѕРЅР°'})`"
                 />
@@ -170,6 +172,7 @@
             <div v-if="form.is_home_service" class="mb-6">
               <BaseInput
                 v-model="form.address"
+                name="address"
                 type="text"
                 label="РђРґСЂРµСЃ *"
                 placeholder="РЈР»РёС†Р°, РґРѕРј, РєРІР°СЂС‚РёСЂР°"
@@ -183,6 +186,7 @@
               <div>
                 <BaseInput
                   v-model="form.client_name"
+                  name="client_name"
                   type="text"
                   label="Р'Р°С€Рµ РёРјСЏ *"
                   placeholder="Р'РІРµРґРёС‚Рµ РІР°С€Рµ РёРјСЏ"
@@ -228,6 +232,7 @@
             <div class="mb-6">
               <BaseInput
                 v-model="form.client_email"
+                name="client_email"
                 type="email"
                 label="Email"
                 placeholder="Р"Р»СЏ РѕС‚РїСЂР°РІРєРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ"
@@ -255,6 +260,7 @@
                   v-for="method in paymentMethods"
                   :key="method.value"
                   v-model="form.payment_method"
+                  name="payment_method"
                   :value="method.value"
                   :label="method.label"
                 />

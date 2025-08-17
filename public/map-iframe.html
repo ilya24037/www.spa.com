@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карта мастеров</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+        }
+        
+        #map {
+            width: 100%;
+            height: 100vh;
+        }
+        
+        .master-balloon {
+            padding: 0;
+            max-width: 380px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .master-balloon-inner {
+            display: flex;
+            height: 180px;
+        }
+        
+        .master-balloon-photo-wrapper {
+            flex-shrink: 0;
+            width: 180px;
+            height: 180px;
+        }
+        
+        .master-balloon-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background: #f3f4f6;
+        }
+        
+        .master-balloon-content {
+            flex: 1;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+        
+        .master-balloon-favorite {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 32px;
+            height: 32px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 1;
+        }
+        
+        .master-balloon-favorite:hover {
+            background: #f9fafb;
+            transform: scale(1.1);
+        }
+        
+        .master-balloon-favorite svg {
+            width: 18px;
+            height: 18px;
+            color: #6b7280;
+        }
+        
+        .master-balloon-favorite:hover svg {
+            color: #ef4444;
+        }
+        
+        .master-balloon-name {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+            line-height: 1.3;
+            padding-right: 40px;
+        }
+        
+        .master-balloon-price {
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+        
+        .master-balloon-price-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #111827;
+        }
+        
+        .master-balloon-price-unit {
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        .master-balloon-services {
+            font-size: 14px;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+        
+        .master-balloon-address {
+            display: flex;
+            align-items: start;
+            gap: 4px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #6b7280;
+            line-height: 1.4;
+        }
+        
+        .master-balloon-address svg {
+            width: 14px;
+            height: 14px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+        
+        .master-balloon-date {
+            font-size: 13px;
+            color: #9ca3af;
+            margin-top: auto;
+        }
+        
+        .master-balloon:hover {
+            background: #f9fafb;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=1220b4af-ae8e-4506-ab3a-c6329234066f&lang=ru_RU"></script>
+    <script>
+        // Ждем загрузки API
+        ymaps.ready(init);
+        
+        function init() {
+            console.log('Инициализация карты...');
+            
+            // Создаем карту
+            const map = new ymaps.Map('map', {
+                center: [58.0105, 56.2502], // Центр Перми
+                zoom: 12,
+                controls: ['zoomControl', 'searchControl', 'geolocationControl']
+            });
+            
+            // Добавляем элемент управления типом карты
+            map.controls.add('typeSelector');
+            
+            // Определяем город пользователя по IP
+            ymaps.geolocation.get({
+                provider: 'yandex'
+            }).then(function(result) {
+                const coords = result.geoObjects.get(0).geometry.getCoordinates();
+                if (coords && coords.length === 2) {
+                    map.setCenter(coords, 12);
+                    console.log('Город определен по IP:', coords);
+                }
+            }).catch(function(error) {
+                console.log('Используем Пермь по умолчанию');
+            });
+            
+            // Загружаем мастеров с API
+            fetch('/api/masters')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Загружено мастеров:', data.data.length);
+                    
+                    // Создаем коллекцию меток
+                    const collection = new ymaps.GeoObjectCollection();
+                    
+                    // Добавляем метки для каждого мастера
+                    data.data.forEach(master => {
+                        if (master.coordinates && master.coordinates.lat && master.coordinates.lng) {
+                            // Функция для форматирования даты
+                            const formatDaysAgo = (days) => {
+                                if (days === 0) return 'Сегодня';
+                                if (days === 1) return 'Вчера';
+                                if (days < 5) return `${days} дня назад`;
+                                if (days < 21) return `${days} дней назад`;
+                                const lastDigit = days % 10;
+                                if (lastDigit === 1) return `${days} день назад`;
+                                if (lastDigit >= 2 && lastDigit <= 4) return `${days} дня назад`;
+                                return `${days} дней назад`;
+                            };
+                            
+                            // Создаем контент для балуна
+                            const photoUrl = master.photo || '/images/no-photo.png';
+                            const daysAgoText = formatDaysAgo(master.days_ago || 0);
+                            
+                            const balloonContent = `
+                                <div class="master-balloon" style="position: relative; cursor: pointer;" onclick="window.open('/ads/${master.id}', '_parent')">
+                                    <button class="master-balloon-favorite" onclick="event.preventDefault(); event.stopPropagation();">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                        </svg>
+                                    </button>
+                                    <div class="master-balloon-inner">
+                                        <div class="master-balloon-photo-wrapper">
+                                            <img src="${photoUrl}" alt="${master.name}" class="master-balloon-photo" onerror="this.src='/images/no-photo.png'">
+                                        </div>
+                                        <div class="master-balloon-content">
+                                            <h3 class="master-balloon-name">${master.name}</h3>
+                                            <div class="master-balloon-price">
+                                                <span class="master-balloon-price-value">${master.price_from} ₽</span>
+                                                <span class="master-balloon-price-unit">${master.price_unit || 'за услугу'}</span>
+                                            </div>
+                                            ${master.services && master.services.length > 0 ? `
+                                            <div class="master-balloon-services">
+                                                Всего ${master.services.length} ${master.services.length === 1 ? 'услуга' : master.services.length < 5 ? 'услуги' : 'услуг'}
+                                            </div>
+                                            ` : ''}
+                                            ${master.address ? `
+                                            <div class="master-balloon-address">
+                                                <svg fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                                                </svg>
+                                                <span>${master.address}</span>
+                                            </div>
+                                            ` : ''}
+                                            <div class="master-balloon-date">${daysAgoText}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            
+                            // Создаем метку
+                            const placemark = new ymaps.Placemark(
+                                [master.coordinates.lat, master.coordinates.lng],
+                                {
+                                    balloonContent: balloonContent,
+                                    hintContent: master.name
+                                },
+                                {
+                                    preset: master.is_premium ? 'islands#goldIcon' : 'islands#blueIcon'
+                                }
+                            );
+                            
+                            collection.add(placemark);
+                        }
+                    });
+                    
+                    // Добавляем коллекцию на карту
+                    map.geoObjects.add(collection);
+                    
+                    // Если есть метки, подстраиваем масштаб
+                    if (collection.getLength() > 0) {
+                        map.setBounds(collection.getBounds(), {
+                            checkZoomRange: true,
+                            zoomMargin: 40
+                        });
+                    }
+                    
+                    console.log('Добавлено меток на карту:', collection.getLength());
+                    
+                    // Отправляем сообщение родительскому окну
+                    window.parent.postMessage({
+                        type: 'map-ready',
+                        masters: data.data.length
+                    }, '*');
+                })
+                .catch(error => {
+                    console.error('Ошибка загрузки мастеров:', error);
+                });
+                
+            // Слушаем сообщения от родительского окна
+            window.addEventListener('message', function(event) {
+                if (event.data.type === 'update-filters') {
+                    // Можем обновить фильтры и перезагрузить мастеров
+                    console.log('Получены новые фильтры:', event.data.filters);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

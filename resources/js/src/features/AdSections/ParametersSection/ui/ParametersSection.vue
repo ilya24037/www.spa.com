@@ -4,6 +4,7 @@
       <BaseInput
         v-if="showAge"
         v-model="localAge"
+        name="age"
         type="number"
         label="Возраст"
         placeholder="25"
@@ -14,6 +15,7 @@
       />
       <BaseInput
         v-model="localHeight"
+        name="height"
         type="number"
         label="Рост (см)"
         placeholder="170"
@@ -24,6 +26,7 @@
       />
       <BaseInput
         v-model="localWeight"
+        name="weight"
         type="number"
         label="Вес (кг)"
         placeholder="60"

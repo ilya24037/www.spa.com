@@ -63,9 +63,9 @@ class ProfileController extends Controller
         $ads = Ad::where('user_id', $user->id)
             ->where('status', $status)
             ->select([
-                'id', 'title', 'status', 'price', 'prices', 'address', 'travel_area',
+                'id', 'title', 'status', 'prices', 'address',
                 'specialty', 'description', 'phone', 'contact_method',
-                'photos', 'service_location', 'views_count',
+                'photos', 'views_count', 'geo',
                 'created_at', 'updated_at'
             ])
             ->orderBy('created_at', 'desc')
@@ -74,23 +74,34 @@ class ProfileController extends Controller
         
         // Преобразуем в формат для ItemCard
         $profiles = $ads->map(function ($ad) {
-            // Обработка фотографий
+            // Обработка фотографий с защитой от пустых объектов
             $photos = $ad->photos;
             if (is_string($photos)) {
                 $photos = json_decode($photos, true) ?? [];
             }
             $photos = is_array($photos) ? $photos : [];
             
+            // Фильтруем пустые объекты и извлекаем валидные URL
+            $validPhotos = [];
+            foreach ($photos as $photo) {
+                if (is_array($photo) && !empty($photo)) {
+                    // Объект с данными - извлекаем URL
+                    $url = $photo['preview'] ?? $photo['url'] ?? $photo['src'] ?? null;
+                    if ($url) {
+                        $validPhotos[] = $url;
+                    }
+                } elseif (is_string($photo) && !empty($photo)) {
+                    // Обычная строка URL
+                    $validPhotos[] = $photo;
+                }
+                // Пустые объекты {} игнорируем
+            }
+            
             $mainImage = null;
-            $photosCount = count($photos);
+            $photosCount = count($validPhotos);
             
             if ($photosCount > 0) {
-                $firstPhoto = $photos[0];
-                if (is_array($firstPhoto)) {
-                    $mainImage = $firstPhoto['preview'] ?? $firstPhoto['url'] ?? $firstPhoto['src'] ?? null;
-                } elseif (is_string($firstPhoto)) {
-                    $mainImage = $firstPhoto;
-                }
+                $mainImage = $validPhotos[0];
             }
             
             // Если нет фото, используем демо
@@ -99,12 +110,8 @@ class ProfileController extends Controller
                 $photosCount = rand(1, 4);
             }
             
-            // Обработка service_location
-            $serviceLocation = $ad->service_location;
-            if (is_string($serviceLocation)) {
-                $serviceLocation = json_decode($serviceLocation, true) ?? [];
-            }
-            $serviceLocation = is_array($serviceLocation) ? $serviceLocation : [];
+            // service_location больше не используется
+            $serviceLocation = [];
             
             // Берем цену за час из нового поля prices (как с фото - простая логика)
             $prices = $ad->prices;
@@ -117,48 +124,30 @@ class ProfileController extends Controller
             $finalPrice = $prices['apartments_1h'] ?? $prices['outcall_1h'] ?? 0;
             
             return [
+                // Идентификация
                 'id' => $ad->id,
-                'slug' => Str::slug($ad->title),
-                'name' => $ad->title,
                 'title' => $ad->title,
                 'status' => $ad->status,
-                'is_active' => $ad->status === 'active',
-                'price' => $finalPrice,
+                
+                // Цена
                 'price_from' => $finalPrice,
                 'prices' => $prices,
-                'views_count' => $ad->views_count ?? 0,
-                'photos_count' => $photosCount,
-                'avatar' => $mainImage,
-                'main_image' => $mainImage,
-                'photos' => $photos,
+                
+                // Медиа
                 'photo' => $mainImage,
-                'city' => 'Москва',
+                'photos' => $validPhotos,
+                'photos_count' => $photosCount,
+                
+                // Основная информация
                 'address' => $ad->address ?? '',
-                'location' => $ad->address ?? '',
-                'district' => $ad->travel_area ?? '',
-                'home_service' => in_array('client_home', $serviceLocation),
-                'availability' => $ad->status === 'active' ? 'Доступен' : 'Недоступен',
-                'messages_count' => 0,
-                'services_list' => $ad->specialty ?? '',
-                'full_address' => $ad->address ?? 'Адрес не указан',
-                'rejection_reason' => null,
-                'bookings_count' => 0,
-                'reviews_count' => 0,
                 'description' => $ad->description,
                 'phone' => $ad->phone,
-                'contact_method' => $ad->contact_method,
-                'created_at' => $ad->created_at ? $ad->created_at->format('d.m.Y') : '',
-                'updated_at' => $ad->updated_at ? $ad->updated_at->format('d.m.Y') : '',
-                'company_name' => 'Массажный салон',
-                'expires_at' => now()->addDays(30)->toISOString(),
-                'new_messages_count' => 0,
-                'subscribers_count' => 0,
-                'favorites_count' => 0,
-                'waiting_payment' => $ad->status === 'waiting_payment',
+                
+                // Счетчики
                 'views' => $ad->views_count ?? 0,
-                'favorites' => 0,
                 'messages' => 0,
-                'calls' => 0
+                'favorites' => 0,
+                'calls' => 0,
             ];
         })->toArray();
         

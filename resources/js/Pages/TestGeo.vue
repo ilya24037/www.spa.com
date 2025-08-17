@@ -67,7 +67,6 @@ const geoDataFormatted = computed(() => {
 const handleGeoUpdate = (value: string) => {
   geoData.value = value
   status.value = `Данные обновлены: ${new Date().toLocaleTimeString()}`
-  console.log('География обновлена:', value)
 }
 
 // Загрузка тестовых данных
@@ -149,9 +148,6 @@ const saveData = () => {
   
   errors.value = {}
   status.value = 'Данные сохранены успешно (имитация)'
-  
-  // Имитация отправки на сервер
-  console.log('Сохранение данных:', geoData.value)
 }
 </script>
 

@@ -9,6 +9,7 @@
       <!-- Основной адрес -->
       <BaseInput
         v-model="localAddress"
+        name="address"
         type="text"
         label="Основной адрес"
         placeholder="Введите адрес салона или офиса"
@@ -26,6 +27,7 @@
             v-for="option in travelAreaOptions"
             :key="option.value"
             v-model="localTravelArea"
+            name="travel_area"
             :value="option.value"
             :label="option.label"
           />
@@ -42,6 +44,7 @@
             <BaseCheckbox
               v-for="area in customTravelAreasOptions"
               :key="area.value"
+              :name="`travel_area_${area.value}`"
               :model-value="localCustomTravelAreas.includes(area.value)"
               :label="area.label"
               @update:modelValue="toggleCustomArea(area.value, $event)"
@@ -68,6 +71,7 @@
         <div class="price-input-group">
           <BaseInput
             v-model="localTravelPrice"
+            name="travel_price"
             type="number"
             placeholder="0"
             :error="errors?.travel_price?.[0]"

@@ -214,6 +214,13 @@
               :item="profile"
               @item-updated="handleItemUpdate"
               @item-deleted="handleItemDelete"
+              @pay="handleItemPay"
+              @promote="handleItemPromote"
+              @edit="handleItemEdit"
+              @deactivate="handleItemDeactivate"
+              @delete="handleItemDelete"
+              @mark-irrelevant="handleItemMarkIrrelevant"
+              @book="handleItemBook"
             />
           </div>
           
@@ -351,6 +358,30 @@ const handleItemUpdate = (itemId: number) => {
 
 const handleItemDelete = (itemId: number) => {
   addToast(`Объявление #${itemId} удалено`, 'info')
+}
+
+const handleItemPay = (itemId: number) => {
+  addToast(`Переход к оплате объявления #${itemId}`, 'info')
+}
+
+const handleItemPromote = (itemId: number) => {
+  addToast(`Продвижение объявления #${itemId}`, 'info')
+}
+
+const handleItemEdit = (itemId: number) => {
+  addToast(`Переход к редактированию объявления #${itemId}`, 'info')
+}
+
+const handleItemDeactivate = (itemId: number) => {
+  addToast(`Объявление #${itemId} снято с публикации`, 'success')
+}
+
+const handleItemMarkIrrelevant = (itemId: number) => {
+  addToast(`Объявление #${itemId} помечено как неактуальное`, 'info')
+}
+
+const handleItemBook = (itemId: number) => {
+  addToast(`Переход к бронированию объявления #${itemId}`, 'info')
 }
 
 // Управление Toast уведомлениями

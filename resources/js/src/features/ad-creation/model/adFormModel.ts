@@ -175,6 +175,21 @@ export function useAdFormModel(props: any, emit: any) {
   // Режим редактирования
   const isEditMode = computed(() => !!props.adId)
   
+  // Watcher для синхронизации адреса из geo в отдельное поле address
+  watch(() => form.geo, (newGeo) => {
+    if (typeof newGeo === 'string' && newGeo) {
+      try {
+        const geoData = JSON.parse(newGeo)
+        if (geoData.address) {
+          form.address = geoData.address
+        }
+      } catch (e) {
+        console.error('Ошибка парсинга geo:', e)
+      }
+    } else if (typeof newGeo === 'object' && newGeo && newGeo.address) {
+      form.address = newGeo.address
+    }
+  }, { deep: true, immediate: true })
 
   // Валидация формы
   const validateForm = (): boolean => {
@@ -240,7 +255,12 @@ export function useAdFormModel(props: any, emit: any) {
         router.put(`/ads/${props.adId}`, submitData, {
           preserveScroll: true,
           onSuccess: () => {
-            emit('success')
+            // Для активных объявлений переходим к списку активных
+            if (props.initialData?.status === 'active') {
+              router.visit('/profile/items/active/all')
+            } else {
+              emit('success')
+            }
           },
           onError: (errorResponse: any) => {
             console.error('Ошибка обновления объявления:', errorResponse)
@@ -268,6 +288,12 @@ export function useAdFormModel(props: any, emit: any) {
 
   // Сохранение черновика (как в старой версии из Backup)
   const handleSaveDraft = async () => {
+    console.log('🚀 handleSaveDraft СТАРТ')
+    console.log('📊 Props:', props)
+    console.log('📝 Form data:', form)
+    console.log('🔍 isEditMode:', isEditMode.value)
+    console.log('📄 initialData status:', props.initialData?.status)
+    
     saving.value = true
     
     // Создаем FormData для отправки файлов
@@ -365,11 +391,39 @@ export function useAdFormModel(props: any, emit: any) {
       formData.append('id', props.adId.toString())
     }
     
+    // Определяем URL в зависимости от статуса объявления
+    let url = '/ads/draft'
+    
+    // Если это активное объявление, используем другой endpoint
+    if (props.initialData?.status === 'active') {
+      url = `/ads/${props.adId}`
+      formData.append('_method', 'PUT')  // HTTP method spoofing для активных
+      console.log('🔄 Активное объявление - используем PUT метод')
+    } else {
+      console.log('📝 Черновик - используем обычный POST')
+    }
+    
+    console.log('🌐 URL для запроса:', url)
+    console.log('📦 FormData содержимое:')
+    for (let [key, value] of formData.entries()) {
+      console.log(`  ${key}: ${value}`)
+    }
+    
     // Используем router.post с FormData
-    router.post('/ads/draft', formData as any, {
+    router.post(url, formData as any, {
       preserveScroll: true,
       forceFormData: true,
+      onStart: () => {
+        console.log('🔄 Запрос НАЧАЛСЯ')
+      },
+      onSuccess: (page) => {
+        console.log('✅ Запрос УСПЕШЕН', page)
+      },
+      onError: (errors) => {
+        console.error('❌ Ошибка запроса:', errors)
+      },
       onFinish: () => {
+        console.log('🏁 Запрос ЗАВЕРШЕН')
         saving.value = false
       }
     })
@@ -406,6 +460,12 @@ export function useAdFormModel(props: any, emit: any) {
     })
   }
 
+
+  // Отмена редактирования и возврат к списку
+  const handleCancel = () => {
+    emit('cancel')
+  }
+
   // Автосохранение в localStorage для новых объявлений
   if (isNewAd) {
     watch(form, (newValue) => {
@@ -424,6 +484,7 @@ export function useAdFormModel(props: any, emit: any) {
     isEditMode,
     handleSubmit,
     handleSaveDraft,
-    handlePublish
+    handlePublish,
+    handleCancel
   }
 }

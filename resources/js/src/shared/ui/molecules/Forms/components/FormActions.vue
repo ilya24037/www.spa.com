@@ -1,25 +1,50 @@
 <template>
   <div class="form-actions">
     <div class="form-actions-main">
-      <button
-        type="button"
-        @click="$emit('save-draft')"
-        class="btn btn-secondary"
-        :disabled="savingDraft"
-      >
-        <span v-if="savingDraft" class="loading-spinner"></span>
-        {{ savingDraft ? 'Сохранение...' : 'Сохранить черновик' }}
-      </button>
+      <!-- Кнопки для активных объявлений (ТОЧНАЯ КОПИЯ ЧЕРНОВИКОВ) -->
+      <template v-if="isActiveAd">
+        <button
+          type="button"
+          @click="$emit('cancel')"
+          class="btn btn-secondary"
+          :disabled="savingDraft"
+        >
+          Отменить и выйти
+        </button>
+        
+        <button
+          type="button"
+          @click="$emit('save-draft')"
+          class="btn btn-primary"
+          :disabled="savingDraft"
+        >
+          <span v-if="savingDraft" class="loading-spinner"></span>
+          {{ savingDraft ? 'Сохранение...' : 'Сохранить изменения' }}
+        </button>
+      </template>
       
-      <button
-        type="submit"
-        @click="$emit('submit')"
-        class="btn btn-primary"
-        :disabled="submitting || !canSubmit"
-      >
-        <span v-if="submitting" class="loading-spinner"></span>
-        {{ submitting ? 'Публикация...' : submitLabel }}
-      </button>
+      <!-- Обычные кнопки для создания и черновиков -->
+      <template v-else>
+        <button
+          type="button"
+          @click="$emit('save-draft')"
+          class="btn btn-secondary"
+          :disabled="savingDraft"
+        >
+          <span v-if="savingDraft" class="loading-spinner"></span>
+          {{ savingDraft ? 'Сохранение...' : 'Сохранить черновик' }}
+        </button>
+        
+        <button
+          type="submit"
+          @click="$emit('submit')"
+          class="btn btn-primary"
+          :disabled="submitting || !canSubmit"
+        >
+          <span v-if="submitting" class="loading-spinner"></span>
+          {{ submitting ? 'Публикация...' : submitLabel }}
+        </button>
+      </template>
     </div>
     
     <div v-if="showProgress" class="form-actions-progress">
@@ -38,6 +63,7 @@ interface Props {
   savingDraft?: boolean
   showProgress?: boolean
   progressHint?: string
+  isActiveAd?: boolean
 }
 
 withDefaults(defineProps<Props>(), {
@@ -46,12 +72,14 @@ withDefaults(defineProps<Props>(), {
   submitting: false,
   savingDraft: false,
   showProgress: false,
-  progressHint: ''
+  progressHint: '',
+  isActiveAd: false
 })
 
 defineEmits<{
   'submit': []
   'save-draft': []
+  'cancel': []
 }>()
 </script>
 

@@ -262,6 +262,227 @@ class MasterController extends Controller
     }
 
     /**
+     * API: Список мастеров с фильтрацией и сортировкой
+     * ИСПРАВЛЕНО: Теперь использует данные из объявлений (Ad), а не из профилей мастеров
+     */
+    public function apiIndex(Request $request)
+    {
+        try {
+            // ИСПОЛЬЗУЕМ ТУ ЖЕ ЛОГИКУ ЧТО И В HomeController
+            $query = \App\Domain\Ad\Models\Ad::query()
+                ->where('status', 'active')
+                ->whereNotNull('geo')
+                ->where('geo', '!=', '[]')
+                ->where('geo', '!=', '{}');
+
+            // Фильтрация по городу (из адреса)
+            if ($request->has('city')) {
+                $query->where('address', 'LIKE', '%' . $request->city . '%');
+            }
+
+            // Поиск по заголовку
+            if ($request->has('search')) {
+                $query->where('title', 'LIKE', '%' . $request->search . '%');
+            }
+
+            // Сортировка
+            $sort = $request->get('sort', 'relevance');
+            switch ($sort) {
+                case 'newest':
+                    $query->orderByDesc('created_at');
+                    break;
+                case 'price':
+                    $query->orderByRaw('CAST(JSON_EXTRACT(price, "$.min") AS UNSIGNED) ASC');
+                    break;
+                default: // relevance
+                    $query->orderByDesc('created_at');
+            }
+
+            $ads = $query->with('user')->get();
+
+            // Форматируем данные для карты (как в HomeController)
+            $mastersData = [];
+            
+            foreach ($ads as $ad) {
+                try {
+                    $geo = is_string($ad->geo) ? json_decode($ad->geo, true) : $ad->geo;
+                    $lat = null;
+                    $lng = null;
+                    
+                    // Извлекаем координаты (поддерживаем разные форматы)
+                    if (is_array($geo)) {
+                        if (isset($geo['lat']) && isset($geo['lng'])) {
+                            $lat = (float)$geo['lat'];
+                            $lng = (float)$geo['lng'];
+                        } elseif (isset($geo['coordinates']['lat']) && isset($geo['coordinates']['lng'])) {
+                            $lat = (float)$geo['coordinates']['lat'];
+                            $lng = (float)$geo['coordinates']['lng'];
+                        }
+                    }
+                    
+                    // Пропускаем объявления без координат
+                    if (!$lat || !$lng) {
+                        continue;
+                    }
+                    
+                    // Извлекаем цены (ИСПРАВЛЕНО: правильная логика для структуры цен)
+                    $priceFrom = 2000; // Дефолтная цена
+                    $priceUnit = 'за услугу'; // Единица по умолчанию
+                    if ($ad->prices) {
+                        $prices = is_string($ad->prices) ? json_decode($ad->prices, true) : $ad->prices;
+                        if (is_array($prices) && !empty($prices)) {
+                            // Извлекаем все непустые числовые значения
+                            $priceValues = [];
+                            foreach ($prices as $key => $value) {
+                                // Пропускаем служебные поля и берем только цены
+                                if ($key !== 'taxi_included' && !empty($value) && is_numeric($value)) {
+                                    $priceValues[] = (float)$value;
+                                    // Определяем единицу измерения по ключу
+                                    if (strpos($key, '_1h') !== false || strpos($key, '_2h') !== false) {
+                                        $priceUnit = 'за час';
+                                    } elseif (strpos($key, '_night') !== false) {
+                                        $priceUnit = 'за ночь';
+                                    }
+                                }
+                            }
+                            
+                            if (!empty($priceValues)) {
+                                $priceFrom = min($priceValues);
+                            }
+                        }
+                    }
+                    
+                    // Если prices пусто, пробуем взять из поля price
+                    if ($priceFrom === 2000 && $ad->price) {
+                        $priceFrom = (float)$ad->price;
+                    }
+                    
+                    // Извлекаем первое фото
+                    $photo = null;
+                    if ($ad->photos) {
+                        $photos = is_string($ad->photos) ? json_decode($ad->photos, true) : $ad->photos;
+                        if (is_array($photos) && !empty($photos)) {
+                            $photo = $photos[0]; // Берем первое фото
+                        }
+                    }
+                    
+                    // Вычисляем дней назад
+                    $daysAgo = 0;
+                    if ($ad->created_at) {
+                        $daysAgo = floor($ad->created_at->diffInDays(now()));
+                    }
+                    
+                    // Извлекаем услуги
+                    $servicesData = is_string($ad->services) ? json_decode($ad->services, true) : $ad->services;
+                    $services = [];
+                    
+                    if (is_array($servicesData)) {
+                        foreach ($servicesData as $serviceGroup) {
+                            if (is_array($serviceGroup) && isset($serviceGroup['services']) && is_array($serviceGroup['services'])) {
+                                foreach ($serviceGroup['services'] as $service) {
+                                    if (is_array($service) && isset($service['name'])) {
+                                        $services[] = ['name' => $service['name']];
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Получаем имя пользователя
+                    $userName = 'Массажист';
+                    if ($ad->user) {
+                        $userName = $ad->user->name ?: $ad->user->email;
+                    }
+                    
+                    $mastersData[] = [
+                        'id' => $ad->id,
+                        'name' => $userName,
+                        'photo' => $photo, // Добавлено фото
+                        'address' => $ad->address, // Добавлен адрес
+                        'rating' => 4.5 + (rand(0, 50) / 100), // Временно случайный рейтинг
+                        'reviews_count' => rand(5, 150),
+                        'price_from' => $priceFrom,
+                        'price_unit' => $priceUnit, // Добавлена единица измерения
+                        'days_ago' => $daysAgo, // Добавлено количество дней
+                        'services' => $services,
+                        'district' => null,
+                        'city' => null,
+                        'is_online' => true,
+                        'is_premium' => false,
+                        'is_verified' => true,
+                        'coordinates' => [
+                            'lat' => $lat,
+                            'lng' => $lng
+                        ]
+                    ];
+                    
+                } catch (\Exception $e) {
+                    \Log::warning("Ошибка обработки объявления {$ad->id}: " . $e->getMessage());
+                    continue;
+                }
+            }
+            
+            // Возвращаем в том же формате что ожидает карта
+            return response()->json([
+                'data' => $mastersData,
+                'total' => count($mastersData)
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Ошибка в MasterController::apiIndex: ' . $e->getMessage());
+            
+            return response()->json([
+                'error' => 'Ошибка загрузки объявлений',
+                'message' => $e->getMessage(),
+                'data' => [] // Возвращаем пустой массив чтобы карта не сломалась
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Данные конкретного мастера
+     */
+    public function apiShow(int $master)
+    {
+        try {
+            $profile = $this->masterService->findWithRelations($master);
+            
+            return response()->json([
+                'id' => $profile->id,
+                'name' => $profile->display_name,
+                'photo' => $profile->avatar_url,
+                'rating' => (float) $profile->rating,
+                'reviews_count' => (int) $profile->reviews_count,
+                'price_from' => (int) $profile->price_from,
+                'services' => $profile->masterServices->pluck('name')->toArray(),
+                'district' => $profile->district,
+                'city' => $profile->city,
+                'is_online' => $profile->is_online,
+                'is_premium' => $profile->is_premium,
+                'is_verified' => $profile->is_verified,
+                'coordinates' => [
+                    'lat' => $profile->latitude,
+                    'lng' => $profile->longitude
+                ],
+                'description' => $profile->about,
+                'photos' => $profile->photos->map(function ($photo) {
+                    return [
+                        'id' => $photo->id,
+                        'url' => $photo->url,
+                        'thumb' => $photo->thumb_url
+                    ];
+                })
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Мастер не найден',
+                'message' => $e->getMessage()
+            ], 404);
+        }
+    }
+
+    /**
      * Возвращает «похожих» мастеров (по тому же городу, кроме текущего).
      */
     protected function getSimilarMasters(MasterProfile $profile): array

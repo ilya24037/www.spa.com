@@ -1,0 +1,152 @@
+/* Touch Events and Mobile Interactions for OZON Map */
+
+/* Base Touch Interaction Styles */
+.maplibregl-canvas-container.maplibregl-interactive {
+  cursor: grab;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+.maplibregl-canvas-container.maplibregl-interactive:active {
+  cursor: grabbing;
+}
+
+.maplibregl-canvas-container.maplibregl-interactive.maplibregl-track-pointer {
+  cursor: pointer;
+}
+
+/* Touch Zoom and Rotate */
+.maplibregl-canvas-container.maplibregl-touch-zoom-rotate,
+.maplibregl-canvas-container.maplibregl-touch-zoom-rotate .maplibregl-canvas {
+  touch-action: pan-x pan-y;
+}
+
+/* Touch Drag Pan */
+.maplibregl-canvas-container.maplibregl-touch-drag-pan,
+.maplibregl-canvas-container.maplibregl-touch-drag-pan .maplibregl-canvas {
+  touch-action: pinch-zoom;
+}
+
+/* Combined Touch Actions */
+.maplibregl-canvas-container.maplibregl-touch-zoom-rotate.maplibregl-touch-drag-pan,
+.maplibregl-canvas-container.maplibregl-touch-zoom-rotate.maplibregl-touch-drag-pan .maplibregl-canvas {
+  touch-action: none;
+}
+
+/* Cooperative Gestures */
+.maplibregl-canvas-container.maplibregl-touch-drag-pan.maplibregl-cooperative-gestures,
+.maplibregl-canvas-container.maplibregl-touch-drag-pan.maplibregl-cooperative-gestures .maplibregl-canvas {
+  touch-action: pan-x pan-y;
+}
+
+/* Control Touch Actions */
+.maplibregl-ctrl-group button.maplibregl-ctrl-compass {
+  touch-action: none;
+  cursor: grab;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+.maplibregl-ctrl-group button.maplibregl-ctrl-compass:active {
+  cursor: grabbing;
+}
+
+/* Mobile-Specific Styles */
+@media (max-width: 768px) {
+  /* Larger touch targets for mobile */
+  .maplibregl-ctrl-group button {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 8px;
+  }
+  
+  /* Increased margins for easier touch */
+  .maplibregl-ctrl-top-left .maplibregl-ctrl {
+    margin: 16px 0 0 16px;
+  }
+  
+  .maplibregl-ctrl-top-right .maplibregl-ctrl {
+    margin: 16px 16px 0 0;
+  }
+  
+  .maplibregl-ctrl-bottom-left .maplibregl-ctrl {
+    margin: 0 0 16px 16px;
+  }
+  
+  .maplibregl-ctrl-bottom-right .maplibregl-ctrl {
+    margin: 0 16px 16px 0;
+  }
+  
+  /* Larger focus areas */
+  .maplibregl-ctrl-group button:focus {
+    box-shadow: 0 0 4px 4px var(--ozon-primary-pale);
+  }
+}
+
+/* Tablet Optimizations */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .maplibregl-ctrl-group button {
+    min-height: 36px;
+    min-width: 36px;
+  }
+}
+
+/* Hover Effects (Desktop Only) */
+@media (hover: hover) and (pointer: fine) {
+  .maplibregl-ctrl button:not(:disabled):hover {
+    background-color: var(--map-control-hover);
+    transition: background-color var(--transition);
+  }
+}
+
+/* Prevent Context Menu on Long Press */
+.maplibregl-canvas {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* iOS Safari Specific Fixes */
+@supports (-webkit-touch-callout: none) {
+  .maplibregl-canvas-container {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Prevent bounce scrolling */
+  .maplibregl-map {
+    position: fixed;
+    overflow: hidden;
+  }
+}
+
+/* Android Chrome Specific */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  .maplibregl-canvas-container.maplibregl-interactive {
+    /* Optimize for Android touch performance */
+    will-change: transform;
+  }
+}
+
+/* Accessibility - Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .maplibregl-ctrl-group button {
+    transition: none;
+  }
+  
+  .maplibregl-ctrl-geolocate-waiting .maplibregl-ctrl-icon {
+    animation: none;
+  }
+}
+
+/* High DPI Screens */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .maplibregl-ctrl-group {
+    /* Sharper borders on high DPI */
+    box-shadow: 0 0 0 0.5px var(--map-control-border);
+  }
+}

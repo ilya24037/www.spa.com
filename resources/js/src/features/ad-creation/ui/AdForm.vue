@@ -193,14 +193,16 @@
 
     <!-- Кнопки действий -->
     <FormActions
-      :can-submit="isFormValid"
+      :can-submit="isActiveAd ? true : isFormValid"
       :submitting="saving"
       :saving-draft="saving"
       :show-progress="true"
       :progress-hint="`Заполнено ${formProgress}% формы`"
       :submit-label="isEditMode ? 'Обновить объявление' : 'Разместить объявление'"
+      :is-active-ad="isActiveAd"
       @submit="handlePublish"
       @save-draft="handleSaveDraft"
+      @cancel="handleCancel"
     />
   </div>
 </template>
@@ -245,6 +247,7 @@ const props = withDefaults(defineProps<Props>(), {
 // Events
 const emit = defineEmits<{
   'success': []
+  'cancel': []
 }>()
 
 // Используем существующую модель для всей логики
@@ -255,8 +258,14 @@ const {
   isEditMode,
   handleSubmit,
   handleSaveDraft,
-  handlePublish
+  handlePublish,
+  handleCancel
 } = useAdFormModel(props, emit)
+
+// Определяем активное объявление
+const isActiveAd = computed(() => {
+  return isEditMode.value && props.initialData?.status === 'active'
+})
 
 // Конфигурация секций
 const sectionsConfig = [

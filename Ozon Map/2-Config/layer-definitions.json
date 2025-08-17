@@ -1,0 +1,191 @@
+{
+  "backgroundLayers": [
+    {
+      "id": "Background",
+      "type": "background",
+      "layout": {"visibility": "visible"},
+      "paint": {"background-color": "hsl(43, 33%, 96%)"}
+    }
+  ],
+  "landuseLayers": [
+    {
+      "id": "Residential",
+      "type": "fill",
+      "source": "openmaptiles",
+      "source-layer": "landuse",
+      "minzoom": 6,
+      "filter": ["all", ["in", "class", "residential", "suburbs", "neighbourhood"]],
+      "layout": {"visibility": "visible"},
+      "paint": {"fill-color": "hsl(43, 33%, 96%)"}
+    },
+    {
+      "id": "Commercial",
+      "type": "fill",
+      "source": "openmaptiles",
+      "source-layer": "landuse",
+      "minzoom": 16,
+      "maxzoom": 22,
+      "filter": ["all", ["==", "class", "commercial"], ["==", "$type", "Polygon"]],
+      "layout": {"visibility": "visible"},
+      "paint": {
+        "fill-color": "hsl(66, 49%, 95%)",
+        "fill-opacity": 1,
+        "fill-outline-color": "hsl(2, 2%, 88%)"
+      }
+    },
+    {
+      "id": "Industrial",
+      "type": "fill",
+      "source": "openmaptiles",
+      "source-layer": "landuse",
+      "minzoom": 12,
+      "maxzoom": 22,
+      "filter": ["all", ["==", "class", "industrial"], ["==", "$type", "Polygon"]],
+      "layout": {"visibility": "visible"},
+      "paint": {
+        "fill-color": "hsla(54, 30%, 94%, 0.7)",
+        "fill-opacity": 1,
+        "fill-outline-color": "hsla(45, 6%, 83%, 0.7)"
+      }
+    }
+  ],
+  "waterLayers": [
+    {
+      "id": "Water",
+      "type": "fill",
+      "source": "openmaptiles",
+      "source-layer": "water",
+      "filter": ["all", ["!=", "intermittent", 1], ["!=", "brunnel", "tunnel"]],
+      "layout": {"visibility": "visible"},
+      "paint": {"fill-color": "hsl(212, 88%, 81%)"}
+    },
+    {
+      "id": "Water intermittent",
+      "type": "fill",
+      "source": "openmaptiles",
+      "source-layer": "water",
+      "filter": ["all", ["==", "intermittent", 1]],
+      "layout": {"visibility": "visible"},
+      "paint": {
+        "fill-color": "hsl(205, 91%, 83%)",
+        "fill-opacity": 0.85
+      }
+    }
+  ],
+  "natureLayers": [
+    {
+      "id": "Park",
+      "type": "fill",
+      "source": "openmaptiles",
+      "source-layer": "landcover",
+      "minzoom": 13,
+      "filter": ["all", ["==", "subclass", "park"]],
+      "layout": {"visibility": "visible"},
+      "paint": {
+        "fill-color": "hsl(93, 62%, 80%)",
+        "fill-antialias": true
+      }
+    },
+    {
+      "id": "Forest",
+      "type": "fill",
+      "source": "openmaptiles",
+      "source-layer": "landcover",
+      "minzoom": 9,
+      "filter": ["all", ["==", "subclass", "forest"]],
+      "layout": {"visibility": "visible"},
+      "paint": {
+        "fill-color": "hsl(92, 59%, 80%)",
+        "fill-antialias": true
+      }
+    },
+    {
+      "id": "Grass",
+      "type": "fill",
+      "source": "openmaptiles",
+      "source-layer": "landcover",
+      "minzoom": 9,
+      "filter": ["all", ["in", "subclass", "grass", "grassland", "golf_course"]],
+      "layout": {"visibility": "visible"},
+      "paint": {
+        "fill-color": "hsl(91, 61%, 81%)",
+        "fill-antialias": true
+      }
+    }
+  ],
+  "pickupPointLayers": [
+    {
+      "id": "pickup-points-clusters",
+      "type": "circle",
+      "source": "ozon-pickup-points",
+      "filter": ["has", "point_count"],
+      "paint": {
+        "circle-color": [
+          "step",
+          ["get", "point_count"],
+          "#51bbd6",
+          10,
+          "#f1f075",
+          30,
+          "#f28cb1"
+        ],
+        "circle-radius": [
+          "step",
+          ["get", "point_count"],
+          20,
+          10,
+          30,
+          30,
+          40
+        ]
+      }
+    },
+    {
+      "id": "pickup-points-cluster-count",
+      "type": "symbol",
+      "source": "ozon-pickup-points",
+      "filter": ["has", "point_count"],
+      "layout": {
+        "text-field": "{point_count_abbreviated}",
+        "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+        "text-size": 12
+      }
+    },
+    {
+      "id": "pickup-points-unclustered",
+      "type": "circle",
+      "source": "ozon-pickup-points",
+      "filter": ["!", ["has", "point_count"]],
+      "paint": {
+        "circle-color": "#005bff",
+        "circle-radius": 8,
+        "circle-stroke-width": 2,
+        "circle-stroke-color": "#fff"
+      }
+    }
+  ],
+  "userLocationLayers": [
+    {
+      "id": "user-location",
+      "type": "circle",
+      "source": "user-location",
+      "paint": {
+        "circle-radius": 8,
+        "circle-color": "#007cbf",
+        "circle-stroke-color": "#fff",
+        "circle-stroke-width": 2
+      }
+    },
+    {
+      "id": "user-location-accuracy",
+      "type": "circle",
+      "source": "user-location",
+      "paint": {
+        "circle-radius": 20,
+        "circle-color": "rgba(0, 124, 191, 0.2)",
+        "circle-stroke-color": "rgba(0, 124, 191, 0.5)",
+        "circle-stroke-width": 1
+      }
+    }
+  ]
+}

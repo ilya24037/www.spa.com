@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создать тестовое видео</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            display: block;
+            margin: 20px 0;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .info {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Создать тестовое видео</h1>
+    
+    <div class="info">
+        Эта страница создаёт простое тестовое видео (3 секунды) с анимацией для проверки загрузки видео.
+    </div>
+
+    <canvas id="canvas" width="640" height="480"></canvas>
+    
+    <button id="createBtn">Создать тестовое видео (3 сек)</button>
+    <button id="downloadBtn" style="display:none">Скачать видео</button>
+    
+    <div id="result"></div>
+    
+    <div id="links" style="display:none">
+        <h3>Тестовые страницы:</h3>
+        <ul>
+            <li><a href="/test-video-upload.html">Тест загрузки видео</a></li>
+            <li><a href="/test-video.html">Тест воспроизведения видео</a></li>
+            <li><a href="/draft/182">Черновик ID 182</a></li>
+        </ul>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const createBtn = document.getElementById('createBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const result = document.getElementById('result');
+        const links = document.getElementById('links');
+        
+        let videoBlob = null;
+        
+        // Рисуем начальный кадр
+        function drawFrame(frameNum) {
+            // Фон
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, `hsl(${frameNum * 2}, 70%, 50%)`);
+            gradient.addColorStop(1, `hsl(${frameNum * 2 + 180}, 70%, 30%)`);
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Текст
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 48px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('ТЕСТОВОЕ ВИДЕО', canvas.width / 2, canvas.height / 2 - 50);
+            
+            ctx.font = '36px Arial';
+            ctx.fillText(`Кадр ${frameNum}`, canvas.width / 2, canvas.height / 2 + 20);
+            
+            // Время
+            ctx.font = '24px Arial';
+            const seconds = (frameNum / 30).toFixed(2);
+            ctx.fillText(`Время: ${seconds} сек`, canvas.width / 2, canvas.height / 2 + 70);
+            
+            // Движущийся круг
+            const x = (canvas.width / 2) + Math.cos(frameNum * 0.1) * 150;
+            const y = (canvas.height / 2) + Math.sin(frameNum * 0.1) * 100;
+            ctx.beginPath();
+            ctx.arc(x, y, 30, 0, Math.PI * 2);
+            ctx.fillStyle = 'yellow';
+            ctx.fill();
+        }
+        
+        drawFrame(0);
+        
+        createBtn.addEventListener('click', async () => {
+            createBtn.disabled = true;
+            result.textContent = 'Создание видео...';
+            result.className = 'info';
+            
+            try {
+                // Создаём MediaRecorder
+                const stream = canvas.captureStream(30);
+                const mediaRecorder = new MediaRecorder(stream, {
+                    mimeType: 'video/webm;codecs=vp9',
+                    videoBitsPerSecond: 2500000
+                });
+                
+                const chunks = [];
+                
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) {
+                        chunks.push(e.data);
+                    }
+                };
+                
+                mediaRecorder.onstop = () => {
+                    videoBlob = new Blob(chunks, { type: 'video/webm' });
+                    const url = URL.createObjectURL(videoBlob);
+                    
+                    result.className = 'info success';
+                    result.innerHTML = `
+                        Видео создано! Размер: ${(videoBlob.size / 1024).toFixed(2)} KB<br>
+                        <video src="${url}" controls width="320" style="margin-top: 10px"></video>
+                    `;
+                    
+                    downloadBtn.style.display = 'inline-block';
+                    downloadBtn.onclick = () => {
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'test-video.webm';
+                        a.click();
+                    };
+                    
+                    links.style.display = 'block';
+                    createBtn.disabled = false;
+                };
+                
+                // Начинаем запись
+                mediaRecorder.start();
+                
+                // Анимируем 3 секунды (90 кадров при 30 fps)
+                let frame = 0;
+                const interval = setInterval(() => {
+                    drawFrame(frame);
+                    frame++;
+                    
+                    result.textContent = `Создание видео... ${Math.round((frame / 90) * 100)}%`;
+                    
+                    if (frame >= 90) {
+                        clearInterval(interval);
+                        mediaRecorder.stop();
+                    }
+                }, 33); // ~30 fps
+                
+            } catch (error) {
+                result.className = 'info error';
+                result.textContent = `Ошибка: ${error.message}`;
+                createBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

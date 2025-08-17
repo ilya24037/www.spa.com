@@ -1,0 +1,31 @@
+{
+  "sources": {
+    "openmaptiles": {
+      "type": "vector",
+      "tiles": ["https://api.maptiler.com/tiles/v3/{z}/{x}/{y}.pbf?key=YOUR_API_KEY"],
+      "minzoom": 0,
+      "maxzoom": 14,
+      "scheme": "xyz",
+      "attribution": "© OpenMapTiles © OpenStreetMap contributors"
+    },
+    "ozon-pickup-points": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": []
+      },
+      "cluster": true,
+      "clusterMaxZoom": 14,
+      "clusterRadius": 50
+    },
+    "user-location": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": []
+      }
+    }
+  },
+  "sprite": "https://st.ozone.ru/s3/maps-sdk-static/route-planner-ui-sprite",
+  "glyphs": "https://st.ozone.ru/s3/maps-sdk-static/vector/fonts/{fontstack}/{range}.pbf"
+}

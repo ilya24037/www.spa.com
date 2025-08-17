@@ -21,6 +21,7 @@
         <div class="flex items-center gap-2">
           <BaseInput
             v-model="filters.priceFrom"
+            name="price_from"
             type="number"
             placeholder="58"
             :min="0"
@@ -29,6 +30,7 @@
           <span class="text-gray-400 flex-shrink-0">—</span>
           <BaseInput
             v-model="filters.priceTo"
+            name="price_to"
             type="number"
             placeholder="167037"
             :min="0"
@@ -44,6 +46,7 @@
           <BaseCheckbox
             v-for="type in massageTypes"
             :key="type.value"
+            :name="`massage_type_${type.value}`"
             :model-value="filters.massageTypes.includes(type.value)"
             @update:modelValue="toggleMassageType(type.value, $event)"
           >
@@ -69,6 +72,7 @@
           <BaseCheckbox
             v-for="option in additionalOptions"
             :key="option.value"
+            :name="`additional_${option.value}`"
             :model-value="filters.additional.includes(option.value)"
             @update:modelValue="toggleAdditional(option.value, $event)"
           >
@@ -94,6 +98,7 @@
           <BaseRadio
             v-for="rating in ratingOptions"
             :key="rating.value"
+            name="rating"
             :model-value="filters.rating"
             :value="rating.value"
             @update:modelValue="filters.rating = $event"

@@ -17,13 +17,16 @@
       </p>
     </div>
 
+    <!-- Адрес (для всех статусов) -->
+    <div v-if="item.address" class="item-location">
+      <p class="location-address">{{ item.address }}</p>
+    </div>
+
     <!-- Для черновиков показываем упрощенную информацию -->
     <template v-if="item.status === 'draft'">
-      <!-- Услуга и локация -->
+      <!-- Услуга -->
       <div class="item-service-info">
         <p class="service-type">{{ item.company_name || 'Массажный салон' }}</p>
-        <p class="service-location">{{ item.city || 'Москва' }}</p>
-        <p class="service-district">{{ item.district || 'Центральный район' }}</p>
       </div>
     </template>
     
@@ -54,11 +57,6 @@
         <p class="company-name">{{ item.company_name || 'Массажный салон' }}</p>
       </div>
 
-      <!-- Адрес -->
-      <div class="item-location">
-        <p class="location-address">{{ item.address || item.city }}</p>
-        <p class="location-district">{{ item.district || 'Центральный район' }}</p>
-      </div>
     </template>
   </div>
 </template>
@@ -84,8 +82,6 @@ interface Props {
     home_service?: boolean
     company_name?: string
     address?: string
-    city?: string
-    district?: string
   }
   itemUrl: string
 }
@@ -206,14 +202,10 @@ const getMinPrice = () => {
 }
 
 .item-location {
-  @apply text-sm text-gray-600;
+  @apply text-sm text-gray-600 mb-2;
 }
 
 .location-address {
   @apply mb-1;
-}
-
-.location-district {
-  @apply text-gray-500;
 }
 </style>

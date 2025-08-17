@@ -14,43 +14,115 @@
         </p>
       </div>
       
-      <!-- MastersCatalog Widget - единая точка входа -->
-      <MastersCatalog
-      :masters="allMasters"
-      :categories="categories"
-      :districts="districts"
-      :current-city="currentCity"
-      :loading="isLoading"
-      :error="error"
-      :enable-virtual-scroll="enableVirtualScroll"
-      :virtual-scroll-height="800"
-      @filters-applied="handleFiltersApplied"
-      @master-favorited="handleMasterFavorited"
-      @booking-requested="handleBookingRequested"
-      @sorting-changed="handleSortingChanged"
-      @retry="handleRetry"
-      @load-more="handleLoadMore"
-    >
-      <!-- Кастомный master card через slot -->
-      <template #master="{ master, index }">
-        <MasterCard 
-          :master="master"
-          :index="index"
-          :is-favorite="isFavorite(master.id)"
-          @toggle-favorite="toggleFavorite"
-          @booking="() => handleBooking(master.id)"
-          @quick-view="openQuickView"
-        />
-      </template>
-      
-      <!-- Кастомная пагинация -->
-      <template #pagination>
-        <Pagination 
-          v-if="masters?.links" 
-          :links="masters.links" 
-        />
-      </template>
-      </MastersCatalog>
+      <!-- Двухколоночный layout: фильтры слева, карта/карточки справа -->
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- Левая колонка: Только фильтры -->
+        <div class="lg:col-span-1">
+          <!-- Фильтры извлечены из MastersCatalog -->
+          <FilterPanel @apply="handleFiltersApplied" @reset="handleFiltersReset">
+            <FilterCategory 
+              title="Категории услуг"
+              icon="🛠️"
+              :active="false"
+            >
+              <div class="space-y-2">
+                <BaseCheckbox
+                  v-for="category in categories"
+                  :key="category.id"
+                  :model-value="false"
+                  :label="category.name"
+                  @update:modelValue="handleCategoryToggle(category.id, $event)"
+                />
+              </div>
+            </FilterCategory>
+          </FilterPanel>
+        </div>
+        
+        <!-- Правая колонка: Карта сверху, карточки снизу -->
+        <div class="lg:col-span-3">
+          <!-- Карта (всегда видна) -->
+          <div class="mb-6">
+            <div v-if="isLoading" class="map-loading">
+              <div class="flex items-center justify-center h-96">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <span class="ml-3">Загрузка карты...</span>
+              </div>
+            </div>
+            <div v-else>
+              <YandexMapPicker
+                :markers="mapMarkers"
+                :multiple="true"
+                :clusterize="false"
+                :show-single-marker="false"
+                :height="400"
+                :center="mapCenter"
+                :zoom="mapZoom"
+                @marker-click="handleMapMarkerClick"
+                @bounds-change="handleBoundsChange"
+              />
+            </div>
+            
+            <!-- Панель информации о выбранном мастере -->
+            <transition name="slide-up">
+              <div v-if="mapSelectedMaster" class="map-master-info">
+                <button @click="mapSelectedMaster = null" class="close-btn">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+                <MasterCard
+                  :master="mapSelectedMaster"
+                  :is-favorite="isFavorite(mapSelectedMaster.id)"
+                  @toggle-favorite="toggleFavorite"
+                  @booking="handleBooking"
+                />
+              </div>
+            </transition>
+          </div>
+          
+          <!-- Карточки мастеров (всегда видны под картой) -->
+          <div>
+            <MastersCatalog
+              :masters="allMasters"
+              :categories="categories"
+              :districts="districts"
+              :current-city="currentCity"
+              :loading="isLoading"
+              :error="error"
+              :enable-virtual-scroll="enableVirtualScroll"
+              :virtual-scroll-height="800"
+              :view-mode="'grid'"
+              @filters-applied="handleFiltersApplied"
+              @master-favorited="handleMasterFavorited"
+              @booking-requested="handleBookingRequested"
+              @sorting-changed="handleSortingChanged"
+              @retry="handleRetry"
+              @load-more="handleLoadMore"
+              @view-change="handleViewChange"
+            >
+              <!-- Кастомный master card через slot -->
+              <template #master="{ master, index }">
+                <MasterCard 
+                  :master="master"
+                  :index="index"
+                  :is-favorite="isFavorite(master.id)"
+                  @toggle-favorite="toggleFavorite"
+                  @booking="() => handleBooking(master.id)"
+                  @quick-view="openQuickView"
+                />
+              </template>
+              
+              <!-- Кастомная пагинация -->
+              <template #pagination>
+                <Pagination 
+                  v-if="masters?.links" 
+                  :links="masters.links" 
+                />
+              </template>
+            </MastersCatalog>
+          </div>
+        </div>
+      </div>
       
       <!-- Персонализированные рекомендации -->
       <RecommendedSection
@@ -105,7 +177,12 @@ import { MasterCard } from '@/src/entities/master/ui/MasterCard'
 import { Pagination } from '@/src/shared/ui/molecules/Pagination'
 import { QuickViewModal, useQuickView } from '@/src/features/quick-view'
 import RecommendationService from '@/src/shared/services/RecommendationService'
+import { FilterPanel, FilterCategory } from '@/src/features/masters-filter'
+import { BaseCheckbox } from '@/src/shared/ui/atoms'
 import { logger } from '@/src/shared/utils/logger'
+import YandexMapPicker from '@/src/shared/ui/molecules/YandexMapPicker/YandexMapPicker.vue'
+import { useMapWithMasters } from '@/src/features/map/composables/useMapWithMasters'
+import type { GridView } from '@/src/shared/ui/molecules/GridControls/GridControls.vue'
 
 // Stores - используем основные TypeScript stores
 import { useFavoritesStore, type Master } from '@/stores/favorites'
@@ -149,6 +226,18 @@ const error = ref<string | null>(null)
 const enableVirtualScroll = ref(true) // Включить виртуальный скроллинг для больших списков
 const allMasters = ref<Master[]>(props.masters?.data || []) // Все загруженные мастера
 const currentPage = ref(1) // Текущая страница для виртуального скролла
+const viewMode = ref<GridView>('grid') // Режим отображения: карта, сетка или список
+
+// Map composable - передаем данные мастеров с сервера
+const {
+  mapMarkers,
+  mapCenter,
+  mapZoom,
+  selectedMaster: mapSelectedMaster,
+  handleMarkerClick: handleMapMarkerClick,
+  handleClusterClick,
+  handleBoundsChange
+} = useMapWithMasters(props.masters?.data || [])
 
 // Computed
 const favoriteIds = computed(() => favoritesStore.favoriteIds)
@@ -278,15 +367,102 @@ const handleSortingChanged = (sortingType: string) => {
   }, 500)
 }
 
+// Обработчик изменения вида отображения
+const handleViewChange = (newView: GridView) => {
+  viewMode.value = newView
+  
+  // Сохраняем выбранный вид в localStorage
+  localStorage.setItem('mastersViewMode', newView)
+  
+  logger.info('Режим отображения изменен на:', newView)
+}
+
+// Методы для работы с фильтрами
+const handleCategoryToggle = (categoryId: string, checked: boolean) => {
+  // Логика переключения категории
+  console.log('Toggle category:', categoryId, checked)
+}
+
+const handleFiltersReset = () => {
+  // Логика сброса фильтров
+  console.log('Reset filters')
+}
+
 // Initialize favorites on mount (only if authenticated)
 onMounted(() => {
   // Загружаем избранное только для авторизованных пользователей
   if (authStore.isAuthenticated) {
     favoritesStore.loadFavorites()
   }
+  
+  // Восстанавливаем сохраненный режим отображения
+  const savedViewMode = localStorage.getItem('mastersViewMode') as GridView
+  if (savedViewMode && ['map', 'grid', 'list'].includes(savedViewMode)) {
+    viewMode.value = savedViewMode
+  }
 })
 </script>
 
 <style scoped>
 /* Стили специфичные для главной страницы */
+.map-section {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.map-master-info {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  max-width: 400px;
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+.close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  z-index: 1;
+}
+
+.close-btn:hover {
+  background: #e5e7eb;
+}
+
+/* Анимация появления панели */
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.slide-up-enter-from,
+.slide-up-leave-to {
+  transform: translateY(100%);
+  opacity: 0;
+}
+
+@media (max-width: 640px) {
+  .map-master-info {
+    left: 10px;
+    right: 10px;
+    max-width: none;
+  }
+}
 </style>

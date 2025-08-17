@@ -2,8 +2,8 @@
 <template>
   <div class="item-content">
     <!-- Статус и ожидание оплаты -->
-    <div v-if="item.status === 'inactive' || item.waiting_payment" class="item-status-badge">
-      <span v-if="item.waiting_payment" class="badge-payment">
+    <div v-if="item.status === 'inactive' || item.status === 'waiting_payment'" class="item-status-badge">
+      <span v-if="item.status === 'waiting_payment'" class="badge-payment">
         Ожидает оплаты
       </span>
       <span v-else-if="item.status === 'inactive'" class="badge-inactive">
@@ -13,7 +13,7 @@
     
     <!-- Заголовок -->
     <h3 class="item-title">
-      {{ item.name || item.title || 'Без названия' }}
+      {{ item.title || 'Без названия' }}
     </h3>
     
     <!-- Цена -->

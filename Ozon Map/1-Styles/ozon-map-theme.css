@@ -1,0 +1,123 @@
+/* OZON Map Theme - Цветовая схема и переменные для карты */
+
+:root {
+  /* OZON Color Palette */
+  --ozon-primary: #005bff;
+  --ozon-primary-hover: #0050e0;
+  --ozon-primary-pale: rgba(0, 150, 255, 0.08);
+  
+  --ozon-text-marketing: #5b51de;
+  --ozon-text-positive: #10c44c;
+  --ozon-text-secondary: #707f8d;
+  --ozon-text-quaternary: #96a3ae;
+  
+  --ozon-bg-secondary: #fff;
+  --ozon-bg-primary-inverse: #eff3f6;
+  --ozon-separator: rgba(204, 214, 228, 0.6);
+  --ozon-shadow-spread: rgba(0, 26, 52, 0.16);
+  --ozon-accent-alert: #f91155;
+  
+  /* Map Control Colors */
+  --map-control-bg: #ffffff;
+  --map-control-border: rgba(0, 0, 0, 0.1);
+  --map-control-hover: rgba(0, 0, 0, 0.05);
+  --map-control-focus: #0096ff;
+  --map-control-disabled: #aaa;
+  
+  /* Map Layer Colors (HSL format from OZON map config) */
+  --map-background: hsl(43, 33%, 96%);
+  --map-residential: hsl(43, 33%, 96%);
+  --map-water: hsl(212, 88%, 81%);
+  --map-water-intermittent: hsl(205, 91%, 83%);
+  --map-park: hsl(93, 62%, 80%);
+  --map-forest: hsl(92, 59%, 80%);
+  --map-grass: hsl(91, 61%, 81%);
+  --map-commercial: hsl(66, 49%, 95%);
+  --map-industrial: hsla(54, 30%, 94%, 0.7);
+  --map-cemetery: hsl(94, 43%, 76%);
+  --map-beach: hsl(43, 100%, 89%);
+  --map-sand: hsl(44, 73%, 90%);
+  
+  /* Animation and Transition */
+  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --animation-spin: maplibregl-spin 2s linear infinite;
+  
+  /* Responsive Breakpoints */
+  --desktop-screen-l: 1472px;
+  --desktop-screen-m: 1280px;
+  --desktop-screen-s: 1200px;
+  --mobile-screen: 320px;
+  
+  /* Spacing */
+  --map-control-margin: 10px;
+  --map-control-size: 29px;
+  --map-control-border-radius: 4px;
+  
+  /* Z-Index */
+  --z-index-map-controls: 2;
+  --z-index-modal: 1000;
+  --z-index-popover: 500;
+}
+
+/* OZON Map Control Theme */
+.ozon-map-controls {
+  --control-background: var(--map-control-bg);
+  --control-border: var(--map-control-border);
+  --control-hover: var(--map-control-hover);
+  --control-focus: var(--map-control-focus);
+  --control-transition: var(--transition);
+}
+
+/* Geolocation Button States - OZON Colors */
+.maplibregl-ctrl-geolocate.active {
+  --geolocate-color: #33b5e5;
+}
+
+.maplibregl-ctrl-geolocate.error {
+  --geolocate-color: var(--ozon-accent-alert);
+}
+
+.maplibregl-ctrl-geolocate.background {
+  --geolocate-color: #33b5e5;
+}
+
+.maplibregl-ctrl-geolocate.background-error {
+  --geolocate-color: #e54e33;
+}
+
+/* Terrain Button Active State */
+.maplibregl-ctrl-terrain-enabled {
+  --terrain-color: #33b5e5;
+}
+
+/* Map Marker Colors */
+.ozon-pickup-marker {
+  --marker-primary: var(--ozon-primary);
+  --marker-active: var(--ozon-primary-hover);
+  --marker-shadow: var(--ozon-shadow-spread);
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --map-control-bg: #2a2a2a;
+    --map-control-border: rgba(255, 255, 255, 0.1);
+    --map-control-hover: rgba(255, 255, 255, 0.05);
+    --map-background: hsl(0, 0%, 15%);
+  }
+}
+
+/* High Contrast Mode Support */
+@media (forced-colors: active) {
+  .maplibregl-ctrl-group:not(:empty) {
+    box-shadow: 0 0 0 2px ButtonText;
+  }
+  
+  .maplibregl-ctrl-icon {
+    background-color: transparent;
+  }
+  
+  .maplibregl-ctrl-group button + button {
+    border-top: 1px solid ButtonText;
+  }
+}

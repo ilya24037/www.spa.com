@@ -53,6 +53,7 @@
             :ad-id="ad.id"
             :initial-data="ad"
             @success="handleSuccess"
+            @cancel="handleCancel"
           />
         </div>
       </div>
@@ -95,6 +96,10 @@ const goBack = () => {
 }
 
 const handleSuccess = () => {
+  router.visit(getBackUrl())
+}
+
+const handleCancel = () => {
   router.visit(getBackUrl())
 }
 </script>

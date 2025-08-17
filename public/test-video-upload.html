@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест загрузки видео</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .upload-form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        input[type="file"] {
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>Тест загрузки видео</h1>
+    
+    <div class="upload-form">
+        <h2>Загрузить видео</h2>
+        
+        <form id="uploadForm">
+            <div>
+                <label for="title">Название:</label>
+                <input type="text" id="title" value="Тестовое объявление с видео" />
+            </div>
+            
+            <div>
+                <label for="video">Видео файл:</label>
+                <input type="file" id="video" accept="video/*" />
+            </div>
+            
+            <button type="submit">Сохранить как черновик</button>
+        </form>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // Получаем CSRF токен
+        async function getCsrfToken() {
+            try {
+                const response = await fetch('/');
+                const html = await response.text();
+                const match = html.match(/<meta name="csrf-token" content="([^"]+)"/);
+                return match ? match[1] : null;
+            } catch (e) {
+                console.error('Failed to get CSRF token:', e);
+                return null;
+            }
+        }
+        
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const resultDiv = document.getElementById('result');
+            const videoInput = document.getElementById('video');
+            const titleInput = document.getElementById('title');
+            
+            if (!videoInput.files[0]) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = 'Выберите видео файл';
+                return;
+            }
+            
+            const csrfToken = await getCsrfToken();
+            if (!csrfToken) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = 'Не удалось получить CSRF токен';
+                return;
+            }
+            
+            // Создаем FormData
+            const formData = new FormData();
+            formData.append('title', titleInput.value);
+            formData.append('category', 'massage');
+            formData.append('specialty', 'Массаж');
+            formData.append('description', 'Тестовое описание для проверки загрузки видео');
+            formData.append('price', '3000');
+            formData.append('phone', '+7 (999) 123-45-67');
+            formData.append('address', 'Пермь, ул. Ленина, 1');
+            
+            // Добавляем видео - пробуем разные варианты
+            formData.append('video[0]', videoInput.files[0]);
+            
+            // Логируем что отправляем
+            console.log('Sending FormData:');
+            for (let pair of formData.entries()) {
+                console.log(pair[0] + ':', pair[1]);
+            }
+            
+            resultDiv.className = 'result';
+            resultDiv.textContent = 'Загрузка...';
+            
+            try {
+                const response = await fetch('/ads/draft', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `Успешно сохранено!\nID черновика: ${data.ad_id}\n\nОтвет сервера:\n${JSON.stringify(data, null, 2)}`;
+                    
+                    // Проверяем что видео сохранилось
+                    if (data.ad_id) {
+                        checkVideo(data.ad_id);
+                    }
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `Ошибка: ${response.status}\n${JSON.stringify(data, null, 2)}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `Ошибка запроса: ${error.message}`;
+            }
+        });
+        
+        async function checkVideo(adId) {
+            const csrfToken = await getCsrfToken();
+            
+            // Проверяем что видео сохранилось в БД
+            try {
+                const response = await fetch(`/api/ads/${adId}/data`, {
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Saved ad data:', data);
+                    
+                    const resultDiv = document.getElementById('result');
+                    resultDiv.textContent += `\n\nВидео в БД: ${data.video}\n`;
+                    
+                    if (data.video && data.video.length > 0) {
+                        resultDiv.textContent += `✓ Видео успешно сохранено: ${data.video[0]}`;
+                        
+                        // Открываем черновик для проверки
+                        setTimeout(() => {
+                            window.open(`/draft/${adId}`, '_blank');
+                        }, 2000);
+                    } else {
+                        resultDiv.textContent += '✗ Видео НЕ сохранилось!';
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to check video:', e);
+            }
+        }
+    </script>
+</body>
+</html>

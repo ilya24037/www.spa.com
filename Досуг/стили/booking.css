@@ -1,0 +1,487 @@
+/*** BOOKING PLUGIN STYLES ***/
+
+#area_booking:not(.box) {
+    margin-top: 10px;
+}
+#area_booking #calendar_map > div {
+    padding-top: 20px;
+}
+#area_booking ul.legend > li, #fs_booking_legend ul.legend > li {
+    padding: 0 0 10px 30px;
+    background: none!important;
+    display: inline-block;
+    width: 45%;
+    margin-right: 10%;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    position: relative;
+}
+#area_booking ul.legend > li:nth-child(2n), #fs_booking_legend ul.legend > li:nth-child(2n) {
+    margin: 0;
+}
+#area_booking ul.legend > li:before, #fs_booking_legend ul.legend > li:before {
+    content: '';
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    left: 0;
+}
+#area_booking ul.ranges > li, #fs_rate_range ul.ranges > li {
+    padding: 0 0 10px;
+}
+#area_booking ul.ranges > li div.date, #fs_rate_range ul.ranges > li div.date {
+    padding-top: 2px;
+}
+#area_booking span.blue_middle {
+    display: inline-block;
+    padding-bottom: 10px;
+}
+#area_booking #refuse_ansfer {
+    margin-top: 10px;
+}
+#area_booking #owner_actions {
+    margin-top: 20px;
+}
+#area_booking .table-cell.wide-field .name.comment {
+    display: none;
+}
+#area_booking #change_period {
+    margin-bottom: 20px;
+}
+#booking_calendar {
+    position: relative;
+}
+#booking_calendar:before {
+    content: '';
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    position: absolute;
+    background: rgba(255,255,255,.5);
+    visibility: hidden;
+    z-index: 1;
+    transition: visibility 0s linear 0.5s, opacity 0.5s ease;
+    opacity: 0;
+}
+#booking_calendar.loading:before {
+    visibility: visible;
+    transition-delay: 0s;
+    opacity: 1;
+}
+#booking_calendar.loading.disabled:before {
+    opacity: 0.5;
+    z-index: 2;
+}
+#booking_calendar .info {
+    padding: 0 0 25px;
+}
+#booking_calendar .month-name {
+    padding: 0 0 20px;
+    text-align: center;
+}
+#booking_calendar table.month-table {
+    table-layout: fixed;
+}
+#booking_calendar table.month-table tr.dayName > td > div {
+    text-align: center;
+    padding-bottom: 10px;
+    font-size: 10px;
+    overflow: hidden;
+    padding: 5px;
+    text-overflow: ellipsis;
+}
+#booking_calendar table.month-table td.calendar_td {
+    cursor: default;
+    overflow: hidden;
+    font-weight: 600;
+}
+#booking_calendar table.month-table td.calendar_td:hover > div.today:not(.booked),
+#booking_calendar table.month-table td.calendar_td:hover > div.available:not(.booked):not(.closed) {
+    cursor: pointer;
+}
+#booking_calendar table.month-table td.calendar_td > div {
+    text-align: center;
+    padding: 5px 0 15px;
+    position: relative;
+}
+#booking_calendar .escort td.calendar_td > div {
+    padding: 10px 0 10px !important;
+}
+#area_booking.escort #booking_message .table-cell,
+#area_booking.request-details #booking_details > div:first-of-type .table-cell {
+    margin-top: 10px;
+}
+#area_booking.escort #booking_message select {
+    width: 160px;
+}
+#booking_calendar td.calendar_td > div > span.day-price {
+    position: absolute;
+    bottom: 2px;
+    font-size: 0.813em;
+    left: 0;
+    width: 100%;
+    opacity: .8;
+    z-index: 1;
+}
+#booking_calendar td.calendar_td > div > span:not(.day-price) {
+    z-index: 1;
+    position: relative;
+}
+#booking_calendar .daySelect:not(.start):not(.end),
+#booking_calendar .current-request:not(.start):not(.end) {
+    color: white !important;
+}
+#booking_calendar div.horizontal > div {
+    top: 0;
+    margin: 0 10px 0;
+    height: 29px;
+    background: none;
+}
+#booking_calendar div.horizontal > div.next {
+    left: auto;
+    right: 0;
+}
+.booking-availability div.nav {
+    padding-top: 20px;
+}
+#booking_rate_ranges_list .from, #booking_rate_ranges_list .to,
+#rate_range_obj .from, #rate_range_obj .to {
+    width: 180px;
+}
+#booking_rate_ranges_list .actions, #rate_range_obj .actions {
+    width: 80px;
+}
+#booking_rate_ranges_list .desc, #rate_range_obj .desc {
+    width: 120px;
+}
+#booking_rate_ranges_list #loading_ranges {
+    padding: 10px 0;
+    text-align: center;
+}
+#booking_rate_ranges_list #add_ranges_table {
+    padding: 10px 0;
+}
+.booking_edit_desc {
+    color: white !important;
+    font-weight: 600;
+}
+#booking_rate_ranges_list #rrange_regular div:nth-child(1),
+#booking_rate_ranges_list #rrange_regular div:nth-child(3) {
+    font-style: italic;
+    font-weight: 500;
+}
+section#content.col-md-8 #booking_rate_ranges_list input.w120.hasDatepicker {
+    width: 102px !important;
+}
+section#content.col-md-8 #booking_rate_ranges_list input.w120.price {
+    width: 58px !important;
+}
+.booking_notices {
+    font-style: italic;
+}
+#area_booking.box .booking_notices {
+    padding-top: 0;
+}
+.booking_notices ul, .booking_notices ul li {
+    list-style: initial;
+}
+.booking-order .item {
+    padding-bottom: 0;
+}
+
+.booking-order .item .navigation-column,
+.booking-order .item ul.info li.middle,
+.booking-order .item ul.ad-info ol {
+    display: none !important;
+}
+.booking-order .item div.data-container {
+    margin-top: 15px !important;
+}
+.booking-order .ad-info .favorite.add,
+.booking-order .ad-info .favorite.remove,
+.booking-order .nav-column, .booking-order .price-tag {
+    display: none !important;
+}
+
+/** Update styles of popup for old versions (4.7.1, 4.7.2)
+ *  @todo - Remove it when compatible will be higher
+ */
+#booking_calendar.popup {
+    background: unset;
+}
+#booking_calendar.popup #calendar_map.escort {
+    left: unset;
+    top: unset;
+    background: unset;
+    position: initial;
+    padding: unset;
+}
+#booking_calendar.popup #calendar_map.escort .col-sm-6,
+#booking_calendar.popup #calendar_map.escort .horizontal {
+    padding: unset;
+    background: unset;
+}
+#booking_calendar.popup #calendar_map.escort .col-sm-6 > div {
+    display: unset;
+}
+/* end of old styles */
+
+.my-listings a.booking-details:before, #listings .book_listing .icon {
+    background: url('book.png') !important;
+}
+.prepayment-notice {
+    margin-bottom: 30px;
+}
+.reservations-escort div.picture {
+    width: 176px !important;
+    height: 274px !important;
+    padding-bottom: 0 !important;
+    float: left;
+    margin: 0 20px 30px 0;
+    z-index: 1;
+}
+#configs_form div.name {
+    width: 295px !important;
+}
+#area_booking.requests .name {
+    width: 156px !important;
+    padding-right: 5px;
+}
+#area_booking.escort .name {
+    width: 180px !important;
+}
+#area_booking.requests .center, #area_requests .center {
+    padding: 11px 11px 0 !important;
+}
+#area_booking.requests .center:not(.iteration), #area_requests .center:not(.iteration) {
+    padding-top: 0 !important;
+}
+.available {
+    color: inherit!important;
+}
+.unavailable {
+    opacity: .6;
+}
+#booking_calendar.popup #calendar_map > div.col-sm-6 {
+    width: 100%;
+    max-width: 100%;
+    flex: 0 0 100%;
+}
+#booking_calendar.popup #calendar_map > div:nth-child(2) {
+    display: none;
+}
+#change_date_button {
+    margin-left: 15px;
+}
+span.a-menu a.b_requests, span.a-menu a.b_reservations {
+    display: inline !important;
+}
+span.a-menu a.requests_count, span.a-menu a.reservations_count {
+    position: initial !important;
+    padding-right: 12px !important;
+    padding-left: 5px !important;
+}
+section.booking-order div.picture img {
+    z-index: 0 !important;
+}
+
+/*** RTL ***/
+body[dir=rtl] #area_booking ul.legend > li {
+    padding: 0 30px 10px 0;
+    margin-right: 0;
+    margin-left: 10%;
+}
+body[dir=rtl] #area_booking ul.legend > li:nth-child(2n) {
+    margin: 0;
+}
+body[dir=rtl] #area_booking ul.legend > li:before {
+    left: auto;
+    right: 0;
+}
+body[dir=rtl] #booking_calendar div.horizontal > div.prev:before {
+    left: auto;
+    right: 8px;
+}
+body[dir=rtl] #booking_calendar div.horizontal > div.next:before {
+    right: auto;
+    left: 10px;
+}
+body[dir=rtl] #booking_calendar div.horizontal > div.next {
+    left: 0;
+    right: auto;
+}
+/*** RTL END ***/
+
+/*** ALL DESKTOP VIEWS ***/
+@media screen and (min-width: 992px) {
+    section.side_block #area_booking #calendar_map > div.col-sm-6 {
+        width: 100%;
+        flex: 0 0 100%;
+        max-width: unset;
+    }
+    section.side_block #area_booking #calendar_map > div:nth-child(2) {
+        display: none;
+    }
+    .booking-order article.item {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 0 0 100% !important;
+    }
+}
+
+@media screen and (min-width: 768px) {
+    .booking-rec{
+            display: none;
+    }
+}
+
+/*** MIDDLE DESKTOP VIEW ***/
+@media screen and (min-width: 992px) and (max-width: 1199px) {
+    form.booking-availability div.row > div:first-of-type {
+        margin-bottom: 15px;
+    }
+}
+/*** MIDDLE DESKTOP VIEW END ***/
+
+/*** TABLET VIEW ***/
+@media screen and (min-width: 768px) and (max-width: 991px) {
+    .side_block.booking .search-button,
+    .content_block.booking .search-button {
+        padding-top: 0;
+    }
+}
+/*** TABLET VIEW END ***/
+
+/*** MOBILE VIEW ***/
+@media screen and (max-width: 767px) {
+    #booking_calendar table.month-table td.calendar_td > div {
+        padding: 6px 0 18px;
+    }
+    #booking_calendar td.calendar_td > div > span.day-price {
+        bottom: 4px;
+    }
+    .booking-availability {
+        max-width: 250px;
+    }
+    #area_booking .red.margin {
+        padding-top: 45px;
+    }
+    #area_booking #calendar_map > div:nth-child(2) {
+        display: none;
+    }
+    #area_booking.requests .center, #area_requests .center {
+        display: none;
+    }
+    .my-listings a.booking-details:before, #listings .book_listing .icon {
+        top: -2px !important;
+    }
+    .booking-requests-page #area_booking .row, .booking-details-page #area_requests .row{
+        display: block !important;
+    }
+
+    .reservations-escort div.picture {
+        width: 100% !important;
+        height: 100% !important;
+        padding-bottom: 0 !important;
+        float: left;
+        margin: 0 20px 30px 0;
+        z-index: 1;
+    }
+    .booking-rec.top{
+        display: flex;
+    }
+
+     .booking-rec {
+        opacity: .8;
+        text-transform: uppercase;
+        -moz-transform: rotate(-90deg);
+        -ms-transform: rotate(-90deg);
+        -o-transform: rotate(-90deg);
+        -webkit-transform: rotate(-90deg);
+        position: fixed;
+        right: -45px;
+        bottom: 32%;
+        z-index: 4;
+        box-shadow: 0 2px 5px rgb(194 191 210);
+        cursor: pointer;
+        display: none;
+        -webkit-box-pack: center;
+        justify-content: center;
+        -webkit-box-align: center;
+        align-items: center;
+        background-color: rgb(0 0 0 / 90%);
+        width: auto;
+        height: auto;
+        outline: transparent;
+        border-radius: 20px;
+        padding: 0px 10px 0px 6px;
+    }
+    .booking-rec::before {
+        right: 0px;
+        top: 0px;
+    }
+    .booking-rec::before {
+        content: "";
+        width: 10px;
+        height: 10px;
+        background-color: rgb(255, 0, 0);
+        display: block;
+        position: absolute;
+        z-index: 1;
+        right: -3px;
+        top: 1px;
+        border-radius: 50%;
+    }
+    .booking-rec .rec-online {
+        width: 25px;
+        height: 27px;
+        display: flex;
+        -webkit-box-pack: center;
+        justify-content: center;
+        -webkit-box-align: center;
+        align-items: center;
+    }
+    .text {
+        display: block;
+    }
+    .booking-rec .rec-text {
+        line-height: 20px;
+        font-size: 12px;
+        margin-left: 4px;
+    }
+    svg[Attributes Style] {
+        fill: rgb(255, 255, 255);
+        width: 20;
+        height: 20;
+    }
+
+}
+
+@media screen and (max-width: 991px) {
+
+    .booking-reservations-page.no-sidebar div#wrapper{
+        margin-top: 100px;
+    }
+    .booking-requests-page div#wrapper, .booking-order-page  div#wrapper{
+        margin-top: 120px;
+    }
+
+}
+
+    .booking-requests-page #area_booking .row, .booking-details-page #area_requests .row{
+        display: table-row;
+    }
+
+    .booking-reservations-page.no-sidebar #listings article {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+
+
+
+/*** MOBILE VIEW END ***/
+
+/*** BOOKING PLUGIN STYLES END **/

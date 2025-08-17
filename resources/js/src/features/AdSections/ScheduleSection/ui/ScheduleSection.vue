@@ -47,6 +47,7 @@
                         <div class="work-toggle">
                             <BaseCheckbox
                                 v-model="localSchedule[day.id].enabled"
+                                :name="`schedule_${day.id}`"
                                 :label="localSchedule[day.id].enabled ? 'Работаю' : 'Выходной'"
                                 @update:modelValue="toggleDay(day.id)"
                             />

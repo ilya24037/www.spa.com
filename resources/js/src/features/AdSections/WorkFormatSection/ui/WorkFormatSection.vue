@@ -6,6 +6,7 @@
         v-for="option in workFormatOptions"
         :key="option.value"
         v-model="localWorkFormat"
+        name="work_format"
         :value="option.value"
         :label="option.label"
         @update:modelValue="emitWorkFormat"

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест видео файлов</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .video-container {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        video {
+            width: 100%;
+            max-width: 400px;
+            height: 300px;
+            background: #000;
+            border: 1px solid #ddd;
+        }
+        .info {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        pre {
+            background: #f1f1f1;
+            padding: 10px;
+            border-radius: 4px;
+            overflow: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Диагностика видео файлов</h1>
+    
+    <div class="info">
+        Загрузите MP4 и WebM файлы для сравнения их поддержки браузером
+    </div>
+
+    <!-- Загрузка файлов -->
+    <div class="video-container">
+        <h3>Загрузка файлов для тестирования</h3>
+        <input type="file" id="fileInput" accept="video/*" multiple>
+        <button onclick="clearAll()">Очистить</button>
+    </div>
+
+    <!-- Проверка поддержки форматов -->
+    <div class="video-container">
+        <h3>Поддержка форматов браузером</h3>
+        <div id="formatSupport"></div>
+    </div>
+
+    <!-- Тестовые видео -->
+    <div id="videoTests"></div>
+
+    <script>
+        // Проверяем поддержку форматов
+        function checkFormatSupport() {
+            const video = document.createElement('video');
+            const formats = [
+                { name: 'MP4 (H.264)', type: 'video/mp4; codecs="avc1.42E01E"' },
+                { name: 'MP4 (H.265)', type: 'video/mp4; codecs="hev1.1.6.L93.B0"' },
+                { name: 'WebM (VP8)', type: 'video/webm; codecs="vp8"' },
+                { name: 'WebM (VP9)', type: 'video/webm; codecs="vp9"' },
+                { name: 'WebM (AV1)', type: 'video/webm; codecs="av01.0.05M.08"' },
+                { name: 'OGG (Theora)', type: 'video/ogg; codecs="theora"' }
+            ];
+
+            let html = '<pre>';
+            formats.forEach(format => {
+                const support = video.canPlayType(format.type);
+                const status = support === 'probably' ? '✅ Отлично' : 
+                              support === 'maybe' ? '⚠️ Возможно' : '❌ Не поддерживается';
+                html += `${format.name}: ${status} (${support})\n`;
+            });
+            html += '</pre>';
+            
+            document.getElementById('formatSupport').innerHTML = html;
+        }
+
+        // Обработка загруженных файлов
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            files.forEach(file => {
+                if (file.type.startsWith('video/')) {
+                    addVideoTest(file);
+                }
+            });
+        });
+
+        function addVideoTest(file) {
+            const container = document.createElement('div');
+            container.className = 'video-container';
+            
+            const url = URL.createObjectURL(file);
+            
+            container.innerHTML = `
+                <h3>Файл: ${file.name}</h3>
+                <div class="info">
+                    <strong>Размер:</strong> ${(file.size / 1024 / 1024).toFixed(2)} MB<br>
+                    <strong>MIME тип:</strong> ${file.type}<br>
+                    <strong>Последнее изменение:</strong> ${new Date(file.lastModified).toLocaleString()}
+                </div>
+                
+                <video controls preload="metadata" 
+                       onloadstart="logEvent('${file.name}', 'loadstart')"
+                       onloadedmetadata="logEvent('${file.name}', 'loadedmetadata', this)"
+                       onloadeddata="logEvent('${file.name}', 'loadeddata')"
+                       oncanplay="logEvent('${file.name}', 'canplay')"
+                       oncanplaythrough="logEvent('${file.name}', 'canplaythrough')"
+                       onerror="logEvent('${file.name}', 'error', this)"
+                       onstalled="logEvent('${file.name}', 'stalled')"
+                       onsuspend="logEvent('${file.name}', 'suspend')">
+                    <source src="${url}" type="${file.type}">
+                    Ваш браузер не поддерживает воспроизведение видео
+                </video>
+                
+                <button onclick="analyzeVideo('${file.name}', '${url}')">Анализировать видео</button>
+                <button onclick="checkCodecs('${file.name}', '${file.type}')">Проверить кодеки</button>
+                
+                <div id="log-${file.name.replace(/[^a-zA-Z0-9]/g, '_')}" class="info" style="margin-top: 10px;">
+                    <strong>Лог событий:</strong><br>
+                </div>
+                
+                <div id="analysis-${file.name.replace(/[^a-zA-Z0-9]/g, '_')}" style="margin-top: 10px;"></div>
+            `;
+            
+            document.getElementById('videoTests').appendChild(container);
+        }
+
+        function logEvent(fileName, eventType, videoElement = null) {
+            const logId = `log-${fileName.replace(/[^a-zA-Z0-9]/g, '_')}`;
+            const logElement = document.getElementById(logId);
+            
+            let message = `[${new Date().toLocaleTimeString()}] ${eventType}`;
+            
+            if (videoElement) {
+                if (eventType === 'loadedmetadata') {
+                    message += ` - Размеры: ${videoElement.videoWidth}x${videoElement.videoHeight}, Длительность: ${videoElement.duration.toFixed(2)}с`;
+                } else if (eventType === 'error') {
+                    const error = videoElement.error;
+                    if (error) {
+                        message += ` - Код ошибки: ${error.code}, Сообщение: ${getErrorMessage(error.code)}`;
+                    }
+                }
+            }
+            
+            logElement.innerHTML += message + '<br>';
+            console.log(`${fileName}: ${message}`);
+        }
+
+        function getErrorMessage(errorCode) {
+            const messages = {
+                1: 'MEDIA_ERR_ABORTED - Загрузка прервана',
+                2: 'MEDIA_ERR_NETWORK - Ошибка сети',
+                3: 'MEDIA_ERR_DECODE - Ошибка декодирования',
+                4: 'MEDIA_ERR_SRC_NOT_SUPPORTED - Формат не поддерживается'
+            };
+            return messages[errorCode] || 'Неизвестная ошибка';
+        }
+
+        function checkCodecs(fileName, mimeType) {
+            const analysisId = `analysis-${fileName.replace(/[^a-zA-Z0-9]/g, '_')}`;
+            const analysisElement = document.getElementById(analysisId);
+            
+            const video = document.createElement('video');
+            
+            const codecs = mimeType.includes('mp4') ? [
+                'video/mp4; codecs="avc1.42E01E"',      // H.264 Baseline
+                'video/mp4; codecs="avc1.4D401E"',      // H.264 Main
+                'video/mp4; codecs="avc1.640028"',      // H.264 High
+                'video/mp4; codecs="mp4v.20.9"',       // MPEG-4 Visual
+                'video/mp4; codecs="hev1.1.6.L93.B0"'  // H.265
+            ] : [
+                'video/webm; codecs="vp8"',
+                'video/webm; codecs="vp9"',
+                'video/webm; codecs="av01.0.05M.08"'
+            ];
+            
+            let html = '<div class="info"><strong>Проверка совместимости кодеков:</strong><br>';
+            codecs.forEach(codec => {
+                const support = video.canPlayType(codec);
+                const status = support === 'probably' ? '✅' : 
+                              support === 'maybe' ? '⚠️' : '❌';
+                html += `${status} ${codec} (${support || 'no'})<br>`;
+            });
+            html += '</div>';
+            
+            analysisElement.innerHTML = html;
+        }
+
+        async function analyzeVideo(fileName, url) {
+            const analysisId = `analysis-${fileName.replace(/[^a-zA-Z0-9]/g, '_')}`;
+            const analysisElement = document.getElementById(analysisId);
+            
+            try {
+                // Создаем временное видео для анализа
+                const video = document.createElement('video');
+                video.src = url;
+                video.preload = 'metadata';
+                
+                await new Promise((resolve, reject) => {
+                    video.onloadedmetadata = resolve;
+                    video.onerror = reject;
+                    setTimeout(reject, 5000); // таймаут 5 сек
+                });
+                
+                let html = '<div class="success"><strong>Технический анализ:</strong><br>';
+                html += `Размеры: ${video.videoWidth} x ${video.videoHeight}<br>`;
+                html += `Длительность: ${video.duration.toFixed(2)} секунд<br>`;
+                html += `Соотношение сторон: ${(video.videoWidth / video.videoHeight).toFixed(2)}<br>`;
+                
+                // Попытка воспроизведения
+                try {
+                    await video.play();
+                    html += `✅ Воспроизведение: Успешно<br>`;
+                    video.pause();
+                } catch (playError) {
+                    html += `❌ Воспроизведение: ${playError.message}<br>`;
+                }
+                
+                html += '</div>';
+                analysisElement.innerHTML = html;
+                
+            } catch (error) {
+                analysisElement.innerHTML = `<div class="error"><strong>Ошибка анализа:</strong> ${error.message || 'Не удалось загрузить метаданные'}</div>`;
+            }
+        }
+
+        function clearAll() {
+            document.getElementById('videoTests').innerHTML = '';
+            document.getElementById('fileInput').value = '';
+        }
+
+        // Проверяем поддержку форматов при загрузке
+        checkFormatSupport();
+        
+        console.log('Страница диагностики видео загружена. Загрузите файлы для тестирования.');
+    </script>
+</body>
+</html>

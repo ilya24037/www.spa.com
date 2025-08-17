@@ -111,9 +111,6 @@ class_alias('App\Domain\Master\Models\WorkZone', 'App\Models\WorkZone');
 // Ad domain aliases
 class_alias('App\Domain\Ad\Models\Ad', 'App\Models\Ad');
 class_alias('App\Domain\Ad\Models\Ad', 'App\Models\BaseAd');
-class_alias('App\Domain\Ad\Models\AdMedia', 'App\Models\AdMedia');
-class_alias('App\Domain\Ad\Models\AdPricing', 'App\Models\AdPricing');
-class_alias('App\Domain\Ad\Models\AdLocation', 'App\Models\AdLocation');
 
 // Booking domain aliases
 class_alias('App\Domain\Booking\Models\Booking', 'App\Models\Booking');

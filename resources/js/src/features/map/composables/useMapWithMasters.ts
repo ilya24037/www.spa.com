@@ -8,38 +8,81 @@ interface Master {
   rating?: number
   reviews_count?: number
   price?: number
+  price_from?: number
   address?: string
   lat?: number
   lng?: number
+  geo?: {
+    lat: number
+    lng: number
+    address?: string
+    district?: string
+    city?: string
+  }
+  coordinates?: {
+    lat: number
+    lng: number
+  }
   photo?: string
-  services?: Array<{ id: number; name: string }>
+  services?: Array<{ id: number; name: string } | null>
+  district?: string | null
+  city?: string | null
   is_online?: boolean
   is_available_today?: boolean
+  is_premium?: boolean
+  is_verified?: boolean
 }
 
-export function useMapWithMasters() {
+// Константы координат для Перми
+const PERM_CENTER = { lat: 58.0105, lng: 56.2502 }
+const DEFAULT_ZOOM = 12
+
+export function useMapWithMasters(initialMasters?: Master[]) {
   // Store для фильтров
   const filterStore = useFilterStore()
   
-  // Состояние
-  const masters = ref<Master[]>([])
+  // Состояние - используем начальные данные если переданы
+  const masters = ref<Master[]>(initialMasters || [])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
   const selectedMaster = ref<Master | null>(null)
-  const mapCenter = ref({ lat: 58.0105, lng: 56.2502 }) // Пермь по умолчанию
-  const mapZoom = ref(12)
+  const mapCenter = ref({ lat: PERM_CENTER.lat, lng: PERM_CENTER.lng })
+  const mapZoom = ref(DEFAULT_ZOOM)
   
   // Преобразование мастеров в маркеры для карты
   const mapMarkers = computed<MapMarker[]>(() => {
-    return masters.value.map(master => ({
-      id: master.id,
-      lat: master.lat || mapCenter.value.lat + (Math.random() - 0.5) * 0.1,
-      lng: master.lng || mapCenter.value.lng + (Math.random() - 0.5) * 0.1,
-      title: master.name,
-      description: formatMasterDescription(master),
-      icon: getMarkerIcon(master),
-      data: master
-    }))
+    return masters.value.map(master => {
+      // Получаем координаты из разных возможных полей
+      let lat: number | undefined
+      let lng: number | undefined
+      
+      // Приоритет: geo -> coordinates -> отдельные поля lat/lng
+      if (master.geo && typeof master.geo.lat === 'number' && typeof master.geo.lng === 'number') {
+        lat = master.geo.lat
+        lng = master.geo.lng
+      } else if (master.coordinates && typeof master.coordinates.lat === 'number' && typeof master.coordinates.lng === 'number') {
+        lat = master.coordinates.lat
+        lng = master.coordinates.lng
+      } else if (typeof master.lat === 'number' && typeof master.lng === 'number') {
+        lat = master.lat
+        lng = master.lng
+      }
+      
+      // Пропускаем мастеров без координат
+      if (!lat || !lng) {
+        return null
+      }
+      
+      return {
+        id: master.id,
+        lat,
+        lng,
+        title: master.name,
+        description: formatMasterDescription(master),
+        icon: getMarkerIcon(master),
+        data: master
+      }
+    }).filter(marker => marker !== null) as MapMarker[]
   })
   
   // Форматирование описания мастера для балуна
@@ -50,17 +93,34 @@ export function useMapWithMasters() {
       parts.push(`⭐ ${master.rating} (${master.reviews_count || 0} отзывов)`)
     }
     
-    if (master.price) {
-      parts.push(`💰 от ${master.price} ₽`)
+    // Используем price_from или price
+    const price = master.price_from || master.price
+    if (price) {
+      parts.push(`💰 от ${price} ₽`)
     }
     
-    if (master.address) {
-      parts.push(`📍 ${master.address}`)
+    // Используем адрес из geo или из отдельного поля
+    const address = master.geo?.address || master.address
+    if (address) {
+      parts.push(`📍 ${address}`)
     }
     
+    // Добавляем район если есть
+    const district = master.geo?.district || master.district
+    if (district) {
+      parts.push(`🏘️ ${district}`)
+    }
+    
+    // Фильтруем services от null значений
     if (master.services && master.services.length > 0) {
-      const serviceNames = master.services.slice(0, 3).map(s => s.name).join(', ')
-      parts.push(`💆 ${serviceNames}`)
+      const serviceNames = master.services
+        .filter(s => s !== null && s !== undefined && s.name) // Фильтруем null/undefined
+        .slice(0, 3)
+        .map(s => s!.name)
+        .join(', ')
+      if (serviceNames) {
+        parts.push(`💆 ${serviceNames}`)
+      }
     }
     
     return parts.join('<br>')
@@ -79,7 +139,12 @@ export function useMapWithMasters() {
   }
   
   // Загрузка мастеров с учетом фильтров
-  const loadMasters = async () => {
+  const loadMasters = async (skipInitial: boolean = false) => {
+    // Если есть начальные данные и это первая загрузка - пропускаем
+    if (skipInitial && initialMasters && initialMasters.length > 0) {
+      return
+    }
+    
     isLoading.value = true
     error.value = null
     
@@ -99,6 +164,11 @@ export function useMapWithMasters() {
       })
       
       if (!response.ok) {
+        // Если API не доступен и есть начальные данные - используем их
+        if (initialMasters && initialMasters.length > 0) {
+          console.warn('API не доступен, используем начальные данные')
+          return
+        }
         throw new Error('Не удалось загрузить мастеров')
       }
       
@@ -117,47 +187,16 @@ export function useMapWithMasters() {
       console.error('Ошибка загрузки мастеров:', err)
       error.value = err instanceof Error ? err.message : 'Произошла ошибка'
       
-      // Используем моковые данные для демонстрации
-      masters.value = generateMockMasters()
+      // Если есть начальные данные - используем их
+      if (initialMasters && initialMasters.length > 0) {
+        console.warn('Используем начальные данные из-за ошибки загрузки')
+        masters.value = initialMasters
+      } else {
+        masters.value = []
+      }
     } finally {
       isLoading.value = false
     }
-  }
-  
-  // Генерация моковых данных для демонстрации
-  const generateMockMasters = (): Master[] => {
-    const services = [
-      { id: 1, name: 'Классический массаж' },
-      { id: 2, name: 'Тайский массаж' },
-      { id: 3, name: 'Лечебный массаж' },
-      { id: 4, name: 'Спортивный массаж' },
-      { id: 5, name: 'Антицеллюлитный' },
-      { id: 6, name: 'Расслабляющий' }
-    ]
-    
-    const addresses = [
-      'ул. Ленина, 45',
-      'ул. Комсомольский проспект, 29',
-      'ул. Екатерининская, 120',
-      'ул. Сибирская, 35',
-      'ул. Петропавловская, 55',
-      'ул. Куйбышева, 88'
-    ]
-    
-    return Array.from({ length: 20 }, (_, i) => ({
-      id: i + 1,
-      name: `Мастер ${i + 1}`,
-      rating: 3.5 + Math.random() * 1.5,
-      reviews_count: Math.floor(Math.random() * 50),
-      price: 1500 + Math.floor(Math.random() * 3500),
-      address: addresses[Math.floor(Math.random() * addresses.length)],
-      lat: mapCenter.value.lat + (Math.random() - 0.5) * 0.1,
-      lng: mapCenter.value.lng + (Math.random() - 0.5) * 0.1,
-      photo: `/images/masters/master-${(i % 5) + 1}.jpg`,
-      services: services.slice(0, Math.floor(Math.random() * 3) + 1),
-      is_online: Math.random() > 0.5,
-      is_available_today: Math.random() > 0.7
-    }))
   }
   
   // Обработчик клика по маркеру
@@ -191,8 +230,10 @@ export function useMapWithMasters() {
     { deep: true }
   )
   
-  // Загружаем мастеров при инициализации
-  loadMasters()
+  // Загружаем мастеров при инициализации только если нет начальных данных
+  if (!initialMasters || initialMasters.length === 0) {
+    loadMasters()
+  }
   
   return {
     // Состояние

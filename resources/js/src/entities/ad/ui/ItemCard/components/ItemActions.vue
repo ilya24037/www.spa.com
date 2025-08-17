@@ -2,7 +2,7 @@
 <template>
   <div class="item-actions">
     <!-- Кнопки для ожидающих оплаты -->
-    <template v-if="item.waiting_payment || item.status === 'waiting_payment'">
+    <template v-if="item.status === 'waiting_payment'">
       <Button 
         @click="$emit('pay')"
         variant="success"
@@ -34,29 +34,36 @@
       </ActionDropdown>
     </template>
     
-    <!-- Кнопки для активных объявлений -->
+    <!-- Кнопка и dropdown для активных объявлений -->
     <template v-else-if="item.status === 'active'">
       <Button 
         @click="$emit('promote')"
         variant="primary"
         size="sm"
       >
-        Продвинуть
+        Поднять просмотры
       </Button>
-      <Button 
-        @click="$emit('edit')"
-        variant="light"
-        size="sm"
-      >
-        Редактировать
-      </Button>
-      <Button 
-        @click="$emit('deactivate')"
-        variant="secondary"
-        size="sm"
-      >
-        Снять
-      </Button>
+      
+      <ActionDropdown aria-label="Дополнительные действия">
+        <ActionDropdownItem 
+          text="Поднять просмотры"
+          @click="$emit('promote')"
+        />
+        <ActionDropdownItem 
+          text="Редактировать"
+          @click="$emit('edit')"
+        />
+        <ActionDropdownItem 
+          text="Забронировать"
+          @click="$emit('book')"
+        />
+        <div class="dropdown-divider" />
+        <ActionDropdownItem 
+          text="Снять с публикации"
+          variant="danger"
+          @click="$emit('deactivate')"
+        />
+      </ActionDropdown>
     </template>
     
     <!-- Кнопки для черновиков -->
@@ -123,6 +130,7 @@ defineEmits<{
   deactivate: []
   delete: []
   'mark-irrelevant': []
+  book: []
 }>()
 </script>
 

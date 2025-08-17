@@ -76,6 +76,7 @@ const emit = defineEmits<{
   'update:modelValue': [value: string]
   'address-found': [address: string, coordinates: { lat: number; lng: number }]
   'marker-moved': [coordinates: { lat: number; lng: number }]
+  'search-error': [error: string]
 }>()
 
 // Состояние
@@ -90,6 +91,12 @@ let map: any = null
 let placemark: any = null
 let userLocationMarker: any = null
 let ymapsLoaded = false
+
+// Флаг готовности карты
+const mapReady = ref(false)
+
+// Очередь запросов поиска
+let pendingSearchRequest: string | null = null
 
 // Текущие координаты
 const currentCoords = ref(props.center)
@@ -155,7 +162,7 @@ const loadYandexMaps = () => {
 const detectLocationByBrowser = (): Promise<{ lat: number; lng: number } | null> => {
   return new Promise((resolve) => {
     if (!navigator.geolocation) {
-      console.log('Геолокация не поддерживается браузером')
+      // Геолокация не поддерживается
       resolve(null)
       return
     }
@@ -166,7 +173,7 @@ const detectLocationByBrowser = (): Promise<{ lat: number; lng: number } | null>
           lat: position.coords.latitude,
           lng: position.coords.longitude
         }
-        console.log('Местоположение определено через браузер:', coords)
+        // Местоположение определено
         userLocation.value = coords
         resolve(coords)
       },
@@ -316,9 +323,18 @@ const initMap = async () => {
     })
 
     loading.value = false
+    mapReady.value = true
+    
+    // Если есть отложенный запрос поиска - выполняем его
+    if (pendingSearchRequest) {
+      const searchQuery = pendingSearchRequest
+      pendingSearchRequest = null
+      setTimeout(() => searchAddress(searchQuery), 100)
+    }
   } catch (error) {
     console.error('Ошибка инициализации карты:', error)
     loading.value = false
+    mapReady.value = false
   }
 }
 
@@ -333,7 +349,22 @@ const handleCoordsUpdate = (coords: number[]) => {
 
 // Поиск адреса
 const searchAddress = async (address: string) => {
-  if (!window.ymaps || !address) return
+  if (!address) return
+  
+  // Проверяем готовность карты
+  if (!mapReady.value || !window.ymaps || !map || !placemark) {
+    console.log('Карта еще не готова, запрос добавлен в очередь')
+    pendingSearchRequest = address
+    emit('search-error', 'Карта загружается, попробуйте через секунду')
+    return
+  }
+  
+  // Проверяем наличие метода geocode
+  if (!window.ymaps.geocode) {
+    console.error('Метод geocode недоступен')
+    emit('search-error', 'Сервис поиска временно недоступен')
+    return
+  }
 
   try {
     const searchQuery = address.includes('Пермь') ? address : `Пермь, ${address}`
@@ -344,17 +375,18 @@ const searchAddress = async (address: string) => {
       const coords = firstGeoObject.geometry.getCoordinates()
       
       // Перемещаем карту и маркер
-      if (map && placemark) {
-        map.setCenter(coords, 16)
-        placemark.geometry.setCoordinates(coords)
-        handleCoordsUpdate(coords)
-      }
+      map.setCenter(coords, 16)
+      placemark.geometry.setCoordinates(coords)
+      handleCoordsUpdate(coords)
       
       const fullAddress = firstGeoObject.getAddressLine()
       emit('address-found', fullAddress, { lat: coords[0], lng: coords[1] })
+    } else {
+      emit('search-error', 'Адрес не найден')
     }
   } catch (error) {
     console.error('Ошибка поиска:', error)
+    emit('search-error', 'Ошибка при поиске адреса')
   }
 }
 

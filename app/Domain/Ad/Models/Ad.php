@@ -35,25 +35,16 @@ class Ad extends Model
         'services_additional_info',
         'schedule',
         'schedule_notes',
-        'service_location',
-        'outcall_locations', 
         'address',
         'geo',
-        'travel_area',
         'phone',
         'contact_method',
         'whatsapp',
         'telegram',
         'description',
-        'price',
         'price_unit',
         'is_starting_price',
         'prices',
-        'price_per_hour',
-        'outcall_price',
-        'express_price',
-        'price_two_hours',
-        'price_night',
         'min_duration',
         'contacts_per_hour',
         'has_girlfriend',
@@ -79,9 +70,7 @@ class Ad extends Model
         'expires_at',
         'views_count',
         'contacts_shown',
-        'favorites_count',
-        'user_folder',
-        'media_paths'
+        'favorites_count'
     ];
 
     /**
@@ -93,12 +82,9 @@ class Ad extends Model
         'features',
         'services',
         'schedule',
-        'service_location',
-        'outcall_locations',
         'geo',
         'photos',
         'video',
-        'media_paths',
         'prices'
     ];
 
@@ -127,45 +113,6 @@ class Ad extends Model
         return $this->belongsTo(\App\Domain\User\Models\User::class);
     }
 
-    /**
-     * Связь с контентом объявления
-     */
-    public function content(): HasOne
-    {
-        return $this->hasOne(\App\Domain\Ad\Models\AdContent::class);
-    }
-
-    /**
-     * Связь с ценами объявления
-     */
-    public function pricing(): HasOne
-    {
-        return $this->hasOne(AdPricing::class);
-    }
-
-    /**
-     * Связь с расписанием объявления
-     */
-    public function schedule(): HasOne
-    {
-        return $this->hasOne(\App\Domain\Ad\Models\AdSchedule::class);
-    }
-
-    /**
-     * Связь с медиа объявления
-     */
-    public function media(): HasOne
-    {
-        return $this->hasOne(AdMedia::class);
-    }
-
-    /**
-     * Связь с локацией объявления
-     */
-    public function location(): HasOne
-    {
-        return $this->hasOne(AdLocation::class);
-    }
 
     /**
      * Получить читаемый статус объявления
@@ -316,17 +263,17 @@ class Ad extends Model
     public function canBePublished(): bool
     {
         // Проверяем основные поля
-        if (empty($this->category) || !$this->location || !$this->location->isComplete()) {
+        if (empty($this->category) || empty($this->address)) {
             return false;
         }
 
-        // Проверяем контент
-        if (!$this->content || !$this->content->isComplete()) {
+        // Проверяем описание
+        if (empty($this->description)) {
             return false;
         }
 
         // Проверяем цены
-        if (!$this->pricing || !$this->pricing->isValidPrice()) {
+        if (empty($this->prices) && empty($this->price_unit)) {
             return false;
         }
 
@@ -343,25 +290,25 @@ class Ad extends Model
 
         // Основные поля
         if (!empty($this->category)) $filledFields++;
-        if ($this->location && $this->location->isComplete()) $filledFields += 2;
+        if (!empty($this->address)) $filledFields++;
+        if (!empty($this->geo)) $filledFields++;
 
         // Контент
-        if ($this->content && $this->content->isComplete()) {
-            $filledFields += 2;
-        }
+        if (!empty($this->description)) $filledFields++;
+        if (!empty($this->title)) $filledFields++;
 
         // Цены  
-        if ($this->pricing && $this->pricing->isValidPrice()) {
+        if (!empty($this->prices) || !empty($this->price_unit)) {
             $filledFields++;
         }
 
         // Расписание
-        if ($this->schedule && $this->schedule->isComplete()) {
+        if (!empty($this->schedule)) {
             $filledFields++;
         }
 
         // Медиа
-        if ($this->media && $this->media->hasMedia()) {
+        if (!empty($this->photos) && count($this->photos) > 0) {
             $filledFields += 2;
         }
 
@@ -379,15 +326,15 @@ class Ad extends Model
             $missing[] = 'category';
         }
 
-        if (!$this->location || !$this->location->isComplete()) {
-            $missing[] = 'location';
+        if (empty($this->address)) {
+            $missing[] = 'address';
         }
 
-        if (!$this->content || !$this->content->isComplete()) {
-            $missing[] = 'content';
+        if (empty($this->description)) {
+            $missing[] = 'description';
         }
 
-        if (!$this->pricing || !$this->pricing->isValidPrice()) {
+        if (empty($this->prices) && empty($this->price_unit)) {
             $missing[] = 'pricing';
         }
 

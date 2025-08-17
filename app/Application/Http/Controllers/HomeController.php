@@ -2,6 +2,7 @@
 
 namespace App\Application\Http\Controllers;
 
+use App\Domain\Ad\Models\Ad;
 use App\Domain\Master\Models\MasterProfile;
 use App\Domain\Master\Services\MasterService;
 use App\Domain\Master\Repositories\MasterRepository;
@@ -19,44 +20,119 @@ class HomeController extends Controller
     }
     public function index(Request $request)
     {
-        // Получаем мастеров из базы данных или создаем тестовые данные
+        // Получаем объявления из базы данных вместо MasterProfile
         try {
-            $masters = MasterProfile::with(['user', 'masterServices', 'primaryLocation', 'locations'])
-                ->where('status', 'active') // Используем правильное поле status вместо is_active
+            $ads = Ad::where('status', 'active')
+                ->whereNotNull('address')
                 ->take(12)
-                ->get()
-                ->map(function ($master) {
-                    // Получаем основную локацию или первую доступную
-                    $location = $master->primaryLocation ?? $master->locations->first();
+                ->get();
+                
+            \Log::info('🗺️ HomeController: найдено активных объявлений', [
+                'count' => $ads->count(),
+                'ids' => $ads->pluck('id')->toArray()
+            ]);
+                
+            $ads = $ads->map(function ($ad) {
+                    // Парсим geo для получения координат
+                    $geo = is_string($ad->geo) ? json_decode($ad->geo, true) : $ad->geo;
+                    $lat = null;
+                    $lng = null;
                     
-                    // Получаем услуги
-                    $services = $master->masterServices->pluck('name')->take(3)->toArray();
+                    if (is_array($geo)) {
+                        // Проверяем два формата координат
+                        if (isset($geo['lat']) && isset($geo['lng'])) {
+                            // Формат: {"lat": 58.0, "lng": 56.0}
+                            $lat = (float)$geo['lat'];
+                            $lng = (float)$geo['lng'];
+                        } elseif (isset($geo['coordinates']['lat']) && isset($geo['coordinates']['lng'])) {
+                            // Формат: {"coordinates": {"lat": 58.0, "lng": 56.0}}
+                            $lat = (float)$geo['coordinates']['lat'];
+                            $lng = (float)$geo['coordinates']['lng'];
+                        }
+                    }
+                    
+                    // Парсим services
+                    $services = [];
+                    if ($ad->services) {
+                        $servicesData = is_string($ad->services) ? json_decode($ad->services, true) : $ad->services;
+                        if (is_array($servicesData)) {
+                            // Берем первые 3 услуги
+                            $services = array_slice(array_keys($servicesData), 0, 3);
+                        }
+                    }
                     if (empty($services)) {
-                        $services = ['Классический массаж']; // Дефолтная услуга
+                        $services = ['Классический массаж'];
+                    }
+                    
+                    // Парсим photos для получения первого фото (логика из ProfileController - работает правильно)
+                    $photo = '/images/no-photo.svg';
+                    if ($ad->photos) {
+                        $photos = is_string($ad->photos) ? json_decode($ad->photos, true) : $ad->photos;
+                        if (is_array($photos) && !empty($photos)) {
+                            $firstPhoto = $photos[0];
+                            // Проверяем разные форматы хранения фото (как в ProfileController)
+                            if (is_array($firstPhoto)) {
+                                // Фото может быть массивом с ключами preview, url, src
+                                $photo = $firstPhoto['preview'] ?? $firstPhoto['url'] ?? $firstPhoto['src'] ?? '/images/no-photo.svg';
+                            } elseif (is_string($firstPhoto)) {
+                                // Или просто строкой с URL
+                                $photo = $firstPhoto;
+                            }
+                        }
+                    }
+                    
+                    // Парсим prices для получения минимальной цены
+                    $priceFrom = 2000;
+                    if ($ad->prices) {
+                        $prices = is_string($ad->prices) ? json_decode($ad->prices, true) : $ad->prices;
+                        if (is_array($prices) && !empty($prices)) {
+                            // Проверяем что есть поле price в элементах массива
+                            $priceValues = array_column($prices, 'price');
+                            if (!empty($priceValues)) {
+                                $priceFrom = min($priceValues);
+                            }
+                        }
+                    }
+                    
+                    // Если prices пусто, пробуем взять из поля price
+                    if ($priceFrom === 2000 && $ad->price) {
+                        $priceFrom = (float)$ad->price;
                     }
                     
                     return [
-                        'id' => $master->id,
-                        'name' => $master->display_name ?? $master->user->name ?? 'Мастер',
-                        'photo' => $master->avatar ?? '/images/no-photo.svg',
-                        'rating' => $master->rating ?? 4.5,
-                        'reviews_count' => $master->reviews_count ?? 0,
-                        'price_from' => $master->masterServices->min('price') ?? 2000,
+                        'id' => $ad->id,
+                        'name' => $ad->title ?? 'Мастер',
+                        'photo' => $photo,
+                        'rating' => 4.5, // Пока используем заглушку
+                        'reviews_count' => 0, // Пока используем заглушку
+                        'price_from' => $priceFrom,
                         'services' => $services,
-                        'district' => $location->district ?? 'Центральный район',
-                        'metro' => $location->metro_station ?? null,
-                        'experience_years' => $master->experience_years ?? 1,
-                        'is_verified' => $master->is_verified ?? false,
-                        'is_premium' => $master->is_premium ?? false,
+                        'district' => $geo['district'] ?? 'Центральный район',
+                        'metro' => null, // Пока не используется
+                        'experience_years' => 1, // Пока используем заглушку
+                        'is_verified' => false,
+                        'is_premium' => false,
+                        // Добавляем данные для карты
+                        'address' => $ad->address,
+                        'lat' => $lat,
+                        'lng' => $lng,
+                        'geo' => $geo
                     ];
                 });
                 
-            // Если мастеров нет в БД, создаем тестовые данные
-            if ($masters->isEmpty()) {
+            // Если объявлений нет в БД, создаем тестовые данные
+            if ($ads->isEmpty()) {
+                \Log::warning('🗺️ HomeController: объявления пусты, используем тестовые данные');
                 $masters = collect($this->getTestMasters());
+            } else {
+                \Log::info('🗺️ HomeController: используем реальные объявления', [
+                    'count' => $ads->count()
+                ]);
+                $masters = $ads;
             }
         } catch (\Exception $e) {
             // В случае ошибки БД используем тестовые данные
+            \Log::error('Ошибка загрузки объявлений', ['error' => $e->getMessage()]);
             $masters = collect($this->getTestMasters());
         }
         

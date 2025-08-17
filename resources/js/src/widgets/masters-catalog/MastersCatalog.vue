@@ -1,35 +1,9 @@
 <template>
   <div class="masters-catalog">
-    <!-- Двухколоночный layout: sidebar + content -->
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
-      <!-- Sidebar (filters) -->
-      <aside class="lg:col-span-1">
-        <slot name="filters">
-          <!-- Skeleton для фильтров при загрузке -->
-          <FilterPanelSkeleton v-if="loading && !masters" />
-          <FilterPanel v-else @apply="handleFiltersApply" @reset="handleFiltersReset">
-            <FilterCategory 
-              title="Категории услуг"
-              icon="🛠️"
-              :count="filterStore.filters.services.length"
-              :active="filterStore.filters.services.length > 0"
-            >
-              <div class="space-y-2">
-                <BaseCheckbox
-                  v-for="category in availableCategories"
-                  :key="category.id"
-                  :model-value="isCategorySelected(category.id)"
-                  :label="category.name"
-                  @update:modelValue="handleCategoryToggle(category.id, $event)"
-                />
-              </div>
-            </FilterCategory>
-          </FilterPanel>
-        </slot>
-      </aside>
-
+    <!-- Только контент без фильтров -->
+    <div>
       <!-- Content (cards, pagination) -->
-      <section class="lg:col-span-3">
+      <section>
         <!-- Управление сеткой и сортировка -->
         <GridControls
           v-if="!loading || masters.length > 0"
@@ -37,10 +11,12 @@
           :total-count="filterStore.filterCounts?.total || masters.length"
           items-label="мастеров"
           :current-sort="currentSort"
-          :show-view-toggle="false"
+          :current-view="props.viewMode"
+          :show-view-toggle="true"
           :show-density-toggle="false"
           :show-column-control="false"
           @sort-change="handleSortChange"
+          @view-change="handleViewChange"
         />
         
         <!-- Loading с детальными skeleton карточками -->
@@ -92,8 +68,8 @@
           </template>
         </VirtualScroll>
         
-        <!-- Обычный Grid (для небольшого количества элементов) -->
-        <div v-else class="masters-grid">
+        <!-- Обычный Grid или List (для небольшого количества элементов) -->
+        <div v-else-if="props.viewMode === 'grid'" class="masters-grid">
           <slot
             v-for="(master, index) in masters"
             :key="master.id"
@@ -104,6 +80,13 @@
             <MasterCard :master="master" :index="index" />
           </slot>
         </div>
+        
+        <!-- Режим списка -->
+        <MasterCardList
+          v-else-if="props.viewMode === 'list'"
+          :masters="masters"
+          :view-mode="'list'"
+        />
 
         <!-- Pagination -->
         <div v-if="showPagination" class="mt-8">
@@ -125,7 +108,9 @@ import { useFilterStore } from '@/src/features/masters-filter/model'
 import BaseCheckbox from '@/src/shared/ui/atoms/BaseCheckbox/BaseCheckbox.vue'
 import SecondaryButton from '@/src/shared/ui/atoms/SecondaryButton/SecondaryButton.vue'
 import GridControls from '@/src/shared/ui/molecules/GridControls/GridControls.vue'
+import type { GridView } from '@/src/shared/ui/molecules/GridControls/GridControls.vue'
 import { VirtualScroll } from '@/src/shared/ui/organisms/VirtualScroll'
+import { MasterCardList } from '@/src/entities/master/ui/MasterCard'
 
 interface Props {
   masters?: any[]
@@ -135,6 +120,7 @@ interface Props {
   availableCategories?: any[]
   enableVirtualScroll?: boolean // Включить виртуальный скроллинг
   virtualScrollHeight?: number // Высота контейнера виртуального скролла
+  viewMode?: GridView // Текущий режим отображения
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -144,7 +130,8 @@ const props = withDefaults(defineProps<Props>(), {
     showPagination: false,
     availableCategories: () => [],
     enableVirtualScroll: false,
-    virtualScrollHeight: 800
+    virtualScrollHeight: 800,
+    viewMode: 'grid'
 })
 
 const emit = defineEmits<{
@@ -153,6 +140,7 @@ const emit = defineEmits<{
   filtersReset: []
   sortingChanged: [sorting: string]
   loadMore: [] // Для подгрузки новых данных
+  viewChange: [view: GridView] // Изменение режима отображения
 }>()
 
 // Store для фильтров
@@ -189,19 +177,19 @@ const handleCategoryToggle = (categoryId: number, checked: boolean) => {
 // Текущая сортировка из store
 const currentSort = computed(() => {
     // Маппинг значений из store на значения GridControls
-    const sortMap = {
+    const sortMap: { [key: string]: string } = {
         'relevance': 'popular',
         'rating': 'rating',
         'price_asc': 'price-asc',
         'price_desc': 'price-desc'
     }
-    return sortMap[filterStore.filters.sorting] || 'popular'
+    return sortMap[filterStore.filters.sorting as string] || 'popular'
 })
 
 // Обработчик изменения сортировки
-const handleSortChange = (newSort) => {
+const handleSortChange = (newSort: string) => {
     // Маппинг значений из GridControls в store
-    const storeMap = {
+    const storeMap: { [key: string]: string } = {
         'popular': 'relevance',
         'rating': 'rating',
         'price-asc': 'price_asc',
@@ -226,6 +214,11 @@ const handleLoadMore = () => {
             loadingMore.value = false
         }, 1000)
     }
+}
+
+// Обработчик изменения режима отображения
+const handleViewChange = (view: GridView) => {
+    emit('viewChange', view)
 }
 </script>
 

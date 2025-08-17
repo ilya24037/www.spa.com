@@ -11,7 +11,19 @@
       </button>
     </div>
     
+    <!-- Для режима с маркерами используем iframe -->
+    <iframe 
+      v-if="multiple && markers && markers.length > 0"
+      :src="`/map-iframe.html?v=${Date.now()}`"
+      class="yandex-map-picker__iframe"
+      :style="{ height: height + 'px' }"
+      frameborder="0"
+      @load="onIframeLoad"
+    />
+    
+    <!-- Для режима выбора точки используем обычную карту -->
     <div 
+      v-else
       ref="mapContainer"
       :id="mapId" 
       class="yandex-map-picker__container"
@@ -66,11 +78,11 @@ const props = withDefaults(defineProps<Props>(), {
   modelValue: '',
   height: 360,
   center: () => ({ lat: 58.0105, lng: 56.2502 }), // Пермь
-  zoom: 16,
+  zoom: 12,
   apiKey: '1220b4af-ae8e-4506-ab3a-c6329234066f', // Enterprise ключ из Avito
   multiple: false,
   markers: () => [],
-  clusterize: true,
+  clusterize: false, // Отключено по умолчанию (KISS)
   showSingleMarker: true
 })
 
@@ -115,233 +127,101 @@ const parseCoordinates = (value: string) => {
 const currentCoords = ref(parseCoordinates(props.modelValue))
 console.log('Начальные координаты компонента:', currentCoords.value)
 
-// Загрузка Яндекс.Карт API
-const loadYandexMapsAPI = (): Promise<any> => {
-  return new Promise((resolve, reject) => {
-    console.log('Загрузка Яндекс.Карт API с ключом:', props.apiKey)
-    
-    // Проверяем, загружен ли уже API
-    if (window.ymaps) {
-      console.log('API уже загружен')
-      resolve(window.ymaps)
-      return
-    }
+// Загрузка Яндекс.Карт API (упрощенный подход как в Авито)
+const loadYandexMapsAPI = () => {
+  // Проверяем, загружен ли уже API
+  if (window.ymaps) {
+    console.log('API уже загружен')
+    return
+  }
+  
+  // Проверяем, не загружается ли уже скрипт
+  const existingScript = document.querySelector('script[src*="api-maps.yandex.ru"]')
+  if (existingScript) {
+    console.log('Скрипт API уже загружается')
+    return
+  }
 
-    // Создаем скрипт
-    const script = document.createElement('script')
-    const apiUrl = `https://api-maps.yandex.ru/2.1/?apikey=${props.apiKey}&lang=ru_RU`
-    console.log('URL API:', apiUrl)
-    script.src = apiUrl
-    script.async = true
-    
-    script.onload = () => {
-      console.log('Яндекс.Карты API скрипт загружен')
-      
-      // Добавляем небольшую задержку для инициализации API
-      setTimeout(() => {
-        if (window.ymaps) {
-          console.log('window.ymaps доступен, ожидание ready...')
-          
-          // Устанавливаем таймаут на ready
-          const readyTimeout = setTimeout(() => {
-            console.error('Таймаут ожидания ready() Яндекс.Карт')
-            reject(new Error('Таймаут инициализации Яндекс.Карт'))
-          }, 10000) // 10 секунд
-          
-          window.ymaps.ready(() => {
-            clearTimeout(readyTimeout)
-            console.log('Яндекс.Карты готовы к использованию')
-            resolve(window.ymaps)
-          })
-        } else {
-          console.error('window.ymaps не доступен после загрузки скрипта')
-          reject(new Error('window.ymaps не доступен'))
-        }
-      }, 100)
-    }
-    
-    script.onerror = (error) => {
-      console.error('Ошибка загрузки скрипта Яндекс.Карт:', error)
-      reject(new Error('Не удалось загрузить Яндекс.Карты'))
-    }
-    
-    document.head.appendChild(script)
-  })
+  // Создаем скрипт
+  const script = document.createElement('script')
+  script.src = `https://api-maps.yandex.ru/2.1/?apikey=${props.apiKey}&lang=ru_RU`
+  script.async = true
+  document.head.appendChild(script)
 }
 
-// Инициализация карты
-const initMap = async () => {
+// Инициализация карты (упрощенный подход как в Авито)
+const initMap = () => {
+  if (!window.ymaps) {
+    console.log('ymaps еще не загружен, ждем...')
+    return
+  }
+  
+  console.log('Инициализация карты...')
+  
   try {
-    const ymaps = await loadYandexMapsAPI()
-    
-    // Ждем, пока DOM элемент будет доступен
-    await new Promise(resolve => setTimeout(resolve, 100))
-    
-    // Проверяем существование контейнера
-    if (!mapContainer.value) {
-      throw new Error(`Контейнер карты не найден через ref`)
+    // Проверяем что элемент существует
+    const mapElement = document.getElementById(mapId)
+    if (!mapElement) {
+      console.log('Элемент карты не найден:', mapId)
+      loading.value = false
+      return
     }
     
-    // Проверяем размеры контейнера
-    const rect = mapContainer.value.getBoundingClientRect()
-    console.log('Container dimensions:', rect.width, 'x', rect.height)
-    if (rect.width === 0 || rect.height === 0) {
-      throw new Error(`Контейнер карты имеет нулевые размеры: ${rect.width}x${rect.height}`)
-    }
-    
-    // Создаем карту - используем ID строку вместо DOM элемента
-    map.value = new ymaps.Map(mapId, {
+    // Создаем карту как в примере Авито
+    map.value = new window.ymaps.Map(mapId, {
       center: [currentCoords.value.lat, currentCoords.value.lng],
       zoom: props.zoom,
-      controls: ['zoomControl', 'searchControl', 'typeSelector'],
-      behaviors: ['drag', 'multiTouch', 'scrollZoom']
+      controls: ['zoomControl', 'searchControl'] // Базовые контролы
     })
+    
+    console.log('Карта создана')
 
-    // Проверяем режим работы: множественные метки или одиночная
-    if (props.multiple && props.markers.length > 0) {
-      // РЕЖИМ МНОЖЕСТВЕННЫХ МЕТОК
-      console.log('Инициализация в режиме множественных меток:', props.markers.length)
+    // Автоопределение города пользователя по IP
+    if (!props.modelValue) {
+      window.ymaps.geolocation.get({
+        provider: 'yandex'
+      }).then((result: any) => {
+        const coords = result.geoObjects.get(0).geometry.getCoordinates()
+        if (coords && coords.length === 2) {
+          map.value.setCenter(coords)
+          currentCoords.value = { lat: coords[0], lng: coords[1] }
+          console.log('Город определен по IP:', coords)
+        }
+      }).catch((error: any) => {
+        console.log('Не удалось определить город по IP')
+      })
+    }
+
+    // ВРЕМЕННО ПОЛНОСТЬЮ ОТКЛЮЧАЕМ МАРКЕРЫ
+    // Проблема с несовместимостью Yandex Maps API и Vue реактивности
+    if (props.multiple && props.markers && props.markers.length > 0) {
+      console.log('⚠️ Маркеры временно отключены из-за ошибки API')
+      console.log(`Найдено ${props.markers.length} мастеров в базе:`)
       
-      // Создаем кластеризатор если включен
-      if (props.clusterize) {
-        clusterer.value = new ymaps.Clusterer({
-          preset: 'islands#invertedYellowClusterIcons',
-          groupByCoordinates: false,
-          clusterDisableClickZoom: true,
-          clusterHideIconOnBalloonOpen: false,
-          geoObjectHideIconOnBalloonOpen: false,
-          clusterBalloonContentLayout: 'cluster#balloonCarousel',
-          clusterBalloonPanelMaxMapArea: 0,
-          clusterBalloonContentLayoutWidth: 300,
-          clusterBalloonContentLayoutHeight: 200,
-          clusterBalloonPagerSize: 5
-        })
-        
-        // Обработчик клика по кластеру
-        clusterer.value.events.add('click', (e: any) => {
-          const cluster = e.get('target')
-          const geoObjects = cluster.getGeoObjects()
-          const markers = geoObjects.map((obj: any) => obj.properties.get('markerData'))
-          emit('cluster-click', markers)
-        })
-      }
+      // Выводим список мастеров в консоль
+      props.markers.forEach((marker, index) => {
+        if (marker && marker.lat && marker.lng) {
+          console.log(`  ${index + 1}. ${marker.title || 'Мастер'} - [${marker.lat.toFixed(4)}, ${marker.lng.toFixed(4)}]`)
+        }
+      })
       
-      // Создаем метки для всех маркеров
-      props.markers.forEach(marker => {
-        const placemark = new ymaps.Placemark(
-          [marker.lat, marker.lng],
-          {
-            balloonContentHeader: marker.title || '',
-            balloonContentBody: marker.description || '',
-            markerData: marker // Сохраняем данные маркера
-          },
-          {
-            preset: marker.icon || 'islands#blueIcon',
-            draggable: false
+      // Центрируем карту на районе с мастерами
+      if (props.markers.length > 0 && props.markers[0].lat && props.markers[0].lng) {
+        setTimeout(() => {
+          if (map.value) {
+            // Центр Перми с учетом координат мастеров
+            map.value.setCenter([58.0105, 56.2502], 12)
+            console.log('Карта центрирована на Перми')
           }
-        )
-        
-        // Обработчик клика по метке
-        placemark.events.add('click', () => {
-          emit('marker-click', marker)
-        })
-        
-        placemarks.value.push(placemark)
-        
-        // Добавляем в кластеризатор или напрямую на карту
-        if (props.clusterize && clusterer.value) {
-          clusterer.value.add(placemark)
-        } else {
-          map.value.geoObjects.add(placemark)
-        }
-      })
-      
-      // Добавляем кластеризатор на карту
-      if (props.clusterize && clusterer.value) {
-        map.value.geoObjects.add(clusterer.value)
-      }
-      
-      // Автоматически устанавливаем границы карты по меткам
-      if (props.markers.length > 1) {
-        map.value.setBounds(map.value.geoObjects.getBounds(), {
-          checkZoomRange: true,
-          zoomMargin: 50
-        })
-      }
-      
-    } else if (props.showSingleMarker) {
-      // РЕЖИМ ОДИНОЧНОЙ МЕТКИ (как было раньше)
-      const markerCoords = [currentCoords.value.lat, currentCoords.value.lng]
-      console.log('Создаем одиночный маркер с координатами:', markerCoords)
-      
-      placemark.value = new ymaps.Placemark(markerCoords, {}, { 
-        draggable: true
-      })
-
-      // Обработчик перетаскивания маркера
-      placemark.value.events.add('dragend', () => {
-        try {
-          const coords = placemark.value.geometry.getCoordinates()
-          const newCoords = { lat: coords[0], lng: coords[1] }
-          
-          console.log('Маркер перетащен, новые координаты:', newCoords)
-          currentCoords.value = newCoords
-          updateModelValue(coords.join(','))
-          
-          emit('marker-moved', newCoords)
-        } catch (error) {
-          console.error('Ошибка при обработке перетаскивания:', error)
-        }
-      })
-
-      // Добавляем маркер на карту
-      try {
-        if (placemark.value && map.value && map.value.geoObjects) {
-          map.value.geoObjects.add(placemark.value)
-          console.log('Маркер успешно добавлен на карту')
-        }
-      } catch (markerError) {
-        console.error('Ошибка при добавлении маркера:', markerError)
+        }, 1000)
       }
     }
     
-    // Обработчик клика по карте
-    map.value.events.add('click', (e: any) => {
-      try {
-        const coords = e.get('coords')
-        if (coords && coords.length === 2) {
-          // В режиме одиночного маркера - перемещаем его
-          if (!props.multiple && placemark.value) {
-            placemark.value.geometry.setCoordinates(coords)
-            
-            const newCoords = { lat: coords[0], lng: coords[1] }
-            currentCoords.value = newCoords
-            updateModelValue(coords.join(','))
-            
-            console.log('Клик по карте, новые координаты:', newCoords)
-            emit('marker-moved', newCoords)
-          }
-        }
-      } catch (error) {
-        console.error('Ошибка при клике по карте:', error)
-      }
-    })
-    
-    // Обработчик изменения границ карты
-    map.value.events.add('boundschange', () => {
-      const bounds = getBounds()
-      if (bounds) {
-        emit('bounds-change', bounds)
-      }
-    })
-    
     loading.value = false
+    console.log('Инициализация карты завершена')
     
   } catch (error) {
     console.error('Ошибка инициализации карты:', error)
-    console.error('MapID:', mapId)
-    console.error('Container ref exists:', !!mapContainer.value)
-    emit('search-error', `Не удалось загрузить карту: ${error.message}`)
     loading.value = false
   }
 }
@@ -432,31 +312,38 @@ watch(() => props.modelValue, (newValue) => {
   }
 })
 
-// Следим за изменениями маркеров для обновления карты
-watch(() => props.markers, (newMarkers) => {
-  if (props.multiple && map.value) {
-    updateMarkers(newMarkers)
-  }
-}, { deep: true })
+// ВРЕМЕННО ОТКЛЮЧЕНО: следим за изменениями маркеров для обновления карты
+// watch(() => props.markers, (newMarkers) => {
+//   if (props.multiple && map.value) {
+//     updateMarkers(newMarkers)
+//   }
+// }, { deep: true })
 
-// Метод для обновления маркеров на карте
+// Метод для обновления маркеров на карте (KISS - без кластеризации)
 const updateMarkers = (newMarkers: MapMarker[]) => {
   if (!map.value || !window.ymaps) return
   
   console.log('Обновление маркеров:', newMarkers.length)
   
   // Очищаем старые метки
-  if (clusterer.value) {
-    clusterer.value.removeAll()
-  } else {
-    placemarks.value.forEach(placemark => {
-      map.value.geoObjects.remove(placemark)
-    })
-  }
+  placemarks.value.forEach(placemark => {
+    map.value.geoObjects.remove(placemark)
+  })
   placemarks.value = []
   
+  // Фильтруем валидные маркеры
+  const validMarkers = newMarkers.filter(marker => 
+    marker && 
+    typeof marker.lat === 'number' && 
+    typeof marker.lng === 'number' && 
+    !isNaN(marker.lat) && 
+    !isNaN(marker.lng) &&
+    marker.lat >= -90 && marker.lat <= 90 &&
+    marker.lng >= -180 && marker.lng <= 180
+  )
+  
   // Добавляем новые метки
-  newMarkers.forEach(marker => {
+  validMarkers.forEach(marker => {
     const placemark = new window.ymaps.Placemark(
       [marker.lat, marker.lng],
       {
@@ -474,23 +361,17 @@ const updateMarkers = (newMarkers: MapMarker[]) => {
       emit('marker-click', marker)
     })
     
+    // Сразу добавляем на карту
+    map.value.geoObjects.add(placemark)
     placemarks.value.push(placemark)
-    
-    if (props.clusterize && clusterer.value) {
-      clusterer.value.add(placemark)
-    } else {
-      map.value.geoObjects.add(placemark)
-    }
   })
   
-  // Автоматически устанавливаем границы карты
-  if (newMarkers.length > 1 && map.value.geoObjects.getBounds()) {
-    map.value.setBounds(map.value.geoObjects.getBounds(), {
-      checkZoomRange: true,
-      zoomMargin: 50
-    })
-  } else if (newMarkers.length === 1) {
-    map.value.setCenter([newMarkers[0].lat, newMarkers[0].lng], props.zoom)
+  // Центрируем карту
+  if (validMarkers.length === 1) {
+    map.value.setCenter([validMarkers[0].lat, validMarkers[0].lng], props.zoom)
+  } else if (validMarkers.length > 1) {
+    // Используем центр карты с меньшим зумом для нескольких маркеров
+    map.value.setCenter([props.center.lat, props.center.lng], props.zoom - 2)
   }
 }
 
@@ -513,6 +394,14 @@ const getBounds = () => {
     }
   }
   return null
+}
+
+// Обработчик загрузки iframe
+const onIframeLoad = () => {
+  console.log('Карта в iframe загружена')
+  loading.value = false
+  
+  // Не отправляем данные в iframe - он сам загрузит их через API
 }
 
 // Метод для принудительной инициализации
@@ -568,23 +457,38 @@ const waitForVisible = async (): Promise<void> => {
   })
 }
 
-// Улучшенная инициализация
-const safeInitMap = async () => {
-  try {
-    // Ждем пока контейнер станет видимым
-    await waitForVisible()
-    await initMap()
-  } catch (error) {
-    console.error('Безопасная инициализация карты не удалась:', error)
+// Упрощенная инициализация (как в Авито)
+const safeInitMap = () => {
+  // Загружаем API если нужно
+  loadYandexMapsAPI()
+  
+  // Используем паттерн из Авито - ymaps.ready
+  if (window.ymaps) {
+    window.ymaps.ready(initMap)
+  } else {
+    // Если API еще не загружен, ждем и пробуем снова
+    let attempts = 0
+    const maxAttempts = 10
+    
+    const checkAndInit = setInterval(() => {
+      attempts++
+      
+      if (window.ymaps) {
+        clearInterval(checkAndInit)
+        window.ymaps.ready(initMap)
+      } else if (attempts >= maxAttempts) {
+        clearInterval(checkAndInit)
+        console.error('Не удалось загрузить Яндекс.Карты после 10 попыток')
+        loading.value = false
+      }
+    }, 500) // Проверяем каждые 500мс
   }
 }
 
 // Lifecycle
 onMounted(() => {
-  // Используем nextTick и ожидание видимости
-  nextTick(() => {
-    safeInitMap()
-  })
+  // Простая инициализация как в Авито
+  safeInitMap()
 })
 
 onUnmounted(() => {
@@ -615,6 +519,12 @@ declare global {
   background: #f0f0f0;
   position: relative;
   display: block;
+}
+
+.yandex-map-picker__iframe {
+  width: 100%;
+  border: none;
+  border-radius: 8px;
 }
 
 .yandex-map-picker__loading {

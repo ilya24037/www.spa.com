@@ -41,6 +41,7 @@
           <!-- Имя -->
           <BaseInput
             v-model="form.name"
+            name="name"
             type="text"
             label="Имя"
             placeholder="Введите ваше имя"
@@ -52,6 +53,7 @@
           <!-- Email -->
           <BaseInput
             v-model="form.email"
+            name="email"
             type="email"
             label="Email"
             placeholder="Введите ваш email"
@@ -63,6 +65,7 @@
           <!-- Пароль -->
           <BaseInput
             v-model="form.password"
+            name="password"
             type="password"
             label="Пароль"
             placeholder="Создайте пароль"
@@ -74,6 +77,7 @@
           <!-- Подтверждение пароля -->
           <BaseInput
             v-model="form.password_confirmation"
+            name="password_confirmation"
             type="password"
             label="Подтвердите пароль"
             placeholder="Повторите пароль"

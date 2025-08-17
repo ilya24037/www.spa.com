@@ -148,17 +148,17 @@ class EventServiceProvider extends ServiceProvider
      */
     private function registerGlobalEventHandlers(): void
     {
-        // Логирование всех событий в дебаг режиме
-        if (config('app.debug')) {
-            \Event::listen('*', function ($eventName, $data) {
-                if (str_starts_with($eventName, 'App\\Domain\\')) {
-                    \Log::debug('Domain Event Fired', [
-                        'event' => $eventName,
-                        'data' => $data,
-                    ]);
-                }
-            });
-        }
+        // Логирование всех событий в дебаг режиме (отключено)
+        // if (config('app.debug')) {
+        //     \Event::listen('*', function ($eventName, $data) {
+        //         if (str_starts_with($eventName, 'App\\Domain\\')) {
+        //             \Log::debug('Domain Event Fired', [
+        //                 'event' => $eventName,
+        //                 'data' => $data,
+        //             ]);
+        //         }
+        //     });
+        // }
 
         // Обработчик ошибок в Event Listeners
         \Event::listen('Illuminate\Queue\Events\JobFailed', function ($event) {
