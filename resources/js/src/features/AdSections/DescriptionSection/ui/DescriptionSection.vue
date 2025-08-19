@@ -1,9 +1,9 @@
 <template>
-  <div class="description-section">
-    <h2 class="form-group-title">О себе</h2>
+  <div class="bg-white rounded-lg p-5">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Описание</h2>
     <BaseTextarea
       v-model="localDescription"
-      placeholder="Расскажите о себе, услугах, особенностях..."
+      placeholder="Напишите подробное описание о себе и о своих услугах. Подробное, интересное, смысловое описание значительно увеличивает эффективность вашей анкеты."
       :rows="5"
       :error="errors.description"
       :maxlength="2000"
@@ -24,10 +24,10 @@ const props = defineProps({
 
 const emit = defineEmits(['update:description'])
 
-const localDescription = ref(props.description)
+const localDescription = ref(props.description || '')
 
 watch(() => props.description, (val) => { 
-  localDescription.value = val 
+  localDescription.value = val || '' 
 })
 
 const emitDescription = () => {
@@ -35,19 +35,4 @@ const emitDescription = () => {
 }
 </script>
 
-<style scoped>
-.description-section { 
-  background: white; 
-  border-radius: 8px; 
-  padding: 20px; 
-}
-
-.form-group-title { 
-  font-size: 18px; 
-  font-weight: 600; 
-  color: #333; 
-  margin-bottom: 16px; 
-}
-
-/* Стили для textarea теперь в компоненте BaseTextarea */
-</style>
+<!-- Все стили теперь используют Tailwind CSS в template -->

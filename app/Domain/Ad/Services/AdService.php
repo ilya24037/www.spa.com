@@ -146,6 +146,17 @@ class AdService
             'archived_at' => now()
         ]);
     }
+    
+    /**
+     * Получить активные объявления для главной страницы
+     * 
+     * @param int $limit
+     * @return \Illuminate\Support\Collection
+     */
+    public function getActiveAdsForHome(int $limit = 12): \Illuminate\Support\Collection
+    {
+        return $this->adRepository->getActiveForHome($limit);
+    }
 
     /**
      * Восстановить объявление
@@ -341,5 +352,84 @@ class AdService
     {
         // Если есть связанные таблицы, удаляем их здесь
         // Пока все хранится в основной таблице ads
+    }
+
+    /**
+     * Восстановить из архива
+     */
+    public function restoreFromArchive(Ad $ad): Ad
+    {
+        return $this->restore($ad);
+    }
+
+    /**
+     * Деактивировать объявление (перевести в архив)
+     */
+    public function deactivate(Ad $ad): Ad
+    {
+        return $this->archive($ad);
+    }
+
+    /**
+     * Увеличить счетчик просмотров
+     */
+    public function incrementViews(Ad $ad): void
+    {
+        $ad->increment('views_count');
+    }
+
+    /**
+     * Получить похожие объявления
+     */
+    public function getSimilarAds(Ad $ad, int $limit = 4): \Illuminate\Support\Collection
+    {
+        return Ad::where('category', $ad->category)
+            ->where('id', '!=', $ad->id)
+            ->where('status', AdStatus::ACTIVE->value)
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * Получить активные объявления с пагинацией
+     */
+    public function getActiveAds(int $perPage = 20, array $withRelations = []): \Illuminate\Pagination\LengthAwarePaginator
+    {
+        $query = Ad::where('status', AdStatus::ACTIVE->value);
+        
+        if (!empty($withRelations)) {
+            $query->with($withRelations);
+        }
+        
+        return $query->latest()->paginate($perPage);
+    }
+
+    /**
+     * Проверить готовность черновика к публикации
+     */
+    public function validateDraftForPublication(Ad $ad): array
+    {
+        $missingFields = [];
+        
+        if (!$ad->title) {
+            $missingFields[] = 'Заголовок';
+        }
+        if (!$ad->description) {
+            $missingFields[] = 'Описание';
+        }
+        if (!$ad->price || $ad->price <= 0) {
+            $missingFields[] = 'Цена';
+        }
+        if (!$ad->phone) {
+            $missingFields[] = 'Телефон';
+        }
+        if (!$ad->category) {
+            $missingFields[] = 'Категория';
+        }
+        
+        return [
+            'ready' => empty($missingFields),
+            'missing_fields' => $missingFields
+        ];
     }
 }

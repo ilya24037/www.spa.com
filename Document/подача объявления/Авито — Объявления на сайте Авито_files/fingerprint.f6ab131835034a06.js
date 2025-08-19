@@ -1,2 +1,0 @@
-/*! For license information please see fingerprint.f6ab131835034a06.js.LICENSE.txt */
-(self["webpackChunkavito_desktop_site"]=self["webpackChunkavito_desktop_site"]||[]).push([[96022],{98245:function(n,t,e){window.addEventListener("load",(function(){e.e(36429).then(e.t.bind(e,79941,23))}))}},function(n){n.O(0,[15578,10233,22897,20427,20242,65109,40179],(function(){return t=98245,n(n.s=t);var t}));n.O()}]);

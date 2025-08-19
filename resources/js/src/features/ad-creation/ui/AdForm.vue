@@ -13,9 +13,9 @@
 
     <!-- Форма -->
     <form @submit.prevent="handleSubmit" novalidate class="ad-form-sections">
-      <!-- О себе (необязательная) -->
+      <!-- Описание (необязательная) -->
       <CollapsibleSection
-        title="О себе"
+        title="Описание"
         :is-open="sectionsState.description"
         :is-required="false"
         :is-filled="checkSectionFilled('description')"
@@ -34,10 +34,11 @@
         :is-required="true"
         :is-filled="checkSectionFilled('parameters')"
         :filled-count="getFilledCount('parameters')"
-        :total-count="7"
+        :total-count="8"
         @toggle="toggleSection('parameters')"
       >
         <ParametersSection 
+          v-model:title="form.title"
           v-model:age="form.age"
           v-model:height="form.height" 
           v-model:weight="form.weight" 
@@ -157,7 +158,8 @@
         @toggle="toggleSection('features')"
       >
         <FeaturesSection 
-          v-model:features="form.features" 
+          v-model:features="form.features"
+          v-model:additionalFeatures="form.additional_features"
           :errors="errors"
         />
       </CollapsibleSection>
@@ -185,7 +187,10 @@
         @toggle="toggleSection('contacts')"
       >
         <ContactsSection 
-          v-model:contacts="form.contacts" 
+          v-model:phone="form.phone"
+          v-model:contactMethod="form.contact_method"
+          v-model:whatsapp="form.whatsapp"
+          v-model:telegram="form.telegram"
           :errors="errors"
         />
       </CollapsibleSection>
@@ -250,6 +255,18 @@ const emit = defineEmits<{
   'cancel': []
 }>()
 
+// Добавим детальную диагностику
+console.log('AdForm props detail:', {
+  adId: props.adId,
+  adIdType: typeof props.adId,
+  adIdValue: props.adId,
+  adIdIsNumber: !isNaN(Number(props.adId)),
+  adIdAsNumber: Number(props.adId),
+  hasInitialData: !!props.initialData,
+  initialDataId: props.initialData?.id,
+  initialDataStatus: props.initialData?.status
+})
+
 // Используем существующую модель для всей логики
 const {
   form,
@@ -271,7 +288,7 @@ const isActiveAd = computed(() => {
 const sectionsConfig = [
   {
     key: 'description',
-    title: 'О себе',
+    title: 'Описание',
     required: false,
     fields: ['description']
   },
@@ -279,7 +296,7 @@ const sectionsConfig = [
      key: 'parameters',
      title: 'Параметры',
      required: true,
-     fields: ['age', 'height', 'weight', 'breast_size', 'hair_color', 'eye_color', 'nationality']
+     fields: ['title', 'age', 'height', 'weight', 'breast_size', 'hair_color', 'eye_color', 'nationality']
    },
   {
     key: 'price',

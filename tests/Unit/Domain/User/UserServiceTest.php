@@ -177,8 +177,15 @@ class UserServiceTest extends UnitTestCase
     public function test_deactivate_validates_method_call()
     {
         $user = Mockery::mock(User::class);
-        $user->shouldReceive('deactivate')
+        $user->shouldReceive('getAttribute')
+            ->with('id')
+            ->andReturn(1);
+
+        $this->mockRepository->shouldReceive('update')
             ->once()
+            ->with(1, Mockery::on(function($data) {
+                return isset($data['is_active']) && $data['is_active'] === false;
+            }))
             ->andReturn(true);
 
         $result = $this->userService->deactivate($user);

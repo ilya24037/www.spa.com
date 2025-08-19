@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import vue from '@vitejs/plugin-vue';
 import { resolve } from 'path';
+import { globSync } from 'glob';
 
 export default defineConfig({
     define: {
@@ -10,7 +11,10 @@ export default defineConfig({
     },
     plugins: [
         laravel({
-            input: 'resources/js/app.js',
+            input: [
+                'resources/js/app.js',
+                ...globSync('resources/js/Pages/**/*.vue')
+            ],
             refresh: true,
         }),
         vue({

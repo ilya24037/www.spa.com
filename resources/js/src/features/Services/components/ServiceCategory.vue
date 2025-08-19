@@ -1,7 +1,7 @@
 <template>
-  <div :class="isSubcategory ? 'service-category mb-4' : 'service-category mb-6'">
+  <div :class="isSubcategory ? 'mb-4' : 'mb-6'">
     <!-- Заголовок категории -->
-    <div class="category-header mb-3 cursor-pointer select-none hover:bg-gray-50 rounded-lg p-2 -mx-2 transition-colors" @click="toggleExpanded">
+    <div class="border border-gray-200 rounded-lg px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors duration-200 mb-3 cursor-pointer select-none" @click="toggleExpanded">
       <div class="flex items-center justify-between">
         <h3 :class="[
           'flex items-center',
@@ -27,15 +27,17 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
         </svg>
       </div>
-      <p v-if="category.description && isExpanded" class="text-sm text-gray-600 mt-1">
-        {{ category.description }}
-      </p>
     </div>
+    
+    <!-- Описание категории (если есть и категория развернута) -->
+    <p v-if="category.description && isExpanded" class="text-sm text-gray-600 mt-2 mb-3 px-2">
+      {{ category.description }}
+    </p>
 
     <!-- Список услуг в виде таблицы -->
-    <div v-show="isExpanded" class="services-table mt-4">
-      <table class="w-full">
-        <thead>
+    <div v-show="isExpanded" class="bg-white rounded-lg overflow-hidden border border-gray-200 mt-4 md:overflow-x-auto">
+      <table class="w-full border-collapse md:min-w-[500px]">
+        <thead class="bg-gray-50 border-b border-gray-200">
           <tr class="text-left text-xs text-gray-500 uppercase tracking-wider">
             <th class="py-2 px-2 w-10"></th>
             <th class="py-2 px-2">Услуга</th>
@@ -67,18 +69,18 @@
     </div>
 
     <!-- Кнопки управления (показываются только если есть услуги) -->
-    <div v-if="category.services.length > 0 && isExpanded" class="category-controls mt-4 flex space-x-2">
+    <div v-if="category.services.length > 0 && isExpanded" class="mt-4 flex space-x-2">
       <button
         @click="selectAll"
         type="button"
-        class="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 transition-colors"
+        class="px-3 py-1 text-xs text-blue-600 hover:text-blue-800 transition-colors underline hover:no-underline"
       >
         Выбрать все
       </button>
       <button
         @click="clearAll"
         type="button"
-        class="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+        class="px-3 py-1 text-xs text-gray-600 hover:text-gray-800 transition-colors underline hover:no-underline"
       >
         Отменить все
       </button>
@@ -184,9 +186,8 @@ const updateService = (serviceId, serviceData) => {
 watch(() => props.modelValue, (newValue) => {
   if (newValue) {
     Object.keys(newValue).forEach(serviceId => {
-      if (serviceValues[serviceId]) {
-        serviceValues[serviceId] = { ...newValue[serviceId] }
-      }
+      // Обновляем или создаем новую услугу при синхронизации
+      serviceValues[serviceId] = { ...newValue[serviceId] }
     })
   }
 }, { deep: true })
@@ -195,54 +196,4 @@ watch(() => props.modelValue, (newValue) => {
 initializeServices()
 </script>
 
-<style scoped>
-.service-category {
-  /* Дополнительные стили если нужны */
-}
-
-.category-header {
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 12px 16px;
-  background: #f9fafb;
-  transition: background-color 0.2s;
-}
-
-.category-header:hover {
-  background: #f3f4f6;
-}
-
-.services-table {
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.services-table table {
-  border-collapse: collapse;
-}
-
-.services-table thead {
-  background: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-@media (max-width: 768px) {
-  .services-table {
-    overflow-x: auto;
-  }
-  
-  .services-table table {
-    min-width: 500px;
-  }
-}
-
-.category-controls button {
-  font-size: 12px;
-  text-decoration: underline;
-}
-
-.category-controls button:hover {
-  text-decoration: none;
-}
-</style> 
+<!-- Все стили теперь используют Tailwind CSS в template --> 

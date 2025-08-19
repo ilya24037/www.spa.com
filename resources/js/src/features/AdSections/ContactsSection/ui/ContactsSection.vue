@@ -1,7 +1,7 @@
 <template>
-  <div class="contacts-section">
-    <h2 class="form-group-title">Контакты</h2>
-    <div class="contacts-fields">
+  <div class="bg-white rounded-lg p-5">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Контакты</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
       <BaseInput
         v-model="localPhone"
         type="tel"
@@ -15,6 +15,7 @@
       
       <BaseInput
         v-model="localWhatsapp"
+        v-maska="'+7 (###) ###-##-##'"
         type="tel"
         label="WhatsApp"
         placeholder="+7 (999) 999-99-99"
@@ -47,6 +48,7 @@
 
 <script setup>
 import { ref, watch, computed } from 'vue'
+import { vMaska } from 'maska/vue'
 import BaseInput from '@/src/shared/ui/atoms/BaseInput/BaseInput.vue'
 import BaseSelect from '@/src/shared/ui/atoms/BaseSelect/BaseSelect.vue'
 
@@ -87,23 +89,4 @@ const emitAll = () => {
 }
 </script>
 
-<style scoped>
-.contacts-section { 
-  background: white; 
-  border-radius: 8px; 
-  padding: 20px; 
-}
-
-.form-group-title { 
-  font-size: 18px; 
-  font-weight: 600; 
-  color: #333; 
-  margin-bottom: 16px; 
-}
-
-.contacts-fields { 
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-}
-</style> 
+<!-- Все стили мигрированы на Tailwind CSS в template --> 

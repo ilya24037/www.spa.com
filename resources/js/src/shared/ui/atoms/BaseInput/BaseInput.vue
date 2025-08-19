@@ -1,10 +1,10 @@
-<!-- Р‘Р°Р·РѕРІС‹Р№ РёРЅРїСѓС‚ РІ СЃС‚РёР»Рµ РђРІРёС‚Рѕ -->
+<!-- Базовый инпут в стиле Авито -->
 <template>
-  <div class="input-container">
-    <label v-if="label" :for="inputId" class="input-label">{{ label }}</label>
+  <div class="w-full">
+    <label v-if="label" :for="inputId" class="block text-base font-medium text-gray-900 mb-2">{{ label }}</label>
     
     <div
-      class="input-wrapper"
+      class="relative w-full"
       :class="{ 
         'has-error': error,
         'has-prefix': prefix,
@@ -27,13 +27,14 @@
         :min="min"
         :max="max"
         :step="step"
-        class="base-input"
+        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-gray-50 text-base text-gray-900 transition-all duration-200 min-h-[48px] box-border focus:outline-none focus:border-blue-500 focus:bg-white hover:border-gray-400 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 readonly:cursor-default readonly:bg-gray-100 placeholder:text-gray-500"
         :class="{
-          'disabled': disabled,
-          'readonly': readonly,
-          'has-clear': clearable && inputValue,
-          'has-prefix': prefix,
-          'has-suffix': suffix
+          'pr-10': clearable && inputValue,
+          'pl-12': prefix,
+          'pr-12': suffix,
+          'pr-20': suffix && clearable && inputValue,
+          'border-red-500 focus:border-red-500': error,
+          'border-gray-300': !error
         }"
         @input="handleInput"
         @focus="handleFocus"
@@ -41,11 +42,11 @@
         @keydown.enter="$emit('enter')"
       >
       
-      <!-- РљРЅРѕРїРєР° РѕС‡РёСЃС‚РєРё -->
+      <!-- Кнопка очистки -->
       <button
         v-if="clearable && inputValue && !disabled && !readonly"
         type="button"
-        class="clear-button"
+        class="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-0 cursor-pointer p-1.5 text-gray-400 hover:text-gray-600 transition-colors"
         tabindex="-1"
         @click="clearInput"
       >
@@ -65,29 +66,29 @@
         </svg>
       </button>
       
-      <!-- РџСЂРµС„РёРєСЃ -->
-      <div v-if="prefix" class="input-prefix">
+      <!-- Префикс -->
+      <div v-if="prefix" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">
         {{ prefix }}
       </div>
       
-      <!-- РЎСѓС„С„РёРєСЃ -->
-      <div v-if="suffix" class="input-suffix">
+      <!-- Суффикс -->
+      <div v-if="suffix" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">
         {{ suffix }}
       </div>
     </div>
     
-    <!-- РћС€РёР±РєР° -->
-    <div v-if="error" :id="`${inputId}-error`" class="input-error" role="alert">
+    <!-- Ошибка -->
+    <div v-if="error" :id="`${inputId}-error`" class="mt-2 text-sm text-red-600" role="alert">
       {{ error }}
     </div>
     
-    <!-- РџРѕРґСЃРєР°Р·РєР° -->
-    <div v-if="hint && !error" :id="`${inputId}-hint`" class="input-hint">
+    <!-- Подсказка -->
+    <div v-if="hint && !error" :id="`${inputId}-hint`" class="mt-2 text-sm text-gray-500">
       {{ hint }}
     </div>
     
-    <!-- РЎС‡РµС‚С‡РёРє СЃРёРјРІРѕР»РѕРІ -->
-    <div v-if="maxlength && showCounter" class="input-counter">
+    <!-- Счетчик символов -->
+    <div v-if="maxlength && showCounter" class="mt-2 text-xs text-gray-400 text-right">
       {{ inputValue.length }}/{{ maxlength }}
     </div>
   </div>
@@ -161,18 +162,6 @@ const props = defineProps({
         type: Boolean,
         default: false
     },
-    min: {
-        type: [Number, String],
-        default: null
-    },
-    max: {
-        type: [Number, String],
-        default: null
-    },
-    step: {
-        type: [Number, String],
-        default: null
-    },
     prefix: {
         type: String,
         default: ''
@@ -180,77 +169,53 @@ const props = defineProps({
     suffix: {
         type: String,
         default: ''
+    },
+    min: {
+        type: [String, Number],
+        default: null
+    },
+    max: {
+        type: [String, Number],
+        default: null
+    },
+    step: {
+        type: [String, Number],
+        default: null
     }
 })
 
-// Events
-const emit = defineEmits(['update:modelValue', 'focus', 'blur', 'enter', 'clear'])
-
-// Generate unique ID if not provided
-const inputId = computed(() => props.id || useId('base-input'))
-
-// Auto-generate name from id or label if not provided
-const inputName = computed(() => {
-    if (props.name) return props.name
-    if (props.id) return props.id
-    if (props.label) {
-        // Преобразуем label в snake_case для name
-        return props.label.toLowerCase()
-            .replace(/[^\w\s]/g, '')
-            .replace(/\s+/g, '_')
-    }
-    return inputId.value
-})
+// Emits
+const emit = defineEmits(['update:modelValue', 'input', 'focus', 'blur', 'enter', 'clear'])
 
 // Refs
 const inputRef = ref(null)
 
 // Computed
+const inputId = computed(() => props.id || useId('input'))
+const inputName = computed(() => props.name || inputId.value)
 const inputValue = computed({
-    get() {
-        return props.modelValue
-    },
-    set(value) {
-        emit('update:modelValue', value)
-    }
+    get: () => props.modelValue,
+    set: (value) => emit('update:modelValue', value)
 })
 
 // Methods
 const handleInput = (event) => {
-    let value = event.target.value
-  
-    // Р”Р»СЏ С‡РёСЃР»РѕРІС‹С… РёРЅРїСѓС‚РѕРІ - Р±РѕР»РµРµ РјСЏРіРєР°СЏ РѕР±СЂР°Р±РѕС‚РєР°
-    if (props.type === 'number') {
-    // Р Р°Р·СЂРµС€Р°РµРј РїСѓСЃС‚РѕРµ Р·РЅР°С‡РµРЅРёРµ, РјРёРЅСѓСЃ, С‚РѕС‡РєСѓ Рё С†РёС„СЂС‹
-        if (value === '' || value === '-' || value === '.' || value === '-.') {
-            emit('update:modelValue', value)
-            return
-        }
+    const target = event.target
+    const value = target.value
     
-        // РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ СЌС‚Рѕ РґРѕРїСѓСЃС‚РёРјРѕРµ С‡РёСЃР»Рѕ (РІРєР»СЋС‡Р°СЏ С‡Р°СЃС‚РёС‡РЅРѕ РІРІРµРґРµРЅРЅС‹Рµ)
-        if (/^-?\d*\.?\d*$/.test(value)) {
-            const numValue = parseFloat(value)
-      
-            // Р•СЃР»Рё СЌС‚Рѕ РїРѕР»РЅРѕРµ С‡РёСЃР»Рѕ, РїСЂРѕРІРµСЂСЏРµРј РѕРіСЂР°РЅРёС‡РµРЅРёСЏ
-            if (!isNaN(numValue)) {
-                if (props.min !== null && numValue < props.min) {
-                    // РќРµ Р±Р»РѕРєРёСЂСѓРµРј РІРІРѕРґ, РїСЂРѕСЃС‚Рѕ РЅРµ РїСЂРёРјРµРЅСЏРµРј РѕРіСЂР°РЅРёС‡РµРЅРёРµ СЃСЂР°Р·Сѓ
-                    emit('update:modelValue', value)
-                    return
-                } else if (props.max !== null && numValue > props.max) {
-                    // РќРµ Р±Р»РѕРєРёСЂСѓРµРј РІРІРѕРґ, РїСЂРѕСЃС‚Рѕ РЅРµ РїСЂРёРјРµРЅСЏРµРј РѕРіСЂР°РЅРёС‡РµРЅРёРµ СЃСЂР°Р·Сѓ
-                    emit('update:modelValue', value)
-                    return
-                }
-            }
-      
-            emit('update:modelValue', value)
+    // Для числовых полей конвертируем в число
+    if (props.type === 'number') {
+        const numValue = parseFloat(value)
+        if (!isNaN(numValue)) {
+            inputValue.value = numValue
+        } else {
+            inputValue.value = value
         }
-        // Р•СЃР»Рё РїР°С‚С‚РµСЂРЅ РЅРµ РїРѕРґС…РѕРґРёС‚, РёРіРЅРѕСЂРёСЂСѓРµРј РІРІРѕРґ
-        return
+    } else {
+        inputValue.value = value
     }
-  
-    emit('update:modelValue', value)
+    
+    emit('input', inputValue.value)
 }
 
 const handleFocus = (event) => {
@@ -258,44 +223,31 @@ const handleFocus = (event) => {
 }
 
 const handleBlur = (event) => {
-    // Р’Р°Р»РёРґР°С†РёСЏ С‡РёСЃР»РѕРІС‹С… Р·РЅР°С‡РµРЅРёР№ РїСЂРё РїРѕС‚РµСЂРµ С„РѕРєСѓСЃР°
-    if (props.type === 'number' && event.target.value !== '') {
-        const numValue = parseFloat(event.target.value)
-    
-        if (!isNaN(numValue)) {
-            let finalValue = numValue
-      
-            // РџСЂРёРјРµРЅСЏРµРј РѕРіСЂР°РЅРёС‡РµРЅРёСЏ min/max
-            if (props.min !== null && numValue < props.min) {
-                finalValue = props.min
-            } else if (props.max !== null && numValue > props.max) {
-                finalValue = props.max
-            }
-      
-            // Р•СЃР»Рё Р·РЅР°С‡РµРЅРёРµ РёР·РјРµРЅРёР»РѕСЃСЊ, РѕР±РЅРѕРІР»СЏРµРј
-            if (finalValue !== numValue) {
-                emit('update:modelValue', finalValue)
-            }
-        }
-    }
-  
     emit('blur', event)
 }
 
 const clearInput = () => {
-    emit('update:modelValue', '')
+    inputValue.value = ''
     emit('clear')
+    
+    // Фокусируемся на поле после очистки
     nextTick(() => {
-        inputRef.value?.focus()
+        if (inputRef.value) {
+            inputRef.value.focus()
+        }
     })
 }
 
 const focus = () => {
-    inputRef.value?.focus()
+    if (inputRef.value) {
+        inputRef.value.focus()
+    }
 }
 
 const blur = () => {
-    inputRef.value?.blur()
+    if (inputRef.value) {
+        inputRef.value.blur()
+    }
 }
 
 // Expose methods
@@ -305,180 +257,31 @@ defineExpose({
 })
 </script>
 
-<style scoped>
-.input-container {
-  width: 100%;
-}
+<!-- Все стили мигрированы на Tailwind CSS с полной адаптивностью -->
 
-.input-label {
-  display: block;
-  font-size: 16px;
-  font-weight: 500;
-  color: #000000;
-  margin-bottom: 8px;
-}
 
-.input-wrapper {
-  position: relative;
-  width: 100%;
-}
 
-.base-input {
-  width: 100%;
-  padding: 12px 16px;
-  border: 2px solid #e5e5e5;
-  border-radius: 8px;
-  background: #f5f5f5;
-  font-size: 16px;
-  color: #1a1a1a;
-  transition: all 0.2s ease;
-  min-height: 48px;
-  box-sizing: border-box;
-}
 
-.base-input::placeholder {
-  color: #8c8c8c;
-}
 
-.base-input:hover:not(:disabled):not(.readonly) {
-  border-color: #d0d0d0;
-}
 
-.base-input:focus {
-  outline: none;
-  border-color: #2196f3;
-  background: #fff;
-}
 
-.base-input.disabled {
-  cursor: not-allowed;
-  background: #f5f5f5;
-  color: #8c8c8c;
-}
 
-.base-input.readonly {
-  cursor: default;
-  background: #f9f9f9;
-}
 
-.base-input.has-clear {
-  padding-right: 40px;
-}
 
-/* РћС‚СЃС‚СѓРїС‹ РґР»СЏ РїСЂРµС„РёРєСЃР° */
-.base-input.has-prefix {
-  padding-left: 48px;
-}
 
-/* РћС‚СЃС‚СѓРїС‹ РґР»СЏ СЃСѓС„С„РёРєСЃР° */
-.base-input.has-suffix {
-  padding-right: 48px;
-}
 
-/* РћС‚СЃС‚СѓРїС‹ РґР»СЏ СЃСѓС„С„РёРєСЃР° + РєРЅРѕРїРєР° РѕС‡РёСЃС‚РєРё */
-.base-input.has-suffix.has-clear {
-  padding-right: 80px;
-}
 
-.input-wrapper.has-error .base-input {
-  border-color: #ff4d4f;
-}
 
-.input-wrapper.has-error .base-input:focus {
-  border-color: #ff4d4f;
-}
 
-.clear-button {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 6px;
-  color: #8c8c8c;
-  transition: color 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 4px;
-}
 
-/* РљРЅРѕРїРєР° РѕС‡РёСЃС‚РєРё РєРѕРіРґР° РµСЃС‚СЊ СЃСѓС„С„РёРєСЃ */
-.input-wrapper.has-suffix .clear-button {
-  right: 48px;
-}
 
-.clear-button:hover {
-  color: #1a1a1a;
-  background: #f0f0f0;
-}
 
-.input-prefix {
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 16px;
-  color: #8c8c8c;
-  pointer-events: none;
-}
 
-.input-suffix {
-  position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 16px;
-  color: #8c8c8c;
-  pointer-events: none;
-}
 
-.base-input:not(:placeholder-shown) + .input-prefix,
-.base-input:focus + .input-prefix {
-  color: #1a1a1a;
-}
 
-.input-error {
-  margin-top: 4px;
-  font-size: 14px;
-  color: #ff4d4f;
-  line-height: 1.4;
-}
 
-.input-hint {
-  margin-top: 4px;
-  font-size: 14px;
-  color: #666666;
-  line-height: 1.4;
-}
-
-.input-counter {
-  margin-top: 4px;
-  font-size: 12px;
-  color: #8c8c8c;
-  text-align: right;
-}
-
-/* РЎС‚РёР»Рё РґР»СЏ С‡РёСЃР»РѕРІС‹С… РёРЅРїСѓС‚РѕРІ */
-.base-input[type="number"] {
-  -moz-appearance: textfield;
-}
-
-.base-input[type="number"]::-webkit-outer-spin-button,
-.base-input[type="number"]::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
 
 /* РђРґР°РїС‚РёРІРЅРѕСЃС‚СЊ */
-@media (max-width: 768px) {
-  .base-input {
-    font-size: 16px; /* РџСЂРµРґРѕС‚РІСЂР°С‰Р°РµС‚ zoom РЅР° iOS */
-  }
-}
-</style> 
+
+ 
 

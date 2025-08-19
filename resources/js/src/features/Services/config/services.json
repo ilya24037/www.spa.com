@@ -2,14 +2,13 @@
   "categories": [
          {
        "id": "intimate_services",
-       "name": "Основные услуги",
-       "icon": "",
-       "description": "",
+       "name": "Популярные услуги",
        "services": [
         {
           "id": "classic_sex",
           "name": "Классический секс",
-          "price_placeholder": "Укажите цену, комментарий"
+          "price_placeholder": "Укажите цену, комментарий",
+          "popular": true
         },
         {
           "id": "oral_sex",

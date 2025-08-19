@@ -1,9 +1,9 @@
 <!-- Р'Р°Р·РѕРІС‹Р№ textarea РІ СЃС‚РёР»Рµ РђРІРёС‚Рѕ -->
 <template>
-  <div class="textarea-container">
-    <label v-if="label" :for="textareaId" class="textarea-label">{{ label }}</label>
+  <div class="flex flex-col gap-1.5 w-full">
+    <label v-if="label" :for="textareaId" class="text-sm font-medium text-gray-900 leading-tight">{{ label }}</label>
     
-    <div class="textarea-wrapper" :class="{ 'has-error': error }">
+    <div class="relative flex items-start">
       <textarea
         :id="textareaId"
         ref="textareaRef"
@@ -13,11 +13,14 @@
         :readonly="readonly"
         :rows="rows"
         :maxlength="maxlength"
-        class="base-textarea"
+        class="w-full min-h-[80px] p-3 text-base leading-relaxed text-gray-900 bg-white border border-gray-300 rounded-lg outline-none transition-all duration-200 font-inherit placeholder-gray-400"
         :class="{
-          'disabled': disabled,
-          'readonly': readonly,
-          'resizable': resizable
+          'bg-gray-50 text-gray-400 cursor-not-allowed border-gray-200': disabled,
+          'bg-gray-50 cursor-default border-gray-200': readonly && !disabled,
+          'resize-y': resizable,
+          'resize-none': !resizable,
+          'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-100': error,
+          'hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100': !error && !disabled && !readonly
         }"
         @input="handleInput"
         @focus="handleFocus"
@@ -26,18 +29,18 @@
       />
     </div>
     
-    <!-- РћС€РёР±РєР° -->
-    <div v-if="error" class="textarea-error">
+    <!-- Ошибка -->
+    <div v-if="error" class="text-xs text-red-500 leading-snug mt-0.5">
       {{ error }}
     </div>
     
-    <!-- РџРѕРґСЃРєР°Р·РєР° -->
-    <div v-if="hint && !error" class="textarea-hint">
+    <!-- Подсказка -->
+    <div v-if="hint && !error" class="text-xs text-gray-600 leading-snug mt-0.5">
       {{ hint }}
     </div>
     
-    <!-- РЎС‡РµС‚С‡РёРє СЃРёРјРІРѕР»РѕРІ -->
-    <div v-if="maxlength && showCounter" class="textarea-counter">
+    <!-- Счетчик символов -->
+    <div v-if="maxlength && showCounter" class="text-xs text-gray-400 text-right mt-1">
       {{ textareaValue.length }}/{{ maxlength }}
     </div>
   </div>
@@ -152,165 +155,5 @@ defineExpose({
 })
 </script>
 
-<style scoped>
-/* РљРѕРЅС‚РµР№РЅРµСЂ */
-.textarea-container {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  width: 100%;
-}
-
-/* Р›РµР№Р±Р» */
-.textarea-label {
-  font-size: 14px;
-  font-weight: 500;
-  color: #1a1a1a;
-  line-height: 1.2;
-}
-
-/* РћР±РµСЂС‚РєР° textarea */
-.textarea-wrapper {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-}
-
-.textarea-wrapper.has-error {
-  border-color: #ff4d4f;
-}
-
-/* Р‘Р°Р·РѕРІС‹Р№ textarea */
-.base-textarea {
-  width: 100%;
-  min-height: 80px;
-  padding: 12px;
-  font-size: 16px;
-  line-height: 1.4;
-  color: #1a1a1a;
-  background-color: #ffffff;
-  border: 1px solid #d6dae0;
-  border-radius: 8px;
-  outline: none;
-  transition: all 0.2s ease;
-  font-family: inherit;
-}
-
-.base-textarea:focus {
-  border-color: #0066ff;
-  box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.1);
-}
-
-.base-textarea:hover:not(:focus):not(.disabled):not(.readonly) {
-  border-color: #bec5cc;
-}
-
-.base-textarea.disabled {
-  background-color: #f5f5f5;
-  color: #999999;
-  cursor: not-allowed;
-  border-color: #e1e5ea;
-}
-
-.base-textarea.readonly {
-  background-color: #f8f9fa;
-  cursor: default;
-  border-color: #e1e5ea;
-}
-
-.base-textarea.resizable {
-  resize: vertical;
-}
-
-.base-textarea:not(.resizable) {
-  resize: none;
-}
-
-.base-textarea::placeholder {
-  color: #999999;
-  font-size: 16px;
-}
-
-/* РЎРѕСЃС‚РѕСЏРЅРёРµ РѕС€РёР±РєРё */
-.textarea-wrapper.has-error .base-textarea {
-  border-color: #ff4d4f;
-}
-
-.textarea-wrapper.has-error .base-textarea:focus {
-  border-color: #ff4d4f;
-  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.1);
-}
-
-/* РЎРѕРѕР±С‰РµРЅРёРµ РѕР± РѕС€РёР±РєРµ */
-.textarea-error {
-  font-size: 13px;
-  color: #ff4d4f;
-  line-height: 1.3;
-  margin-top: 2px;
-}
-
-/* РџРѕРґСЃРєР°Р·РєР° */
-.textarea-hint {
-  font-size: 13px;
-  color: #666666;
-  line-height: 1.3;
-  margin-top: 2px;
-}
-
-/* РЎС‡РµС‚С‡РёРє СЃРёРјРІРѕР»РѕРІ */
-.textarea-counter {
-  font-size: 12px;
-  color: #999999;
-  text-align: right;
-  margin-top: 4px;
-}
-
-/* РђРґР°РїС‚РёРІРЅРѕСЃС‚СЊ */
-@media (max-width: 768px) {
-  .base-textarea {
-    font-size: 16px; /* РџСЂРµРґРѕС‚РІСЂР°С‰Р°РµС‚ Р·СѓРј РЅР° iOS */
-  }
-}
-
-/* РўРµРјРЅР°СЏ С‚РµРјР° (РѕРїС†РёРѕРЅР°Р»СЊРЅРѕ) */
-@media (prefers-color-scheme: dark) {
-  .textarea-label {
-    color: #e1e5ea;
-  }
-  
-  .base-textarea {
-    background-color: #2a2a2a;
-    border-color: #4a4a4a;
-    color: #e1e5ea;
-  }
-  
-  .base-textarea:focus {
-    border-color: #0066ff;
-    box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.2);
-  }
-  
-  .base-textarea.disabled {
-    background-color: #1a1a1a;
-    color: #666666;
-    border-color: #333333;
-  }
-  
-  .base-textarea.readonly {
-    background-color: #1f1f1f;
-    border-color: #333333;
-  }
-  
-  .base-textarea::placeholder {
-    color: #666666;
-  }
-  
-  .textarea-hint {
-    color: #999999;
-  }
-  
-  .textarea-counter {
-    color: #666666;
-  }
-}
-</style> 
+<!-- Компонент полностью мигрирован на Tailwind CSS --> 
 

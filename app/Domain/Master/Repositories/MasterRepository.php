@@ -144,6 +144,19 @@ class MasterRepository extends BaseRepository implements MasterRepositoryInterfa
     }
 
     /**
+     * Найти мастера с медиафайлами для редактирования
+     */
+    public function findWithMedia(int $id): ?MasterProfile
+    {
+        return MasterProfile::with([
+            'photos' => function($query) {
+                $query->orderBy('sort_order')->orderBy('created_at');
+            },
+            'videos'
+        ])->find($id);
+    }
+
+    /**
      * Получить активных мастеров
      */
     public function getActive(array $filters = []): Collection

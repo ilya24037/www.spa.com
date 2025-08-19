@@ -1,7 +1,7 @@
 <!-- Базовый селект в стиле Авито -->
 <template>
-  <div class="select-container" ref="selectRef">
-    <label v-if="label" :for="selectId" class="select-label">{{ label }}</label>
+  <div class="w-full" ref="selectRef">
+    <label v-if="label" :for="selectId" class="block text-base font-normal text-gray-900 mb-2">{{ label }}</label>
     
     <!-- Скрытый select для форм -->
     <select 
@@ -24,22 +24,23 @@
     </select>
     
     <div 
-      class="custom-select-wrapper" 
+      class="relative w-full"
       :class="{ 'active': isOpen, 'disabled': disabled }"
     >
       <div 
-        class="custom-select-trigger"
+        class="w-full px-4 py-3 pr-10 border-2 border-gray-300 rounded-lg bg-gray-50 cursor-pointer flex items-center justify-between min-h-[48px] transition-all duration-200 hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:bg-white disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-50"
+        :class="{ 'border-blue-500 bg-white rounded-b-none': isOpen }"
         :tabindex="disabled ? -1 : 0"
         @click.stop="toggleDropdown"
         @keydown.enter="toggleDropdown"
         @keydown.space="toggleDropdown"
         @keydown.escape="isOpen = false"
       >
-        <span class="selected-text">
+        <span class="text-base text-gray-900 font-normal flex-1 text-left">
           {{ selectedOption?.label || placeholder }}
         </span>
         <svg 
-          class="select-arrow" 
+          class="text-gray-500 transition-transform duration-200 flex-shrink-0" 
           :class="{ 'rotate-180': isOpen }"
           width="20" 
           height="20" 
@@ -63,17 +64,17 @@
         leave-from-class="transform opacity-100 scale-100"
         leave-to-class="transform opacity-0 scale-95"
       >
-        <div v-if="isOpen" class="custom-select-dropdown">
+        <div v-if="isOpen" class="absolute top-full left-0 right-0 bg-white border-2 border-t-0 border-blue-500 rounded-b-lg shadow-lg z-50 max-h-60 overflow-y-auto">
           <template v-for="(option, index) in flatOptions" :key="index">
-            <div v-if="option.isGroup" class="dropdown-group">
+            <div v-if="option.isGroup" class="px-4 py-2 text-sm font-medium text-gray-500 bg-gray-50 border-b border-gray-200">
               {{ option.label }}
             </div>
             <div
               v-else
-              class="dropdown-option"
+              class="px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors duration-150"
               :class="{ 
-                'selected': option.value === modelValue,
-                'grouped': option.grouped 
+                'bg-blue-50 text-blue-900': option.value === modelValue,
+                'pl-8': option.grouped 
               }"
               @click.stop="selectOption(option)"
             >
@@ -84,10 +85,10 @@
       </Transition>
     </div>
     
-    <div v-if="error" class="select-error">
+    <div v-if="error" class="mt-2 text-sm text-red-600">
       {{ error }}
     </div>
-    <div v-if="hint" class="select-hint">
+    <div v-if="hint" class="mt-2 text-sm text-gray-500">
       {{ hint }}
     </div>
   </div>
@@ -227,182 +228,21 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* Класс для скрытия элемента (screen reader only) */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-
-.select-container {
-  width: 100%;
-}
-
-.select-label {
-  display: block;
-  font-size: 16px;
-  font-weight: 400;
-  color: #1a1a1a;
-  margin-bottom: 8px;
-}
-
-.custom-select-wrapper {
-  position: relative;
-  width: 100%;
-}
-
-.custom-select-wrapper.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.custom-select-trigger {
-  width: 100%;
-  padding: 12px 40px 12px 16px;
-  border: 2px solid #e5e5e5;
-  border-radius: 8px;
-  background: #f5f5f5;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 48px;
-  transition: all 0.2s ease;
-}
-
-.custom-select-trigger:hover:not(.disabled) {
-  border-color: #d0d0d0;
-}
-
-.custom-select-trigger:focus {
-  outline: none;
-  border-color: #2196f3;
-  background: #fff;
-}
-
-.custom-select-wrapper.active .custom-select-trigger {
-  border-color: #2196f3;
-  background: #fff;
-  border-radius: 8px 8px 0 0;
-}
-
-.custom-select-wrapper.disabled .custom-select-trigger {
-  cursor: not-allowed;
-  background: #f5f5f5;
-}
-
-.selected-text {
-  font-size: 16px;
-  color: #1a1a1a;
-  font-weight: 400;
-  flex: 1;
-  text-align: left;
-}
-
-.custom-select-wrapper.disabled .selected-text {
-  color: #8c8c8c;
-}
-
-.select-arrow {
-  color: #8c8c8c;
-  transition: transform 0.2s ease;
-  flex-shrink: 0;
-}
-
-.select-arrow.rotate-180 {
-  transform: rotate(180deg);
-}
-
-.custom-select-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: #fff;
-  border: 2px solid #2196f3;
-  border-top: none;
-  border-radius: 0 0 8px 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 100; /* Поднимаем выше всех секций */
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.dropdown-option {
-  padding: 12px 16px;
-  cursor: pointer;
-  font-size: 16px;
-  color: #1a1a1a;
-  transition: background-color 0.2s ease;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.dropdown-option:last-child {
-  border-bottom: none;
-}
-
-.dropdown-option:hover {
-  background-color: #f8f9fa;
-}
-
-.dropdown-option.selected {
-  background-color: #e3f2fd;
-  color: #2196f3;
-  font-weight: 500;
-}
-
-/* Стили для групп */
-.dropdown-group {
-  padding: 8px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #999;
-  text-transform: uppercase;
-  background-color: #f5f5f5;
-  border-bottom: 1px solid #e8e8e8;
-}
-
-/* Стили для опций в группе */
-.dropdown-option.grouped {
-  padding-left: 24px;
-}
-
-.select-error {
-  margin-top: 4px;
-  font-size: 14px;
-  color: #ff4d4f;
-  line-height: 1.4;
-}
-
-.select-hint {
-  margin-top: 4px;
-  font-size: 14px;
-  color: #8c8c8c;
-  line-height: 1.4;
-}
-
-/* Скроллбар для dropdown */
+/* Кастомные скроллбары для dropdown */
 .custom-select-dropdown::-webkit-scrollbar {
-  width: 6px;
+  @apply w-1.5;
 }
 
 .custom-select-dropdown::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  @apply bg-gray-100;
 }
 
 .custom-select-dropdown::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 3px;
+  @apply bg-gray-400 rounded;
 }
 
 .custom-select-dropdown::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  @apply bg-gray-500;
 }
 </style> 
 

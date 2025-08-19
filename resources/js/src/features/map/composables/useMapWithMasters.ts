@@ -207,13 +207,13 @@ export function useMapWithMasters(initialMasters?: Master[]) {
   // Обработчик клика по кластеру
   const handleClusterClick = (markers: MapMarker[]) => {
     // Можно показать список мастеров в кластере
-    console.log('Кластер содержит мастеров:', markers.length)
+    // Debug log removed
   }
   
   // Обработчик изменения границ карты
   const handleBoundsChange = (bounds: any) => {
     // Можно загружать только мастеров в видимой области
-    console.log('Границы карты изменились:', bounds)
+    // Debug log removed
   }
   
   // Обновление локации в фильтрах

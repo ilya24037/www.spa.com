@@ -205,12 +205,13 @@
                 >
                   РўРµР»РµС„РѕРЅ *
                 </label>
-                <vue-tel-input
+                <input
                   :id="`${componentId}-phone`"
                   v-model="form.client_phone"
-                  :preferred-countries="['ru', 'ua', 'by']"
-                  :only-countries="['ru', 'ua', 'by', 'kz']"
-                  mode="international"
+                  v-maska="'+7 (###) ###-##-##'"
+                  type="tel"
+                  placeholder="+7 (999) 999-99-99"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   data-testid="client-phone-input"
                   :class="{ 'border-red-500': formErrors.client_phone }"
                   :aria-describedby="`${componentId}-phone-error`"
@@ -326,6 +327,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import { router } from '@inertiajs/vue3'
+import { vMaska } from 'maska'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
 import type { AxiosResponse } from 'axios'
 import axios from 'axios'

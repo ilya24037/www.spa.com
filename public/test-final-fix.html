@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ФИНАЛЬНЫЙ тест исправления черновиков</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 20px; background: #f5f5f5; }
+        .test-block { border: 2px solid #007bff; padding: 20px; margin: 15px 0; border-radius: 8px; background: white; }
+        .success { background-color: #d4edda; border-color: #28a745; }
+        .error { background-color: #f8d7da; border-color: #dc3545; }
+        .warning { background-color: #fff3cd; border-color: #ffc107; }
+        button { padding: 12px 24px; margin: 8px; cursor: pointer; border: none; border-radius: 4px; font-size: 16px; }
+        .btn-test { background-color: #28a745; color: white; }
+        .btn-check { background-color: #17a2b8; color: white; }
+        .btn-clear { background-color: #6c757d; color: white; }
+        .form-group { margin: 15px 0; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; }
+        input, textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .log { background: #f8f9fa; padding: 15px; border-radius: 5px; font-family: 'Courier New', monospace; font-size: 13px; max-height: 400px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1 style="color: #007bff;">🔧 ФИНАЛЬНЫЙ ТЕСТ: Исправление дублирования черновиков</h1>
+    
+    <div class="test-block" style="background: #e7f3ff;">
+        <h2>🎯 ЦЕЛЬ ТЕСТА</h2>
+        <p><strong>ПРОБЛЕМА:</strong> При редактировании объявления создавался новый черновик вместо обновления существующего</p>
+        <p><strong>ИСПРАВЛЕНИЕ:</strong> Vue компонент теперь передает ID объявления в FormData</p>
+        <p><strong>ОЖИДАЕМЫЙ РЕЗУЛЬТАТ:</strong> "🔄 Был обновлен: ДА" + стабильное количество черновиков</p>
+    </div>
+
+    <div class="test-block">
+        <h3>🧪 Тестовая форма</h3>
+        
+        <div class="form-group">
+            <label for="testAdId">ID черновика для обновления:</label>
+            <input type="number" id="testAdId" value="5" placeholder="ID существующего черновика">
+            <small style="color: #666;">Убедитесь что черновик с этим ID существует в БД</small>
+        </div>
+        
+        <div class="form-group">
+            <label for="testTitle">Новый заголовок:</label>
+            <input type="text" id="testTitle" value="" placeholder="Автоматически заполнится">
+        </div>
+        
+        <div class="form-group">
+            <label for="testDescription">Новое описание:</label>
+            <textarea id="testDescription" rows="2" placeholder="Автоматически заполнится"></textarea>
+        </div>
+        
+        <button onclick="testDraftUpdate()" class="btn-test">
+            🚀 ТЕСТИРОВАТЬ ИСПРАВЛЕНИЕ
+        </button>
+        
+        <button onclick="checkDraftsCount()" class="btn-check">
+            📊 Проверить количество черновиков
+        </button>
+        
+        <button onclick="clearLog()" class="btn-clear">
+            🗑️ Очистить лог
+        </button>
+    </div>
+
+    <div class="test-block">
+        <h3>📊 Результаты тестирования</h3>
+        <div id="testLog" class="log">
+            ЛОГА НЕТ - НАЧНИТЕ ТЕСТ<br>
+        </div>
+    </div>
+
+    <script>
+        let logElement = document.getElementById('testLog');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                'info': '#333',
+                'success': '#28a745', 
+                'error': '#dc3545',
+                'warning': '#ffc107',
+                'debug': '#6c757d'
+            };
+            
+            logElement.innerHTML += `<span style="color: ${colors[type]}; font-weight: bold;">[${timestamp}] ${message}</span><br>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        function clearLog() {
+            logElement.innerHTML = 'Лог очищен. Готов к новому тесту...<br>';
+        }
+        
+        async function testDraftUpdate() {
+            const adId = document.getElementById('testAdId').value;
+            const title = document.getElementById('testTitle').value;
+            const description = document.getElementById('testDescription').value;
+            
+            if (!adId || adId <= 0) {
+                log('❌ Укажите корректный ID черновика (больше 0)', 'error');
+                return;
+            }
+            
+            // Автоматически заполняем поля
+            const timestamp = new Date().toLocaleTimeString();
+            document.getElementById('testTitle').value = `ФИНАЛЬНЫЙ ТЕСТ ${timestamp}`;
+            document.getElementById('testDescription').value = `Описание обновлено в ${new Date().toLocaleString()}`;
+            
+            log(`🎬 СТАРТ ФИНАЛЬНОГО ТЕСТА`, 'debug');
+            log(`🎯 Черновик для обновления: ID=${adId}`, 'info');
+            log(`📝 Новый заголовок: "${document.getElementById('testTitle').value}"`, 'info');
+            
+            try {
+                // Подсчитаем черновики ДО операции
+                const countBefore = await getDraftsCount();
+                log(`📊 Черновиков ДО операции: ${countBefore}`, 'info');
+                
+                // Готовим FormData
+                const formData = new FormData();
+                formData.append('ad_id', adId); // КЛЮЧЕВОЕ ПОЛЕ!
+                formData.append('id', adId); // Дублируем для надежности
+                formData.append('title', document.getElementById('testTitle').value);
+                formData.append('description', document.getElementById('testDescription').value);
+                formData.append('specialty', 'Финальный тест');
+                formData.append('phone', '+7 (999) 888-77-66');
+                
+                log(`✅ FormData подготовлена с ad_id: ${adId}`, 'success');
+                
+                // КРИТИЧЕСКИЙ МОМЕНТ: используем ПРАВИЛЬНЫЙ маршрут
+                log(`🚀 Отправляем на /test-draft (БЕЗ CSRF)...`, 'debug');
+                
+                const response = await fetch('/test-draft', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                log(`📡 Ответ сервера: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    log(`📊 Черновиков ПОСЛЕ операции: ${result.total_drafts}`, 'info');
+                    log(`🎯 ID результата: ${result.ad_id}`, 'info');
+                    log(`🔄 Был обновлен: ${result.was_updated ? 'ДА ✅' : 'НЕТ ❌'}`, result.was_updated ? 'success' : 'error');
+                    
+                    // ОСНОВНАЯ ПРОВЕРКА
+                    if (result.was_updated && result.ad_id == adId) {
+                        log(`🎉 УСПЕХ! Черновик ID=${adId} был ОБНОВЛЕН, а не создан заново!`, 'success');
+                        log(`✅ ИСПРАВЛЕНИЕ РАБОТАЕТ КОРРЕКТНО!`, 'success');
+                        
+                        if (countBefore == result.total_drafts) {
+                            log(`✅ Количество черновиков стабильно: ${countBefore} = ${result.total_drafts}`, 'success');
+                        } else {
+                            log(`⚠️ Количество изменилось: ${countBefore} → ${result.total_drafts}`, 'warning');
+                        }
+                    } else {
+                        log(`❌ ПРОВАЛ! Был создан НОВЫЙ черновик ID=${result.ad_id} вместо обновления ID=${adId}`, 'error');
+                        log(`❌ ИСПРАВЛЕНИЕ НЕ РАБОТАЕТ!`, 'error');
+                        log(`💡 Проверьте: передается ли ad_id в Vue компоненте?`, 'warning');
+                    }
+                } else {
+                    const errorText = await response.text();
+                    log(`❌ ОШИБКА СЕРВЕРА: ${errorText.substring(0, 200)}...`, 'error');
+                }
+                
+            } catch (error) {
+                log(`💥 КРИТИЧЕСКАЯ ОШИБКА: ${error.message}`, 'error');
+            }
+        }
+        
+        async function getDraftsCount() {
+            try {
+                const response = await fetch('/api/drafts-count');
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.count;
+                } else {
+                    log(`⚠️ Не удалось получить количество черновиков`, 'warning');
+                    return '?';
+                }
+            } catch (error) {
+                log(`⚠️ Ошибка подсчета: ${error.message}`, 'warning');
+                return '?';
+            }
+        }
+        
+        async function checkDraftsCount() {
+            log('🔍 Подсчитываем черновики...', 'debug');
+            const count = await getDraftsCount();
+            log(`📊 Текущее количество черновиков в БД: ${count}`, 'info');
+        }
+        
+        // Автозаполнение при загрузке
+        window.onload = function() {
+            const timestamp = new Date().toLocaleTimeString();
+            document.getElementById('testTitle').value = `Финальный тест ${timestamp}`;
+            document.getElementById('testDescription').value = `Автоматическое описание ${new Date().toLocaleString()}`;
+            
+            log('🚀 ФИНАЛЬНАЯ ТЕСТОВАЯ СТРАНИЦА ЗАГРУЖЕНА', 'success');
+            log('💡 Нажмите "ТЕСТИРОВАТЬ ИСПРАВЛЕНИЕ" для проверки', 'info');
+            log('🎯 Ожидается: "🔄 Был обновлен: ДА ✅"', 'debug');
+        };
+    </script>
+</body>
+</html>

@@ -1,8 +1,8 @@
 <!-- Р'Р°Р·РѕРІР°СЏ СЂР°РґРёРѕРєРЅРѕРїРєР° РІ СЃС‚РёР»Рµ РђРІРёС‚Рѕ -->
 <template>
   <div 
-    class="radio-container" 
-    :class="{ 'disabled': disabled }"
+    class="flex items-start cursor-pointer py-3 gap-3 select-none"
+    :class="{ 'cursor-not-allowed opacity-50': disabled }"
     @click="select"
   >
     <!-- Скрытый input для форм -->
@@ -17,24 +17,25 @@
       :aria-describedby="description ? `${radioId}-description` : undefined"
       :aria-checked="isSelected"
       :required="required"
-      class="sr-only"
+      class="absolute w-px h-px p-0 -m-px overflow-hidden clip-rect-0 whitespace-nowrap border-0"
       @change="select"
     >
     <div 
-      class="custom-radio"
+      class="w-5 h-5 border-2 rounded-full flex items-center justify-center transition-all duration-200 bg-white flex-shrink-0 cursor-pointer"
       :class="{ 
-        'checked': isSelected,
-        'disabled': disabled 
+        'border-gray-500': isSelected,
+        'border-gray-300 hover:border-gray-400': !isSelected && !disabled,
+        'cursor-not-allowed bg-gray-50 border-gray-300': disabled 
       }"
     >
-      <div v-if="isSelected" class="radio-dot" />
+      <div v-if="isSelected" class="w-2 h-2 bg-gray-500 rounded-full transition-all duration-200" />
     </div>
     
-    <label v-if="label || $slots.default" :for="radioId" class="radio-content">
-      <div v-if="label" class="radio-label">
+    <label v-if="label || $slots.default" :for="radioId" class="flex-1 min-w-0">
+      <div v-if="label" class="text-base text-gray-900 font-normal leading-relaxed mb-1" :class="{ 'text-gray-500': disabled }">
         {{ label }}
       </div>
-      <div v-if="description" :id="`${radioId}-description`" class="radio-description">
+      <div v-if="description" :id="`${radioId}-description`" class="text-sm text-gray-500 leading-relaxed" :class="{ 'text-gray-300': disabled }">
         {{ description }}
       </div>
       <slot />
@@ -118,94 +119,5 @@ const select = () => {
 }
 </script>
 
-<style scoped>
-/* Класс для скрытия элемента (screen reader only) */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-
-.radio-container {
-  display: flex;
-  align-items: flex-start;
-  cursor: pointer;
-  padding: 12px 0;
-  gap: 12px;
-  user-select: none;
-}
-
-.radio-container.disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.custom-radio {
-  width: 20px;
-  height: 20px;
-  border: 2px solid #d1d5db;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  background: #fff;
-  flex-shrink: 0;
-  cursor: pointer;
-}
-
-.custom-radio:hover:not(.disabled) {
-  border-color: #9ca3af;
-}
-
-.custom-radio.checked {
-  border-color: #6b7280;
-}
-
-.custom-radio.disabled {
-  cursor: not-allowed;
-  background: #f5f5f5;
-}
-
-.radio-dot {
-  width: 8px;
-  height: 8px;
-  background: #6b7280;
-  border-radius: 50%;
-  transition: all 0.2s ease;
-}
-
-.radio-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.radio-label {
-  font-size: 16px;
-  color: #1a1a1a;
-  font-weight: 400;
-  line-height: 1.4;
-  margin-bottom: 4px;
-}
-
-.radio-description {
-  font-size: 14px;
-  color: #8c8c8c;
-  line-height: 1.4;
-}
-
-.radio-container.disabled .radio-label {
-  color: #8c8c8c;
-}
-
-.radio-container.disabled .radio-description {
-  color: #bfbfbf;
-}
-</style> 
+<!-- Компонент полностью мигрирован на Tailwind CSS --> 
 

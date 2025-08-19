@@ -1,1 +1,0 @@
-/**/jsonp_yandex_coverage__l_map_ll_30_31586800_59_93909500_z_16_lang_ru_RU({"status":"success","data":[{"id":"map","zoomRange":[0,21],"copyrights":["© Яндекс"],"LayerMetaData":[{"scaled":true}],"copyrightsOptions":{}}]});

@@ -1,5 +1,5 @@
 <template>
-  <div class="yandex-map-picker">
+  <div class="w-full rounded-lg overflow-hidden border border-gray-200">
     <!-- Debug info (только в development) -->
     <div v-if="false" style="font-size: 10px; color: #999; margin-bottom: 4px; display: flex; gap: 8px; align-items: center;">
       MapID: {{ mapId }} | Loading: {{ loading }}
@@ -15,7 +15,7 @@
     <iframe 
       v-if="multiple && markers && markers.length > 0"
       :src="`/map-iframe.html?v=${Date.now()}`"
-      class="yandex-map-picker__iframe"
+      class="w-full border-none rounded-lg"
       :style="{ height: height + 'px' }"
       frameborder="0"
       @load="onIframeLoad"
@@ -26,13 +26,13 @@
       v-else
       ref="mapContainer"
       :id="mapId" 
-      class="yandex-map-picker__container"
+      class="w-full min-w-[200px] bg-gray-100 relative block"
       :style="{ height: height + 'px' }"
     >
       <!-- Загрузка -->
       <div 
         v-if="loading" 
-        class="yandex-map-picker__loading"
+        class="absolute inset-0 bg-white/90 z-10"
       >
         <div class="flex flex-col items-center justify-center h-full">
           <svg class="animate-spin h-8 w-8 text-blue-600 mb-2" fill="none" viewBox="0 0 24 24">
@@ -109,7 +109,7 @@ const placemarks = ref<any[]>([]) // Массив всех меток на ка�
 
 // Логируем ID для отладки (только в development)
 if (import.meta.env.DEV) {
-  console.log('YandexMapPicker mapId:', mapId)
+  // Debug log removed
 }
 
 // Парсинг координат из modelValue
@@ -125,20 +125,20 @@ const parseCoordinates = (value: string) => {
 
 // Текущие координаты с проверкой
 const currentCoords = ref(parseCoordinates(props.modelValue))
-console.log('Начальные координаты компонента:', currentCoords.value)
+// Debug log removed
 
 // Загрузка Яндекс.Карт API (упрощенный подход как в Авито)
 const loadYandexMapsAPI = () => {
   // Проверяем, загружен ли уже API
   if (window.ymaps) {
-    console.log('API уже загружен')
+    // Debug log removed
     return
   }
   
   // Проверяем, не загружается ли уже скрипт
   const existingScript = document.querySelector('script[src*="api-maps.yandex.ru"]')
   if (existingScript) {
-    console.log('Скрипт API уже загружается')
+    // Debug log removed
     return
   }
 
@@ -152,17 +152,17 @@ const loadYandexMapsAPI = () => {
 // Инициализация карты (упрощенный подход как в Авито)
 const initMap = () => {
   if (!window.ymaps) {
-    console.log('ymaps еще не загружен, ждем...')
+    // Debug log removed
     return
   }
   
-  console.log('Инициализация карты...')
+  // Debug log removed
   
   try {
     // Проверяем что элемент существует
     const mapElement = document.getElementById(mapId)
     if (!mapElement) {
-      console.log('Элемент карты не найден:', mapId)
+      // Debug log removed
       loading.value = false
       return
     }
@@ -174,7 +174,7 @@ const initMap = () => {
       controls: ['zoomControl', 'searchControl'] // Базовые контролы
     })
     
-    console.log('Карта создана')
+    // Debug log removed
 
     // Автоопределение города пользователя по IP
     if (!props.modelValue) {
@@ -185,23 +185,23 @@ const initMap = () => {
         if (coords && coords.length === 2) {
           map.value.setCenter(coords)
           currentCoords.value = { lat: coords[0], lng: coords[1] }
-          console.log('Город определен по IP:', coords)
+          // Debug log removed
         }
       }).catch((error: any) => {
-        console.log('Не удалось определить город по IP')
+        // Debug log removed
       })
     }
 
     // ВРЕМЕННО ПОЛНОСТЬЮ ОТКЛЮЧАЕМ МАРКЕРЫ
     // Проблема с несовместимостью Yandex Maps API и Vue реактивности
     if (props.multiple && props.markers && props.markers.length > 0) {
-      console.log('⚠️ Маркеры временно отключены из-за ошибки API')
-      console.log(`Найдено ${props.markers.length} мастеров в базе:`)
+      // Debug log removed
+      // Debug log removed
       
       // Выводим список мастеров в консоль
       props.markers.forEach((marker, index) => {
         if (marker && marker.lat && marker.lng) {
-          console.log(`  ${index + 1}. ${marker.title || 'Мастер'} - [${marker.lat.toFixed(4)}, ${marker.lng.toFixed(4)}]`)
+          // Debug log removed}, ${marker.lng.toFixed(4)}]`)
         }
       })
       
@@ -211,14 +211,14 @@ const initMap = () => {
           if (map.value) {
             // Центр Перми с учетом координат мастеров
             map.value.setCenter([58.0105, 56.2502], 12)
-            console.log('Карта центрирована на Перми')
+            // Debug log removed
           }
         }, 1000)
       }
     }
     
     loading.value = false
-    console.log('Инициализация карты завершена')
+    // Debug log removed
     
   } catch (error) {
     console.error('Ошибка инициализации карты:', error)
@@ -228,7 +228,7 @@ const initMap = () => {
 
 // Поиск адреса
 const searchAddress = async (address: string): Promise<void> => {
-  console.log('Начинаем поиск адреса:', address)
+  // Debug log removed
   
   if (!window.ymaps) {
     console.error('ymaps не доступен для поиска')
@@ -248,15 +248,15 @@ const searchAddress = async (address: string): Promise<void> => {
       searchQuery = `Пермь, ${address}`
     }
 
-    console.log('Поисковый запрос:', searchQuery)
+    // Debug log removed
     
     const result = await window.ymaps.geocode(searchQuery, { results: 1 })
-    console.log('Результат геокодинга:', result)
+    // Debug log removed
     
     const firstGeoObject = result.geoObjects.get(0)
     
     if (!firstGeoObject) {
-      console.log('Адрес не найден')
+      // Debug log removed
       emit('search-error', 'Адрес не найден')
       return
     }
@@ -264,7 +264,7 @@ const searchAddress = async (address: string): Promise<void> => {
     const coords = firstGeoObject.geometry.getCoordinates()
     const newCoords = { lat: coords[0], lng: coords[1] }
     
-    console.log('Найденные координаты:', newCoords)
+    // Debug log removed
     
     // Обновляем позицию карты и маркера
     if (map.value && placemark.value) {
@@ -277,7 +277,7 @@ const searchAddress = async (address: string): Promise<void> => {
     
     // Получаем точный адрес
     const geoAddress = firstGeoObject.getAddressLine()
-    console.log('Точный адрес:', geoAddress)
+    // Debug log removed
     emit('address-found', geoAddress, newCoords)
     
   } catch (error) {
@@ -323,7 +323,7 @@ watch(() => props.modelValue, (newValue) => {
 const updateMarkers = (newMarkers: MapMarker[]) => {
   if (!map.value || !window.ymaps) return
   
-  console.log('Обновление маркеров:', newMarkers.length)
+  // Debug log removed
   
   // Очищаем старые метки
   placemarks.value.forEach(placemark => {
@@ -398,7 +398,7 @@ const getBounds = () => {
 
 // Обработчик загрузки iframe
 const onIframeLoad = () => {
-  console.log('Карта в iframe загружена')
+  // Debug log removed
   loading.value = false
   
   // Не отправляем данные в iframe - он сам загрузит их через API
@@ -432,15 +432,15 @@ const waitForVisible = async (): Promise<void> => {
       
       if (mapContainer.value) {
         const rect = mapContainer.value.getBoundingClientRect()
-        console.log(`Попытка ${attempts}: размеры контейнера ${rect.width}x${rect.height}`)
+        // Debug log removed
         
         if (rect.width > 0 && rect.height > 0) {
-          console.log('Контейнер стал видимым, начинаем инициализацию')
+          // Debug log removed
           resolve()
           return
         }
       } else {
-        console.log(`Попытка ${attempts}: ref контейнера не найден`)
+        // Debug log removed
       }
       
       if (attempts >= maxAttempts) {
@@ -506,38 +506,7 @@ declare global {
 </script>
 
 <style scoped>
-.yandex-map-picker {
-  width: 100%;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid #e5e7eb;
-}
-
-.yandex-map-picker__container {
-  width: 100%;
-  min-width: 200px;
-  background: #f0f0f0;
-  position: relative;
-  display: block;
-}
-
-.yandex-map-picker__iframe {
-  width: 100%;
-  border: none;
-  border-radius: 8px;
-}
-
-.yandex-map-picker__loading {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.9);
-  z-index: 10;
-}
-
-/* Стили для элементов Яндекс.Карт */
+/* Специфичные стили для элементов Яндекс.Карт API - НЕЛЬЗЯ ТРОГАТЬ! */
 :deep(.ymaps-2-1-79-map) {
   width: 100% !important;
   height: 100% !important;
@@ -546,4 +515,6 @@ declare global {
 :deep(.ymaps-2-1-79-balloon-content) {
   max-width: 200px !important;
 }
+
+/* Остальные стили мигрированы на Tailwind CSS в template */
 </style>

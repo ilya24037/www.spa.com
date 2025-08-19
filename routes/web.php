@@ -10,6 +10,9 @@ use App\Application\Http\Controllers\Booking\BookingController;
 use App\Application\Http\Controllers\SearchController;
 use App\Application\Http\Controllers\AddItemController;
 use App\Application\Http\Controllers\Ad\AdController;
+use App\Application\Http\Controllers\Ad\AdStatusController;
+use App\Application\Http\Controllers\Ad\DraftController;
+use App\Application\Http\Controllers\Ad\AdMediaController;
 use App\Application\Http\Controllers\TestController;
 use App\Application\Http\Controllers\MyAdsController;
 use App\Application\Http\Controllers\PaymentController;
@@ -252,7 +255,7 @@ Route::middleware('auth')->group(function () {
     /*
     | Размещение объявлений (как у Avito - /additem)
     */
-    Route::get('/additem', [AdController::class, 'addItem'])->name('additem');
+    Route::get('/additem', [AdController::class, 'create'])->name('additem');
     Route::post('/additem', [AdController::class, 'store'])->name('additem.store');
     
     // 🔥 ДОБАВЛЕНО: дополнительные маршруты для полного функционала Dashboard
@@ -302,33 +305,35 @@ Route::middleware('auth')->group(function () {
     Route::post('/photos/{photo}/set-main', [MediaUploadController::class, 'setMainPhoto'])->name('master.set.main.photo');
     
     // Маршруты для объявлений
-            // Удалено: ads/create - теперь используем /additem
+    Route::get('/ads', [AdController::class, 'index'])->name('ads.index');
     Route::post('/ads', [AdController::class, 'store'])->name('ads.store');
-    Route::post('/ads/draft', [AdController::class, 'storeDraft'])->name('ads.draft');
-    Route::post('/ads/publish', [AdController::class, 'publish'])->name('ads.publish');
-    Route::post('/ads/upload-video', [AdController::class, 'uploadVideo'])->name('ads.upload-video');
     Route::get('/ads/{ad}', [AdController::class, 'show'])->name('ads.show');
     Route::get('/ads/{ad}/edit', [AdController::class, 'edit'])->name('ads.edit');
-    
-    // Маршруты для черновиков
-    Route::get('/draft/{ad}', [AdController::class, 'showDraft'])->name('ads.draft.show');
-    Route::put('/draft/{ad}', [AdController::class, 'updateDraft'])->name('ads.draft.update');
-    Route::delete('/draft/{ad}', [MyAdsController::class, 'destroy'])->name('ads.draft.destroy');
-    // Удаление черновиков теперь через my-ads.destroy как и других объявлений
-    Route::get('/ads/{ad}/data', [AdController::class, 'getData'])->name('ads.data');
     Route::put('/ads/{ad}', [AdController::class, 'update'])->name('ads.update');
     Route::delete('/ads/{ad}', [AdController::class, 'destroy'])->name('ads.destroy');
-    Route::patch('/ads/{ad}/status', [AdController::class, 'toggleStatus'])->name('ads.toggle-status');
+    
+    // Маршруты для черновиков
+    Route::post('/draft', [DraftController::class, 'store'])->name('ads.draft');
+    Route::get('/draft/{ad}', [DraftController::class, 'show'])->name('ads.draft.show');
+    Route::put('/draft/{ad}', [DraftController::class, 'update'])->name('ads.draft.update');
+    Route::delete('/draft/{ad}', [DraftController::class, 'destroy'])->name('ads.draft.destroy');
+    
+    // Управление статусом объявлений
+    Route::post('/ads/{ad}/activate', [AdStatusController::class, 'activate'])->name('ads.activate');
+    Route::post('/ads/{ad}/deactivate', [AdStatusController::class, 'deactivate'])->name('ads.deactivate');
+    Route::post('/ads/{ad}/archive', [AdStatusController::class, 'archive'])->name('ads.archive');
+    Route::post('/ads/{ad}/restore', [AdStatusController::class, 'restore'])->name('ads.restore');
+    Route::post('/ads/{ad}/publish', [AdStatusController::class, 'publish'])->name('ads.publish');
     
     // Маршруты для работы с медиа объявлений
     Route::prefix('ads/{ad}/media')->name('ads.media.')->group(function () {
-        Route::get('/', [App\Application\Http\Controllers\Ad\AdMediaController::class, 'getMediaInfo'])->name('info');
-        Route::post('/photos', [App\Application\Http\Controllers\Ad\AdMediaController::class, 'uploadPhotos'])->name('photos.upload');
-        Route::post('/photo', [App\Application\Http\Controllers\Ad\AdMediaController::class, 'uploadPhoto'])->name('photo.upload');
-        Route::delete('/photo', [App\Application\Http\Controllers\Ad\AdMediaController::class, 'deletePhoto'])->name('photo.delete');
-        Route::post('/photos/reorder', [App\Application\Http\Controllers\Ad\AdMediaController::class, 'reorderPhotos'])->name('photos.reorder');
-        Route::post('/video', [App\Application\Http\Controllers\Ad\AdMediaController::class, 'uploadVideo'])->name('video.upload');
-        Route::delete('/video', [App\Application\Http\Controllers\Ad\AdMediaController::class, 'deleteVideo'])->name('video.delete');
+        Route::get('/', [AdMediaController::class, 'getMediaInfo'])->name('info');
+        Route::post('/photos', [AdMediaController::class, 'uploadPhotos'])->name('photos.upload');
+        Route::post('/photo', [AdMediaController::class, 'uploadPhoto'])->name('photo.upload');
+        Route::delete('/photo', [AdMediaController::class, 'deletePhoto'])->name('photo.delete');
+        Route::post('/photos/reorder', [AdMediaController::class, 'reorderPhotos'])->name('photos.reorder');
+        Route::post('/video', [AdMediaController::class, 'uploadVideo'])->name('video.upload');
+        Route::delete('/video', [AdMediaController::class, 'deleteVideo'])->name('video.delete');
     });
 });
 
@@ -340,3 +345,46 @@ Route::get('/examples/isolated-widgets', function () {
 Route::get('/examples/adaptive-grid', function () {
     return Inertia::render('Examples/AdaptiveGridExample');
 })->name('examples.adaptive-grid');
+
+// Тестовый API для подсчета черновиков
+Route::get('/api/drafts-count', function () {
+    try {
+        $count = \App\Domain\Ad\Models\Ad::where('status', 'draft')->count();
+        return response()->json(['count' => $count]);
+    } catch (Exception $e) {
+        return response()->json(['count' => 0, 'error' => $e->getMessage()]);
+    }
+})->name('api.drafts-count');
+
+// Тестовый маршрут для черновиков БЕЗ middleware
+Route::post('/test-draft', function (Illuminate\Http\Request $request) {
+    try {
+        $draftService = app(\App\Domain\Ad\Services\DraftService::class);
+        $user = \App\Domain\User\Models\User::first(); // Берем первого пользователя для теста
+        
+        // Извлекаем ID как в основном контроллере
+        $adId = $request->input('ad_id') ?: $request->input('id');
+        $adId = $adId ? (int) $adId : null;
+        
+        $data = [
+            'title' => $request->input('title', 'Test Draft'),
+            'description' => $request->input('description', 'Test Description'),
+            'specialty' => $request->input('specialty', 'Test Specialty'),
+            'phone' => $request->input('phone', '+7 (999) 999-99-99'),
+            'status' => 'draft',
+            'user_id' => $user->id
+        ];
+        
+        $result = $draftService->saveOrUpdate($data, $user, $adId);
+        
+        return response()->json([
+            'success' => true, 
+            'message' => 'Черновик успешно сохранен',
+            'ad_id' => $result->id,
+            'was_updated' => $adId && $adId == $result->id,
+            'total_drafts' => \App\Domain\Ad\Models\Ad::where('status', 'draft')->count()
+        ]);
+    } catch (Exception $e) {
+        return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+    }
+})->name('test.draft');

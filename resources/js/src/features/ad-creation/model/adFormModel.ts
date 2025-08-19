@@ -80,7 +80,7 @@ export function useAdFormModel(props: any, emit: any) {
         savedFormData = JSON.parse(saved)
       }
     } catch (e) {
-      console.error('Error restoring form data:', e)
+      // Молча игнорируем ошибку восстановления
     }
   } else {
     // Для существующих объявлений очищаем localStorage чтобы не было конфликтов
@@ -119,7 +119,7 @@ export function useAdFormModel(props: any, emit: any) {
           try {
             return JSON.parse(props.initialData.prices)
           } catch (e) {
-            console.error('Error parsing prices JSON:', e)
+            // Молча игнорируем ошибку парсинга
           }
         }
         // Если это уже объект - используем как есть
@@ -172,8 +172,20 @@ export function useAdFormModel(props: any, emit: any) {
   // Состояние сохранения
   const saving = ref(false)
   
-  // Режим редактирования
-  const isEditMode = computed(() => !!props.adId)
+  // Режим редактирования - упрощенная проверка
+  const isEditMode = computed(() => {
+    // Преобразуем в число и проверяем что больше 0
+    const id = Number(props.adId)
+    console.log('isEditMode check:', {
+      propsAdId: props.adId,
+      propsAdIdType: typeof props.adId,
+      numberValue: id,
+      isNaN: isNaN(id),
+      isGreaterThanZero: id > 0,
+      result: !isNaN(id) && id > 0
+    })
+    return !isNaN(id) && id > 0
+  })
   
   // Watcher для синхронизации адреса из geo в отдельное поле address
   watch(() => form.geo, (newGeo) => {
@@ -184,7 +196,7 @@ export function useAdFormModel(props: any, emit: any) {
           form.address = geoData.address
         }
       } catch (e) {
-        console.error('Ошибка парсинга geo:', e)
+        // Молча игнорируем ошибку парсинга
       }
     } else if (typeof newGeo === 'object' && newGeo && newGeo.address) {
       form.address = newGeo.address
@@ -243,7 +255,7 @@ export function useAdFormModel(props: any, emit: any) {
             emit('success')
           },
           onError: (errorResponse: any) => {
-            console.error('Ошибка обновления черновика:', errorResponse)
+            // Обработка ошибки
             errors.value = errorResponse
           },
           onFinish: () => {
@@ -263,7 +275,7 @@ export function useAdFormModel(props: any, emit: any) {
             }
           },
           onError: (errorResponse: any) => {
-            console.error('Ошибка обновления объявления:', errorResponse)
+            // Обработка ошибки
             errors.value = errorResponse
           },
           onFinish: () => {
@@ -276,7 +288,7 @@ export function useAdFormModel(props: any, emit: any) {
       router.post('/additem', submitData, {
         preserveScroll: true,
         onError: (errorResponse: any) => {
-          console.error('Ошибка создания объявления:', errorResponse)
+          // Обработка ошибки
           errors.value = errorResponse
         },
         onFinish: () => {
@@ -288,16 +300,40 @@ export function useAdFormModel(props: any, emit: any) {
 
   // Сохранение черновика (как в старой версии из Backup)
   const handleSaveDraft = async () => {
-    console.log('🚀 handleSaveDraft СТАРТ')
-    console.log('📊 Props:', props)
-    console.log('📝 Form data:', form)
-    console.log('🔍 isEditMode:', isEditMode.value)
-    console.log('📄 initialData status:', props.initialData?.status)
+    // Временная отладка для диагностики
+    console.log('📝 Сохранение черновика:', {
+      isEditMode: isEditMode.value,
+      adId: props.adId,
+      adIdType: typeof props.adId,
+      status: props.initialData?.status,
+      hasInitialData: !!props.initialData,
+      initialDataId: props.initialData?.id
+    })
     
     saving.value = true
     
     // Создаем FormData для отправки файлов
     const formData = new FormData()
+    
+    // ВАЖНО: Если редактируем существующий черновик, передаем его ID
+    // Проверяем все возможные источники ID
+    let adId = null
+    
+    if (props.adId && Number(props.adId) > 0) {
+      adId = Number(props.adId)
+      console.log('✅ ID найден в props.adId:', adId)
+    } else if (props.initialData?.id && Number(props.initialData.id) > 0) {
+      adId = Number(props.initialData.id)
+      console.log('✅ ID найден в props.initialData.id:', adId)
+    }
+    
+    if (adId && adId > 0) {
+      formData.append('ad_id', String(adId))
+      formData.append('id', String(adId)) // Дублируем для надежности
+      console.log('✅ Добавлен ad_id в FormData:', adId)
+    } else {
+      console.log('❌ ID не найден или не валидный. props.adId:', props.adId, 'initialData.id:', props.initialData?.id)
+    }
     
     // Добавляем все обычные поля
     formData.append('category', props.category || '')
@@ -386,44 +422,22 @@ export function useAdFormModel(props: any, emit: any) {
       formData.append('video', '[]')
     }
     
-    // Если редактируем существующий черновик - передаем его ID
-    if (isEditMode.value) {
-      formData.append('id', props.adId.toString())
-    }
-    
-    // Определяем URL в зависимости от статуса объявления
-    let url = '/ads/draft'
-    
-    // Если это активное объявление, используем другой endpoint
-    if (props.initialData?.status === 'active') {
-      url = `/ads/${props.adId}`
-      formData.append('_method', 'PUT')  // HTTP method spoofing для активных
-      console.log('🔄 Активное объявление - используем PUT метод')
-    } else {
-      console.log('📝 Черновик - используем обычный POST')
-    }
-    
-    console.log('🌐 URL для запроса:', url)
-    console.log('📦 FormData содержимое:')
-    for (let [key, value] of formData.entries()) {
-      console.log(`  ${key}: ${value}`)
-    }
-    
-    // Используем router.post с FormData
-    router.post(url, formData as any, {
+    // ВСЕГДА используем POST /draft для черновиков
+    // Контроллер сам определит - создавать новый или обновить существующий
+    router.post('/draft', formData as any, {
       preserveScroll: true,
       forceFormData: true,
       onStart: () => {
-        console.log('🔄 Запрос НАЧАЛСЯ')
+        // Debug log removed
       },
       onSuccess: (page) => {
-        console.log('✅ Запрос УСПЕШЕН', page)
+        // Debug log removed
       },
       onError: (errors) => {
-        console.error('❌ Ошибка запроса:', errors)
+        // Обработка ошибки
       },
       onFinish: () => {
-        console.log('🏁 Запрос ЗАВЕРШЕН')
+        // Debug log removed
         saving.value = false
       }
     })
@@ -451,7 +465,7 @@ export function useAdFormModel(props: any, emit: any) {
     router.post('/ads/publish', publishData, {
       preserveScroll: true,
       onError: (errorResponse: any) => {
-        console.error('Ошибка публикации объявления:', errorResponse)
+        // Обработка ошибки
         errors.value = errorResponse
       },
       onFinish: () => {
@@ -472,7 +486,7 @@ export function useAdFormModel(props: any, emit: any) {
       try {
         localStorage.setItem('adFormData', JSON.stringify(newValue))
       } catch (e) {
-        console.error('Error saving form data:', e)
+        // Молча игнорируем ошибку сохранения
       }
     }, { deep: true })
   }

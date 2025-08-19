@@ -1,6 +1,15 @@
 <template>
-  <div class="parameters-section">
-    <div class="parameters-fields">
+  <div class="bg-white rounded-lg p-5">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <BaseInput
+        v-model="localTitle"
+        name="title"
+        type="text"
+        label="Имя"
+        placeholder="Введите ваше имя"
+        @update:modelValue="emitAll"
+        :error="errors.title"
+      />
       <BaseInput
         v-if="showAge"
         v-model="localAge"
@@ -80,6 +89,7 @@ import { ref, watch, computed } from 'vue'
 import BaseInput from '@/src/shared/ui/atoms/BaseInput/BaseInput.vue'
 import BaseSelect from '@/src/shared/ui/atoms/BaseSelect/BaseSelect.vue'
 const props = defineProps({
+  title: { type: String, default: '' },
   age: { type: [String, Number], default: '' },
   height: { type: [String, Number], default: '' },
   weight: { type: [String, Number], default: '' },
@@ -95,7 +105,8 @@ const props = defineProps({
   showEyeColor: { type: Boolean, default: true },
   showNationality: { type: Boolean, default: true }
 })
-const emit = defineEmits(['update:age', 'update:height', 'update:weight', 'update:breastSize', 'update:hairColor', 'update:eyeColor', 'update:nationality'])
+const emit = defineEmits(['update:title', 'update:age', 'update:height', 'update:weight', 'update:breastSize', 'update:hairColor', 'update:eyeColor', 'update:nationality'])
+const localTitle = ref(props.title)
 const localAge = ref(props.age)
 const localHeight = ref(props.height)
 const localWeight = ref(props.weight)
@@ -155,6 +166,7 @@ const nationalityOptions = computed(() => [
   { value: 'other', label: 'Другая' }
 ])
 
+watch(() => props.title, val => { localTitle.value = val })
 watch(() => props.age, val => { localAge.value = val })
 watch(() => props.height, val => { localHeight.value = val })
 watch(() => props.weight, val => { localWeight.value = val })
@@ -163,6 +175,7 @@ watch(() => props.hairColor, val => { localHairColor.value = val })
 watch(() => props.eyeColor, val => { localEyeColor.value = val })
 watch(() => props.nationality, val => { localNationality.value = val })
 const emitAll = () => {
+  emit('update:title', localTitle.value)
   emit('update:age', localAge.value)
   emit('update:height', localHeight.value)
   emit('update:weight', localWeight.value)
@@ -173,23 +186,4 @@ const emitAll = () => {
 }
 </script>
 
-<style scoped>
-.parameters-section { 
-  background: white; 
-  border-radius: 8px; 
-  padding: 20px; 
-}
-
-.form-group-title { 
-  font-size: 18px; 
-  font-weight: 600; 
-  color: #333; 
-  margin-bottom: 16px; 
-}
-
-.parameters-fields { 
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-}
-</style> 
+<!-- Все стили мигрированы на Tailwind CSS в template --> 

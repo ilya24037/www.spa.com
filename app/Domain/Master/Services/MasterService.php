@@ -182,11 +182,4 @@ class MasterService implements MasterServiceInterface
         return $this->searchService->updateRating($master);
     }
 
-    /**
-     * Найти мастера с отношениями
-     */
-    public function findWithRelations(int $id)
-    {
-        return $this->searchService->findWithRelations($id);
-    }
 }

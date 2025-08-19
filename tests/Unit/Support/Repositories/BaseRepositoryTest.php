@@ -248,6 +248,66 @@ class BaseRepositoryTest extends TestCase
 class TestRepository extends BaseRepository
 {
     // Конкретная реализация для тестов
+    
+    public function paginate(int $perPage = 15): \Illuminate\Pagination\LengthAwarePaginator
+    {
+        return $this->model->paginate($perPage);
+    }
+    
+    public function findBy(string $field, $value): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->model->where($field, $value)->get();
+    }
+    
+    public function findOneBy(string $field, $value): ?Model
+    {
+        return $this->model->where($field, $value)->first();
+    }
+    
+    public function whereIn(string $field, array $values): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->model->whereIn($field, $values)->get();
+    }
+    
+    public function whereBetween(string $field, array $values): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->model->whereBetween($field, $values)->get();
+    }
+    
+    public function orderBy(string $field, string $direction = 'asc'): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->model->orderBy($field, $direction)->get();
+    }
+    
+    public function with($relations): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->model->with($relations)->get();
+    }
+    
+    public function exists(int $id): bool
+    {
+        return $this->model->where('id', $id)->exists();
+    }
+    
+    public function count(): int
+    {
+        return $this->model->count();
+    }
+    
+    public function where(string $field, $operator, $value = null): \Illuminate\Database\Eloquent\Collection
+    {
+        // Если value не передан, то operator является значением для сравнения '='
+        if ($value === null) {
+            $value = $operator;
+            $operator = '=';
+        }
+        return $this->model->where($field, $operator, $value)->get();
+    }
+    
+    public function updateOrCreate(array $attributes, array $values = []): Model
+    {
+        return $this->model->updateOrCreate($attributes, $values);
+    }
 }
 
 // Тестовая модель для тестов

@@ -14,5 +14,6 @@ class VerifyCsrfToken extends Middleware
     protected $except = [
         'masters/*/upload/photos/test',
         'api/*',
+        'test-draft', // Тестовый маршрут для проверки исправления черновиков
     ];
 } 

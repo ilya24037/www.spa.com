@@ -67,7 +67,7 @@ class AdCacheStrategy implements CacheStrategyInterface
     {
         if ($data instanceof Ad) {
             // Предзагружаем связи для кеширования
-            $data->load(['user', 'masterProfile', 'photos', 'services']);
+            $data->load(['user', 'masterProfile']);
             
             // Удаляем чувствительные данные для кеширования
             $cached = $data->toArray();

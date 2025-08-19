@@ -178,7 +178,7 @@ const detectLocationByBrowser = (): Promise<{ lat: number; lng: number } | null>
         resolve(coords)
       },
       (error) => {
-        console.log('Ошибка геолокации браузера:', error.message)
+        // Debug: Ошибка геолокации браузера
         resolve(null)
       },
       {
@@ -206,13 +206,13 @@ const detectLocationByIP = async (): Promise<{ lat: number; lng: number } | null
     const coords = result.geoObjects.position
     if (coords) {
       const location = { lat: coords[0], lng: coords[1] }
-      console.log('Местоположение определено через IP (Яндекс):', location)
+      // Debug: Местоположение определено через IP (Яндекс)
       return location
     }
     
     return null
   } catch (error) {
-    console.log('Ошибка определения по IP:', error)
+    // Debug: Ошибка определения по IP
     
     // Fallback на внешний сервис
     try {
@@ -224,11 +224,11 @@ const detectLocationByIP = async (): Promise<{ lat: number; lng: number } | null
           lat: data.latitude,
           lng: data.longitude
         }
-        console.log('Местоположение определено через ipapi.co:', location, 'Город:', data.city)
+        // Debug: Местоположение определено через ipapi.co
         return location
       }
     } catch (err) {
-      console.log('Ошибка ipapi.co:', err)
+      // Debug: Ошибка ipapi.co
     }
     
     return null
@@ -241,7 +241,7 @@ const detectInitialLocation = async (): Promise<{ lat: number; lng: number }> =>
   if (props.modelValue) {
     const [lat, lng] = props.modelValue.split(',').map(Number)
     if (!isNaN(lat) && !isNaN(lng)) {
-      console.log('Используем сохраненные координаты:', { lat, lng })
+      // Debug: Используем сохраненные координаты
       return { lat, lng }
     }
   }
@@ -264,7 +264,7 @@ const detectInitialLocation = async (): Promise<{ lat: number; lng: number }> =>
   }
   
   // Fallback на дефолтные координаты
-  console.log('Используем координаты по умолчанию (Пермь)')
+  // Debug: Используем координаты по умолчанию (Пермь)
   return props.center
 }
 
@@ -353,7 +353,7 @@ const searchAddress = async (address: string) => {
   
   // Проверяем готовность карты
   if (!mapReady.value || !window.ymaps || !map || !placemark) {
-    console.log('Карта еще не готова, запрос добавлен в очередь')
+    // Debug: Карта еще не готова, запрос добавлен в очередь
     pendingSearchRequest = address
     emit('search-error', 'Карта загружается, попробуйте через секунду')
     return
@@ -440,7 +440,7 @@ const centerOnUserLocation = async () => {
         emit('address-found', address, location)
       }
     } else {
-      console.log('Не удалось определить местоположение')
+      // Debug: Не удалось определить местоположение
     }
   } catch (error) {
     console.error('Ошибка при определении местоположения:', error)

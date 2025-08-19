@@ -172,6 +172,7 @@
                   <label class="block text-sm font-medium mb-2">РўРµР»РµС„РѕРЅ *</label>
                   <input 
                     v-model="form.client_phone"
+                    v-maska="'+7 (###) ###-##-##'"
                     type="tel"
                     class="w-full border-gray-500 rounded-lg"
                     placeholder="+7 (999) 123-45-67"
@@ -349,6 +350,7 @@ import { route } from 'ziggy-js'
 
 import { ref, computed, onMounted } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
+import { vMaska } from 'maska/vue'
 import { StarIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/solid'
 import { format, addDays, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isToday, isSameMonth } from 'date-fns'
 

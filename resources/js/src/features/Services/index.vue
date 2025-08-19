@@ -14,7 +14,7 @@
       </div>
     </div>
     <div class="services-categories">
-      <!-- Основные услуги (всегда развернуты) -->
+      <!-- Популярные услуги (всегда развернуты) -->
       <ServiceCategory
         v-if="mainCategory"
         :key="mainCategory.id"
@@ -26,7 +26,7 @@
       
       <!-- Дополнительные услуги (свернуты по умолчанию) -->
       <div v-if="additionalCategories.length > 0" class="service-category mb-6">
-        <div class="category-header mb-3 cursor-pointer select-none hover:bg-gray-50 rounded-lg p-2 -mx-2 transition-colors" @click="toggleAdditionalServices">
+        <div class="border border-gray-200 rounded-lg px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors duration-200 mb-3 cursor-pointer select-none" @click="toggleAdditionalServices">
           <div class="flex items-center justify-between">
             <h3 class="text-base font-semibold text-gray-900 flex items-center">
               Дополнительные услуги
@@ -138,7 +138,7 @@ const localServices = reactive<Record<string, Record<string, ServiceData>>>({})
 // Состояние раскрытия дополнительных услуг
 const isAdditionalExpanded = ref(false)
 
-// Основная категория (Основные услуги)
+// Основная категория (Популярные услуги)
 const mainCategory = computed(() => {
   return filteredCategories.value.find(cat => cat.id === 'intimate_services')
 })
@@ -205,6 +205,7 @@ const clearAllServices = () => {
   emitAll()
 }
 
+
 // Обработчик изменений категории
 const updateCategory = (categoryId: string, categoryData: Record<string, ServiceData>) => {
   localServices[categoryId] = { ...categoryData }
@@ -227,6 +228,10 @@ const emitAll = () => {
 }
 
 // Инициализация
+// 1. Сначала инициализируем структуру всех категорий
+initializeServicesData()
+
+// 2. Затем загружаем сохраненные данные из props
 if (props.services && typeof props.services === 'object') {
   Object.keys(props.services).forEach(categoryId => {
     if (!localServices[categoryId]) localServices[categoryId] = {}
@@ -235,30 +240,6 @@ if (props.services && typeof props.services === 'object') {
     })
   })
 }
-initializeServicesData()
 </script>
 
-<style scoped>
-.services-module {}
-.module-header {}
-.category-filters {}
-.services-categories {}
-.additional-info {}
-.services-stats {}
-
-.additional-services-wrapper {
-  margin-top: 24px;
-}
-
-.category-header {
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 12px 16px;
-  background: #f9fafb;
-  transition: background-color 0.2s;
-}
-
-.category-header:hover {
-  background: #f3f4f6;
-}
-</style>
+<!-- Все стили мигрированы на Tailwind CSS в template -->

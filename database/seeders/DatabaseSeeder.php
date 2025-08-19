@@ -9,6 +9,8 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            UsersSeeder::class,
+            AdsSeeder::class,
             MassageCategorySeeder::class, // Добавьте эту строку ПЕРЕД MasterSeeder
             MasterSeeder::class,
         ]);

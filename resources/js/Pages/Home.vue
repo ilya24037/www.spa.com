@@ -64,8 +64,8 @@
             
             <!-- Панель информации о выбранном мастере -->
             <transition name="slide-up">
-              <div v-if="mapSelectedMaster" class="map-master-info">
-                <button @click="mapSelectedMaster = null" class="close-btn">
+              <div v-if="mapSelectedMaster" class="absolute bottom-5 left-5 right-5 max-w-[400px] bg-white rounded-xl p-4 shadow-xl z-10 sm:left-5 sm:right-5 sm:max-w-none">
+                <button @click="mapSelectedMaster = null" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-gray-100 border-0 flex items-center justify-center cursor-pointer transition-colors hover:bg-gray-200 z-10">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -380,12 +380,12 @@ const handleViewChange = (newView: GridView) => {
 // Методы для работы с фильтрами
 const handleCategoryToggle = (categoryId: string, checked: boolean) => {
   // Логика переключения категории
-  console.log('Toggle category:', categoryId, checked)
+  // Debug: Toggle category
 }
 
 const handleFiltersReset = () => {
   // Логика сброса фильтров
-  console.log('Reset filters')
+  // Debug: Reset filters
 }
 
 // Initialize favorites on mount (only if authenticated)
@@ -404,49 +404,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Стили специфичные для главной страницы */
-.map-section {
-  position: relative;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.map-master-info {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  right: 20px;
-  max-width: 400px;
-  background: white;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  z-index: 10;
-}
-
-.close-btn {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #f3f4f6;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.2s;
-  z-index: 1;
-}
-
-.close-btn:hover {
-  background: #e5e7eb;
-}
-
-/* Анимация появления панели */
+/* Анимация появления панели с мастером на карте */
 .slide-up-enter-active,
 .slide-up-leave-active {
   transition: transform 0.3s ease, opacity 0.3s ease;
@@ -458,11 +416,5 @@ onMounted(() => {
   opacity: 0;
 }
 
-@media (max-width: 640px) {
-  .map-master-info {
-    left: 10px;
-    right: 10px;
-    max-width: none;
-  }
-}
+/* Остальные стили мигрированы на Tailwind CSS в template */
 </style>

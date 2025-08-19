@@ -47,8 +47,19 @@ class AppServiceProvider extends ServiceProvider
         
         // Регистрация интеграционных сервисов
         $this->app->singleton(\App\Application\Services\Integration\UserMasterIntegrationService::class);
+        
+        // Регистрация новых Review сервисов (после рефакторинга)
+        $this->app->singleton(\App\Application\Services\Integration\ReviewValidator::class);
+        $this->app->singleton(\App\Application\Services\Integration\UserReviewsReader::class);
+        $this->app->singleton(\App\Application\Services\Integration\UserReviewsWriter::class);
         $this->app->singleton(\App\Application\Services\Integration\UserReviewsIntegrationService::class);
+        
         $this->app->singleton(\App\Application\Services\Integration\UserFavoritesIntegrationService::class);
+        $this->app->singleton(\App\Application\Services\Integration\UserAdsIntegrationService::class);
+        $this->app->singleton(\App\Application\Services\Integration\UserBookingIntegrationService::class);
+        
+        // Регистрация UserIntegrationService (заменяет Integration трейты)
+        $this->app->singleton(\App\Domain\User\Services\UserIntegrationService::class);
 
         // Регистрация User сервисов
         $this->registerUserServices();
@@ -85,6 +96,9 @@ class AppServiceProvider extends ServiceProvider
         
         // AdDraftService
         $this->app->singleton(\App\Domain\Ad\Services\AdDraftService::class);
+        
+        // DraftService (для исправления дублирования черновиков)
+        $this->app->singleton(\App\Domain\Ad\Services\DraftService::class);
         
         // AdModerationService
         $this->app->singleton(\App\Domain\Ad\Services\AdModerationService::class);

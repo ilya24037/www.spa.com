@@ -89,6 +89,16 @@ class MasterProfile extends Model
     {
         return $this->hasMany(\App\Domain\Media\Models\Video::class, 'master_profile_id');
     }
+    
+    public function services(): HasMany
+    {
+        return $this->hasMany(\App\Domain\Master\Models\MasterService::class, 'master_profile_id');
+    }
+    
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(\App\Domain\Review\Models\Review::class, 'master_profile_id');
+    }
 
     public function schedules(): HasMany
     {

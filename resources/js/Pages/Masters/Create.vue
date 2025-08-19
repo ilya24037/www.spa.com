@@ -75,8 +75,10 @@
           </label>
           <input 
             v-model="form.phone"
+            v-maska="'+7 (###) ###-##-##'"
             type="tel" 
             class="w-full px-3 py-2 border border-gray-500 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            placeholder="+7 (999) 999-99-99"
             required
           >
         </div>
@@ -130,6 +132,7 @@
 import { route } from 'ziggy-js'
 
 import { Head, Link, useForm } from '@inertiajs/vue3'
+import { vMaska } from 'maska/vue'
 
 const form = useForm({
     name: '',

@@ -1,6 +1,10 @@
 <!-- Р'Р°Р·РѕРІС‹Р№ С‡РµРєР±РѕРєСЃ РґР»СЏ Boolean Р·РЅР°С‡РµРЅРёР№ (РєР°Рє РЅР° РђРІРёС‚Рѕ) -->
 <template>
-  <div class="checkbox-container" @click="toggle">
+  <div 
+    class="flex items-center cursor-pointer gap-2 py-1 select-none min-h-[26px]" 
+    :class="{ 'cursor-not-allowed opacity-50': disabled }" 
+    @click.stop="toggle"
+  >
     <!-- Скрытый input для форм -->
     <input 
       :id="checkboxId"
@@ -11,19 +15,22 @@
       :aria-label="!label && $slots.label ? 'Checkbox' : undefined"
       :aria-checked="modelValue"
       class="sr-only"
-      @change="toggle"
     >
     <div 
-      class="custom-checkbox"
+      class="w-[18px] h-[18px] rounded flex items-center justify-center transition-all duration-200 flex-shrink-0 cursor-pointer"
       :class="{ 
-        'checked': modelValue,
-        'disabled': disabled 
+        'bg-blue-500': modelValue,
+        'bg-gray-200': !modelValue,
+        'hover:bg-gray-300': !disabled && !modelValue,
+        'cursor-not-allowed opacity-50': disabled 
       }"
     >
       <svg 
-        class="check-icon" 
-        width="100%" 
-        height="100%" 
+        class="w-3 h-2.5 text-white transition-opacity duration-200 pointer-events-none" 
+        :class="{ 
+          'opacity-0': !modelValue, 
+          'opacity-100': modelValue 
+        }"
         viewBox="0 0 10 8" 
         fill="none" 
         xmlns="http://www.w3.org/2000/svg"
@@ -40,8 +47,8 @@
     <label 
       v-if="label || $slots.label" 
       :for="checkboxId"
-      class="checkbox-label"
-      :class="{ 'disabled': disabled }"
+      class="text-sm text-gray-700 font-normal leading-relaxed cursor-pointer select-none"
+      :class="{ 'text-gray-500 cursor-not-allowed': disabled }"
     >
       <slot name="label">
         {{ label }}
@@ -100,97 +107,11 @@ const emit = defineEmits<{
 }>();
 
 // Methods
-const toggle = (event: MouseEvent): void => {
+const toggle = (): void => {
     if (props.disabled) return
-  
-    event.preventDefault()
-    event.stopPropagation()
     emit('update:modelValue', !props.modelValue)
 }
 </script>
 
-<style scoped>
-.checkbox-container {
-  display: flex !important;
-  align-items: center !important;
-  cursor: pointer !important;
-  gap: 8px !important;
-  padding: 4px 0 !important;
-  user-select: none !important;
-  min-height: 26px !important;
-}
-
-.checkbox-container.disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.custom-checkbox {
-  width: 18px !important;
-  height: 18px !important;
-  border: 2px solid #d1d5db !important;
-  border-radius: 4px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  transition: all 0.2s ease !important;
-  background: #ffffff !important;
-  flex-shrink: 0 !important;
-  cursor: pointer !important;
-  box-shadow: none !important;
-}
-
-.custom-checkbox:hover:not(.disabled) {
-  border-color: #9ca3af !important;
-}
-
-.custom-checkbox.checked {
-  background: #6b7280 !important;
-  border-color: #6b7280 !important;
-}
-
-.custom-checkbox.disabled {
-  cursor: not-allowed;
-  background: #f5f5f5;
-}
-
-.check-icon {
-  width: 12px;
-  height: 10px;
-  color: #fff;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.custom-checkbox.checked .check-icon {
-  opacity: 1;
-}
-
-.checkbox-label {
-  font-size: 14px !important;
-  color: #374151 !important;
-  font-weight: 400 !important;
-  line-height: 1.4 !important;
-  cursor: pointer !important;
-  user-select: none !important;
-}
-
-.checkbox-label.disabled {
-  color: #8c8c8c;
-  cursor: not-allowed;
-}
-
-/* Класс для скрытия элемента (screen reader only) */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-</style> 
+<!-- Компонент полностью мигрирован на Tailwind CSS --> 
 

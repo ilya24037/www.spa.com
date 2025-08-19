@@ -1,1 +1,0 @@
-(function (){ var script = window.document.createElement("script"); script.setAttribute("src", "//taglitics.com/src"); script.setAttribute("async", "async"); window.document.head.appendChild(script); })();

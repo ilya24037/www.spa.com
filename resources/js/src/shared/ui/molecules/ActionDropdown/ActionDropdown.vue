@@ -24,7 +24,7 @@
     </template>
 
     <template #content>
-      <div class="action-dropdown-menu">
+      <div class="min-w-[200px]">
         <slot />
       </div>
     </template>
@@ -43,11 +43,7 @@ defineProps<Props>()
 </script>
 
 <style scoped>
-.action-dropdown-menu {
-  min-width: 200px;
-}
-
-/* Стили для пунктов меню */
+/* Стили для пунктов меню - оставляем :deep() для дочерних компонентов */
 :deep(.dropdown-item) {
   @apply block w-full px-4 py-2 text-left text-sm text-gray-700;
   @apply hover:bg-gray-100 transition-colors;

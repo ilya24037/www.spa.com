@@ -195,6 +195,22 @@ class AdRepository extends BaseRepository
             ->limit($limit)
             ->get();
     }
+    
+    /**
+     * Получить активные объявления для главной страницы
+     * 
+     * @param int $limit
+     * @return Collection
+     */
+    public function getActiveForHome(int $limit = 12): Collection
+    {
+        return Ad::where('status', AdStatus::ACTIVE->value)
+            ->whereNotNull('address')
+            ->with(['user']) // Загружаем связь с пользователем для имени
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
+    }
 
     /**
      * Получить недавние объявления

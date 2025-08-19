@@ -2,12 +2,7 @@
 
 namespace App\Domain\User\Models;
 
-use App\Domain\User\Traits\HasAdsIntegration;
-use App\Domain\User\Traits\HasBookingIntegration;
-use App\Domain\User\Traits\HasFavoritesIntegration;
-use App\Domain\User\Traits\HasMasterIntegration;
 use App\Domain\User\Traits\HasProfile;
-use App\Domain\User\Traits\HasReviewsIntegration;
 use App\Domain\User\Traits\HasRoles;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
@@ -18,14 +13,15 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
- * Основная модель пользователя (только authentication)
- * Согласно карте рефакторинга - 100 строк
+ * Основная модель пользователя (Clean Architecture V2)
+ * ✅ Убраны Integration трейты (10 → 2)
+ * ✅ Интеграция с доменами через UserIntegrationService
+ * ✅ Соблюдается Single Responsibility Principle
  */
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
-    use HasRoles, HasProfile, HasBookingIntegration, HasMasterIntegration;
-    use HasFavoritesIntegration, HasReviewsIntegration, HasAdsIntegration;
+    use HasRoles, HasProfile;
 
     /**
      * The attributes that are mass assignable.
@@ -81,14 +77,79 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(UserSettings::class);
     }
 
-    // ✅ DDD РЕФАКТОРИНГ ЗАВЕРШЕН:
+    /**
+     * Связь с объявлениями пользователя
+     */
+    public function ads()
+    {
+        return $this->hasMany(\App\Domain\Ad\Models\Ad::class);
+    }
+
+    // ✅ АРХИТЕКТУРНЫЙ РЕФАКТОРИНГ ЗАВЕРШЕН (V2):
     // - HasRoles: методы ролей и разрешений
-    // - HasProfile: профиль и настройки пользователя  
-    // - HasBookingIntegration: интеграция с бронированиями через события
-    // - HasMasterIntegration: интеграция с мастерами через события
-    // - HasFavoritesIntegration: интеграция с избранным через события
-    // - HasReviewsIntegration: интеграция с отзывами через события  
-    // - HasAdsIntegration: интеграция с объявлениями через события
-    // - Удалены прямые связи с другими доменами
-    // - Используются Integration Services для взаимодействия
+    // - HasProfile: профиль и настройки пользователя
+    // - УБРАНЫ Integration трейты (заменены на UserIntegrationService)
+    // - Соблюдается Single Responsibility Principle
+    // - Уменьшение Cognitive Load с 10 до 2 трейтов
+    // - Clean Architecture: композиция через сервисы вместо трейтов
+    
+    /**
+     * Получить сервис интеграции пользователя
+     * Заменяет Integration трейты
+     */
+    public function integration()
+    {
+        return app(\App\Domain\User\Services\UserIntegrationService::class);
+    }
+    
+    // ======== DEPRECATED МЕТОДЫ ДЛЯ ОБРАТНОЙ СОВМЕСТИМОСТИ ========
+    // Постепенно удалим после рефакторинга всех вызовов
+    
+    /**
+     * @deprecated Используйте integration()->getAds($user)
+     */
+    public function getAds()
+    {
+        return $this->integration()->getAds($this);
+    }
+    
+    /**
+     * @deprecated Используйте integration()->getActiveAds($user)
+     */
+    public function getActiveAds()
+    {
+        return $this->integration()->getActiveAds($this);
+    }
+    
+    /**
+     * @deprecated Используйте integration()->getBookings($user)
+     */
+    public function getBookings()
+    {
+        return $this->integration()->getBookings($this);
+    }
+    
+    /**
+     * @deprecated Используйте integration()->getFavoriteMasters($user)
+     */
+    public function getFavoriteMasters()
+    {
+        return $this->integration()->getFavoriteMasters($this);
+    }
+    
+    /**
+     * @deprecated Используйте integration()->getMasterProfile($user)
+     */
+    public function getMasterProfile()
+    {
+        return $this->integration()->getMasterProfile($this);
+    }
+    
+    /**
+     * @deprecated Используйте integration()->getReceivedReviews($user)
+     */
+    public function getReceivedReviews()
+    {
+        return $this->integration()->getReceivedReviews($this);
+    }
 }

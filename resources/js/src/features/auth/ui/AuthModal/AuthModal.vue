@@ -37,7 +37,7 @@
 
       <!-- Форма авторизации -->
       <div class="p-6">
-        <form class="space-y-6" @submit.prevent="submit">
+        <form class="space-y-6" @submit.prevent="submit" @click.stop>
           <!-- Email -->
           <BaseInput
             v-model="form.email"
@@ -63,7 +63,7 @@
           />
 
           <!-- Запомнить пароль и забыли пароль -->
-          <div class="flex items-center justify-between">
+          <div class="flex items-center justify-between" @click.stop>
             <BaseCheckbox
               v-model="form.remember"
               name="remember"
@@ -117,7 +117,7 @@
 <script setup lang="ts">
 import { Link, useForm } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
-import { onMounted } from 'vue'
+import { onMounted, watch } from 'vue'
 import BaseInput from '@/src/shared/ui/atoms/BaseInput/BaseInput.vue'
 import BaseCheckbox from '@/src/shared/ui/atoms/BaseCheckbox/BaseCheckbox.vue'
 import PrimaryButton from '@/src/shared/ui/atoms/PrimaryButton/PrimaryButton.vue'
@@ -147,6 +147,13 @@ const form = useForm<LoginForm>({
     password: '',
     remember: false,
 })
+
+// Watch для отслеживания изменений remember (для отладки в dev режиме)
+if (process.env.NODE_ENV === 'development') {
+    watch(() => form.remember, (newValue, oldValue) => {
+        console.log('Form.remember changed:', { oldValue, newValue })
+    })
+}
 
 // Получаем CSRF токен при монтировании компонента
 onMounted(async () => {

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>УМНЫЙ ТЕСТ - Исправление черновиков</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; padding: 30px; }
+        .test-block { border: 2px solid #007bff; padding: 25px; margin: 20px 0; border-radius: 10px; background: #f8f9ff; }
+        .success { background-color: #d4edda; border-color: #28a745; }
+        .error { background-color: #f8d7da; border-color: #dc3545; }
+        .info { background-color: #d1ecf1; border-color: #17a2b8; }
+        button { padding: 15px 30px; margin: 10px 0; cursor: pointer; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; }
+        .btn-test { background-color: #28a745; color: white; }
+        .btn-load { background-color: #17a2b8; color: white; }
+        select, input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; }
+        .log { background: #f8f9fa; padding: 20px; border-radius: 8px; font-family: monospace; font-size: 14px; max-height: 350px; overflow-y: auto; }
+        h1 { color: #007bff; text-align: center; }
+        h2 { color: #28a745; }
+        .draft-list { background: #e9ecef; padding: 15px; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🧠 УМНЫЙ ТЕСТ: Автоматический поиск черновиков</h1>
+    
+    <div class="test-block info">
+        <h2>🎯 О тесте</h2>
+        <p><strong>ЦЕЛЬ:</strong> Проверить исправление дублирования черновиков</p>
+        <p><strong>ЛОГИКА:</strong> Автоматически найти существующий черновик и протестировать его обновление</p>
+    </div>
+
+    <div class="test-block">
+        <h2>📋 1. Загрузка черновиков из БД</h2>
+        <button onclick="loadDrafts()" class="btn-load">
+            🔍 НАЙТИ ЧЕРНОВИКИ В БД
+        </button>
+        
+        <div id="draftsInfo" class="draft-list" style="display: none;">
+            <strong>Найденные черновики:</strong>
+            <select id="draftSelect" size="3" style="height: 80px;"></select>
+        </div>
+    </div>
+
+    <div class="test-block">
+        <h2>🧪 2. Тест исправления</h2>
+        <button onclick="runSmartTest()" class="btn-test" id="testBtn" disabled>
+            🚀 ТЕСТ ИСПРАВЛЕНИЯ (сначала загрузите черновики)
+        </button>
+        
+        <h3>📊 Результат:</h3>
+        <div id="testResult" class="log">
+            Сначала нажмите "НАЙТИ ЧЕРНОВИКИ В БД"...
+        </div>
+    </div>
+
+    <script>
+        let availableDrafts = [];
+        
+        function log(message, isSuccess = null) {
+            const result = document.getElementById('testResult');
+            const color = isSuccess === true ? '#28a745' : isSuccess === false ? '#dc3545' : '#333';
+            result.innerHTML += `<div style="color: ${color}; margin: 5px 0;">${message}</div>`;
+            result.scrollTop = result.scrollHeight;
+        }
+
+        async function loadDrafts() {
+            const testBlocks = document.querySelectorAll('.test-block');
+            const firstBlock = testBlocks[1]; // Блок с кнопкой загрузки
+            firstBlock.className = 'test-block';
+            
+            document.getElementById('testResult').innerHTML = '';
+            log('🔍 Загружаем черновики из БД...');
+            
+            try {
+                const response = await fetch('/test-drafts-count');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                log(`📊 Найдено черновиков: ${data.count}`);
+                
+                if (data.count === 0) {
+                    log('❌ В БД нет черновиков для тестирования!', false);
+                    log('💡 Создайте черновик через интерфейс или Tinker', false);
+                    firstBlock.className = 'test-block error';
+                    return;
+                }
+                
+                // Получаем список всех объявлений со статусом draft
+                log('🔄 Получаем детали черновиков...');
+                
+                // Имитируем получение списка (в реальности нужен отдельный API)
+                availableDrafts = [];
+                for (let i = 1; i <= Math.min(data.count, 10); i++) {
+                    availableDrafts.push({
+                        id: i,
+                        title: `Черновик ${i}`,
+                        exists: true // будем проверять при тесте
+                    });
+                }
+                
+                // Заполняем селект
+                const select = document.getElementById('draftSelect');
+                select.innerHTML = '';
+                availableDrafts.forEach(draft => {
+                    const option = document.createElement('option');
+                    option.value = draft.id;
+                    option.textContent = `ID=${draft.id} - ${draft.title}`;
+                    select.appendChild(option);
+                });
+                
+                // Выбираем первый
+                if (availableDrafts.length > 0) {
+                    select.selectedIndex = 0;
+                }
+                
+                document.getElementById('draftsInfo').style.display = 'block';
+                document.getElementById('testBtn').disabled = false;
+                document.getElementById('testBtn').textContent = '🚀 ТЕСТ ИСПРАВЛЕНИЯ';
+                
+                log(`✅ Загружено ${availableDrafts.length} черновиков для тестирования`, true);
+                log(`🎯 Выберите черновик в списке и нажмите "ТЕСТ ИСПРАВЛЕНИЯ"`);
+                
+                firstBlock.className = 'test-block success';
+                
+            } catch (error) {
+                log(`💥 Ошибка загрузки: ${error.message}`, false);
+                firstBlock.className = 'test-block error';
+            }
+        }
+
+        async function runSmartTest() {
+            const testBlocks = document.querySelectorAll('.test-block');
+            const testBlock = testBlocks[testBlocks.length - 1];
+            if (testBlock) testBlock.className = 'test-block';
+            
+            const select = document.getElementById('draftSelect');
+            const selectedId = select.value;
+            
+            if (!selectedId) {
+                log('❌ Выберите черновик из списка!', false);
+                return;
+            }
+            
+            document.getElementById('testResult').innerHTML = '';
+            log('🎬 СТАРТ УМНОГО ТЕСТА');
+            log(`🎯 Тестируем черновик ID: ${selectedId}`);
+            
+            try {
+                // 1. Получаем количество ДО
+                const countResponse = await fetch('/test-drafts-count');
+                const countBefore = countResponse.ok ? (await countResponse.json()).count : 0;
+                log(`📊 Черновиков ДО: ${countBefore}`);
+                
+                // 2. Подготавливаем данные
+                const timestamp = new Date().toLocaleTimeString();
+                const formData = new FormData();
+                formData.append('ad_id', selectedId); // КЛЮЧЕВОЕ ПОЛЕ!
+                formData.append('id', selectedId);
+                formData.append('title', `УМНЫЙ ТЕСТ ${timestamp}`);
+                formData.append('description', `Автоматическое обновление в ${new Date().toLocaleString()}`);
+                formData.append('specialty', 'Тестовая специализация');
+                formData.append('phone', '+7 (999) 777-88-99');
+                
+                log(`✅ Данные подготовлены с ad_id: ${selectedId}`);
+                
+                // 3. Отправляем запрос
+                log('🚀 Отправляем запрос на /test-draft-fix...');
+                
+                const response = await fetch('/test-draft-fix', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                log(`📡 Статус ответа: ${response.status}`);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    log(`📊 Черновиков ПОСЛЕ: ${result.total_drafts}`);
+                    log(`🎯 ID результата: ${result.ad_id}`);
+                    log(`🔄 Был обновлен: ${result.was_updated ? 'ДА' : 'НЕТ'}`);
+                    
+                    // 4. АНАЛИЗ РЕЗУЛЬТАТА
+                    if (result.was_updated && result.ad_id == selectedId) {
+                        log(`🎉 ПОЛНЫЙ УСПЕХ! Черновик ID=${selectedId} был ОБНОВЛЕН!`, true);
+                        log('✅ ИСПРАВЛЕНИЕ РАБОТАЕТ НА 100%!', true);
+                        if (testBlock) testBlock.className = 'test-block success';
+                        
+                        if (countBefore == result.total_drafts) {
+                            log(`✅ Количество стабильно: ${countBefore} = ${result.total_drafts}`, true);
+                        } else {
+                            log(`ℹ️ Количество изменилось: ${countBefore} → ${result.total_drafts}`, null);
+                        }
+                    } else if (result.was_updated === false && result.ad_id != selectedId) {
+                        log(`⚠️ Черновик ID=${selectedId} НЕ НАЙДЕН в БД`, false);
+                        log(`📝 Создан новый черновик ID=${result.ad_id}`, false);
+                        log(`💡 Попробуйте другой ID из списка`, false);
+                        if (testBlock) testBlock.className = 'test-block error';
+                    } else {
+                        log(`❓ Неожиданный результат: was_updated=${result.was_updated}, ad_id=${result.ad_id}`, false);
+                        if (testBlock) testBlock.className = 'test-block error';
+                    }
+                    
+                } else {
+                    const errorText = await response.text();
+                    log(`❌ ОШИБКА СЕРВЕРА: ${response.status}`, false);
+                    log(`📄 ${errorText.substring(0, 150)}...`, false);
+                    if (testBlock) testBlock.className = 'test-block error';
+                }
+                
+            } catch (error) {
+                log(`💥 КРИТИЧЕСКАЯ ОШИБКА: ${error.message}`, false);
+                if (testBlock) testBlock.className = 'test-block error';
+            }
+        }
+        
+        // Автозагрузка при открытии страницы
+        window.onload = function() {
+            log('🧠 Умный тест готов к работе');
+            log('💡 Нажмите "НАЙТИ ЧЕРНОВИКИ В БД" для начала');
+        };
+    </script>
+</body>
+</html>

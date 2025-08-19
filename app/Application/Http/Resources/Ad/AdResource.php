@@ -76,8 +76,8 @@ class AdResource extends JsonResource
             // Медиа контент
             'media' => [
                 'main_photo' => $this->main_photo,
-                'photos' => new MediaCollectionResource($this->whenLoaded('photos')),
-                'videos' => new MediaCollectionResource($this->whenLoaded('videos')),
+                'photos' => $this->photos, // JSON поле
+                'videos' => $this->video,  // JSON поле (переименовано в video)
             ],
             
             // Статистика и метрики
@@ -102,9 +102,9 @@ class AdResource extends JsonResource
             // Вычисляемые поля
             'is_active' => $this->isActive(),
             'is_expired' => $this->isExpired(),
-            'is_premium' => $this->isPremium(),
-            'can_book' => $this->canBook(),
-            'url' => route('ads.show', $this->slug),
+            'is_premium' => false, // Заглушка до реализации премиум функционала
+            'can_book' => $this->canBePublished(), // Используем существующий метод
+            'url' => route('ads.show', $this->id), // Используем id вместо slug
             
             // Поля для владельца объявления
             $this->mergeWhen($this->isOwner($request->user()), [

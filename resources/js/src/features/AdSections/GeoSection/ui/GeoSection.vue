@@ -1,19 +1,19 @@
 <template>
-  <div class="geo-section">
+  <div class="bg-white rounded-lg p-6">
     <!-- Заголовок с Badge -->
-    <div class="geo-section__header">
-      <h2 class="geo-section__title">География</h2>
+    <div class="flex items-center gap-3 mb-6">
+      <h2 class="text-2xl font-semibold text-gray-900 m-0">География</h2>
       <Badge text="Новое" variant="primary" size="md" />
     </div>
 
     <!-- Секция адреса -->
-    <div class="geo-section__address">
-      <h3 class="geo-section__subtitle">Ваш адрес</h3>
-      <p class="geo-section__description">
+    <div class="mb-6">
+      <h3 class="text-base font-medium text-gray-900 mb-2">Ваш адрес</h3>
+      <p class="text-sm text-gray-600 leading-relaxed mb-4">
         Клиенты выбирают исполнителя по точному адресу, когда ищут услуги поблизости.
       </p>
       
-      <div class="geo-section__input">
+      <div class="mb-4">
         <AddressInput
           ref="addressInputRef"
           v-model="geoData.address"
@@ -31,7 +31,7 @@
     </div>
 
     <!-- Карта -->
-    <div class="geo-section__map">
+    <div class="mb-6 rounded-lg overflow-hidden">
       <YandexMapPicker
         ref="mapRef"
         v-model="coordinatesString"
@@ -45,13 +45,13 @@
     </div>
 
     <!-- Секция выезда -->
-    <div class="geo-section__outcall">
-      <h3 class="geo-section__subtitle">Куда выезжаете</h3>
-      <p class="geo-section__description">
+    <div class="pt-6 border-t border-gray-200">
+      <h3 class="text-base font-medium text-gray-900 mb-2">Куда выезжаете</h3>
+      <p class="text-sm text-gray-600 leading-relaxed mb-4">
         Укажите все зоны выезда, чтобы клиенты понимали, доберётесь ли вы до них.
       </p>
       
-      <div class="geo-section__radio-group">
+      <div class="flex flex-col gap-2">
         <BaseRadio
           v-model="geoData.outcall"
           value="none"
@@ -76,12 +76,12 @@
       </div>
 
       <!-- Выбор зон (показывается если выбрано "В выбранные зоны") -->
-      <div v-if="geoData.outcall === 'zones'" class="geo-section__zones">
-        <p id="zones-hint" class="geo-section__zones-hint">
+      <div v-if="geoData.outcall === 'zones'" class="mt-4 p-4 bg-gray-100 rounded-lg">
+        <p id="zones-hint" class="text-sm text-gray-600 mb-3">
           Выберите районы, в которые вы готовы выезжать:
         </p>
-        <div class="geo-section__zones-list" role="group" aria-labelledby="zones-hint">
-          <div v-for="zone in availableZones" :key="zone" class="geo-section__zone-checkbox">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" role="group" aria-labelledby="zones-hint">
+          <div v-for="zone in availableZones" :key="zone" class="flex items-center gap-2 text-sm text-gray-900">
             <input
               :id="`zone-${zone.toLowerCase().replace(/\s+/g, '-')}`"
               type="checkbox"
@@ -89,8 +89,9 @@
               :value="zone"
               :checked="geoData.zones.includes(zone)"
               @change="toggleZone(zone)"
+              class="w-4 h-4 border border-gray-300 rounded cursor-pointer flex-shrink-0"
             >
-            <label :for="`zone-${zone.toLowerCase().replace(/\s+/g, '-')}`">
+            <label :for="`zone-${zone.toLowerCase().replace(/\s+/g, '-')}`" class="cursor-pointer select-none transition-colors hover:text-blue-600">
               {{ zone }}
             </label>
           </div>
@@ -285,10 +286,10 @@ const toggleZone = (zone: string) => {
 
 // Новые методы для работы с Яндекс.Картами
 const handleAddressSearch = async (address: string) => {
-  console.log('GeoSection: получен запрос поиска адреса:', address)
+  // Debug log removed
   
   if (!address.trim()) {
-    console.log('GeoSection: адрес пустой, отменяем поиск')
+    // Debug log removed
     return
   }
   
@@ -296,7 +297,7 @@ const handleAddressSearch = async (address: string) => {
   
   try {
     if (mapRef.value && typeof mapRef.value.searchAddress === 'function') {
-      console.log('GeoSection: вызываем searchAddress у карты')
+      // Debug log removed
       await mapRef.value.searchAddress(address)
     } else {
       console.error('GeoSection: mapRef или searchAddress недоступны')
@@ -345,124 +346,4 @@ const emitGeoData = () => {
 }
 </script>
 
-<style scoped>
-.geo-section {
-  background: white;
-  border-radius: 8px;
-  padding: 24px;
-}
-
-.geo-section__header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-.geo-section__title {
-  font-size: 24px;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin: 0;
-}
-
-.geo-section__address {
-  margin-bottom: 24px;
-}
-
-.geo-section__subtitle {
-  font-size: 16px;
-  font-weight: 500;
-  color: #1a1a1a;
-  margin: 0 0 8px 0;
-}
-
-.geo-section__description {
-  font-size: 13px;
-  color: #666;
-  line-height: 1.5;
-  margin: 0 0 16px 0;
-}
-
-.geo-section__input {
-  margin-bottom: 16px;
-}
-
-.geo-section__map {
-  margin-bottom: 24px;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.geo-section__outcall {
-  padding-top: 24px;
-  border-top: 1px solid #e5e5e5;
-}
-
-.geo-section__radio-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.geo-section__zones {
-  margin-top: 16px;
-  padding: 16px;
-  background: #f5f5f5;
-  border-radius: 8px;
-}
-
-.geo-section__zones-hint {
-  font-size: 14px;
-  color: #666;
-  margin: 0 0 12px 0;
-}
-
-.geo-section__zones-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
-}
-
-.geo-section__zone-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: #1a1a1a;
-}
-
-.geo-section__zone-checkbox input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  border: 1px solid #d6d6d6;
-  border-radius: 4px;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.geo-section__zone-checkbox label {
-  cursor: pointer;
-  user-select: none;
-  transition: color 0.2s ease;
-}
-
-.geo-section__zone-checkbox:hover label {
-  color: #0066ff;
-}
-
-/* Адаптивность */
-@media (max-width: 768px) {
-  .geo-section {
-    padding: 16px;
-  }
-  
-  .geo-section__title {
-    font-size: 20px;
-  }
-  
-  .geo-section__zones-list {
-    grid-template-columns: 1fr;
-  }
-}
-</style>
+<!-- Все стили мигрированы на Tailwind CSS в template с адаптивностью -->
