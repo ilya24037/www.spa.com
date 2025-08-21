@@ -82,6 +82,10 @@ class UpdateAdRequest extends FormRequest
             'show_photos_in_gallery' => 'nullable|boolean',
             'allow_download_photos' => 'nullable|boolean',
             'watermark_photos' => 'nullable|boolean',
+            
+            // FAQ
+            'faq' => 'nullable|array',
+            'faq.*' => 'nullable',
         ];
     }
 

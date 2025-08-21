@@ -97,23 +97,43 @@ export function usePhotoUpload() {
     if (index < 0 || index >= localPhotos.value.length) return
     
     const newPhotos = [...localPhotos.value]
-    const currentRotation = newPhotos[index].rotation || 0
+    const photo = newPhotos[index]
+    
+    if (!photo) {
+      console.warn('❌ usePhotoUpload: rotatePhoto - фото не найдено по индексу', { index })
+      return
+    }
+    
+    const currentRotation = photo.rotation || 0
     newPhotos[index] = {
-      ...newPhotos[index],
+      ...photo,
       rotation: (currentRotation + 90) % 360
     }
     localPhotos.value = newPhotos
   }
 
   const reorderPhotos = (fromIndex: number, toIndex: number) => {
+    console.log('🔄 usePhotoUpload: reorderPhotos НАЧАЛО', { 
+      fromIndex, 
+      toIndex, 
+      currentLength: localPhotos.value.length 
+    })
+    
     if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0 || 
         fromIndex >= localPhotos.value.length || toIndex >= localPhotos.value.length) {
+      console.log('❌ usePhotoUpload: reorderPhotos - неверные индексы, пропускаем')
       return
     }
     
     const newPhotos = [...localPhotos.value]
     const [movedPhoto] = newPhotos.splice(fromIndex, 1)
     newPhotos.splice(toIndex, 0, movedPhoto)
+    
+    console.log('✅ usePhotoUpload: reorderPhotos - фото перемещено', {
+      movedPhotoId: movedPhoto?.id,
+      newOrder: newPhotos.map(p => p?.id)
+    })
+    
     localPhotos.value = newPhotos
   }
 
@@ -167,11 +187,12 @@ export function usePhotoUpload() {
           }
         }
         console.log(`🔄 usePhotoUpload: Маппинг объекта ${index}:`, photo)
+        const photoObj = photo as Partial<Photo>
         return {
-          ...photo,
-          id: photo.id || `photo-${index}`,
-          rotation: photo.rotation || 0
-        }
+          ...photoObj,
+          id: photoObj.id || `photo-${index}`,
+          rotation: photoObj.rotation || 0
+        } as Photo
       })
       
       console.log('✅ usePhotoUpload: initializeFromProps ЗАВЕРШЕНО, новая длина:', localPhotos.value.length)
@@ -194,8 +215,18 @@ export function usePhotoUpload() {
   const handleDragDrop = (targetIndex: number) => {
     const sourceIndex = draggedIndex.value
     
+    console.log('🔄 usePhotoUpload: handleDragDrop вызван', { 
+      sourceIndex, 
+      targetIndex, 
+      currentPhotosLength: localPhotos.value.length 
+    })
+    
     if (sourceIndex !== null && sourceIndex !== targetIndex) {
+      console.log('✅ usePhotoUpload: Вызываем reorderPhotos')
       reorderPhotos(sourceIndex, targetIndex)
+      console.log('✅ usePhotoUpload: reorderPhotos завершен, новая длина:', localPhotos.value.length)
+    } else {
+      console.log('❌ usePhotoUpload: Индексы одинаковые или null, пропускаем')
     }
     
     // Reset drag state

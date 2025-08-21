@@ -11,7 +11,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 interface SearchEngineInterface
 {
     /**
-     * Выполнить поиск
+     * Основной метод поиска
      */
     public function search(
         string $query,
@@ -23,37 +23,37 @@ interface SearchEngineInterface
     ): LengthAwarePaginator;
 
     /**
-     * Быстрый поиск (для автодополнения)
+     * Поиск объявлений
      */
-    public function quickSearch(string $query, int $limit = 5): array;
+    public function searchAds(
+        string $query,
+        array $filters = [],
+        SortBy $sortBy = SortBy::RELEVANCE,
+        int $page = 1,
+        int $perPage = 20,
+        ?array $location = null
+    ): LengthAwarePaginator;
 
     /**
-     * Получить связанные запросы
+     * Поиск мастеров
      */
-    public function getRelatedQueries(string $query): array;
+    public function searchMasters(
+        string $query,
+        array $filters = [],
+        SortBy $sortBy = SortBy::RELEVANCE,
+        int $page = 1,
+        int $perPage = 20,
+        ?array $location = null
+    ): LengthAwarePaginator;
 
     /**
-     * Найти похожие объекты
+     * Поиск услуг
      */
-    public function findSimilar(int $objectId, int $limit = 10, array $excludeIds = []): array;
-
-    /**
-     * Продвинутый поиск
-     */
-    public function advancedSearch(array $criteria): LengthAwarePaginator;
-
-    /**
-     * Экспорт результатов
-     */
-    public function exportResults(LengthAwarePaginator $results, string $format = 'csv'): string;
-
-    /**
-     * Фасетный поиск (опционально)
-     */
-    public function facetedSearch(string $query, array $facets = []): array;
-
-    /**
-     * Геопоиск (опционально)
-     */
-    public function geoSearch(array $location, float $radius, array $filters = [], int $limit = 20): array;
+    public function searchServices(
+        string $query,
+        array $filters = [],
+        SortBy $sortBy = SortBy::RELEVANCE,
+        int $page = 1,
+        int $perPage = 20
+    ): LengthAwarePaginator;
 }

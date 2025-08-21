@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Cache;
 /**
  * Движок рекомендаций
  */
-class RecommendationEngine extends BaseSearchEngine
+class RecommendationEngine extends DatabaseSearchEngine
 {
     protected function getBaseQuery(): Builder
     {

@@ -12,6 +12,7 @@ use App\Domain\Ad\Models\Ad;
 use App\Domain\Ad\DTOs\CreateAdDTO;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -109,10 +110,31 @@ class AdController extends Controller
         
         $this->authorize('update', $ad);
 
+        // ✅ ПРИНУДИТЕЛЬНОЕ ЛОГИРОВАНИЕ В AdController::edit
+        Log::info("🔍 AdController::edit НАЧАЛО", [
+            'ad_id' => $ad->id,
+            'ad_status' => $ad->status,
+            'ad_exists' => $ad->exists,
+            'ad_attributes' => $ad->getAttributes(),
+            'ad_keys' => array_keys($ad->getAttributes())
+        ]);
+        
         // Для черновиков используем DraftService для правильной подготовки данных
-        if ($ad->status === 'draft') {
+        if ($ad->status->value === 'draft') {
+            Log::info("📸 AdController::edit: Это черновик, вызываем DraftService", [
+                'ad_id' => $ad->id,
+                'ad_status' => $ad->status
+            ]);
+            
             $draftService = app(\App\Domain\Ad\Services\DraftService::class);
             $preparedData = $draftService->prepareForDisplay($ad);
+            
+            Log::info("📸 AdController::edit: DraftService вернул данные", [
+                'prepared_data_keys' => array_keys($preparedData),
+                'prepared_data_count' => count($preparedData),
+                'has_media_settings' => isset($preparedData['media_settings']),
+                'media_settings_value' => $preparedData['media_settings'] ?? 'undefined'
+            ]);
             
             // ВАЖНО: Убедимся, что ID всегда присутствует и имеет правильный тип
             $preparedData['id'] = (int) $ad->id;
@@ -123,6 +145,13 @@ class AdController extends Controller
             ]);
         }
 
+        // ✅ ПРИНУДИТЕЛЬНОЕ ЛОГИРОВАНИЕ ДЛЯ АКТИВНЫХ ОБЪЯВЛЕНИЙ
+        Log::info("📸 AdController::edit: Это активное объявление, используем AdResource", [
+            'ad_id' => $ad->id,
+            'ad_status' => $ad->status,
+            'ad_is_active' => $ad->isActive()
+        ]);
+        
         // Для активных объявлений используем стандартный AdResource
         return Inertia::render('Ad/Edit', [
             'ad' => new AdResource($ad),

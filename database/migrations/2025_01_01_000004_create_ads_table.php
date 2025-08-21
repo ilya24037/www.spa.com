@@ -84,9 +84,6 @@ return new class extends Migration
             // === ДОПОЛНИТЕЛЬНЫЕ НАСТРОЙКИ ===
             $table->boolean('has_girlfriend')->default(false);
             $table->boolean('online_booking')->default(false);
-            $table->boolean('show_photos_in_gallery')->default(true);
-            $table->boolean('allow_download_photos')->default(false);
-            $table->boolean('watermark_photos')->default(false);
             
             // === СТАТУСЫ И МОДЕРАЦИЯ ===
             $table->enum('status', ['draft', 'active', 'paused', 'archived'])->default('draft');

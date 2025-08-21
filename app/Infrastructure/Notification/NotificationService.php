@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\DB;
  * Упрощенный сервис уведомлений
  * Основная логика вынесена в отдельные классы
  */
-class NotificationService
+class NotificationService implements \App\Domain\Notification\Contracts\NotificationServiceInterface
 {
     protected NotificationRepository $repository;
     protected NotificationTemplateProcessor $templateProcessor;
@@ -263,5 +263,74 @@ class NotificationService
             'notifications' => $deletedNotifications,
             'deliveries' => $deletedDeliveries
         ];
+    }
+
+    /**
+     * Реализация методов NotificationServiceInterface
+     */
+    
+    /**
+     * Отправить уведомление пользователю
+     */
+    public function send($user, string $type, array $data = []): void
+    {
+        // Маппинг типов уведомлений
+        $typeMap = [
+            'booking.created' => NotificationType::BOOKING_CREATED,
+            'booking.confirmed' => NotificationType::BOOKING_CONFIRMED,
+            'booking.cancelled' => NotificationType::BOOKING_CANCELLED,
+            'booking.reminder_day_before' => NotificationType::BOOKING_REMINDER,
+            'booking.reminder_2hours' => NotificationType::BOOKING_REMINDER,
+            'booking.rescheduled' => NotificationType::BOOKING_RESCHEDULED,
+            'booking.new_for_master' => NotificationType::BOOKING_CREATED,
+            'booking.cancelled_for_master' => NotificationType::BOOKING_CANCELLED,
+            'booking.rescheduled_for_master' => NotificationType::BOOKING_RESCHEDULED,
+            'master.daily_schedule' => NotificationType::GENERAL,
+        ];
+
+        $notificationType = $typeMap[$type] ?? NotificationType::GENERAL;
+        
+        $this->createAndSend(
+            $notificationType,
+            $user,
+            $data,
+            [NotificationChannel::IN_APP, NotificationChannel::EMAIL]
+        );
+    }
+    
+    /**
+     * Отправить уведомление о завершении бронирования
+     */
+    public function sendBookingCompleted(Booking $booking): void
+    {
+        $this->bookingCompleted($booking);
+    }
+    
+    /**
+     * Отправить запрос на отзыв
+     */
+    public function sendReviewRequest(Booking $booking): void
+    {
+        $this->createAndSend(
+            NotificationType::REVIEW_REQUEST,
+            $booking->user,
+            ['booking' => $booking],
+            [NotificationChannel::IN_APP, NotificationChannel::EMAIL]
+        );
+    }
+    
+    /**
+     * Отправить SMS о завершении
+     */
+    public function sendCompletionSMS(Booking $booking): void
+    {
+        if ($booking->client_phone) {
+            $this->createAndSend(
+                NotificationType::BOOKING_COMPLETED,
+                $booking->user,
+                ['booking' => $booking],
+                [NotificationChannel::SMS]
+            );
+        }
     }
 }

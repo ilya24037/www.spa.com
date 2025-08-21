@@ -22,10 +22,10 @@
           'ring-2 ring-blue-500': dragOverIndex === index
         }"
         :draggable="!isMobile"
-        @dragstart="!isMobile && handleDragStart(index)"
-        @dragover.prevent="!isMobile && handleDragOver(index)"
-        @drop.prevent="!isMobile && handleDragDrop(index)"
-        @dragend="!isMobile && handleDragEnd()"
+        @dragstart="!isMobile && handleDragStart(index, $event)"
+        @dragover.prevent="!isMobile && handleDragOver(index, $event)"
+        @drop.prevent="!isMobile && handleDragDrop(index, $event)"
+        @dragend="!isMobile && handleDragEnd($event)"
       >
         <!-- Метка главного фото -->
         <div v-if="index === 0" class="absolute -top-2 left-0 right-0 z-10">
@@ -120,19 +120,25 @@ onUnmounted(() => {
 })
 
 // Обработчики drag&drop
-const handleDragStart = (index: number) => {
+const handleDragStart = (index: number, event: DragEvent) => {
+  // Не блокируем dragstart - он нужен для перетаскивания фото
   emit('dragstart', index)
 }
 
-const handleDragOver = (index: number) => {
+const handleDragOver = (index: number, event: DragEvent) => {
+  // Только preventDefault для разрешения drop
+  event.preventDefault()
   emit('dragover', index)
 }
 
-const handleDragDrop = (index: number) => {
+const handleDragDrop = (index: number, event: DragEvent) => {
+  // Только preventDefault для разрешения drop
+  event.preventDefault()
   emit('drop', index)
 }
 
-const handleDragEnd = () => {
+const handleDragEnd = (event: DragEvent) => {
+  // Не блокируем dragend
   emit('dragend')
 }
 
@@ -144,12 +150,16 @@ const movePhoto = (fromIndex: number, toIndex: number) => {
   const [movedPhoto] = newPhotos.splice(fromIndex, 1)
   newPhotos.splice(toIndex, 0, movedPhoto)
   
-  // Эмитим изменения для мобильной версии
-  emit('update:photos', newPhotos)
+  // ❌ УБИРАЕМ этот эмит - он создает дублирование!
+  // emit('update:photos', newPhotos)
+  
+  // ✅ Вместо этого эмитим событие drag&drop для единообразия
+  emit('drop', toIndex)
 }
 
 const makeMain = (index: number) => {
   if (index === 0) return
+  // ✅ Используем movePhoto, который уже эмитит 'drop'
   movePhoto(index, 0)
 }
 </script>

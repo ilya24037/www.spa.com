@@ -6,7 +6,7 @@ use App\Domain\Ad\Models\Ad;
 use App\Domain\Ad\Models\AdPlan;
 use App\Domain\Payment\Models\Payment;
 use App\Domain\User\Models\User;
-use App\Domain\Payment\Services\PaymentGatewayService;
+use App\Domain\Payment\Gateways\PaymentGatewayManager;
 use Illuminate\Console\Command;
 
 class TestPaymentSystem extends Command
@@ -25,9 +25,9 @@ class TestPaymentSystem extends Command
      */
     protected $description = 'Тестирование системы платежей';
 
-    protected PaymentGatewayService $paymentGateway;
+    protected PaymentGatewayManager $paymentGateway;
 
-    public function __construct(PaymentGatewayService $paymentGateway)
+    public function __construct(PaymentGatewayManager $paymentGateway)
     {
         parent::__construct();
         $this->paymentGateway = $paymentGateway;

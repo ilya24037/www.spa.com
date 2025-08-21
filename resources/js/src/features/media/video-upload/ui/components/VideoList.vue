@@ -1,14 +1,17 @@
 <template>
-  <div class="video-list space-y-2">
-    <TransitionGroup name="list">
-      <VideoItem
-        v-for="(video, index) in safeVideos"
-        :key="video.id"
-        :video="video"
-        :index="index"
-        @remove="handleRemove(video.id)"
-      />
-    </TransitionGroup>
+  <div class="video-list">
+    <!-- Сетка видео как у фотографий -->
+    <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+      <TransitionGroup name="list">
+        <VideoItem
+          v-for="(video, index) in safeVideos"
+          :key="video.id"
+          :video="video"
+          :index="index"
+          @remove="handleRemove(video.id)"
+        />
+      </TransitionGroup>
+    </div>
     
     <!-- Empty state с явной проверкой -->
     <div v-if="safeVideos === null || safeVideos === undefined || safeVideos.length === 0" class="text-center py-4 text-gray-500">

@@ -367,7 +367,8 @@ const searchAddress = async (address: string) => {
   }
 
   try {
-    const searchQuery = address.includes('Пермь') ? address : `Пермь, ${address}`
+    // Используем адрес как есть, без принудительного добавления города
+    const searchQuery = address
     const result = await window.ymaps.geocode(searchQuery, { results: 1 })
     const firstGeoObject = result.geoObjects.get(0)
     

@@ -3,6 +3,9 @@
 namespace App\Application\Http\Controllers;
 
 use App\Domain\Search\Services\SearchService;
+use App\Domain\Search\Services\SearchFilterService;
+use App\Domain\Search\Services\SearchResultService;
+use App\Domain\Search\Services\SearchAnalyticsService;
 use App\Domain\Search\Enums\SearchType;
 use App\Domain\Search\Enums\SortBy;
 use App\Application\Http\Requests\Search\GeoSearchRequest;
@@ -16,7 +19,10 @@ use Illuminate\Http\JsonResponse;
 class SearchController extends Controller
 {
     public function __construct(
-        private SearchService $searchService
+        private SearchService $searchService,
+        private SearchFilterService $filterService,
+        private SearchResultService $resultService,
+        private SearchAnalyticsService $analyticsService
     ) {}
 
     /**
@@ -30,8 +36,8 @@ class SearchController extends Controller
         $page = (int) $request->get('page', 1);
         $perPage = (int) $request->get('per_page', 20);
         
-        // Получаем фильтры из запроса
-        $filters = $this->extractFilters($request, $type);
+        // Получаем фильтры из запроса используя новый FilterService
+        $filters = $this->filterService->fromRequest($type, $request);
         
         // Получаем местоположение пользователя
         $location = $this->getUserLocation($request);
@@ -47,16 +53,22 @@ class SearchController extends Controller
             $location
         );
 
+        // Форматируем результаты для UI используя новый ResultService
+        $formattedResults = $this->resultService->formatForUI($results, [
+            'include_meta' => true,
+            'suggest_filters' => empty($query)
+        ]);
+
         return Inertia::render('Search/Index', [
-            'results' => $results,
+            'results' => $formattedResults,
             'query' => $query,
             'type' => $type->value,
-            'filters' => $filters,
+            'filters' => $this->filterService->formatForDisplay($filters, $type),
             'sortBy' => $sortBy->value,
-            'availableFilters' => $type->getAvailableFilters(),
-            'availableSortOptions' => $type->getAvailableSortOptions(),
+            'availableFilters' => $this->filterService->getAvailableFilters($type),
             'searchTypes' => $this->getSearchTypes(),
-            'popularQueries' => $this->searchService->getPopularQueries($type, 5),
+            'popularQueries' => $this->analyticsService->getPopularQueries($type, 5),
+            'autocomplete' => !empty($query) ? $this->analyticsService->getAutocomplete($query, $type) : [],
         ]);
     }
 

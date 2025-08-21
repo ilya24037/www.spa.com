@@ -1,12 +1,34 @@
-<template>
+﻿<template>
   <div class="address-input">
     <!-- Скрытый label для доступности -->
     <label v-if="label" :for="inputId" class="sr-only">{{ label }}</label>
     
     <div class="address-input__container">
       <div class="address-input__field-wrapper">
+        <!-- Иконка дома с tooltip -->
+        <div 
+          v-if="localValue && showAddressIcon"
+          class="address-input__home-icon"
+          :title="fullAddressTooltip"
+          @mouseenter="showTooltip = true"
+          @mouseleave="showTooltip = false"
+        >
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+          </svg>
+          
+          <!-- Tooltip с полным адресом -->
+          <div
+            v-if="showTooltip && fullAddressTooltip"
+            class="address-input__tooltip"
+          >
+            {{ fullAddressTooltip }}
+          </div>
+        </div>
+
         <input
           :id="inputId"
+          ref="inputRef"
           v-model="localValue"
           type="text"
           :name="name"
@@ -16,18 +38,24 @@
           :aria-invalid="!!error"
           :aria-describedby="error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined"
           class="address-input__field"
-          :class="{ 'pr-10': localValue && showClearButton && !showSearchButton }"
+          :class="{ 
+            'pr-10': localValue && showClearButton,
+            'pl-12': localValue && showAddressIcon
+          }"
           @input="handleInput"
           @focus="handleFocus"
           @blur="handleBlur"
+          @keydown="handleKeydown"
           @keyup.enter="handleSearch"
+          autocomplete="off"
         >
         
         <!-- Кнопка очистки -->
         <button
-          v-if="localValue && showClearButton && !showSearchButton"
+          v-if="localValue && showClearButton"
           type="button"
           class="address-input__clear"
+          :class="{ 'address-input__clear--with-search': showSearchButton }"
           @click="clearInput"
           :disabled="disabled"
         >
@@ -35,6 +63,29 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
+
+        <!-- Выпадающий список подсказок -->
+        <div
+          v-if="showSuggestions && suggestions.length > 0"
+          class="address-input__suggestions"
+          :class="{ 'address-input__suggestions--with-search': showSearchButton }"
+        >
+          <div
+            v-for="(suggestion, index) in suggestions"
+            :key="index"
+            class="address-input__suggestion"
+            :class="{ 'address-input__suggestion--active': index === selectedIndex }"
+            @click="selectSuggestion(suggestion)"
+            @mouseenter="selectedIndex = index"
+          >
+            <div class="address-input__suggestion-text">
+              {{ suggestion.displayName }}
+            </div>
+            <div v-if="suggestion.description" class="address-input__suggestion-description">
+              {{ suggestion.description }}
+            </div>
+          </div>
+        </div>
       </div>
       
       <!-- Кнопка поиска -->
@@ -46,10 +97,7 @@
         @click="handleSearch"
         :disabled="disabled || loading || !localValue.trim()"
       >
-        <svg v-if="loading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
+        <div v-if="loading" class="w-4 h-4 animate-spin rounded-full border-b-2 border-white"></div>
         <span v-else>Найти</span>
       </button>
     </div>
@@ -72,8 +120,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, nextTick, onMounted } from 'vue'
 import { useId } from '@/src/shared/composables/useId'
+
+interface Suggestion {
+  displayName: string
+  description?: string
+  value: string
+  country?: string
+  priority?: number
+}
 
 interface Props {
   modelValue?: string
@@ -86,6 +142,10 @@ interface Props {
   loading?: boolean
   name?: string
   label?: string
+  showAutocomplete?: boolean
+  prioritizeCountry?: string // Приоритетная страна (по умолчанию 'Russia')
+  showAddressIcon?: boolean // Показывать ли иконку дома
+  fullAddress?: string // Полный адрес для tooltip
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -98,7 +158,11 @@ const props = withDefaults(defineProps<Props>(), {
   showSearchButton: false,
   loading: false,
   name: 'address',
-  label: ''
+  label: '',
+  showAutocomplete: true,
+  prioritizeCountry: 'Russia',
+  showAddressIcon: true,
+  fullAddress: ''
 })
 
 const emit = defineEmits<{
@@ -107,12 +171,24 @@ const emit = defineEmits<{
   'blur': []
   'clear': []
   'search': [value: string]
+  'suggestion-selected': [suggestion: Suggestion]
 }>()
 
 // Локальные данные
 const localValue = ref(props.modelValue)
 const searchStatus = ref('')
 const inputId = useId('address-input')
+const inputRef = ref<HTMLInputElement>()
+const showTooltip = ref(false)
+
+// Автокомплит
+const suggestions = ref<Suggestion[]>([])
+const showSuggestions = ref(false)
+const selectedIndex = ref(-1)
+const suggestionTimeout = ref<NodeJS.Timeout>()
+
+// Страна пользователя (определяется по IP)
+const userCountry = ref<string>('Russia')
 
 // Вычисляемые свойства
 const searchStatusClass = computed(() => {
@@ -124,6 +200,259 @@ const searchStatusClass = computed(() => {
   }
   return 'address-input__status--info'
 })
+
+const fullAddressTooltip = computed(() => {
+  if (props.fullAddress) {
+    return props.fullAddress
+  }
+  return localValue.value || ''
+})
+
+// Определение страны пользователя по IP
+const detectUserCountry = async (): Promise<string> => {
+  try {
+    // Сначала пробуем через Яндекс.Карты
+    if (window.ymaps) {
+      try {
+        const result = await window.ymaps.geolocation.get({
+          provider: 'yandex',
+          mapStateAutoApply: false
+        })
+        
+        const geoObjects = result.geoObjects
+        if (geoObjects.getLength() > 0) {
+          const geoObject = geoObjects.get(0)
+          const country = geoObject.getCountry()
+          if (country) {
+            return country
+          }
+        }
+      } catch (error) {
+        // Продолжаем к следующему методу
+      }
+    }
+
+    // Fallback на внешний сервис
+    const response = await fetch('https://ipapi.co/json/')
+    const data = await response.json()
+    
+    if (data.country_name) {
+      // Переводим английские названия в русские
+      const countryMap: { [key: string]: string } = {
+        'Russia': 'Россия',
+        'Russian Federation': 'Россия',
+        'Kazakhstan': 'Казахстан',
+        'Belarus': 'Беларусь',
+        'Ukraine': 'Украина',
+        'United States': 'США',
+        'Germany': 'Германия',
+        'France': 'Франция'
+      }
+      
+      return countryMap[data.country_name] || data.country_name
+    }
+  } catch (error) {
+    console.error('Ошибка определения страны:', error)
+  }
+  
+  return 'Россия' // Fallback на Россию
+}
+
+// Получение подсказок с приоритетом по стране
+const getSuggestions = async (query: string): Promise<Suggestion[]> => {
+  if (!window.ymaps || !query || query.length < 2) {
+    return []
+  }
+
+  try {
+    // Определяем тип поиска: если есть запятая и цифры, то ищем дома
+    const hasCommaAndNumbers = query.includes(',') && /\d/.test(query)
+    const searchKind = hasCommaAndNumbers ? 'house' : 'locality'
+    
+    // Получаем результаты для приоритетной страны и глобальные
+    const [priorityResults, globalResults] = await Promise.all([
+      // Поиск в приоритетной стране
+      window.ymaps.geocode(query, { 
+        results: hasCommaAndNumbers ? 5 : 3,
+        kind: searchKind,
+        boundedBy: props.prioritizeCountry === 'Russia' || userCountry.value === 'Россия' 
+          ? [[41.151416, 19.607544], [81.857361, 180.0]] // Границы России
+          : undefined
+      }),
+      // Глобальный поиск
+      window.ymaps.geocode(query, { 
+        results: hasCommaAndNumbers ? 7 : 5,
+        kind: searchKind
+      })
+    ])
+    
+    const suggestions: Suggestion[] = []
+    const addedAddresses = new Set<string>()
+    
+    // Обрабатываем результаты приоритетного поиска
+    const priorityGeoObjects = priorityResults.geoObjects
+    for (let i = 0; i < priorityGeoObjects.getLength(); i++) {
+      const geoObject = priorityGeoObjects.get(i)
+      const name = geoObject.getAddressLine()
+      const country = geoObject.getCountry()
+      const administrativeArea = geoObject.getAdministrativeAreas()
+      
+      if (!addedAddresses.has(name)) {
+        let description = ''
+        if (hasCommaAndNumbers) {
+          // Для домов показываем город в описании
+          description = geoObject.getLocalities().join(', ') || (administrativeArea && administrativeArea[0]) || country || ''
+        } else {
+          // Для городов показываем область/страну
+          if (administrativeArea && administrativeArea.length > 0) {
+            description = administrativeArea[0]
+          } else if (country) {
+            description = country
+          }
+        }
+        
+        suggestions.push({
+          displayName: name,
+          description: description,
+          value: name,
+          country: country,
+          priority: country === props.prioritizeCountry || country === userCountry.value ? 1 : 2
+        })
+        
+        addedAddresses.add(name)
+      }
+    }
+    
+    // Обрабатываем глобальные результаты
+    const globalGeoObjects = globalResults.geoObjects
+    const maxSuggestions = hasCommaAndNumbers ? 8 : 5
+    for (let i = 0; i < globalGeoObjects.getLength() && suggestions.length < maxSuggestions; i++) {
+      const geoObject = globalGeoObjects.get(i)
+      const name = geoObject.getAddressLine()
+      const country = geoObject.getCountry()
+      const administrativeArea = geoObject.getAdministrativeAreas()
+      
+      if (!addedAddresses.has(name)) {
+        let description = ''
+        if (hasCommaAndNumbers) {
+          // Для домов показываем город в описании
+          description = geoObject.getLocalities().join(', ') || (administrativeArea && administrativeArea[0]) || country || ''
+        } else {
+          // Для городов показываем область/страну
+          if (administrativeArea && administrativeArea.length > 0) {
+            description = administrativeArea[0]
+          } else if (country) {
+            description = country
+          }
+        }
+        
+        suggestions.push({
+          displayName: name,
+          description: description,
+          value: name,
+          country: country,
+          priority: country === props.prioritizeCountry || country === userCountry.value ? 1 : 2
+        })
+        
+        addedAddresses.add(name)
+      }
+    }
+    
+    // Сортируем по приоритету (сначала приоритетная страна)
+    return suggestions.sort((a, b) => (a.priority || 2) - (b.priority || 2))
+    
+  } catch (error) {
+    console.error('Ошибка получения подсказок:', error)
+    return []
+  }
+}
+
+// Обновление подсказок с задержкой
+const updateSuggestions = async (query: string) => {
+  if (!props.showAutocomplete) return
+
+  // Очищаем предыдущий таймаут
+  if (suggestionTimeout.value) {
+    clearTimeout(suggestionTimeout.value)
+  }
+
+  // Скрываем подсказки если запрос слишком короткий или поле не пустое
+  if (!query || query.length < 2) {
+    showSuggestions.value = false
+    suggestions.value = []
+    return
+  }
+
+  // Показываем подсказки для городов и для домов
+  // Не показываем только если это уже полный точный адрес (содержит много запятых)
+  const commaCount = (query.match(/,/g) || []).length
+  if (commaCount > 1 && query.length > 20) {
+    showSuggestions.value = false
+    suggestions.value = []
+    return
+  }
+
+  // Задержка 300ms для уменьшения количества запросов к API
+  suggestionTimeout.value = setTimeout(async () => {
+    const newSuggestions = await getSuggestions(query)
+    suggestions.value = newSuggestions
+    showSuggestions.value = newSuggestions.length > 0
+    selectedIndex.value = -1
+  }, 300)
+}
+
+// Выбор подсказки
+const selectSuggestion = (suggestion: Suggestion) => {
+  localValue.value = suggestion.value
+  
+  // Немедленно скрываем подсказки
+  showSuggestions.value = false
+  selectedIndex.value = -1
+  suggestions.value = []
+  
+  // Очищаем таймаут если он активен
+  if (suggestionTimeout.value) {
+    clearTimeout(suggestionTimeout.value)
+    suggestionTimeout.value = undefined
+  }
+  
+  emit('update:modelValue', suggestion.value)
+  emit('suggestion-selected', suggestion)
+  
+  // Возвращаем фокус на поле
+  nextTick(() => {
+    inputRef.value?.focus()
+  })
+}
+
+// Навигация по подсказкам стрелками
+const handleKeydown = (event: KeyboardEvent) => {
+  if (!showSuggestions.value || suggestions.value.length === 0) return
+
+  switch (event.key) {
+    case 'ArrowDown':
+      event.preventDefault()
+      selectedIndex.value = Math.min(selectedIndex.value + 1, suggestions.value.length - 1)
+      break
+    
+    case 'ArrowUp':
+      event.preventDefault()
+      selectedIndex.value = Math.max(selectedIndex.value - 1, -1)
+      break
+    
+    case 'Enter':
+      if (selectedIndex.value >= 0) {
+        event.preventDefault()
+        selectSuggestion(suggestions.value[selectedIndex.value])
+      }
+      break
+    
+    case 'Escape':
+      showSuggestions.value = false
+      selectedIndex.value = -1
+      break
+  }
+}
 
 // Следим за изменениями props
 watch(() => props.modelValue, (newValue) => {
@@ -141,19 +470,40 @@ watch(() => props.error, (newError) => {
 const handleInput = () => {
   searchStatus.value = ''
   emit('update:modelValue', localValue.value)
+  
+  // Обновляем подсказки
+  updateSuggestions(localValue.value)
 }
 
 const handleFocus = () => {
   emit('focus')
+  
+  // Показываем подсказки если поле содержит ввод (города или начало адреса дома)
+  if (localValue.value && localValue.value.length >= 2) {
+    const commaCount = (localValue.value.match(/,/g) || []).length
+    // Показываем подсказки для городов и для начала ввода домов, но не для полных адресов
+    if (commaCount <= 1 || localValue.value.length <= 20) {
+      updateSuggestions(localValue.value)
+    }
+  }
 }
 
-const handleBlur = () => {
-  emit('blur')
+const handleBlur = (event: FocusEvent) => {
+  // Задержка чтобы клик по подсказке успел сработать
+  setTimeout(() => {
+    showSuggestions.value = false
+    selectedIndex.value = -1
+    emit('blur')
+  }, 150)
 }
 
 const clearInput = () => {
   localValue.value = ''
   searchStatus.value = ''
+  showSuggestions.value = false
+  suggestions.value = []
+  selectedIndex.value = -1
+  
   emit('update:modelValue', '')
   emit('clear')
 }
@@ -162,6 +512,7 @@ const handleSearch = () => {
   if (!localValue.value.trim() || props.loading) return
   
   searchStatus.value = ''
+  showSuggestions.value = false
   emit('search', localValue.value.trim())
 }
 
@@ -174,11 +525,23 @@ const clearStatus = () => {
   searchStatus.value = ''
 }
 
+// Инициализация - определяем страну пользователя
+onMounted(async () => {
+  userCountry.value = await detectUserCountry()
+})
+
 // Экспорт методов
 defineExpose({
   setSearchStatus,
   clearStatus
 })
+
+// Типы для window.ymaps
+declare global {
+  interface Window {
+    ymaps: any
+  }
+}
 </script>
 
 <style scoped>
@@ -224,6 +587,53 @@ defineExpose({
   cursor: not-allowed;
 }
 
+/* Иконка дома */
+.address-input__home-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  z-index: 10;
+  cursor: help;
+  transition: color 0.2s ease;
+}
+
+.address-input__home-icon:hover {
+  color: #0066ff;
+}
+
+/* Tooltip */
+.address-input__tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  background: #1a1a1a;
+  color: white;
+  font-size: 13px;
+  line-height: 1.4;
+  border-radius: 6px;
+  white-space: nowrap;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  z-index: 1001;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.address-input__tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: #1a1a1a;
+}
+
 .address-input__clear {
   position: absolute;
   right: 12px;
@@ -239,6 +649,7 @@ defineExpose({
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 10;
 }
 
 .address-input__clear:hover:not(:disabled) {
@@ -249,6 +660,10 @@ defineExpose({
 .address-input__clear:disabled {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+.address-input__clear--with-search {
+  right: 12px;
 }
 
 .address-input__search {
@@ -282,6 +697,54 @@ defineExpose({
 .address-input__search--loading {
   background-color: #0052cc;
   border-color: #0052cc;
+}
+
+/* Выпадающий список подсказок */
+.address-input__suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #d6d6d6;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.address-input__suggestions--with-search {
+  right: 108px; /* Учитываем ширину кнопки поиска */
+}
+
+.address-input__suggestion {
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s ease;
+}
+
+.address-input__suggestion:last-child {
+  border-bottom: none;
+}
+
+.address-input__suggestion:hover,
+.address-input__suggestion--active {
+  background-color: #f8f9fa;
+}
+
+.address-input__suggestion-text {
+  font-size: 14px;
+  color: #1a1a1a;
+  font-weight: 500;
+}
+
+.address-input__suggestion-description {
+  font-size: 12px;
+  color: #666;
+  margin-top: 2px;
 }
 
 .address-input__hint {
@@ -338,6 +801,10 @@ defineExpose({
   
   .address-input__search {
     width: 100%;
+  }
+  
+  .address-input__suggestions--with-search {
+    right: 0;
   }
 }
 </style>

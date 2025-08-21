@@ -2,335 +2,536 @@
 
 namespace App\Domain\Booking\Services;
 
-use App\Domain\User\Models\User;
-use App\Domain\Service\Models\Service;
+use App\Domain\Booking\Models\Booking;
 use App\Domain\Booking\Models\BookingSlot;
-use App\Enums\BookingType;
 use App\Domain\Booking\Repositories\BookingRepository;
-use App\Domain\User\Repositories\UserRepository;
-// use App\Domain\Service\Repositories\ServiceRepository;
+use App\Domain\Master\Models\MasterProfile;
+use App\Domain\Master\Repositories\MasterRepository;
+use App\Domain\Service\Models\Service;
+use App\Domain\Booking\Enums\BookingStatus;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 /**
- * Сервис для работы с временными слотами
- * Отвечает только за расчет и управление слотами
+ * Единый сервис для работы со слотами и доступностью
+ * Консолидирует: AvailabilityCheckService, SlotManagementService, 
+ * AvailabilityService, SlotService
  */
 class BookingSlotService
 {
+    private const SLOT_DURATION = 30; // минут
+    private const CACHE_TTL = 300; // 5 минут
+
     public function __construct(
         private BookingRepository $bookingRepository,
-        private UserRepository $userRepository,
-        // private ServiceRepository $serviceRepository
+        private MasterRepository $masterRepository
     ) {}
 
     /**
-     * Получить доступные слоты для мастера
+     * ==========================================
+     * ПРОВЕРКА ДОСТУПНОСТИ
+     * ==========================================
      */
-    public function getAvailableSlots(
-        int $masterId, 
-        int $serviceId, 
-        ?BookingType $type = null,
-        int $days = 14
-    ): array {
-        $master = $this->userRepository->findWithRelations($masterId, ['masterProfile.schedules']);
-        // $service = $this->serviceRepository->findById($serviceId);
-        $service = \App\Domain\Service\Models\Service::find($serviceId); // Временно
-        
-        if (!$master || !$service) {
-            return [];
-        }
-        
-        if (!$master->masterProfile) {
-            return [];
-        }
-
-        $type = $type ?? BookingType::INCALL;
-        $duration = $service->duration_minutes ?? $type->getDefaultDurationMinutes();
-        $minAdvanceHours = $type->getMinAdvanceHours();
-        
-        $slots = [];
-        $startDate = now()->addHours($minAdvanceHours);
-        $endDate = now()->addDays($days);
-
-        for ($date = $startDate->copy()->startOfDay(); $date <= $endDate; $date->addDay()) {
-            $daySlots = $this->generateDaySlots($date, $master, $service, $type, $duration);
-            
-            if (!empty($daySlots)) {
-                $slots[$date->format('Y-m-d')] = [
-                    'date' => $date->format('Y-m-d'),
-                    'day_name' => $date->locale('ru')->dayName,
-                    'is_weekend' => $date->isWeekend(),
-                    'slots' => $daySlots,
-                ];
-            }
-        }
-
-        return $slots;
-    }
 
     /**
-     * Генерация слотов на день
+     * Проверить доступность временного слота
      */
-    public function generateDaySlots(
-        Carbon $date, 
-        User $master, 
-        Service $service, 
-        BookingType $type,
-        int $duration
-    ): array {
-        $schedule = $this->getMasterSchedule($master, $date);
-        
-        if (!$schedule || !$schedule->is_working_day) {
-            return [];
-        }
-
-        $slots = [];
-        $workStart = Carbon::parse($date->format('Y-m-d') . ' ' . $schedule->start_time);
-        $workEnd = Carbon::parse($date->format('Y-m-d') . ' ' . $schedule->end_time);
-        $breakStart = $schedule->break_start ? Carbon::parse($date->format('Y-m-d') . ' ' . $schedule->break_start) : null;
-        $breakEnd = $schedule->break_end ? Carbon::parse($date->format('Y-m-d') . ' ' . $schedule->break_end) : null;
-        
-        // Получаем занятые слоты
-        $busySlots = $this->getBusySlots($master->id, $date);
-        
-        $currentTime = $workStart->copy();
-        $slotInterval = $this->getSlotInterval($type);
-        
-        while ($currentTime->copy()->addMinutes($duration) <= $workEnd) {
-            // Пропускаем перерыв
-            if ($this->isBreakTime($currentTime, $duration, $breakStart, $breakEnd)) {
-                $currentTime = $breakEnd->copy();
-                continue;
-            }
-            
-            // Проверяем доступность
-            if ($this->isSlotAvailable($currentTime, $duration, $busySlots, $type)) {
-                $slots[] = $this->formatSlot($currentTime, $duration, $type);
-            }
-            
-            $currentTime->addMinutes($slotInterval);
-        }
-
-        return $slots;
-    }
-
-    /**
-     * Проверить доступность конкретного слота
-     */
-    public function checkSlotAvailability(
-        int $masterId,
+    public function isSlotAvailable(
         Carbon $startTime,
-        int $duration,
+        Carbon $endTime,
+        int $masterId,
         ?int $excludeBookingId = null
     ): bool {
-        $endTime = $startTime->copy()->addMinutes($duration);
-        
-        $overlapping = $this->bookingRepository->findOverlapping(
+        return $this->findOverlappingBookings($startTime, $endTime, $masterId, $excludeBookingId)->isEmpty();
+    }
+
+    /**
+     * Найти пересекающиеся бронирования
+     */
+    public function findOverlappingBookings(
+        Carbon $startTime,
+        Carbon $endTime,
+        int $masterId,
+        ?int $excludeBookingId = null
+    ): Collection {
+        return $this->bookingRepository->findOverlapping(
             $startTime,
             $endTime,
             $masterId,
             $excludeBookingId
         );
+    }
+
+    /**
+     * Проверить доступность мастера в указанное время
+     */
+    public function isMasterAvailable(
+        int $masterId,
+        Carbon $startTime,
+        int $durationMinutes,
+        ?int $excludeBookingId = null
+    ): bool {
+        $endTime = $startTime->copy()->addMinutes($durationMinutes);
+
+        // Проверяем пересечения с бронированиями
+        if (!$this->isSlotAvailable($startTime, $endTime, $masterId, $excludeBookingId)) {
+            return false;
+        }
+
+        // Проверяем рабочее время мастера
+        return $this->isMasterWorkingTime($masterId, $startTime, $durationMinutes);
+    }
+
+    /**
+     * Проверить рабочее время мастера
+     */
+    public function isMasterWorkingTime(int $masterId, Carbon $startTime, int $durationMinutes): bool
+    {
+        $master = $this->masterRepository->findWithSchedule($masterId);
+        if (!$master) {
+            return false;
+        }
+
+        $dayOfWeek = $startTime->dayOfWeek;
+        $schedule = $this->getMasterScheduleForDay($master, $dayOfWeek);
+
+        if (!$schedule || !$schedule->is_working_day) {
+            return false;
+        }
+
+        $endTime = $startTime->copy()->addMinutes($durationMinutes);
+        $workStart = Carbon::parse($schedule->work_start_time);
+        $workEnd = Carbon::parse($schedule->work_end_time);
+
+        // Устанавливаем правильную дату для сравнения
+        $workStart->setDate($startTime->year, $startTime->month, $startTime->day);
+        $workEnd->setDate($startTime->year, $startTime->month, $startTime->day);
+
+        return $startTime->gte($workStart) && $endTime->lte($workEnd);
+    }
+
+    /**
+     * Проверить возможность переноса бронирования
+     */
+    public function canRescheduleBooking(
+        Booking $booking,
+        Carbon $newStartTime,
+        int $durationMinutes
+    ): bool {
+        // Проверяем доступность нового времени для мастера
+        if (!$this->isMasterAvailable(
+            $booking->master_id,
+            $newStartTime,
+            $durationMinutes,
+            $booking->id
+        )) {
+            return false;
+        }
+
+        // Проверяем доступность нового времени для клиента
+        if ($booking->user_id && !$this->isUserAvailableForBooking(
+            $booking->user_id,
+            $newStartTime,
+            $durationMinutes,
+            $booking->id
+        )) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Проверить доступность пользователя для бронирования
+     */
+    public function isUserAvailableForBooking(
+        int $userId,
+        Carbon $startTime,
+        int $durationMinutes,
+        ?int $excludeBookingId = null
+    ): bool {
+        $endTime = $startTime->copy()->addMinutes($durationMinutes);
+
+        $overlappingBookings = Booking::where('user_id', $userId)
+            ->where('status', '!=', BookingStatus::CANCELLED)
+            ->when($excludeBookingId, fn($q) => $q->where('id', '!=', $excludeBookingId))
+            ->where(function ($query) use ($startTime, $endTime) {
+                $query->whereBetween('booking_date', [$startTime->toDateString(), $endTime->toDateString()])
+                    ->where(function ($q) use ($startTime, $endTime) {
+                        // Проверяем пересечение времени
+                        $q->where(function ($subQ) use ($startTime, $endTime) {
+                            $subQ->whereRaw("CONCAT(booking_date, ' ', start_time) < ?", [$endTime->toDateTimeString()])
+                                 ->whereRaw("DATE_ADD(CONCAT(booking_date, ' ', start_time), INTERVAL duration_minutes MINUTE) > ?", [$startTime->toDateTimeString()]);
+                        });
+                    });
+            })
+            ->exists();
+
+        return !$overlappingBookings;
+    }
+
+    /**
+     * Получить занятые слоты мастера на день
+     */
+    public function getMasterBusySlots(int $masterId, Carbon $date): Collection
+    {
+        $bookings = $this->bookingRepository->getMasterBookingsForDate($masterId, $date);
+
+        return $bookings->map(function ($booking) {
+            $start = Carbon::parse($booking->booking_date . ' ' . $booking->start_time);
+            return [
+                'start' => $start->format('H:i'),
+                'end' => $start->copy()->addMinutes($booking->duration_minutes)->format('H:i'),
+                'booking_id' => $booking->id,
+                'status' => $booking->status,
+                'service' => $booking->service?->name ?? 'Услуга'
+            ];
+        });
+    }
+
+    /**
+     * ==========================================
+     * УПРАВЛЕНИЕ СЛОТАМИ
+     * ==========================================
+     */
+
+    /**
+     * Получить доступные слоты для мастера
+     */
+    public function getAvailableSlots(
+        int $masterId,
+        int $serviceId,
+        ?Carbon $date = null,
+        int $daysAhead = 7
+    ): array {
+        $startDate = $date ?? Carbon::now();
+        $endDate = $startDate->copy()->addDays($daysAhead);
         
-        return $overlapping->isEmpty();
+        $service = Service::find($serviceId);
+        $duration = $service?->duration_minutes ?? 60;
+
+        $slots = [];
+        $currentDate = $startDate->copy();
+
+        while ($currentDate->lte($endDate)) {
+            $daySlots = $this->generateDaySlots($masterId, $currentDate, $duration);
+            if (!empty($daySlots)) {
+                $slots[$currentDate->toDateString()] = $daySlots;
+            }
+            $currentDate->addDay();
+        }
+
+        return $slots;
+    }
+
+    /**
+     * Генерировать слоты для конкретного дня
+     */
+    public function generateDaySlots(int $masterId, Carbon $date, int $serviceDuration): array
+    {
+        // Кешируем результат
+        $cacheKey = "slots:{$masterId}:{$date->toDateString()}:{$serviceDuration}";
+        
+        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($masterId, $date, $serviceDuration) {
+            $master = $this->masterRepository->findWithSchedule($masterId);
+            if (!$master) {
+                return [];
+            }
+
+            $schedule = $this->getMasterScheduleForDay($master, $date->dayOfWeek);
+            if (!$schedule || !$schedule->is_working_day) {
+                return [];
+            }
+
+            return $this->generateSlotsForSchedule($masterId, $date, $schedule, $serviceDuration);
+        });
+    }
+
+    /**
+     * Генерировать слоты на основе расписания
+     */
+    private function generateSlotsForSchedule(
+        int $masterId,
+        Carbon $date,
+        object $schedule,
+        int $serviceDuration
+    ): array {
+        $slots = [];
+        
+        $workStart = Carbon::parse($date->toDateString() . ' ' . $schedule->work_start_time);
+        $workEnd = Carbon::parse($date->toDateString() . ' ' . $schedule->work_end_time);
+
+        // Учитываем перерывы
+        $breaks = $this->parseBreaks($schedule, $date);
+
+        $currentTime = $workStart->copy();
+        
+        while ($currentTime->copy()->addMinutes($serviceDuration)->lte($workEnd)) {
+            // Пропускаем прошедшее время
+            if ($currentTime->isPast()) {
+                $currentTime->addMinutes(self::SLOT_DURATION);
+                continue;
+            }
+
+            // Проверяем, не попадает ли слот в перерыв
+            if ($this->isTimeInBreak($currentTime, $serviceDuration, $breaks)) {
+                $currentTime->addMinutes(self::SLOT_DURATION);
+                continue;
+            }
+
+            // Проверяем доступность слота
+            $isAvailable = $this->isMasterAvailable(
+                $masterId,
+                $currentTime,
+                $serviceDuration
+            );
+
+            $slots[] = [
+                'time' => $currentTime->format('H:i'),
+                'datetime' => $currentTime->toDateTimeString(),
+                'available' => $isAvailable,
+                'duration' => $serviceDuration
+            ];
+
+            $currentTime->addMinutes(self::SLOT_DURATION);
+        }
+
+        return $slots;
+    }
+
+    /**
+     * Зарезервировать слот для бронирования
+     */
+    public function reserveSlot(
+        int $masterId,
+        Carbon $startTime,
+        int $durationMinutes,
+        int $userId
+    ): ?BookingSlot {
+        return DB::transaction(function () use ($masterId, $startTime, $durationMinutes, $userId) {
+            // Проверяем доступность перед резервированием
+            if (!$this->isMasterAvailable($masterId, $startTime, $durationMinutes)) {
+                Log::warning('Slot not available for reservation', [
+                    'master_id' => $masterId,
+                    'start_time' => $startTime->toDateTimeString(),
+                    'duration' => $durationMinutes
+                ]);
+                return null;
+            }
+
+            // Создаем резервирование слота
+            $slot = BookingSlot::create([
+                'master_id' => $masterId,
+                'user_id' => $userId,
+                'slot_date' => $startTime->toDateString(),
+                'slot_time' => $startTime->format('H:i:s'),
+                'duration_minutes' => $durationMinutes,
+                'is_reserved' => true,
+                'reserved_until' => Carbon::now()->addMinutes(15), // Резерв на 15 минут
+                'status' => 'reserved'
+            ]);
+
+            // Инвалидируем кеш
+            $this->invalidateSlotCache($masterId, $startTime);
+
+            Log::info('Slot reserved', [
+                'slot_id' => $slot->id,
+                'master_id' => $masterId,
+                'user_id' => $userId
+            ]);
+
+            return $slot;
+        });
+    }
+
+    /**
+     * Освободить зарезервированный слот
+     */
+    public function releaseSlot(int $slotId): bool
+    {
+        $slot = BookingSlot::find($slotId);
+        if (!$slot) {
+            return false;
+        }
+
+        $slot->update([
+            'is_reserved' => false,
+            'reserved_until' => null,
+            'status' => 'available'
+        ]);
+
+        // Инвалидируем кеш
+        $this->invalidateSlotCache(
+            $slot->master_id,
+            Carbon::parse($slot->slot_date . ' ' . $slot->slot_time)
+        );
+
+        Log::info('Slot released', ['slot_id' => $slotId]);
+
+        return true;
     }
 
     /**
      * Найти ближайший доступный слот
      */
-    public function findNextAvailableSlot(
+    public function findNearestAvailableSlot(
         int $masterId,
-        int $serviceId,
-        ?Carbon $preferredTime = null,
-        ?BookingType $type = null
+        Carbon $preferredTime,
+        int $durationMinutes,
+        int $searchDays = 7
     ): ?array {
-        $master = $this->userRepository->findById($masterId);
-        // $service = $this->serviceRepository->findById($serviceId);
-        $service = \App\Domain\Service\Models\Service::find($serviceId); // Временно
-        
-        if (!$master || !$service) {
-            return null;
-        }
+        $searchEnd = $preferredTime->copy()->addDays($searchDays);
+        $currentTime = $preferredTime->copy();
 
-        $type = $type ?? BookingType::INCALL;
-        $startSearch = $preferredTime ?? now()->addHours($type->getMinAdvanceHours());
-        $duration = $service->duration_minutes ?? $type->getDefaultDurationMinutes();
-        
-        // Ищем в течение 2 недель
-        for ($i = 0; $i < 14; $i++) {
-            $date = $startSearch->copy()->addDays($i);
-            $daySlots = $this->generateDaySlots($date, $master, $service, $type, $duration);
-            
-            if (!empty($daySlots)) {
-                return $daySlots[0]; // Возвращаем первый доступный
+        while ($currentTime->lte($searchEnd)) {
+            // Пропускаем прошедшее время
+            if ($currentTime->isPast()) {
+                $currentTime = Carbon::now()->addMinutes(30);
+            }
+
+            // Проверяем доступность
+            if ($this->isMasterAvailable($masterId, $currentTime, $durationMinutes)) {
+                return [
+                    'date' => $currentTime->toDateString(),
+                    'time' => $currentTime->format('H:i'),
+                    'available' => true
+                ];
+            }
+
+            // Переходим к следующему 30-минутному интервалу
+            $currentTime->addMinutes(30);
+
+            // Если дошли до конца рабочего дня, переходим на следующий
+            if ($currentTime->hour >= 20) {
+                $currentTime->addDay()->hour(9)->minute(0);
             }
         }
-        
+
         return null;
     }
 
     /**
-     * Получить занятые слоты мастера на дату
+     * Получить статистику доступности мастера
      */
-    public function getBusySlots(int $masterId, Carbon $date): Collection
+    public function getMasterAvailabilityStats(int $masterId, Carbon $startDate, Carbon $endDate): array
     {
-        return $this->bookingRepository->getBookingsForDate($date, $masterId);
-    }
+        $totalSlots = 0;
+        $availableSlots = 0;
+        $busySlots = 0;
 
-    /**
-     * Получить расписание мастера на дату
-     */
-    protected function getMasterSchedule(User $master, Carbon $date)
-    {
-        if (!$master->masterProfile) {
-            return null;
+        $currentDate = $startDate->copy();
+        while ($currentDate->lte($endDate)) {
+            $daySlots = $this->calculateDaySlots($masterId, $currentDate);
+            $totalSlots += $daySlots['total'];
+            $availableSlots += $daySlots['available'];
+            $busySlots += $daySlots['busy'];
+            
+            $currentDate->addDay();
         }
 
-        return $master->masterProfile->schedules()
-            ->where('day_of_week', $date->dayOfWeek)
-            ->first();
-    }
-
-    /**
-     * Проверить время перерыва
-     */
-    protected function isBreakTime(
-        Carbon $time, 
-        int $duration, 
-        ?Carbon $breakStart, 
-        ?Carbon $breakEnd
-    ): bool {
-        if (!$breakStart || !$breakEnd) {
-            return false;
-        }
-
-        $slotEnd = $time->copy()->addMinutes($duration);
-        
-        // Слот пересекается с перерывом
-        return ($time >= $breakStart && $time < $breakEnd) ||
-               ($slotEnd > $breakStart && $slotEnd <= $breakEnd) ||
-               ($time < $breakStart && $slotEnd > $breakEnd);
-    }
-
-    /**
-     * Проверить доступность слота
-     */
-    protected function isSlotAvailable(
-        Carbon $time,
-        int $duration,
-        Collection $busySlots,
-        BookingType $type
-    ): bool {
-        // Проверяем минимальное время заранее
-        $minAdvanceTime = now()->addHours($type->getMinAdvanceHours());
-        if ($time->lt($minAdvanceTime)) {
-            return false;
-        }
-
-        $slotEnd = $time->copy()->addMinutes($duration);
-        
-        // Проверяем пересечения с занятыми слотами
-        foreach ($busySlots as $booking) {
-            if ($time->lt($booking->end_time) && $slotEnd->gt($booking->start_time)) {
-                return false;
-            }
-        }
-        
-        return true;
-    }
-
-    /**
-     * Форматировать слот для вывода
-     */
-    protected function formatSlot(Carbon $time, int $duration, BookingType $type): array
-    {
         return [
-            'start_time' => $time->format('H:i'),
-            'end_time' => $time->copy()->addMinutes($duration)->format('H:i'),
-            'datetime' => $time->toISOString(),
-            'duration' => $duration,
-            'type' => $type->value,
-            'available' => true,
+            'total_slots' => $totalSlots,
+            'available_slots' => $availableSlots,
+            'busy_slots' => $busySlots,
+            'occupancy_rate' => $totalSlots > 0 ? round(($busySlots / $totalSlots) * 100, 2) : 0,
+            'availability_rate' => $totalSlots > 0 ? round(($availableSlots / $totalSlots) * 100, 2) : 0
         ];
     }
 
     /**
-     * Получить интервал между слотами
+     * ==========================================
+     * ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
+     * ==========================================
      */
-    protected function getSlotInterval(BookingType $type): int
-    {
-        return match($type) {
-            BookingType::ONLINE => 15,    // 15 минут для онлайн
-            BookingType::PACKAGE => 60,   // 60 минут для пакетов
-            default => 30,                // 30 минут стандарт
-        };
-    }
 
-    /**
-     * Создать слоты для бронирования
-     */
-    public function createBookingSlots(int $bookingId, array $slots): Collection
+    private function getMasterScheduleForDay(MasterProfile $master, int $dayOfWeek): ?object
     {
-        $booking = $this->bookingRepository->findOrFail($bookingId);
-        $createdSlots = collect();
-
-        foreach ($slots as $slotData) {
-            $slot = BookingSlot::create([
-                'booking_id' => $booking->id,
-                'master_id' => $booking->master_id,
-                'start_time' => $slotData['start_time'],
-                'end_time' => $slotData['end_time'],
-                'duration_minutes' => $slotData['duration_minutes'],
-                'is_blocked' => $slotData['is_blocked'] ?? false,
-                'is_break' => $slotData['is_break'] ?? false,
-                'is_preparation' => $slotData['is_preparation'] ?? false,
-                'notes' => $slotData['notes'] ?? null,
-                'resource_type' => $slotData['resource_type'] ?? null,
-                'resource_id' => $slotData['resource_id'] ?? null,
-            ]);
-            
-            $createdSlots->push($slot);
+        if (!$master->schedule) {
+            return null;
         }
 
-        return $createdSlots;
+        $scheduleData = is_string($master->schedule) 
+            ? json_decode($master->schedule, true) 
+            : $master->schedule;
+
+        if (!$scheduleData || !isset($scheduleData[$dayOfWeek])) {
+            return null;
+        }
+
+        return (object) $scheduleData[$dayOfWeek];
     }
 
-    /**
-     * Обновить слоты бронирования
-     */
-    public function updateBookingSlots(int $bookingId, Carbon $newStartTime, int $newDuration): void
+    private function parseBreaks(object $schedule, Carbon $date): array
     {
-        $booking = $this->bookingRepository->findOrFail($bookingId);
+        $breaks = [];
         
-        // Удаляем старые слоты через модель (допустимо для связанных записей)
-        $booking->slots()->delete();
-        
-        // Создаем новый основной слот
-        $this->createBookingSlots($bookingId, [[
-            'start_time' => $newStartTime,
-            'end_time' => $newStartTime->copy()->addMinutes($newDuration),
-            'duration_minutes' => $newDuration,
-            'notes' => 'Перенесенное бронирование',
-        ]]);
+        if (isset($schedule->break_start_time) && isset($schedule->break_end_time)) {
+            $breaks[] = [
+                'start' => Carbon::parse($date->toDateString() . ' ' . $schedule->break_start_time),
+                'end' => Carbon::parse($date->toDateString() . ' ' . $schedule->break_end_time)
+            ];
+        }
+
+        return $breaks;
     }
 
-    /**
-     * Заблокировать слоты мастера
-     */
-    public function blockMasterSlots(
-        int $masterId,
-        Carbon $startTime,
-        Carbon $endTime,
-        string $reason
-    ): BookingSlot {
-        return BookingSlot::create([
-            'master_id' => $masterId,
-            'start_time' => $startTime,
-            'end_time' => $endTime,
-            'duration_minutes' => $startTime->diffInMinutes($endTime),
-            'is_blocked' => true,
-            'notes' => $reason,
-        ]);
+    private function isTimeInBreak(Carbon $time, int $duration, array $breaks): bool
+    {
+        $endTime = $time->copy()->addMinutes($duration);
+
+        foreach ($breaks as $break) {
+            if (
+                ($time->gte($break['start']) && $time->lt($break['end'])) ||
+                ($endTime->gt($break['start']) && $endTime->lte($break['end'])) ||
+                ($time->lte($break['start']) && $endTime->gte($break['end']))
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function calculateDaySlots(int $masterId, Carbon $date): array
+    {
+        $master = $this->masterRepository->findWithSchedule($masterId);
+        if (!$master) {
+            return ['total' => 0, 'available' => 0, 'busy' => 0];
+        }
+
+        $schedule = $this->getMasterScheduleForDay($master, $date->dayOfWeek);
+        if (!$schedule || !$schedule->is_working_day) {
+            return ['total' => 0, 'available' => 0, 'busy' => 0];
+        }
+
+        $workStart = Carbon::parse($date->toDateString() . ' ' . $schedule->work_start_time);
+        $workEnd = Carbon::parse($date->toDateString() . ' ' . $schedule->work_end_time);
+        
+        // Считаем 30-минутные слоты
+        $totalMinutes = $workStart->diffInMinutes($workEnd);
+        $totalSlots = intval($totalMinutes / 30);
+
+        // Получаем занятые слоты
+        $busySlots = $this->getMasterBusySlots($masterId, $date);
+        $busyCount = $busySlots->count();
+
+        return [
+            'total' => $totalSlots,
+            'available' => $totalSlots - $busyCount,
+            'busy' => $busyCount
+        ];
+    }
+
+    private function invalidateSlotCache(int $masterId, Carbon $date): void
+    {
+        $pattern = "slots:{$masterId}:{$date->toDateString()}:*";
+        $keys = Cache::getRedis()->keys($pattern);
+        
+        foreach ($keys as $key) {
+            Cache::forget($key);
+        }
     }
 }

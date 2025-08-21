@@ -4,25 +4,23 @@ namespace App\Domain\Search\Services;
 
 use App\Domain\Search\Enums\SearchType;
 use App\Domain\Search\Enums\SortBy;
-use App\Domain\Search\Services\Handlers\SearchEngineManager;
-use App\Domain\Search\Services\Handlers\SearchValidator;
-use App\Domain\Search\Services\Handlers\SearchAnalytics;
-use App\Domain\Search\Services\Handlers\SearchSuggestionProvider;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Упрощенный сервис поиска
- * Делегирует работу специализированным обработчикам
+ * Основной сервис поиска (обновленный после рефакторинга)
+ * Интегрирован с новыми консолидированными сервисами
+ * 
+ * Принцип KISS: минимум зависимостей, максимум функциональности
  */
 class SearchService
 {
     public function __construct(
-        private SearchEngineManager $engineManager,
-        private SearchValidator $validator,
-        private SearchAnalytics $analytics,
-        private SearchSuggestionProvider $suggestionProvider
+        private SearchAnalyticsService $analyticsService,
+        private DatabaseSearchEngine $databaseEngine,
+        private ElasticsearchEngine $elasticsearchEngine,
+        private RecommendationEngine $recommendationEngine
     ) {}
 
     /**
@@ -38,24 +36,24 @@ class SearchService
         ?array $location = null
     ): LengthAwarePaginator {
         
-        // Валидация
-        $this->validator->validateSearchParams($query, $type, $filters, $sortBy, $page, $perPage);
+        // Валидация через новый аналитический сервис
+        $this->analyticsService->validateSearchParams($query, $type, $filters, $sortBy, $page, $perPage);
 
         // Логирование поискового запроса
-        $this->analytics->logSearchQuery($query, $type, $filters, $sortBy);
+        $this->analyticsService->logSearchQuery($query, $type, $filters, $sortBy, auth()->id());
 
         try {
             // Получаем подходящий движок
-            $engine = $this->engineManager->getEngine($type);
+            $engine = $this->getEngine($type);
             
             // Выполняем поиск через движок
             $results = $engine->search($query, $filters, $sortBy, $page, $perPage, $location);
             
             // Обогащаем результаты
-            $enrichedResults = $this->enrichResults($results, $type);
+            $enrichedResults = $this->enrichResults($results, $engine);
             
             // Логируем результаты
-            $this->analytics->logSearchResults($query, $type, $enrichedResults->total());
+            $this->analyticsService->logSearchResults($query, $type, $enrichedResults->total());
             
             return $enrichedResults;
             
@@ -81,14 +79,14 @@ class SearchService
         int $limit = 5
     ): array {
         
-        if (mb_strlen($query) < $type->getMinQueryLength()) {
+        if (mb_strlen($query) < 2) { // Упрощено, убрали вызов $type->getMinQueryLength()
             return [];
         }
 
         $cacheKey = "quick_search:{$type->value}:" . md5($query) . ":{$limit}";
         
         return Cache::remember($cacheKey, 300, function () use ($query, $type, $limit) {
-            $engine = $this->engineManager->getEngine($type);
+            $engine = $this->getEngine($type);
             return $engine->quickSearch($query, $limit);
         });
     }
@@ -101,7 +99,7 @@ class SearchService
         SearchType $type = SearchType::ADS,
         int $limit = 10
     ): array {
-        return $this->suggestionProvider->getAutocomplete($query, $type, $limit);
+        return $this->analyticsService->getAutocomplete($query, $type, $limit);
     }
 
     /**
@@ -109,7 +107,7 @@ class SearchService
      */
     public function getPopularQueries(SearchType $type = SearchType::ADS, int $limit = 10): array
     {
-        return $this->suggestionProvider->getPopularQueries($type, $limit);
+        return $this->analyticsService->getPopularQueries($type, $limit);
     }
 
     /**
@@ -117,7 +115,7 @@ class SearchService
      */
     public function getRelatedQueries(string $query, SearchType $type = SearchType::ADS): array
     {
-        return $this->suggestionProvider->getRelatedQueries($query, $type);
+        return $this->analyticsService->getRelatedQueries($query, $type);
     }
 
     /**
@@ -128,7 +126,7 @@ class SearchService
         SearchType $type = SearchType::ADS,
         array $context = []
     ): array {
-        return $this->suggestionProvider->getSearchSuggestions($query, $type, $context);
+        return $this->analyticsService->getSearchSuggestions($query, $type, $context);
     }
 
     /**
@@ -140,7 +138,7 @@ class SearchService
         int $limit = 10,
         array $excludeIds = []
     ): array {
-        $engine = $this->engineManager->getEngine($type);
+        $engine = $this->getEngine($type);
         return $engine->findSimilar($objectId, $limit, $excludeIds);
     }
 
@@ -149,10 +147,10 @@ class SearchService
      */
     public function advancedSearch(array $criteria): LengthAwarePaginator
     {
-        $this->validator->validateAdvancedCriteria($criteria);
+        $this->analyticsService->validateAdvancedCriteria($criteria);
         
         $type = SearchType::tryFrom($criteria['type'] ?? 'ads') ?? SearchType::ADS;
-        $engine = $this->engineManager->getEngine($type);
+        $engine = $this->getEngine($type);
         
         return $engine->advancedSearch($criteria);
     }
@@ -165,11 +163,7 @@ class SearchService
         SearchType $type,
         array $facets = []
     ): array {
-        if (!$type->supportsFacetedSearch()) {
-            return [];
-        }
-        
-        $engine = $this->engineManager->getEngine($type);
+        $engine = $this->getEngine($type);
         return $engine->facetedSearch($query, $facets);
     }
 
@@ -183,9 +177,9 @@ class SearchService
         array $filters = [],
         int $limit = 20
     ): array {
-        $this->validator->validateGeoSearch($location, $radius, $type);
+        $this->analyticsService->validateGeoSearch($location, $radius, $type);
         
-        $engine = $this->engineManager->getEngine($type);
+        $engine = $this->getEngine($type);
         return $engine->geoSearch($location, $radius, $filters, $limit);
     }
 
@@ -201,7 +195,7 @@ class SearchService
         $cacheKey = "intelligent_search:" . md5($query . $type->value . ($userId ?? '') . serialize($context));
         
         return Cache::remember($cacheKey, 900, function () use ($query, $type, $userId, $context) {
-            $engine = $this->engineManager->getEngine($type);
+            $engine = $this->getEngine($type);
             
             // Используем ML для улучшения релевантности
             if (method_exists($engine, 'intelligentSearch')) {
@@ -224,7 +218,7 @@ class SearchService
         int $limit = 1000
     ): string {
         $results = $this->search($query, $type, $filters, SortBy::RELEVANCE, 1, $limit);
-        $engine = $this->engineManager->getEngine($type);
+        $engine = $this->getEngine($type);
         
         return $engine->exportResults($results, $format);
     }
@@ -234,7 +228,7 @@ class SearchService
      */
     public function getSearchStatistics(array $filters = []): array
     {
-        return $this->analytics->getSearchStatistics($filters);
+        return $this->analyticsService->getSearchStatistics($filters);
     }
 
     /**
@@ -242,12 +236,12 @@ class SearchService
      */
     public function trackSearchClick(string $query, SearchType $type, int $position, int $itemId): void
     {
-        $this->analytics->trackSearchClick($query, $type, $position, $itemId);
+        $this->analyticsService->trackSearchClick($query, $type, $position, $itemId);
     }
 
     public function trackSearchConversion(string $query, SearchType $type, int $itemId, float $value = 0): void
     {
-        $this->analytics->trackSearchConversion($query, $type, $itemId, $value);
+        $this->analyticsService->trackSearchConversion($query, $type, $itemId, $value);
     }
 
     // === МЕТОДЫ УПРАВЛЕНИЯ ===
@@ -270,11 +264,11 @@ class SearchService
     public function warmupCache(): void
     {
         foreach (SearchType::cases() as $type) {
-            $popularQueries = $this->suggestionProvider->getPopularQueries($type, 20);
+            $popularQueries = $this->analyticsService->getPopularQueries($type, 20);
             
             foreach ($popularQueries as $query) {
                 try {
-                    $this->search($query, $type, [], SortBy::getDefaultForSearchType($type), 1, 20);
+                    $this->search($query, $type, [], SortBy::RELEVANCE, 1, 20);
                 } catch (\Exception $e) {
                     Log::warning('Cache warmup failed', [
                         'query' => $query,
@@ -292,7 +286,7 @@ class SearchService
     public function healthCheck(): array
     {
         return [
-            'engines' => $this->engineManager->healthCheck(),
+            'engines' => $this->checkEnginesHealth(),
             'cache_status' => $this->checkCacheStatus(),
             'search_test' => $this->performSearchTest(),
         ];
@@ -301,12 +295,50 @@ class SearchService
     // === ПРИВАТНЫЕ МЕТОДЫ ===
 
     /**
+     * Получить движок для типа поиска (встроенный менеджер)
+     */
+    private function getEngine(SearchType $type): SearchEngineInterface
+    {
+        switch ($type) {
+            case SearchType::ADS:
+            case SearchType::MASTERS:
+            case SearchType::SERVICES:
+                // Используем DatabaseEngine для всех основных типов
+                return $this->databaseEngine;
+                
+            case SearchType::RECOMMENDATIONS:
+                return $this->recommendationEngine;
+                
+            case SearchType::GLOBAL:
+            default:
+                // Проверяем доступность Elasticsearch
+                if ($this->isElasticsearchAvailable()) {
+                    return $this->elasticsearchEngine;
+                }
+                
+                // Fallback на DatabaseEngine
+                return $this->databaseEngine;
+        }
+    }
+
+    /**
+     * Проверить доступность Elasticsearch
+     */
+    private function isElasticsearchAvailable(): bool
+    {
+        try {
+            $health = $this->elasticsearchEngine->healthCheck();
+            return $health['status'] === 'healthy';
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
      * Обогащение результатов поиска
      */
-    private function enrichResults(LengthAwarePaginator $results, SearchType $type): LengthAwarePaginator
-    {
-        $engine = $this->engineManager->getEngine($type);
-        
+    private function enrichResults(LengthAwarePaginator $results, SearchEngineInterface $engine): LengthAwarePaginator
+    {        
         if (method_exists($engine, 'enrichResults')) {
             return $engine->enrichResults($results);
         }
@@ -329,6 +361,18 @@ class SearchService
                 'pageName' => 'page',
             ]
         );
+    }
+
+    /**
+     * Проверить работоспособность всех движков
+     */
+    private function checkEnginesHealth(): array
+    {
+        return [
+            'database' => $this->databaseEngine->healthCheck(),
+            'elasticsearch' => $this->elasticsearchEngine->healthCheck(),
+            'recommendation' => $this->recommendationEngine->healthCheck()
+        ];
     }
 
     /**

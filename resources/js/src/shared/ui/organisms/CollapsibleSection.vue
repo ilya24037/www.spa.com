@@ -15,7 +15,7 @@
         </span>
         <span class="text-lg font-medium text-gray-900 sm:text-xl">
           {{ title }}
-          <span v-if="isRequired" class="text-red-500 ml-1 text-sm">*</span>
+          <span v-if="isRequired" class="text-red-500 ml-1 text-2xl">*</span>
         </span>
       </div>
       

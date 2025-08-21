@@ -49,9 +49,9 @@
               </div>
             </div>
             <div v-else>
-              <YandexMapPicker
+              <YandexMap
                 :markers="mapMarkers"
-                :multiple="true"
+                mode="multiple"
                 :clusterize="false"
                 :show-single-marker="false"
                 :height="400"
@@ -180,7 +180,7 @@ import RecommendationService from '@/src/shared/services/RecommendationService'
 import { FilterPanel, FilterCategory } from '@/src/features/masters-filter'
 import { BaseCheckbox } from '@/src/shared/ui/atoms'
 import { logger } from '@/src/shared/utils/logger'
-import YandexMapPicker from '@/src/shared/ui/molecules/YandexMapPicker/YandexMapPicker.vue'
+import YandexMap from '@/src/shared/ui/molecules/YandexMapPicker/YandexMap.vue'
 import { useMapWithMasters } from '@/src/features/map/composables/useMapWithMasters'
 import type { GridView } from '@/src/shared/ui/molecules/GridControls/GridControls.vue'
 

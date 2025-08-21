@@ -33,7 +33,7 @@ class UpdateServiceImports extends Command
         'App\Services\AdSearchService' => 'App\Domain\Ad\Services\AdSearchService',
         'App\Services\AdService' => 'App\Domain\Ad\Services\AdService',
         'App\Services\MasterService' => 'App\Domain\Master\Services\MasterService',
-        'App\Services\PaymentGatewayService' => 'App\Domain\Payment\Services\PaymentGatewayService',
+        // 'App\Services\PaymentGatewayService' => 'УДАЛЕН при оптимизации',
         'App\Services\PaymentService' => 'App\Domain\Payment\Services\PaymentService',
         'App\Services\ReviewService' => 'App\Domain\Review\Services\ReviewService',
         'App\Services\SearchService' => 'App\Domain\Search\Services\SearchService',

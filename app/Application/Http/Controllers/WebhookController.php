@@ -2,7 +2,7 @@
 
 namespace App\Application\Http\Controllers;
 
-use App\Domain\Payment\Services\PaymentGatewayService;
+use App\Domain\Payment\Gateways\PaymentGatewayManager;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -11,11 +11,11 @@ use Illuminate\Http\Response;
  */
 class WebhookController extends Controller
 {
-    protected PaymentGatewayService $paymentGateway;
+    protected PaymentGatewayManager $gatewayManager;
 
-    public function __construct(PaymentGatewayService $paymentGateway)
+    public function __construct(PaymentGatewayManager $gatewayManager)
     {
-        $this->paymentGateway = $paymentGateway;
+        $this->gatewayManager = $gatewayManager;
     }
 
     /**
@@ -35,7 +35,7 @@ class WebhookController extends Controller
 
         $data = $request->json()->all();
 
-        $success = $this->paymentGateway->handleWebhook('yookassa', $data);
+        $success = $this->gatewayManager->handleWebhook('yookassa', $data);
 
         return response($success ? 'OK' : 'ERROR', $success ? 200 : 400);
     }
@@ -47,7 +47,7 @@ class WebhookController extends Controller
     {
         $data = $request->all();
 
-        $success = $this->paymentGateway->handleWebhook('sbp', $data);
+        $success = $this->gatewayManager->handleWebhook('sbp', $data);
 
         return response($success ? 'OK' : 'ERROR', $success ? 200 : 400);
     }
@@ -64,7 +64,7 @@ class WebhookController extends Controller
 
         $data = $request->all();
 
-        $success = $this->paymentGateway->handleWebhook('webmoney', $data);
+        $success = $this->gatewayManager->handleWebhook('webmoney', $data);
 
         return response($success ? 'YES' : 'NO', $success ? 200 : 400);
     }
@@ -76,7 +76,7 @@ class WebhookController extends Controller
     {
         $data = $request->all();
 
-        $success = $this->paymentGateway->handleWebhook('robokassa', $data);
+        $success = $this->gatewayManager->handleWebhook('robokassa', $data);
 
         return response($success ? 'OK' : 'ERROR', $success ? 200 : 400);
     }
@@ -198,7 +198,7 @@ class WebhookController extends Controller
                 'event' => 'payment.succeeded'
             ];
 
-            $success = $this->paymentGateway->handleWebhook('yookassa', $testData);
+            $success = $this->gatewayManager->handleWebhook('yookassa', $testData);
             
             return response()->json([
                 'success' => $success,

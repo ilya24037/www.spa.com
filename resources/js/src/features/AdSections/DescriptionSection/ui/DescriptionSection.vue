@@ -1,6 +1,5 @@
 <template>
   <div class="bg-white rounded-lg p-5">
-    <h2 class="text-lg font-semibold text-gray-900 mb-4">Описание</h2>
     <BaseTextarea
       v-model="localDescription"
       placeholder="Напишите подробное описание о себе и о своих услугах. Подробное, интересное, смысловое описание значительно увеличивает эффективность вашей анкеты."

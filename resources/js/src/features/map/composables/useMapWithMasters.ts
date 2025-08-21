@@ -1,6 +1,6 @@
 import { ref, computed, watch } from 'vue'
 import { useFilterStore } from '@/src/features/masters-filter/model/filter.store'
-import type { MapMarker } from '@/src/shared/ui/molecules/YandexMapPicker/YandexMapPicker.vue'
+import type { MapMarker } from '@/src/shared/ui/molecules/YandexMapPicker/YandexMap.vue'
 
 interface Master {
   id: number | string

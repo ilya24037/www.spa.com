@@ -242,11 +242,8 @@ const searchAddress = async (address: string): Promise<void> => {
   }
 
   try {
-    // Добавляем префикс города если его нет
+    // Используем адрес как есть, без принудительного добавления города
     let searchQuery = address
-    if (searchQuery.toLowerCase().indexOf('пермь') === -1) {
-      searchQuery = `Пермь, ${address}`
-    }
 
     // Debug log removed
     

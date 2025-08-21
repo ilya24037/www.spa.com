@@ -68,17 +68,26 @@ class DraftService
      */
     public function prepareForDisplay(Ad $ad): array
     {
+        // ✅ ПРИНУДИТЕЛЬНОЕ ЛОГИРОВАНИЕ ВХОДА
+        Log::info("📸 DraftService::prepareForDisplay НАЧАЛО", [
+            'ad_id' => $ad->id,
+            'ad_status' => $ad->status,
+            'ad_exists' => $ad->exists,
+            'ad_attributes' => $ad->getAttributes(),
+            'ad_keys' => array_keys($ad->getAttributes())
+        ]);
+        
         $data = $ad->toArray();
         
         // ВАЖНО: Убедимся, что ID всегда присутствует и имеет правильный тип
         $data['id'] = (int) $ad->id;
         
         // Декодируем JSON поля
-        $jsonFields = ['clients', 'services', 'features', 'photos', 'video', 'geo', 'prices', 'schedule'];
+        $jsonFields = ['clients', 'services', 'features', 'photos', 'video', 'geo', 'prices', 'schedule', 'faq'];
         
         // Логируем данные schedule для отладки
         if (isset($data['schedule'])) {
-            \Log::info("📅 DraftService::prepareForDisplay: Данные schedule", [
+            Log::info("📅 DraftService::prepareForDisplay: Данные schedule", [
                 'schedule_exists' => isset($data['schedule']),
                 'schedule_value' => $data['schedule'],
                 'schedule_type' => gettype($data['schedule']),
@@ -87,7 +96,7 @@ class DraftService
                 'schedule_is_null' => is_null($data['schedule'])
             ]);
         } else {
-            \Log::info("📅 DraftService::prepareForDisplay: Поле schedule НЕ НАЙДЕНО в данных", [
+            Log::info("📅 DraftService::prepareForDisplay: Поле schedule НЕ НАЙДЕНО в данных", [
                 'available_fields' => array_keys($data),
                 'data_keys_count' => count(array_keys($data))
             ]);
@@ -126,13 +135,46 @@ class DraftService
                 
                 // Логируем результат декодирования для schedule
                 if ($field === 'schedule') {
-                    \Log::info("📅 DraftService::prepareForDisplay: Результат декодирования schedule", [
+                    Log::info("📅 DraftService::prepareForDisplay: Результат декодирования schedule", [
                         'field' => $field,
                         'original_value' => $ad->getAttribute($field),
                         'decoded_value' => $data[$field],
                         'decoded_type' => gettype($data[$field]),
                         'decoded_is_array' => is_array($data[$field])
                     ]);
+                }
+            }
+        }
+        
+        // При загрузке данных переносим поля из prices в geo для фронтенда
+        if (isset($data['prices']) && is_array($data['prices']) && isset($data['geo']) && is_array($data['geo'])) {
+            // Поля для переноса из prices в geo при загрузке
+            $fieldsToMove = ['outcall_apartment', 'outcall_hotel', 'outcall_house', 
+                           'outcall_sauna', 'outcall_office', 'taxi_included'];
+            
+            foreach ($fieldsToMove as $field) {
+                if (isset($data['prices'][$field])) {
+                    $data['geo'][$field] = $data['prices'][$field];
+                }
+            }
+        }
+        
+        // Переносим поля типов мест и такси из geo в prices
+        if (isset($data['geo']) && is_array($data['geo'])) {
+            // Инициализируем prices если его нет
+            if (!isset($data['prices']) || !is_array($data['prices'])) {
+                $data['prices'] = [];
+            }
+            
+            // Поля для переноса из geo в prices
+            $fieldsToMove = ['outcall_apartment', 'outcall_hotel', 'outcall_house', 
+                           'outcall_sauna', 'outcall_office', 'taxi_included'];
+            
+            foreach ($fieldsToMove as $field) {
+                if (isset($data['geo'][$field])) {
+                    $data['prices'][$field] = $data['geo'][$field];
+                    // Удаляем из geo, чтобы избежать дублирования
+                    unset($data['geo'][$field]);
                 }
             }
         }
@@ -175,17 +217,11 @@ class DraftService
             $data['description'] = '';
         }
         
-        // Преобразуем отдельные boolean поля обратно в массив media_settings для фронтенда
-        $data['media_settings'] = [];
-        if (!empty($data['show_photos_in_gallery'])) {
-            $data['media_settings'][] = 'show_photos_in_gallery';
-        }
-        if (!empty($data['allow_download_photos'])) {
-            $data['media_settings'][] = 'allow_download_photos';
-        }
-        if (!empty($data['watermark_photos'])) {
-            $data['media_settings'][] = 'watermark_photos';
-        }
+        // ✅ ПРИНУДИТЕЛЬНОЕ ЛОГИРОВАНИЕ В КОНЦЕ
+        Log::info("📸 DraftService::prepareForDisplay ЗАВЕРШЕНО", [
+            'final_data_keys' => array_keys($data),
+            'final_data_count' => count($data)
+        ]);
         
         return $data;
     }
@@ -204,16 +240,59 @@ class DraftService
     }
 
     /**
+     * Валидация взаимоисключающих опций в FAQ
+     * Обеспечивает что опция "Нет" не может быть выбрана вместе с другими опциями
+     */
+    private function validateFaqExclusivity($faq): array
+    {
+        if (!is_array($faq)) {
+            return [];
+        }
+        
+        // Вопросы с взаимоисключающей опцией "Нет" (questionId => value опции "Нет")
+        $exclusiveNoQuestions = [
+            'faq_2' => 4, // "Есть ласки и тактильный контакт?" - опция "Нет"
+            'faq_3' => 4  // "Возможны встречи в формате GFE?" - опция "Нет"
+        ];
+        
+        foreach ($exclusiveNoQuestions as $questionId => $noValue) {
+            if (isset($faq[$questionId]) && is_array($faq[$questionId])) {
+                $values = $faq[$questionId];
+                
+                // Если опция "Нет" выбрана вместе с другими опциями
+                if (in_array($noValue, $values) && count($values) > 1) {
+                    // Оставляем только "Нет", убираем все остальные опции
+                    $faq[$questionId] = [$noValue];
+                    
+                    Log::info("FAQ взаимоисключение: Очищены конфликтующие опции", [
+                        'question_id' => $questionId,
+                        'original_values' => $values,
+                        'cleaned_values' => [$noValue]
+                    ]);
+                }
+            }
+        }
+        
+        return $faq;
+    }
+    
+    /**
      * Подготовить данные для сохранения
      */
     private function prepareData(array $data): array
     {
+        // Валидация взаимоисключающих опций в FAQ
+        if (isset($data['faq'])) {
+            $data['faq'] = $this->validateFaqExclusivity($data['faq']);
+        }
+        
         // Кодируем массивы в JSON
+        // Исключаем 'faq' из ручного кодирования, так как модель обрабатывает его автоматически через $jsonFields
         $jsonFields = ['clients', 'services', 'features', 'photos', 'video', 'geo', 'prices', 'schedule'];
         
         // Логируем данные schedule перед обработкой
         if (isset($data['schedule'])) {
-            \Log::info("📅 DraftService: Данные schedule перед JSON кодированием", [
+            Log::info("📅 DraftService: Данные schedule перед JSON кодированием", [
                 'schedule_data' => $data['schedule'],
                 'schedule_type' => gettype($data['schedule']),
                 'schedule_is_array' => is_array($data['schedule'])
@@ -256,7 +335,7 @@ class DraftService
                         
                         // Логируем результат JSON кодирования для schedule
                         if ($field === 'schedule') {
-                            \Log::info("📅 DraftService: Результат JSON кодирования schedule", [
+                            Log::info("📅 DraftService: Результат JSON кодирования schedule", [
                                 'encoded_schedule' => $data[$field],
                                 'encoded_length' => strlen($data[$field])
                             ]);

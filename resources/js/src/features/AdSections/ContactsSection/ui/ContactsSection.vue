@@ -2,13 +2,15 @@
   <div class="bg-white rounded-lg p-5">
     <h2 class="text-lg font-semibold text-gray-900 mb-4">Контакты</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <!-- Все телефонные поля используют единую маску +7 (###) ###-##-## -->
       <BaseInput
         v-model="localPhone"
+        v-maska="'+7 (###) ###-##-##'"
         type="tel"
         label="Телефон"
         placeholder="+7 (999) 999-99-99"
         hint="Основной номер для связи"
-        pattern="[+]7\s?[\(]?[0-9]{3}[\)]?\s?[0-9]{3}[-]?[0-9]{2}[-]?[0-9]{2}"
+        pattern="^\+7 \([0-9]{3}\) [0-9]{3}-[0-9]{2}-[0-9]{2}$"
         :error="errors.phone"
         @update:modelValue="emitAll"
       />
@@ -20,6 +22,7 @@
         label="WhatsApp"
         placeholder="+7 (999) 999-99-99"
         hint="Оставьте пустым, если совпадает с телефоном"
+        pattern="^\+7 \([0-9]{3}\) [0-9]{3}-[0-9]{2}-[0-9]{2}$"
         :error="errors.whatsapp"
         @update:modelValue="emitAll"
       />

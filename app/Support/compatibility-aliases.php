@@ -33,9 +33,7 @@ class_alias('App\Domain\Booking\Actions\CancelBookingAction', 'App\Actions\Cance
 class_alias('App\Domain\Booking\Actions\ConfirmBookingAction', 'App\Actions\ConfirmBookingAction');
 class_alias('App\Domain\Booking\Actions\CompleteBookingAction', 'App\Actions\CompleteBookingAction');
 class_alias('App\Domain\Booking\Actions\RescheduleBookingAction', 'App\Actions\RescheduleBookingAction');
-class_alias('App\Domain\Payment\Actions\CreatePaymentAction', 'App\Actions\CreatePaymentAction');
-class_alias('App\Domain\Payment\Actions\ProcessPaymentAction', 'App\Actions\ProcessPaymentAction');
-class_alias('App\Domain\Payment\Actions\RefundPaymentAction', 'App\Actions\RefundPaymentAction');
+// Payment Actions удалены при оптимизации
 
 // User domain aliases
 class_alias('App\Domain\User\Models\User', 'App\Models\User');
@@ -48,7 +46,7 @@ class_alias('App\Domain\Ad\Services\AdMediaService', 'App\Services\AdMediaServic
 class_alias('App\Domain\Ad\Services\AdModerationService', 'App\Services\AdModerationService');
 class_alias('App\Domain\Ad\Services\AdSearchService', 'App\Services\AdSearchService');
 class_alias('App\Domain\Master\Services\MasterService', 'App\Services\MasterService');
-class_alias('App\Domain\Payment\Services\PaymentGatewayService', 'App\Services\PaymentGatewayService');
+// class_alias('App\Domain\Payment\Services\PaymentGatewayService', 'App\Services\PaymentGatewayService'); // УДАЛЕН в ходе рефакторинга
 class_alias('App\Domain\Payment\Services\PaymentService', 'App\Services\PaymentService');
 class_alias('App\Domain\Review\Services\ReviewService', 'App\Services\ReviewService');
 class_alias('App\Domain\User\Services\UserAuthService', 'App\Services\UserAuthService');
@@ -61,16 +59,28 @@ class_alias('App\Infrastructure\Media\MediaService', 'App\Services\MediaService'
 class_alias('App\Infrastructure\Notification\LegacyNotificationService', 'App\Services\LegacyNotificationService');
 class_alias('App\Infrastructure\Adapters\BookingServiceAdapter', 'App\Services\BookingServiceAdapter');
 
-// Search service aliases
-class_alias('App\Domain\Search\Engines\AdSearchEngine', 'App\Services\Search\AdSearchEngine');
-class_alias('App\Domain\Search\Services\BaseSearchEngine', 'App\Services\Search\BaseSearchEngine');
-class_alias('App\Domain\Search\Services\GlobalSearchEngine', 'App\Services\Search\GlobalSearchEngine');
-class_alias('App\Domain\Search\Engines\MasterSearchEngine', 'App\Services\Search\MasterSearchEngine');
+// Search service aliases - обновлены после консолидации (20->7 сервисов)
+// Старые движки перенаправляем на DatabaseSearchEngine
+class_alias('App\Domain\Search\Services\DatabaseSearchEngine', 'App\Services\Search\AdSearchEngine');
+class_alias('App\Domain\Search\Services\DatabaseSearchEngine', 'App\Services\Search\MasterSearchEngine');
+class_alias('App\Domain\Search\Services\DatabaseSearchEngine', 'App\Services\Search\ServiceSearchEngine');
+class_alias('App\Domain\Search\Services\DatabaseSearchEngine', 'App\Services\Search\GlobalSearchEngine');
+
+// Основные сервисы
 class_alias('App\Domain\Search\Services\RecommendationEngine', 'App\Services\Search\RecommendationEngine');
 class_alias('App\Domain\Search\Services\SearchEngineInterface', 'App\Services\Search\SearchEngineInterface');
-class_alias('App\Domain\Search\Services\SearchFilter', 'App\Services\Search\SearchFilter');
-class_alias('App\Domain\Search\Services\SearchResult', 'App\Services\Search\SearchResult');
-class_alias('App\Domain\Search\Services\ServiceSearchEngine', 'App\Services\Search\ServiceSearchEngine');
+class_alias('App\Domain\Search\Services\SearchFilterService', 'App\Services\Search\SearchFilter');
+class_alias('App\Domain\Search\Services\SearchResultService', 'App\Services\Search\SearchResult');
+class_alias('App\Domain\Search\Services\SearchAnalyticsService', 'App\Services\Search\SearchAnalytics');
+
+// Удаленные фильтры перенаправляем на SearchFilterService
+class_alias('App\Domain\Search\Services\SearchFilterService', 'App\Domain\Search\Filters\CategoryFilter');
+class_alias('App\Domain\Search\Services\SearchFilterService', 'App\Domain\Search\Filters\LocationFilter');
+class_alias('App\Domain\Search\Services\SearchFilterService', 'App\Domain\Search\Filters\PriceFilter');
+
+// Удаленные движки перенаправляем на DatabaseSearchEngine
+class_alias('App\Domain\Search\Services\DatabaseSearchEngine', 'App\Domain\Search\Engines\AdSearchEngine');
+class_alias('App\Domain\Search\Services\DatabaseSearchEngine', 'App\Domain\Search\Engines\MasterSearchEngine');
 
 // Notification channel aliases
 class_alias('App\Infrastructure\Notification\Channels\ChannelInterface', 'App\Services\Notification\Channels\ChannelInterface');

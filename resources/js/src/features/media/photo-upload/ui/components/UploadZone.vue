@@ -6,9 +6,9 @@
       'border-blue-400 bg-blue-50': isDragOver,
       'border-gray-300': !isDragOver
     }"
-    @drop.prevent="handleDrop"
-    @dragover.prevent="isDragOver = true"
-    @dragleave.prevent="isDragOver = false"
+    @drop.prevent="hasContent ? null : handleDrop"
+    @dragover.prevent="hasContent ? null : handleDragOver"
+    @dragleave.prevent="hasContent ? null : (isDragOver = false)"
   >
     <input
       ref="fileInput"
@@ -43,7 +43,7 @@ interface Props {
   hasContent?: boolean
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
 
 const emit = defineEmits<{
   'files-selected': [files: File[]]
@@ -57,20 +57,58 @@ const openFileDialog = () => {
 }
 
 const handleFileSelect = (event: Event) => {
+  console.log('📁 UploadZone: handleFileSelect вызван', { 
+    event: event.type,
+    target: event.target,
+    filesCount: (event.target as HTMLInputElement)?.files?.length
+  })
+  
   const target = event.target as HTMLInputElement
   const files = Array.from(target.files || [])
   if (files.length > 0) {
+    console.log('✅ UploadZone: Файлы выбраны, эмитим событие', { filesCount: files.length })
     emit('files-selected', files)
   }
   target.value = ''
 }
 
 const handleDrop = (event: DragEvent) => {
+  console.log('📁 UploadZone: handleDrop вызван', { 
+    dataTransferTypes: event.dataTransfer?.types,
+    hasFiles: event.dataTransfer?.types.includes('Files'),
+    typesCount: event.dataTransfer?.types.length
+  })
+  
   isDragOver.value = false
-  const files = Array.from(event.dataTransfer?.files || [])
-  if (files.length > 0) {
-    emit('files-selected', files)
+  
+  // Проверяем, что перетаскиваются ТОЛЬКО файлы, без других типов
+  const hasFiles = event.dataTransfer?.types.includes('Files')
+  const hasOnlyFiles = hasFiles && event.dataTransfer?.types.length === 1
+  
+  if (hasOnlyFiles) {
+    const files = Array.from(event.dataTransfer?.files || [])
+    if (files.length > 0) {
+      console.log('✅ UploadZone: Файлы перетащены, эмитим событие', { filesCount: files.length })
+      emit('files-selected', files)
+    }
+  } else {
+    console.log('❌ UploadZone: Drag & drop пропущен - не файлы или перетаскивание фото', {
+      hasFiles,
+      hasOnlyFiles,
+      typesCount: event.dataTransfer?.types.length,
+      types: Array.from(event.dataTransfer?.types || [])
+    })
   }
+}
+
+const handleDragOver = (event: DragEvent) => {
+  console.log('📁 UploadZone: handleDragOver вызван', { 
+    event: event.type,
+    dataTransferTypes: event.dataTransfer?.types,
+    hasContent: props.hasContent,
+    typesCount: event.dataTransfer?.types.length
+  })
+  isDragOver.value = true
 }
 
 defineExpose({ openFileDialog })

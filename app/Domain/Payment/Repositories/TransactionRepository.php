@@ -203,7 +203,7 @@ class TransactionRepository extends BaseRepository
     /**
      * Применить фильтры к запросу
      */
-    protected function applyFilters($query, array $filters): void
+    protected function applyFilters($query, array $filters): \Illuminate\Database\Eloquent\Builder
     {
         if (!empty($filters['type'])) {
             $query->byType($filters['type']);
@@ -232,5 +232,7 @@ class TransactionRepository extends BaseRepository
         if (!empty($filters['max_amount'])) {
             $query->where('amount', '<=', $filters['max_amount']);
         }
+
+        return $query;
     }
 }

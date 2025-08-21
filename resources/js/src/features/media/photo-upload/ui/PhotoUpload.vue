@@ -40,27 +40,26 @@
         />
         
         <!-- Кнопка добавить еще -->
-        <button 
-          v-if="safePhotosCount < maxFiles"
-          type="button"
-          @click="uploadZone?.openFileDialog()"
-          class="w-full py-2 px-4 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          Добавить еще фото
-        </button>
+        <div v-if="safePhotosCount < maxFiles" class="text-center">
+          <button 
+            type="button"
+            @click="uploadZone?.openFileDialog()"
+            class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+          >
+            Добавить ещё фото
+          </button>
+        </div>
       </div>
     </UploadZone>
     
-    <!-- ЧЕКБОКСЫ НАСТРОЕК (КРИТИЧЕСКИ ВАЖНО!) -->
-    <MediaSettings
-      v-if="safePhotosCount > 0"
-      :show-additional-info="showAdditionalInfo"
-      :show-services="showServices"
-      :show-prices="showPrices"
-      @update:show-additional-info="$emit('update:showAdditionalInfo', $event)"
-      @update:show-services="$emit('update:showServices', $event)"
-      @update:show-prices="$emit('update:showPrices', $event)"
-    />
+    <!-- Информация об ограничениях -->
+    <div class="text-xs text-gray-500 space-y-1">
+      <p>• Максимум {{ maxFiles }} фотографий</p>
+      <p>• Размер файла до 5MB</p>
+      <p>• Поддерживаемые форматы: JPG, PNG, WebP</p>
+    </div>
+    
+
     
     <!-- Ошибки -->
     <div v-if="error" class="rounded-md bg-red-50 p-3">
@@ -71,11 +70,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, onMounted } from 'vue'
 import { usePhotoUpload } from '../composables/usePhotoUpload'
 import UploadZone from './components/UploadZone.vue'
 import PhotoGrid from './components/PhotoGrid.vue'
-import MediaSettings from './components/MediaSettings.vue'
+
 import PhotoUploadSkeleton from './components/PhotoUploadSkeleton.vue'
 import EmptyState from './components/EmptyState.vue'
 import ErrorBoundary from './components/ErrorBoundary.vue'
@@ -84,15 +83,14 @@ import type { PhotoUploadProps, PhotoUploadEmits, Photo } from '../model/types'
 const props = withDefaults(defineProps<PhotoUploadProps>(), {
   photos: () => [],
   maxFiles: 10,
-  showAdditionalInfo: false,
-  showServices: false,
-  showPrices: false,
   isLoading: false
 })
 
 const emit = defineEmits<PhotoUploadEmits>()
 
 const uploadZone = ref<InstanceType<typeof UploadZone>>()
+
+
 
 // Использование composable
 const {
@@ -187,12 +185,16 @@ const handleRemovePhoto = (index: number) => {
 
 // Wrapper для drag&drop с эмитом
 const onDragDrop = (index: number) => {
+  console.log('🔄 PhotoUpload: onDragDrop вызван', { index })
   handleDragDrop(index)
-  // Эмитим изменения после drag&drop
+  // ✅ Эмитим изменения ОДИН РАЗ после drag&drop
+  // handleDragDrop уже обновил localPhotos, поэтому эмитим safePhotos.value
   emit('update:photos', safePhotos.value)
 }
 
 const onDragEnd = () => {
   handleDragEnd()
 }
+
+
 </script>

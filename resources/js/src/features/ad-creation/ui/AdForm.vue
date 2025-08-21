@@ -27,6 +27,34 @@
         />
       </CollapsibleSection>
 
+      <!-- Кто оказывает услуги -->
+      <CollapsibleSection
+        title="Кто оказывает услуги"
+        :is-open="sectionsState.serviceProvider"
+        :is-required="true"
+        :is-filled="checkSectionFilled('serviceProvider')"
+        @toggle="toggleSection('serviceProvider')"
+      >
+        <ServiceProviderSection 
+          v-model:serviceProvider="form.service_provider" 
+          :errors="errors"
+        />
+      </CollapsibleSection>
+
+      <!-- Ваши клиенты -->
+      <CollapsibleSection
+        title="Ваши клиенты"
+        :is-open="sectionsState.clients"
+        :is-required="true"
+        :is-filled="checkSectionFilled('clients')"
+        @toggle="toggleSection('clients')"
+      >
+        <ClientsSection 
+          v-model:clients="form.clients" 
+          :errors="errors"
+        />
+      </CollapsibleSection>
+
       <!-- Параметры -->
        <CollapsibleSection
          title="Параметры"
@@ -113,9 +141,6 @@
       >
         <PhotoUpload 
           v-model:photos="form.photos" 
-          v-model:show-additional-info="form.media_settings.showAdditionalInfo"
-          v-model:show-services="form.media_settings.showServices"
-          v-model:show-prices="form.media_settings.showPrices"
           :errors="errors"
         />
       </CollapsibleSection>
@@ -193,6 +218,20 @@
         />
       </CollapsibleSection>
 
+      <!-- FAQ (необязательная) -->
+      <CollapsibleSection
+        title="FAQ (Часто задаваемые вопросы)"
+        :is-open="sectionsState.faq"
+        :is-required="false"
+        :is-filled="checkSectionFilled('faq')"
+        @toggle="toggleSection('faq')"
+      >
+        <FaqSection 
+          v-model:faq="form.faq"
+          :errors="errors"
+        />
+      </CollapsibleSection>
+
       <!-- Контакты (в самом низу) -->
       <CollapsibleSection
         title="Контакты"
@@ -250,7 +289,10 @@ import ContactsSection from '@/src/features/AdSections/ContactsSection/ui/Contac
 import ScheduleSection from '@/src/features/AdSections/ScheduleSection/ui/ScheduleSection.vue'
 import FeaturesSection from '@/src/features/AdSections/FeaturesSection/ui/FeaturesSection.vue'
 import DescriptionSection from '@/src/features/AdSections/DescriptionSection/ui/DescriptionSection.vue'
+import ServiceProviderSection from '@/src/features/AdSections/ServiceProviderSection/ui/ServiceProviderSection.vue'
+import ClientsSection from '@/src/features/AdSections/ClientsSection/ui/ClientsSection.vue'
 import PromoSection from '@/src/features/AdSections/PromoSection/ui/PromoSection.vue'
+import FaqSection from '@/src/features/AdSections/FaqSection/ui/FaqSection.vue'
 
 // Props
 interface Props {
@@ -295,6 +337,18 @@ const sectionsConfig = [
     title: 'Описание',
     required: false,
     fields: ['description']
+  },
+  {
+    key: 'serviceProvider',
+    title: 'Кто оказывает услуги',
+    required: true,
+    fields: ['service_provider']
+  },
+  {
+    key: 'clients',
+    title: 'Ваши клиенты',
+    required: true,
+    fields: ['clients']
   },
   {
      key: 'parameters',
@@ -357,6 +411,12 @@ const sectionsConfig = [
     fields: ['promo']
   },
   {
+    key: 'faq',
+    title: 'FAQ (Часто задаваемые вопросы)',
+    required: false,
+    fields: ['faq']
+  },
+  {
     key: 'contacts',
     title: 'Контакты',
     required: true,
@@ -416,6 +476,8 @@ onMounted(() => {
     scheduleInInitialData: props.initialData?.schedule,
     scheduleType: typeof props.initialData?.schedule
   })
+  
+
 })
 
 watch(() => form.schedule_notes, (newNotes, oldNotes) => {
@@ -455,13 +517,6 @@ watch(() => form.photos, (newPhotos, oldPhotos) => {
   }
 }, { deep: true })
 
-watch(() => form.media_settings, (newSettings, oldSettings) => {
-  console.log('🔄 AdForm: watch form.media_settings ТРИГГЕР', {
-    newSettings: newSettings,
-    oldSettings: oldSettings,
-    isEqual: JSON.stringify(newSettings) === JSON.stringify(oldSettings)
-  })
-}, { deep: true })
 
 </script>
 

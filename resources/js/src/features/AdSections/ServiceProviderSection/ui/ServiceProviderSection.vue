@@ -1,13 +1,15 @@
 <template>
   <div class="service-provider-section">
     <h2 class="form-group-title">Кто оказывает услуги</h2>
-    <div class="checkbox-group">
-      <BaseCheckbox
+    <div class="radio-group">
+      <BaseRadio
         v-for="option in providerOptions"
         :key="option.value"
-        :model-value="localProviders.includes(option.value)"
+        v-model="selectedProvider"
+        :value="option.value"
         :label="option.label"
-        @update:modelValue="toggleProvider(option.value, $event)"
+        name="service_provider"
+        @update:modelValue="handleProviderChange"
       />
     </div>
     <div v-if="errors.service_provider" class="error-message">
@@ -18,7 +20,7 @@
 
 <script setup>
 import { ref, watch, computed } from 'vue'
-import BaseCheckbox from '@/src/shared/ui/atoms/BaseCheckbox/BaseCheckbox.vue'
+import BaseRadio from '@/src/shared/ui/atoms/BaseRadio/BaseRadio.vue'
 
 const props = defineProps({
   serviceProvider: { type: Array, default: () => [] },
@@ -27,31 +29,24 @@ const props = defineProps({
 
 const emit = defineEmits(['update:serviceProvider'])
 
-const localProviders = ref([...props.serviceProvider])
+// Для радиокнопок используем строку вместо массива
+const selectedProvider = ref(props.serviceProvider[0] || 'women')
 
 watch(() => props.serviceProvider, (val) => {
-  localProviders.value = [...val]
+  selectedProvider.value = val[0] || 'women'
 })
 
-// Опции для CheckboxGroup
+// Опции для радиокнопок
 const providerOptions = computed(() => [
   { value: 'women', label: 'Женщина' },
   { value: 'men', label: 'Мужчина' },
   { value: 'couple', label: 'Пара' }
 ])
 
-const toggleProvider = (value, checked) => {
-  if (checked) {
-    if (!localProviders.value.includes(value)) {
-      localProviders.value.push(value)
-    }
-  } else {
-    const index = localProviders.value.indexOf(value)
-    if (index > -1) {
-      localProviders.value.splice(index, 1)
-    }
-  }
-  emit('update:serviceProvider', [...localProviders.value])
+const handleProviderChange = (value) => {
+  selectedProvider.value = value
+  // Отправляем массив с одним элементом для совместимости
+  emit('update:serviceProvider', [value])
 }
 </script>
 
@@ -71,7 +66,7 @@ const toggleProvider = (value, checked) => {
   line-height: 1.3;
 }
 
-.checkbox-group {
+.radio-group {
   display: flex;
   flex-direction: column;
   gap: 12px;

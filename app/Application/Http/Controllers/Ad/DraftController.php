@@ -72,6 +72,18 @@ class DraftController extends Controller
             $data['schedule_notes'] = '';
         }
         
+        // Обработка поля faq
+        if ($request->has('faq')) {
+            $faqData = $request->input('faq');
+            // Если faq пришел как JSON строка, декодируем
+            if (is_string($faqData)) {
+                $decoded = json_decode($faqData, true);
+                $data['faq'] = is_array($decoded) ? $decoded : [];
+            } else {
+                $data['faq'] = is_array($faqData) ? $faqData : [];
+            }
+        }
+        
         // Преобразование media_settings в отдельные boolean поля
         if (isset($data['media_settings'])) {
             $settings = is_string($data['media_settings']) 
@@ -204,13 +216,34 @@ class DraftController extends Controller
             }
         }
         
+        // Обработка поля online_booking
+        if ($request->has('online_booking')) {
+            $data['online_booking'] = $request->boolean('online_booking');
+        } else {
+            $data['online_booking'] = false; // Значение по умолчанию
+        }
+        
+        // Обработка поля faq
+        if ($request->has('faq')) {
+            $faqData = $request->input('faq');
+            // Если faq пришел как JSON строка, декодируем
+            if (is_string($faqData)) {
+                $decoded = json_decode($faqData, true);
+                $data['faq'] = is_array($decoded) ? $decoded : [];
+            } else {
+                $data['faq'] = is_array($faqData) ? $faqData : [];
+            }
+        }
+        
         // Логируем данные schedule для отладки
         \Log::info("📅 DraftController: Данные schedule", [
             'request_has_schedule' => $request->has('schedule'),
             'schedule_input' => $request->input('schedule'),
             'schedule_data' => $data['schedule'],
             'schedule_notes_input' => $request->input('schedule_notes'),
-            'schedule_notes_data' => $data['schedule_notes']
+            'schedule_notes_data' => $data['schedule_notes'],
+            'online_booking_input' => $request->input('online_booking'),
+            'online_booking_data' => $data['online_booking']
         ]);
         
         // Обработка media_settings

@@ -116,86 +116,7 @@
           </BaseInput>
         </div>
       </div>
-      
-      <!-- Места выезда -->
-      <div class="outcall-locations" v-if="hasOutcallPrices">
-        <div class="locations-header" @click="isOutcallExpanded = !isOutcallExpanded">
-          <label class="locations-label">Куда выезжаете:</label>
-          <svg 
-            class="expand-icon" 
-            :class="{ 'rotate-180': isOutcallExpanded }"
-            width="20" 
-            height="20" 
-            viewBox="0 0 20 20"
-            fill="none"
-          >
-            <path 
-              d="M5 7.5L10 12.5L15 7.5" 
-              stroke="currentColor" 
-              stroke-width="2" 
-              stroke-linecap="round" 
-              stroke-linejoin="round"
-            />
-          </svg>
-        </div>
-        <Transition name="collapse">
-          <div v-show="isOutcallExpanded" class="locations-content">
-            <div class="checkbox-list">
-              <BaseCheckbox
-                v-model="localPrices.outcall_apartment"
-                name="outcall_apartment"
-                label="На квартиру"
-                @update:modelValue="updatePrices"
-              />
-              <BaseCheckbox
-                v-model="localPrices.outcall_hotel"
-                name="outcall_hotel"
-                label="В гостиницу"
-                @update:modelValue="updatePrices"
-              />
-              <BaseCheckbox
-                v-model="localPrices.outcall_house"
-                name="outcall_house"
-                label="В загородный дом"
-                @update:modelValue="updatePrices"
-              />
-              <BaseCheckbox
-                v-model="localPrices.outcall_sauna"
-                name="outcall_sauna"
-                label="В сауну"
-                @update:modelValue="updatePrices"
-              />
-              <BaseCheckbox
-                v-model="localPrices.outcall_office"
-                name="outcall_office"
-                label="В офис"
-                @update:modelValue="updatePrices"
-              />
-            </div>
-            
-            <!-- Такси -->
-            <div class="taxi-options">
-              <label class="taxi-label">Такси:</label>
-              <div class="radio-group">
-                <BaseRadio
-                  v-model="localPrices.taxi_included"
-                  :value="false"
-                  label="Оплачивается отдельно"
-                  name="taxi"
-                  @update:modelValue="updatePrices"
-                />
-                <BaseRadio
-                  v-model="localPrices.taxi_included"
-                  :value="true"
-                  label="Включено в стоимость"
-                  name="taxi"
-                  @update:modelValue="updatePrices"
-                />
-              </div>
-            </div>
-          </div>
-        </Transition>
-      </div>
+
     </div>
 
     <!-- Ошибки валидации -->
@@ -208,8 +129,6 @@
 <script setup>
 import { ref, watch, reactive, computed } from 'vue'
 import BaseInput from '@/src/shared/ui/atoms/BaseInput/BaseInput.vue'
-import BaseCheckbox from '@/src/shared/ui/atoms/BaseCheckbox/BaseCheckbox.vue'
-import BaseRadio from '@/src/shared/ui/atoms/BaseRadio/BaseRadio.vue'
 
 const props = defineProps({
   prices: {
@@ -222,13 +141,7 @@ const props = defineProps({
       outcall_express: null,
       outcall_1h: null,
       outcall_2h: null,
-      outcall_night: null,
-      taxi_included: false,
-      outcall_apartment: true,
-      outcall_hotel: false,
-      outcall_house: false,
-      outcall_sauna: false,
-      outcall_office: false
+      outcall_night: null
     })
   },
   errors: {
@@ -239,8 +152,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:prices'])
 
-// Состояние для разворачивания секции выезда
-const isOutcallExpanded = ref(false)
+
 
 // Хелпер для преобразования значения в булевое
 const toBoolean = (value) => {
@@ -267,33 +179,17 @@ const localPrices = reactive({
   outcall_express: props.prices?.outcall_express ?? null,
   outcall_1h: props.prices?.outcall_1h ?? null,
   outcall_2h: props.prices?.outcall_2h ?? null,
-  outcall_night: props.prices?.outcall_night ?? null,
-  taxi_included: toBoolean(props.prices?.taxi_included) ?? false,
-  // Места выезда - преобразуем в булевые значения
-  outcall_apartment: toBoolean(props.prices?.outcall_apartment ?? true),
-  outcall_hotel: toBoolean(props.prices?.outcall_hotel ?? false),
-  outcall_house: toBoolean(props.prices?.outcall_house ?? false),
-  outcall_sauna: toBoolean(props.prices?.outcall_sauna ?? false),
-  outcall_office: toBoolean(props.prices?.outcall_office ?? false)
+  outcall_night: props.prices?.outcall_night ?? null
 })
 
-// Проверяем, указаны ли цены на выезд
-const hasOutcallPrices = computed(() => {
-  return localPrices.outcall_express || localPrices.outcall_1h || localPrices.outcall_2h || localPrices.outcall_night
-})
+
 
 // Следим за изменениями props
 watch(() => props.prices, (newPrices) => {
   if (newPrices) {
     Object.keys(newPrices).forEach(key => {
       if (newPrices[key] !== undefined) {
-        // Преобразуем булевые поля для чекбоксов
-        const booleanFields = ['taxi_included', 'outcall_apartment', 'outcall_hotel', 'outcall_house', 'outcall_sauna', 'outcall_office']
-        if (booleanFields.includes(key)) {
-          localPrices[key] = toBoolean(newPrices[key])
-        } else {
-          localPrices[key] = newPrices[key]
-        }
+        localPrices[key] = newPrices[key]
       }
     })
   }

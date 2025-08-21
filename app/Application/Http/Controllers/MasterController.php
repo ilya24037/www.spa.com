@@ -124,12 +124,21 @@ class MasterController extends Controller
                 'total' => $transformed->count()
             ]);
 
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Ошибка загрузки объявлений',
+        } catch (\Throwable $e) {
+            // Логируем ошибку для отладки
+            \Log::error('MasterController::apiIndex error', [
                 'message' => $e->getMessage(),
-                'data' => []
-            ], 500);
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            // Возвращаем пустой результат для карты
+            return response()->json([
+                'data' => [],
+                'total' => 0,
+                'error' => 'Временно недоступно'
+            ], 200); // 200 вместо 500 чтобы карта не ломалась
         }
     }
 

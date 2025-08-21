@@ -52,10 +52,10 @@
         <!-- Карта или список -->
         <div class="map-content">
           <!-- Режим карты -->
-          <YandexMapPicker
+          <YandexMap
             v-if="!showList"
             ref="mapRef"
-            :multiple="true"
+            mode="multiple"
             :markers="mapMarkers"
             :clusterize="true"
             :show-single-marker="false"
@@ -114,7 +114,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Head } from '@inertiajs/vue3'
-import YandexMapPicker from '@/src/shared/ui/molecules/YandexMapPicker/YandexMapPicker.vue'
+import YandexMap from '@/src/shared/ui/molecules/YandexMapPicker/YandexMap.vue'
 import FilterPanel from '@/src/features/masters-filter/ui/FilterPanel/FilterPanel.vue'
 import SearchBar from '@/src/features/search/ui/SearchBar/SearchBar.vue'
 import MasterCard from '@/src/entities/master/ui/MasterCard/MasterCard.vue'

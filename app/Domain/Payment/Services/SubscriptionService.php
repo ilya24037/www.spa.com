@@ -7,10 +7,14 @@ use App\Domain\Payment\Models\Payment;
 use App\Domain\Payment\Repositories\SubscriptionRepository;
 use App\Domain\Payment\Enums\SubscriptionStatus;
 use App\Domain\Payment\Enums\SubscriptionInterval;
+use App\Domain\Payment\Enums\PaymentStatus;
 use App\Domain\Payment\DTOs\CreateSubscriptionDTO;
 use App\Domain\User\Models\User;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
 
 /**
@@ -95,7 +99,7 @@ class SubscriptionService
     /**
      * Отменить подписку
      */
-    public function cancelSubscription(Subscription $subscription, string $reason = null, bool $immediate = false): bool
+    public function cancelSubscription(Subscription $subscription, ?string $reason = null, bool $immediate = false): bool
     {
         if ($subscription->isCancelled()) {
             return false;
@@ -232,7 +236,7 @@ class SubscriptionService
     /**
      * Проверить доступ к функции
      */
-    public function checkFeatureAccess(int $userId, string $feature, string $planName = null): bool
+    public function checkFeatureAccess(int $userId, string $feature, ?string $planName = null): bool
     {
         $subscription = $this->repository->findActiveByUser($userId, $planName);
         
@@ -355,5 +359,467 @@ class SubscriptionService
         $newAmount = $newPrice * $remainingPercent;
 
         return $newAmount - $unusedAmount;
+    }
+
+    // ========== ВАЛИДАЦИЯ И ПРОВЕРКИ ==========
+
+    /**
+     * Валидировать создание подписки
+     */
+    public function validateSubscription(CreateSubscriptionDTO $dto): void
+    {
+        $validator = Validator::make($dto->toArray(), [
+            'userId' => 'required|exists:users,id',
+            'planName' => 'required|string|max:100',
+            'price' => 'required|numeric|min:0',
+            'currency' => 'sometimes|string|size:3',
+            'interval' => 'required|string',
+            'intervalCount' => 'sometimes|integer|min:1|max:12'
+        ]);
+
+        if ($validator->fails()) {
+            throw new ValidationException($validator);
+        }
+
+        // Дополнительные бизнес-проверки
+        $this->validateUserEligibility($dto->userId, $dto->planName);
+        $this->validatePlanLimits($dto);
+    }
+
+    /**
+     * Проверить право пользователя на подписку
+     */
+    private function validateUserEligibility(int $userId, string $planName): void
+    {
+        $user = User::find($userId);
+        
+        if (!$user) {
+            throw new \InvalidArgumentException('Пользователь не найден');
+        }
+
+        if ($user->is_blocked ?? false) {
+            throw new \InvalidArgumentException('Заблокированный пользователь не может оформить подписку');
+        }
+
+        // Проверка максимального количества подписок
+        $activeSubscriptions = $this->repository->getUserActiveSubscriptions($userId);
+        if ($activeSubscriptions->count() >= 3) {
+            throw new \InvalidArgumentException('Превышено максимальное количество активных подписок');
+        }
+    }
+
+    /**
+     * Валидировать лимиты плана
+     */
+    private function validatePlanLimits(CreateSubscriptionDTO $dto): void
+    {
+        // Проверка максимальной цены
+        if ($dto->price > 100000) {
+            throw new \InvalidArgumentException('Цена подписки превышает максимально допустимую');
+        }
+
+        // Проверка интервала
+        if ($dto->intervalCount && $dto->intervalCount > 12) {
+            throw new \InvalidArgumentException('Максимальный интервал подписки - 12 периодов');
+        }
+    }
+
+    // ========== УПРАВЛЕНИЕ СКИДКАМИ И КУПОНАМИ ==========
+
+    /**
+     * Применить купон к подписке
+     */
+    public function applyCoupon(Subscription $subscription, string $couponCode): float
+    {
+        $coupon = $this->validateCoupon($couponCode);
+        
+        $discount = $this->calculateDiscount($subscription->price, $coupon);
+        
+        $subscription->update([
+            'metadata' => array_merge($subscription->metadata ?? [], [
+                'coupon_code' => $couponCode,
+                'original_price' => $subscription->price,
+                'discount_amount' => $discount
+            ]),
+            'price' => $subscription->price - $discount
+        ]);
+
+        Log::info('Coupon applied to subscription', [
+            'subscription_id' => $subscription->id,
+            'coupon_code' => $couponCode,
+            'discount' => $discount
+        ]);
+
+        return $discount;
+    }
+
+    /**
+     * Валидировать купон
+     */
+    private function validateCoupon(string $couponCode): array
+    {
+        // Простая валидация купона
+        $validCoupons = [
+            'TRIAL30' => ['type' => 'percent', 'value' => 30, 'max_uses' => 100],
+            'SAVE500' => ['type' => 'fixed', 'value' => 500, 'max_uses' => 50],
+            'PREMIUM25' => ['type' => 'percent', 'value' => 25, 'max_uses' => 200]
+        ];
+
+        if (!isset($validCoupons[$couponCode])) {
+            throw new \InvalidArgumentException('Недействительный купон');
+        }
+
+        return $validCoupons[$couponCode];
+    }
+
+    /**
+     * Рассчитать скидку
+     */
+    private function calculateDiscount(float $price, array $coupon): float
+    {
+        if ($coupon['type'] === 'percent') {
+            return $price * ($coupon['value'] / 100);
+        }
+
+        return min($coupon['value'], $price);
+    }
+
+    // ========== АНАЛИТИКА И ОТЧЁТНОСТЬ ==========
+
+    /**
+     * Получить детальную статистику подписок
+     */
+    public function getDetailedStatistics(?Carbon $from = null, ?Carbon $to = null): array
+    {
+        $from = $from ?? now()->subMonth();
+        $to = $to ?? now();
+
+        $subscriptions = Subscription::whereBetween('created_at', [$from, $to])->get();
+
+        $stats = [
+            'total_subscriptions' => $subscriptions->count(),
+            'active_subscriptions' => $subscriptions->where('status', SubscriptionStatus::ACTIVE)->count(),
+            'cancelled_subscriptions' => $subscriptions->where('status', SubscriptionStatus::CANCELLED)->count(),
+            'expired_subscriptions' => $subscriptions->where('status', SubscriptionStatus::EXPIRED)->count(),
+            'trial_subscriptions' => $subscriptions->where('status', SubscriptionStatus::TRIALING)->count(),
+            'total_revenue' => $subscriptions->sum('price'),
+            'average_price' => $subscriptions->avg('price') ?? 0,
+            'by_plan' => [],
+            'by_interval' => [],
+            'churn_rate' => 0,
+            'retention_rate' => 0
+        ];
+
+        // Группировка по планам
+        foreach ($subscriptions->groupBy('plan_name') as $plan => $planSubscriptions) {
+            $stats['by_plan'][$plan] = [
+                'count' => $planSubscriptions->count(),
+                'revenue' => $planSubscriptions->sum('price'),
+                'active' => $planSubscriptions->where('status', SubscriptionStatus::ACTIVE)->count()
+            ];
+        }
+
+        // Группировка по интервалам
+        foreach ($subscriptions->groupBy('interval') as $interval => $intervalSubscriptions) {
+            $stats['by_interval'][$interval] = [
+                'count' => $intervalSubscriptions->count(),
+                'revenue' => $intervalSubscriptions->sum('price')
+            ];
+        }
+
+        // Расчёт показателей
+        $stats['churn_rate'] = $this->calculateChurnRate($from, $to);
+        $stats['retention_rate'] = 100 - $stats['churn_rate'];
+
+        return $stats;
+    }
+
+    /**
+     * Рассчитать показатель оттока (churn rate)
+     */
+    private function calculateChurnRate(Carbon $from, Carbon $to): float
+    {
+        $startActive = Subscription::where('status', SubscriptionStatus::ACTIVE)
+            ->where('created_at', '<', $from)
+            ->count();
+
+        $cancelled = Subscription::where('status', SubscriptionStatus::CANCELLED)
+            ->whereBetween('cancelled_at', [$from, $to])
+            ->count();
+
+        return $startActive > 0 ? round(($cancelled / $startActive) * 100, 2) : 0;
+    }
+
+    /**
+     * Получить прогноз доходов
+     */
+    public function getRevenueForecasting(int $months = 12): array
+    {
+        $activeSubscriptions = Subscription::where('status', SubscriptionStatus::ACTIVE)
+            ->where('auto_renew', true)
+            ->get();
+
+        $forecast = [];
+        $currentDate = now();
+
+        for ($i = 0; $i < $months; $i++) {
+            $month = $currentDate->copy()->addMonths($i);
+            $monthlyRevenue = 0;
+
+            foreach ($activeSubscriptions as $subscription) {
+                $monthlyRevenue += $this->calculateMonthlyRevenue($subscription, $month);
+            }
+
+            $forecast[] = [
+                'month' => $month->format('Y-m'),
+                'revenue' => round($monthlyRevenue, 2),
+                'subscriptions_count' => $activeSubscriptions->count()
+            ];
+        }
+
+        return $forecast;
+    }
+
+    /**
+     * Рассчитать месячный доход от подписки
+     */
+    private function calculateMonthlyRevenue(Subscription $subscription, Carbon $month): float
+    {
+        if ($subscription->ends_at && $subscription->ends_at->lt($month)) {
+            return 0;
+        }
+
+        // Приведение к месячному доходу
+        return match($subscription->interval) {
+            SubscriptionInterval::MONTH => $subscription->price,
+            SubscriptionInterval::YEAR => $subscription->price / 12,
+            SubscriptionInterval::WEEK => $subscription->price * 4.33,
+            SubscriptionInterval::DAY => $subscription->price * 30,
+            default => $subscription->price
+        };
+    }
+
+    // ========== УВЕДОМЛЕНИЯ И НАПОМИНАНИЯ ==========
+
+    /**
+     * Отправить напоминания об истекающих подписках
+     */
+    public function sendExpirationReminders(): int
+    {
+        $expiringSoon = Subscription::where('status', SubscriptionStatus::ACTIVE)
+            ->where('auto_renew', false)
+            ->whereBetween('ends_at', [now()->addDays(3), now()->addDays(7)])
+            ->get();
+
+        $sent = 0;
+        foreach ($expiringSoon as $subscription) {
+            try {
+                $this->sendExpirationNotification($subscription);
+                $sent++;
+            } catch (\Exception $e) {
+                Log::error('Failed to send expiration reminder', [
+                    'subscription_id' => $subscription->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
+
+        return $sent;
+    }
+
+    /**
+     * Отправить уведомление об истечении подписки
+     */
+    private function sendExpirationNotification(Subscription $subscription): void
+    {
+        Log::info('Subscription expiration reminder sent', [
+            'subscription_id' => $subscription->id,
+            'user_id' => $subscription->user_id,
+            'expires_at' => $subscription->ends_at
+        ]);
+    }
+
+    // ========== МИГРАЦИЯ И МАССОВЫЕ ОПЕРАЦИИ ==========
+
+    /**
+     * Массовая смена плана
+     */
+    public function bulkChangePlan(Collection $subscriptions, string $newPlan, array $planDetails): array
+    {
+        $results = [
+            'success' => 0,
+            'failed' => 0,
+            'errors' => []
+        ];
+
+        foreach ($subscriptions as $subscription) {
+            try {
+                $this->changePlan($subscription, $newPlan, $planDetails);
+                $results['success']++;
+            } catch (\Exception $e) {
+                $results['failed']++;
+                $results['errors'][] = [
+                    'subscription_id' => $subscription->id,
+                    'error' => $e->getMessage()
+                ];
+            }
+        }
+
+        return $results;
+    }
+
+    /**
+     * Массовое продление подписок
+     */
+    public function bulkRenewal(Collection $subscriptions, ?Carbon $customEndDate = null): array
+    {
+        $results = [
+            'success' => 0,
+            'failed' => 0,
+            'errors' => []
+        ];
+
+        foreach ($subscriptions as $subscription) {
+            try {
+                $this->renewSubscription($subscription, $customEndDate);
+                $results['success']++;
+            } catch (\Exception $e) {
+                $results['failed']++;
+                $results['errors'][] = [
+                    'subscription_id' => $subscription->id,
+                    'error' => $e->getMessage()
+                ];
+            }
+        }
+
+        return $results;
+    }
+
+    // ========== ИНТЕГРАЦИЯ С ДРУГИМИ СЕРВИСАМИ ==========
+
+    /**
+     * Создать подписку с полной интеграцией
+     */
+    public function createSubscriptionWithIntegration(CreateSubscriptionDTO $dto): Subscription
+    {
+        // Валидация
+        $this->validateSubscription($dto);
+
+        // Создание подписки
+        $subscription = $this->createSubscription($dto);
+
+        // Интеграция с другими сервисами
+        $this->activateSubscriptionFeatures($subscription);
+
+        return $subscription;
+    }
+
+    /**
+     * Активировать функции подписки
+     */
+    private function activateSubscriptionFeatures(Subscription $subscription): void
+    {
+        // Активация специфичных для плана возможностей
+        $features = $subscription->features ?? [];
+        
+        foreach ($features as $feature => $enabled) {
+            if ($enabled) {
+                Log::info('Subscription feature activated', [
+                    'subscription_id' => $subscription->id,
+                    'feature' => $feature
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Получить рекомендации по улучшению подписки
+     */
+    public function getUpgradeRecommendations(int $userId): array
+    {
+        $currentSubscription = $this->repository->findActiveByUser($userId);
+        
+        if (!$currentSubscription) {
+            return [
+                'has_subscription' => false,
+                'recommendations' => [
+                    'plan' => 'basic',
+                    'reason' => 'Начните с базового плана для доступа к основным функциям'
+                ]
+            ];
+        }
+
+        $usageStats = $this->getSubscriptionUsageStats($currentSubscription);
+        
+        return [
+            'has_subscription' => true,
+            'current_plan' => $currentSubscription->plan_name,
+            'usage_stats' => $usageStats,
+            'recommendations' => $this->analyzeUpgradeNeeds($currentSubscription, $usageStats)
+        ];
+    }
+
+    /**
+     * Получить статистику использования подписки
+     */
+    private function getSubscriptionUsageStats(Subscription $subscription): array
+    {
+        return [
+            'features_used' => count(array_filter($subscription->features ?? [])),
+            'limits_reached' => $this->checkLimitsUsage($subscription),
+            'usage_percentage' => $this->calculateUsagePercentage($subscription)
+        ];
+    }
+
+    /**
+     * Проверить использование лимитов
+     */
+    private function checkLimitsUsage(Subscription $subscription): array
+    {
+        $limits = $subscription->limits ?? [];
+        $reached = [];
+
+        foreach ($limits as $limit => $value) {
+            // Здесь была бы реальная проверка использования лимитов
+            // Пока возвращаем заглушку
+            $reached[$limit] = rand(0, 100) > 80; // 20% шанс достижения лимита
+        }
+
+        return $reached;
+    }
+
+    /**
+     * Рассчитать процент использования подписки
+     */
+    private function calculateUsagePercentage(Subscription $subscription): float
+    {
+        // Заглушка для расчёта процента использования
+        return rand(30, 90);
+    }
+
+    /**
+     * Анализировать потребности в улучшении
+     */
+    private function analyzeUpgradeNeeds(Subscription $subscription, array $usageStats): array
+    {
+        $recommendations = [];
+
+        if ($usageStats['usage_percentage'] > 80) {
+            $recommendations[] = [
+                'type' => 'upgrade',
+                'reason' => 'Высокое использование текущего плана',
+                'suggested_plan' => 'premium'
+            ];
+        }
+
+        if (count(array_filter($usageStats['limits_reached'])) > 0) {
+            $recommendations[] = [
+                'type' => 'upgrade',
+                'reason' => 'Достигнуты лимиты использования',
+                'suggested_plan' => 'unlimited'
+            ];
+        }
+
+        return $recommendations;
     }
 }

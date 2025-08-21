@@ -30,7 +30,14 @@
       :browser="currentBrowser"
     />
 
-    <!-- Зона загрузки (показывать только если уже есть видео И есть место для еще) -->
+    <!-- Список видео (ПЕРВЫМ) -->
+    <VideoList
+      v-if="hasVideos"
+      :videos="safeVideos"
+      @remove="handleRemoveVideo"
+    />
+
+    <!-- Зона загрузки (ПОСЛЕ видео) -->
     <VideoUploadZone
       v-if="!isEmpty && canAddMoreVideos"
       ref="uploadZone"
@@ -39,11 +46,11 @@
       @files-selected="handleFilesSelected"
     />
 
-    <!-- Empty state -->
+    <!-- Empty state (если нет видео) -->
     <div v-if="isEmpty" class="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
       <svg class="w-24 h-24 mx-auto mb-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-              d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 00-2-2V8a2 2 0 00-2 2v8a2 2 0 002 2z" />
       </svg>
       <p class="text-gray-500 mb-4">Видео не загружены</p>
       <button 
@@ -53,13 +60,6 @@
         Загрузить видео
       </button>
     </div>
-
-    <!-- Список видео -->
-    <VideoList
-      v-if="hasVideos"
-      :videos="safeVideos"
-      @remove="handleRemoveVideo"
-    />
     
     <!-- Ошибки загрузки -->
     <div v-if="error !== null && error !== undefined && error !== ''" class="rounded-md bg-red-50 p-3">

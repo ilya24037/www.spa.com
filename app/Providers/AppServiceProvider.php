@@ -76,6 +76,9 @@ class AppServiceProvider extends ServiceProvider
         // Регистрация Analytics сервисов
         $this->registerAnalyticsServices();
         
+        // Регистрация Payment сервисов
+        $this->registerPaymentServices();
+        
         // Регистрация Cache декораторов
         $this->registerCacheDecorators();
     }
@@ -157,13 +160,20 @@ class AppServiceProvider extends ServiceProvider
             \App\Domain\Booking\Services\BookingService::class
         );
         
-        // Другие сервисы Booking
+        // Консолидированные сервисы Booking (7 сервисов согласно плану)
+        $this->app->singleton(\App\Domain\Booking\Services\BookingService::class);
+        $this->app->singleton(\App\Domain\Booking\Services\BookingQueryService::class);
+        $this->app->singleton(\App\Domain\Booking\Services\BookingValidationService::class);
+        $this->app->singleton(\App\Domain\Booking\Services\BookingNotificationService::class);
         $this->app->singleton(\App\Domain\Booking\Services\BookingSlotService::class);
-        $this->app->singleton(\App\Domain\Booking\Services\AvailabilityService::class);
-        $this->app->singleton(\App\Domain\Booking\Services\SlotService::class);
-        $this->app->singleton(\App\Domain\Booking\Services\PricingService::class);
-        $this->app->singleton(\App\Domain\Booking\Services\ValidationService::class);
-        $this->app->singleton(\App\Domain\Booking\Services\NotificationService::class);
+        $this->app->singleton(\App\Domain\Booking\Services\BookingPaymentService::class);
+        $this->app->singleton(\App\Domain\Booking\Services\BookingStatisticsService::class);
+        
+        // Привязка NotificationServiceInterface к реализации
+        $this->app->bind(
+            \App\Domain\Notification\Contracts\NotificationServiceInterface::class,
+            \App\Infrastructure\Notification\NotificationService::class
+        );
         
         // Booking Actions
         $this->app->singleton(\App\Domain\Booking\Actions\CreateBookingAction::class);
@@ -246,6 +256,51 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(\App\Domain\Ad\Repositories\AdRepository::class, function ($app) {
             return new \App\Domain\Ad\Repositories\AdRepository();
         });
+    }
+
+    /**
+     * Регистрация Payment сервисов (День 2 рефакторинга)
+     */
+    protected function registerPaymentServices(): void
+    {
+        // Payment Repositories
+        $this->app->singleton(\App\Domain\Payment\Repositories\PaymentRepository::class);
+        $this->app->singleton(\App\Domain\Payment\Repositories\TransactionRepository::class);
+        $this->app->singleton(\App\Domain\Payment\Repositories\SubscriptionRepository::class);
+        
+        // Основные Payment сервисы (консолидированные)
+        $this->app->singleton(\App\Domain\Payment\Services\PaymentService::class);
+        $this->app->singleton(\App\Domain\Payment\Services\PaymentProcessorService::class);
+        $this->app->singleton(\App\Domain\Payment\Services\PaymentFilterService::class);
+        $this->app->singleton(\App\Domain\Payment\Services\RefundService::class);
+        $this->app->singleton(\App\Domain\Payment\Services\TransactionService::class);
+        $this->app->singleton(\App\Domain\Payment\Services\SubscriptionService::class);
+        
+        
+        // Payment Gateways
+        $this->app->singleton(\App\Domain\Payment\Gateways\StripeGateway::class);
+        $this->app->singleton(\App\Domain\Payment\Gateways\YooKassaGateway::class);
+        $this->app->singleton(\App\Domain\Payment\Gateways\SbpGateway::class);
+        
+        // Stripe сервисы интегрированы в StripeGateway при оптимизации
+        
+        // YooKassa сервисы интегрированы в YooKassaGateway при оптимизации
+        
+        // СБП вспомогательные сервисы
+        // SBP сервисы интегрированы в SbpGateway при оптимизации
+        
+        // Payment Contract интерфейсы удалены при оптимизации
+        
+        // Gateway Manager для выбора правильного gateway
+        $this->app->singleton(\App\Domain\Payment\Gateways\PaymentGatewayManager::class, function ($app) {
+            return new \App\Domain\Payment\Gateways\PaymentGatewayManager([
+                'stripe' => $app->make(\App\Domain\Payment\Gateways\StripeGateway::class),
+                'yookassa' => $app->make(\App\Domain\Payment\Gateways\YooKassaGateway::class),
+                'sbp' => $app->make(\App\Domain\Payment\Gateways\SbpGateway::class),
+            ]);
+        });
+        
+        // Payment Actions удалены при оптимизации
     }
 
     /**

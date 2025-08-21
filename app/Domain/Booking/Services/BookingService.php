@@ -11,7 +11,6 @@ use App\Domain\Booking\Events\BookingCreated;
 use App\Domain\Booking\DTOs\BookingData;
 use App\Domain\Booking\Models\Booking;
 use App\Domain\Booking\Repositories\BookingRepository;
-use App\Domain\Booking\Services\NotificationService;
 use App\Domain\Booking\Contracts\BookingServiceInterface;
 use App\Domain\User\Models\User;
 use App\Enums\BookingType;
@@ -25,9 +24,10 @@ class BookingService implements BookingServiceInterface
 {
     public function __construct(
         private BookingRepository $bookingRepository,
-        private AvailabilityService $availabilityService,
-        private PricingService $pricingService,
-        private ValidationService $validationService,
+        private BookingSlotService $slotService,
+        private BookingValidationService $validationService,
+        private BookingNotificationService $notificationService,
+        private BookingPaymentService $paymentService,
         private CreateBookingAction $createBookingAction,
         private ConfirmBookingAction $confirmBookingAction,
         private CancelBookingAction $cancelBookingAction,
@@ -40,13 +40,13 @@ class BookingService implements BookingServiceInterface
      */
     public function createBooking(array $data): Booking
     {
-        $this->validationService->validateBookingData($data);
+        $this->validationService->validateCreate($data);
 
         if (isset($data['type'])) {
             $type = BookingType::from($data['type']);
-            $this->availabilityService->validateTimeSlotAvailability($data, $type);
+            $this->validationService->validateTimeSlotAvailability($data, $type);
         } else {
-            $this->availabilityService->validateTimeSlot(
+            $this->validationService->validateTimeSlot(
                 $data['master_profile_id'] ?? $data['master_id'],
                 $data['booking_date'] ?? Carbon::parse($data['start_time'])->format('Y-m-d'),
                 $data['booking_time'] ?? Carbon::parse($data['start_time'])->format('H:i'),
@@ -59,6 +59,8 @@ class BookingService implements BookingServiceInterface
         
         BookingCreated::dispatch($booking);
         
+        $this->notificationService->sendCreatedNotification($booking);
+        
         return $booking;
     }
 
@@ -67,13 +69,12 @@ class BookingService implements BookingServiceInterface
      */
     public function confirmBookingByMaster(Booking $booking, User $master): Booking
     {
-        $this->validationService->validateMasterPermission($booking, $master);
-        $this->validationService->validateConfirmationAbility($booking);
+        $this->validationService->validateConfirmation($booking);
 
         $confirmedBooking = $this->confirmBookingAction->execute($booking, $master);
         
         $this->sendNotificationSafely(
-            fn() => $this->notificationService->sendBookingConfirmation($confirmedBooking),
+            fn() => $this->notificationService->sendConfirmationNotification($confirmedBooking),
             'booking confirmation',
             $confirmedBooking->id
         );
@@ -86,16 +87,16 @@ class BookingService implements BookingServiceInterface
      */
     public function cancelBookingByUser(Booking $booking, User $user, ?string $reason = null): Booking
     {
-        $this->validationService->validateCancellationPermission($booking, $user);
+        $this->validationService->validateCancellation($booking, $user);
         
-        if (!$this->availabilityService->canCancelBooking($booking)) {
+        if (!$this->validationService->canCancelBooking($booking)) {
             throw new \Exception('Это бронирование нельзя отменить');
         }
 
         $cancelledBooking = $this->cancelBookingAction->execute($booking, $user, $reason);
         
         $this->sendNotificationSafely(
-            fn() => $this->notificationService->sendBookingCancellation($cancelledBooking),
+            fn() => $this->notificationService->sendCancellationNotification($cancelledBooking, $reason),
             'booking cancellation',
             $cancelledBooking->id
         );
@@ -108,13 +109,12 @@ class BookingService implements BookingServiceInterface
      */
     public function completeBookingByMaster(Booking $booking, User $master): Booking
     {
-        $this->validationService->validateMasterPermission($booking, $master);
-        $this->validationService->validateCompletionAbility($booking);
+        $this->validationService->validateCompletion($booking);
 
         $completedBooking = $this->completeBookingAction->execute($booking, $master);
         
         $this->sendNotificationSafely(
-            fn() => $this->notificationService->sendBookingCompleted($completedBooking),
+            fn() => $this->notificationService->sendCompletionNotifications($completedBooking),
             'booking completed',
             $completedBooking->id
         );
@@ -130,26 +130,26 @@ class BookingService implements BookingServiceInterface
         Carbon $newStartTime, 
         ?int $newDuration = null
     ): Booking {
-        if (!$this->availabilityService->canRescheduleBooking($booking)) {
-            throw new \Exception('Это бронирование нельзя перенести');
-        }
-
+        $user = auth()->user() ?? $booking->user;
+        $this->validationService->validateReschedule($booking, $newStartTime, $user);
+        
         $masterId = $booking->master_id ?? $booking->master->id;
         $duration = $newDuration ?? $booking->duration_minutes;
         
-        if (!$this->availabilityService->isMasterAvailable($masterId, $newStartTime, $duration)) {
+        if (!$this->slotService->canRescheduleBooking($booking, $newStartTime, $duration)) {
+            throw new \Exception('Это бронирование нельзя перенести');
+        }
+        
+        if (!$this->slotService->isMasterAvailable($masterId, $newStartTime, $duration)) {
             throw new \Exception('Выбранное время недоступно');
         }
 
-        $oldDateTime = [
-            'date' => $booking->start_time->format('d.m.Y'),
-            'time' => $booking->start_time->format('H:i'),
-        ];
+        $oldDateTime = Carbon::parse($booking->booking_date . ' ' . $booking->start_time);
         
         $rescheduledBooking = $this->rescheduleBookingAction->execute($booking, $newStartTime, $newDuration);
         
         $this->sendNotificationSafely(
-            fn() => $this->notificationService->sendBookingRescheduled($rescheduledBooking, $oldDateTime),
+            fn() => $this->notificationService->sendRescheduleNotification($rescheduledBooking, $oldDateTime),
             'booking rescheduled',
             $rescheduledBooking->id
         );
@@ -269,7 +269,7 @@ class BookingService implements BookingServiceInterface
     public function getAvailableSlots(int $masterId, string $date): array
     {
         $dateCarbon = Carbon::parse($date);
-        return $this->availabilityService->getAvailableSlots($masterId, $dateCarbon);
+        return $this->slotService->getAvailableSlots($masterId, 1, $dateCarbon, 1);
     }
 
     /**
@@ -280,7 +280,7 @@ class BookingService implements BookingServiceInterface
         try {
             $bookingData['client_id'] = $clientId;
             $bookingData['master_profile_id'] = $masterId;
-            $this->validationService->validateBookingData($bookingData);
+            $this->validationService->validateCreate($bookingData);
             return true;
         } catch (\Exception $e) {
             return false;
@@ -303,16 +303,16 @@ class BookingService implements BookingServiceInterface
     {
         switch ($eventType) {
             case 'created':
-                $this->notificationService->sendBookingCreated($booking);
+                $this->notificationService->sendCreatedNotification($booking);
                 break;
             case 'confirmed':
-                $this->notificationService->sendBookingConfirmed($booking);
+                $this->notificationService->sendConfirmationNotification($booking);
                 break;
             case 'cancelled':
-                $this->notificationService->sendBookingCancelled($booking);
+                $this->notificationService->sendCancellationNotification($booking);
                 break;
             case 'completed':
-                $this->notificationService->sendBookingCompleted($booking);
+                $this->notificationService->sendCompletionNotifications($booking);
                 break;
         }
     }
@@ -330,7 +330,7 @@ class BookingService implements BookingServiceInterface
      */
     public function validateBookingData(array $data): array
     {
-        $this->validationService->validateBookingData($data);
+        $this->validationService->validateCreate($data);
         return ['valid' => true, 'errors' => []];
     }
 }

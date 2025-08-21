@@ -35,6 +35,7 @@ class Ad extends Model
         'services_additional_info',
         'schedule',
         'schedule_notes',
+        'online_booking',
         'address',
         'geo',
         'phone',
@@ -70,7 +71,8 @@ class Ad extends Model
         'expires_at',
         'views_count',
         'contacts_shown',
-        'favorites_count'
+        'favorites_count',
+        'faq'
     ];
 
     /**
@@ -85,7 +87,8 @@ class Ad extends Model
         'geo',
         'photos',
         'video',
-        'prices'
+        'prices',
+        'faq'
     ];
 
     protected $casts = [

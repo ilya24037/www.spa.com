@@ -1,7 +1,7 @@
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { useAuthStore } from '@/stores/authStore'
-import type { MediaSettings } from '@/src/features/media/photo-upload/model/types'
+
 
 // Типы данных формы
 export interface AdFormData {
@@ -52,7 +52,7 @@ export interface AdFormData {
   gift: string
   photos: any[]
   video: any[]
-  media_settings: MediaSettings
+
   geo: any
   address: string
   travel_area: string
@@ -64,6 +64,7 @@ export interface AdFormData {
   contact_method: string
   whatsapp: string
   telegram: string
+  faq?: Record<string, any> // FAQ ответы
 }
 
 // Композабл для управления формой
@@ -86,10 +87,36 @@ export function useAdFormModel(props: any, emit: any) {
   const form = reactive<AdFormData>({
     title: savedFormData?.title || props.initialData?.title || '',
     specialty: savedFormData?.specialty || props.initialData?.specialty || '',
-    clients: savedFormData?.clients || props.initialData?.clients || [],
+    clients: (() => {
+      if (savedFormData?.clients) return savedFormData.clients
+      if (!props.initialData?.clients) return []
+      if (Array.isArray(props.initialData.clients)) return props.initialData.clients
+      if (typeof props.initialData.clients === 'string') {
+        try {
+          const parsed = JSON.parse(props.initialData.clients)
+          return Array.isArray(parsed) ? parsed : []
+        } catch (e) {
+          return []
+        }
+      }
+      return []
+    })(),
     service_location: savedFormData?.service_location || props.initialData?.service_location || ['У заказчика дома'],
     work_format: savedFormData?.work_format || props.initialData?.work_format || 'individual',
-    service_provider: savedFormData?.service_provider || props.initialData?.service_provider || ['women'],
+    service_provider: (() => {
+      if (savedFormData?.service_provider) return savedFormData.service_provider
+      if (!props.initialData?.service_provider) return ['women']
+      if (Array.isArray(props.initialData.service_provider)) return props.initialData.service_provider
+      if (typeof props.initialData.service_provider === 'string') {
+        try {
+          const parsed = JSON.parse(props.initialData.service_provider)
+          return Array.isArray(parsed) ? parsed : ['women']
+        } catch (e) {
+          return ['women']
+        }
+      }
+      return ['women']
+    })(),
     experience: savedFormData?.experience || props.initialData?.experience || '',
     description: savedFormData?.description || props.initialData?.description || '',
     services: (() => {
@@ -251,11 +278,7 @@ export function useAdFormModel(props: any, emit: any) {
       }
       return []
     })(),
-    media_settings: props.initialData?.media_settings || {
-      showAdditionalInfo: false,
-      showServices: false,
-      showPrices: false
-    },
+
     geo: props.initialData?.geo || {},
     address: props.initialData?.address || '',
     travel_area: props.initialData?.travel_area || 'no_travel',
@@ -266,7 +289,20 @@ export function useAdFormModel(props: any, emit: any) {
     phone: props.initialData?.phone || '',
     contact_method: props.initialData?.contact_method || 'phone',
     whatsapp: props.initialData?.whatsapp || '',
-    telegram: props.initialData?.telegram || ''
+    telegram: props.initialData?.telegram || '',
+    faq: (() => {
+      if (props.initialData?.faq) {
+        if (typeof props.initialData.faq === 'string') {
+          try {
+            return JSON.parse(props.initialData.faq)
+          } catch (e) {
+            return {}
+          }
+        }
+        return props.initialData.faq
+      }
+      return {}
+    })()
   })
 
   // Ошибки валидации
@@ -303,6 +339,8 @@ export function useAdFormModel(props: any, emit: any) {
       form.address = newGeo.address
     }
   }, { deep: true, immediate: true })
+
+
 
   // Валидация формы
   const validateForm = (): boolean => {
@@ -442,6 +480,11 @@ export function useAdFormModel(props: any, emit: any) {
       schedule_notes: form.schedule_notes,
       schedule_notesType: typeof form.schedule_notes
     })
+    formData.append('online_booking', form.online_booking ? '1' : '0')
+    console.log('📅 adFormModel: Добавляем online_booking в FormData', {
+      online_booking: form.online_booking,
+      online_bookingType: typeof form.online_booking
+    })
     formData.append('price', form.price?.toString() || '')
     formData.append('price_unit', form.price_unit || '')
     formData.append('is_starting_price', form.is_starting_price ? '1' : '0')
@@ -510,9 +553,7 @@ export function useAdFormModel(props: any, emit: any) {
         })
       }
       if (form.additional_services) formData.append('additional_services', JSON.stringify(form.additional_services))
-      if (form.media_settings) {
-        formData.append('media_settings', JSON.stringify(form.media_settings))
-      }
+
       // Проверяем, не является ли geo уже строкой
       if (form.geo) {
         if (typeof form.geo === 'string') {
@@ -524,6 +565,11 @@ export function useAdFormModel(props: any, emit: any) {
         }
       }
       if (form.custom_travel_areas) formData.append('custom_travel_areas', JSON.stringify(form.custom_travel_areas))
+      
+      // Добавляем FAQ данные
+      if (form.faq && Object.keys(form.faq).length > 0) {
+        formData.append('faq', JSON.stringify(form.faq))
+      }
     } catch (jsonError) {
       // Молча игнорируем ошибку JSON
     }

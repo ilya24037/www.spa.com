@@ -186,8 +186,20 @@
             
             // Загружаем мастеров с API
             fetch('/api/masters')
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
+                    console.log('Ответ API:', data);
+                    
+                    if (!data.data || !Array.isArray(data.data)) {
+                        console.warn('Неверный формат данных от API:', data);
+                        return;
+                    }
+                    
                     console.log('Загружено мастеров:', data.data.length);
                     
                     // Создаем коллекцию меток
@@ -285,6 +297,12 @@
                 })
                 .catch(error => {
                     console.error('Ошибка загрузки мастеров:', error);
+                    
+                    // Отправляем сообщение родительскому окну об ошибке
+                    window.parent.postMessage({
+                        type: 'map-error',
+                        error: error.message
+                    }, '*');
                 });
                 
             // Слушаем сообщения от родительского окна
