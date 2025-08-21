@@ -261,9 +261,9 @@ const userInitials = computed(() => {
 
 const roleDisplayName = computed(() => {
     const roleNames = {
-        master: 'РњР°СЃС‚РµСЂ',
-        admin: 'РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ',
-        user: 'РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ'
+        master: 'Мастер',
+        admin: 'Администратор',
+        user: 'Пользователь'
     }
     return roleNames[props.user.role]
 })

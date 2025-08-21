@@ -114,7 +114,7 @@ const props = defineProps({
         validator: (value, props) => {
             // Предупреждение если нет name (но не блокируем работу)
             if (!value && !props.id) {
-                console.warn('[BaseInput] Рекомендуется указать name или id для доступности и автозаполнения')
+                // Убираем предупреждение - id генерируется автоматически при необходимости
             }
             return true
         }

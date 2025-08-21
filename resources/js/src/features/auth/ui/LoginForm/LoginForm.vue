@@ -1,7 +1,7 @@
 <template>
   <form class="space-y-4" @submit.prevent="handleSubmit">
     <h2 class="text-2xl font-bold text-center mb-6">
-      Р’С…РѕРґ
+      Вход
     </h2>
     
     <!-- Error message -->
@@ -20,7 +20,7 @@
       :disabled="loading"
       class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
     >
-      {{ loading ? 'Р—Р°РіСЂСѓР·РєР°...' : 'Р’РѕР№С‚Рё' }}
+      {{ loading ? 'Загрузка...' : 'Войти' }}
     </button>
   </form>
 </template>

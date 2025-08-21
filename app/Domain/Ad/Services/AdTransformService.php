@@ -30,6 +30,9 @@ class AdTransformService
      */
     public function transformForHomePage(Collection $ads): Collection
     {
+        // Загружаем связи с профилем мастера
+        $ads->load('user.masterProfile');
+        
         return $ads->map(function ($ad) {
             return $this->transformSingleAd($ad);
         });
@@ -56,6 +59,10 @@ class AdTransformService
         $isVerified = $this->checkVerificationStatus($ad);
         $isPremium = $this->checkPremiumStatus($ad);
         
+        // Получаем данные о профиле мастера
+        $masterProfile = $ad->user?->masterProfile;
+        $masterSlug = $masterProfile?->slug ?: \Illuminate\Support\Str::slug($ad->title ?: 'master');
+        
         return new AdHomePageDTO([
             'id' => $ad->id,
             'name' => $ad->title ?? $this->getUserName($ad),
@@ -73,6 +80,11 @@ class AdTransformService
             'experience_years' => $this->extractExperience($ad),
             'is_verified' => $isVerified,
             'is_premium' => $isPremium,
+            // Добавляем данные о профиле мастера
+            'master_profile_id' => $masterProfile?->id,
+            'master_slug' => $masterSlug,
+            'has_master_profile' => $masterProfile !== null,
+            'slug' => $masterSlug, // Дублируем для совместимости
         ]);
     }
     

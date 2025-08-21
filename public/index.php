@@ -3,6 +3,12 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 
+// Увеличиваем лимиты для работы с изображениями
+ini_set('memory_limit', '512M');
+ini_set('max_execution_time', 300);
+ini_set('post_max_size', '50M');
+ini_set('upload_max_filesize', '10M');
+
 define('LARAVEL_START', microtime(true));
 
 // Determine if the application is in maintenance mode...

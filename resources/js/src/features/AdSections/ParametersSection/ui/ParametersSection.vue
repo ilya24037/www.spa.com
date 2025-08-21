@@ -51,7 +51,7 @@
         placeholder="Не указано"
         :options="breastSizeOptions"
         @update:modelValue="emitAll"
-        :error="errors.breastSize"
+        :error="errors.breast_size"
       />
       <BaseSelect
         v-if="showHairColor"
@@ -60,7 +60,7 @@
         placeholder="Выберите цвет"
         :options="hairColorOptions"
         @update:modelValue="emitAll"
-        :error="errors.hairColor"
+        :error="errors.hair_color"
       />
       <BaseSelect
         v-if="showEyeColor"
@@ -69,7 +69,7 @@
         placeholder="Выберите цвет"
         :options="eyeColorOptions"
         @update:modelValue="emitAll"
-        :error="errors.eyeColor"
+        :error="errors.eye_color"
       />
       <BaseSelect
         v-if="showNationality"
@@ -93,9 +93,9 @@ const props = defineProps({
   age: { type: [String, Number], default: '' },
   height: { type: [String, Number], default: '' },
   weight: { type: [String, Number], default: '' },
-  breastSize: { type: [String, Number], default: '' },
-  hairColor: { type: String, default: '' },
-  eyeColor: { type: String, default: '' },
+  breast_size: { type: [String, Number], default: '' },
+  hair_color: { type: String, default: '' },
+  eye_color: { type: String, default: '' },
   nationality: { type: String, default: '' },
   errors: { type: Object, default: () => ({}) },
   // Опциональные props для управления видимостью полей
@@ -105,14 +105,14 @@ const props = defineProps({
   showEyeColor: { type: Boolean, default: true },
   showNationality: { type: Boolean, default: true }
 })
-const emit = defineEmits(['update:title', 'update:age', 'update:height', 'update:weight', 'update:breastSize', 'update:hairColor', 'update:eyeColor', 'update:nationality'])
+const emit = defineEmits(['update:title', 'update:age', 'update:height', 'update:weight', 'update:breast_size', 'update:hair_color', 'update:eye_color', 'update:nationality'])
 const localTitle = ref(props.title)
 const localAge = ref(props.age)
 const localHeight = ref(props.height)
 const localWeight = ref(props.weight)
-const localBreastSize = ref(props.breastSize ? String(props.breastSize) : '')
-const localHairColor = ref(props.hairColor)
-const localEyeColor = ref(props.eyeColor)
+const localBreastSize = ref(props.breast_size ? String(props.breast_size) : '')
+const localHairColor = ref(props.hair_color)
+const localEyeColor = ref(props.eye_color)
 const localNationality = ref(props.nationality)
 
 // Опции для селектов
@@ -170,18 +170,18 @@ watch(() => props.title, val => { localTitle.value = val })
 watch(() => props.age, val => { localAge.value = val })
 watch(() => props.height, val => { localHeight.value = val })
 watch(() => props.weight, val => { localWeight.value = val })
-watch(() => props.breastSize, val => { localBreastSize.value = val ? String(val) : '' })
-watch(() => props.hairColor, val => { localHairColor.value = val })
-watch(() => props.eyeColor, val => { localEyeColor.value = val })
+watch(() => props.breast_size, val => { localBreastSize.value = val ? String(val) : '' })
+watch(() => props.hair_color, val => { localHairColor.value = val })
+watch(() => props.eye_color, val => { localEyeColor.value = val })
 watch(() => props.nationality, val => { localNationality.value = val })
 const emitAll = () => {
   emit('update:title', localTitle.value)
   emit('update:age', localAge.value)
   emit('update:height', localHeight.value)
   emit('update:weight', localWeight.value)
-  emit('update:breastSize', localBreastSize.value)
-  emit('update:hairColor', localHairColor.value)
-  emit('update:eyeColor', localEyeColor.value)
+  emit('update:breast_size', localBreastSize.value)
+  emit('update:hair_color', localHairColor.value)
+  emit('update:eye_color', localEyeColor.value)
   emit('update:nationality', localNationality.value)
 }
 </script>

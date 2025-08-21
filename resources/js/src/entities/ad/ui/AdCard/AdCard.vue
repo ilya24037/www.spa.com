@@ -357,6 +357,8 @@ const openAd = (): void => {
     try {
         errorState?.clearError()
         emit('adOpened', props?.ad.id)
+        
+        // Всегда переходим на страницу объявления
         router?.visit(`/ads/${props?.ad.id}`)
     } catch (error: unknown) {
         errorState?.handleError(error, 'data_load')

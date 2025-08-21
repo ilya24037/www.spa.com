@@ -23,6 +23,11 @@ class AdHomePageDTO
     public int $experience_years;
     public bool $is_verified;
     public bool $is_premium;
+    // Данные о профиле мастера
+    public ?int $master_profile_id;
+    public ?string $master_slug;
+    public ?string $slug;
+    public bool $has_master_profile;
     
     public function __construct(array $data)
     {
@@ -42,6 +47,11 @@ class AdHomePageDTO
         $this->experience_years = $data['experience_years'] ?? 1;
         $this->is_verified = $data['is_verified'] ?? false;
         $this->is_premium = $data['is_premium'] ?? false;
+        // Инициализация полей профиля мастера
+        $this->master_profile_id = $data['master_profile_id'] ?? null;
+        $this->master_slug = $data['master_slug'] ?? null;
+        $this->slug = $data['slug'] ?? null;
+        $this->has_master_profile = $data['has_master_profile'] ?? false;
     }
     
     /**
@@ -68,6 +78,11 @@ class AdHomePageDTO
             'experience_years' => $this->experience_years,
             'is_verified' => $this->is_verified,
             'is_premium' => $this->is_premium,
+            // Добавляем поля профиля мастера
+            'master_profile_id' => $this->master_profile_id,
+            'master_slug' => $this->master_slug,
+            'slug' => $this->slug,
+            'has_master_profile' => $this->has_master_profile,
         ];
     }
     

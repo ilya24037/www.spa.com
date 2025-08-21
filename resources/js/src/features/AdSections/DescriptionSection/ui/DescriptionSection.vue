@@ -31,7 +31,8 @@ watch(() => props.description, (val) => {
 })
 
 const emitDescription = () => {
-  emit('update:description', localDescription.value)
+  // ВАЖНО: Всегда отправляем строку, не null
+  emit('update:description', localDescription.value || '')
 }
 </script>
 

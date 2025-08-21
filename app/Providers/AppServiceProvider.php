@@ -253,6 +253,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Увеличиваем буферы MySQL для предотвращения ошибок сортировки
+        if (config('database.default') === 'mysql') {
+            try {
+                \DB::statement("SET SESSION sort_buffer_size = 8388608");     // 8MB
+                \DB::statement("SET SESSION read_rnd_buffer_size = 4194304"); // 4MB  
+                \DB::statement("SET SESSION join_buffer_size = 4194304");     // 4MB
+            } catch (\Exception $e) {
+                // Молча игнорируем, если не удалось установить
+                \Log::debug('Could not set MySQL buffers: ' . $e->getMessage());
+            }
+        }
+        
         Vite::prefetch(concurrency: 3);
     }
 }

@@ -14,7 +14,7 @@
         
         <button
           type="button"
-          @click="$emit('save-draft')"
+          @click="() => { console.log('🔵 Кнопка СОХРАНИТЬ ИЗМЕНЕНИЯ нажата!'); $emit('save-draft') }"
           class="px-6 py-3 rounded-lg text-base font-semibold cursor-pointer transition-all duration-200 flex items-center gap-2 min-w-[140px] justify-center bg-gradient-to-br from-blue-500 to-blue-700 text-white border-0 hover:from-blue-600 hover:to-blue-800 hover:-translate-y-px disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none sm:w-auto w-full"
           :disabled="savingDraft"
         >
@@ -27,7 +27,7 @@
       <template v-else>
         <button
           type="button"
-          @click="$emit('save-draft')"
+          @click="() => { console.log('🔵 Кнопка СОХРАНИТЬ ЧЕРНОВИК нажата!'); $emit('save-draft') }"
           class="px-6 py-3 rounded-lg text-base font-semibold cursor-pointer transition-all duration-200 flex items-center gap-2 min-w-[140px] justify-center bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none sm:w-auto w-full"
           :disabled="savingDraft"
         >

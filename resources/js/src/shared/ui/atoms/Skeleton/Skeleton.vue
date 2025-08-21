@@ -49,7 +49,7 @@ const customStyles = computed(() => {
 })
 
 const ariaLabel = computed(() => 
-    props.ariaLabel || `Р—Р°РіСЂСѓР·РєР° ${props.variant === 'text' ? 'С‚РµРєСЃС‚Р°' : 'РєРѕРЅС‚РµРЅС‚Р°'}...`
+            props.ariaLabel || `Загрузка ${props.variant === 'text' ? 'текста' : 'контента'}...`
 )
 </script>
 

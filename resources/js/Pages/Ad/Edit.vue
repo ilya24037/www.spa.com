@@ -48,10 +48,10 @@
         <!-- Форма редактирования -->
         <div class="p-6">
           <AdForm 
-            :category="ad.category || 'erotic'"
+            :category="ad.data?.category || ad.category || 'erotic'"
             :categories="[]"
-            :ad-id="ad.id"
-            :initial-data="ad"
+            :ad-id="ad.data?.id || ad.id"
+            :initial-data="ad.data || ad"
             @success="handleSuccess"
             @cancel="handleCancel"
           />
@@ -85,9 +85,13 @@ interface EditAdProps {
 
 const props = defineProps<EditAdProps>()
 
+// Props успешно принимаются и обрабатываются
+// ВАЖНО: Данные могут быть вложены в ключ 'data' если используется AdResource
+const actualAd = props.ad?.data || props.ad
+
 // Навигация
 const getBackUrl = () => {
-  const status = props.ad.status || 'draft'
+  const status = actualAd.status || 'draft'
   return status === 'draft' ? '/profile/items/draft/all' : '/profile/items/active/all'
 }
 

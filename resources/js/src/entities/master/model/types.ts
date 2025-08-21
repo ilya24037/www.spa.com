@@ -32,6 +32,14 @@ export interface Master {
   services?: MasterService[]
   photos?: MasterPhoto[]
   reviews?: MasterReview[]
+  // Поля для связи с профилем мастера
+  master_profile_id?: number
+  master_slug?: string
+  has_master_profile?: boolean
+  // Дополнительные поля для галереи
+  gallery?: MasterPhoto[]
+  photo_placeholder?: string
+  avatar_placeholder?: string
 }
 
 export interface MasterSchedule {

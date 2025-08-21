@@ -324,7 +324,9 @@
       "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" test_draft_fix_final.php)",
       "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" diagnose_real_edit.php)",
       "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" artisan serve --port=8000)",
-      "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\":*)"
+      "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\":*)",
+      "Bash(C:Usersuser1.configherdbinphp.bat C:www.spa.comtest-edit-route.php)",
+      "Bash(C:Usersuser1.configherdbinphp.bat C:www.spa.comtest-photo-fix.php)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

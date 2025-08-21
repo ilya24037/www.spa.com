@@ -10,7 +10,7 @@
         {{ title }}
       </h3>
       <div v-if="availableDates.length > maxVisibleDates" class="mobile-date-list-count">
-        РџРѕРєР°Р·Р°РЅРѕ {{ Math.min(maxVisibleDates, availableDates.length) }} РёР· {{ availableDates.length }}
+        Показано {{ Math.min(maxVisibleDates, availableDates.length) }} из {{ availableDates.length }}
       </div>
     </div>
 
@@ -108,13 +108,13 @@
         </button>
       </div>
 
-      <!-- РљРЅРѕРїРєР° "РџРѕРєР°Р·Р°С‚СЊ Р±РѕР»СЊС€Рµ" -->
+              <!-- Кнопка "Показать больше" -->
       <button
         v-if="availableDates.length > maxVisibleDates && !showAll"
         class="mobile-date-list-show-more"
         @click="showAll = true"
       >
-        РџРѕРєР°Р·Р°С‚СЊ РµС‰Рµ {{ availableDates.length - maxVisibleDates }} РґР°С‚
+        Показать еще {{ availableDates.length - maxVisibleDates }} дат
       </button>
     </div>
   </div>
@@ -299,7 +299,7 @@ const getAdditionalInfo = (dateItem: AvailableDateItem): string => {
   @apply mt-2 pt-2 border-t border-gray-500 text-xs text-gray-500;
 }
 
-/* РљРЅРѕРїРєР° "РџРѕРєР°Р·Р°С‚СЊ Р±РѕР»СЊС€Рµ" */
+    /* Кнопка "Показать больше" */
 .mobile-date-list-show-more {
   @apply w-full py-3 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1;
 }

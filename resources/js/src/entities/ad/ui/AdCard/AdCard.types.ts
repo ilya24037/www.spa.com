@@ -31,6 +31,10 @@ export interface Ad {
   metro_station?: string
   images?: AdImage[]
   photos?: AdImage[]
+  // Данные о профиле мастера для перехода на страницу мастера
+  master_profile_id?: number
+  master_slug?: string
+  has_master_profile?: boolean
 }
 
 export interface AdCardProps {

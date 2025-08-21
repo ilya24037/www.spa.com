@@ -42,9 +42,9 @@
           v-model:age="form.age"
           v-model:height="form.height" 
           v-model:weight="form.weight" 
-          v-model:breastSize="form.breast_size"
-          v-model:hairColor="form.hair_color" 
-          v-model:eyeColor="form.eye_color" 
+          v-model:breast_size="form.breast_size"
+          v-model:hair_color="form.hair_color" 
+          v-model:eye_color="form.eye_color" 
           v-model:nationality="form.nationality" 
           :showAge="true"
           :showBreastSize="true"
@@ -101,20 +101,35 @@
         />
       </CollapsibleSection>
 
-      <!-- Фото и видео -->
+      <!-- Фотографии -->
       <CollapsibleSection
-        title="Фото и видео"
-        :is-open="sectionsState.media"
+        title="Фотографии"
+        :is-open="sectionsState.photos"
         :is-required="true"
-        :is-filled="checkSectionFilled('media')"
+        :is-filled="checkSectionFilled('photos')"
         :filled-count="form.photos?.length || 0"
         :total-count="'мин. 3'"
-        @toggle="toggleSection('media')"
+        @toggle="toggleSection('photos')"
       >
-        <MediaSection 
+        <PhotoUpload 
           v-model:photos="form.photos" 
-          v-model:video="form.video" 
-          v-model:media-settings="form.media_settings" 
+          v-model:show-additional-info="form.media_settings.showAdditionalInfo"
+          v-model:show-services="form.media_settings.showServices"
+          v-model:show-prices="form.media_settings.showPrices"
+          :errors="errors"
+        />
+      </CollapsibleSection>
+
+      <!-- Видео -->
+      <CollapsibleSection
+        title="Видео"
+        :is-open="sectionsState.video"
+        :is-required="false"
+        :is-filled="!!form.video?.length"
+        @toggle="toggleSection('video')"
+      >
+        <VideoUpload 
+          v-model:videos="form.video" 
           :errors="errors"
         />
       </CollapsibleSection>
@@ -213,7 +228,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watch, onMounted } from 'vue'
 import { useFormSections } from '@/src/shared/composables'
 import FormProgress from '@/src/shared/ui/molecules/Forms/components/FormProgress.vue'
 import FormControls from '@/src/shared/ui/molecules/Forms/components/FormControls.vue'
@@ -228,7 +243,8 @@ import ParametersSection from '@/src/features/AdSections/ParametersSection/ui/Pa
 import PricingSection from '@/src/features/AdSections/PricingSection/ui/PricingSection.vue'
 import ServicesModule from '@/src/features/Services/index.vue'
 import ComfortSection from '@/src/features/Services/ComfortSection.vue'
-import MediaSection from '@/src/features/AdSections/MediaSection/ui/MediaSection.vue'
+import { PhotoUpload } from '@/src/features/media/photo-upload'
+import { VideoUpload } from '@/src/features/media/video-upload'
 import GeoSection from '@/src/features/AdSections/GeoSection/ui/GeoSection.vue'
 import ContactsSection from '@/src/features/AdSections/ContactsSection/ui/ContactsSection.vue'
 import ScheduleSection from '@/src/features/AdSections/ScheduleSection/ui/ScheduleSection.vue'
@@ -254,18 +270,6 @@ const emit = defineEmits<{
   'success': []
   'cancel': []
 }>()
-
-// Добавим детальную диагностику
-console.log('AdForm props detail:', {
-  adId: props.adId,
-  adIdType: typeof props.adId,
-  adIdValue: props.adId,
-  adIdIsNumber: !isNaN(Number(props.adId)),
-  adIdAsNumber: Number(props.adId),
-  hasInitialData: !!props.initialData,
-  initialDataId: props.initialData?.id,
-  initialDataStatus: props.initialData?.status
-})
 
 // Используем существующую модель для всей логики
 const {
@@ -317,10 +321,16 @@ const sectionsConfig = [
     fields: []
   },
   {
-    key: 'media',
-    title: 'Фото и видео',
+    key: 'photos',
+    title: 'Фотографии',
     required: true,
-    fields: ['photos', 'video', 'media_settings']
+    fields: ['photos', 'media_settings']
+  },
+  {
+    key: 'video',
+    title: 'Видео',
+    required: false,
+    fields: ['video']
   },
   {
     key: 'geo',
@@ -371,6 +381,88 @@ const isFormValid = computed(() => {
   const requiredSections = sectionsConfig.filter(s => s.required)
   return requiredSections.every(section => checkSectionFilled(section.key))
 })
+
+// ===== ЛОГИРОВАНИЕ ДЛЯ ОТЛАДКИ SCHEDULE =====
+watch(() => form.schedule, (newSchedule, oldSchedule) => {
+  console.log('🔄 AdForm: watch form.schedule ТРИГГЕР', {
+    newSchedule: newSchedule,
+    newScheduleType: typeof newSchedule,
+    oldSchedule: oldSchedule,
+    oldScheduleType: typeof oldSchedule,
+    isEqual: JSON.stringify(newSchedule) === JSON.stringify(oldSchedule)
+  })
+}, { deep: true })
+
+// Логируем инициализацию form.schedule
+console.log('🔍 AdForm: ИНИЦИАЛИЗАЦИЯ form.schedule:', {
+  schedule: form.schedule,
+  scheduleType: typeof form.schedule,
+  scheduleKeys: form.schedule ? Object.keys(form.schedule) : 'undefined',
+  scheduleValue: form.schedule
+})
+
+// Логируем при монтировании компонента
+onMounted(() => {
+  console.log('🔍 AdForm: onMounted - form.schedule:', {
+    schedule: form.schedule,
+    scheduleType: typeof form.schedule,
+    scheduleKeys: form.schedule ? Object.keys(form.schedule) : 'undefined',
+    scheduleValue: form.schedule
+  })
+  
+  console.log('🔍 AdForm: onMounted - props.initialData:', {
+    hasInitialData: !!props.initialData,
+    initialDataKeys: props.initialData ? Object.keys(props.initialData) : 'undefined',
+    scheduleInInitialData: props.initialData?.schedule,
+    scheduleType: typeof props.initialData?.schedule
+  })
+})
+
+watch(() => form.schedule_notes, (newNotes, oldNotes) => {
+  console.log('🔄 AdForm: watch form.schedule_notes ТРИГГЕР', {
+    newNotes: newNotes,
+    oldNotes: oldNotes,
+    isEqual: newNotes === oldNotes
+  })
+}, { deep: true })
+
+// ===== ЛОГИРОВАНИЕ ДЛЯ ОТЛАДКИ PHOTOS =====
+watch(() => form.photos, (newPhotos, oldPhotos) => {
+  console.log('🔄 AdForm: watch form.photos ТРИГГЕР', {
+    newPhotos: newPhotos,
+    newPhotosLength: newPhotos?.length,
+    newPhotosType: typeof newPhotos,
+    oldPhotos: oldPhotos,
+    oldPhotosLength: oldPhotos?.length,
+    oldPhotosType: typeof oldPhotos,
+    isEqual: JSON.stringify(newPhotos) === JSON.stringify(oldPhotos),
+    stackTrace: new Error().stack?.split('\n').slice(1, 4)
+  })
+  
+  if (newPhotos !== oldPhotos) {
+    console.log('✅ AdForm: form.photos изменен')
+    
+    // Детальное сравнение
+    if (Array.isArray(newPhotos) && Array.isArray(oldPhotos)) {
+      console.log('📊 AdForm: Детальное сравнение массивов photos:', {
+        oldLength: oldPhotos.length,
+        newLength: newPhotos.length,
+        added: newPhotos.length - oldPhotos.length,
+        oldIds: oldPhotos.map(p => p?.id || 'no-id'),
+        newIds: newPhotos.map(p => p?.id || 'no-id')
+      })
+    }
+  }
+}, { deep: true })
+
+watch(() => form.media_settings, (newSettings, oldSettings) => {
+  console.log('🔄 AdForm: watch form.media_settings ТРИГГЕР', {
+    newSettings: newSettings,
+    oldSettings: oldSettings,
+    isEqual: JSON.stringify(newSettings) === JSON.stringify(oldSettings)
+  })
+}, { deep: true })
+
 </script>
 
 <style scoped>

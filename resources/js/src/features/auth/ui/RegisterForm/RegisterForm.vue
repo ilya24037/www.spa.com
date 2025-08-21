@@ -20,7 +20,7 @@
       :disabled="loading"
       class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
     >
-      {{ loading ? 'Р—Р°РіСЂСѓР·РєР°...' : 'Р—Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°С‚СЊСЃСЏ' }}
+              {{ loading ? 'Загрузка...' : 'Зарегистрироваться' }}
     </button>
   </form>
 </template>

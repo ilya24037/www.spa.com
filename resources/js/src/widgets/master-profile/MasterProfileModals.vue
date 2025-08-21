@@ -284,18 +284,18 @@ const copyUrl = async () => {
 
 const shareToVK = () => {
     const url = encodeURIComponent(masterUrl.value)
-    const title = encodeURIComponent(`РњР°СЃС‚РµСЂ РјР°СЃСЃР°Р¶Р° ${props.master.name}`)
+            const title = encodeURIComponent(`Мастер массажа ${props.master.name}`)
     window.open(`https://vk.com/share.php?url=${url}&title=${title}`, '_blank')
 }
 
 const shareToTelegram = () => {
     const url = encodeURIComponent(masterUrl.value)
-    const text = encodeURIComponent(`РњР°СЃС‚РµСЂ РјР°СЃСЃР°Р¶Р° ${props.master.name}`)
+            const text = encodeURIComponent(`Мастер массажа ${props.master.name}`)
     window.open(`https://t.me/share/url?url=${url}&text=${text}`, '_blank')
 }
 
 const shareToWhatsApp = () => {
-    const text = encodeURIComponent(`РњР°СЃС‚РµСЂ РјР°СЃСЃР°Р¶Р° ${props.master.name} ${masterUrl.value}`)
+            const text = encodeURIComponent(`Мастер массажа ${props.master.name} ${masterUrl.value}`)
     window.open(`https://wa.me/?text=${text}`, '_blank')
 }
 

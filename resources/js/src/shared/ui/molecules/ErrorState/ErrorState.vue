@@ -37,7 +37,7 @@
         <button
           v-if="!state.showFullDetails"
           class="error-state__details-toggle"
-          aria-label="РџРѕРєР°Р·Р°С‚СЊ РґРµС‚Р°Р»Рё РѕС€РёР±РєРё"
+          aria-label="Показать детали ошибки"
           @click="state.showFullDetails = true"
         >
           <svg

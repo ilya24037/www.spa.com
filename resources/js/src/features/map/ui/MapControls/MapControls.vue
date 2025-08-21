@@ -93,7 +93,7 @@
       </svg>
     </button>
 
-    <!-- РџРѕРєР°Р·Р°С‚РµР»СЊ Р·СѓРјР° -->
+            <!-- Показатель зума -->
     <div :class="ZOOM_INDICATOR_CLASSES">
       {{ zoom }}x
     </div>

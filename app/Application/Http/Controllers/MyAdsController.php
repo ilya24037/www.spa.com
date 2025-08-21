@@ -105,12 +105,6 @@ class MyAdsController extends Controller
             
             return back()->with('success', $message);
         } catch (\Exception $e) {
-            \Log::error('Ошибка удаления объявления', [
-                'ad_id' => $ad->id,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            
             if (request()->header('X-Inertia')) {
                 return back()->withErrors(['error' => 'Ошибка при удалении: ' . $e->getMessage()]);
             }

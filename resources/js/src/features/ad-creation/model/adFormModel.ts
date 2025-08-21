@@ -1,6 +1,7 @@
 import { ref, reactive, computed, watch } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { useAuthStore } from '@/stores/authStore'
+import type { MediaSettings } from '@/src/features/media/photo-upload/model/types'
 
 // Типы данных формы
 export interface AdFormData {
@@ -51,7 +52,7 @@ export interface AdFormData {
   gift: string
   photos: any[]
   video: any[]
-  media_settings: string[]
+  media_settings: MediaSettings
   geo: any
   address: string
   travel_area: string
@@ -69,22 +70,16 @@ export interface AdFormData {
 export function useAdFormModel(props: any, emit: any) {
   const authStore = useAuthStore()
   
-  // Попытка восстановить данные из localStorage ТОЛЬКО для новых объявлений
+  // НЕ восстанавливаем данные из localStorage для новых объявлений
+  // Это предотвращает появление старых данных в новой форме
   let savedFormData = null
   const isNewAd = !props.adId && !props.initialData?.id
   
+  // ВАЖНО: Очищаем localStorage при создании нового объявления
   if (isNewAd) {
-    try {
-      const saved = localStorage.getItem('adFormData')
-      if (saved) {
-        savedFormData = JSON.parse(saved)
-      }
-    } catch (e) {
-      // Молча игнорируем ошибку восстановления
-    }
-  } else {
-    // Для существующих объявлений очищаем localStorage чтобы не было конфликтов
+    // Очищаем старые данные, чтобы форма была пустой
     localStorage.removeItem('adFormData')
+    // localStorage очищен для нового объявления
   }
   
   // Состояние формы
@@ -97,12 +92,86 @@ export function useAdFormModel(props: any, emit: any) {
     service_provider: savedFormData?.service_provider || props.initialData?.service_provider || ['women'],
     experience: savedFormData?.experience || props.initialData?.experience || '',
     description: savedFormData?.description || props.initialData?.description || '',
-    services: savedFormData?.services || props.initialData?.services || {},
+    services: (() => {
+      if (savedFormData?.services) return savedFormData.services
+      if (!props.initialData?.services) return {}
+      if (typeof props.initialData.services === 'object' && !Array.isArray(props.initialData.services)) {
+        return props.initialData.services
+      }
+      if (typeof props.initialData.services === 'string') {
+        try {
+          return JSON.parse(props.initialData.services)
+        } catch (e) {
+          return {}
+        }
+      }
+      return {}
+    })(),
     services_additional_info: savedFormData?.services_additional_info || props.initialData?.services_additional_info || '',
-    features: savedFormData?.features || props.initialData?.features || [],
+    features: (() => {
+      if (savedFormData?.features) return savedFormData.features
+      if (!props.initialData?.features) return []
+      if (Array.isArray(props.initialData.features)) return props.initialData.features
+      if (typeof props.initialData.features === 'string') {
+        try {
+          const parsed = JSON.parse(props.initialData.features)
+          return Array.isArray(parsed) ? parsed : []
+        } catch (e) {
+          return []
+        }
+      }
+      return []
+    })(),
     additional_features: savedFormData?.additional_features || props.initialData?.additional_features || '',
-    schedule: savedFormData?.schedule || props.initialData?.schedule || {},
-    schedule_notes: savedFormData?.schedule_notes || props.initialData?.schedule_notes || '',
+    schedule: (() => {
+      // Сначала проверяем сохраненные данные
+      if (savedFormData?.schedule) {
+        console.log('📅 adFormModel: Используем schedule из savedFormData', savedFormData.schedule)
+        return savedFormData.schedule
+      }
+      // Если schedule есть в initialData
+      if (props.initialData?.schedule) {
+        console.log('📅 adFormModel: initialData.schedule найден:', {
+          value: props.initialData.schedule,
+          type: typeof props.initialData.schedule
+        })
+        // Если это строка - парсим JSON
+        if (typeof props.initialData.schedule === 'string') {
+          try {
+            const parsed = JSON.parse(props.initialData.schedule)
+            console.log('📅 adFormModel: schedule успешно распарсен из JSON:', parsed)
+            return parsed
+          } catch (e) {
+            console.warn('❌ Ошибка парсинга schedule:', e)
+            return {}
+          }
+        }
+        // Если это уже объект - используем как есть
+        console.log('📅 adFormModel: schedule уже объект, используем как есть:', props.initialData.schedule)
+        return props.initialData.schedule
+      }
+      // По умолчанию
+      console.log('📅 adFormModel: schedule не найден, используем пустой объект')
+      return {}
+    })(),
+    schedule_notes: (() => {
+      // Сначала проверяем сохраненные данные
+      if (savedFormData?.schedule_notes) {
+        console.log('📅 adFormModel: Используем schedule_notes из savedFormData:', savedFormData.schedule_notes)
+        return savedFormData.schedule_notes
+      }
+      // Если schedule_notes есть в initialData
+      if (props.initialData?.schedule_notes) {
+        console.log('📅 adFormModel: initialData.schedule_notes найден:', {
+          value: props.initialData.schedule_notes,
+          type: typeof props.initialData.schedule_notes
+        })
+        return props.initialData.schedule_notes
+      }
+      // По умолчанию
+      console.log('📅 adFormModel: schedule_notes не найден, используем пустую строку')
+      return ''
+    })(),
     online_booking: savedFormData?.online_booking || props.initialData?.online_booking || false,
     price: savedFormData?.price || props.initialData?.price || null,
     price_unit: savedFormData?.price_unit || props.initialData?.price_unit || 'hour',
@@ -131,10 +200,16 @@ export function useAdFormModel(props: any, emit: any) {
         apartments_1h: null,
         apartments_2h: null,
         apartments_night: null,
+        outcall_express: null,
         outcall_1h: null,
         outcall_2h: null,
         outcall_night: null,
-        taxi_included: false
+        taxi_included: false,
+        outcall_apartment: true,
+        outcall_hotel: false,
+        outcall_house: false,
+        outcall_sauna: false,
+        outcall_office: false
       }
     })(),
     main_service_name: props.initialData?.main_service_name || '',
@@ -150,9 +225,37 @@ export function useAdFormModel(props: any, emit: any) {
     nationality: props.initialData?.nationality || '',
     new_client_discount: props.initialData?.new_client_discount || '',
     gift: props.initialData?.gift || '',
-    photos: props.initialData?.photos || [],
-    video: props.initialData?.video || [],
-    media_settings: props.initialData?.media_settings || ['show_photos_in_gallery'],
+    photos: (() => {
+      if (!props.initialData?.photos) return []
+      if (Array.isArray(props.initialData.photos)) return props.initialData.photos
+      if (typeof props.initialData.photos === 'string') {
+        try {
+          const parsed = JSON.parse(props.initialData.photos)
+          return Array.isArray(parsed) ? parsed : []
+        } catch (e) {
+          return []
+        }
+      }
+      return []
+    })(),
+    video: (() => {
+      if (!props.initialData?.video) return []
+      if (Array.isArray(props.initialData.video)) return props.initialData.video
+      if (typeof props.initialData.video === 'string') {
+        try {
+          const parsed = JSON.parse(props.initialData.video)
+          return Array.isArray(parsed) ? parsed : []
+        } catch (e) {
+          return []
+        }
+      }
+      return []
+    })(),
+    media_settings: props.initialData?.media_settings || {
+      showAdditionalInfo: false,
+      showServices: false,
+      showPrices: false
+    },
     geo: props.initialData?.geo || {},
     address: props.initialData?.address || '',
     travel_area: props.initialData?.travel_area || 'no_travel',
@@ -172,19 +275,17 @@ export function useAdFormModel(props: any, emit: any) {
   // Состояние сохранения
   const saving = ref(false)
   
-  // Режим редактирования - упрощенная проверка
+  // Режим редактирования - учитываем оба источника ID
   const isEditMode = computed(() => {
-    // Преобразуем в число и проверяем что больше 0
-    const id = Number(props.adId)
-    console.log('isEditMode check:', {
-      propsAdId: props.adId,
-      propsAdIdType: typeof props.adId,
-      numberValue: id,
-      isNaN: isNaN(id),
-      isGreaterThanZero: id > 0,
-      result: !isNaN(id) && id > 0
-    })
-    return !isNaN(id) && id > 0
+    // Проверяем оба источника ID
+    const idFromProps = Number(props.adId)
+    const idFromData = Number(props.initialData?.id)
+    
+    const hasValidPropsId = !isNaN(idFromProps) && idFromProps > 0
+    const hasValidDataId = !isNaN(idFromData) && idFromData > 0
+    
+    // Проверяем оба источника ID для определения режима редактирования
+    return hasValidPropsId || hasValidDataId
   })
   
   // Watcher для синхронизации адреса из geo в отдельное поле address
@@ -245,11 +346,20 @@ export function useAdFormModel(props: any, emit: any) {
       category: props.category
     }
     
+    
     // Если это редактирование существующего объявления
     if (isEditMode.value) {
+      // Определяем ID для редактирования (та же логика что и в handleSaveDraft)
+      let editId = null
+      if (props.adId && Number(props.adId) > 0) {
+        editId = Number(props.adId)
+      } else if (props.initialData?.id && Number(props.initialData.id) > 0) {
+        editId = Number(props.initialData.id)
+      }
+      
       // Для черновиков используем PUT на /draft/{id}
       if (props.initialData?.status === 'draft') {
-        router.put(`/draft/${props.adId}`, submitData, {
+        router.put(`/draft/${editId}`, submitData, {
           preserveScroll: true,
           onSuccess: () => {
             emit('success')
@@ -264,7 +374,7 @@ export function useAdFormModel(props: any, emit: any) {
         })
       } else {
         // Для обычных объявлений используем PUT на /ads/{id}
-        router.put(`/ads/${props.adId}`, submitData, {
+        router.put(`/ads/${editId}`, submitData, {
           preserveScroll: true,
           onSuccess: () => {
             // Для активных объявлений переходим к списку активных
@@ -298,42 +408,24 @@ export function useAdFormModel(props: any, emit: any) {
     }
   }
 
-  // Сохранение черновика (как в старой версии из Backup)
+  // Сохранение черновика с корректной логикой PUT/POST
   const handleSaveDraft = async () => {
-    // Временная отладка для диагностики
-    console.log('📝 Сохранение черновика:', {
-      isEditMode: isEditMode.value,
-      adId: props.adId,
-      adIdType: typeof props.adId,
-      status: props.initialData?.status,
-      hasInitialData: !!props.initialData,
-      initialDataId: props.initialData?.id
-    })
-    
-    saving.value = true
+    try {
+      saving.value = true
     
     // Создаем FormData для отправки файлов
     const formData = new FormData()
     
-    // ВАЖНО: Если редактируем существующий черновик, передаем его ID
-    // Проверяем все возможные источники ID
+    // Определяем ID для редактирования существующего черновика
+    // Приоритет: props.adId > props.initialData.id
     let adId = null
     
     if (props.adId && Number(props.adId) > 0) {
       adId = Number(props.adId)
-      console.log('✅ ID найден в props.adId:', adId)
     } else if (props.initialData?.id && Number(props.initialData.id) > 0) {
       adId = Number(props.initialData.id)
-      console.log('✅ ID найден в props.initialData.id:', adId)
     }
     
-    if (adId && adId > 0) {
-      formData.append('ad_id', String(adId))
-      formData.append('id', String(adId)) // Дублируем для надежности
-      console.log('✅ Добавлен ad_id в FormData:', adId)
-    } else {
-      console.log('❌ ID не найден или не валидный. props.adId:', props.adId, 'initialData.id:', props.initialData?.id)
-    }
     
     // Добавляем все обычные поля
     formData.append('category', props.category || '')
@@ -341,10 +433,15 @@ export function useAdFormModel(props: any, emit: any) {
     formData.append('specialty', form.specialty || '')
     formData.append('work_format', form.work_format || '')
     formData.append('experience', form.experience || '')
+    // Важно: всегда отправляем description как строку, даже если пустая
     formData.append('description', form.description || '')
     formData.append('services_additional_info', form.services_additional_info || '')
     formData.append('additional_features', form.additional_features || '')
     formData.append('schedule_notes', form.schedule_notes || '')
+    console.log('📅 adFormModel: Добавляем schedule_notes в FormData', {
+      schedule_notes: form.schedule_notes,
+      schedule_notesType: typeof form.schedule_notes
+    })
     formData.append('price', form.price?.toString() || '')
     formData.append('price_unit', form.price_unit || '')
     formData.append('is_starting_price', form.is_starting_price ? '1' : '0')
@@ -355,14 +452,24 @@ export function useAdFormModel(props: any, emit: any) {
       formData.append('prices[apartments_1h]', form.prices.apartments_1h?.toString() || '')
       formData.append('prices[apartments_2h]', form.prices.apartments_2h?.toString() || '')
       formData.append('prices[apartments_night]', form.prices.apartments_night?.toString() || '')
+      formData.append('prices[outcall_express]', form.prices.outcall_express?.toString() || '')
       formData.append('prices[outcall_1h]', form.prices.outcall_1h?.toString() || '')
       formData.append('prices[outcall_2h]', form.prices.outcall_2h?.toString() || '')
       formData.append('prices[outcall_night]', form.prices.outcall_night?.toString() || '')
       formData.append('prices[taxi_included]', form.prices.taxi_included ? '1' : '0')
+      // Места выезда
+      formData.append('prices[outcall_apartment]', form.prices.outcall_apartment ? '1' : '0')
+      formData.append('prices[outcall_hotel]', form.prices.outcall_hotel ? '1' : '0')
+      formData.append('prices[outcall_house]', form.prices.outcall_house ? '1' : '0')
+      formData.append('prices[outcall_sauna]', form.prices.outcall_sauna ? '1' : '0')
+      formData.append('prices[outcall_office]', form.prices.outcall_office ? '1' : '0')
     }
     formData.append('main_service_name', form.main_service_name || '')
     formData.append('main_service_price', form.main_service_price?.toString() || '')
     formData.append('main_service_price_unit', form.main_service_price_unit || '')
+    
+    // Добавляем параметры
+    
     formData.append('age', form.age?.toString() || '')
     formData.append('height', form.height || '')
     formData.append('weight', form.weight || '')
@@ -383,64 +490,273 @@ export function useAdFormModel(props: any, emit: any) {
     formData.append('telegram', form.telegram || '')
     
     // Добавляем массивы как JSON
-    if (form.clients) formData.append('clients', JSON.stringify(form.clients))
-    if (form.service_location) formData.append('service_location', JSON.stringify(form.service_location))
-    if (form.service_provider) formData.append('service_provider', JSON.stringify(form.service_provider))
-    if (form.services) formData.append('services', JSON.stringify(form.services))
-    if (form.features) formData.append('features', JSON.stringify(form.features))
-    if (form.schedule) formData.append('schedule', JSON.stringify(form.schedule))
-    if (form.additional_services) formData.append('additional_services', JSON.stringify(form.additional_services))
-    if (form.media_settings) formData.append('media_settings', JSON.stringify(form.media_settings))
-    if (form.geo) formData.append('geo', JSON.stringify(form.geo))
-    if (form.custom_travel_areas) formData.append('custom_travel_areas', JSON.stringify(form.custom_travel_areas))
+    try {
+      if (form.clients) formData.append('clients', JSON.stringify(form.clients))
+      if (form.service_location) formData.append('service_location', JSON.stringify(form.service_location))
+      if (form.service_provider) formData.append('service_provider', JSON.stringify(form.service_provider))
+      if (form.services) formData.append('services', JSON.stringify(form.services))
+      if (form.features) formData.append('features', JSON.stringify(form.features))
+      if (form.schedule) {
+        console.log('📅 adFormModel: Добавляем schedule в FormData', {
+          schedule: form.schedule,
+          scheduleType: typeof form.schedule,
+          scheduleStringified: JSON.stringify(form.schedule)
+        })
+        formData.append('schedule', JSON.stringify(form.schedule))
+      } else {
+        console.log('📅 adFormModel: form.schedule пустой или undefined', {
+          schedule: form.schedule,
+          scheduleType: typeof form.schedule
+        })
+      }
+      if (form.additional_services) formData.append('additional_services', JSON.stringify(form.additional_services))
+      if (form.media_settings) {
+        formData.append('media_settings', JSON.stringify(form.media_settings))
+      }
+      // Проверяем, не является ли geo уже строкой
+      if (form.geo) {
+        if (typeof form.geo === 'string') {
+          // Если уже строка, отправляем как есть
+          formData.append('geo', form.geo)
+        } else {
+          // Если объект, сериализуем
+          formData.append('geo', JSON.stringify(form.geo))
+        }
+      }
+      if (form.custom_travel_areas) formData.append('custom_travel_areas', JSON.stringify(form.custom_travel_areas))
+    } catch (jsonError) {
+      // Молча игнорируем ошибку JSON
+    }
     
-    // Обрабатываем фотографии
-    if (form.photos && form.photos.length > 0) {
+    // KISS: Всегда отправляем полный массив фотографий
+    // Подготовка photos для отправки
+    
+    console.log('📸 adFormModel: НАЧИНАЕМ ПОДГОТОВКУ PHOTOS', {
+      formPhotos: form.photos,
+      photosLength: form.photos?.length,
+      photosType: typeof form.photos,
+      isArray: Array.isArray(form.photos),
+      photosDetailed: form.photos?.map((p, i) => ({
+        index: i,
+        type: typeof p,
+        isFile: p instanceof File,
+        hasUrl: p?.url,
+        hasPreview: p?.preview,
+        id: p?.id
+      }))
+    })
+    
+    if (form.photos && Array.isArray(form.photos)) {
+      console.log('✅ adFormModel: form.photos является массивом, начинаем итерацию')
+      // Всегда отправляем массив photos, даже если пустой
       form.photos.forEach((photo: any, index: number) => {
+        console.log(`📸 adFormModel: Обрабатываем фото ${index}`, {
+          photo: photo,
+          type: typeof photo,
+          isFile: photo instanceof File,
+          hasUrl: photo?.url,
+          hasPreview: photo?.preview,
+          id: photo?.id
+        })
+        
         if (photo instanceof File) {
+          console.log(`✅ adFormModel: Фото ${index} является File, добавляем в FormData`)
           formData.append(`photos[${index}]`, photo)
-        } else if (typeof photo === 'string') {
+        } else if (typeof photo === 'string' && photo !== '') {
+          console.log(`✅ adFormModel: Фото ${index} является строкой, добавляем в FormData:`, photo)
           formData.append(`photos[${index}]`, photo)
+        } else if (typeof photo === 'object' && photo !== null) {
+          const value = photo.url || photo.preview || ''
+          console.log(`📸 adFormModel: Фото ${index} является объектом, извлекаем value:`, value)
+          if (value) {
+            console.log(`✅ adFormModel: Фото ${index} добавляем объект в FormData`)
+            formData.append(`photos[${index}]`, value)
+          } else {
+            console.log(`❌ adFormModel: Фото ${index} объект без url/preview, пропускаем`)
+          }
+        } else {
+          console.log(`❌ adFormModel: Фото ${index} неизвестный тип, пропускаем`)
         }
       })
+      
+      // Если массив пустой, явно отправляем пустой массив
+      if (form.photos.length === 0) {
+        console.log('❌ adFormModel: Массив photos пуст, отправляем []')
+        formData.append('photos', '[]')
+      } else {
+        console.log('✅ adFormModel: Добавили фото в FormData, количество:', form.photos.length)
+      }
     } else {
-      // Если фото нет, отправляем пустой массив
+      // Если photos не инициализирован, отправляем пустой массив
+      console.log('❌ adFormModel: form.photos НЕ массив, отправляем []')
       formData.append('photos', '[]')
     }
     
-    // Обрабатываем видео
-    if (form.video && form.video.length > 0) {
+    // Обрабатываем видео (аналогично photos)
+    if (form.video && Array.isArray(form.video)) {
+      // Всегда отправляем массив video, даже если пустой
       form.video.forEach((video: any, index: number) => {
         if (video instanceof File) {
           formData.append(`video[${index}]`, video)
-        } else if (typeof video === 'string') {
+        } else if (typeof video === 'string' && video !== '') {
           formData.append(`video[${index}]`, video)
+        } else if (typeof video === 'object' && video !== null) {
+          const value = video.url || video.preview || ''
+          if (value) {
+            formData.append(`video[${index}]`, value)
+          } else {
+            formData.append(`video[${index}]`, JSON.stringify(video))
+          }
         }
       })
+      
+      // Если массив пустой, явно отправляем пустой массив
+      if (form.video.length === 0) {
+        formData.append('video', '[]')
+      }
     } else {
-      // Если видео нет, отправляем пустой массив
+      // Если video не инициализирован, отправляем пустой массив
       formData.append('video', '[]')
     }
     
-    // ВСЕГДА используем POST /draft для черновиков
-    // Контроллер сам определит - создавать новый или обновить существующий
-    router.post('/draft', formData as any, {
-      preserveScroll: true,
-      forceFormData: true,
-      onStart: () => {
-        // Debug log removed
-      },
-      onSuccess: (page) => {
-        // Debug log removed
-      },
-      onError: (errors) => {
-        // Обработка ошибки
-      },
-      onFinish: () => {
-        // Debug log removed
-        saving.value = false
+    // KISS: Простая логика отправки
+    if (adId && adId > 0) {
+      // Обновление существующего черновика
+      
+      // Проверяем, есть ли файлы (фото или видео) 
+      // ИСПРАВЛЕНИЕ: видео может быть как File, так и объект с file полем
+      const hasPhotoFiles = form.photos?.some((p: any) => p instanceof File)
+      const hasVideoFiles = form.video?.some((v: any) => 
+        v instanceof File || (v && typeof v === 'object' && (v.file instanceof File || v.url))
+      )
+      const hasFiles = hasPhotoFiles || hasVideoFiles
+      
+      if (hasFiles) {
+        // Если есть файлы - используем FormData с POST и _method=PUT
+        formData.append('_method', 'PUT')
+        
+        console.log('🚀 adFormModel: ОТПРАВЛЯЕМ ЗАПРОС (с файлами) PUT /draft/' + adId, {
+          adId: adId,
+          hasPhotoFiles: hasPhotoFiles,
+          hasVideoFiles: hasVideoFiles,
+          formDataEntries: Array.from((formData as any).entries()).filter(([key]) => key.startsWith('photos')),
+          method: 'POST с _method=PUT'
+        })
+        
+        router.post(`/draft/${adId}`, formData as any, {
+          preserveScroll: true,
+          forceFormData: true,
+          onSuccess: () => {
+            saving.value = false
+          },
+          onError: (errors) => {
+            saving.value = false
+          },
+          onFinish: () => {
+            saving.value = false
+          }
+        })
+      } else {
+        // Если файлов нет - используем обычный PUT с JSON
+        
+        console.log('🚀 adFormModel: ОТПРАВЛЯЕМ ЗАПРОС (без файлов) PUT /draft/' + adId, {
+          adId: adId,
+          hasPhotoFiles: hasPhotoFiles,
+          hasVideoFiles: hasVideoFiles,
+          method: 'PUT с JSON'
+        })
+        
+        // Правильная конвертация FormData в объект с поддержкой индексированных массивов
+        const plainData: any = {}
+        
+        console.log('🔧 adFormModel: Начинаем конвертацию FormData в plainData')
+        
+        formData.forEach((value, key) => {
+          console.log(`🔧 adFormModel: Обрабатываем ключ "${key}" = "${value}"`)
+          
+          // Пропускаем пустые значения
+          if (value === '' || value === undefined) return
+          
+          // Проверяем, это индексированный массив (например photos[0], photos[1])
+          const indexMatch = key.match(/^(\w+)\[(\d+)\]$/)
+          if (indexMatch) {
+            const arrayName = indexMatch[1] // 'photos'
+            const arrayIndex = parseInt(indexMatch[2], 10) // 0, 1, 2...
+            
+            console.log(`🔧 adFormModel: Найден индексированный массив: ${arrayName}[${arrayIndex}]`)
+            
+            // Создаем массив если его еще нет
+            if (!plainData[arrayName]) {
+              plainData[arrayName] = []
+            }
+            
+            // Добавляем значение в нужную позицию массива
+            plainData[arrayName][arrayIndex] = value
+            
+            console.log(`✅ adFormModel: Добавили в ${arrayName}[${arrayIndex}], текущий размер массива:`, plainData[arrayName].length)
+            return
+          }
+          
+          // Парсим JSON строки
+          if (typeof value === 'string' && (value.startsWith('[') || value.startsWith('{'))) {
+            try {
+              plainData[key] = JSON.parse(value)
+              console.log(`✅ adFormModel: JSON распарсен для ключа "${key}"`)
+            } catch {
+              plainData[key] = value
+              console.log(`⚠️ adFormModel: Ошибка парсинга JSON для ключа "${key}", оставляем как строку`)
+            }
+          } else {
+            plainData[key] = value
+            console.log(`✅ adFormModel: Обычное значение для ключа "${key}"`)
+          }
+        })
+        
+        console.log('📤 adFormModel: plainData для PUT запроса:', {
+          photos: plainData.photos,
+          photosType: typeof plainData.photos,
+          allKeys: Object.keys(plainData)
+        })
+        
+        router.put(`/draft/${adId}`, plainData, {
+          preserveScroll: true,
+          onSuccess: () => {
+            saving.value = false
+          },
+          onError: (errors) => {
+            saving.value = false
+          },
+          onFinish: () => {
+            saving.value = false
+          }
+        })
       }
-    })
+    } else {
+      // Создание нового черновика
+      console.log('🚀 adFormModel: СОЗДАЕМ НОВЫЙ ЧЕРНОВИК POST /draft', {
+        hasPhotoFiles: form.photos?.some((p: any) => p instanceof File),
+        photosCount: form.photos?.length || 0,
+        formDataPhotos: Array.from((formData as any).entries()).filter(([key]) => key.startsWith('photos')),
+        method: 'POST FormData'
+      })
+      
+      router.post('/draft', formData as any, {
+        preserveScroll: true,
+        forceFormData: true,
+        onSuccess: () => {
+          saving.value = false
+        },
+        onError: (errors) => {
+          saving.value = false
+        },
+        onFinish: () => {
+          saving.value = false
+        }
+      })
+    }
+    } catch (error) {
+      saving.value = false
+    }
   }
 
   // Публикация объявления
@@ -480,11 +796,14 @@ export function useAdFormModel(props: any, emit: any) {
     emit('cancel')
   }
 
-  // Автосохранение в localStorage для новых объявлений
-  if (isNewAd) {
+  // Автосохранение в localStorage ТОЛЬКО для существующих черновиков
+  // НЕ сохраняем для новых объявлений, чтобы избежать конфликтов
+  if (!isNewAd && props.initialData?.status === 'draft') {
     watch(form, (newValue) => {
       try {
-        localStorage.setItem('adFormData', JSON.stringify(newValue))
+        // Сохраняем с ID черновика в ключе, чтобы разделить данные разных черновиков
+        const storageKey = `adFormData_draft_${props.adId || props.initialData?.id}`
+        localStorage.setItem(storageKey, JSON.stringify(newValue))
       } catch (e) {
         // Молча игнорируем ошибку сохранения
       }

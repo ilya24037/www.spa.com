@@ -7,6 +7,7 @@ use App\Application\Http\Requests\Ad\CreateAdRequest;
 use App\Application\Http\Requests\Ad\UpdateAdRequest;
 use App\Application\Http\Resources\Ad\AdResource;
 use App\Domain\Ad\Services\AdService;
+use App\Domain\Ad\Services\DraftService;
 use App\Domain\Ad\Models\Ad;
 use App\Domain\Ad\DTOs\CreateAdDTO;
 use Illuminate\Http\RedirectResponse;
@@ -54,7 +55,7 @@ class AdController extends Controller
 
         $ad->load(['user.profile']);
 
-        return Inertia::render('Ad/Show', [
+        return Inertia::render('Ads/Show', [
             'ad' => new AdResource($ad),
             'similarAds' => AdResource::collection(
                 $this->adService->getSimilarAds($ad, limit: 4)
@@ -67,7 +68,9 @@ class AdController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('AddItem');
+        // Рендерим новую страницу создания объявления
+        // которая правильно очищает localStorage
+        return Inertia::render('Ad/Create');
     }
 
     /**
@@ -99,8 +102,28 @@ class AdController extends Controller
      */
     public function edit(Ad $ad): Response
     {
+        // Защита от несуществующих объявлений
+        if (!$ad->exists) {
+            abort(404, 'Объявление не найдено');
+        }
+        
         $this->authorize('update', $ad);
 
+        // Для черновиков используем DraftService для правильной подготовки данных
+        if ($ad->status === 'draft') {
+            $draftService = app(\App\Domain\Ad\Services\DraftService::class);
+            $preparedData = $draftService->prepareForDisplay($ad);
+            
+            // ВАЖНО: Убедимся, что ID всегда присутствует и имеет правильный тип
+            $preparedData['id'] = (int) $ad->id;
+            
+            return Inertia::render('Ad/Edit', [
+                'ad' => $preparedData,
+                'isActive' => false
+            ]);
+        }
+
+        // Для активных объявлений используем стандартный AdResource
         return Inertia::render('Ad/Edit', [
             'ad' => new AdResource($ad),
             'isActive' => $ad->isActive()

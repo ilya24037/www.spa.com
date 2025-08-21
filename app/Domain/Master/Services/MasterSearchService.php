@@ -203,4 +203,36 @@ class MasterSearchService
                 break;
         }
     }
+
+    /**
+     * Получить похожих мастеров
+     */
+    public function getSimilarMasters(int $masterId, ?string $city, int $limit = 5): array
+    {
+        $query = MasterProfile::query()
+            ->with(['services', 'reviews'])
+            ->where('id', '!=', $masterId)
+            ->where('status', 'active');
+
+        // Если указан город, ищем в том же городе
+        if ($city) {
+            $query->where('city', $city);
+        }
+
+        // Ищем мастеров с похожими услугами
+        $master = MasterProfile::find($masterId);
+        if ($master && $master->services->isNotEmpty()) {
+            $serviceCategories = $master->services->pluck('category')->filter()->unique();
+            if ($serviceCategories->isNotEmpty()) {
+                $query->whereHas('services', function ($q) use ($serviceCategories) {
+                    $q->whereIn('category', $serviceCategories->toArray());
+                });
+            }
+        }
+
+        return $query->orderBy('rating', 'desc')
+                    ->limit($limit)
+                    ->get()
+                    ->toArray();
+    }
 }

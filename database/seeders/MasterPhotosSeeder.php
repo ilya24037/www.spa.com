@@ -2,10 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\MasterProfile;
-use App\Models\MasterPhoto;
+use Illuminate\Support\Facades\DB;
+use App\Domain\Master\Models\MasterProfile;
 
 class MasterPhotosSeeder extends Seeder
 {
@@ -14,68 +13,96 @@ class MasterPhotosSeeder extends Seeder
      */
     public function run(): void
     {
-        // Найдем мастера Елену Сидорову
-        $master = MasterProfile::where('display_name', 'Елена Сидорова')->first();
+        $this->command->info('Добавляем тестовые фотографии для мастеров...');
         
-        if (!$master) {
-            $this->command->error('Мастер Елена Сидорова не найден!');
+        // Получаем всех мастеров
+        $masters = MasterProfile::all();
+        
+        if ($masters->isEmpty()) {
+            $this->command->error('Мастера не найдены! Сначала запустите MasterSeeder.');
             return;
         }
-
-        // Удалим существующие фотографии
-        $master->photos()->delete();
-
-        // Добавим тестовые фотографии
-        $photos = [
-            [
-                'path' => 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=600&fit=crop&crop=face',
-                'is_main' => true,
-                'order' => 1
-            ],
-            [
-                'path' => 'https://images.unsplash.com/photo-1580618672591-eb180b1a973f?w=400&h=600&fit=crop&crop=face',
-                'is_main' => false,
-                'order' => 2
-            ],
-            [
-                'path' => 'https://images.unsplash.com/photo-1594824388853-0d0e4a8a1b4c?w=400&h=600&fit=crop&crop=face',
-                'is_main' => false,
-                'order' => 3
-            ],
-            [
-                'path' => 'https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=400&h=600&fit=crop&crop=face',
-                'is_main' => false,
-                'order' => 4
-            ],
-            [
-                'path' => 'https://images.unsplash.com/photo-1588516903720-8ceb67f9ef84?w=400&h=600&fit=crop&crop=face',
-                'is_main' => false,
-                'order' => 5
-            ],
-            [
-                'path' => 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=600&fit=crop&crop=face',
-                'is_main' => false,
-                'order' => 6
-            ]
-        ];
-
-        foreach ($photos as $photo) {
-            MasterPhoto::create([
+        
+        foreach ($masters as $master) {
+            $this->command->info("Обрабатываем мастера: {$master->display_name}");
+            
+            // Удаляем существующие фотографии
+            DB::table('master_photos')->where('master_profile_id', $master->id)->delete();
+            
+            // Тестовые фотографии для каждого мастера
+            $photos = [
+                [
+                    'filename' => 'main_photo.jpg',
+                    'mime_type' => 'image/jpeg',
+                    'file_size' => 1024000,
+                    'width' => 400,
+                    'height' => 600,
+                    'is_main' => true,
+                    'sort_order' => 1,
+                    'is_approved' => true
+                ],
+                [
+                    'filename' => 'work_photo.jpg',
+                    'mime_type' => 'image/jpeg',
+                    'file_size' => 800000,
+                    'width' => 400,
+                    'height' => 600,
+                    'is_main' => false,
+                    'sort_order' => 2,
+                    'is_approved' => true
+                ],
+                [
+                    'filename' => 'certificate_photo.jpg',
+                    'mime_type' => 'image/jpeg',
+                    'file_size' => 600000,
+                    'width' => 400,
+                    'height' => 600,
+                    'is_main' => false,
+                    'sort_order' => 3,
+                    'is_approved' => true
+                ]
+            ];
+            
+            foreach ($photos as $photo) {
+                DB::table('master_photos')->insert([
+                    'master_profile_id' => $master->id,
+                    'filename' => $photo['filename'],
+                    'mime_type' => $photo['mime_type'],
+                    'file_size' => $photo['file_size'],
+                    'width' => $photo['width'],
+                    'height' => $photo['height'],
+                    'is_main' => $photo['is_main'],
+                    'sort_order' => $photo['sort_order'],
+                    'is_approved' => $photo['is_approved'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+                
+                $this->command->info("  ✅ Добавлена фотография: {$photo['filename']}");
+            }
+            
+            // Добавляем тестовое видео
+            DB::table('master_videos')->where('master_profile_id', $master->id)->delete();
+            
+            DB::table('master_videos')->insert([
                 'master_profile_id' => $master->id,
-                'path' => $photo['path'],
-                'is_main' => $photo['is_main'],
-                'order' => $photo['order']
+                'filename' => 'intro_video.mp4',
+                'mime_type' => 'video/mp4',
+                'file_size' => 5000000,
+                'width' => 1280,
+                'height' => 720,
+                'duration_seconds' => 30,
+                'thumbnail_filename' => 'intro_video_thumb.jpg',
+                'is_main' => false,
+                'sort_order' => 1,
+                'is_approved' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
+            
+            $this->command->info("  ✅ Добавлено видео: intro_video.mp4");
         }
-
-        // Обновим аватар мастера
-        $master->update([
-            'avatar' => $photos[0]['path'],
-            'is_verified' => true,
-            'is_premium' => true,
-            'premium_until' => now()->addMonths(3)
-        ]);
-
-        $this->command->info('✅ Добавлено ' . count($photos) . ' фотографий для мастера: ' . $master->display_name);
+        
+        $this->command->info('✅ Все фотографии и видео успешно добавлены!');
     }
 } 

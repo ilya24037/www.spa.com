@@ -87,7 +87,7 @@ const props = withDefaults(defineProps<SpinnerProps>(), {
     centered: false,
     overlay: false,
     text: '',
-    ariaLabel: 'Р—Р°РіСЂСѓР·РєР°...'
+            ariaLabel: 'Загрузка...'
 })
 
 const slots = useSlots()

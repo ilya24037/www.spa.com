@@ -18,7 +18,7 @@
           
           <div class="flex-1">
             <h1 class="text-2xl font-bold text-gray-500 mb-2">
-              {{ master.name || 'РњР°СЃС‚РµСЂ' }}
+              {{ master.name || 'Мастер' }}
             </h1>
             
             <p v-if="master.description" class="text-gray-500 mb-4">
@@ -31,7 +31,7 @@
               </span>
               
               <span v-if="master.reviewsCount" class="text-gray-500">
-                {{ master.reviewsCount }} РѕС‚Р·С‹РІРѕРІ
+                {{ master.reviewsCount }} отзывов
               </span>
             </div>
           </div>

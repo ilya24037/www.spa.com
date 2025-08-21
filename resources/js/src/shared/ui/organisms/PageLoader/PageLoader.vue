@@ -177,7 +177,7 @@ const pageConfigs: PageTypeConfigs = {
         skeletonCount: 3,
         showSpinner: true,
         showProgress: false,
-        message: 'Р—Р°РіСЂСѓР·РєР°...',
+        message: 'Загрузка...',
         fullScreen: false,
         overlay: false,
         animation: 'fade'
@@ -195,9 +195,9 @@ const _actualShowSkeletons = computed<boolean>(() => _props?.showSkeletons && co
 
 const ariaLabel = computed<string>(() => {
     if (_props?.showProgress && _props?.progress > 0) {
-        return `Р—Р°РіСЂСѓР·РєР°: ${_props?.progress}%`
+        return `Загрузка: ${_props?.progress}%`
     }
-    return actualMessage?.value || 'Р—Р°РіСЂСѓР·РєР° СЃС‚СЂР°РЅРёС†С‹'
+            return actualMessage?.value || 'Загрузка страницы'
 })
 
 const containerClasses = computed<string>(() => {

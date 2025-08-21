@@ -182,4 +182,54 @@ class MasterService implements MasterServiceInterface
         return $this->searchService->updateRating($master);
     }
 
+    /**
+     * Проверить валидность slug для SEO-URL
+     */
+    public function isValidSlug(MasterProfile $profile, string $slug): bool
+    {
+        return $profile->slug === $slug;
+    }
+
+    /**
+     * Обновить мета-теги профиля
+     */
+    public function ensureMetaTags(MasterProfile $profile): void
+    {
+        // Если мета-теги не установлены, устанавливаем по умолчанию
+        if (empty($profile->meta_title)) {
+            $profile->update([
+                'meta_title' => $profile->display_name . ' - Массаж в ' . ($profile->city ?? 'Москве'),
+                'meta_description' => 'Профессиональный массаж от ' . $profile->display_name . '. Запись на массаж онлайн.'
+            ]);
+        }
+    }
+
+    /**
+     * Увеличить счетчик просмотров
+     */
+    public function incrementViews(MasterProfile $profile): void
+    {
+        $profile->increment('views_count');
+    }
+
+    /**
+     * Получить похожих мастеров
+     */
+    public function getSimilarMasters(int $masterId, ?string $city, int $limit = 5): array
+    {
+        return $this->searchService->getSimilarMasters($masterId, $city, $limit);
+    }
+
+    /**
+     * Проверить находится ли мастер в избранном пользователя
+     */
+    public function isFavorite(int $masterId, int $userId): bool
+    {
+        return \DB::table('user_favorites')
+            ->where('user_id', $userId)
+            ->where('favoritable_type', 'master')
+            ->where('favoritable_id', $masterId)
+            ->exists();
+    }
+
 }

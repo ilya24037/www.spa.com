@@ -7,7 +7,6 @@ use App\Domain\Ad\Services\AdTransformService;
 use App\Domain\Service\Services\CategoryService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Контроллер главной страницы
@@ -27,7 +26,6 @@ class HomeController extends Controller
             $masters = $this->transformer->transformForHomePage($ads)
                 ->map(fn($dto) => $dto->toArray());
         } catch (\Exception $e) {
-            Log::error('Error loading advertisements', ['error' => $e->getMessage()]);
             $masters = collect([]);
         }
         

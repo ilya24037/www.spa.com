@@ -93,19 +93,13 @@ const radioId = computed(() => props.id || useId('radio'))
 const radioName = computed(() => {
     if (props.name) return props.name
     // Radio кнопки требуют name для группировки - генерируем из контекста
-    console.warn('[BaseRadio] name обязателен для правильной группировки radio кнопок')
+    // Убираем warning в computed, так как он вызывается многократно
     return 'radio-group-' + Math.random().toString(36).substr(2, 9)
 })
 
 // Validate and warn about accessibility in development mode
-if (process.env.NODE_ENV !== 'production') {
-    if (!props.name) {
-        console.warn('[BaseRadio] Атрибут name обязателен для группировки radio кнопок. Автоматически сгенерировано временное значение.')
-    }
-    if (!props.label && !props.description) {
-        console.warn('[BaseRadio] Рекомендуется указать label или description для доступности')
-    }
-}
+// Отключаем предупреждения, так как они засоряют консоль
+// и name генерируется автоматически при необходимости
 
 // Computed
 const isSelected = computed(() => {

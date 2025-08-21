@@ -218,7 +218,13 @@ const formatPrice = (price: number): string => {
 }
 
 const goToProfile = () => {
-  router.visit(`/masters/${props.master.id}`)
+  // Переходим на страницу профиля мастера
+  if (props.master.slug) {
+    router.visit(`/masters/${props.master.slug}-${props.master.id}`)
+  } else {
+    // Fallback если slug отсутствует
+    router.visit(`/masters/master-${props.master.id}`)
+  }
 }
 
 const toggleFavorite = () => {

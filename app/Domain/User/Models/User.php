@@ -4,6 +4,7 @@ namespace App\Domain\User\Models;
 
 use App\Domain\User\Traits\HasProfile;
 use App\Domain\User\Traits\HasRoles;
+use App\Domain\User\Traits\HasMasterProfile;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -21,7 +22,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
-    use HasRoles, HasProfile;
+    use HasRoles, HasProfile, HasMasterProfile;
 
     /**
      * The attributes that are mass assignable.

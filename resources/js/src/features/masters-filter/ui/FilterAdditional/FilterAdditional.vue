@@ -103,7 +103,7 @@
       </label>
     </div>
 
-    <!-- РџРѕРєР°Р·Р°С‚СЊ Р°РєС‚РёРІРЅС‹Рµ С„РёР»СЊС‚СЂС‹ -->
+            <!-- Показать активные фильтры -->
     <div v-if="hasActiveFilters" :class="ACTIVE_FILTERS_CLASSES">
       <span :class="ACTIVE_COUNT_CLASSES">
         РђРєС‚РёРІРЅРѕ С„РёР»СЊС‚СЂРѕРІ: {{ activeFiltersCount }}

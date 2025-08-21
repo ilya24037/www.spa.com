@@ -85,7 +85,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, watch, computed } from 'vue'
 import BaseSelect from '@/src/shared/ui/atoms/BaseSelect/BaseSelect.vue'
 import BaseTextarea from '@/src/shared/ui/atoms/BaseTextarea/BaseTextarea.vue'
@@ -93,13 +93,29 @@ import BaseCheckbox from '@/src/shared/ui/atoms/BaseCheckbox/BaseCheckbox.vue'
 import BaseRadio from '@/src/shared/ui/atoms/BaseRadio/BaseRadio.vue'
 import SecondaryButton from '@/src/shared/ui/atoms/SecondaryButton/SecondaryButton.vue'
 
-const props = defineProps({
-    schedule: { type: Object, default: () => ({}) },
-    scheduleNotes: { type: String, default: '' },
-    onlineBooking: { type: Boolean, default: false },
-    errors: { type: Object, default: () => ({}) }
+// TypeScript интерфейсы
+interface Props {
+    schedule?: Record<string, any>
+    scheduleNotes?: string
+    onlineBooking?: boolean
+    errors?: Record<string, any>
+}
+
+interface Emits {
+    'update:schedule': [value: Record<string, any>]
+    'update:scheduleNotes': [value: string]
+    'update:online-booking': [value: boolean]
+}
+
+// Props и Emits
+const props = withDefaults(defineProps<Props>(), {
+    schedule: () => ({}),
+    scheduleNotes: '',
+    onlineBooking: false,
+    errors: () => ({})
 })
-const emit = defineEmits(['update:schedule', 'update:scheduleNotes', 'update:onlineBooking'])
+
+const emit = defineEmits<Emits>()
 
 const days = [
     { id: 'monday', name: 'Понедельник' },
@@ -140,46 +156,80 @@ const initSchedule = () => {
     return initial
 }
 
-const localSchedule = reactive({ ...initSchedule(), ...props.schedule })
-const localNotes = ref(props.scheduleNotes || '')
-const localOnlineBooking = ref(props.onlineBooking)
+// Локальное состояние для графика работы
+const localSchedule = reactive({ ...initSchedule() })
+const localNotes = ref('')
+const localOnlineBooking = ref(false)
 
-// Флаг для предотвращения рекурсивных обновлений
-let isUpdatingFromProps = false
-
-watch(() => props.schedule, (val) => {
-    if (val && !isUpdatingFromProps) {
-        isUpdatingFromProps = true
-        days.forEach(day => {
-            if (val[day.id]) {
-                localSchedule[day.id] = { ...val[day.id] }
+// Инициализация при монтировании
+const initializeSchedule = () => {
+    // Инициализируем структуру дней
+    days.forEach(day => {
+        if (!localSchedule[day.id]) {
+            localSchedule[day.id] = { enabled: false, from: '', to: '' }
+        }
+    })
+    
+    // Загружаем данные из props
+    if (props.schedule && typeof props.schedule === 'object') {
+        Object.keys(props.schedule).forEach(dayId => {
+            if (localSchedule[dayId]) {
+                localSchedule[dayId] = { ...props.schedule[dayId] }
             }
         })
-        isUpdatingFromProps = false
+    }
+    
+    // Загружаем заметки
+    if (props.scheduleNotes) {
+        localNotes.value = props.scheduleNotes
+    }
+    
+    // Загружаем онлайн запись
+    if (props.onlineBooking !== undefined) {
+        localOnlineBooking.value = props.onlineBooking
+    }
+}
+
+// Отслеживаем изменения из родителя
+watch(() => props.schedule, (newValue) => {
+    if (newValue && typeof newValue === 'object') {
+        Object.keys(newValue).forEach(dayId => {
+            if (localSchedule[dayId]) {
+                localSchedule[dayId] = { ...newValue[dayId] }
+            }
+        })
     }
 }, { deep: true })
 
-// Эмитим изменения только при пользовательских действиях
-const emitSchedule = () => {
-    if (!isUpdatingFromProps) {
-        emit('update:schedule', { ...localSchedule })
+watch(() => props.scheduleNotes, (newValue) => {
+    if (newValue !== undefined) {
+        localNotes.value = newValue
     }
+})
+
+watch(() => props.onlineBooking, (newValue) => {
+    if (newValue !== undefined) {
+        localOnlineBooking.value = newValue
+    }
+})
+
+// Инициализируем при монтировании
+initializeSchedule()
+
+// Эмитим изменения при пользовательских действиях
+const emitSchedule = () => {
+    emit('update:schedule', { ...localSchedule })
 }
 
-watch(() => props.scheduleNotes, (val) => {
-    localNotes.value = val || ''
-})
 
-watch(() => props.onlineBooking, (val) => {
-    localOnlineBooking.value = val
-})
 
 const emitNotes = () => {
-    emit('update:scheduleNotes', localNotes.value)
+    // ВАЖНО: Всегда отправляем строку, не null
+    emit('update:scheduleNotes', localNotes.value || '')
 }
 
 const emitOnlineBooking = () => {
-    emit('update:onlineBooking', localOnlineBooking.value)
+    emit('update:online-booking', localOnlineBooking.value)
 }
 
 const toggleDay = (dayId) => {

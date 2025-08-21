@@ -8,7 +8,7 @@
   >
     <!-- Loading overlay -->
     <div v-if="loading" class="card-loading">
-      <div class="card-spinner" aria-label="Р—Р°РіСЂСѓР·РєР°..." />
+              <div class="card-spinner" aria-label="Загрузка..." />
     </div>
 
     <!-- Р—Р°РіРѕР»РѕРІРѕРє РєР°СЂС‚РѕС‡РєРё -->

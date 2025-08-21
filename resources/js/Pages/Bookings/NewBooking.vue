@@ -289,7 +289,7 @@
                 <div class="flex items-center gap-1 text-sm text-gray-500">
                   <StarIcon class="w-4 h-4 text-yellow-400 fill-current" />
                   <span>{{ masterProfile.rating }}</span>
-                  <span class="text-gray-500">({{ masterProfile.reviews_count }} РѕС‚Р·С‹РІРѕРІ)</span>
+                  <span class="text-gray-500">({{ masterProfile.reviews_count }} отзывов)</span>
                 </div>
               </div>
             </div>

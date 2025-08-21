@@ -5,7 +5,6 @@ namespace App\Application\Http\Controllers;
 use App\Domain\Payment\Services\PaymentGatewayService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Контроллер для обработки webhook от платежных систем
@@ -26,27 +25,15 @@ class WebhookController extends Controller
     {
         // Проверяем IP адрес
         if (!$this->isAllowedIp($request, 'yookassa')) {
-            Log::warning('YooKassa webhook from unauthorized IP', [
-                'ip' => $request->ip(),
-                'user_agent' => $request->userAgent()
-            ]);
             return response('Forbidden', 403);
         }
 
         // Проверяем подпись webhook
         if (!$this->verifyYookassaSignature($request)) {
-            Log::warning('YooKassa webhook with invalid signature', [
-                'headers' => $request->headers->all()
-            ]);
             return response('Invalid signature', 400);
         }
 
         $data = $request->json()->all();
-        
-        Log::info('YooKassa webhook received', [
-            'event' => $data['event'] ?? 'unknown',
-            'object_id' => $data['object']['id'] ?? null
-        ]);
 
         $success = $this->paymentGateway->handleWebhook('yookassa', $data);
 
@@ -59,8 +46,6 @@ class WebhookController extends Controller
     public function sbp(Request $request): Response
     {
         $data = $request->all();
-        
-        Log::info('SBP webhook received', $data);
 
         $success = $this->paymentGateway->handleWebhook('sbp', $data);
 
@@ -74,18 +59,10 @@ class WebhookController extends Controller
     {
         // Проверяем IP адрес
         if (!$this->isAllowedIp($request, 'webmoney')) {
-            Log::warning('WebMoney webhook from unauthorized IP', [
-                'ip' => $request->ip()
-            ]);
             return response('NO', 403);
         }
 
         $data = $request->all();
-        
-        Log::info('WebMoney webhook received', [
-            'payment_no' => $data['LMI_PAYMENT_NO'] ?? null,
-            'amount' => $data['LMI_PAYMENT_AMOUNT'] ?? null
-        ]);
 
         $success = $this->paymentGateway->handleWebhook('webmoney', $data);
 
@@ -98,8 +75,6 @@ class WebhookController extends Controller
     public function robokassa(Request $request): Response
     {
         $data = $request->all();
-        
-        Log::info('Robokassa webhook received', $data);
 
         $success = $this->paymentGateway->handleWebhook('robokassa', $data);
 
@@ -114,7 +89,6 @@ class WebhookController extends Controller
         $allowedGateways = ['yookassa', 'sbp', 'webmoney', 'robokassa', 'paypal'];
 
         if (!in_array($gateway, $allowedGateways)) {
-            Log::warning('Unknown payment gateway webhook', ['gateway' => $gateway]);
             return response('Unknown gateway', 404);
         }
 
@@ -206,8 +180,6 @@ class WebhookController extends Controller
         }
 
         $data = $request->all();
-        
-        Log::info('Test webhook received', $data);
 
         // Эмуляция успешного платежа
         if (isset($data['payment_id'])) {

@@ -13,7 +13,7 @@
       :width="line.width"
       :animated="line.animated"
       :custom-class="line.customClass"
-      :aria-label="`Р—Р°РіСЂСѓР·РєР° СЃС‚СЂРѕРєРё ${index + 1} РёР· ${linesArray.length}`"
+              :aria-label="`Загрузка строки ${index + 1} из ${linesArray.length}`"
     />
   </div>
 </template>
@@ -64,7 +64,7 @@ const linesArray = computed(() => {
 })
 
 const groupAriaLabel = computed(() => 
-    `Р—Р°РіСЂСѓР·РєР° РіСЂСѓРїРїС‹ РёР· ${props.lines} СЌР»РµРјРµРЅС‚РѕРІ`
+            `Загрузка группы из ${props.lines} элементов`
 )
 </script>
 

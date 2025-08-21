@@ -72,7 +72,7 @@
               class="w-full px-4 py-2 text-left text-sm text-gray-500 hover:bg-gray-500 transition-colors"
               @click="showDetails = !showDetails"
             >
-              {{ showDetails ? 'РЎРєСЂС‹С‚СЊ РґРµС‚Р°Р»Рё' : 'РџРѕРєР°Р·Р°С‚СЊ РґРµС‚Р°Р»Рё' }}
+              {{ showDetails ? 'Скрыть детали' : 'Показать детали' }}
             </button>
           </div>
         </div>

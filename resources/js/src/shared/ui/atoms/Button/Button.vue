@@ -85,7 +85,7 @@ const props = withDefaults(defineProps<ButtonProps>(), {
     fullWidth: false,
     rounded: 'md',
     loading: false,
-    loadingText: 'Р—Р°РіСЂСѓР·РєР°...',
+            loadingText: 'Загрузка...',
     disabled: false,
     type: 'button'
 })

@@ -66,6 +66,36 @@ class AdResource extends JsonResource
                 'schedule_notes' => $this->schedule_notes,
             ],
             
+            // Параметры (для форм редактирования)
+            'title' => $this->title, // Дублируем для совместимости
+            'age' => $this->age,
+            'height' => $this->height,
+            'weight' => $this->weight,
+            'breast_size' => $this->breast_size,
+            'hair_color' => $this->hair_color,
+            'eye_color' => $this->eye_color,
+            'nationality' => $this->nationality,
+            'appearance' => $this->appearance,
+            'has_girlfriend' => $this->has_girlfriend,
+            'discount' => $this->discount,
+            'new_client_discount' => $this->new_client_discount,
+            'gift' => $this->gift,
+            
+            // Дополнительные поля для совместимости с формами
+            'prices' => $this->prices, // JSON поле для цен
+            'geo' => $this->geo, // JSON поле для координат
+            'description' => $this->description, // Дублируем
+            'phone' => $this->phone, // Дублируем
+            'whatsapp' => $this->whatsapp, // Дублируем
+            'telegram' => $this->telegram, // Дублируем
+            'contact_method' => $this->contact_method, // Дублируем
+            'address' => $this->address, // Дублируем
+            'category' => $this->category, // Дублируем
+            'photos' => $this->photos, // Дублируем для загрузки
+            'video' => $this->video, // Дублируем для загрузки
+            'services_additional_info' => $this->services_additional_info,
+            'schedule_notes' => $this->schedule_notes,
+            
             // Услуги и особенности
             'services' => $this->services,
             'features' => $this->features,

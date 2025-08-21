@@ -125,8 +125,6 @@ class MasterController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Ошибка в MasterController::apiIndex: ' . $e->getMessage());
-            
             return response()->json([
                 'error' => 'Ошибка загрузки объявлений',
                 'message' => $e->getMessage(),

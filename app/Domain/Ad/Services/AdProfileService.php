@@ -18,10 +18,12 @@ class AdProfileService
     {
         $ads = Ad::where('user_id', $user->id)
             ->where('status', $status)
+            ->with('user.masterProfile') // Загружаем связь с профилем мастера
             ->select([
                 'id', 'title', 'status', 'price', 'address', 'travel_area', 
                 'specialty', 'description', 'phone', 'contact_method', 
                 'photos', 'service_location', 'views_count',
+                'user_id', // Добавляем user_id для связи
                 'created_at', 'updated_at'
             ])
             ->orderBy('created_at', 'desc')
@@ -76,6 +78,11 @@ class AdProfileService
             $mainImage = $this->extractMainImage($ad);
             $photosCount = $this->getPhotosCount($ad);
             
+            // Получаем данные о профиле мастера
+            $masterProfile = $ad->user?->masterProfile;
+            // Используем slug из профиля мастера или генерируем из title
+            $masterSlug = $masterProfile?->slug ?: ($masterProfile ? Str::slug($ad->title) : null);
+            
             return [
                 'id' => $ad->id,
                 'slug' => Str::slug($ad->title),
@@ -98,6 +105,10 @@ class AdProfileService
                 'new_messages_count' => 0,
                 'services_list' => $ad->specialty ?? '',
                 'full_address' => $ad->address ?? 'Адрес не указан',
+                // Добавляем данные о мастере для перехода на страницу мастера
+                'master_profile_id' => $masterProfile?->id,
+                'master_slug' => $masterSlug,
+                'has_master_profile' => $masterProfile !== null,
                 'rejection_reason' => null,
                 'bookings_count' => 0,
                 'reviews_count' => 0,

@@ -4,7 +4,8 @@ namespace App\Domain\Master\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany, HasOne};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany, HasOne, MorphMany};
+
 use App\Domain\Master\Traits\HasSlug;
 use App\Domain\Master\Traits\GeneratesMetaTags;
 use App\Support\Traits\JsonFieldsTrait;
@@ -14,6 +15,7 @@ class MasterProfile extends Model
     use HasSlug;
     use GeneratesMetaTags;
     use JsonFieldsTrait;
+
 
     protected $slugField  = 'slug';
     protected $slugSource = 'display_name';
@@ -95,9 +97,9 @@ class MasterProfile extends Model
         return $this->hasMany(\App\Domain\Master\Models\MasterService::class, 'master_profile_id');
     }
     
-    public function reviews(): HasMany
+    public function reviews(): MorphMany
     {
-        return $this->hasMany(\App\Domain\Review\Models\Review::class, 'master_profile_id');
+        return $this->morphMany(\App\Domain\Review\Models\Review::class, 'reviewable');
     }
 
     public function schedules(): HasMany

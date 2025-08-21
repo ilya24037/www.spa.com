@@ -74,7 +74,8 @@ const toggleFeature = (featureId) => {
 
 const emitFeatures = () => {
   emit('update:features', [...localFeatures.value])
-  emit('update:additionalFeatures', localAdditional.value)
+  // ВАЖНО: Всегда отправляем строку, не null
+  emit('update:additionalFeatures', localAdditional.value || '')
 }
 </script>
 

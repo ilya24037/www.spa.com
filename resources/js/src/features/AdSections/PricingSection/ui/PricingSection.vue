@@ -242,6 +242,22 @@ const emit = defineEmits(['update:prices'])
 // Состояние для разворачивания секции выезда
 const isOutcallExpanded = ref(false)
 
+// Хелпер для преобразования значения в булевое
+const toBoolean = (value) => {
+  // Явная проверка на null и undefined (требование CLAUDE.md)
+  if (value === null || value === undefined) {
+    return false
+  }
+  // Преобразуем строки "1", "true" и числа в булевые значения
+  if (value === "1" || value === 1 || value === true || value === "true") {
+    return true
+  }
+  if (value === "0" || value === 0 || value === false || value === "false") {
+    return false
+  }
+  return Boolean(value)
+}
+
 // Локальное состояние цен
 const localPrices = reactive({
   apartments_express: props.prices?.apartments_express ?? null,
@@ -252,13 +268,13 @@ const localPrices = reactive({
   outcall_1h: props.prices?.outcall_1h ?? null,
   outcall_2h: props.prices?.outcall_2h ?? null,
   outcall_night: props.prices?.outcall_night ?? null,
-  taxi_included: props.prices?.taxi_included ?? false,
-  // Места выезда
-  outcall_apartment: props.prices?.outcall_apartment ?? true,
-  outcall_hotel: props.prices?.outcall_hotel ?? false,
-  outcall_house: props.prices?.outcall_house ?? false,
-  outcall_sauna: props.prices?.outcall_sauna ?? false,
-  outcall_office: props.prices?.outcall_office ?? false
+  taxi_included: toBoolean(props.prices?.taxi_included) ?? false,
+  // Места выезда - преобразуем в булевые значения
+  outcall_apartment: toBoolean(props.prices?.outcall_apartment ?? true),
+  outcall_hotel: toBoolean(props.prices?.outcall_hotel ?? false),
+  outcall_house: toBoolean(props.prices?.outcall_house ?? false),
+  outcall_sauna: toBoolean(props.prices?.outcall_sauna ?? false),
+  outcall_office: toBoolean(props.prices?.outcall_office ?? false)
 })
 
 // Проверяем, указаны ли цены на выезд
@@ -271,7 +287,13 @@ watch(() => props.prices, (newPrices) => {
   if (newPrices) {
     Object.keys(newPrices).forEach(key => {
       if (newPrices[key] !== undefined) {
-        localPrices[key] = newPrices[key]
+        // Преобразуем булевые поля для чекбоксов
+        const booleanFields = ['taxi_included', 'outcall_apartment', 'outcall_hotel', 'outcall_house', 'outcall_sauna', 'outcall_office']
+        if (booleanFields.includes(key)) {
+          localPrices[key] = toBoolean(newPrices[key])
+        } else {
+          localPrices[key] = newPrices[key]
+        }
       }
     })
   }
