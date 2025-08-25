@@ -25,7 +25,7 @@ class CreateAdRequest extends FormRequest
         return [
             'category' => 'required|string|max:100',
             'title' => 'required|string|max:255|min:10',
-            'specialty' => 'required|string|max:200',
+            'specialty' => 'nullable|string|max:200',
             'clients' => 'array',
             'clients.*' => 'string|max:50',
             'service_location' => 'required|array|min:1',
@@ -37,7 +37,7 @@ class CreateAdRequest extends FormRequest
             'service_provider' => 'nullable|array',
             'service_provider.*' => 'string|max:100',
             'experience' => 'required|string|in:3260137,3260142,3260146,3260149,3260152',
-            'education_level' => 'nullable|string|in:2,3,4,5,6,7',
+
             'features' => 'nullable|array',
             'features.*' => 'string|max:100',
             'additional_features' => 'nullable|string|max:1000',
@@ -93,7 +93,7 @@ class CreateAdRequest extends FormRequest
             'title.required' => 'Введите название объявления',
             'title.min' => 'Название должно содержать минимум 10 символов',
             'title.max' => 'Название не должно превышать 255 символов',
-            'specialty.required' => 'Укажите специализацию',
+
             'service_location.required' => 'Выберите место оказания услуг',
             'service_location.min' => 'Выберите хотя бы один тип услуг',
             'work_format.required' => 'Выберите формат работы',

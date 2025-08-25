@@ -13,7 +13,6 @@ export { default as FormControls } from './components/FormControls.vue'
 export { default as FormActions } from './components/FormActions.vue'
 
 // Специализированные формы
-export { default as EducationForm } from './features/EducationForm.vue'
 export { default as MediaForm } from './features/MediaForm.vue'
 
 // Composables
@@ -61,8 +60,6 @@ export type {
   DynamicFieldProps,
   
   // Специфичные данные
-  EducationFormData,
-  Course,
   MediaFormData,
   
   // Результаты

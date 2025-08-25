@@ -25,36 +25,49 @@ class UpdateAdRequest extends FormRequest
      */
     public function rules(): array
     {
+        // Получаем объявление из роута
+        $ad = $this->route('ad');
+        
+        // Если объявление активное - смягчаем валидацию
+        $isActive = $ad && $ad->status === 'active';
+        
+        \Log::info('🟢 UpdateAdRequest: Определяем правила валидации', [
+            'ad_id' => $ad?->id,
+            'ad_status' => $ad?->status,
+            'is_active' => $isActive,
+            'validation_mode' => $isActive ? 'МЯГКАЯ (активное)' : 'СТРОГАЯ (новое/черновик)'
+        ]);
+        
         return [
-            'title' => 'required|string|max:255|min:10',
-            'specialty' => 'required|string|max:200',
+            'title' => $isActive ? 'nullable|string|max:255|min:3' : 'required|string|max:255|min:10',
+            'specialty' => 'nullable|string|max:200',
             'clients' => 'array',
             'clients.*' => 'string|max:50',
-            'service_location' => 'required|array|min:1',
+            'service_location' => $isActive ? 'nullable|array' : 'required|array|min:1',
             'service_location.*' => 'string|in:home,salon,both',
             'outcall_locations' => 'nullable|array',
             'outcall_locations.*' => 'string|max:100',
             'taxi_option' => 'nullable|string|in:separately,included',
-            'work_format' => 'required|string|in:individual,duo,group',
+            'work_format' => $isActive ? 'nullable|string|in:individual,duo,group' : 'required|string|in:individual,duo,group',
             'service_provider' => 'nullable|array',
             'service_provider.*' => 'string|max:100',
-            'experience' => 'required|string|in:3260137,3260142,3260146,3260149,3260152',
-            'education_level' => 'nullable|string|in:2,3,4,5,6,7',
+            'experience' => $isActive ? 'nullable|string' : 'required|string|in:3260137,3260142,3260146,3260149,3260152',
+
             'features' => 'nullable|array',
             'features.*' => 'string|max:100',
             'additional_features' => 'nullable|string|max:1000',
-            'description' => 'required|string|min:50|max:5000',
-            'price' => 'required|numeric|min:0|max:1000000',
-            'price_unit' => 'required|string|in:service,hour,minute,day',
+            'description' => $isActive ? 'nullable|string|max:5000' : 'required|string|min:50|max:5000',
+            'price' => $isActive ? 'nullable|numeric|min:0|max:1000000' : 'required|numeric|min:0|max:1000000',
+            'price_unit' => $isActive ? 'nullable|string|in:service,hour,minute,day' : 'required|string|in:service,hour,minute,day',
             'is_starting_price' => 'nullable|array',
             'contacts_per_hour' => 'nullable|string|in:1,2,3,4,5,6',
             'discount' => 'nullable|numeric|min:0|max:100',
             'new_client_discount' => 'nullable|numeric|min:0|max:100',
             'gift' => 'nullable|string|max:500',
-            'address' => 'required|string|max:500',
-            'travel_area' => 'required|string|max:200',
-            'phone' => 'required|string|regex:/^[+]?[0-9\s\-\(\)]{10,20}$/',
-            'contact_method' => 'required|string|in:any,calls,messages',
+            'address' => $isActive ? 'nullable|string|max:500' : 'required|string|max:500',
+            'travel_area' => $isActive ? 'nullable|string|max:200' : 'required|string|max:200',
+            'phone' => $isActive ? 'nullable|string|regex:/^[+]?[0-9\s\-\(\)]{10,20}$/' : 'required|string|regex:/^[+]?[0-9\s\-\(\)]{10,20}$/',
+            'contact_method' => $isActive ? 'nullable|string|in:any,calls,messages' : 'required|string|in:any,calls,messages',
             'whatsapp' => 'nullable|string|regex:/^[+]?[0-9\s\-\(\)]{10,20}$/',
             'telegram' => 'nullable|string|max:100',
             
@@ -98,7 +111,7 @@ class UpdateAdRequest extends FormRequest
             'title.required' => 'Введите название объявления',
             'title.min' => 'Название должно содержать минимум 10 символов',
             'title.max' => 'Название не должно превышать 255 символов',
-            'specialty.required' => 'Укажите специализацию',
+
             'service_location.required' => 'Выберите место оказания услуг',
             'service_location.min' => 'Выберите хотя бы один тип услуг',
             'work_format.required' => 'Выберите формат работы',

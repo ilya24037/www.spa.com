@@ -11,9 +11,7 @@
             <h1 class="text-3xl font-bold text-gray-900 mb-2">
               {{ ad.title }}
             </h1>
-            <p class="text-lg text-gray-600 mb-4">
-              {{ ad.specialty }}
-            </p>
+            <!-- specialty скрыто - поле теперь необязательное -->
             <div class="flex items-center gap-4 text-sm text-gray-500">
               <span>Создано: {{ formatDate(ad.created_at) }}</span>
               <span>Обновлено: {{ formatDate(ad.updated_at) }}</span>

@@ -14,12 +14,12 @@
         
         <button
           type="button"
-          @click="() => { console.log('🔵 Кнопка СОХРАНИТЬ ИЗМЕНЕНИЯ нажата!'); $emit('save-draft') }"
+          @click="() => { console.log('🔵 Кнопка СОХРАНИТЬ ИЗМЕНЕНИЯ нажата!'); $emit('submit') }"
           class="px-6 py-3 rounded-lg text-base font-semibold cursor-pointer transition-all duration-200 flex items-center gap-2 min-w-[140px] justify-center bg-gradient-to-br from-blue-500 to-blue-700 text-white border-0 hover:from-blue-600 hover:to-blue-800 hover:-translate-y-px disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none sm:w-auto w-full"
-          :disabled="savingDraft"
+          :disabled="submitting"
         >
-          <span v-if="savingDraft" class="w-4 h-4 border-2 border-transparent border-t-current rounded-full animate-spin"></span>
-          {{ savingDraft ? 'Сохранение...' : 'Сохранить изменения' }}
+          <span v-if="submitting" class="w-4 h-4 border-2 border-transparent border-t-current rounded-full animate-spin"></span>
+          {{ submitting ? 'Сохранение...' : 'Сохранить изменения' }}
         </button>
       </template>
       
@@ -35,14 +35,15 @@
           {{ savingDraft ? 'Сохранение...' : 'Сохранить черновик' }}
         </button>
         
+        <!-- Новая кнопка "Разместить объявление" -->
         <button
-          type="submit"
-          @click="$emit('submit')"
-          class="px-6 py-3 rounded-lg text-base font-semibold cursor-pointer transition-all duration-200 flex items-center gap-2 min-w-[140px] justify-center bg-gradient-to-br from-blue-500 to-blue-700 text-white border-0 hover:from-blue-600 hover:to-blue-800 hover:-translate-y-px disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none sm:w-auto w-full"
-          :disabled="submitting || !canSubmit"
+          type="button"
+          @click="() => { console.log('🟢 Кнопка РАЗМЕСТИТЬ ОБЪЯВЛЕНИЕ нажата!'); $emit('publish') }"
+          class="px-6 py-3 rounded-lg text-base font-semibold cursor-pointer transition-all duration-200 flex items-center gap-2 min-w-[180px] justify-center bg-gradient-to-br from-green-500 to-green-700 text-white border-0 hover:from-green-600 hover:to-green-800 hover:-translate-y-px disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none sm:w-auto w-full"
+          :disabled="publishing"
         >
-          <span v-if="submitting" class="w-4 h-4 border-2 border-transparent border-t-current rounded-full animate-spin"></span>
-          {{ submitting ? 'Публикация...' : submitLabel }}
+          <span v-if="publishing" class="w-4 h-4 border-2 border-transparent border-t-current rounded-full animate-spin"></span>
+          {{ publishing ? 'Размещение...' : 'Разместить объявление' }}
         </button>
       </template>
     </div>
@@ -61,6 +62,7 @@ interface Props {
   canSubmit?: boolean
   submitting?: boolean
   savingDraft?: boolean
+  publishing?: boolean
   showProgress?: boolean
   progressHint?: string
   isActiveAd?: boolean
@@ -71,6 +73,7 @@ withDefaults(defineProps<Props>(), {
   canSubmit: true,
   submitting: false,
   savingDraft: false,
+  publishing: false,
   showProgress: false,
   progressHint: '',
   isActiveAd: false
@@ -79,6 +82,7 @@ withDefaults(defineProps<Props>(), {
 defineEmits<{
   'submit': []
   'save-draft': []
+  'publish': []
   'cancel': []
 }>()
 </script>

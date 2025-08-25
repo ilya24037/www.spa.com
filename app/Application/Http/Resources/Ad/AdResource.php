@@ -20,7 +20,11 @@ class AdResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return [
+        // Парсим JSON поля для корректной работы с формами
+        $parsedData = $this->parseJsonFields();
+        
+        return array_merge([
+            // Основные поля
             'id' => $this->id,
             'title' => $this->title,
             'slug' => $this->slug,
@@ -56,15 +60,21 @@ class AdResource extends JsonResource
                 'travel_area' => $this->travel_area,
             ],
             
-            // Рабочая информация
+            // Рабочая информация (с парсингом JSON)
             'work' => [
                 'work_format' => $this->work_format,
                 'experience' => $this->experience,
-                'clients' => $this->clients,
-                'service_provider' => $this->service_provider,
-                'schedule' => $this->schedule,
+                'clients' => $parsedData['clients'] ?? $this->clients,
+                'service_provider' => $parsedData['service_provider'] ?? $this->service_provider,
+                'schedule' => $parsedData['schedule'] ?? $this->schedule,
                 'schedule_notes' => $this->schedule_notes,
             ],
+            
+            // Ключевые поля для форм (с парсингом JSON)
+            'clients' => $parsedData['clients'] ?? $this->clients,
+            'service_provider' => $parsedData['service_provider'] ?? $this->service_provider,
+            'schedule' => $parsedData['schedule'] ?? $this->schedule,
+            'faq' => $parsedData['faq'] ?? $this->faq,
             
             // Параметры (для форм редактирования)
             'title' => $this->title, // Дублируем для совместимости
@@ -81,24 +91,24 @@ class AdResource extends JsonResource
             'new_client_discount' => $this->new_client_discount,
             'gift' => $this->gift,
             
-            // Дополнительные поля для совместимости с формами
-            'prices' => $this->prices, // JSON поле для цен
-            'geo' => $this->geo, // JSON поле для координат
-            'description' => $this->description, // Дублируем
-            'phone' => $this->phone, // Дублируем
-            'whatsapp' => $this->whatsapp, // Дублируем
-            'telegram' => $this->telegram, // Дублируем
-            'contact_method' => $this->contact_method, // Дублируем
-            'address' => $this->address, // Дублируем
-            'category' => $this->category, // Дублируем
-            'photos' => $this->photos, // Дублируем для загрузки
-            'video' => $this->video, // Дублируем для загрузки
+            // Дополнительные поля для совместимости с формами (с парсингом JSON)
+            'prices' => $parsedData['prices'] ?? $this->prices,
+            'geo' => $parsedData['geo'] ?? $this->geo,
+            'description' => $this->description,
+            'phone' => $this->phone,
+            'whatsapp' => $this->whatsapp,
+            'telegram' => $this->telegram,
+            'contact_method' => $this->contact_method,
+            'address' => $this->address,
+            'category' => $this->category,
+            'photos' => $parsedData['photos'] ?? $this->photos,
+            'video' => $parsedData['video'] ?? $this->video,
             'services_additional_info' => $this->services_additional_info,
             'schedule_notes' => $this->schedule_notes,
             
-            // Услуги и особенности
-            'services' => $this->services,
-            'features' => $this->features,
+            // Услуги и особенности (с парсингом JSON)
+            'services' => $parsedData['services'] ?? $this->services,
+            'features' => $parsedData['features'] ?? $this->features,
             'additional_features' => $this->additional_features,
             'education' => $this->education,
             'certificates' => $this->certificates,
@@ -106,8 +116,8 @@ class AdResource extends JsonResource
             // Медиа контент
             'media' => [
                 'main_photo' => $this->main_photo,
-                'photos' => $this->photos, // JSON поле
-                'videos' => $this->video,  // JSON поле (переименовано в video)
+                'photos' => $parsedData['photos'] ?? $this->photos,
+                'videos' => $parsedData['video'] ?? $this->video,
             ],
             
             // Статистика и метрики
@@ -143,7 +153,32 @@ class AdResource extends JsonResource
                 'rejection_reason' => $this->rejection_reason,
                 'moderation_status' => $this->moderation_status,
             ])
-        ];
+        ], $parsedData);
+    }
+    
+    /**
+     * Парсит JSON поля для корректной работы с формами
+     */
+    private function parseJsonFields(): array
+    {
+        $jsonFields = ['clients', 'service_provider', 'services', 'features', 'photos', 'video', 'geo', 'prices', 'schedule', 'faq'];
+        $parsed = [];
+        
+        foreach ($jsonFields as $field) {
+            if (isset($this->$field) && is_string($this->$field)) {
+                try {
+                    $decoded = json_decode($this->$field, true);
+                    if (is_array($decoded)) {
+                        $parsed[$field] = $decoded;
+                    }
+                } catch (\Exception $e) {
+                    // Если не удалось распарсить, оставляем как есть
+                    continue;
+                }
+            }
+        }
+        
+        return $parsed;
     }
     
     /**

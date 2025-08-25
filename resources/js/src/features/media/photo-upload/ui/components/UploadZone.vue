@@ -1,7 +1,7 @@
 <!-- Зона загрузки фотографий с drag & drop -->
 <template>
   <div 
-    class="upload-zone border-2 border-dashed rounded-lg p-4 transition-colors"
+    class="upload-zone border-2 border-dashed rounded-lg transition-colors"
     :class="{ 
       'border-blue-400 bg-blue-50': isDragOver,
       'border-gray-300': !isDragOver
@@ -19,20 +19,30 @@
       class="hidden"
     />
     
-    <!-- Пустое состояние -->
-    <div v-if="!hasContent" class="text-center py-8" @click="openFileDialog">
-      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-      </svg>
-      <p class="mt-2 text-sm text-gray-600">
-        Перетащите фото сюда или нажмите для выбора
-      </p>
-      <p class="text-xs text-gray-500">PNG, JPG до 10MB</p>
+    <!-- Пустое состояние - как у видео -->
+    <div v-if="!hasContent" class="text-center py-3 px-4" @click="openFileDialog">
+      <div class="flex items-center justify-center space-x-2 mb-3">
+        <svg class="h-5 w-5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+        </svg>
+        <span class="text-sm text-gray-600">
+          {{ isDragOver ? 'Отпустите файлы здесь' : 'Перетащите фото в эту область или нажмите выбрать фото' }}
+        </span>
+      </div>
+      
+      <button 
+        type="button"
+        class="px-3 py-1.5 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
+      >
+        Выбрать фото
+      </button>
     </div>
     
     <!-- Контент (фотографии) -->
-    <slot v-else />
+    <div v-else class="p-4">
+      <slot />
+    </div>
   </div>
 </template>
 

@@ -47,7 +47,6 @@ return new class extends Migration
             // === РАБОТА И ОПЫТ ===
             $table->string('work_format')->nullable(); // individual/group
             $table->string('experience')->nullable();
-            $table->string('education_level')->nullable();
             
             // === ЦЕНЫ И УСЛОВИЯ ===
             $table->decimal('price', 10, 2)->nullable();

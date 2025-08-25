@@ -203,29 +203,6 @@ export interface FormComponentConfig {
   showResetButton?: boolean
 }
 
-// Специфичные типы для образования
-export interface EducationFormData {
-  education_level: string
-  university: string
-  specialization: string
-  graduation_year: number
-  courses: Course[]
-  has_certificates: boolean
-  certificate_photos: File[]
-  experience_years: string
-  work_history: string
-}
-
-export interface Course {
-  id: string | number
-  name: string
-  organization: string
-  year: number
-  duration: string
-  description: string
-  certificate_number?: string
-}
-
 // Специфичные типы для медиа
 export interface MediaFormData {
   photos: File[]

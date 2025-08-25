@@ -1,11 +1,11 @@
 <!-- Компонент отдельной фотографии -->
 <template>
   <div class="photo-item relative group" :class="{ 'ring-2 ring-blue-500': isMain }">
-    <div class="aspect-square rounded-lg overflow-hidden bg-gray-100">
+    <div class="aspect-square rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
       <img 
         :src="photoUrl" 
         :alt="`Фото ${index + 1}`"
-        class="w-full h-full object-cover"
+        class="w-full h-full object-contain"
         :style="{ transform: `rotate(${photo.rotation || 0}deg)` }"
         loading="lazy"
         decoding="async"
@@ -39,10 +39,7 @@
         </button>
       </div>
       
-      <!-- Метка основного фото -->
-      <div v-if="isMain" class="absolute bottom-2 left-2 bg-blue-500 text-white px-2 py-1 rounded text-xs font-medium">
-        Основное
-      </div>
+
     </div>
   </div>
 </template>

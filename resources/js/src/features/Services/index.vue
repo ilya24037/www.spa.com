@@ -59,21 +59,7 @@
       </div>
       
     </div>
-    <div class="services-stats mt-6 p-4 bg-gray-50 rounded-lg">
-      <div class="flex items-center justify-between">
-        <span class="text-sm text-gray-700">
-          Выбрано услуг: <strong>{{ totalSelectedServices }}</strong>
-        </span>
-        <button
-          v-if="totalSelectedServices > 0"
-          @click="clearAllServices"
-          type="button"
-          class="px-3 py-1 text-sm text-red-600 hover:text-red-800 transition-colors"
-        >
-          Очистить все
-        </button>
-      </div>
-    </div>
+
   </div>
 </template>
 
@@ -183,27 +169,7 @@ const initializeServicesData = () => {
   })
 }
 
-const totalSelectedServices = computed(() => {
-  let count = 0
-  Object.values(localServices).forEach(categoryServices => {
-    Object.values(categoryServices).forEach(service => {
-      if (service?.enabled) count++
-    })
-  })
-  return count
-})
 
-const clearAllServices = () => {
-  Object.keys(localServices).forEach(categoryId => {
-    Object.keys(localServices[categoryId]).forEach(serviceId => {
-      localServices[categoryId][serviceId] = {
-        enabled: false,
-        price_comment: ''
-      }
-    })
-  })
-  emitAll()
-}
 
 
 // Обработчик изменений категории

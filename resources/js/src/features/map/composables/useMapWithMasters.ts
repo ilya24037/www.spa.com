@@ -210,10 +210,42 @@ export function useMapWithMasters(initialMasters?: Master[]) {
     // Debug log removed
   }
   
-  // Обработчик изменения границ карты
+  // Обработчик изменения границ карты для ленивой загрузки
   const handleBoundsChange = (bounds: any) => {
-    // Можно загружать только мастеров в видимой области
-    // Debug log removed
+    // bounds - это массив [[southWest], [northEast]] координат
+    if (!bounds || bounds.length !== 2) return
+    
+    // Сохраняем текущие границы для последующих запросов
+    const currentBounds = {
+      sw_lat: bounds[0][0],
+      sw_lng: bounds[0][1],
+      ne_lat: bounds[1][0],
+      ne_lng: bounds[1][1]
+    }
+    
+    // Можно добавить фильтрацию существующих маркеров по границам
+    // или сделать новый запрос к API с параметрами границ
+    
+    // Пример: фильтрация уже загруженных маркеров
+    const visibleMarkers = masters.value.filter(master => {
+      const lat = master.geo?.lat || master.lat
+      const lng = master.geo?.lng || master.lng
+      
+      if (!lat || !lng) return false
+      
+      return lat >= currentBounds.sw_lat && 
+             lat <= currentBounds.ne_lat &&
+             lng >= currentBounds.sw_lng && 
+             lng <= currentBounds.ne_lng
+    })
+    
+    // Для оптимизации можно отображать только видимые маркеры
+    // если их слишком много
+    if (masters.value.length > 100) {
+      // Эмитим событие с отфильтрованными маркерами
+      // Это можно использовать для обновления отображения
+      return visibleMarkers
+    }
   }
   
   // Обновление локации в фильтрах

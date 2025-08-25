@@ -1,0 +1,807 @@
+﻿<template>
+  <div class="yandex-map-unified">
+    <!-- Debug info (только в development) -->
+    <div v-if="false" style="font-size: 10px; color: #999; margin-bottom: 4px; display: flex; gap: 8px; align-items: center;">
+      MapID: {{ mapId }} | Loading: {{ loading }} | Mode: {{ mode }}
+    </div>
+    
+    <!-- Для режима множественных маркеров с iframe (пока отключено) -->
+    <iframe 
+      v-if="false && mode === 'multiple' && markers && markers.length > 0"
+      :src="`/map-iframe.html?v=${Date.now()}`"
+      class="w-full border-none rounded-lg"
+      :style="{ height: height + 'px' }"
+      frameborder="0"
+      @load="onIframeLoad"
+    />
+    
+    <!-- Обычная карта для всех режимов -->
+    <div 
+      :id="mapId" 
+      class="yandex-map-unified__container"
+      :style="{ height: height + 'px' }"
+    >
+      <!-- Загрузка -->
+      <div 
+        v-if="loading" 
+        class="yandex-map-unified__loading"
+      >
+        <div class="flex flex-col items-center justify-center h-full">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <p class="text-sm text-gray-600">{{ loadingText }}</p>
+        </div>
+      </div>
+      
+      <!-- Кнопка геолокации (только для single режима) -->
+      <button
+        v-if="mode === 'single' && !loading && showGeolocationButton"
+        @click="centerOnUserLocation"
+        class="yandex-map-unified__geolocation-btn"
+        :title="geolocationTooltip"
+      >
+        <svg 
+          class="w-5 h-5" 
+          :class="{ 'text-blue-600': userLocationActive, 'text-gray-600': !userLocationActive }"
+          fill="none" 
+          viewBox="0 0 24 24" 
+          stroke="currentColor"
+        >
+          <path 
+            stroke-linecap="round" 
+            stroke-linejoin="round" 
+            stroke-width="2" 
+            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+          />
+          <path 
+            stroke-linecap="round" 
+            stroke-linejoin="round" 
+            stroke-width="2" 
+            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+          />
+        </svg>
+      </button>
+
+      <!-- Центральный маркер (только для single режима и когда есть адрес) -->
+      <div
+        v-if="mode === 'single' && !loading && showSingleMarker && hasAddress"
+        class="yandex-map-unified__center-marker"
+        @mouseenter="handleMarkerHover"
+        @mouseleave="handleMarkerLeave"
+      >
+        <svg width="32" height="40" viewBox="0 0 32 40" fill="none">
+          <!-- Основная капля -->
+          <path d="M16 0C7.164 0 0 7.164 0 16C0 24.836 16 40 16 40S32 24.836 32 16C32 7.164 24.836 0 16 0Z" fill="#007BFF"/>
+          <!-- Внутренний круг -->
+          <circle cx="16" cy="16" r="6" fill="white"/>
+          <!-- Центральная точка -->
+          <circle cx="16" cy="16" r="2" fill="#007BFF"/>
+        </svg>
+      </div>
+
+      <!-- Tooltip для адреса на карте -->
+      <div
+        v-if="showAddressTooltip && currentAddress"
+        class="yandex-map-unified__address-tooltip"
+        :style="tooltipPosition"
+      >
+        {{ currentAddress }}
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
+import { useId } from '@/src/shared/composables/useId'
+
+// Интерфейс для маркера на карте
+export interface MapMarker {
+  id: string | number
+  lat: number
+  lng: number
+  title?: string
+  description?: string
+  icon?: string
+  data?: any // Дополнительные данные (например, мастер)
+}
+
+interface Props {
+  // Базовые props
+  modelValue?: string // "lat,lng"
+  height?: number
+  center?: { lat: number; lng: number }
+  zoom?: number
+  apiKey?: string
+  
+  // Режимы работы
+  mode?: 'single' | 'multiple' // Один маркер или множество
+  markers?: MapMarker[] // Для режима multiple
+  
+  // Дополнительные функции
+  showGeolocationButton?: boolean // Кнопка геолокации
+  autoDetectLocation?: boolean // Автоопределение местоположения
+  clusterize?: boolean // Кластеризация (для multiple)
+  draggable?: boolean // Можно ли перетаскивать маркер
+  showSingleMarker?: boolean // Показывать ли маркер в single режиме
+  showAddressTooltipOnHover?: boolean // Показывать tooltip с адресом при наведении
+  currentAddress?: string // Текущий адрес для определения показа маркера
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  height: 400,
+  center: () => ({ lat: 58.0105, lng: 56.2502 }), // Пермь по умолчанию
+  zoom: 15,
+  apiKey: '23ff8acc-835f-4e99-8b19-d33c5d346e18',
+  mode: 'single',
+  markers: () => [],
+  showGeolocationButton: false,
+  autoDetectLocation: false,
+  clusterize: false,
+  draggable: true,
+  showSingleMarker: true,
+  showAddressTooltipOnHover: true,
+  currentAddress: ''
+})
+
+const emit = defineEmits<{
+  'update:modelValue': [value: string]
+  'marker-moved': [coords: { lat: number; lng: number }]
+  'marker-click': [marker: MapMarker]
+  'address-found': [address: string, coords: { lat: number; lng: number }]
+  'search-error': [error: string]
+  'marker-address-hover': [address: string]
+}>()
+
+// Локальные переменные
+const mapId = useId('yandex-map')
+const loading = ref(true)
+const loadingText = ref('Инициализация карты...')
+const mapReady = ref(false)
+const userLocationActive = ref(false)
+const userLocation = ref<{ lat: number; lng: number } | null>(null)
+
+// Tooltip для адреса
+const showAddressTooltip = ref(false)
+const currentAddress = ref('')
+const tooltipPosition = ref({ left: '0px', top: '0px' })
+
+// Объекты Яндекс.Карт
+let map: any = null
+let placemark: any = null
+let userLocationMarker: any = null
+let pendingSearchRequest: string | null = null
+const placemarks = ref<any[]>([])
+
+// Текущие координаты
+const currentCoords = ref(props.center)
+
+// Вычисляемые свойства
+const geolocationTooltip = computed(() => 
+  userLocationActive.value ? 'Показано ваше местоположение' : 'Определить мое местоположение'
+)
+
+const hasAddress = computed(() => 
+  currentCoords.value && 
+  props.currentAddress && 
+  props.currentAddress.trim().length > 0 &&
+  props.modelValue && 
+  props.modelValue.includes(',')
+)
+
+// Watchers
+watch(() => props.modelValue, (newValue) => {
+  if (newValue && newValue.includes(',')) {
+    const [lat, lng] = newValue.split(',').map(Number)
+    if (!isNaN(lat) && !isNaN(lng)) {
+      currentCoords.value = { lat, lng }
+      setCoordinates({ lat, lng })
+    }
+  }
+})
+
+watch(() => props.markers, (newMarkers) => {
+  if (props.mode === 'multiple' && newMarkers) {
+    updateMarkers(newMarkers)
+  }
+}, { deep: true })
+
+// Методы
+const loadYandexMaps = (): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    if (window.ymaps && window.ymaps.ready) {
+      window.ymaps.ready(resolve)
+      return
+    }
+
+    const script = document.createElement('script')
+    script.src = `https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=${props.apiKey}`
+    script.onload = () => {
+      window.ymaps.ready(resolve)
+    }
+    script.onerror = reject
+    document.head.appendChild(script)
+  })
+}
+
+// Определение местоположения через браузер
+const detectLocationByBrowser = (): Promise<{ lat: number; lng: number } | null> => {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) {
+      resolve(null)
+      return
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        resolve({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        })
+      },
+      () => resolve(null),
+      { timeout: 5000 }
+    )
+  })
+}
+
+// Определение местоположения по IP
+const detectLocationByIP = async (): Promise<{ lat: number; lng: number } | null> => {
+  try {
+    const response = await fetch('https://ipapi.co/json/')
+    const data = await response.json()
+    
+    if (data.latitude && data.longitude) {
+      return {
+        lat: parseFloat(data.latitude),
+        lng: parseFloat(data.longitude)
+      }
+    }
+  } catch (error) {
+    console.error('Ошибка определения местоположения по IP:', error)
+  }
+  
+  return null
+}
+
+// Определение начальных координат
+const detectInitialLocation = async (): Promise<{ lat: number; lng: number }> => {
+  // Если есть modelValue, используем его
+  if (props.modelValue && props.modelValue.includes(',')) {
+    const [lat, lng] = props.modelValue.split(',').map(Number)
+    if (!isNaN(lat) && !isNaN(lng)) {
+      return { lat, lng }
+    }
+  }
+  
+  // Если включено автоопределение
+  if (props.autoDetectLocation) {
+    loadingText.value = 'Определение местоположения...'
+    
+    // Сначала пробуем через браузер
+    const browserLocation = await detectLocationByBrowser()
+    if (browserLocation) {
+      return browserLocation
+    }
+    
+    // Затем через IP
+    const ipLocation = await detectLocationByIP()
+    if (ipLocation) {
+      return ipLocation
+    }
+  }
+  
+  // Fallback на дефолтные координаты
+  return props.center
+}
+
+// Получение адреса по координатам
+const getAddressFromCoords = async (coords: number[]): Promise<string> => {
+  try {
+    if (!window.ymaps || !window.ymaps.geocode) {
+      return ''
+    }
+    
+    const result = await window.ymaps.geocode(coords, { results: 1 })
+    const firstGeoObject = result.geoObjects.get(0)
+    
+    if (firstGeoObject) {
+      return firstGeoObject.getAddressLine()
+    }
+  } catch (error) {
+    console.error('Ошибка получения адреса:', error)
+  }
+  
+  return ''
+}
+
+// Показ tooltip с адресом
+const showTooltipWithAddress = async (coords: number[], event: any) => {
+  if (!props.showAddressTooltipOnHover) return
+  
+  const address = await getAddressFromCoords(coords)
+  if (address) {
+    currentAddress.value = address
+    
+    // Позиционируем tooltip относительно курсора
+    const mapContainer = document.getElementById(mapId)
+    if (mapContainer && event) {
+      const rect = mapContainer.getBoundingClientRect()
+      const x = event.get('position')[0]
+      const y = event.get('position')[1]
+      
+      tooltipPosition.value = {
+        left: `${x + 10}px`,
+        top: `${y - 30}px`
+      }
+      
+      showAddressTooltip.value = true
+    }
+  }
+}
+
+// Скрытие tooltip
+const hideAddressTooltip = () => {
+  showAddressTooltip.value = false
+  currentAddress.value = ''
+}
+
+// Обработчики наведения на центральный маркер
+// Буферизация обновления адреса
+let addressUpdateTimeout: NodeJS.Timeout | null = null
+const isUpdatingAddress = ref(false)
+
+// Получение адреса по координатам с буферизацией
+const updateAddressFromCoords = async (coords: number[], immediate = false) => {
+  if (!window.ymaps || !window.ymaps.geocode || isUpdatingAddress.value) return
+  
+  // Очищаем предыдущий таймаут
+  if (addressUpdateTimeout) {
+    clearTimeout(addressUpdateTimeout)
+  }
+  
+  const delay = immediate ? 0 : 1000 // 1 секунда задержки для буферизации
+  
+  addressUpdateTimeout = setTimeout(async () => {
+    try {
+      isUpdatingAddress.value = true
+      const result = await window.ymaps.geocode(coords, { results: 1 })
+      const firstGeoObject = result.geoObjects.get(0)
+      
+      if (firstGeoObject) {
+        const fullAddress = firstGeoObject.getAddressLine()
+        emit('marker-address-hover', fullAddress)
+      }
+    } catch (error) {
+      console.error('Ошибка получения адреса:', error)
+    } finally {
+      isUpdatingAddress.value = false
+    }
+  }, delay)
+}
+
+const handleMarkerHover = async () => {
+  if (!map || !currentCoords.value) return
+  
+  const coords = [currentCoords.value.lat, currentCoords.value.lng]
+  // Немедленное обновление при наведении
+  updateAddressFromCoords(coords, true)
+}
+
+const handleMarkerLeave = () => {
+  // При уходе курсора ничего не делаем
+}
+
+// Инициализация карты
+const initMap = async () => {
+  try {
+    loadingText.value = 'Загрузка карты...'
+    await loadYandexMaps()
+    
+    // Определяем начальные координаты
+    const initialCoords = await detectInitialLocation()
+    currentCoords.value = initialCoords
+    
+    // Ждем рендеринга DOM
+    await new Promise(resolve => setTimeout(resolve, 100))
+    
+    const container = document.getElementById(mapId)
+    if (!container) {
+      console.error('Контейнер карты не найден')
+      loading.value = false
+      return
+    }
+
+    // Создаем карту
+    const controls = props.mode === 'single' 
+      ? ['zoomControl', 'typeSelector'] 
+      : ['zoomControl', 'searchControl']
+      
+    map = new window.ymaps.Map(mapId, {
+      center: [currentCoords.value.lat, currentCoords.value.lng],
+      zoom: props.zoom,
+      controls
+    })
+
+    // Устанавливаем ограничения зума после создания карты
+    map.options.set('minZoom', 10)
+    map.options.set('maxZoom', 18)
+
+    // Режим single - используем центральный маркер
+    if (props.mode === 'single' && props.showSingleMarker) {
+      // Добавляем обработчик движения карты
+      map.events.add('boundschange', function() {
+        const center = map.getCenter()
+        handleCoordsUpdate(center)
+        
+        // Обновляем адрес с буферизацией при движении карты
+        updateAddressFromCoords(center, false)
+      })
+      
+      // Инициализируем координаты центра
+      handleCoordsUpdate([currentCoords.value.lat, currentCoords.value.lng])
+    }
+
+    // Режим multiple - обрабатываем маркеры
+    if (props.mode === 'multiple' && props.markers && props.markers.length > 0) {
+      updateMarkers(props.markers)
+    }
+
+    // Автоопределение города пользователя по IP (только если нет modelValue)
+    if (!props.modelValue && props.autoDetectLocation) {
+      try {
+        const result = await window.ymaps.geolocation.get({ provider: 'yandex' })
+        const coords = result.geoObjects.get(0).geometry.getCoordinates()
+        if (coords && coords.length === 2) {
+          map.setCenter(coords)
+          currentCoords.value = { lat: coords[0], lng: coords[1] }
+          handleCoordsUpdate(coords)
+        }
+      } catch (error) {
+        // Игнорируем ошибку автоопределения
+      }
+    }
+
+    loading.value = false
+    mapReady.value = true
+    
+    // Если есть отложенный запрос поиска - выполняем его
+    if (pendingSearchRequest) {
+      const searchQuery = pendingSearchRequest
+      pendingSearchRequest = null
+      setTimeout(() => searchAddress(searchQuery), 100)
+    }
+  } catch (error) {
+    console.error('Ошибка инициализации карты:', error)
+    loading.value = false
+    mapReady.value = false
+  }
+}
+
+// Обновление координат
+const handleCoordsUpdate = (coords: number[]) => {
+  if (!coords || coords.length !== 2) return
+  
+  currentCoords.value = { lat: coords[0], lng: coords[1] }
+  emit('update:modelValue', coords.join(','))
+  emit('marker-moved', currentCoords.value)
+}
+
+// Поиск адреса
+const searchAddress = async (address: string) => {
+  if (!address) return
+  
+  // Проверяем готовность карты
+  if (!mapReady.value || !window.ymaps || !map) {
+    pendingSearchRequest = address
+    emit('search-error', 'Карта загружается, попробуйте через секунду')
+    return
+  }
+  
+  // Проверяем наличие метода geocode
+  if (!window.ymaps.geocode) {
+    console.error('Метод geocode недоступен')
+    emit('search-error', 'Сервис поиска временно недоступен')
+    return
+  }
+
+  try {
+    // Используем адрес как есть, без принудительного добавления города
+    const result = await window.ymaps.geocode(address, { results: 1 })
+    const firstGeoObject = result.geoObjects.get(0)
+    
+    if (firstGeoObject) {
+      const coords = firstGeoObject.geometry.getCoordinates()
+      
+      // Перемещаем карту (маркер автоматически остается в центре)
+      map.setCenter(coords, 15)
+      
+      if (props.mode === 'single') {
+        handleCoordsUpdate(coords)
+      }
+      
+      const fullAddress = firstGeoObject.getAddressLine()
+      emit('address-found', fullAddress, { lat: coords[0], lng: coords[1] })
+    } else {
+      emit('search-error', 'Адрес не найден')
+    }
+  } catch (error) {
+    console.error('Ошибка поиска:', error)
+    emit('search-error', 'Ошибка при поиске адреса')
+  }
+}
+
+// Центрирование на местоположении пользователя
+const centerOnUserLocation = async () => {
+  userLocationActive.value = false
+  loadingText.value = 'Определение местоположения...'
+  loading.value = true
+  
+  try {
+    // Определяем местоположение
+    const location = await detectLocationByBrowser() || await detectLocationByIP()
+    
+    if (location && map) {
+      // Перемещаем карту (маркер автоматически остается в центре)
+      map.setCenter([location.lat, location.lng], 15)
+      
+      if (props.mode === 'single') {
+        handleCoordsUpdate([location.lat, location.lng])
+      }
+      
+      // Добавляем или обновляем маркер местоположения пользователя
+      if (userLocationMarker) {
+        userLocationMarker.geometry.setCoordinates([location.lat, location.lng])
+      } else {
+        // Создаем синий круг для обозначения текущего местоположения
+        userLocationMarker = new window.ymaps.Circle(
+          [[location.lat, location.lng], 100], // центр и радиус в метрах
+          {
+            hintContent: 'Вы здесь'
+          },
+          {
+            fillColor: '#3B82F677',
+            strokeColor: '#3B82F6',
+            strokeOpacity: 0.8,
+            strokeWidth: 2
+          }
+        )
+        map.geoObjects.add(userLocationMarker)
+      }
+      
+      userLocationActive.value = true
+      userLocation.value = location
+      
+      // Геокодируем для получения адреса
+      const result = await window.ymaps.geocode([location.lat, location.lng], { results: 1 })
+      const firstGeoObject = result.geoObjects.get(0)
+      if (firstGeoObject) {
+        const address = firstGeoObject.getAddressLine()
+        emit('address-found', address, location)
+      }
+    }
+  } catch (error) {
+    console.error('Ошибка при определении местоположения:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+// Метод для обновления маркеров на карте (для multiple режима)
+const updateMarkers = (newMarkers: MapMarker[]) => {
+  if (!map || !window.ymaps || props.mode !== 'multiple') return
+  
+  // Очищаем старые метки
+  placemarks.value.forEach(placemark => {
+    map.geoObjects.remove(placemark)
+  })
+  placemarks.value = []
+  
+  // Фильтруем валидные маркеры
+  const validMarkers = newMarkers.filter(marker => 
+    marker && 
+    typeof marker.lat === 'number' && 
+    typeof marker.lng === 'number' && 
+    !isNaN(marker.lat) && 
+    !isNaN(marker.lng) &&
+    marker.lat >= -90 && marker.lat <= 90 &&
+    marker.lng >= -180 && marker.lng <= 180
+  )
+  
+  // Добавляем новые метки
+  validMarkers.forEach(marker => {
+    const placemark = new window.ymaps.Placemark(
+      [marker.lat, marker.lng],
+      {
+        balloonContentHeader: marker.title || '',
+        balloonContentBody: marker.description || '',
+        markerData: marker
+      },
+      {
+        preset: marker.icon || 'islands#blueIcon',
+        draggable: false
+      }
+    )
+    
+    placemark.events.add('click', () => {
+      emit('marker-click', marker)
+    })
+
+    // Добавляем обработчики наведения для показа адреса
+    if (props.showAddressTooltipOnHover) {
+      placemark.events.add('mouseenter', async function(event: any) {
+        const coords = [marker.lat, marker.lng]
+        await showTooltipWithAddress(coords, event)
+      })
+      
+      placemark.events.add('mouseleave', function() {
+        hideAddressTooltip()
+      })
+    }
+    
+    // Сразу добавляем на карту
+    map.geoObjects.add(placemark)
+    placemarks.value.push(placemark)
+  })
+  
+  // Центрируем карту
+  if (validMarkers.length === 1) {
+    map.setCenter([validMarkers[0].lat, validMarkers[0].lng], props.zoom)
+  } else if (validMarkers.length > 1) {
+    // Используем центр карты с меньшим зумом для нескольких маркеров
+    map.setCenter([props.center.lat, props.center.lng], props.zoom - 2)
+  }
+}
+
+// Установка координат извне
+const setCoordinates = (coords: { lat: number; lng: number }) => {
+  if (!map) return
+  
+  const ymapsCoords = [coords.lat, coords.lng]
+  
+  // Перемещаем карту (маркер автоматически остается в центре)
+  map.panTo(ymapsCoords)
+  
+  currentCoords.value = coords
+}
+
+// Принудительная инициализация карты (для случаев когда компонент скрыт)
+const forceInit = async () => {
+  if (!mapReady.value) {
+    await initMap()
+  }
+}
+
+// Lifecycle hooks
+onMounted(() => {
+  initMap()
+})
+
+onUnmounted(() => {
+  if (map) {
+    map.destroy()
+  }
+})
+
+// Экспорт методов
+defineExpose({
+  searchAddress,
+  setCoordinates,
+  forceInit
+})
+
+// Типы для window.ymaps
+declare global {
+  interface Window {
+    ymaps: any
+  }
+}
+</script>
+
+<style scoped>
+.yandex-map-unified {
+  position: relative;
+  width: 100%;
+}
+
+.yandex-map-unified__container {
+  position: relative;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.yandex-map-unified__loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.yandex-map-unified__geolocation-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 100;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.yandex-map-unified__geolocation-btn:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  border-color: #bbb;
+}
+
+.yandex-map-unified__geolocation-btn:active {
+  transform: scale(0.95);
+}
+
+/* Центральный маркер */
+.yandex-map-unified__center-marker {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+  pointer-events: auto;
+  cursor: pointer;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  transition: all 0.2s ease;
+}
+
+.yandex-map-unified__center-marker:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+}
+
+/* Tooltip для адреса на карте */
+.yandex-map-unified__address-tooltip {
+  position: absolute;
+  z-index: 1000;
+  background: #1a1a1a;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.4;
+  max-width: 300px;
+  word-wrap: break-word;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  transform: translateY(-100%);
+}
+
+.yandex-map-unified__address-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 20px;
+  border: 6px solid transparent;
+  border-top-color: #1a1a1a;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .yandex-map-unified__geolocation-btn {
+    top: 8px;
+    right: 8px;
+    padding: 6px;
+  }
+  
+  .yandex-map-unified__address-tooltip {
+    max-width: 250px;
+    font-size: 12px;
+  }
+}
+</style>

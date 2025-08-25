@@ -11,7 +11,7 @@
         placeholder="+7 (999) 999-99-99"
         hint="Основной номер для связи"
         pattern="^\+7 \([0-9]{3}\) [0-9]{3}-[0-9]{2}-[0-9]{2}$"
-        :error="errors.phone"
+        :error="errors?.phone"
         @update:modelValue="emitAll"
       />
       
@@ -23,7 +23,7 @@
         placeholder="+7 (999) 999-99-99"
         hint="Оставьте пустым, если совпадает с телефоном"
         pattern="^\+7 \([0-9]{3}\) [0-9]{3}-[0-9]{2}-[0-9]{2}$"
-        :error="errors.whatsapp"
+        :error="errors?.whatsapp"
         @update:modelValue="emitAll"
       />
       
@@ -33,7 +33,7 @@
         label="Telegram"
         placeholder="@username или +7 (999) 999-99-99"
         hint="Ник или номер телефона"
-        :error="errors.telegram"
+        :error="errors?.telegram"
         @update:modelValue="emitAll"
       />
       
@@ -42,7 +42,7 @@
         label="Способ связи"
         :options="contactMethodOptions"
         hint="Как клиенты могут с вами связаться"
-        :error="errors.contactMethod"
+        :error="errors?.contact_method"
         @update:modelValue="emitAll"
       />
     </div>
@@ -56,19 +56,43 @@ import BaseInput from '@/src/shared/ui/atoms/BaseInput/BaseInput.vue'
 import BaseSelect from '@/src/shared/ui/atoms/BaseSelect/BaseSelect.vue'
 
 const props = defineProps({
-  phone: { type: String, default: '' },
-  contactMethod: { type: String, default: 'any' },
-  whatsapp: { type: String, default: '' },
-  telegram: { type: String, default: '' },
+  contacts: { 
+    type: Object, 
+    default: () => ({
+      phone: '',
+      contact_method: 'any',
+      whatsapp: '',
+      telegram: ''
+    })
+  },
   errors: { type: Object, default: () => ({}) }
 })
 
-const emit = defineEmits(['update:phone', 'update:contactMethod', 'update:whatsapp', 'update:telegram'])
+const emit = defineEmits(['update:contacts'])
 
-const localPhone = ref(props.phone)
-const localContactMethod = ref(props.contactMethod)
-const localWhatsapp = ref(props.whatsapp)
-const localTelegram = ref(props.telegram)
+// Локальная копия контактов для работы
+const localContacts = ref({ ...props.contacts })
+
+// Computed свойства для удобного доступа к полям
+const localPhone = computed({
+  get: () => localContacts.value.phone,
+  set: (value) => updateContact('phone', value)
+})
+
+const localContactMethod = computed({
+  get: () => localContacts.value.contact_method,
+  set: (value) => updateContact('contact_method', value)
+})
+
+const localWhatsapp = computed({
+  get: () => localContacts.value.whatsapp,
+  set: (value) => updateContact('whatsapp', value)
+})
+
+const localTelegram = computed({
+  get: () => localContacts.value.telegram,
+  set: (value) => updateContact('telegram', value)
+})
 
 // Опции для способа связи
 const contactMethodOptions = computed(() => [
@@ -79,17 +103,21 @@ const contactMethodOptions = computed(() => [
   { value: 'any', label: 'Любой способ' }
 ])
 
-watch(() => props.phone, val => { localPhone.value = val })
-watch(() => props.contactMethod, val => { localContactMethod.value = val })
-watch(() => props.whatsapp, val => { localWhatsapp.value = val })
-watch(() => props.telegram, val => { localTelegram.value = val })
-
-const emitAll = () => {
-  emit('update:phone', localPhone.value)
-  emit('update:contactMethod', localContactMethod.value)
-  emit('update:whatsapp', localWhatsapp.value)
-  emit('update:telegram', localTelegram.value)
+// Универсальная функция обновления контактов
+const updateContact = (field, value) => {
+  localContacts.value[field] = value
+  emit('update:contacts', { ...localContacts.value })
 }
+
+// Функция для обновления всех контактов
+const emitAll = () => {
+  emit('update:contacts', { ...localContacts.value })
+}
+
+// Watcher для синхронизации с внешними изменениями
+watch(() => props.contacts, (newContacts) => {
+  localContacts.value = { ...newContacts }
+}, { deep: true })
 </script>
 
 <!-- Все стили мигрированы на Tailwind CSS в template --> 

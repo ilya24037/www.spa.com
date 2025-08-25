@@ -1,6 +1,6 @@
 # Список всех секций для копирования
 $sections = @(
-    'SpecialtySection',
+
     'LocationSection', 
     'WorkFormatSection',
     'ServiceProviderSection',

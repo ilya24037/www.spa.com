@@ -68,8 +68,23 @@ class AdRepository extends BaseRepository
      */
     public function updateAd(Ad $ad, array $data): Ad
     {
+        \Log::info('🟢 AdRepository::updateAd НАЧАЛО', [
+            'ad_id' => $ad->id,
+            'data_keys' => array_keys($data),
+            'service_provider_data' => $data['service_provider'] ?? 'not_provided',
+            'clients_data' => $data['clients'] ?? 'not_provided'
+        ]);
+        
         $ad->update($data);
-        return $ad->fresh();
+        $freshAd = $ad->fresh();
+        
+        \Log::info('🟢 AdRepository::updateAd ЗАВЕРШЕНО', [
+            'ad_id' => $freshAd->id,
+            'updated_service_provider' => $freshAd->service_provider,
+            'updated_clients' => $freshAd->clients
+        ]);
+        
+        return $freshAd;
     }
 
     /**

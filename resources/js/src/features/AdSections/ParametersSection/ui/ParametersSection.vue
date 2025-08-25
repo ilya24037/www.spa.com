@@ -5,13 +5,13 @@
         v-model="localTitle"
         name="title"
         type="text"
-        label="Имя"
-        placeholder="Введите ваше имя"
+        label="Название объявления"
+        placeholder="Введите название объявления"
         @update:modelValue="emitAll"
-        :error="errors.title"
+        :error="errors?.title || errors?.['parameters.title']"
       />
       <BaseInput
-        v-if="showAge"
+        v-if="props.showFields.includes('age')"
         v-model="localAge"
         name="age"
         type="number"
@@ -20,7 +20,7 @@
         :min="18"
         :max="65"
         @update:modelValue="emitAll"
-        :error="errors.age"
+        :error="errors?.age || errors?.['parameters.age']"
       />
       <BaseInput
         v-model="localHeight"
@@ -31,7 +31,7 @@
         :min="100"
         :max="250"
         @update:modelValue="emitAll"
-        :error="errors.height"
+        :error="errors?.height || errors?.['parameters.height']"
       />
       <BaseInput
         v-model="localWeight"
@@ -42,43 +42,43 @@
         :min="30"
         :max="200"
         @update:modelValue="emitAll"
-        :error="errors.weight"
+        :error="errors?.weight || errors?.['parameters.weight']"
       />
       <BaseSelect
-        v-if="showBreastSize"
+        v-if="props.showFields.includes('breast_size')"
         v-model="localBreastSize"
         label="Размер груди"
         placeholder="Не указано"
         :options="breastSizeOptions"
         @update:modelValue="emitAll"
-        :error="errors.breast_size"
+        :error="errors?.breast_size || errors?.['parameters.breast_size']"
       />
       <BaseSelect
-        v-if="showHairColor"
+        v-if="props.showFields.includes('hair_color')"
         v-model="localHairColor"
         label="Цвет волос"
         placeholder="Выберите цвет"
         :options="hairColorOptions"
         @update:modelValue="emitAll"
-        :error="errors.hair_color"
+        :error="errors?.hair_color || errors?.['parameters.hair_color']"
       />
       <BaseSelect
-        v-if="showEyeColor"
+        v-if="props.showFields.includes('eye_color')"
         v-model="localEyeColor"
         label="Цвет глаз"
         placeholder="Выберите цвет"
         :options="eyeColorOptions"
         @update:modelValue="emitAll"
-        :error="errors.eye_color"
+        :error="errors?.eye_color || errors?.['parameters.eye_color']"
       />
       <BaseSelect
-        v-if="showNationality"
+        v-if="props.showFields.includes('nationality')"
         v-model="localNationality"
         label="Национальность"
         placeholder="Выберите национальность"
         :options="nationalityOptions"
         @update:modelValue="emitAll"
-        :error="errors.nationality"
+        :error="errors?.nationality || errors?.['parameters.nationality']"
       />
     </div>
   </div>
@@ -89,31 +89,69 @@ import { ref, watch, computed } from 'vue'
 import BaseInput from '@/src/shared/ui/atoms/BaseInput/BaseInput.vue'
 import BaseSelect from '@/src/shared/ui/atoms/BaseSelect/BaseSelect.vue'
 const props = defineProps({
-  title: { type: String, default: '' },
-  age: { type: [String, Number], default: '' },
-  height: { type: [String, Number], default: '' },
-  weight: { type: [String, Number], default: '' },
-  breast_size: { type: [String, Number], default: '' },
-  hair_color: { type: String, default: '' },
-  eye_color: { type: String, default: '' },
-  nationality: { type: String, default: '' },
-  errors: { type: Object, default: () => ({}) },
-  // Опциональные props для управления видимостью полей
-  showAge: { type: Boolean, default: true },
-  showBreastSize: { type: Boolean, default: false },
-  showHairColor: { type: Boolean, default: true },
-  showEyeColor: { type: Boolean, default: true },
-  showNationality: { type: Boolean, default: true }
+  parameters: { 
+    type: Object, 
+    default: () => ({
+      title: '',
+      age: '',
+      height: '',
+      weight: '',
+      breast_size: '',
+      hair_color: '',
+      eye_color: '',
+      nationality: ''
+    })
+  },
+  showFields: { 
+    type: Array, 
+    default: () => ['age', 'breast_size', 'hair_color', 'eye_color', 'nationality'] 
+  },
+  errors: { type: Object, default: () => ({}) }
 })
-const emit = defineEmits(['update:title', 'update:age', 'update:height', 'update:weight', 'update:breast_size', 'update:hair_color', 'update:eye_color', 'update:nationality'])
-const localTitle = ref(props.title)
-const localAge = ref(props.age)
-const localHeight = ref(props.height)
-const localWeight = ref(props.weight)
-const localBreastSize = ref(props.breast_size ? String(props.breast_size) : '')
-const localHairColor = ref(props.hair_color)
-const localEyeColor = ref(props.eye_color)
-const localNationality = ref(props.nationality)
+const emit = defineEmits(['update:parameters'])
+// Локальная копия параметров
+const localParameters = ref({ ...props.parameters })
+
+// Computed свойства для удобства доступа к полям
+const localTitle = computed({
+  get: () => localParameters.value.title,
+  set: (value) => updateParameter('title', value)
+})
+
+const localAge = computed({
+  get: () => localParameters.value.age,
+  set: (value) => updateParameter('age', value)
+})
+
+const localHeight = computed({
+  get: () => localParameters.value.height,
+  set: (value) => updateParameter('height', value)
+})
+
+const localWeight = computed({
+  get: () => localParameters.value.weight,
+  set: (value) => updateParameter('weight', value)
+})
+
+const localBreastSize = computed({
+  get: () => localParameters.value.breast_size ? String(localParameters.value.breast_size) : '',
+  set: (value) => updateParameter('breast_size', value)
+})
+
+const localHairColor = computed({
+  get: () => localParameters.value.hair_color,
+  set: (value) => updateParameter('hair_color', value)
+})
+
+const localEyeColor = computed({
+  get: () => localParameters.value.eye_color,
+  set: (value) => updateParameter('eye_color', value)
+})
+
+const localNationality = computed({
+  get: () => localParameters.value.nationality,
+  set: (value) => updateParameter('nationality', value)
+})
 
 // Опции для селектов
 const breastSizeOptions = computed(() => [
@@ -166,23 +204,19 @@ const nationalityOptions = computed(() => [
   { value: 'other', label: 'Другая' }
 ])
 
-watch(() => props.title, val => { localTitle.value = val })
-watch(() => props.age, val => { localAge.value = val })
-watch(() => props.height, val => { localHeight.value = val })
-watch(() => props.weight, val => { localWeight.value = val })
-watch(() => props.breast_size, val => { localBreastSize.value = val ? String(val) : '' })
-watch(() => props.hair_color, val => { localHairColor.value = val })
-watch(() => props.eye_color, val => { localEyeColor.value = val })
-watch(() => props.nationality, val => { localNationality.value = val })
+// Универсальная функция обновления параметра
+const updateParameter = (field, value) => {
+  localParameters.value[field] = value
+  emit('update:parameters', { ...localParameters.value })
+}
+
+// Слежение за изменениями props.parameters
+watch(() => props.parameters, (newParams) => {
+  localParameters.value = { ...newParams }
+}, { deep: true })
+// Функция для отправки всех параметров
 const emitAll = () => {
-  emit('update:title', localTitle.value)
-  emit('update:age', localAge.value)
-  emit('update:height', localHeight.value)
-  emit('update:weight', localWeight.value)
-  emit('update:breast_size', localBreastSize.value)
-  emit('update:hair_color', localHairColor.value)
-  emit('update:eye_color', localEyeColor.value)
-  emit('update:nationality', localNationality.value)
+  emit('update:parameters', { ...localParameters.value })
 }
 </script>
 

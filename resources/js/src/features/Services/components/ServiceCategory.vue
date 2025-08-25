@@ -119,8 +119,11 @@ const hasSelectedServices = () => {
 }
 
 // Состояние раскрытия - "Основные услуги" развернуты по умолчанию
-// Также раскрываем категории с выбранными услугами
-const isExpanded = ref(props.category.id === 'intimate_services' || hasSelectedServices())
+// Секции комфорта свернуты по умолчанию, если не выбраны услуги
+const isExpanded = ref(
+  props.category.id === 'intimate_services' || 
+  (hasSelectedServices() && !props.category.is_amenity)
+)
 
 // Функция переключения состояния раскрытия
 const toggleExpanded = () => {
@@ -130,7 +133,7 @@ const toggleExpanded = () => {
 // При монтировании проверяем, нужно ли раскрыть категорию
 onMounted(async () => {
   await nextTick()
-  if (props.category.id === 'intimate_services' || hasSelectedServices()) {
+  if (props.category.id === 'intimate_services' || (hasSelectedServices() && !props.category.is_amenity)) {
     isExpanded.value = true
   }
 })

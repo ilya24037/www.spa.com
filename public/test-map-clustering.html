@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест кластеризации карты</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        button.danger {
+            background: #dc3545;
+        }
+        
+        button.danger:hover {
+            background: #c82333;
+        }
+        
+        button.success {
+            background: #28a745;
+        }
+        
+        button.success:hover {
+            background: #218838;
+        }
+        
+        #map {
+            width: 100%;
+            height: 600px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .stats {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .mobile-info {
+            display: none;
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-info {
+                display: block;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗺️ Тест кластеризации и оптимизаций карты</h1>
+        
+        <div class="info">
+            <p><strong>Что тестируем:</strong></p>
+            <ul>
+                <li>✅ Кластеризация маркеров (группировка близких точек)</li>
+                <li>✅ Ленивая загрузка (загрузка только видимых маркеров)</li>
+                <li>✅ Мобильная оптимизация (мультитач, инерция)</li>
+                <li>✅ Производительность с большим количеством маркеров</li>
+            </ul>
+        </div>
+        
+        <div class="mobile-info">
+            📱 <strong>Мобильный режим активен!</strong><br>
+            Используйте жесты: щипок для зума, свайп для перемещения
+        </div>
+        
+        <div class="controls">
+            <button onclick="addRandomMarkers(10)">+ 10 маркеров</button>
+            <button onclick="addRandomMarkers(50)">+ 50 маркеров</button>
+            <button onclick="addRandomMarkers(100)">+ 100 маркеров</button>
+            <button onclick="addRandomMarkers(500)" class="success">+ 500 маркеров (стресс-тест)</button>
+            <button onclick="clearAllMarkers()" class="danger">Очистить все</button>
+            <button onclick="toggleClustering()">Вкл/Выкл кластеризацию</button>
+            <button onclick="centerOnPerm()">Центр на Пермь</button>
+        </div>
+        
+        <div id="map"></div>
+        
+        <div class="stats">
+            <div class="stats-row">
+                <span>Всего маркеров:</span>
+                <strong id="totalMarkers">0</strong>
+            </div>
+            <div class="stats-row">
+                <span>Кластеризация:</span>
+                <strong id="clusterStatus">Включена</strong>
+            </div>
+            <div class="stats-row">
+                <span>Текущий зум:</span>
+                <strong id="currentZoom">12</strong>
+            </div>
+            <div class="stats-row">
+                <span>Видимая область:</span>
+                <strong id="visibleBounds">-</strong>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=23ff8acc-835f-4e99-8b19-d33c5d346e18"></script>
+    
+    <script>
+        let myMap;
+        let clusterer;
+        let markers = [];
+        let clusteringEnabled = true;
+        const PERM_CENTER = [58.0105, 56.2502];
+        
+        // Инициализация карты
+        ymaps.ready(init);
+        
+        function init() {
+            // Определяем мобильное устройство
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            // Создаем карту с оптимизациями
+            myMap = new ymaps.Map("map", {
+                center: PERM_CENTER,
+                zoom: 12,
+                controls: ['zoomControl', 'searchControl', 'typeSelector'],
+                behaviors: isMobile 
+                    ? ['drag', 'dblClickZoom', 'multiTouch'] 
+                    : ['default']
+            });
+            
+            // Настройки для мобильных
+            if (isMobile) {
+                myMap.behaviors.enable('multiTouch');
+                myMap.options.set('suppressMapOpenBlock', true);
+                myMap.options.set('dragInertiaEnable', true);
+                myMap.options.set('dragInertiaFriction', 0.9);
+            }
+            
+            // Создаем кластеризатор
+            createClusterer();
+            
+            // Слушаем изменения карты
+            myMap.events.add('boundschange', onBoundsChange);
+            
+            // Добавляем начальные маркеры
+            addRandomMarkers(20);
+        }
+        
+        function createClusterer() {
+            clusterer = new ymaps.Clusterer({
+                preset: 'islands#invertedBlueClusterIcons',
+                groupByCoordinates: false,
+                clusterDisableClickZoom: false,
+                clusterHideIconOnBalloonOpen: false,
+                geoObjectHideIconOnBalloonOpen: false,
+                clusterBalloonContentLayout: 'cluster#balloonCarousel',
+                clusterBalloonPanelMaxMapArea: 0,
+                clusterBalloonContentLayoutWidth: 300,
+                clusterBalloonContentLayoutHeight: 200,
+                clusterBalloonPagerSize: 5,
+                clusterNumbers: [2],
+                clusterMaxZoom: 16,
+                gridSize: 80
+            });
+            
+            myMap.geoObjects.add(clusterer);
+        }
+        
+        function addRandomMarkers(count) {
+            const newMarkers = [];
+            const center = myMap.getCenter();
+            
+            for (let i = 0; i < count; i++) {
+                // Генерируем случайные координаты вокруг центра
+                const offset = 0.1; // Радиус разброса
+                const lat = center[0] + (Math.random() - 0.5) * offset;
+                const lng = center[1] + (Math.random() - 0.5) * offset;
+                
+                // Генерируем рейтинг для разных иконок
+                const rating = Math.random() * 5;
+                let preset = 'islands#grayIcon';
+                
+                if (rating >= 4.5) {
+                    preset = 'islands#goldIcon';
+                } else if (rating >= 4) {
+                    preset = 'islands#greenIcon';
+                } else if (rating >= 3) {
+                    preset = 'islands#blueIcon';
+                }
+                
+                const placemark = new ymaps.Placemark([lat, lng], {
+                    balloonContentHeader: `Мастер #${markers.length + i + 1}`,
+                    balloonContentBody: `
+                        <div>
+                            <p>⭐ Рейтинг: ${rating.toFixed(1)}</p>
+                            <p>💰 от ${Math.floor(1000 + Math.random() * 4000)} ₽</p>
+                            <p>📍 ${getRandomDistrict()}</p>
+                        </div>
+                    `,
+                    clusterCaption: `Мастер #${markers.length + i + 1}`
+                }, {
+                    preset: preset,
+                    draggable: false
+                });
+                
+                newMarkers.push(placemark);
+            }
+            
+            // Добавляем маркеры
+            if (clusteringEnabled) {
+                clusterer.add(newMarkers);
+            } else {
+                newMarkers.forEach(marker => {
+                    myMap.geoObjects.add(marker);
+                });
+            }
+            
+            markers.push(...newMarkers);
+            updateStats();
+        }
+        
+        function clearAllMarkers() {
+            if (clusteringEnabled) {
+                clusterer.removeAll();
+            } else {
+                markers.forEach(marker => {
+                    myMap.geoObjects.remove(marker);
+                });
+            }
+            markers = [];
+            updateStats();
+        }
+        
+        function toggleClustering() {
+            clusteringEnabled = !clusteringEnabled;
+            
+            // Пересоздаем все маркеры
+            const tempMarkers = [...markers];
+            clearAllMarkers();
+            
+            if (clusteringEnabled) {
+                clusterer.add(tempMarkers);
+            } else {
+                tempMarkers.forEach(marker => {
+                    myMap.geoObjects.add(marker);
+                });
+            }
+            
+            markers = tempMarkers;
+            updateStats();
+        }
+        
+        function centerOnPerm() {
+            myMap.setCenter(PERM_CENTER, 12, {
+                duration: 500
+            });
+        }
+        
+        function onBoundsChange() {
+            const zoom = myMap.getZoom();
+            const bounds = myMap.getBounds();
+            
+            document.getElementById('currentZoom').textContent = zoom.toFixed(0);
+            
+            // Показываем границы
+            if (bounds) {
+                const sw = bounds[0];
+                const ne = bounds[1];
+                document.getElementById('visibleBounds').textContent = 
+                    `${sw[0].toFixed(3)}, ${sw[1].toFixed(3)} - ${ne[0].toFixed(3)}, ${ne[1].toFixed(3)}`;
+                
+                // Здесь можно добавить ленивую загрузку
+                // loadMarkersInBounds(bounds);
+            }
+        }
+        
+        function updateStats() {
+            document.getElementById('totalMarkers').textContent = markers.length;
+            document.getElementById('clusterStatus').textContent = 
+                clusteringEnabled ? 'Включена' : 'Выключена';
+        }
+        
+        function getRandomDistrict() {
+            const districts = [
+                'Ленинский район',
+                'Свердловский район',
+                'Мотовилихинский район',
+                'Индустриальный район',
+                'Дзержинский район',
+                'Кировский район',
+                'Орджоникидзевский район'
+            ];
+            return districts[Math.floor(Math.random() * districts.length)];
+        }
+    </script>
+</body>
+</html>

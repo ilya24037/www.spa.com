@@ -1,6 +1,5 @@
 <template>
   <div class="service-provider-section">
-    <h2 class="form-group-title">Кто оказывает услуги</h2>
     <div class="radio-group">
       <BaseRadio
         v-for="option in providerOptions"
@@ -52,18 +51,7 @@ const handleProviderChange = (value) => {
 
 <style scoped>
 .service-provider-section {
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 24px;
-}
-
-.form-group-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
-  margin: 0 0 20px 0;
-  line-height: 1.3;
+  /* Убираем лишние стили, теперь это подсекция */
 }
 
 .radio-group {

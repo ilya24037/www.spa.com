@@ -1,16 +1,22 @@
 <template>
   <div class="work-format-section">
-    <h2 class="form-group-title">Формат работы</h2>
     <div class="work-format-fields">
-      <BaseRadio
+      <div
         v-for="option in workFormatOptions"
         :key="option.value"
-        v-model="localWorkFormat"
-        name="work_format"
-        :value="option.value"
-        :label="option.label"
-        @update:modelValue="emitWorkFormat"
-      />
+        class="work-format-option"
+      >
+        <BaseRadio
+          v-model="localWorkFormat"
+          name="work_format"
+          :value="option.value"
+          :label="option.label"
+          @update:modelValue="emitWorkFormat"
+        />
+        <p class="work-format-description">
+          {{ option.description }}
+        </p>
+      </div>
     </div>
     <div v-if="errors.work_format" class="error-message">
       {{ errors.work_format }}
@@ -30,10 +36,23 @@ const props = defineProps({
 const emit = defineEmits(['update:workFormat'])
 const localWorkFormat = ref(props.workFormat)
 
-// Опции для радио-кнопок
+// Опции для радио-кнопок (согласно скриншоту и backend валидации)
 const workFormatOptions = computed(() => [
-  { value: 'individual', label: 'Индивидуально' },
-  { value: 'salon', label: 'Салон' }
+  { 
+    value: 'individual', 
+    label: 'Частный мастер',
+    description: 'Работаете в одиночку'
+  },
+  { 
+    value: 'duo', 
+    label: 'Салон',
+    description: 'У вас есть отдельное помещение и штат мастеров'
+  },
+  { 
+    value: 'group', 
+    label: 'Сеть салонов',
+    description: 'У вас несколько филиалов с одним названием и концепцией'
+  }
 ])
 
 watch(() => props.workFormat, val => { 
@@ -46,23 +65,28 @@ const emitWorkFormat = () => {
 </script>
 
 <style scoped>
-.work-format-section { 
-  background: white; 
-  border-radius: 8px; 
-  padding: 20px; 
-}
-
-.form-group-title { 
-  font-size: 18px; 
-  font-weight: 600; 
-  color: #333; 
-  margin-bottom: 16px; 
+.work-format-section {
+  /* Убираем лишние стили, теперь это подсекция */
 }
 
 .work-format-fields { 
   display: flex; 
   flex-direction: column;
-  gap: 12px; 
+  gap: 16px; 
+}
+
+.work-format-option {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.work-format-description {
+  color: #6b7280;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  margin: 0;
+  margin-left: 24px; /* Выравнивание с текстом радио-кнопки */
 }
 
 .error-message {

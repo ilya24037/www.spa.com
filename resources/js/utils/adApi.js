@@ -291,7 +291,8 @@ export const prepareFormData = (form) => {
   }
   
   const data = {
-    title: form.title || '',
+    // title теперь берется из parameters
+    title: form.parameters?.title || '',
     specialty: form.specialty || '',
     clients: Array.isArray(form.clients) ? form.clients : [],
     service_location: Array.isArray(form.service_location) ? form.service_location : [],
@@ -324,20 +325,21 @@ export const prepareFormData = (form) => {
     address: form.address || '',
     travel_area: form.travel_area || '',
     geo: form.geo || {},
-    phone: form.phone || '',
-    contact_method: form.contact_method || 'messages',
-    whatsapp: form.whatsapp || '',
-    telegram: form.telegram || '',
+    // Контактные данные (теперь берутся из объекта contacts для обратной совместимости)
+    phone: form.contacts?.phone || form.phone || '',
+    contact_method: form.contacts?.contact_method || form.contact_method || 'messages',
+    whatsapp: form.contacts?.whatsapp || form.whatsapp || '',
+    telegram: form.contacts?.telegram || form.telegram || '',
     
-    // Физические параметры
-    age: form.age || '',
-    height: form.height || '',
-    weight: form.weight || '',
-    breast_size: form.breast_size || '',
-    hair_color: form.hair_color || '',
-    eye_color: form.eye_color || '',
+    // Физические параметры (теперь берутся из объекта parameters)
+    age: form.parameters?.age || '',
+    height: form.parameters?.height || '',
+    weight: form.parameters?.weight || '',
+    breast_size: form.parameters?.breast_size || '',
+    hair_color: form.parameters?.hair_color || '',
+    eye_color: form.parameters?.eye_color || '',
     appearance: form.appearance || '',
-    nationality: form.nationality || '',
+    nationality: form.parameters?.nationality || '',
     
     // Услуги
     services: form.services || {},

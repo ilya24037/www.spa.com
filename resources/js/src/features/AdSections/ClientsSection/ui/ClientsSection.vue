@@ -1,6 +1,5 @@
 <template>
   <div class="clients-section">
-    <h2 class="form-group-title">Ваши клиенты</h2>
     <div class="checkbox-group">
       <BaseCheckbox
         v-for="option in clientOptions"
@@ -53,17 +52,8 @@ const toggleClient = (value, checked) => {
 </script>
 
 <style scoped>
-.clients-section { 
-  background: white; 
-  border-radius: 8px; 
-  padding: 20px; 
-}
-
-.form-group-title { 
-  font-size: 18px; 
-  font-weight: 600; 
-  color: #333; 
-  margin-bottom: 16px; 
+.clients-section {
+  /* Убираем лишние стили, теперь это подсекция */
 }
 
 .checkbox-group { 

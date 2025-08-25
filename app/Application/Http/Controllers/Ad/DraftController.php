@@ -144,7 +144,7 @@ class DraftController extends Controller
         // Для Inertia запросов
         if ($request->header('X-Inertia')) {
             return redirect()
-                ->route('profile.items.draft')
+                ->to('/profile/items/draft/all')
                 ->with('success', 'Черновик сохранен');
         }
 
@@ -592,7 +592,7 @@ class DraftController extends Controller
         // Для Inertia запросов
         if ($request->header('X-Inertia')) {
             return redirect()
-                ->route('profile.items.draft')
+                ->to('/profile/items/draft/all')
                 ->with('success', 'Черновик обновлен');
         }
 
@@ -605,6 +605,69 @@ class DraftController extends Controller
     }
 
     /**
+     * Опубликовать черновик (сделать активным)
+     */
+    public function publish(Request $request, Ad $ad): JsonResponse|RedirectResponse
+    {
+        \Log::info('🟢 DraftController::publish НАЧАЛО', [
+            'ad_id' => $ad->id,
+            'ad_status' => $ad->status,
+            'user_id' => auth()->id(),
+            'request_headers' => $request->headers->all()
+        ]);
+        
+        try {
+            $this->authorize('update', $ad);
+            \Log::info('🟢 DraftController::publish Авторизация пройдена');
+            
+            // Используем AdService для публикации
+            $publishedAd = $this->adService->publish($ad);
+            \Log::info('🟢 DraftController::publish AdService::publish успешно', [
+                'published_ad_id' => $publishedAd->id,
+                'published_ad_status' => $publishedAd->status
+            ]);
+            
+            // Для Inertia запросов
+            if ($request->header('X-Inertia')) {
+                \Log::info('🟢 DraftController::publish Inertia redirect');
+                return redirect()
+                    ->to('/profile/items/active/all')
+                    ->with('success', 'Объявление опубликовано!');
+            }
+            
+            // Для AJAX запросов
+            \Log::info('🟢 DraftController::publish JSON response');
+            return response()->json([
+                'success' => true,
+                'message' => 'Объявление успешно опубликовано!',
+                'ad_id' => $publishedAd->id,
+                'status' => $publishedAd->status,
+                'redirect_url' => '/profile/items/active/all'
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('🟢 DraftController::publish ОШИБКА', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'ad_id' => $ad->id
+            ]);
+            
+            // Для Inertia запросов
+            if ($request->header('X-Inertia')) {
+                return redirect()->back()->withErrors([
+                    'publish' => 'Ошибка публикации: ' . $e->getMessage()
+                ]);
+            }
+            
+            // Для AJAX запросов
+            return response()->json([
+                'success' => false,
+                'message' => 'Ошибка публикации: ' . $e->getMessage()
+            ], 422);
+        }
+    }
+
+    /**
      * Удалить черновик
      */
     public function destroy(Ad $ad): RedirectResponse
@@ -614,7 +677,7 @@ class DraftController extends Controller
         $this->draftService->delete($ad);
 
         return redirect()
-            ->route('profile.items.draft')
+            ->to('/profile/items/draft/all')
             ->with('success', 'Черновик удален');
     }
 }

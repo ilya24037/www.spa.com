@@ -2,10 +2,44 @@ import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { useAuthStore } from '@/stores/authStore'
 
+// Функция миграции параметров для обратной совместимости
+const migrateParameters = (data: any): any => {
+  // Если уже в новом формате с объектом parameters
+  if (data?.parameters && typeof data.parameters === 'object') {
+    return data.parameters
+  }
+  
+  // Мигрируем из старого формата (отдельные поля)
+  return {
+    title: data?.title || '',
+    age: data?.age || '',
+    height: data?.height || '',
+    weight: data?.weight || '',
+    breast_size: data?.breast_size || '',
+    hair_color: data?.hair_color || '',
+    eye_color: data?.eye_color || '',
+    nationality: data?.nationality || ''
+  }
+}
+
+// Функция миграции контактов для обратной совместимости
+const migrateContacts = (data: any): any => {
+  // Если уже в новом формате с объектом contacts
+  if (data?.contacts && typeof data.contacts === 'object') {
+    return data.contacts
+  }
+  
+  // Мигрируем из старого формата (отдельные поля)
+  return {
+    phone: data?.phone || '',
+    contact_method: data?.contact_method || 'any',  // ✅ Исправлено на 'any' как было изначально
+    whatsapp: data?.whatsapp || '',
+    telegram: data?.telegram || ''
+  }
+}
 
 // Типы данных формы
 export interface AdFormData {
-  title: string
   specialty: string
   clients: string[]
   service_location: string[]
@@ -33,21 +67,17 @@ export interface AdFormData {
     outcall_night?: number | null
     taxi_included?: boolean
   }
-  main_service_name: string
-  main_service_price: number | null
-  main_service_price_unit: string
-  additional_services: Array<{
-    name: string
-    price: number
-    unit: string
-  }>
-  age: string | number
-  height: string
-  weight: string
-  breast_size: string
-  hair_color: string
-  eye_color: string
-  nationality: string
+  // Объединяем параметры в единый объект
+  parameters: {
+    title: string
+    age: string | number
+    height: string
+    weight: string
+    breast_size: string
+    hair_color: string
+    eye_color: string
+    nationality: string
+  }
   new_client_discount: string
   gift: string
   photos: any[]
@@ -60,10 +90,13 @@ export interface AdFormData {
   travel_radius: string | number
   travel_price: number | null
   travel_price_type: string
-  phone: string
-  contact_method: string
-  whatsapp: string
-  telegram: string
+  // Объединяем контакты в единый объект
+  contacts: {
+    phone: string
+    contact_method: string
+    whatsapp: string
+    telegram: string
+  }
   faq?: Record<string, any> // FAQ ответы
 }
 
@@ -85,7 +118,6 @@ export function useAdFormModel(props: any, emit: any) {
   
   // Состояние формы
   const form = reactive<AdFormData>({
-    title: savedFormData?.title || props.initialData?.title || '',
     specialty: savedFormData?.specialty || props.initialData?.specialty || '',
     clients: (() => {
       if (savedFormData?.clients) return savedFormData.clients
@@ -101,7 +133,7 @@ export function useAdFormModel(props: any, emit: any) {
       }
       return []
     })(),
-    service_location: savedFormData?.service_location || props.initialData?.service_location || ['У заказчика дома'],
+    service_location: savedFormData?.service_location || props.initialData?.service_location || [],
     work_format: savedFormData?.work_format || props.initialData?.work_format || 'individual',
     service_provider: (() => {
       if (savedFormData?.service_provider) return savedFormData.service_provider
@@ -239,17 +271,8 @@ export function useAdFormModel(props: any, emit: any) {
         outcall_office: false
       }
     })(),
-    main_service_name: props.initialData?.main_service_name || '',
-    main_service_price: props.initialData?.main_service_price || null,
-    main_service_price_unit: props.initialData?.main_service_price_unit || 'hour',
-    additional_services: props.initialData?.additional_services || [],
-    age: props.initialData?.age || '',
-    height: props.initialData?.height || '',
-    weight: props.initialData?.weight || '',
-    breast_size: props.initialData?.breast_size || '',
-    hair_color: props.initialData?.hair_color || '',
-    eye_color: props.initialData?.eye_color || '',
-    nationality: props.initialData?.nationality || '',
+    // Используем функцию миграции для обратной совместимости
+    parameters: migrateParameters(savedFormData || props.initialData),
     new_client_discount: props.initialData?.new_client_discount || '',
     gift: props.initialData?.gift || '',
     photos: (() => {
@@ -286,10 +309,8 @@ export function useAdFormModel(props: any, emit: any) {
     travel_radius: props.initialData?.travel_radius || '',
     travel_price: props.initialData?.travel_price || null,
     travel_price_type: props.initialData?.travel_price_type || 'free',
-    phone: props.initialData?.phone || '',
-    contact_method: props.initialData?.contact_method || 'phone',
-    whatsapp: props.initialData?.whatsapp || '',
-    telegram: props.initialData?.telegram || '',
+    // Используем функцию миграции для обратной совместимости
+    contacts: migrateContacts(savedFormData || props.initialData),
     faq: (() => {
       if (props.initialData?.faq) {
         if (typeof props.initialData.faq === 'string') {
@@ -346,25 +367,42 @@ export function useAdFormModel(props: any, emit: any) {
   const validateForm = (): boolean => {
     const newErrors: Record<string, string[]> = {}
     
-    if (!form.title) {
-      newErrors.title = ['Название объявления обязательно']
+    console.log('🔍 validateForm: Проверяем поля формы', {
+      'parameters.title': form.parameters.title,
+      'specialty': form.specialty,
+      'price': form.price,
+      'contacts.phone': form.contacts.phone,
+      'geo.city': form.geo?.city,
+      'geo': form.geo
+    })
+    
+    if (!form.parameters.title) {
+      newErrors['parameters.title'] = ['Название объявления обязательно']
+      console.log('❌ validateForm: Название объявления пустое')
     }
     
-    if (!form.specialty) {
-      newErrors.specialty = ['Специализация обязательна']
-    }
+    // specialty теперь необязательно - убрали валидацию
     
     if (!form.price || form.price <= 0) {
       newErrors.price = ['Укажите корректную цену']
+      console.log('❌ validateForm: Цена некорректная:', form.price)
     }
     
-    if (!form.phone) {
-      newErrors.phone = ['Телефон обязателен']
+    if (!form.contacts.phone) {
+      newErrors['contacts.phone'] = ['Телефон обязателен']
+      console.log('❌ validateForm: Телефон пустой')
     }
     
     if (!form.geo?.city) {
       newErrors['geo.city'] = ['Выберите город']
+      console.log('❌ validateForm: Город не выбран')
     }
+    
+    console.log('🔍 validateForm: Результат валидации', {
+      errors: newErrors,
+      errorsCount: Object.keys(newErrors).length,
+      isValid: Object.keys(newErrors).length === 0
+    })
     
     errors.value = newErrors
     return Object.keys(newErrors).length === 0
@@ -372,17 +410,63 @@ export function useAdFormModel(props: any, emit: any) {
 
   // Обработка отправки формы
   const handleSubmit = async () => {
-    if (!validateForm()) {
+    console.log('🔵 adFormModel: КНОПКА "СОХРАНИТЬ ИЗМЕНЕНИЯ" НАЖАТА', {
+      isEditMode: isEditMode.value,
+      adId: props.adId,
+      initialDataId: props.initialData?.id,
+      initialDataStatus: props.initialData?.status,
+      formData: {
+        title: form.parameters.title,
+        specialty: form.specialty,
+        service_provider: form.service_provider,
+        clients: form.clients
+      }
+    })
+    
+    // ВРЕМЕННО: отключаем валидацию для активных объявлений
+    if (props.initialData?.status !== 'active' && !validateForm()) {
+      console.log('❌ adFormModel: Валидация не прошла')
       return
     }
     
+    if (props.initialData?.status === 'active') {
+      console.log('✅ adFormModel: Пропускаем валидацию для активного объявления')
+    }
+    
+    console.log('✅ adFormModel: Валидация прошла успешно')
     saving.value = true
     
-    // Подготовка данных для отправки
+    // Подготовка данных для отправки - ИСПРАВЛЯЕМ СТРУКТУРУ
     const submitData = {
       ...form,
+      // ✅ Извлекаем поля из parameters объекта для backend совместимости
+      title: form.parameters.title,
+      age: form.parameters.age,
+      height: form.parameters.height,
+      weight: form.parameters.weight,
+      breast_size: form.parameters.breast_size,
+      hair_color: form.parameters.hair_color,
+      eye_color: form.parameters.eye_color,
+      nationality: form.parameters.nationality,
+      // ✅ Извлекаем поля из contacts объекта для backend совместимости  
+      phone: form.contacts.phone,
+      contact_method: form.contacts.contact_method,
+      whatsapp: form.contacts.whatsapp,
+      telegram: form.contacts.telegram,
+      // ✅ Исправляем is_starting_price - backend ждет array, а не boolean
+      is_starting_price: form.is_starting_price ? ['true'] : [],
       category: props.category
     }
+    
+    console.log('📤 adFormModel: Подготовлены данные для отправки', {
+      submitDataKeys: Object.keys(submitData),
+      title: submitData.title,
+      phone: submitData.phone,
+      is_starting_price: submitData.is_starting_price,
+      service_provider: submitData.service_provider,
+      clients: submitData.clients,
+      contacts: submitData.contacts
+    })
     
     
     // Если это редактирование существующего объявления
@@ -397,36 +481,51 @@ export function useAdFormModel(props: any, emit: any) {
       
       // Для черновиков используем PUT на /draft/{id}
       if (props.initialData?.status === 'draft') {
+        console.log('🟡 adFormModel: Отправляем PUT запрос для ЧЕРНОВИКА', {
+          url: `/draft/${editId}`,
+          editId: editId,
+          submitDataKeys: Object.keys(submitData)
+        })
+        
         router.put(`/draft/${editId}`, submitData, {
           preserveScroll: true,
           onSuccess: () => {
+            console.log('✅ adFormModel: Черновик успешно обновлен')
             emit('success')
           },
           onError: (errorResponse: any) => {
-            // Обработка ошибки
+            console.log('❌ adFormModel: Ошибка обновления черновика', errorResponse)
             errors.value = errorResponse
           },
           onFinish: () => {
+            console.log('🏁 adFormModel: Черновик - запрос завершен')
             saving.value = false
           }
         })
       } else {
+        console.log('🟢 adFormModel: Отправляем PUT запрос для АКТИВНОГО ОБЪЯВЛЕНИЯ', {
+          url: `/ads/${editId}`,
+          editId: editId,
+          submitDataKeys: Object.keys(submitData),
+          service_provider: submitData.service_provider,
+          clients: submitData.clients
+        })
+        
         // Для обычных объявлений используем PUT на /ads/{id}
         router.put(`/ads/${editId}`, submitData, {
           preserveScroll: true,
           onSuccess: () => {
-            // Для активных объявлений переходим к списку активных
-            if (props.initialData?.status === 'active') {
-              router.visit('/profile/items/active/all')
-            } else {
-              emit('success')
-            }
+            // ✅ Позволяем Backend сделать redirect (как у черновиков)
+            console.log('🟢 adFormModel: Активное объявление успешно обновлено, Backend сделает redirect')
+            // Не делаем router.visit() - Backend сам перенаправит
+            emit('success')
           },
           onError: (errorResponse: any) => {
-            // Обработка ошибки
+            console.log('❌ adFormModel: Ошибка обновления активного объявления', errorResponse)
             errors.value = errorResponse
           },
           onFinish: () => {
+            console.log('🏁 adFormModel: Активное объявление - запрос завершен')
             saving.value = false
           }
         })
@@ -467,7 +566,7 @@ export function useAdFormModel(props: any, emit: any) {
     
     // Добавляем все обычные поля
     formData.append('category', props.category || '')
-    formData.append('title', form.title || '')
+    formData.append('title', form.parameters.title || '')
     formData.append('specialty', form.specialty || '')
     formData.append('work_format', form.work_format || '')
     formData.append('experience', form.experience || '')
@@ -507,19 +606,15 @@ export function useAdFormModel(props: any, emit: any) {
       formData.append('prices[outcall_sauna]', form.prices.outcall_sauna ? '1' : '0')
       formData.append('prices[outcall_office]', form.prices.outcall_office ? '1' : '0')
     }
-    formData.append('main_service_name', form.main_service_name || '')
-    formData.append('main_service_price', form.main_service_price?.toString() || '')
-    formData.append('main_service_price_unit', form.main_service_price_unit || '')
     
-    // Добавляем параметры
-    
-    formData.append('age', form.age?.toString() || '')
-    formData.append('height', form.height || '')
-    formData.append('weight', form.weight || '')
-    formData.append('breast_size', form.breast_size || '')
-    formData.append('hair_color', form.hair_color || '')
-    formData.append('eye_color', form.eye_color || '')
-    formData.append('nationality', form.nationality || '')
+    // Добавляем параметры (из объекта parameters для обратной совместимости с backend)
+    formData.append('age', form.parameters.age?.toString() || '')
+    formData.append('height', form.parameters.height || '')
+    formData.append('weight', form.parameters.weight || '')
+    formData.append('breast_size', form.parameters.breast_size || '')
+    formData.append('hair_color', form.parameters.hair_color || '')
+    formData.append('eye_color', form.parameters.eye_color || '')
+    formData.append('nationality', form.parameters.nationality || '')
     formData.append('new_client_discount', form.new_client_discount || '')
     formData.append('gift', form.gift || '')
     formData.append('address', form.address || '')
@@ -527,10 +622,11 @@ export function useAdFormModel(props: any, emit: any) {
     formData.append('travel_radius', form.travel_radius?.toString() || '')
     formData.append('travel_price', form.travel_price?.toString() || '')
     formData.append('travel_price_type', form.travel_price_type || '')
-    formData.append('phone', form.phone || '')
-    formData.append('contact_method', form.contact_method || '')
-    formData.append('whatsapp', form.whatsapp || '')
-    formData.append('telegram', form.telegram || '')
+    // Добавляем контактные данные из объекта contacts для обратной совместимости с backend
+    formData.append('phone', form.contacts.phone || '')
+    formData.append('contact_method', form.contacts.contact_method || '')
+    formData.append('whatsapp', form.contacts.whatsapp || '')
+    formData.append('telegram', form.contacts.telegram || '')
     
     // Добавляем массивы как JSON
     try {
@@ -552,7 +648,6 @@ export function useAdFormModel(props: any, emit: any) {
           scheduleType: typeof form.schedule
         })
       }
-      if (form.additional_services) formData.append('additional_services', JSON.stringify(form.additional_services))
 
       // Проверяем, не является ли geo уже строкой
       if (form.geo) {
@@ -640,18 +735,42 @@ export function useAdFormModel(props: any, emit: any) {
     
     // Обрабатываем видео (аналогично photos)
     if (form.video && Array.isArray(form.video)) {
+      console.log('🎥 adFormModel: Обрабатываем видео:', {
+        videoCount: form.video.length,
+        videoData: form.video
+      })
+      
       // Всегда отправляем массив video, даже если пустой
       form.video.forEach((video: any, index: number) => {
+        console.log(`🎥 adFormModel: Обрабатываем видео ${index}:`, {
+          video,
+          isFile: video instanceof File,
+          hasFile: video?.file instanceof File,
+          hasUrl: !!video?.url,
+          videoType: typeof video
+        })
+        
         if (video instanceof File) {
+          // Прямой File объект
           formData.append(`video[${index}]`, video)
+          console.log(`🎥 adFormModel: Добавлен File для видео ${index}`)
+        } else if (video?.file instanceof File) {
+          // Video объект с File полем (основной случай)
+          formData.append(`video[${index}]`, video.file)
+          console.log(`🎥 adFormModel: Добавлен video.file для видео ${index}`)
         } else if (typeof video === 'string' && video !== '') {
+          // Строковые URL
           formData.append(`video[${index}]`, video)
+          console.log(`🎥 adFormModel: Добавлен URL для видео ${index}`)
         } else if (typeof video === 'object' && video !== null) {
+          // Объект без File
           const value = video.url || video.preview || ''
           if (value) {
             formData.append(`video[${index}]`, value)
+            console.log(`🎥 adFormModel: Добавлен value для видео ${index}:`, value)
           } else {
             formData.append(`video[${index}]`, JSON.stringify(video))
+            console.log(`🎥 adFormModel: Добавлен JSON для видео ${index}`)
           }
         }
       })

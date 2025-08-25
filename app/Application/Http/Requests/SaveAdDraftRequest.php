@@ -35,7 +35,7 @@ class SaveAdDraftRequest extends FormRequest
             'work_format' => 'nullable|string|in:individual,duo,group',
             'service_provider' => 'nullable|array',
             'experience' => 'nullable|string|in:3260137,3260142,3260146,3260149,3260152',
-            'education_level' => 'nullable|string|in:2,3,4,5,6,7',
+
             'features' => 'nullable|array',
             'additional_features' => 'nullable|string|max:1000',
             'description' => 'nullable|string|max:5000',

@@ -1,6 +1,5 @@
 <template>
   <div class="experience-section">
-    <h2 class="form-group-title">Опыт работы</h2>
     <BaseSelect
       v-model="localExperience"
       label="Опыт (лет)"
@@ -24,23 +23,15 @@ const props = defineProps({
 const emit = defineEmits(['update:experience'])
 const localExperience = ref(props.experience)
 
-// Генерируем опции для опыта
-const experienceOptions = computed(() => {
-  const options = [
-    { value: '', label: 'Выберите опыт' },
-    { value: '0', label: 'Без опыта' }
-  ]
-  
-  // Добавляем годы от 1 до 20
-  for (let i = 1; i <= 20; i++) {
-    const yearLabel = i === 1 ? 'год' : i >= 2 && i <= 4 ? 'года' : 'лет'
-    options.push({ value: String(i), label: `${i} ${yearLabel}` })
-  }
-  
-  options.push({ value: '20+', label: 'Более 20 лет' })
-  
-  return options
-})
+// Опции для опыта (согласно backend валидации)
+const experienceOptions = computed(() => [
+  { value: '', label: 'Выберите опыт' },
+  { value: '3260137', label: 'Без опыта' },
+  { value: '3260142', label: '1-2 года' },
+  { value: '3260146', label: '3-5 лет' },
+  { value: '3260149', label: '6-10 лет' },
+  { value: '3260152', label: 'Более 10 лет' }
+])
 
 watch(() => props.experience, val => { 
   localExperience.value = val 
@@ -52,16 +43,7 @@ const emitExperience = () => {
 </script>
 
 <style scoped>
-.experience-section { 
-  background: white; 
-  border-radius: 8px; 
-  padding: 20px; 
-}
-
-.form-group-title { 
-  font-size: 18px; 
-  font-weight: 600; 
-  color: #333; 
-  margin-bottom: 16px; 
+.experience-section {
+  /* Убираем лишние стили, теперь это подсекция */
 }
 </style>

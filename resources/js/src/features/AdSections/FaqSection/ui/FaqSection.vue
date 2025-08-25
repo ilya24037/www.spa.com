@@ -2,8 +2,8 @@
   <div class="faq-section">
     <div class="faq-header">
       <h2 class="faq-title">
-        FAQ (Часто задаваемые вопросы)
-        <span class="faq-icon">❓</span>
+        Особенности мастера
+        <span class="faq-icon">⭐</span>
       </h2>
     </div>
     

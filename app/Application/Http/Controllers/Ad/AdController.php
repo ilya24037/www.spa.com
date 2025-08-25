@@ -164,12 +164,48 @@ class AdController extends Controller
      */
     public function update(UpdateAdRequest $request, Ad $ad): RedirectResponse
     {
+        \Log::info('🟢 AdController::update НАЧАЛО', [
+            'ad_id' => $ad->id,
+            'ad_status' => $ad->status,
+            'request_data_keys' => array_keys($request->validated()),
+            'service_provider' => $request->input('service_provider'),
+            'clients' => $request->input('clients'),
+            'user_id' => auth()->id()
+        ]);
+        
         $this->authorize('update', $ad);
+        \Log::info('🟢 AdController::update авторизация пройдена');
 
-        $this->adService->update($ad, $request->validated());
+        $updatedAd = $this->adService->update($ad, $request->validated());
+        
+        \Log::info('🟢 AdController::update обновление завершено', [
+            'ad_id' => $updatedAd->id,
+            'ad_status' => $updatedAd->status,
+            'is_paid' => $updatedAd->is_paid,
+            'expires_at' => $updatedAd->expires_at,
+            'is_active' => $updatedAd->isActive(),
+            'status_enum_value' => $updatedAd->status->value ?? 'null'
+        ]);
 
+        // Для активных объявлений перенаправляем на страницу активных
+        // ВРЕМЕННО: проверяем только статус, не is_paid
+        if ($updatedAd->status === \App\Domain\Ad\Enums\AdStatus::ACTIVE) {
+            \Log::info('🟢 AdController::update АКТИВНОЕ объявление - перенаправляем на /profile/items/active/all', [
+                'ad_id' => $updatedAd->id,
+                'redirect_to' => '/profile/items/active/all'
+            ]);
+            return redirect()
+                ->to('/profile/items/active/all')
+                ->with('success', 'Изменения сохранены!');
+        }
+        
+        // Для остальных объявлений переходим к просмотру
+        \Log::info('🟢 AdController::update НЕ АКТИВНОЕ объявление - перенаправляем на ads.show', [
+            'ad_id' => $updatedAd->id,
+            'redirect_route' => 'ads.show'
+        ]);
         return redirect()
-            ->route('ads.show', $ad)
+            ->route('ads.show', $updatedAd)
             ->with('success', 'Объявление успешно обновлено');
     }
 

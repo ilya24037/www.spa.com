@@ -11,20 +11,21 @@
       role="region"
       aria-label="Загрузка и управление фотографиями"
     >
-    <div class="flex justify-between items-center">
-      <h3 class="text-lg font-medium">Фотографии</h3>
-      <span class="text-sm text-gray-500">
-        {{ safePhotosCount }} из {{ maxFiles }}
-      </span>
-    </div>
 
-    <UploadZone 
+
+    <!-- Если нет фото - показываем основную зону -->
+    <PhotoUploadZone
+      v-if="safePhotosCount === 0"
       ref="uploadZone"
-      :has-content="safePhotosCount > 0"
+      :max-size="maxSize"
+      :accepted-formats="acceptedFormats"
       @files-selected="handleFilesSelected"
-    >
-      <!-- Контент когда есть фото -->
-      <div v-if="safePhotosCount > 0" class="space-y-3">
+    />
+    
+    <!-- Если есть фото - показываем сетку + доп зону -->
+    <div v-else class="space-y-3">
+      <!-- Обертка для сетки фото -->
+      <div class="border-2 border-dashed border-gray-300 rounded-lg pt-4 px-4 pb-2">
         <!-- Сетка фотографий -->
         <PhotoGrid
           :photos="safePhotos"
@@ -38,19 +39,17 @@
           @drop="onDragDrop"
           @dragend="onDragEnd"
         />
-        
-        <!-- Кнопка добавить еще -->
-        <div v-if="safePhotosCount < maxFiles" class="text-center">
-          <button 
-            type="button"
-            @click="uploadZone?.openFileDialog()"
-            class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-          >
-            Добавить ещё фото
-          </button>
-        </div>
       </div>
-    </UploadZone>
+      
+      <!-- Дополнительная зона загрузки (как у видео) -->
+      <PhotoUploadZone
+        v-if="safePhotosCount < props.maxFiles"
+        ref="additionalUploadZone"
+        :max-size="maxSize"
+        :accepted-formats="acceptedFormats"
+        @files-selected="handleFilesSelected"
+      />
+    </div>
     
     <!-- Информация об ограничениях -->
     <div class="text-xs text-gray-500 space-y-1">
@@ -73,6 +72,7 @@
 import { ref, watch, computed, onMounted } from 'vue'
 import { usePhotoUpload } from '../composables/usePhotoUpload'
 import UploadZone from './components/UploadZone.vue'
+import PhotoUploadZone from './components/PhotoUploadZone.vue'
 import PhotoGrid from './components/PhotoGrid.vue'
 
 import PhotoUploadSkeleton from './components/PhotoUploadSkeleton.vue'
@@ -86,9 +86,14 @@ const props = withDefaults(defineProps<PhotoUploadProps>(), {
   isLoading: false
 })
 
+// Константы для PhotoUploadZone
+const maxSize = 5 * 1024 * 1024 // 5MB
+const acceptedFormats = ['image/jpeg', 'image/png', 'image/webp']
+
 const emit = defineEmits<PhotoUploadEmits>()
 
-const uploadZone = ref<InstanceType<typeof UploadZone>>()
+const uploadZone = ref<InstanceType<typeof PhotoUploadZone>>()
+const additionalUploadZone = ref<InstanceType<typeof PhotoUploadZone>>()
 
 
 
@@ -196,5 +201,18 @@ const onDragEnd = () => {
   handleDragEnd()
 }
 
+// Метод для открытия диалога выбора файлов
+const openFileDialog = () => {
+  if (safePhotosCount.value === 0) {
+    // Основная зона
+    uploadZone.value?.openFileDialog()
+  } else {
+    // Дополнительная зона
+    additionalUploadZone.value?.openFileDialog()
+  }
+}
 
+defineExpose({
+  openFileDialog
+})
 </script>

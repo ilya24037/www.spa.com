@@ -3,13 +3,25 @@
     <!-- Сетка видео как у фотографий -->
     <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
       <TransitionGroup name="list">
-        <VideoItem
+        <div
           v-for="(video, index) in safeVideos"
           :key="video.id"
-          :video="video"
-          :index="index"
-          @remove="handleRemove(video.id)"
-        />
+          class="video-item-wrapper relative"
+        >
+          <!-- Компонент видео -->
+          <VideoItem
+            :video="video"
+            :index="index"
+            @remove="handleRemove(video.id)"
+          />
+
+          <!-- Индикатор главного видео -->
+          <div v-if="index === 0" class="mt-2 text-center">
+            <span class="bg-green-500 text-white text-xs px-2 py-1 rounded font-medium shadow-sm">
+              Главное видео
+            </span>
+          </div>
+        </div>
       </TransitionGroup>
     </div>
     

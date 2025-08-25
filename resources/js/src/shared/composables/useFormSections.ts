@@ -24,6 +24,28 @@ export function useFormSections(sections: SectionConfig[], formData: any) {
   const checkInitialSectionFilled = (section: SectionConfig): boolean => {
     const sectionKey = section.key
     
+    // Специальная логика для параметров (объект parameters)
+    if (sectionKey === 'parameters') {
+      const params = formData.parameters
+      if (params && typeof params === 'object') {
+        // Проверяем хотя бы одно заполненное поле
+        return !!(params.title || params.age || params.height || params.weight ||
+                  params.breast_size || params.hair_color || params.eye_color || params.nationality)
+      }
+      return false
+    }
+    
+    // Специальная логика для контактов (объект contacts)
+    if (sectionKey === 'contacts') {
+      const contacts = formData.contacts
+      if (contacts && typeof contacts === 'object') {
+        // Проверяем хотя бы одно заполненное поле
+        return !!(contacts.phone || contacts.whatsapp || contacts.telegram || 
+                  (contacts.contact_method && contacts.contact_method !== 'any'))
+      }
+      return false
+    }
+    
     // Специальная логика для услуг и комфорта (они используют общие данные)
     if (sectionKey === 'services' || sectionKey === 'comfort') {
       const services = formData.services
@@ -103,6 +125,26 @@ export function useFormSections(sections: SectionConfig[], formData: any) {
     const section = sections.find(s => s.key === sectionKey)
     if (!section) return false
 
+    // Специальная логика для параметров (объект parameters)
+    if (sectionKey === 'parameters') {
+      const params = formData.parameters
+      if (params && typeof params === 'object') {
+        // Проверяем основные поля
+        return !!(params.title && params.age && params.height)
+      }
+      return false
+    }
+
+    // Специальная логика для контактов (объект contacts)
+    if (sectionKey === 'contacts') {
+      const contacts = formData.contacts
+      if (contacts && typeof contacts === 'object') {
+        // Проверяем обязательное поле телефон
+        return !!contacts.phone
+      }
+      return false
+    }
+
     // Специальная логика для услуг
     if (sectionKey === 'services') {
       const services = formData.services
@@ -144,6 +186,36 @@ export function useFormSections(sections: SectionConfig[], formData: any) {
   const getFilledCount = (sectionKey: string): number => {
     const section = sections.find(s => s.key === sectionKey)
     if (!section) return 0
+
+    // Специальная логика для параметров (объект parameters)
+    if (sectionKey === 'parameters') {
+      let count = 0
+      const params = formData.parameters
+      if (params && typeof params === 'object') {
+        if (params.title) count++
+        if (params.age) count++
+        if (params.height) count++
+        if (params.weight) count++
+        if (params.breast_size) count++
+        if (params.hair_color) count++
+        if (params.eye_color) count++
+        if (params.nationality) count++
+      }
+      return count
+    }
+
+    // Специальная логика для контактов (объект contacts)
+    if (sectionKey === 'contacts') {
+      let count = 0
+      const contacts = formData.contacts
+      if (contacts && typeof contacts === 'object') {
+        if (contacts.phone) count++
+        if (contacts.whatsapp) count++
+        if (contacts.telegram) count++
+        if (contacts.contact_method && contacts.contact_method !== 'any') count++
+      }
+      return count
+    }
 
     // Специальная логика для услуг
     if (sectionKey === 'services') {

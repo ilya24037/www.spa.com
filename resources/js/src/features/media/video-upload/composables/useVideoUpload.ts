@@ -63,14 +63,24 @@ export function useVideoUpload() {
       const reader = new FileReader()
       
       reader.onload = (e) => {
+        const dataUrl = e.target?.result as string
         const video: Video = {
           id: Date.now(),
           file: file,
-          thumbnail: e.target?.result as string,
+          url: dataUrl,           // Для воспроизведения
+          thumbnail: dataUrl,     // Для превью
           format: file.type,
           size: file.size,
           isUploading: false
         }
+        
+        console.log('🎥 processVideo: Создано видео:', {
+          id: video.id,
+          hasUrl: !!video.url,
+          hasThumbnail: !!video.thumbnail,
+          format: video.format,
+          size: video.size
+        })
         
         isUploading.value = false
         resolve(video)
@@ -87,18 +97,38 @@ export function useVideoUpload() {
   }
 
   const addVideos = async (files: File[]) => {
+    console.log('🎥 addVideos: Начало обработки файлов:', {
+      filesCount: files.length,
+      currentVideosCount: localVideos.value.length
+    })
+    
     const newVideos: Video[] = []
     
     for (const file of files) {
       try {
+        console.log('🎥 addVideos: Обрабатываем файл:', {
+          name: file.name,
+          type: file.type,
+          size: file.size
+        })
+        
         const video = await processVideo(file)
         newVideos.push(video)
+        
+        console.log('🎥 addVideos: Видео успешно обработано:', video.id)
       } catch (err) {
-        console.error('Error adding video:', err)
+        console.error('🎥 addVideos: Ошибка обработки видео:', err)
       }
     }
     
+    const oldLength = localVideos.value.length
     localVideos.value = [...localVideos.value, ...newVideos]
+    
+    console.log('🎥 addVideos: Завершено:', {
+      newVideosAdded: newVideos.length,
+      totalVideosBefore: oldLength,
+      totalVideosAfter: localVideos.value.length
+    })
   }
 
   const addVideo = async (file: File) => {
@@ -193,11 +223,27 @@ export function useVideoUpload() {
   }
 
   const initializeFromProps = (videos: Video[] | any[]) => {
+    console.log('🎬 useVideoUpload: initializeFromProps вызван с:', {
+      videos,
+      videosType: typeof videos,
+      isArray: Array.isArray(videos),
+      length: videos?.length,
+      localVideosLength: localVideos.value.length
+    })
+    
     if (localVideos.value.length === 0 && videos && videos.length > 0) {
       localVideos.value = videos.map((video, index) => {
+        console.log(`🎬 useVideoUpload: Обрабатываем видео ${index}:`, {
+          video,
+          videoType: typeof video,
+          isString: typeof video === 'string',
+          hasUrl: video?.url,
+          hasId: video?.id
+        })
+        
         // Если это строка (URL) - преобразуем в объект Video
         if (typeof video === 'string') {
-          return {
+          const convertedVideo = {
             id: `video-${index}-${Date.now()}`,
             url: video,
             file: null,
@@ -208,18 +254,25 @@ export function useVideoUpload() {
             uploadProgress: 0,
             error: null
           }
+          console.log(`🎬 useVideoUpload: Преобразовали строку в объект:`, convertedVideo)
+          return convertedVideo
         }
         
         // Если объект, но без ID - добавляем ID
         if (typeof video === 'object' && !video.id) {
-          return {
+          const videoWithId = {
             ...video,
             id: `video-${index}-${Date.now()}`
           }
+          console.log(`🎬 useVideoUpload: Добавили ID к объекту:`, videoWithId)
+          return videoWithId
         }
         
+        console.log(`🎬 useVideoUpload: Используем видео как есть:`, video)
         return video
       })
+      
+      console.log('🎬 useVideoUpload: Финальный localVideos:', localVideos.value)
     }
   }
 

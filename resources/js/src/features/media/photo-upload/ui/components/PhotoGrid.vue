@@ -27,12 +27,6 @@
         @drop.prevent="!isMobile && handleDragDrop(index, $event)"
         @dragend="!isMobile && handleDragEnd($event)"
       >
-        <!-- Метка главного фото -->
-        <div v-if="index === 0" class="absolute -top-2 left-0 right-0 z-10">
-          <span class="bg-green-500 text-white text-xs px-2 py-1 rounded">
-            Главное фото
-          </span>
-        </div>
 
         <!-- Компонент фото -->
         <PhotoItem
@@ -42,6 +36,13 @@
           @rotate="$emit('rotate', index)"
           @remove="$emit('remove', index)"
         />
+
+        <!-- Индикатор главного фото -->
+        <div v-if="index === 0" class="mt-1 text-center">
+          <span class="bg-green-500 text-white text-xs px-2 py-1 rounded font-medium shadow-sm">
+            Главное фото
+          </span>
+        </div>
 
         <!-- Кнопки для мобильных -->
         <div v-if="isMobile && photos.length > 1" class="mobile-controls absolute bottom-2 left-2 right-2 flex justify-between gap-1">

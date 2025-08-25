@@ -316,6 +316,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/draft', [DraftController::class, 'store'])->name('ads.draft');
     Route::get('/draft/{ad}', [DraftController::class, 'show'])->name('ads.draft.show');
     Route::put('/draft/{ad}', [DraftController::class, 'update'])->name('ads.draft.update');
+    Route::post('/draft/{ad}/publish', [DraftController::class, 'publish'])->name('ads.draft.publish');
     Route::delete('/draft/{ad}', [DraftController::class, 'destroy'])->name('ads.draft.destroy');
     
     // Управление статусом объявлений

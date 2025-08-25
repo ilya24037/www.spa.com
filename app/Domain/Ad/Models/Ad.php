@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Основная модель объявления
@@ -371,5 +372,44 @@ class Ad extends Model
     public function scopeArchived($query)
     {
         return $query->where('status', AdStatus::ARCHIVED);
+    }
+    
+    /**
+     * Boot метод для добавления событий модели
+     */
+    protected static function boot()
+    {
+        parent::boot();
+        
+        // Логируем изменения важных полей
+        static::updating(function ($ad) {
+            $watchedFields = ['service_provider', 'clients'];
+            $changes = [];
+            
+            foreach ($watchedFields as $field) {
+                if ($ad->isDirty($field)) {
+                    $changes[$field] = [
+                        'old' => $ad->getOriginal($field),
+                        'new' => $ad->getAttribute($field)
+                    ];
+                }
+            }
+            
+            if (!empty($changes)) {
+                Log::info('🟢 Ad Model: Изменения важных полей', [
+                    'ad_id' => $ad->id,
+                    'changes' => $changes
+                ]);
+            }
+        });
+        
+        // Логируем результат после обновления
+        static::updated(function ($ad) {
+            Log::info('🟢 Ad Model: Объявление обновлено в БД', [
+                'ad_id' => $ad->id,
+                'service_provider' => $ad->service_provider,
+                'clients' => $ad->clients
+            ]);
+        });
     }
 }

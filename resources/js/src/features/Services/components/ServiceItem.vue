@@ -117,17 +117,7 @@
             :class="{ 'right-7': serviceData.price && serviceData.price > 0 }"
           >₽</span>
           <!-- Кнопка сброса -->
-          <button 
-            v-if="serviceData.price && serviceData.price > 0"
-            @click="resetPrice"
-            type="button"
-            class="absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center text-gray-400 hover:text-red-600 rounded transition-all"
-            title="Сбросить"
-          >
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path d="M9 3L3 9M3 3l6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-          </button>
+
         </div>
       </div>
     </td>
@@ -164,17 +154,7 @@
               :maxlength="100"
             >
             <!-- Кнопка сброса комментария -->
-            <button 
-              v-if="serviceData.comment"
-              @click="resetComment"
-              type="button"
-              class="absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center text-gray-400 hover:text-red-600 rounded transition-all"
-              title="Сбросить комментарий"
-            >
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d="M9 3L3 9M3 3l6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-              </svg>
-            </button>
+
           </div>
           <button 
             @click="hideComment"

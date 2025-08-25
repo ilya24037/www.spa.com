@@ -1,44 +1,40 @@
 <template>
   <div class="video-item relative group bg-white rounded-lg border overflow-hidden">
     <!-- Превью видео -->
-    <div class="aspect-square bg-gray-100 relative">
+    <div class="aspect-square bg-gray-100 relative flex items-center justify-center">
       <!-- Для сохраненного видео показываем мини-плеер -->
       <video 
         v-if="safeVideo.url !== null && safeVideo.url !== undefined && safeVideo.url !== ''" 
         :src="safeVideo.url"
-        class="w-full h-full object-cover"
+        class="w-full h-full object-contain"
+        controls
         muted
         preload="metadata"
         playsinline
         disablepictureinpicture
-        crossorigin="anonymous"
-        fetchpriority="auto"
         :title="`Видео ${index + 1}`"
-        @click="togglePlay"
+        @error="handleVideoError"
+        @loadedmetadata="handleVideoLoaded"
       />
       <!-- Для загружаемого видео показываем превью -->
       <img 
         v-else-if="safeVideo.thumbnail !== null && safeVideo.thumbnail !== undefined && safeVideo.thumbnail !== ''" 
         :src="safeVideo.thumbnail" 
         :alt="`Видео ${index + 1}`"
-        class="w-full h-full object-cover"
+        class="w-full h-full object-contain"
       />
       <!-- Заглушка когда нет ни url ни thumbnail -->
       <div v-else class="w-full h-full flex items-center justify-center">
-        <svg class="w-12 h-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-        </svg>
-      </div>
-
-      <!-- Иконка воспроизведения -->
-      <div v-if="safeVideo.url" class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
-        <div class="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center">
-          <svg class="w-6 h-6 text-gray-700 ml-1" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M8 5v14l11-7z"/>
+        <div class="text-center">
+          <svg class="w-12 h-12 text-gray-400 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
           </svg>
+          <p class="text-xs text-gray-500">Видео недоступно</p>
         </div>
       </div>
+
+
       
       <!-- Кнопка удаления -->
       <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -66,23 +62,7 @@
       </div>
     </div>
     
-    <!-- Информация внизу -->
-    <div class="p-2 space-y-1">
-      <p class="text-xs font-medium text-gray-900 truncate">
-        {{ getVideoDisplayName() }}
-      </p>
-      <div class="flex items-center justify-between text-xs text-gray-500">
-        <span>{{ formatSize(safeVideo.size) }}</span>
-        <span v-if="safeVideo.duration !== null && safeVideo.duration !== undefined && safeVideo.duration > 0">
-          {{ formatDuration(safeVideo.duration) }}
-        </span>
-      </div>
-      
-      <!-- Ошибка -->
-      <p v-if="safeVideo.error !== null && safeVideo.error !== undefined && safeVideo.error !== ''" class="text-xs text-red-600">
-        {{ safeVideo.error }}
-      </p>
-    </div>
+
   </div>
 </template>
 
@@ -147,13 +127,28 @@ const getVideoDisplayName = (): string => {
   return `Видео ${props.index + 1}`
 }
 
-// Функция воспроизведения видео
-const togglePlay = (event: Event) => {
+
+
+// Обработка ошибок загрузки видео
+const handleVideoError = (event: Event) => {
   const video = event.target as HTMLVideoElement
-  if (video.paused) {
-    video.play()
-  } else {
-    video.pause()
-  }
+  const error = video.error
+  
+  console.warn('Ошибка загрузки видео:', {
+    url: safeVideo.value.url,
+    error: error?.message || 'Неизвестная ошибка',
+    code: error?.code
+  })
+}
+
+// Обработка успешной загрузки метаданных
+const handleVideoLoaded = (event: Event) => {
+  const video = event.target as HTMLVideoElement
+  console.log('Видео успешно загружено:', {
+    url: safeVideo.value.url,
+    duration: video.duration,
+    videoWidth: video.videoWidth,
+    videoHeight: video.videoHeight
+  })
 }
 </script>

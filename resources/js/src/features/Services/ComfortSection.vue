@@ -1,36 +1,44 @@
 <template>
   <div class="comfort-module">
-    <div class="comfort-categories space-y-4">
-      <ServiceCategory
-        v-for="category in comfortCategories"
-        :key="category.id"
-        :category="category"
-        v-model="servicesData[category.id]"
-        @update:modelValue="updateCategory(category.id, $event)"
-        :is-subcategory="false"
-      />
-    </div>
-    
-    <div class="services-stats mt-6 p-4 bg-gray-50 rounded-lg">
-      <div class="flex items-center justify-between">
-        <span class="text-sm text-gray-700">
-          Выбрано удобств: <strong>{{ totalSelectedComfort }}</strong>
-        </span>
-        <button
-          v-if="totalSelectedComfort > 0"
-          @click="clearAllComfort"
-          type="button"
-          class="px-3 py-1 text-sm text-red-600 hover:text-red-800 transition-colors"
-        >
-          Очистить все
-        </button>
+    <!-- Комфорт как свернутая категория (как Дополнительные услуги) -->
+    <div v-if="comfortCategories.length > 0" class="service-category">
+      <div class="border border-gray-200 rounded-lg px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors duration-200 mb-3 cursor-pointer select-none" @click="toggleComfortServices">
+        <div class="flex items-center justify-between">
+          <h3 class="text-base font-semibold text-gray-900 flex items-center">
+            Комфорт
+            <span v-if="totalSelectedComfort > 0" class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded-full">
+              {{ totalSelectedComfort }}
+            </span>
+          </h3>
+          <svg 
+            class="w-5 h-5 text-gray-500 transition-transform duration-200" 
+            :class="{ 'rotate-180': isComfortExpanded }"
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </div>
+      
+      <div v-show="isComfortExpanded" class="mt-4 space-y-4 pl-6">
+        <ServiceCategory
+          v-for="category in comfortCategories"
+          :key="category.id"
+          :category="category"
+          v-model="servicesData[category.id]"
+          @update:modelValue="updateCategory(category.id, $event)"
+          :is-subcategory="true"
+        />
       </div>
     </div>
+
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import ServiceCategory from './components/ServiceCategory.vue'
 import servicesConfig from './config/services.json'
 
@@ -67,6 +75,14 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue'])
+
+// Состояние раскрытия секции Комфорт (свернуто по умолчанию)
+const isComfortExpanded = ref(false)
+
+// Функция переключения секции Комфорт
+const toggleComfortServices = () => {
+  isComfortExpanded.value = !isComfortExpanded.value
+}
 
 // Получаем только категории удобств (с флагом is_amenity: true)
 const allCategories = servicesConfig.categories as Category[]
