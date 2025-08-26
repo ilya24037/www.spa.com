@@ -326,7 +326,10 @@
       "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\" artisan serve --port=8000)",
       "Bash(\"C:\\Users\\user1\\.config\\herd\\bin\\php.bat\":*)",
       "Bash(C:Usersuser1.configherdbinphp.bat C:www.spa.comtest-edit-route.php)",
-      "Bash(C:Usersuser1.configherdbinphp.bat C:www.spa.comtest-photo-fix.php)"
+      "Bash(C:Usersuser1.configherdbinphp.bat C:www.spa.comtest-photo-fix.php)",
+      "Bash(where claude)",
+      "Read(/C:\\РАБОЧАЯ\\Sites\\Сайт досуг\\Проверочное фото/**)",
+      "Read(/C:\\РАБОЧАЯ\\Sites\\Сайт досуг\\Проверочное фото/**)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

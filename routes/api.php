@@ -7,6 +7,7 @@ use App\Application\Http\Controllers\Booking\BookingController;
 use App\Application\Http\Controllers\SearchController;
 use App\Application\Http\Controllers\MasterController;
 use App\Application\Http\Controllers\FavoriteController;
+use App\Application\Http\Controllers\Api\ReviewController;
 
 Route::middleware('api')->group(function () {
     // Тестовый маршрут
@@ -61,6 +62,15 @@ Route::middleware('api')->group(function () {
             Route::delete('/all', [\App\Application\Http\Controllers\User\FavoritesController::class, 'destroyAll']); // Очистить все
             Route::delete('/type/{type}', [\App\Application\Http\Controllers\User\FavoritesController::class, 'destroyByType']); // Очистить по типу
             Route::get('/export', [\App\Application\Http\Controllers\User\FavoritesController::class, 'export']); // Экспорт
+        });
+        
+        // =================== ОТЗЫВЫ ===================
+        Route::prefix('reviews')->group(function () {
+            Route::get('/', [ReviewController::class, 'index']); // Список отзывов
+            Route::get('/{review}', [ReviewController::class, 'show']); // Просмотр отзыва
+            Route::post('/', [ReviewController::class, 'store']); // Создать отзыв
+            Route::put('/{review}', [ReviewController::class, 'update']); // Обновить отзыв
+            Route::delete('/{review}', [ReviewController::class, 'destroy']); // Удалить отзыв
         });
     });
 
@@ -124,5 +134,14 @@ Route::middleware('api')->group(function () {
         Route::post('/favorites/toggle', [FavoriteController::class, 'toggle']);
         Route::get('/bookings/available-slots', [BookingController::class, 'availableSlots']);
         Route::get('/search/statistics', [SearchController::class, 'statistics'])->middleware('can:viewSearchStatistics');
+        
+        // =================== ВЕРИФИКАЦИЯ ОБЪЯВЛЕНИЙ ===================
+        Route::prefix('ads/{ad}/verification')->group(function () {
+            Route::post('/photo', [\App\Application\Http\Controllers\Api\AdVerificationController::class, 'uploadPhoto']);
+            Route::post('/video', [\App\Application\Http\Controllers\Api\AdVerificationController::class, 'uploadVideo']);
+            Route::get('/status', [\App\Application\Http\Controllers\Api\AdVerificationController::class, 'getStatus']);
+            Route::delete('/photo', [\App\Application\Http\Controllers\Api\AdVerificationController::class, 'deletePhoto']);
+        });
+        Route::get('/verification/instructions', [\App\Application\Http\Controllers\Api\AdVerificationController::class, 'getInstructions']);
     });
 }); 

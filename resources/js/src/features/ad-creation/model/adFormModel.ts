@@ -98,6 +98,13 @@ export interface AdFormData {
     telegram: string
   }
   faq?: Record<string, any> // FAQ ответы
+  
+  // Поля верификации
+  verification_photo: string | null
+  verification_video: string | null
+  verification_status: string
+  verification_comment: string | null
+  verification_expires_at: string | null
 }
 
 // Композабл для управления формой
@@ -323,7 +330,14 @@ export function useAdFormModel(props: any, emit: any) {
         return props.initialData.faq
       }
       return {}
-    })()
+    })(),
+    
+    // Поля верификации
+    verification_photo: props.initialData?.verification_photo || null,
+    verification_video: props.initialData?.verification_video || null,
+    verification_status: props.initialData?.verification_status || 'none',
+    verification_comment: props.initialData?.verification_comment || null,
+    verification_expires_at: props.initialData?.verification_expires_at || null
   })
 
   // Ошибки валидации

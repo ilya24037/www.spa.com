@@ -1,289 +1,133 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domain\Review\Services;
 
-use App\Domain\Review\Models\Review;
-use App\Domain\Review\Models\ReviewReply;
-use App\Domain\User\Models\User;
-use App\Domain\Review\Repositories\ReviewRepository;
 use App\Domain\Review\DTOs\CreateReviewDTO;
 use App\Domain\Review\DTOs\UpdateReviewDTO;
-use App\Infrastructure\Notification\NotificationService;
-use App\Enums\NotificationType;
-use Illuminate\Support\Facades\Log;
+use App\Domain\Review\Models\Review;
+use App\Domain\Review\Repositories\ReviewRepositoryNew as ReviewRepository;
+use App\Domain\User\Models\User;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Collection;
 
-/**
- * Упрощенный сервис для работы с отзывами
- * Делегирует сложную логику специализированным обработчикам
- */
-class ReviewService
+final class ReviewService
 {
     public function __construct(
-        private ReviewRepository $repository,
-        private NotificationService $notificationService,
-        private ReviewModerationHandler $moderationHandler,
-        private ReviewInteractionHandler $interactionHandler,
-        private ReviewQueryHandler $queryHandler,
-        private ReviewValidationHandler $validationHandler
+        private readonly ReviewRepository $repository
     ) {}
 
     /**
-     * Создать отзыв
+     * Получить список отзывов для пользователя
+     */
+    public function getUserReviews(int $userId, int $perPage = 10): LengthAwarePaginator
+    {
+        return $this->repository->getUserReviews($userId, $perPage);
+    }
+
+    /**
+     * Получить отзыв по ID
+     */
+    public function getById(int $id): ?Review
+    {
+        return $this->repository->findById($id);
+    }
+
+    /**
+     * Создать новый отзыв
      */
     public function create(CreateReviewDTO $dto): Review
     {
-        // Валидация через специализированный обработчик
-        $errors = $this->validationHandler->validateCreateData($dto);
-        if (!empty($errors)) {
-            throw new \InvalidArgumentException('Validation failed: ' . implode(', ', $errors));
+        // Проверка, что пользователь не оставляет отзыв самому себе
+        if ($dto->userId === $dto->reviewableUserId) {
+            throw new \InvalidArgumentException('Нельзя оставить отзыв самому себе');
         }
 
-        try {
-            DB::beginTransaction();
+        // Проверка на дублирование отзыва
+        $existingReview = $this->repository->findByUserAndReviewable(
+            $dto->userId,
+            $dto->reviewableUserId,
+            $dto->adId
+        );
 
-            // Создаем отзыв
-            $review = $this->repository->create([
-                'user_id' => $dto->userId,
-                'reviewable_type' => $dto->reviewableType,
-                'reviewable_id' => $dto->reviewableId,
-                'booking_id' => $dto->bookingId,
-                'type' => $dto->type,
-                'status' => $this->validationHandler->determineInitialStatus($dto),
-                'rating' => $dto->rating,
-                'title' => $dto->title,
-                'comment' => $dto->comment,
-                'pros' => $dto->pros,
-                'cons' => $dto->cons,
-                'photos' => $dto->photos,
-                'is_anonymous' => $dto->isAnonymous,
-                'is_verified' => $this->validationHandler->isVerifiedPurchase($dto),
-                'is_recommended' => $dto->isRecommended,
-                'metadata' => $dto->metadata,
-            ]);
+        if ($existingReview) {
+            throw new \InvalidArgumentException('Вы уже оставляли отзыв этому пользователю');
+        }
 
-            DB::commit();
-
-            // Отправляем уведомления
-            $this->sendCreateNotifications($review);
-
-            Log::info('Review created', [
-                'review_id' => $review->id,
-                'user_id' => $dto->userId,
-                'reviewable_type' => $dto->reviewableType,
-                'reviewable_id' => $dto->reviewableId,
-            ]);
-
-            return $review;
-
-        } catch (\Exception $e) {
-            DB::rollBack();
+        return DB::transaction(function () use ($dto) {
+            $review = $this->repository->create($dto->toArray());
             
-            Log::error('Failed to create review', [
-                'error' => $e->getMessage(),
-                'user_id' => $dto->userId,
-            ]);
-
-            throw $e;
-        }
+            // Здесь можно добавить отправку уведомления
+            // $this->notificationService->notifyNewReview($review);
+            
+            return $review;
+        });
     }
 
     /**
      * Обновить отзыв
      */
-    public function update(int $reviewId, UpdateReviewDTO $dto, int $userId): Review
+    public function update(int $id, UpdateReviewDTO $dto, User $user): Review
     {
-        $review = $this->repository->findOrFail($reviewId);
-
-        // Валидация через специализированный обработчик
-        $errors = $this->validationHandler->validateUpdateData($review, $userId);
-        if (!empty($errors)) {
-            throw new \InvalidArgumentException('Validation failed: ' . implode(', ', $errors));
+        $review = $this->repository->findById($id);
+        
+        if (!$review) {
+            throw new \InvalidArgumentException('Отзыв не найден');
         }
 
-        $updateData = array_filter([
-            'title' => $dto->title,
-            'comment' => $dto->comment,
-            'pros' => $dto->pros,
-            'cons' => $dto->cons,
-            'rating' => $dto->rating,
-            'is_anonymous' => $dto->isAnonymous,
-            'is_recommended' => $dto->isRecommended,
-            'photos' => $dto->photos,
-            'metadata' => $dto->metadata,
-            'status' => \App\Enums\ReviewStatus::PENDING, // Переводим на повторную модерацию
-        ], fn($value) => $value !== null);
+        // Проверка прав на редактирование (только автор или админ)
+        if (!$review->isAuthor($user) && !$user->isAdmin()) {
+            throw new \InvalidArgumentException('Недостаточно прав для редактирования');
+        }
 
-        $this->repository->update($reviewId, $updateData);
-
-        Log::info('Review updated', [
-            'review_id' => $reviewId,
-            'user_id' => $userId,
-        ]);
-
-        return $this->repository->findOrFail($reviewId);
+        return $this->repository->update($id, $dto->toArray());
     }
 
     /**
      * Удалить отзыв
      */
-    public function delete(int $reviewId, int $userId): bool
+    public function delete(int $id, User $user): bool
     {
-        $review = $this->repository->findOrFail($reviewId);
-
-        // Проверяем права
-        if ($review->user_id !== $userId) {
-            throw new \UnauthorizedHttpException('You can only delete your own reviews');
+        $review = $this->repository->findById($id);
+        
+        if (!$review) {
+            throw new \InvalidArgumentException('Отзыв не найден');
         }
 
-        $result = $this->repository->delete($reviewId);
-
-        if ($result) {
-            Log::info('Review deleted', [
-                'review_id' => $reviewId,
-                'user_id' => $userId,
-            ]);
+        // Проверка прав на удаление (только автор или админ)
+        if (!$review->isAuthor($user) && !$user->isAdmin()) {
+            throw new \InvalidArgumentException('Недостаточно прав для удаления');
         }
 
-        return $result;
-    }
-
-    // ============ ДЕЛЕГИРОВАНИЕ К ОБРАБОТЧИКАМ ============
-
-    /**
-     * Модерация - делегируем к ModerationHandler
-     */
-    public function approve(int $reviewId, User $moderator): Review
-    {
-        return $this->moderationHandler->approve($reviewId, $moderator);
-    }
-
-    public function reject(int $reviewId, User $moderator, ?string $reason = null): Review
-    {
-        return $this->moderationHandler->reject($reviewId, $moderator, $reason);
-    }
-
-    public function flag(int $reviewId, User $flagger, string $reason): Review
-    {
-        return $this->moderationHandler->flag($reviewId, $flagger, $reason);
-    }
-
-    public function batchApprove(array $ids, User $moderator): int
-    {
-        return $this->moderationHandler->batchApprove($ids, $moderator);
-    }
-
-    public function batchReject(array $ids, User $moderator, ?string $reason = null): int
-    {
-        return $this->moderationHandler->batchReject($ids, $moderator, $reason);
-    }
-
-    public function getPendingModeration(int $limit = 50): Collection
-    {
-        return $this->moderationHandler->getPendingModeration($limit);
-    }
-
-    public function getFlagged(int $limit = 50): Collection
-    {
-        return $this->moderationHandler->getFlagged($limit);
+        return $this->repository->delete($id);
     }
 
     /**
-     * Взаимодействия - делегируем к InteractionHandler
+     * Получить статистику отзывов пользователя
      */
-    public function reply(int $reviewId, int $userId, string $reply, bool $isOfficial = false): ReviewReply
+    public function getUserReviewStats(int $userId): array
     {
-        return $this->interactionHandler->reply($reviewId, $userId, $reply, $isOfficial);
-    }
-
-    public function markAsHelpful(int $reviewId, int $userId): void
-    {
-        $this->interactionHandler->markAsHelpful($reviewId, $userId);
-    }
-
-    public function markAsNotHelpful(int $reviewId, int $userId): void
-    {
-        $this->interactionHandler->markAsNotHelpful($reviewId, $userId);
-    }
-
-    /**
-     * Запросы - делегируем к QueryHandler
-     */
-    public function getForReviewable(string $type, int $id, array $filters = [], int $limit = 20): Collection
-    {
-        return $this->queryHandler->getForReviewable($type, $id, $filters, $limit);
-    }
-
-    public function getUserReviews(int $userId, int $limit = 20): Collection
-    {
-        return $this->queryHandler->getUserReviews($userId, $limit);
-    }
-
-    public function getReviewableStats(string $type, int $id): array
-    {
-        return $this->queryHandler->getReviewableStats($type, $id);
-    }
-
-    public function search(string $query, array $filters = [], int $limit = 20): Collection
-    {
-        return $this->queryHandler->search($query, $filters, $limit);
-    }
-
-    public function getPopular(int $days = 30, int $limit = 10): Collection
-    {
-        return $this->queryHandler->getPopular($days, $limit);
-    }
-
-    public function getStats(int $days = 30): array
-    {
-        return $this->queryHandler->getGeneralStats($days);
-    }
-
-    /**
-     * Очистка старых отзывов
-     */
-    public function cleanup(): array
-    {
-        $deletedOld = $this->repository->cleanupOld(365);
-
+        $reviews = $this->repository->getUserReviewsCollection($userId);
+        $avgRating = $reviews->avg('rating');
+        
         return [
-            'deleted_old' => $deletedOld,
+            'total_count' => $reviews->count(),
+            'average_rating' => $avgRating ? round($avgRating, 1) : 0.0,
+            'rating_distribution' => $this->getRatingDistribution($reviews),
         ];
     }
 
     /**
-     * Отправить уведомления о создании отзыва
+     * Получить распределение рейтингов
      */
-    private function sendCreateNotifications(Review $review): void
+    private function getRatingDistribution(Collection $reviews): array
     {
-        try {
-            // Уведомляем владельца объекта отзыва
-            if ($review->reviewable && method_exists($review->reviewable, 'getOwnerId')) {
-                $ownerId = $review->reviewable->getOwnerId();
-                
-                if ($ownerId && $ownerId !== $review->user_id) {
-                    $this->notificationService->create(
-                        \App\DTOs\Notification\CreateNotificationDTO::forUser(
-                            $ownerId,
-                            NotificationType::REVIEW_RECEIVED,
-                            'Новый отзыв',
-                            'Вы получили новый отзыв',
-                            [
-                                'review_id' => $review->id,
-                                'rating' => $review->rating?->value,
-                                'action_url' => route('reviews.show', $review->id),
-                            ]
-                        )
-                    );
-                }
-            }
-
-        } catch (\Exception $e) {
-            Log::error('Failed to send review notifications', [
-                'review_id' => $review->id,
-                'error' => $e->getMessage(),
-            ]);
+        $distribution = [];
+        for ($i = 1; $i <= 5; $i++) {
+            $distribution[$i] = $reviews->where('rating', $i)->count();
         }
+        return $distribution;
     }
 }

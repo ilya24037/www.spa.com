@@ -248,6 +248,19 @@
         </div>
       </CollapsibleSection>
 
+      <!-- Подтверждение фотографий -->
+      <VerificationSection
+        :ad-id="initialData?.id || 0"
+        :verification-photo="form.verification_photo"
+        :verification-video="form.verification_video"
+        :verification-status="form.verification_status"
+        :verification-comment="form.verification_comment"
+        :verification-expires-at="form.verification_expires_at"
+        @update:verification-photo="form.verification_photo = $event"
+        @update:verification-video="form.verification_video = $event"
+        @update:verification-status="form.verification_status = $event"
+      />
+
       <!-- География -->
       <CollapsibleSection
         title="География"
@@ -375,6 +388,9 @@ import WorkFormatSection from '@/src/features/AdSections/WorkFormatSection/ui/Wo
 import ExperienceSection from '@/src/features/AdSections/ExperienceSection/ui/ExperienceSection.vue'
 import ClientsSection from '@/src/features/AdSections/ClientsSection/ui/ClientsSection.vue'
 import PromoSection from '@/src/features/AdSections/PromoSection/ui/PromoSection.vue'
+
+// Импорт компонента верификации
+import VerificationSection from '@/src/features/verification-upload/ui/VerificationSection.vue'
 
 // Состояние активного блока навигации
 const currentActiveBlock = ref('basic')

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="./vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         testdox="true"
+         stopOnFailure="false"
+>
+    <testsuites>
+        <testsuite name="Review Unit Tests">
+            <directory suffix="Test.php">./tests/Unit/Domain/Review</directory>
+            <directory suffix="Test.php">./tests/Unit/Application/Http/Controllers/Api/ReviewControllerTest.php</directory>
+        </testsuite>
+        
+        <testsuite name="Review Feature Tests">
+            <directory suffix="Test.php">./tests/Feature/Review</directory>
+        </testsuite>
+        
+        <testsuite name="Review Integration Tests">
+            <directory suffix="Test.php">./tests/Integration/Review</directory>
+        </testsuite>
+    </testsuites>
+    
+    <coverage processUncoveredFiles="true">
+        <include>
+            <directory suffix=".php">./app/Domain/Review</directory>
+            <file>./app/Application/Http/Controllers/Api/ReviewController.php</file>
+            <directory suffix=".php">./app/Application/Http/Requests/StoreReviewRequest.php</directory>
+            <directory suffix=".php">./app/Application/Http/Requests/UpdateReviewRequest.php</directory>
+            <directory suffix=".php">./app/Application/Http/Resources/ReviewResource.php</directory>
+        </include>
+        <report>
+            <html outputDirectory="coverage/html"/>
+            <text outputFile="coverage/coverage.txt"/>
+            <clover outputFile="coverage/clover.xml"/>
+        </report>
+    </coverage>
+    
+    <php>
+        <env name="APP_ENV" value="testing"/>
+        <env name="BCRYPT_ROUNDS" value="4"/>
+        <env name="CACHE_DRIVER" value="array"/>
+        <env name="DB_CONNECTION" value="mysql"/>
+        <env name="DB_DATABASE" value="spa_test"/>
+        <env name="MAIL_MAILER" value="array"/>
+        <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="SESSION_DRIVER" value="array"/>
+        <env name="TELESCOPE_ENABLED" value="false"/>
+    </php>
+</phpunit>

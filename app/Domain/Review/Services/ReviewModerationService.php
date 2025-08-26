@@ -259,12 +259,4 @@ class ReviewModerationService
     {
         return $this->contentAnalyzer->isDuplicate($review);
     }
-
-    /**
-     * @deprecated Используйте checkUserReputation()
-     */
-    protected function checkUserReputation(User $user): array
-    {
-        return $this->reputationService->checkUserReputation($user);
-    }
 }

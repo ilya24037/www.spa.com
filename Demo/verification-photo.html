@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Предварительный просмотр - Секция Проверочное фото</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .verification-number {
+            @apply flex-shrink-0 w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-medium;
+        }
+        .instruction-block {
+            @apply bg-gray-100 p-3 rounded border-l-4 border-orange-500;
+        }
+        .warning-box {
+            @apply bg-orange-50 border border-orange-200 rounded-lg p-4;
+        }
+        .info-box {
+            @apply bg-yellow-50 border border-yellow-200 rounded-lg p-4;
+        }
+        .success-box {
+            @apply bg-green-50 border border-green-200 rounded-lg p-4;
+        }
+        .recommendation-box {
+            @apply bg-blue-50 border border-blue-200 rounded-lg p-4;
+        }
+        .upload-zone {
+            @apply border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-pointer;
+        }
+        .upload-zone.drag-over {
+            @apply border-blue-400 bg-blue-50;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Основной контейнер секции -->
+        <div class="bg-white rounded-lg p-6 shadow-sm">
+            
+            <!-- Заголовок секции -->
+            <h2 class="text-xl font-semibold text-gray-900 mb-6">
+                Подтверждение фотографий (рекомендуем):
+            </h2>
+            
+            <!-- Предупреждающий блок -->
+            <div class="warning-box mb-6">
+                <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0">
+                        <svg class="w-5 h-5 text-orange-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-700 leading-relaxed">
+                            Проверочные фотографии предназначены только для внутреннего использования.<br>
+                            Внимательно прочтите условия для получения значка фото проверено!
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Основные инструкции -->
+            <div class="mb-8">
+                <h3 class="text-base font-medium text-gray-900 mb-4">
+                    Для получения значка "Фото проверено" вам необходимо сделать 2 (две) проверочные фотографии:
+                </h3>
+                
+                <p class="text-sm text-gray-600 mb-6 bg-gray-50 p-3 rounded border-l-4 border-blue-500">
+                    <strong>Важно:</strong> Для новых анкет (в день добавления анкеты на сайт) дата на проверочной фотке не должна превышать 1 недели!
+                </p>
+
+                <!-- Инструкция №1 -->
+                <div class="flex items-start space-x-4 mb-6">
+                    <div class="verification-number">1</div>
+                    <div class="flex-1">
+                        <p class="text-sm text-gray-700 mb-3">
+                            На первой проверочной фотографии держите листок бумаги, где написано:
+                        </p>
+                        <div class="instruction-block">
+                            <p class="font-medium text-gray-900 text-base">
+                                текущая дата<br>
+                                для FEIPITER
+                            </p>
+                            <p class="text-xs text-gray-600 mt-2">
+                                Надписи должны быть написаны от руки.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Инструкция №2 -->
+                <div class="flex items-start space-x-4 mb-6">
+                    <div class="verification-number">2</div>
+                    <div class="flex-1">
+                        <p class="text-sm text-gray-700 mb-3">
+                            На второй проверочной фотографии вы должны делать пальцами знак, как на рисунке, соответственно вас должно быть полностью видно:
+                        </p>
+                        
+                        <!-- Изображение жеста -->
+                        <div class="bg-gray-50 p-4 rounded-lg inline-block mb-4">
+                            <div class="w-20 h-24 bg-pink-100 rounded-lg flex items-center justify-center border-2 border-pink-200">
+                                <span class="text-4xl">✌️</span>
+                            </div>
+                        </div>
+                        
+                        <p class="text-sm text-gray-600 leading-relaxed">
+                            Вы должны сфотографироваться в белье в полный рост, если на фотографиях анкеты вы не в белье, тогда в той же одежде, в которой вы на фотах анкеты и фигура должна соответствовать фотографиям анкеты, если например заметно пополнели или фотосессия очень старая, то "фото проверено" не сможем поставить. Поэтому фотосессия должна быть актуальной.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Дополнительные условия -->
+                <div class="info-box mb-4">
+                    <p class="text-sm text-gray-700 font-medium">
+                        Если на фотографиях анкеты лицо заретушировано, загружайте 1-2 фото из фотосессии с открытым лицом!
+                    </p>
+                </div>
+
+                <div class="success-box mb-8">
+                    <p class="text-sm text-gray-700 font-medium">
+                        Запрещены типажные фотографии для получения статуса Фото проверено!!!
+                    </p>
+                </div>
+            </div>
+
+            <!-- Секция загрузки -->
+            <div class="border-t border-gray-200 pt-6">
+                <h3 class="text-base font-medium text-orange-600 mb-4">
+                    Загрузить проверочное фото
+                </h3>
+                
+                <div class="mb-6">
+                    <label class="block text-sm text-gray-700 mb-3 font-medium">Проверочные фото:</label>
+                    
+                    <!-- Зона загрузки (пустая) -->
+                    <div class="upload-zone" id="uploadZone">
+                        <div class="flex flex-col items-center">
+                            <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                            
+                            <div class="text-center mb-3">
+                                <span class="text-gray-600">
+                                    Перетащите фото в эту область или
+                                </span>
+                            </div>
+                            
+                            <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors">
+                                Загрузить фотографии
+                            </button>
+                            
+                            <p class="text-xs text-gray-500 mt-3">
+                                Максимум 2 фотографии • JPG, PNG • до 5MB
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Рекомендация -->
+                <div class="recommendation-box">
+                    <p class="text-sm text-gray-700">
+                        Рекомендуем почаще обновлять проверочные фотки, например раз в 6 месяцев, чтобы на странице анкеты выводилась свежая дата проверки, так для вас будет лучше.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Демо с загруженными фото -->
+        <div class="bg-white rounded-lg p-6 shadow-sm mt-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Демо: Загруженные фото</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Фото 1 -->
+                <div class="relative group border-2 border-gray-200 rounded-lg overflow-hidden">
+                    <div class="aspect-square bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center">
+                        <div class="text-center">
+                            <span class="text-4xl mb-2 block">📄</span>
+                            <p class="text-sm text-gray-600">Фото с листком</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Контролы -->
+                    <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button class="p-1.5 bg-white rounded shadow hover:bg-red-50">
+                            <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <!-- Номер фото -->
+                    <div class="absolute bottom-2 left-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+                        Фото 1
+                    </div>
+                </div>
+
+                <!-- Фото 2 -->
+                <div class="relative group border-2 border-gray-200 rounded-lg overflow-hidden">
+                    <div class="aspect-square bg-gradient-to-br from-blue-100 to-green-100 flex items-center justify-center">
+                        <div class="text-center">
+                            <span class="text-4xl mb-2 block">✌️</span>
+                            <p class="text-sm text-gray-600">Фото с жестом</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Контролы -->
+                    <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button class="p-1.5 bg-white rounded shadow hover:bg-red-50">
+                            <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <!-- Номер фото -->
+                    <div class="absolute bottom-2 left-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+                        Фото 2
+                    </div>
+                </div>
+            </div>
+
+            <!-- Кнопка добавления еще фото -->
+            <div class="mt-4">
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-pointer">
+                    <div class="flex items-center justify-center space-x-2">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span class="text-sm text-gray-600">Добавить еще фото</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Простая демонстрация drag&drop
+        const uploadZone = document.getElementById('uploadZone');
+        
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('drag-over');
+        });
+        
+        uploadZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('drag-over');
+        });
+        
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('drag-over');
+            alert('Файлы загружены! (демо)');
+        });
+    </script>
+</body>
+</html>

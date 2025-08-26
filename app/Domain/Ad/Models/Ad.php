@@ -73,7 +73,16 @@ class Ad extends Model
         'views_count',
         'contacts_shown',
         'favorites_count',
-        'faq'
+        'faq',
+        // Поля верификации
+        'verification_photo',
+        'verification_video',
+        'verification_status',
+        'verification_type',
+        'verified_at',
+        'verification_expires_at',
+        'verification_comment',
+        'verification_metadata'
     ];
 
     /**
@@ -89,7 +98,8 @@ class Ad extends Model
         'photos',
         'video',
         'prices',
-        'faq'
+        'faq',
+        'verification_metadata'
     ];
 
     protected $casts = [
@@ -107,6 +117,9 @@ class Ad extends Model
         'favorites_count' => 'integer',
         'status' => AdStatus::class,
         // work_format обрабатывается через mutator в app/Models/Ad.php
+        // Поля верификации
+        'verified_at' => 'datetime',
+        'verification_expires_at' => 'datetime',
     ];
 
     /**
@@ -411,5 +424,76 @@ class Ad extends Model
                 'clients' => $ad->clients
             ]);
         });
+    }
+
+    // ============= МЕТОДЫ ВЕРИФИКАЦИИ =============
+    
+    /**
+     * Проверка: верифицировано ли объявление
+     */
+    public function isVerified(): bool
+    {
+        return $this->verification_status === 'verified' && 
+               (!$this->verification_expires_at || $this->verification_expires_at->isFuture());
+    }
+    
+    /**
+     * Проверка: истекла ли верификация
+     */
+    public function isVerificationExpired(): bool
+    {
+        return $this->verification_expires_at && $this->verification_expires_at->isPast();
+    }
+    
+    /**
+     * Проверка: нужно ли обновить верификацию
+     */
+    public function needsVerificationUpdate(): bool
+    {
+        if (!$this->isVerified()) {
+            return false;
+        }
+        
+        // Предупреждаем за 7 дней до истечения
+        if ($this->verification_expires_at) {
+            return $this->verification_expires_at->diffInDays(now()) <= 7;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Получить badge верификации
+     */
+    public function getVerificationBadge(): ?array
+    {
+        if (!$this->isVerified()) {
+            return null;
+        }
+        
+        $daysLeft = $this->verification_expires_at 
+            ? $this->verification_expires_at->diffInDays(now())
+            : null;
+            
+        return [
+            'status' => 'verified',
+            'text' => 'Фото проверено',
+            'expires_at' => $this->verification_expires_at?->format('d.m.Y'),
+            'days_left' => $daysLeft,
+            'needs_update' => $this->needsVerificationUpdate()
+        ];
+    }
+    
+    /**
+     * Получить статус верификации для отображения
+     */
+    public function getVerificationStatusDisplay(): string
+    {
+        return match($this->verification_status) {
+            'verified' => '✅ Фото проверено',
+            'pending' => '⏳ На проверке',
+            'rejected' => '❌ Отклонено',
+            default => '⚪ Не проверено'
+        };
     }
 }

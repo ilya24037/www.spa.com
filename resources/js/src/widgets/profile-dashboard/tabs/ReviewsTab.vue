@@ -1,36 +1,38 @@
 <!-- resources/js/src/widgets/profile-dashboard/tabs/ReviewsTab.vue -->
 <template>
   <div :class="CONTAINER_CLASSES">
-    <div :class="EMPTY_STATE_CLASSES">
-      <ChatAltIcon :class="EMPTY_ICON_CLASSES" />
-      <h3 :class="EMPTY_TITLE_CLASSES">
-        Нет отзывов
-      </h3>
-      <p :class="EMPTY_DESCRIPTION_CLASSES">
-        Здесь будут отображаться отзывы о вас
-      </p>
-    </div>
+    <!-- Используем новый компонент ReviewList с CRUD функционалом -->
+    <ReviewList
+      :user-id="userId"
+      :can-add-review="canAddReview"
+      :can-moderate="canModerate"
+      :show-status-filter="canModerate"
+    />
   </div>
 </template>
 
-<script setup>
-import { ChatAltIcon } from '@heroicons/vue/outline'
+<script setup lang="ts">
+import ReviewList from '@/features/review-management/ui/ReviewList/ReviewList.vue'
+import { computed } from 'vue'
+import { usePage } from '@inertiajs/vue3'
 
 // 🎯 Стили
 const CONTAINER_CLASSES = 'space-y-6'
-const EMPTY_STATE_CLASSES = 'text-center py-12'
-const EMPTY_ICON_CLASSES = 'w-12 h-12 mx-auto text-gray-500 mb-4'
-const EMPTY_TITLE_CLASSES = 'text-lg font-medium text-gray-500 mb-2'
-const EMPTY_DESCRIPTION_CLASSES = 'text-gray-500'
 
-defineProps({
-    reviews: {
-        type: Array,
-        default: () => []
-    },
-    counts: {
-        type: Object,
-        default: () => ({})
-    }
+// Получаем данные текущего пользователя
+const page = usePage()
+const user = computed(() => page.props.auth?.user)
+
+// Props для компонента
+interface Props {
+  userId?: number
+  canAddReview?: boolean
+  canModerate?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  userId: computed(() => user.value?.id),
+  canAddReview: true,
+  canModerate: computed(() => user.value?.role === 'admin' || user.value?.role === 'moderator')
 })
 </script>

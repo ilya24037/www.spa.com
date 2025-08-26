@@ -1,67 +1,50 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domain\Review\DTOs;
 
-use App\Enums\ReviewRating;
+use Illuminate\Http\Request;
 
-/**
- * DTO для обновления отзыва
- */
-class UpdateReviewDTO
+final class UpdateReviewDTO
 {
     public function __construct(
-        public ?string $title = null,
-        public ?string $comment = null,
-        public ?ReviewRating $rating = null,
-        public ?array $pros = null,
-        public ?array $cons = null,
-        public ?array $photos = null,
-        public ?bool $isAnonymous = null,
-        public ?bool $isRecommended = null,
-        public ?array $metadata = null,
+        public readonly ?int $rating,
+        public readonly ?string $comment,
+        public readonly ?bool $isVisible,
+        public readonly ?bool $isVerified,
     ) {}
 
-    /**
-     * Создать из массива
-     */
-    public static function fromArray(array $data): self
+    public static function fromRequest(Request $request): self
     {
         return new self(
-            title: $data['title'] ?? null,
-            comment: $data['comment'] ?? null,
-            rating: isset($data['rating']) ? ReviewRating::fromValue($data['rating']) : null,
-            pros: $data['pros'] ?? null,
-            cons: $data['cons'] ?? null,
-            photos: $data['photos'] ?? null,
-            isAnonymous: $data['is_anonymous'] ?? null,
-            isRecommended: $data['is_recommended'] ?? null,
-            metadata: $data['metadata'] ?? null,
+            rating: $request->has('rating') ? (int) $request->input('rating') : null,
+            comment: $request->has('comment') ? $request->input('comment') : null,
+            isVisible: $request->has('is_visible') ? (bool) $request->input('is_visible') : null,
+            isVerified: $request->has('is_verified') ? (bool) $request->input('is_verified') : null,
         );
     }
 
-    /**
-     * Преобразовать в массив (только заполненные поля)
-     */
     public function toArray(): array
     {
-        return array_filter([
-            'title' => $this->title,
-            'comment' => $this->comment,
-            'rating' => $this->rating,
-            'pros' => $this->pros,
-            'cons' => $this->cons,
-            'photos' => $this->photos,
-            'is_anonymous' => $this->isAnonymous,
-            'is_recommended' => $this->isRecommended,
-            'metadata' => $this->metadata,
-        ], fn($value) => $value !== null);
-    }
-
-    /**
-     * Проверить, есть ли изменения
-     */
-    public function hasChanges(): bool
-    {
-        return !empty($this->toArray());
+        $data = [];
+        
+        if ($this->rating !== null) {
+            $data['rating'] = $this->rating;
+        }
+        
+        if ($this->comment !== null) {
+            $data['comment'] = $this->comment;
+        }
+        
+        if ($this->isVisible !== null) {
+            $data['is_visible'] = $this->isVisible;
+        }
+        
+        if ($this->isVerified !== null) {
+            $data['is_verified'] = $this->isVerified;
+        }
+        
+        return $data;
     }
 }

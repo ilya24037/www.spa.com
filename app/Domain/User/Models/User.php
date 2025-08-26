@@ -147,6 +147,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
     
     /**
+     * Проверка, является ли пользователь администратором
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin' || $this->is_admin === true;
+    }
+    
+    /**
      * @deprecated Используйте integration()->getReceivedReviews($user)
      */
     public function getReceivedReviews()
