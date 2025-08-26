@@ -1,0 +1,399 @@
+/**
+ * Layout - Responsive Grid System
+ * Адаптивная система сеток по образцу больших маркетплейсов
+ */
+
+/* === БРЕЙКПОИНТЫ И ПЕРЕМЕННЫЕ === */
+
+:root {
+  /* Брейкпоинты (Mobile First) */
+  --bp-xs: 320px;   /* Маленькие телефоны */
+  --bp-sm: 640px;   /* Большие телефоны */
+  --bp-md: 768px;   /* Планшеты */
+  --bp-lg: 1024px;  /* Небольшие десктопы */
+  --bp-xl: 1280px;  /* Большие десктопы */
+  --bp-2xl: 1536px; /* Широкие экраны */
+  
+  /* Размеры карточек */
+  --card-min-width: 280px;
+  --card-max-width: 320px;
+  --card-aspect-ratio: 1.2;
+  
+  /* Отступы сетки */
+  --grid-gap: 1rem;
+  --grid-gap-mobile: 0.75rem;
+  --grid-gap-desktop: 1.5rem;
+  --grid-gap-compact: 0.5rem;
+  
+  /* Контейнеры */
+  --container-padding: 1rem;
+  --container-max-width: 1600px;
+}
+
+/* === БАЗОВЫЕ КОНТЕЙНЕРЫ === */
+
+/* Адаптивный контейнер */
+.container-adaptive {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 var(--container-padding);
+  
+  /* Увеличиваем отступы на больших экранах */
+  @media (min-width: 640px) {
+    --container-padding: 1.5rem;
+  }
+  
+  @media (min-width: 768px) {
+    --container-padding: 2rem;
+    max-width: 1200px;
+  }
+  
+  @media (min-width: 1024px) {
+    --container-padding: 2.5rem;
+    max-width: 1400px;
+  }
+  
+  @media (min-width: 1280px) {
+    --container-padding: 3rem;
+    max-width: var(--container-max-width);
+  }
+}
+
+/* Узкий контейнер для текста */
+.container-narrow {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 var(--container-padding);
+  max-width: 800px;
+}
+
+/* Широкий контейнер для каталогов */
+.container-wide {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 var(--container-padding);
+  max-width: 1800px;
+}
+
+/* === ОСНОВНЫЕ СЕТКИ === */
+
+/* Сетка услуг - основная для SPA Platform */
+.service-grid {
+  display: grid;
+  gap: var(--grid-gap);
+  
+  /* Автоматическая адаптивная сетка */
+  grid-template-columns: repeat(auto-fill, minmax(var(--card-min-width), 1fr));
+  
+  /* Убеждаемся что карточки не станут слишком широкими */
+  @supports (grid-template-columns: repeat(auto-fit, minmax(min(var(--card-min-width), 100%), 1fr))) {
+    grid-template-columns: repeat(auto-fit, minmax(min(var(--card-min-width), 100%), 1fr));
+  }
+}
+
+/* Mobile: 320px-639px = 1 колонка */
+@media (max-width: 639px) {
+  .service-grid {
+    grid-template-columns: 1fr;
+    gap: var(--grid-gap-mobile);
+  }
+}
+
+/* Small: 640px-767px = 2 колонки */
+@media (min-width: 640px) and (max-width: 767px) {
+  .service-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Medium: 768px-1023px = 2-3 колонки */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .service-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+}
+
+/* Large: 1024px-1279px = 3-4 колонки */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .service-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--grid-gap-desktop);
+  }
+}
+
+/* XL: 1280px+ = 4-5 колонок */
+@media (min-width: 1280px) {
+  .service-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--grid-gap-desktop);
+  }
+}
+
+/* === СЕТКА МАСТЕРОВ === */
+
+.master-grid {
+  display: grid;
+  gap: var(--grid-gap);
+  
+  /* Мастера занимают больше места - как карточки профилей на Avito */
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+}
+
+@media (max-width: 767px) {
+  .master-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .master-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .master-grid {
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: var(--grid-gap-desktop);
+  }
+}
+
+/* === КОМПАКТНАЯ СЕТКА === */
+
+/* Плотная упаковка как на Wildberries */
+.compact-grid {
+  display: grid;
+  gap: calc(var(--grid-gap) * 0.75);
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+@media (max-width: 639px) {
+  .compact-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--grid-gap-compact);
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .compact-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .compact-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+}
+
+/* === СПЕЦИАЛЬНЫЕ СЕТКИ === */
+
+/* Featured Grid - Рекомендуемые (первый элемент больше) */
+.featured-grid {
+  display: grid;
+  gap: var(--grid-gap-desktop);
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.featured-grid .featured-item:first-child {
+  @media (min-width: 768px) {
+    grid-column: span 2;
+  }
+  
+  @media (min-width: 1024px) {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+}
+
+/* Hot Deals Grid - Горячие предложения */
+.hot-deals-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}
+
+@media (max-width: 639px) {
+  .hot-deals-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--grid-gap-compact);
+  }
+}
+
+@media (min-width: 1024px) {
+  .hot-deals-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}
+
+/* === ПЕРЕКЛЮЧЕНИЕ ВИДОВ === */
+
+/* List View - Списочный вид (как на Avito) */
+.list-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--grid-gap);
+}
+
+.list-view .card {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  min-height: 150px;
+}
+
+.list-view .card__image {
+  width: 200px;
+  height: 150px;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.list-view .card__content {
+  flex: 1;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* На мобильных list-view становится вертикальным */
+@media (max-width: 767px) {
+  .list-view .card {
+    flex-direction: column;
+  }
+  
+  .list-view .card__image {
+    width: 100%;
+    height: 200px;
+  }
+}
+
+/* Grid View - Сеточный вид */
+.grid-view {
+  display: grid;
+  gap: var(--grid-gap);
+  grid-template-columns: repeat(auto-fill, minmax(var(--card-min-width), 1fr));
+}
+
+.grid-view .card {
+  display: flex;
+  flex-direction: column;
+}
+
+.grid-view .card__image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+/* === АДАПТИВНЫЕ УТИЛИТЫ === */
+
+/* Управление отображением колонок */
+.cols-1 { grid-template-columns: repeat(1, 1fr) !important; }
+.cols-2 { grid-template-columns: repeat(2, 1fr) !important; }
+.cols-3 { grid-template-columns: repeat(3, 1fr) !important; }
+.cols-4 { grid-template-columns: repeat(4, 1fr) !important; }
+.cols-5 { grid-template-columns: repeat(5, 1fr) !important; }
+.cols-6 { grid-template-columns: repeat(6, 1fr) !important; }
+
+/* Адаптивные колонки */
+@media (min-width: 640px) {
+  .sm\:cols-1 { grid-template-columns: repeat(1, 1fr) !important; }
+  .sm\:cols-2 { grid-template-columns: repeat(2, 1fr) !important; }
+  .sm\:cols-3 { grid-template-columns: repeat(3, 1fr) !important; }
+  .sm\:cols-4 { grid-template-columns: repeat(4, 1fr) !important; }
+}
+
+@media (min-width: 768px) {
+  .md\:cols-1 { grid-template-columns: repeat(1, 1fr) !important; }
+  .md\:cols-2 { grid-template-columns: repeat(2, 1fr) !important; }
+  .md\:cols-3 { grid-template-columns: repeat(3, 1fr) !important; }
+  .md\:cols-4 { grid-template-columns: repeat(4, 1fr) !important; }
+}
+
+@media (min-width: 1024px) {
+  .lg\:cols-1 { grid-template-columns: repeat(1, 1fr) !important; }
+  .lg\:cols-2 { grid-template-columns: repeat(2, 1fr) !important; }
+  .lg\:cols-3 { grid-template-columns: repeat(3, 1fr) !important; }
+  .lg\:cols-4 { grid-template-columns: repeat(4, 1fr) !important; }
+  .lg\:cols-5 { grid-template-columns: repeat(5, 1fr) !important; }
+}
+
+@media (min-width: 1280px) {
+  .xl\:cols-1 { grid-template-columns: repeat(1, 1fr) !important; }
+  .xl\:cols-2 { grid-template-columns: repeat(2, 1fr) !important; }
+  .xl\:cols-3 { grid-template-columns: repeat(3, 1fr) !important; }
+  .xl\:cols-4 { grid-template-columns: repeat(4, 1fr) !important; }
+  .xl\:cols-5 { grid-template-columns: repeat(5, 1fr) !important; }
+  .xl\:cols-6 { grid-template-columns: repeat(6, 1fr) !important; }
+}
+
+/* Управление отступами */
+.gap-none { gap: 0 !important; }
+.gap-sm { gap: 0.5rem !important; }
+.gap-md { gap: 1rem !important; }
+.gap-lg { gap: 1.5rem !important; }
+.gap-xl { gap: 2rem !important; }
+
+/* === PERFORMANCE ОПТИМИЗАЦИИ === */
+
+/* GPU ускорение для сеток */
+.grid-gpu {
+  transform: translateZ(0);
+  will-change: auto;
+}
+
+/* Оптимизация для большого количества элементов */
+.grid-large {
+  contain: layout style;
+}
+
+/* Виртуализация для очень больших списков */
+.grid-virtual {
+  height: 600px;
+  overflow-y: auto;
+  contain: strict;
+}
+
+/* === ДОСТУПНОСТЬ === */
+
+/* Поддержка скрин-ридеров */
+.grid-accessible {
+  /* Логическая структура для screen readers */
+  display: grid;
+  grid-auto-flow: row;
+}
+
+.grid-accessible .card:focus-within {
+  /* Фокус должен быть видимым */
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Анимации отключаются если пользователь предпочитает reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .service-grid,
+  .master-grid,
+  .compact-grid {
+    * {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+}
+
+/* === ОТЛАДКА === */
+
+/* Показывает границы сетки в development режиме */
+.debug .service-grid,
+.debug .master-grid,
+.debug .compact-grid {
+  outline: 2px dashed rgba(255, 0, 0, 0.3);
+}
+
+.debug .service-grid > *,
+.debug .master-grid > *,
+.debug .compact-grid > * {
+  outline: 1px solid rgba(0, 255, 0, 0.3);
+}

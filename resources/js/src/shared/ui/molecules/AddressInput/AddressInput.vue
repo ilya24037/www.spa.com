@@ -211,7 +211,7 @@ const fullAddressTooltip = computed(() => {
 // Определение страны пользователя по IP
 const detectUserCountry = async (): Promise<string> => {
   try {
-    // Сначала пробуем через Яндекс.Карты
+    // Сначала пробуем через Яндекс.Карты (если доступны)
     if (window.ymaps) {
       try {
         const result = await window.ymaps.geolocation.get({
@@ -228,34 +228,16 @@ const detectUserCountry = async (): Promise<string> => {
           }
         }
       } catch (error) {
-        // Продолжаем к следующему методу
+        // Яндекс.Карты недоступны, используем дефолт
       }
-    }
-
-    // Fallback на внешний сервис
-    const response = await fetch('https://ipapi.co/json/')
-    const data = await response.json()
-    
-    if (data.country_name) {
-      // Переводим английские названия в русские
-      const countryMap: { [key: string]: string } = {
-        'Russia': 'Россия',
-        'Russian Federation': 'Россия',
-        'Kazakhstan': 'Казахстан',
-        'Belarus': 'Беларусь',
-        'Ukraine': 'Украина',
-        'United States': 'США',
-        'Germany': 'Германия',
-        'France': 'Франция'
-      }
-      
-      return countryMap[data.country_name] || data.country_name
     }
   } catch (error) {
-    console.error('Ошибка определения страны:', error)
+    // Тихо обрабатываем ошибку без вывода в консоль
   }
   
-  return 'Россия' // Fallback на Россию
+  // Всегда возвращаем Россию по умолчанию
+  // Убираем внешние API чтобы избежать CORS и лимитов
+  return 'Россия'
 }
 
 // Получение подсказок с приоритетом по стране

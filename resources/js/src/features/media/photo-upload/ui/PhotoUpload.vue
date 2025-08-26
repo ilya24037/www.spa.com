@@ -87,7 +87,7 @@ const props = withDefaults(defineProps<PhotoUploadProps>(), {
 })
 
 // Константы для PhotoUploadZone
-const maxSize = 5 * 1024 * 1024 // 5MB
+const maxSize = 10 * 1024 * 1024 // 10MB (унифицировано с backend)
 const acceptedFormats = ['image/jpeg', 'image/png', 'image/webp']
 
 const emit = defineEmits<PhotoUploadEmits>()
@@ -132,24 +132,16 @@ const isLoading = computed(() => props.isLoading || isUploading.value)
 
 // УПРОЩЕНИЕ по принципу KISS: только инициализация при первой загрузке
 watch(() => props.photos, (newPhotos) => {
-  console.log('🔄 PhotoUpload: watch props.photos', {
-    newPhotosLength: newPhotos?.length,
-    localPhotosLength: localPhotos.value?.length
-  })
-  
   // Инициализируем только если localPhotos пустой и есть новые фото
   if (localPhotos.value.length === 0 && 
       newPhotos && 
       newPhotos.length > 0) {
-    console.log('✅ PhotoUpload: Инициализация из props')
     initializeFromProps(newPhotos)
   }
 }, { immediate: true })
 
 // УПРОЩЕНИЕ: простая обработка файлов
 const handleFilesSelected = async (files: File[]) => {
-  console.log('📁 PhotoUpload: handleFilesSelected', { count: files?.length })
-  
   if (!files || files.length === 0) return
   
   // Проверка лимита
@@ -162,7 +154,6 @@ const handleFilesSelected = async (files: File[]) => {
     await addPhotos(files)
     emit('update:photos', safePhotos.value)
   } catch (err) {
-    console.error('❌ PhotoUpload: Ошибка при загрузке:', err)
     error.value = 'Ошибка при загрузке фото'
   }
 }
@@ -190,7 +181,6 @@ const handleRemovePhoto = (index: number) => {
 
 // Wrapper для drag&drop с эмитом
 const onDragDrop = (index: number) => {
-  console.log('🔄 PhotoUpload: onDragDrop вызван', { index })
   handleDragDrop(index)
   // ✅ Эмитим изменения ОДИН РАЗ после drag&drop
   // handleDragDrop уже обновил localPhotos, поэтому эмитим safePhotos.value

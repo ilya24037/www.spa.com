@@ -5,6 +5,7 @@
       label="Опыт (лет)"
       placeholder="Выберите опыт"
       :options="experienceOptions"
+      :required="true"
       :error="errors.experience"
       @update:modelValue="emitExperience"
     />

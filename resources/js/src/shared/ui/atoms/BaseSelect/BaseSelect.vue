@@ -1,7 +1,10 @@
 <!-- Базовый селект в стиле Авито -->
 <template>
   <div class="w-full" ref="selectRef">
-    <label v-if="label" :for="selectId" class="block text-base font-normal text-gray-900 mb-2">{{ label }}</label>
+    <label v-if="label" :for="selectId" class="block text-base font-normal text-gray-900 mb-2">
+      {{ label }}
+      <span v-if="required" class="text-red-500 ml-1">*</span>
+    </label>
     
     <!-- Скрытый select для форм -->
     <select 
@@ -142,6 +145,10 @@ const props = defineProps({
     hint: {
         type: String,
         default: ''
+    },
+    required: {
+        type: Boolean,
+        default: false
     }
 })
 

@@ -60,7 +60,6 @@ class BundleOptimizer {
           if (this.componentCache.has(componentName)) {
             const cached = this.componentCache.get(componentName)
             if (Date.now() - cached.timestamp < this.config.componentCacheTime) {
-              logger.debug(`Component ${componentName} loaded from cache`, null, 'BundleOptimizer')
               return cached.component
             }
           }
@@ -82,8 +81,6 @@ class BundleOptimizer {
             chunkName: this.getChunkName(componentName)
           })
 
-          logger.debug(`Component ${componentName} loaded in ${loadTime.toFixed(2)}ms`, null, 'BundleOptimizer')
-          
           return component
         } catch (error) {
           logger.error(`Failed to load component ${componentName}`, error, 'BundleOptimizer')
@@ -130,13 +127,10 @@ class BundleOptimizer {
   async preloadCritical(components: Array<{ name: string, loader: AsyncComponentLoader }>) {
     if (!this.config.enablePreloading) return
 
-    logger.info('Preloading critical components', { count: components.length }, 'BundleOptimizer')
-
     const preloadPromises = components.map(async ({ name, loader }) => {
       try {
         await loader()
         this.markChunkAsLoaded(this.getChunkName(name))
-        logger.debug(`Critical component ${name} preloaded`, null, 'BundleOptimizer')
       } catch (error) {
         logger.warn(`Failed to preload critical component ${name}`, error, 'BundleOptimizer')
       }
@@ -165,7 +159,6 @@ class BundleOptimizer {
   }
 
   private async doPrefetch(routeName: string, components: Array<{ name: string, loader: AsyncComponentLoader }>) {
-    logger.debug(`Prefetching components for route ${routeName}`, { count: components.length }, 'BundleOptimizer')
 
     for (const { name, loader } of components) {
       try {
@@ -173,11 +166,9 @@ class BundleOptimizer {
         if (!this.loadedChunks.has(chunkName)) {
           await loader()
           this.markChunkAsLoaded(chunkName)
-          logger.debug(`Prefetched component ${name}`, null, 'BundleOptimizer')
         }
       } catch (error) {
         // Игнорируем ошибки prefetch
-        logger.debug(`Prefetch failed for ${name}`, error, 'BundleOptimizer')
       }
     }
   }
@@ -236,7 +227,6 @@ class BundleOptimizer {
    */
   clearCache() {
     this.componentCache.clear()
-    logger.info('Component cache cleared', null, 'BundleOptimizer')
   }
 
   /**

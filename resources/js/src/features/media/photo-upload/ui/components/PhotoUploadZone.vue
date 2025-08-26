@@ -51,7 +51,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  maxSize: 5 * 1024 * 1024, // 5MB
+  maxSize: 10 * 1024 * 1024, // 10MB (унифицировано с backend)
   acceptedFormats: () => ['image/jpeg', 'image/png', 'image/webp']
 })
 
@@ -91,17 +91,19 @@ const handleDrop = (event: DragEvent) => {
 
 const validateFiles = (files: File[]): File[] => {
   return files.filter(file => {
-    // Проверка формата
-    if (!props.acceptedFormats.some(format => file.type.startsWith(format.split('/*')[0]))) {
-      console.warn(`Неподдерживаемый формат: ${file.type}`)
-      return false
+    // ✅ УПРОЩЕННАЯ ВАЛИДАЦИЯ: более читаемый код
+    const isValidFormat = props.acceptedFormats.some(format => 
+      file.type.startsWith(format.split('/*')[0])
+    )
+    const isValidSize = file.size <= props.maxSize
+    
+    // Логируем только ошибки в production
+    if (!isValidFormat || !isValidSize) {
+      const reason = !isValidFormat ? 'неподдерживаемый формат' : 'слишком большой размер'
+      console.warn(`❌ Файл отклонен (${reason}): ${file.name}`)
     }
-    // Проверка размера
-    if (file.size > props.maxSize) {
-      console.warn(`Файл слишком большой: ${file.name}`)
-      return false
-    }
-    return true
+    
+    return isValidFormat && isValidSize
   })
 }
 

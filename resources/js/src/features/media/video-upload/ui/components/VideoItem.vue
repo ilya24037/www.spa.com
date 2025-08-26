@@ -1,11 +1,11 @@
 <template>
-  <div class="video-item relative group bg-white rounded-lg border overflow-hidden">
+  <div class="video-item relative group bg-white rounded-lg border overflow-hidden cursor-move hover:shadow-md transition-shadow">
     <!-- Превью видео -->
     <div class="aspect-square bg-gray-100 relative flex items-center justify-center">
       <!-- Для сохраненного видео показываем мини-плеер -->
       <video 
-        v-if="safeVideo.url !== null && safeVideo.url !== undefined && safeVideo.url !== ''" 
-        :src="safeVideo.url"
+        v-if="!videoError && getVideoUrl() !== null && getVideoUrl() !== ''" 
+        :src="getVideoUrl()"
         class="w-full h-full object-contain"
         controls
         muted
@@ -16,12 +16,13 @@
         @error="handleVideoError"
         @loadedmetadata="handleVideoLoaded"
       />
-      <!-- Для загружаемого видео показываем превью -->
+      <!-- Показываем thumbnail если видео не загрузилось или есть thumbnail -->
       <img 
         v-else-if="safeVideo.thumbnail !== null && safeVideo.thumbnail !== undefined && safeVideo.thumbnail !== ''" 
         :src="safeVideo.thumbnail" 
         :alt="`Видео ${index + 1}`"
-        class="w-full h-full object-contain"
+        class="w-full h-full object-contain cursor-pointer"
+        @click="tryPlayVideo"
       />
       <!-- Заглушка когда нет ни url ни thumbnail -->
       <div v-else class="w-full h-full flex items-center justify-center">
@@ -30,7 +31,12 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                   d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
           </svg>
-          <p class="text-xs text-gray-500">Видео недоступно</p>
+          <p class="text-xs text-gray-500">
+            {{ videoError ? 'Ошибка загрузки видео' : 'Видео недоступно' }}
+          </p>
+          <button v-if="videoError && getVideoUrl()" @click="retryVideo" class="mt-2 text-xs text-blue-500 hover:text-blue-600">
+            Попробовать снова
+          </button>
         </div>
       </div>
 
@@ -67,7 +73,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 import type { Video } from '../../model/types'
 
 interface Props {
@@ -81,12 +87,36 @@ const emit = defineEmits<{
   remove: []
 }>()
 
+// Состояние для отслеживания ошибок видео
+const videoError = ref(false)
+
+// Храним созданный blob URL для очистки при размонтировании
+const createdBlobUrl = ref<string | null>(null)
+
 // Computed для защиты от null/undefined (требование CLAUDE.md)
 const safeVideo = computed(() => {
   // Явная проверка на null и undefined
   if (props.video === null || props.video === undefined) {
     return {} as Video
   }
+  
+  // Дополнительная проверка: если video это строка JSON, пытаемся распарсить
+  if (typeof props.video === 'string') {
+    try {
+      const parsed = JSON.parse(props.video)
+      console.warn('VideoItem: получена строка вместо объекта, распарсили:', parsed)
+      return parsed
+    } catch (e) {
+      // Если это просто путь к файлу (старый формат), конвертируем в объект
+      return {
+        id: `video_${props.index}`,
+        url: props.video,
+        file: null,
+        isUploading: false
+      } as Video
+    }
+  }
+  
   return props.video
 })
 
@@ -127,6 +157,63 @@ const getVideoDisplayName = (): string => {
   return `Видео ${props.index + 1}`
 }
 
+// Получение корректного URL видео
+const getVideoUrl = (): string => {
+  // ВАЖНО: Сначала проверяем file для локального превью (до сохранения)
+  if (safeVideo.value?.file instanceof File) {
+    // Если blob URL еще не создан, создаем его
+    if (!createdBlobUrl.value) {
+      createdBlobUrl.value = URL.createObjectURL(safeVideo.value.file)
+      console.log('VideoItem: создан blob URL для превью:', createdBlobUrl.value)
+    }
+    return createdBlobUrl.value
+  }
+  
+  // Проверяем что есть URL
+  if (!safeVideo.value?.url) {
+    return ''
+  }
+  
+  const url = safeVideo.value.url
+  
+  // Проверяем что URL это строка, а не объект
+  if (typeof url !== 'string') {
+    console.error('VideoItem: URL не строка:', url)
+    return ''
+  }
+  
+  // Поддержка blob URL (для локального превью)
+  if (url.startsWith('blob:')) {
+    console.log('VideoItem: используем существующий blob URL:', url)
+    return url
+  }
+  
+  // Игнорируем base64 данные (они слишком большие для браузера)
+  if (url.startsWith('data:')) {
+    console.error('VideoItem: URL содержит base64 данные, которые нельзя воспроизвести')
+    videoError.value = true
+    return ''
+  }
+  
+  // Проверяем что URL начинается с /storage/ или http
+  if (url.startsWith('/storage/') || url.startsWith('http://') || url.startsWith('https://')) {
+    return url
+  }
+  
+  // Если URL выглядит как JSON, значит проблема
+  if (url.startsWith('{') || url.startsWith('[')) {
+    console.error('VideoItem: URL содержит JSON вместо пути:', url)
+    return ''
+  }
+  
+  // Для относительных путей добавляем /storage/
+  if (!url.startsWith('/')) {
+    return '/storage/' + url
+  }
+  
+  return url
+}
+
 
 
 // Обработка ошибок загрузки видео
@@ -139,16 +226,43 @@ const handleVideoError = (event: Event) => {
     error: error?.message || 'Неизвестная ошибка',
     code: error?.code
   })
+  
+  // Помечаем что видео не загрузилось
+  videoError.value = true
+  
+  // Если есть thumbnail, показываем его вместо видео
+  if (safeVideo.value.thumbnail) {
+    console.log('Показываем thumbnail вместо видео')
+  }
 }
 
 // Обработка успешной загрузки метаданных
 const handleVideoLoaded = (event: Event) => {
   const video = event.target as HTMLVideoElement
-  console.log('Видео успешно загружено:', {
-    url: safeVideo.value.url,
-    duration: video.duration,
-    videoWidth: video.videoWidth,
-    videoHeight: video.videoHeight
-  })
+  
+  // Сбрасываем флаг ошибки
+  videoError.value = false
 }
+
+// Попытка воспроизвести видео при клике на thumbnail
+const tryPlayVideo = () => {
+  if (getVideoUrl()) {
+    // Открываем видео в новой вкладке
+    window.open(getVideoUrl(), '_blank')
+  }
+}
+
+// Попытка перезагрузить видео
+const retryVideo = () => {
+  videoError.value = false
+  // Vue перерендерит компонент и попробует загрузить видео снова
+}
+
+// Очистка blob URL при размонтировании для предотвращения утечки памяти
+onUnmounted(() => {
+  if (createdBlobUrl.value) {
+    URL.revokeObjectURL(createdBlobUrl.value)
+    createdBlobUrl.value = null
+  }
+})
 </script>

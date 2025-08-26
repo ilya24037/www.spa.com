@@ -25,6 +25,7 @@
             label="1 час"
             placeholder="0"
             :min="0"
+            :required="true"
             @update:modelValue="updatePrices"
           >
             <template #suffix>₽</template>

@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -61,6 +62,15 @@ class DraftController extends Controller
             $data['prices'] = $prices;
         }
         
+        // Логируем все входящие данные для отладки bikini_zone
+        \Log::info("🔍 DraftController: Входящие данные для создания черновика", [
+            'all_data' => $request->all(),
+            'has_bikini_zone' => $request->has('bikini_zone'),
+            'bikini_zone_value' => $request->input('bikini_zone'),
+            'parameters_data' => $request->input('parameters'),
+            'has_parameters' => $request->has('parameters')
+        ]);
+        
         // Обеспечиваем наличие текстовых полей (даже если пустые)
         if (!isset($data['description'])) {
             $data['description'] = '';
@@ -99,39 +109,197 @@ class DraftController extends Controller
             unset($data['media_settings']); // Удаляем, т.к. такого поля нет в БД
         }
         
-        // Обработка фотографий для нового черновика
-        $uploadedPhotos = [];
+        // Обработка полей верификации
+        if ($request->has('verification_photo')) {
+            $verificationPhoto = $request->input('verification_photo');
+            
+            // Если это base64 изображение - сохраняем как файл
+            if ($verificationPhoto && str_starts_with($verificationPhoto, 'data:image')) {
+                try {
+                    // Извлекаем base64 данные
+                    $base64Parts = explode(',', $verificationPhoto);
+                    if (count($base64Parts) === 2) {
+                        $imageData = base64_decode($base64Parts[1]);
+                        
+                        // Определяем расширение
+                        $mimeType = str_replace('data:', '', explode(';', $base64Parts[0])[0]);
+                        $extension = match($mimeType) {
+                            'image/jpeg' => 'jpg',
+                            'image/png' => 'png',
+                            default => 'jpg'
+                        };
+                        
+                        // Генерируем имя файла и сохраняем
+                        $fileName = 'verification_' . uniqid() . '_' . time() . '.' . $extension;
+                        $path = 'verification/' . Auth::id() . '/' . $fileName;
+                        Storage::disk('public')->put($path, $imageData);
+                        
+                        $data['verification_photo'] = '/storage/' . $path;
+                        \Log::info('📸 Verification photo saved: ' . $data['verification_photo']);
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('Error saving verification photo: ' . $e->getMessage());
+                    // Если не удалось сохранить - не сохраняем вообще
+                    $data['verification_photo'] = null;
+                }
+            } elseif ($verificationPhoto && str_starts_with($verificationPhoto, '/storage/')) {
+                // Если это уже путь к файлу - сохраняем как есть
+                $data['verification_photo'] = $verificationPhoto;
+            } else {
+                // Иначе очищаем
+                $data['verification_photo'] = null;
+            }
+        }
+        if ($request->has('verification_status')) {
+            $data['verification_status'] = $request->input('verification_status');
+        }
+        if ($request->has('verification_video')) {
+            $data['verification_video'] = $request->input('verification_video');
+        }
+        if ($request->has('verification_comment')) {
+            $data['verification_comment'] = $request->input('verification_comment');
+        }
+        if ($request->has('verification_expires_at')) {
+            $data['verification_expires_at'] = $request->input('verification_expires_at');
+        }
         
-        // Проверяем индексированные поля photos[0], photos[1], etc
-        $index = 0;
-        $maxIterations = 50; // Защита от бесконечного цикла
+        // ✅ УПРОЩЕННАЯ ЛОГИКА: используем helper метод для обработки фотографий
+        $photos = $this->processPhotosFromRequest($request);
+        if (!empty($photos)) {
+            $data['photos'] = $photos;
+            \Log::info('📸 Store: Фото обработаны', ['count' => count($photos)]);
+        }
         
-        while ($index < $maxIterations) {
-            if ($request->hasFile("photos.{$index}")) {
-                $file = $request->file("photos.{$index}");
+        // Обработка видео файлов (пробуем оба формата как в update)
+        $uploadedVideos = [];
+        $existingVideos = [];
+        $videoIndex = 0;
+        $maxVideoIterations = 10;
+        
+        // Проверяем сначала единичный файл video (без индекса)
+        if ($videoIndex === 0 && $request->hasFile('video')) {
+            \Log::info('🎥 STORE: Обнаружен единичный файл video');
+            $file = $request->file('video');
+            
+            // Если это массив файлов, берем первый
+            if (is_array($file) && count($file) > 0) {
+                $file = $file[0];
+            }
+            
+            // Проверяем размер файла (макс 100MB для видео)
+            if ($file && !is_array($file) && $file->getSize() <= 100 * 1024 * 1024) {
+                try {
+                    // Генерируем уникальное имя файла
+                    $fileName = uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
+                    $path = $file->storeAs('videos/' . Auth::id(), $fileName, 'public');
+                    
+                    // ВАЖНО: Сохраняем как простую строку URL (как в архиве)
+                    $uploadedVideos[] = '/storage/' . $path;
+                    
+                    \Log::info('🎥 Единичное видео загружено:', [
+                        'path' => '/storage/' . $path
+                    ]);
+                } catch (\Exception $e) {
+                    \Log::error('Ошибка загрузки единичного видео: ' . $e->getMessage());
+                }
+            }
+            $videoIndex++;
+        }
+        
+        while ($videoIndex < $maxVideoIterations) {
+            // Пробуем ВСЕ форматы: video_0_file, video.0.file, video_0, video[0]
+            $underscoreFileNotation = "video_{$videoIndex}_file";
+            $underscoreNotation = "video_{$videoIndex}";
+            $dotNotation = "video.{$videoIndex}.file";
+            $bracketNotation = "video[{$videoIndex}]";
+            
+            $hasFile = $request->hasFile($underscoreFileNotation) || 
+                      $request->hasFile($dotNotation) || 
+                      $request->hasFile($bracketNotation);
+            $hasValue = $request->has($underscoreNotation) || 
+                       $request->has("video.{$videoIndex}") || 
+                       $request->has($bracketNotation);
+            
+            if (!$hasFile && !$hasValue) {
+                break; // Больше нет видео
+            }
+            
+            if ($hasFile) {
+                // Пробуем получить файл из всех возможных форматов
+                $file = $request->file($underscoreFileNotation) ?: 
+                       $request->file($dotNotation) ?: 
+                       $request->file($bracketNotation);
                 
-                // Проверяем размер файла (макс 10MB)
-                if ($file->getSize() > 10 * 1024 * 1024) {
-                    $index++;
+                // Проверяем размер файла (макс 100MB для видео)
+                if ($file && $file->getSize() > 100 * 1024 * 1024) {
+                    $videoIndex++;
                     continue;
                 }
                 
                 try {
-                    
-                    // Генерируем уникальное имя файла
-                    $fileName = uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
-                    $path = $file->storeAs('photos/' . Auth::id(), $fileName, 'public');
-                    $uploadedPhotos[] = '/storage/' . $path;
+                    if ($file) {
+                        // Генерируем уникальное имя файла
+                        $fileName = uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
+                        $path = $file->storeAs('videos/' . Auth::id(), $fileName, 'public');
+                        
+                        // ВАЖНО: Сохраняем как простую строку URL (как в архиве)
+                        $uploadedVideos[] = '/storage/' . $path;
+                        
+                        \Log::info('🎥 Видео загружено:', [
+                            'index' => $videoIndex,
+                            'path' => '/storage/' . $path
+                        ]);
+                    }
                 } catch (\Exception $e) {
+                    \Log::error('Ошибка загрузки видео: ' . $e->getMessage());
                 }
-            } elseif (!$request->has("photos.{$index}")) {
-                break; // Больше нет фотографий
+            } elseif ($hasValue) {
+                // Получаем значение из любого формата
+                $videoValue = $request->input($underscoreNotation) ?: 
+                             $request->input("video.{$videoIndex}") ?: 
+                             $request->input($bracketNotation);
+                if (is_string($videoValue) && !empty($videoValue) && $videoValue !== '[]') {
+                    // Проверяем, это JSON строка с объектом видео или обычная строка
+                    $decoded = json_decode($videoValue, true);
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                        // Если это объект видео, извлекаем URL
+                        if (isset($decoded['url'])) {
+                            $existingVideos[] = $decoded['url'];
+                        } else {
+                            // Если нет URL, пропускаем
+                            \Log::warning('🎥 Видео объект без URL:', ['video' => $decoded]);
+                        }
+                    } else {
+                        // Обычная строка URL
+                        $existingVideos[] = $videoValue;
+                    }
+                }
             }
-            $index++;
+            
+            $videoIndex++;
         }
         
-        if (!empty($uploadedPhotos)) {
-            $data['photos'] = $uploadedPhotos;
+        // Обработка финального массива видео
+        $finalVideos = [];
+        
+        // Проверяем явную очистку видео
+        if ($request->input('video') === '[]') {
+            $finalVideos = [];
+        } else {
+            // 1. Сначала добавляем существующие видео из запроса
+            if (!empty($existingVideos)) {
+                $finalVideos = $existingVideos;
+            }
+            
+            // 2. Добавляем новые загруженные видео
+            if (!empty($uploadedVideos)) {
+                $finalVideos = array_merge($finalVideos, $uploadedVideos);
+            }
+        }
+        
+        if (!empty($finalVideos)) {
+            $data['video'] = $finalVideos;
+            \Log::info('🎥 Store: Видео сохранено', ['count' => count($finalVideos)]);
         }
         
         // Создаем новый черновик
@@ -159,449 +327,333 @@ class DraftController extends Controller
     /**
      * Обновить черновик
      */
-    public function update(Request $request, Ad $ad): JsonResponse|RedirectResponse
+    public function update(Request $request, $id)
     {
-        $this->authorize('update', $ad);
-        
-        // Обрабатываем загруженные файлы фотографий
-        $data = $request->all();
-        
-        // Обработка полей prices (они приходят как prices[key])
-        $prices = [];
-        foreach ($request->all() as $key => $value) {
-            if (str_starts_with($key, 'prices[')) {
-                $fieldName = str_replace(['prices[', ']'], '', $key);
-                $prices[$fieldName] = $value;
-            }
-        }
-        if (!empty($prices)) {
-            $data['prices'] = $prices;
-        }
-        
-        // Обеспечиваем сохранение пустых текстовых полей
-        // ВАЖНО: Всегда устанавливаем текстовые поля, даже если пустые
-        if (!isset($data['description'])) {
-            $data['description'] = '';
-        }
-        if ($request->has('description')) {
-            $data['description'] = $request->input('description', '');
-        }
-        
-        if (!isset($data['additional_features'])) {
-            $data['additional_features'] = '';
-        }
-        if ($request->has('additional_features')) {
-            $data['additional_features'] = $request->input('additional_features', '');
-        }
-        
-        if (!isset($data['schedule_notes'])) {
-            $data['schedule_notes'] = '';
-        }
-        if ($request->has('schedule_notes')) {
-            $data['schedule_notes'] = $request->input('schedule_notes', '');
-        }
-        
-        // Обработка поля schedule
-        if (!isset($data['schedule'])) {
-            $data['schedule'] = [];
-        }
-        if ($request->has('schedule')) {
-            $scheduleData = $request->input('schedule');
-            // Если schedule пришел как JSON строка, декодируем
-            if (is_string($scheduleData)) {
-                $decoded = json_decode($scheduleData, true);
-                $data['schedule'] = is_array($decoded) ? $decoded : [];
-            } else {
-                $data['schedule'] = is_array($scheduleData) ? $scheduleData : [];
-            }
-        }
-        
-        // Обработка поля online_booking
-        if ($request->has('online_booking')) {
-            $data['online_booking'] = $request->boolean('online_booking');
-        } else {
-            $data['online_booking'] = false; // Значение по умолчанию
-        }
-        
-        // Обработка поля faq
-        if ($request->has('faq')) {
-            $faqData = $request->input('faq');
-            // Если faq пришел как JSON строка, декодируем
-            if (is_string($faqData)) {
-                $decoded = json_decode($faqData, true);
-                $data['faq'] = is_array($decoded) ? $decoded : [];
-            } else {
-                $data['faq'] = is_array($faqData) ? $faqData : [];
-            }
-        }
-        
-        // Логируем данные schedule для отладки
-        \Log::info("📅 DraftController: Данные schedule", [
-            'request_has_schedule' => $request->has('schedule'),
-            'schedule_input' => $request->input('schedule'),
-            'schedule_data' => $data['schedule'],
-            'schedule_notes_input' => $request->input('schedule_notes'),
-            'schedule_notes_data' => $data['schedule_notes'],
-            'online_booking_input' => $request->input('online_booking'),
-            'online_booking_data' => $data['online_booking']
-        ]);
-        
-        // Обработка media_settings
-        if (isset($data['media_settings']) && is_array($data['media_settings'])) {
-            // Преобразуем массив в boolean поля
-            $data['show_photos_in_gallery'] = in_array('show_photos_in_gallery', $data['media_settings']);
-            $data['allow_download_photos'] = in_array('allow_download_photos', $data['media_settings']);
-            $data['watermark_photos'] = in_array('watermark_photos', $data['media_settings']);
+        try {
+            $data = $request->all();
             
-            // Удаляем media_settings, так как в БД таких полей нет
-            unset($data['media_settings']);
-        }
-        
-        // Сначала получаем существующие фотографии из БД
-        $currentPhotos = [];
-        if ($ad->photos) {
-            $decoded = json_decode($ad->photos, true);
-            if (is_array($decoded)) {
-                $currentPhotos = $decoded;
-            }
-        }
-        
-        \Log::info("📸 DraftController: Фотографии из БД", [
-            'ad_id' => $ad->id,
-            'photos_from_db' => count($currentPhotos),
-            'current_photos' => $currentPhotos
-        ]);
-        
-        // KISS: Простая обработка фотографий
-        $uploadedPhotos = [];
-        $existingPhotos = [];
-        
-        // Обработка видео
-        $uploadedVideos = [];
-        $existingVideos = [];
-        
-        // Проверяем индексированные поля photos[0], photos[1] и т.д.
-        $index = 0;
-        $maxIterations = 50; // Защита от бесконечного цикла
-        
-        while ($index < $maxIterations) {
-            // Пробуем оба формата: photos.0 и photos[0]
-            $dotNotation = "photos.{$index}";
-            $bracketNotation = "photos[{$index}]";
+            // 🔍 ДИАГНОСТИКА: Логируем все входящие данные
+            \Log::info('🔍 DraftController: ВСЕ ВХОДЯЩИЕ ДАННЫЕ', [
+                'request_all' => $request->all(),
+                'request_files' => $request->allFiles(),
+                'request_photos_keys' => array_keys(array_filter($request->all(), function($key) {
+                    return str_starts_with($key, 'photos');
+                }, ARRAY_FILTER_USE_KEY)),
+                'request_method' => $request->method(),
+                'request_content_type' => $request->header('Content-Type'),
+                'request_is_multipart' => $request->isMethod('post') && str_contains($request->header('Content-Type'), 'multipart/form-data')
+            ]);
             
-            $hasFile = $request->hasFile($dotNotation) || $request->hasFile($bracketNotation);
-            $hasValue = $request->has($dotNotation) || $request->has($bracketNotation);
-            
-            if (!$hasFile && !$hasValue) {
-                break; // Больше нет фотографий
-            }
-            
-            if ($hasFile) {
-                $file = $request->file($dotNotation) ?: $request->file($bracketNotation);
-                
-                // Проверяем размер файла (макс 10MB)
-                if ($file && $file->getSize() > 10 * 1024 * 1024) {
-                    $index++;
-                    continue;
-                }
-                
-                try {
-                    if ($file) {
-                        // Генерируем уникальное имя файла
-                        $fileName = uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
-                        $path = $file->storeAs('photos/' . Auth::id(), $fileName, 'public');
-                        $uploadedPhotos[] = '/storage/' . $path;
-                    }
-                } catch (\Exception $e) {
-                    // Игнорируем ошибку загрузки
-                }
-            } elseif ($hasValue) {
-                // Получаем значение из любого формата
-                $photoValue = $request->input($dotNotation) ?: $request->input($bracketNotation);
-                if (is_string($photoValue) && !empty($photoValue) && $photoValue !== '[]') {
-                    
-                    // ИСПРАВЛЕНИЕ: Обработка data:URL фотографий по аналогии с видео
-                    if (str_starts_with($photoValue, 'data:image/')) {
-                        try {
-                            // Извлекаем MIME тип для определения расширения
-                            preg_match('/data:image\/([^;]+)/', $photoValue, $matches);
-                            $extension = $matches[1] ?? 'webp';
-                            
-                            // Декодируем base64 данные
-                            $base64Data = explode(',', $photoValue, 2)[1];
-                            $binaryData = base64_decode($base64Data);
-                            
-                            if ($binaryData !== false) {
-                                // Сохраняем как файл
-                                $fileName = uniqid() . '_' . time() . '.' . $extension;
-                                $path = 'photos/' . Auth::id() . '/' . $fileName;
-                                
-                                \Storage::disk('public')->put($path, $binaryData);
-                                $uploadedPhotos[] = '/storage/' . $path;
-                                
-                                \Log::info("✅ DraftController: Data:URL фото сохранено", [
-                                    'index' => $index,
-                                    'extension' => $extension,
-                                    'saved_path' => '/storage/' . $path
-                                ]);
-                            } else {
-                                \Log::error("❌ DraftController: Не удалось декодировать Base64 фото", [
-                                    'index' => $index
-                                ]);
-                                // Если декодирование не удалось, оставляем как обычную строку
-                                $existingPhotos[] = $photoValue;
-                            }
-                        } catch (\Exception $e) {
-                            \Log::error("❌ DraftController: Ошибка обработки data:URL фото", [
-                                'index' => $index,
-                                'error' => $e->getMessage()
-                            ]);
-                            // В случае ошибки оставляем как обычную строку
-                            $existingPhotos[] = $photoValue;
+            // Получаем существующие фото и видео из БД если редактируем
+            $currentPhotos = [];
+            $currentVideos = [];
+            if ($id && $ad = \App\Domain\Ad\Models\Ad::find($id)) {
+                if ($ad->photos) {
+                    // photos уже является массивом благодаря JsonFieldsTrait
+                    if (is_array($ad->photos)) {
+                        $currentPhotos = $ad->photos;
+                    } elseif (is_string($ad->photos)) {
+                        // На случай если это строка JSON
+                        $decoded = json_decode($ad->photos, true);
+                        if (is_array($decoded)) {
+                            $currentPhotos = $decoded;
                         }
-                    } else {
-                        // Обычная строка (URL или путь)
-                        $existingPhotos[] = $photoValue;
+                    }
+                }
+                if ($ad->video) {
+                    // video уже является массивом благодаря JsonFieldsTrait
+                    if (is_array($ad->video)) {
+                        $currentVideos = $ad->video;
+                    } elseif (is_string($ad->video)) {
+                        // На случай если это строка JSON
+                        $decoded = json_decode($ad->video, true);
+                        if (is_array($decoded)) {
+                            $currentVideos = $decoded;
+                        }
                     }
                 }
             }
             
-            $index++;
-        }
-        
-        // Обработка видео аналогично фото
-        
-        $videoIndex = 0;
-        while ($videoIndex < $maxIterations) {
-            // Пробуем оба формата: video.0 и video[0]
-            $dotNotation = "video.{$videoIndex}";
-            $bracketNotation = "video[{$videoIndex}]";
+            // ✅ УПРОЩЕННАЯ ЛОГИКА: используем helper метод
+            $finalPhotos = $this->processPhotosFromRequest($request);
             
-            $hasFile = $request->hasFile($dotNotation) || $request->hasFile($bracketNotation);
-            $hasValue = $request->has($dotNotation) || $request->has($bracketNotation);
+            \Log::info('📸 DraftController: Результаты обработки фотографий', [
+                'photos_count' => count($finalPhotos)
+            ]);
             
-            if (!$hasFile && !$hasValue) {
-                break; // Больше нет видео
+            // ✅ ИСПРАВЛЕНО: корректная проверка наличия поля photos в запросе
+            // Проверяем, передано ли поле photos явно в запросе
+            $photosInRequest = $request->has('photos') || 
+                               $request->has('photos.0') || 
+                               $request->hasFile('photos.0');
+            
+            if ($photosInRequest) {
+                // Если поле photos передано - используем результат обработки
+                // даже если массив пустой (это означает удаление всех фото)
+                \Log::info('📸 Поле photos передано в запросе, используем результат обработки', [
+                    'count' => count($finalPhotos),
+                    'photos' => $finalPhotos
+                ]);
+            } else {
+                // Если поле photos НЕ передано вообще - сохраняем существующие из БД
+                $finalPhotos = $currentPhotos;
+                \Log::info('📸 Поле photos НЕ передано, сохраняем из БД:', [
+                    'count' => count($currentPhotos)
+                ]);
             }
             
+            \Log::info('📸 DraftController: Финальный массив фотографий', [
+                'final_photos_count' => count($finalPhotos)
+            ]);
             
-            if ($hasFile) {
-                $file = $request->file($dotNotation) ?: $request->file($bracketNotation);
+            // ✅ УПРОЩЕННАЯ ЛОГИКА: всегда используем финальный массив
+            $data['photos'] = $finalPhotos;
+            \Log::info('📸 Устанавливаем photos:', [
+                'count' => count($finalPhotos),
+                'photos' => $finalPhotos
+            ]);
+            
+            // Отладка входящих видео
+            \Log::info('🎥 UPDATE: Анализ входящих видео данных', [
+                'all_keys' => array_keys($request->all()),
+                'has_video' => $request->has('video'),
+                'has_video_0' => $request->has('video.0'),
+                'has_video_0_file' => $request->hasFile('video.0.file'),
+                'video_files' => $request->allFiles()
+            ]);
+            
+            // Обработка видео файлов (пробуем оба формата)
+            $uploadedVideos = [];
+            $existingVideos = [];
+            $videoIndex = 0;
+            $maxVideoIterations = 10;
+            
+            // Проверяем сначала единичный файл video (без индекса)
+            if ($videoIndex === 0 && $request->hasFile('video')) {
+                \Log::info('🎥 UPDATE: Обнаружен единичный файл video');
+                $file = $request->file('video');
                 
-                // Проверяем размер файла (макс 50MB для видео)
-                if ($file && $file->getSize() > 50 * 1024 * 1024) {
-                    \Log::warning("🎬 DraftController: Видео слишком большое", [
-                        'index' => $videoIndex,
-                        'size' => $file->getSize(),
-                        'name' => $file->getClientOriginalName()
-                    ]);
-                    $videoIndex++;
-                    continue;
+                // Если это массив файлов, берем первый
+                if (is_array($file) && count($file) > 0) {
+                    $file = $file[0];
                 }
                 
-                try {
-                    if ($file) {
+                // Проверяем размер файла (макс 100MB для видео)
+                if ($file && !is_array($file) && $file->getSize() <= 100 * 1024 * 1024) {
+                    try {
                         // Генерируем уникальное имя файла
                         $fileName = uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
                         $path = $file->storeAs('videos/' . Auth::id(), $fileName, 'public');
+                        
+                        // ВАЖНО: Сохраняем как простую строку URL (как в архиве)
                         $uploadedVideos[] = '/storage/' . $path;
                         
-                        \Log::info("✅ DraftController: Видео загружено", [
-                            'index' => $videoIndex,
-                            'original_name' => $file->getClientOriginalName(),
-                            'saved_path' => '/storage/' . $path
+                        \Log::info('🎥 Единичное видео загружено при обновлении:', [
+                            'path' => '/storage/' . $path
                         ]);
+                    } catch (\Exception $e) {
+                        \Log::error('Ошибка загрузки единичного видео при обновлении: ' . $e->getMessage());
                     }
-                } catch (\Exception $e) {
-                    \Log::error("❌ DraftController: Ошибка загрузки видео", [
-                        'index' => $videoIndex,
-                        'error' => $e->getMessage()
-                    ]);
                 }
-            } elseif ($hasValue) {
-                // Получаем значение из любого формата
-                $videoValue = $request->input($dotNotation) ?: $request->input($bracketNotation);
-                if (is_string($videoValue) && !empty($videoValue) && $videoValue !== '[]') {
+                $videoIndex = 1; // Начинаем с индекса 1, так как 0 уже обработали
+            }
+            
+            while ($videoIndex < $maxVideoIterations) {
+                // Пробуем ВСЕ форматы: video_0_file, video.0.file, video_0, video[0]
+                $underscoreFileNotation = "video_{$videoIndex}_file";
+                $underscoreNotation = "video_{$videoIndex}";
+                $dotNotation = "video.{$videoIndex}.file";
+                $bracketNotation = "video[{$videoIndex}]";
+                
+                $hasFile = $request->hasFile($underscoreFileNotation) || 
+                          $request->hasFile($dotNotation) || 
+                          $request->hasFile($bracketNotation);
+                $hasValue = $request->has($underscoreNotation) || 
+                           $request->has("video.{$videoIndex}") || 
+                           $request->has($bracketNotation);
+                
+                if (!$hasFile && !$hasValue) {
+                    break; // Больше нет видео
+                }
+                
+                if ($hasFile) {
+                    // Пробуем получить файл из всех возможных форматов
+                    $file = $request->file($underscoreFileNotation) ?: 
+                           $request->file($dotNotation) ?: 
+                           $request->file($bracketNotation);
                     
-                    // ИСПРАВЛЕНИЕ: Обработка data:URL видео
-                    if (str_starts_with($videoValue, 'data:video/')) {
-                        try {
-                            // Обработка data:URL видео
+                    // Проверяем размер файла (макс 100MB для видео)
+                    if ($file && $file->getSize() > 100 * 1024 * 1024) {
+                        $videoIndex++;
+                        continue;
+                    }
+                    
+                    try {
+                        if ($file) {
+                            // Генерируем уникальное имя файла
+                            $fileName = uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
+                            $path = $file->storeAs('videos/' . Auth::id(), $fileName, 'public');
                             
-                            // Извлекаем MIME тип для определения расширения
-                            preg_match('/data:video\/([^;]+)/', $videoValue, $matches);
-                            $extension = $matches[1] ?? 'webm';
+                            // ВАЖНО: Сохраняем как простую строку URL (как в архиве)
+                            $uploadedVideos[] = '/storage/' . $path;
                             
-                            // Декодируем base64 данные
-                            $base64Data = explode(',', $videoValue, 2)[1];
-                            $binaryData = base64_decode($base64Data);
-                            
-                            if ($binaryData !== false) {
-                                // Сохраняем как файл
-                                $fileName = uniqid() . '_' . time() . '.' . $extension;
-                                $path = 'videos/' . Auth::id() . '/' . $fileName;
-                                
-                                \Storage::disk('public')->put($path, $binaryData);
-                                $uploadedVideos[] = '/storage/' . $path;
-                                
-                                \Log::info("✅ DraftController: Data:URL видео сохранено", [
-                                    'index' => $videoIndex,
-                                    'extension' => $extension,
-                                    'saved_path' => '/storage/' . $path,
-                                    'file_size' => strlen($binaryData)
-                                ]);
-                            } else {
-                                \Log::error("❌ DraftController: Не удалось декодировать base64", [
-                                    'index' => $videoIndex
-                                ]);
-                            }
-                            
-                        } catch (\Exception $e) {
-                            \Log::error("❌ DraftController: Ошибка обработки data:URL видео", [
+                            \Log::info('🎥 Видео загружено при обновлении:', [
                                 'index' => $videoIndex,
-                                'error' => $e->getMessage()
+                                'path' => '/storage/' . $path
                             ]);
                         }
-                    } else {
-                        // Обычный URL или путь к файлу
-                        $existingVideos[] = $videoValue;
-                        \Log::info("🎬 DraftController: Добавлено существующее видео", [
-                            'index' => $videoIndex,
-                            'value' => $videoValue
-                        ]);
+                    } catch (\Exception $e) {
+                        \Log::error('Ошибка загрузки видео при обновлении: ' . $e->getMessage());
                     }
+                } elseif ($hasValue) {
+                    // Получаем значение из любого формата
+                    $videoValue = $request->input($underscoreNotation) ?: 
+                                 $request->input("video.{$videoIndex}") ?: 
+                                 $request->input($bracketNotation);
+                    if (is_string($videoValue) && !empty($videoValue) && $videoValue !== '[]') {
+                        // Проверяем, это JSON строка с объектом видео или обычная строка
+                        $decoded = json_decode($videoValue, true);
+                        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                            // Если это объект видео, извлекаем URL
+                            if (isset($decoded['url'])) {
+                                $existingVideos[] = $decoded['url'];
+                            } else {
+                                // Если нет URL, пропускаем
+                                \Log::warning('🎥 Видео объект без URL при обновлении:', ['video' => $decoded]);
+                            }
+                        } else {
+                            // Обычная строка URL
+                            $existingVideos[] = $videoValue;
+                        }
+                    }
+                }
+                
+                $videoIndex++;
+            }
+            
+            // Обработка финального массива видео
+            $finalVideos = [];
+            
+            // Проверяем явную очистку видео
+            if ($request->input('video') === '[]') {
+                \Log::info('🎥 Получен пустой массив video - очищаем все видео');
+                $finalVideos = [];
+            } else {
+                // 1. Сначала добавляем существующие видео из запроса
+                if (!empty($existingVideos)) {
+                    $finalVideos = $existingVideos;
+                }
+                
+                // 2. Добавляем новые загруженные видео
+                if (!empty($uploadedVideos)) {
+                    $finalVideos = array_merge($finalVideos, $uploadedVideos);
                 }
             }
             
-            $videoIndex++;
-        }
-        
-        // Получаем существующие видео из БД
-        $currentVideos = [];
-        if ($ad->video) {
-            $decoded = json_decode($ad->video, true);
-            if (is_array($decoded)) {
-                $currentVideos = $decoded;
-            }
-        }
-        
-        // KISS: Простая логика - то что пришло с фронта, то и сохраняем
-        $finalPhotos = [];
-        $finalVideos = [];
-        
-        
-        // Проверяем, если пришел специальный маркер пустого массива
-        if ($request->input('photos') === '[]') {
-            $finalPhotos = [];
-        } else {
-            // ИСПРАВЛЕНО: Простое объединение всех фото без сложной логики
-            
-            // Добавляем все существующие фото из запроса (data:URL и обычные URL)
-            if (!empty($existingPhotos)) {
-                $finalPhotos = array_merge($finalPhotos, $existingPhotos);
-            }
-            
-            // Добавляем новые загруженные файлы фото  
-            if (!empty($uploadedPhotos)) {
-                $finalPhotos = array_merge($finalPhotos, $uploadedPhotos);
-            }
-            
-            // Если нет фото в запросе вообще - берем из БД
-            if (empty($finalPhotos) && !empty($currentPhotos)) {
-                $finalPhotos = $currentPhotos;
-            }
-        }
-        
-        \Log::info("📸 DraftController: ИСПРАВЛЕННЫЙ результат объединения фотографий", [
-            'ad_id' => $ad->id,
-            'existing_photos_count' => count($existingPhotos),
-            'existing_photos' => $existingPhotos,
-            'uploaded_photos_count' => count($uploadedPhotos), 
-            'uploaded_photos' => $uploadedPhotos,
-            'current_photos_count' => count($currentPhotos),
-            'current_photos' => $currentPhotos,
-            'final_photos_count' => count($finalPhotos),
-            'final_photos' => $finalPhotos
-        ]);
-        
-        // Обработка видео аналогично фото
-        if ($request->input('video') === '[]') {
-            $finalVideos = [];
-        } else {
-            // 1. Сначала добавляем существующие видео из запроса (те что остались после удаления)
-            if (!empty($existingVideos)) {
-                $finalVideos = $existingVideos;
-            }
-            
-            // 2. Добавляем новые загруженные видео
-            if (!empty($uploadedVideos)) {
-                $finalVideos = array_merge($finalVideos, $uploadedVideos);
-            }
-        }
-        
-        // 3. Проверяем были ли отправлены photos в любом виде
-        // Laravel не видит photos как отдельное поле, если отправлены photos[0], photos[1] и т.д.
-        $hasPhotosInRequest = false;
-        foreach ($request->all() as $key => $value) {
-            if (str_starts_with($key, 'photos[') || $key === 'photos') {
-                $hasPhotosInRequest = true;
-                break;
-            }
-        }
-        
-        if ($hasPhotosInRequest) {
-            // Photos были отправлены (даже если пустые) - используем их
-            $data['photos'] = $finalPhotos;
-        } else {
-            // Поле photos не передано вообще - сохраняем существующие из БД
-            $data['photos'] = $currentPhotos;
-        }
-        
-        // 4. Проверяем были ли отправлены video в любом виде
-        $hasVideoInRequest = false;
-        foreach ($request->all() as $key => $value) {
-            if (str_starts_with($key, 'video[') || $key === 'video') {
-                $hasVideoInRequest = true;
-                break;
-            }
-        }
-        
-        if ($hasVideoInRequest) {
-            // Video были отправлены (даже если пустые) - используем их
-            $data['video'] = $finalVideos;
-            \Log::info("🎬 DraftController: Финальные видео (из запроса)", [
-                'count' => count($finalVideos),
-                'videos' => $finalVideos
+            // Логирование результатов обработки видео
+            \Log::info('🎥 UPDATE: Результаты обработки видео', [
+                'uploaded_videos' => $uploadedVideos,
+                'uploaded_count' => count($uploadedVideos),
+                'existing_videos' => $existingVideos,
+                'existing_count' => count($existingVideos),
+                'current_videos_from_db' => $currentVideos,
+                'current_count' => count($currentVideos)
             ]);
-        } else {
-            // Поле video не передано вообще - сохраняем существующие из БД
-            $data['video'] = $currentVideos;
-            \Log::info("🎬 DraftController: Финальные видео (из БД)", [
-                'count' => count($currentVideos),
-                'videos' => $currentVideos
+            
+            // Проверяем были ли отправлены video в любом виде
+            $hasVideoInRequest = false;
+            foreach ($request->all() as $key => $value) {
+                if (str_starts_with($key, 'video_') || str_starts_with($key, 'video[') || $key === 'video' || str_starts_with($key, 'video.')) {
+                    $hasVideoInRequest = true;
+                    \Log::info('🎥 UPDATE: Найден video ключ в запросе', ['key' => $key, 'value' => $value]);
+                    break;
+                }
+            }
+            
+            if ($hasVideoInRequest) {
+                // Video были отправлены (даже если пустые) - используем их
+                $data['video'] = $finalVideos;
+                \Log::info('🎥 Устанавливаем video из запроса:', [
+                    'count' => count($finalVideos),
+                    'videos' => $finalVideos
+                ]);
+            } else {
+                // Поле video не передано вообще - сохраняем существующие из БД
+                $data['video'] = $currentVideos;
+                \Log::info('🎥 Сохраняем существующие video из БД:', [
+                    'count' => count($currentVideos),
+                    'videos' => $currentVideos
+                ]);
+            }
+            
+            // Обработка поля verification_photo
+            if ($request->has('verification_photo')) {
+                $verificationPhoto = $request->input('verification_photo');
+                
+                // Если это base64 изображение - сохраняем как файл
+                if ($verificationPhoto && str_starts_with($verificationPhoto, 'data:image')) {
+                    try {
+                        // Извлекаем base64 данные
+                        $base64Parts = explode(',', $verificationPhoto);
+                        if (count($base64Parts) === 2) {
+                            $imageData = base64_decode($base64Parts[1]);
+                            
+                            // Определяем расширение
+                            $mimeType = str_replace('data:', '', explode(';', $base64Parts[0])[0]);
+                            $extension = match($mimeType) {
+                                'image/jpeg' => 'jpg',
+                                'image/png' => 'png',
+                                default => 'jpg'
+                            };
+                            
+                            // Генерируем имя файла и сохраняем
+                            $fileName = 'verification_' . uniqid() . '_' . time() . '.' . $extension;
+                            $path = 'verification/' . Auth::id() . '/' . $fileName;
+                            Storage::disk('public')->put($path, $imageData);
+                            
+                            $data['verification_photo'] = '/storage/' . $path;
+                            \Log::info('📸 Verification photo saved in update: ' . $data['verification_photo']);
+                        }
+                    } catch (\Exception $e) {
+                        \Log::error('Error saving verification photo in update: ' . $e->getMessage());
+                        // Если не удалось сохранить - не сохраняем вообще
+                        $data['verification_photo'] = null;
+                    }
+                } elseif ($verificationPhoto && str_starts_with($verificationPhoto, '/storage/')) {
+                    // Если это уже путь к файлу - сохраняем как есть
+                    $data['verification_photo'] = $verificationPhoto;
+                } elseif ($verificationPhoto === '' || $verificationPhoto === null) {
+                    // Если пустое значение - очищаем поле
+                    $data['verification_photo'] = null;
+                }
+            }
+            
+            // Используем метод saveOrUpdate, который существует в DraftService
+            $draft = $this->draftService->saveOrUpdate($data, Auth::user(), $id);
+            
+            // Для Inertia запросов возвращаем редирект на список черновиков
+            if ($request->header('X-Inertia')) {
+                return redirect()->route('profile.items.draft')->with('success', 'Черновик обновлен успешно');
+            }
+            
+            // Для обычных AJAX запросов возвращаем JSON
+            return response()->json([
+                'success' => true,
+                'message' => 'Черновик обновлен успешно',
+                'draft_id' => $draft->id
             ]);
+        } catch (\Exception $e) {
+            // Для Inertia запросов
+            if ($request->header('X-Inertia')) {
+                return redirect()->back()->withErrors(['error' => 'Ошибка при обновлении черновика: ' . $e->getMessage()]);
+            }
+            
+            // Для AJAX запросов
+            return response()->json([
+                'success' => false,
+                'message' => 'Ошибка при обновлении черновика: ' . $e->getMessage()
+            ], 500);
         }
-
-        $ad = $this->draftService->saveOrUpdate(
-            $data,
-            Auth::user(),
-            $ad->id
-        );
-
-
-        // Для Inertia запросов
-        if ($request->header('X-Inertia')) {
-            return redirect()
-                ->to('/profile/items/draft/all')
-                ->with('success', 'Черновик обновлен');
-        }
-
-        // Для AJAX запросов
-        return response()->json([
-            'success' => true,
-            'message' => 'Черновик обновлен',
-            'ad_id' => $ad->id
-        ]);
     }
 
     /**
@@ -679,5 +731,109 @@ class DraftController extends Controller
         return redirect()
             ->to('/profile/items/draft/all')
             ->with('success', 'Черновик удален');
+    }
+    
+    /**
+     * ✅ HELPER МЕТОДЫ ДЛЯ УПРОЩЕНИЯ КОДА (REFACTORING)
+     */
+    
+    /**
+     * Сохранить base64 изображение как файл
+     * @param string $base64Data Base64 строка изображения
+     * @return string|null Путь к сохраненному файлу или null
+     */
+    private function saveBase64Photo(string $base64Data): ?string
+    {
+        try {
+            // Проверяем что это base64
+            if (!str_starts_with($base64Data, 'data:image/')) {
+                return null;
+            }
+            
+            // Декодируем base64
+            $parts = explode(',', $base64Data, 2);
+            if (count($parts) !== 2) {
+                return null;
+            }
+            
+            $imageData = base64_decode($parts[1]);
+            if (!$imageData) {
+                return null;
+            }
+            
+            // Определяем расширение
+            preg_match('/data:image\/([^;]+)/', $base64Data, $matches);
+            $extension = $matches[1] ?? 'jpg';
+            
+            // Генерируем имя файла
+            $fileName = uniqid() . '_' . time() . '.' . $extension;
+            $path = 'photos/' . Auth::id() . '/' . $fileName;
+            
+            // Сохраняем файл
+            Storage::disk('public')->put($path, $imageData);
+            
+            return '/storage/' . $path;
+        } catch (\Exception $e) {
+            \Log::error('Ошибка сохранения base64 фото: ' . $e->getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Обработать массив фотографий из запроса
+     * Упрощенная логика для читаемости
+     * @param Request $request Запрос
+     * @param int $maxPhotos Максимальное количество фото для обработки
+     * @return array Массив путей к фотографиям
+     */
+    private function processPhotosFromRequest(Request $request, int $maxPhotos = 50): array
+    {
+        $uploadedPhotos = [];
+        $existingPhotos = [];
+        
+        // Проходим по всем возможным индексам
+        for ($index = 0; $index < $maxPhotos; $index++) {
+            // Проверяем оба формата: photos[0] и photos.0
+            $bracketNotation = "photos[{$index}]";
+            $dotNotation = "photos.{$index}";
+            
+            // Проверяем файл
+            if ($request->hasFile($bracketNotation) || $request->hasFile($dotNotation)) {
+                $file = $request->file($bracketNotation) ?: $request->file($dotNotation);
+                
+                // Проверка размера (10MB)
+                if ($file && $file->getSize() <= 10 * 1024 * 1024) {
+                    try {
+                        $fileName = uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
+                        $path = $file->storeAs('photos/' . Auth::id(), $fileName, 'public');
+                        $uploadedPhotos[] = '/storage/' . $path;
+                    } catch (\Exception $e) {
+                        \Log::error('Ошибка загрузки фото: ' . $e->getMessage());
+                    }
+                }
+            }
+            // Проверяем значение (существующее фото или base64)
+            elseif ($request->has($bracketNotation) || $request->has($dotNotation)) {
+                $photoValue = $request->input($bracketNotation) ?: $request->input($dotNotation);
+                
+                if (is_string($photoValue) && !empty($photoValue) && $photoValue !== '[]') {
+                    // Если это base64 - сохраняем как файл
+                    if (str_starts_with($photoValue, 'data:image/')) {
+                        $savedPath = $this->saveBase64Photo($photoValue);
+                        if ($savedPath) {
+                            $existingPhotos[] = $savedPath;
+                        }
+                    } else {
+                        // Обычный URL
+                        $existingPhotos[] = $photoValue;
+                    }
+                }
+            } else {
+                // Нет больше фото
+                break;
+            }
+        }
+        
+        return array_merge($existingPhotos, $uploadedPhotos);
     }
 }

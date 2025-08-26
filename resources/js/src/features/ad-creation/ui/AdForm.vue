@@ -96,13 +96,13 @@
         :is-required="true"
         :is-filled="checkSectionFilled('parameters')"
         :filled-count="getFilledCount('parameters')"
-        :total-count="8"
+        :total-count="9"
         @toggle="toggleSection('parameters')"
         data-section="parameters"
       >
         <ParametersSection 
           v-model:parameters="form.parameters"
-          :show-fields="['age', 'breast_size', 'hair_color', 'eye_color', 'nationality']"
+          :show-fields="['age', 'breast_size', 'hair_color', 'eye_color', 'nationality', 'bikini_zone']"
           :errors="errors.parameters || {}"
         />
       </CollapsibleSection>
@@ -245,21 +245,43 @@
               />
             </div>
           </div>
+
+          <!-- Проверочное фото - раскрывающаяся подкатегория -->
+          <div class="media-category mb-6">
+            <div class="border border-gray-200 rounded-lg px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors duration-200 mb-3 cursor-pointer select-none" @click="toggleVerificationSection">
+              <div class="flex items-center justify-between">
+                <h3 class="text-base font-semibold text-gray-900 flex items-center">
+                  Проверочное фото
+                  <span class="text-sm font-normal text-gray-500 ml-2">(повышает доверие)</span>
+                  <span v-if="form.verification_photo" class="ml-2 px-2 py-1 text-xs bg-green-100 text-green-600 rounded-full">
+                    ✓ Загружено
+                  </span>
+                </h3>
+                <svg 
+                  :class="[
+                    'text-gray-500 transition-transform duration-200 w-5 h-5',
+                    { 'rotate-180': isVerificationExpanded }
+                  ]"
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+            <div v-show="isVerificationExpanded">
+              <VerificationPhotoSection 
+                v-model:photo="form.verification_photo" 
+                :status="form.verification_status"
+                :ad-id="initialData?.id || 0"
+                @uploaded="handleVerificationUploaded"
+              />
+            </div>
+          </div>
         </div>
       </CollapsibleSection>
 
-      <!-- Подтверждение фотографий -->
-      <VerificationSection
-        :ad-id="initialData?.id || 0"
-        :verification-photo="form.verification_photo"
-        :verification-video="form.verification_video"
-        :verification-status="form.verification_status"
-        :verification-comment="form.verification_comment"
-        :verification-expires-at="form.verification_expires_at"
-        @update:verification-photo="form.verification_photo = $event"
-        @update:verification-video="form.verification_video = $event"
-        @update:verification-status="form.verification_status = $event"
-      />
 
       <!-- География -->
       <CollapsibleSection
@@ -389,8 +411,8 @@ import ExperienceSection from '@/src/features/AdSections/ExperienceSection/ui/Ex
 import ClientsSection from '@/src/features/AdSections/ClientsSection/ui/ClientsSection.vue'
 import PromoSection from '@/src/features/AdSections/PromoSection/ui/PromoSection.vue'
 
-// Импорт компонента верификации
-import VerificationSection from '@/src/features/verification-upload/ui/VerificationSection.vue'
+// Импорт компонента верификации (упрощенная версия)
+import VerificationPhotoSection from '@/src/features/verification-upload/ui/VerificationPhotoSection.vue'
 
 // Состояние активного блока навигации
 const currentActiveBlock = ref('basic')
@@ -398,6 +420,7 @@ const currentActiveBlock = ref('basic')
 // Состояние раскрытия подкатегорий МЕДИА
 const isPhotosExpanded = ref(true) // Фотографии развернуты по умолчанию (обязательное поле)
 const isVideoExpanded = ref(false) // Видео свернуто по умолчанию
+const isVerificationExpanded = ref(false) // Проверочное фото свернуто по умолчанию
 
 // Обработчик смены блока
 const handleBlockChange = (blockKey) => {
@@ -411,6 +434,15 @@ const togglePhotosSection = () => {
 
 const toggleVideoSection = () => {
   isVideoExpanded.value = !isVideoExpanded.value
+}
+
+const toggleVerificationSection = () => {
+  isVerificationExpanded.value = !isVerificationExpanded.value
+}
+
+const handleVerificationUploaded = (path: string) => {
+  form.verification_status = 'pending'
+  console.log('Проверочное фото загружено:', path)
 }
 
 // Методы для подсчета количества медиа
@@ -509,7 +541,7 @@ const sectionsConfig = [
     key: 'parameters',
     title: 'Параметры',
     required: true,
-    fields: ['title', 'age', 'height', 'weight', 'breast_size', 'hair_color', 'eye_color', 'nationality']
+    fields: ['title', 'age', 'height', 'weight', 'breast_size', 'hair_color', 'eye_color', 'nationality', 'bikini_zone']
   },
   {
     key: 'price',
@@ -643,78 +675,25 @@ const isFormValid = computed(() => {
   })
 })
 
-// ===== ЛОГИРОВАНИЕ ДЛЯ ОТЛАДКИ SCHEDULE =====
-watch(() => form.schedule, (newSchedule, oldSchedule) => {
-  console.log('🔄 AdForm: watch form.schedule ТРИГГЕР', {
-    newSchedule: newSchedule,
-    newScheduleType: typeof newSchedule,
-    oldSchedule: oldSchedule,
-    oldScheduleType: typeof oldSchedule,
-    isEqual: JSON.stringify(newSchedule) === JSON.stringify(oldSchedule)
-  })
-}, { deep: true })
-
-// Логируем инициализацию form.schedule
-console.log('🔍 AdForm: ИНИЦИАЛИЗАЦИЯ form.schedule:', {
-  schedule: form.schedule,
-  scheduleType: typeof form.schedule,
-  scheduleKeys: form.schedule ? Object.keys(form.schedule) : 'undefined',
-  scheduleValue: form.schedule
-})
-
-// Логируем при монтировании компонента
+// Хук монтирования компонента (если нужна дополнительная инициализация)
 onMounted(() => {
-  console.log('🔍 AdForm: onMounted - form.schedule:', {
-    schedule: form.schedule,
-    scheduleType: typeof form.schedule,
-    scheduleKeys: form.schedule ? Object.keys(form.schedule) : 'undefined',
-    scheduleValue: form.schedule
-  })
-  
+  // ✅ ДОБАВЛЯЕМ ЛОГИРОВАНИЕ ДЛЯ ОТЛАДКИ ФОТО
   console.log('🔍 AdForm: onMounted - props.initialData:', {
     hasInitialData: !!props.initialData,
     initialDataKeys: props.initialData ? Object.keys(props.initialData) : 'undefined',
-    scheduleInInitialData: props.initialData?.schedule,
-    scheduleType: typeof props.initialData?.schedule
-  })
-})
-
-watch(() => form.schedule_notes, (newNotes, oldNotes) => {
-  console.log('🔄 AdForm: watch form.schedule_notes ТРИГГЕР', {
-    newNotes: newNotes,
-    oldNotes: oldNotes,
-    isEqual: newNotes === oldNotes
-  })
-}, { deep: true })
-
-// ===== ЛОГИРОВАНИЕ ДЛЯ ОТЛАДКИ PHOTOS =====
-watch(() => form.photos, (newPhotos, oldPhotos) => {
-  console.log('🔄 AdForm: watch form.photos ТРИГГЕР', {
-    newPhotos: newPhotos,
-    newPhotosLength: newPhotos?.length,
-    newPhotosType: typeof newPhotos,
-    oldPhotos: oldPhotos,
-    oldPhotosLength: oldPhotos?.length,
-    oldPhotosType: typeof oldPhotos,
-    isEqual: JSON.stringify(newPhotos) === JSON.stringify(oldPhotos),
-    stackTrace: new Error().stack?.split('\n').slice(1, 4)
+    photosInInitialData: props.initialData?.photos,
+    photosType: typeof props.initialData?.photos,
+    photosIsArray: Array.isArray(props.initialData?.photos),
+    photosLength: props.initialData?.photos?.length || 0
   })
   
-  if (newPhotos !== oldPhotos) {
-    console.log('✅ AdForm: form.photos изменен')
-    
-    // Детальное сравнение
-    if (Array.isArray(newPhotos) && Array.isArray(oldPhotos)) {
-      console.log('📊 AdForm: Детальное сравнение массивов photos:', {
-        oldLength: oldPhotos.length,
-        newLength: newPhotos.length,
-        added: newPhotos.length - oldPhotos.length,
-        oldIds: oldPhotos.map(p => p?.id || 'no-id'),
-        newIds: newPhotos.map(p => p?.id || 'no-id')
-      })
-    }
-  }
-}, { deep: true })
+  console.log('🔍 AdForm: onMounted - form.photos:', {
+    formPhotos: form.photos,
+    formPhotosType: typeof form.photos,
+    formPhotosIsArray: Array.isArray(form.photos),
+    formPhotosLength: form.photos?.length || 0
+  })
+})
 
 </script>
 

@@ -17,10 +17,31 @@ export function useAdForm(initialData = {}, options = {}) {
     onError = null
   } = options
 
+  // Объект parameters для физических характеристик (объявляем ПЕРЕД form)
+  const parameters = reactive({
+    title: initialData.title || '',
+    age: initialData.age || '',
+    height: initialData.height || '',
+    weight: initialData.weight || '',
+    breast_size: initialData.breast_size || '',
+    hair_color: initialData.hair_color || '',
+    eye_color: initialData.eye_color || '',
+    nationality: initialData.nationality || '',
+    bikini_zone: initialData.bikini_zone || ''
+  })
+
+  // Объект contacts для контактной информации
+  const contacts = reactive({
+    phone: initialData.phone || '',
+    contact_method: initialData.contact_method || 'whatsapp',
+    whatsapp: initialData.whatsapp || '',
+    telegram: initialData.telegram || ''
+  })
+
   // Состояние формы
   const form = reactive({
-    // Новые поля согласно Avito
-    title: initialData.title || '',
+    // Новые поля согласно Avito (title теперь в parameters)
+    // title: initialData.title || '', // УБРАНО - теперь в parameters
     specialty: initialData.specialty || '',
     clients: initialData.clients || [],
     service_location: initialData.service_location || [],
@@ -32,14 +53,8 @@ export function useAdForm(initialData = {}, options = {}) {
     price_unit: initialData.price_unit || 'session',
     is_starting_price: initialData.is_starting_price || false,
     
-    // Физические параметры
-    age: initialData.age || '',
-    height: initialData.height || '',
-    weight: initialData.weight || '',
-    breast_size: initialData.breast_size || '',
-    hair_color: initialData.hair_color || '',
-    eye_color: initialData.eye_color || '',
-    nationality: initialData.nationality || '',
+    // Физические параметры (теперь в объекте parameters)
+    // age, height, weight, breast_size, hair_color, eye_color, nationality, bikini_zone - убраны
     
     // Акции (обновленные)
     new_client_discount: initialData.new_client_discount || '',
@@ -56,9 +71,8 @@ export function useAdForm(initialData = {}, options = {}) {
     address: initialData.address || null,
     travel_area: initialData.travel_area || null,
     
-    // Контакты
-    phone: initialData.phone || '',
-    contact_method: initialData.contact_method || 'whatsapp',
+    // Контакты (теперь в объекте contacts)
+    // phone, contact_method, whatsapp, telegram - убраны
     
     // Другие поля
     description: initialData.description || '',
@@ -71,11 +85,17 @@ export function useAdForm(initialData = {}, options = {}) {
     additional_features: initialData.additional_features || '',
     schedule: initialData.schedule || {},
     schedule_notes: initialData.schedule_notes || '',
-    whatsapp: initialData.whatsapp || '',
-    telegram: initialData.telegram || '',
+    // whatsapp: initialData.whatsapp || '', // УБРАНО - теперь в contacts
+    // telegram: initialData.telegram || '', // УБРАНО - теперь в contacts
     
     // Дополнительные поля для службы
-    service_provider: initialData.service_provider || ''
+    service_provider: initialData.service_provider || '',
+    
+    // Объект parameters для физических характеристик
+    parameters: parameters,
+    
+    // Объект contacts для контактной информации
+    contacts: contacts
   })
 
   // Состояние валидации

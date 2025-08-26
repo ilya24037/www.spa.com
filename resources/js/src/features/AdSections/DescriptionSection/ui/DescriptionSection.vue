@@ -4,6 +4,7 @@
       v-model="localDescription"
       placeholder="Напишите подробное описание о себе и о своих услугах. Подробное, интересное, смысловое описание значительно увеличивает эффективность вашей анкеты."
       :rows="5"
+      :required="true"
       :error="errors.description"
       :maxlength="2000"
       :show-counter="true"

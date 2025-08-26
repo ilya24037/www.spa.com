@@ -1,0 +1,1 @@
+export { default as PhotoThumbnails } from './PhotoThumbnails.vue'

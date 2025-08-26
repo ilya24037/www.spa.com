@@ -1,5 +1,15 @@
 <template>
   <div class="video-list">
+    <!-- Счетчик видео и подсказка (как у фото) -->
+    <div v-if="safeVideos.length > 0" class="flex justify-between items-center mb-2">
+      <span class="text-sm text-gray-600">
+        Загружено {{ safeVideos.length }} видео
+      </span>
+      <span v-if="safeVideos.length > 1" class="text-xs text-gray-500">
+        Перетащите для изменения порядка
+      </span>
+    </div>
+    
     <!-- Сетка видео как у фотографий -->
     <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
       <TransitionGroup name="list">
@@ -7,6 +17,15 @@
           v-for="(video, index) in safeVideos"
           :key="video.id"
           class="video-item-wrapper relative"
+          :class="{
+            'opacity-50': props.draggedIndex === index,
+            'ring-2 ring-blue-500': props.dragOverIndex === index
+          }"
+          :draggable="true"
+          @dragstart="$emit('dragstart', index)"
+          @dragover.prevent="$emit('dragover', index)"
+          @drop.prevent="$emit('drop', index)"
+          @dragend="$emit('dragend')"
         >
           <!-- Компонент видео -->
           <VideoItem
@@ -39,12 +58,18 @@ import type { Video } from '../../model/types'
 
 interface Props {
   videos: Video[]
+  draggedIndex?: number | null
+  dragOverIndex?: number | null
 }
 
 const props = defineProps<Props>()
 
 const emit = defineEmits<{
   remove: [id: string | number]
+  dragstart: [index: number]
+  dragover: [index: number]
+  drop: [index: number]
+  dragend: []
 }>()
 
 // Computed для защиты от null/undefined (требование CLAUDE.md)

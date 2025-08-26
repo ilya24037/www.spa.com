@@ -31,7 +31,13 @@
         <!-- Список видео -->
         <VideoList
           :videos="safeVideos"
+          :dragged-index="draggedIndex"
+          :drag-over-index="dragOverIndex"
           @remove="handleRemoveVideo"
+          @dragstart="handleDragStart"
+          @dragover="handleDragOver"
+          @drop="onDragDrop"
+          @dragend="handleDragEnd"
         />
       </div>
       
@@ -131,10 +137,16 @@ const hasError = ref(false)
 const {
   localVideos,
   error,
+  draggedIndex,
+  dragOverIndex,
   addVideos,
   removeVideo,
   uploadVideo,
-  initializeFromProps
+  initializeFromProps,
+  handleDragStart,
+  handleDragOver,
+  handleDragDrop,
+  handleDragEnd
 } = useVideoUpload()
 
 const {
@@ -170,24 +182,9 @@ const maxSizeInMB = computed(() => {
   return Math.round(props.maxSize / (1024 * 1024))
 })
 
-// Инициализация видео из props
+// Инициализация видео из props (упрощённая логика как в фото)
 watch(() => props.videos, (newVideos) => {
-  console.log('🎬 VideoUpload: Получены videos из props:', {
-    newVideos,
-    newVideosType: typeof newVideos,
-    isArray: Array.isArray(newVideos),
-    length: newVideos?.length,
-    localVideosLength: localVideos.value?.length
-  })
-  
-  // Явная проверка на null и undefined
-  if (newVideos !== null && 
-      newVideos !== undefined && 
-      newVideos.length > 0 && 
-      localVideos.value !== null &&
-      localVideos.value !== undefined &&
-      localVideos.value.length === 0) {
-    console.log('🎬 VideoUpload: Инициализируем из props')
+  if (newVideos && newVideos.length > 0 && localVideos.value.length === 0) {
     initializeFromProps(newVideos)
   }
 }, { immediate: true })
@@ -210,22 +207,21 @@ const handleDrop = (event: DragEvent) => {
   }
 }
 
+// Обработчик drag&drop для изменения порядка (как у фото)
+const onDragDrop = (index: number) => {
+  handleDragDrop(index)
+  // Эмитим изменения после drag&drop
+  emit('update:videos', safeVideos.value)
+}
+
 // Обработчик выбора файлов
 const handleFilesSelected = async (files: File[]) => {
-  console.log('🎥 VideoUpload: handleFilesSelected вызван с:', {
-    files,
-    filesLength: files?.length,
-    currentVideosCount: safeVideosCount.value,
-    maxFiles: props.maxFiles
-  })
-  
-  // Явная проверка на null и undefined
-  if (files === null || files === undefined || files.length === 0) {
-    console.log('🎥 VideoUpload: Нет файлов для обработки')
+  // Упрощённая проверка как в фото
+  if (!files || files.length === 0) {
     return
   }
 
-  // Проверка количества с явными проверками
+  // Проверка количества
   if (safeVideosCount.value + files.length > props.maxFiles) {
     error.value = `Максимум ${props.maxFiles} видео`
     hasError.value = true
@@ -233,30 +229,19 @@ const handleFilesSelected = async (files: File[]) => {
   }
   
   // Определение формата первого файла
-  if (files.length > 0 && files[0] !== null && files[0] !== undefined) {
+  if (files.length > 0 && files[0]) {
     detectedFormat.value = await detectVideoFormat(files[0])
   }
   
   try {
-    console.log('🎥 VideoUpload: Начало добавления видео...')
-    
     // Добавление видео
     await addVideos(files)
-    
-    console.log('🎥 VideoUpload: Видео добавлены, emit update:videos с:', {
-      safeVideosValue: safeVideos.value,
-      safeVideosLength: safeVideos.value.length
-    })
     
     emit('update:videos', safeVideos.value)
     
     // Начать загрузку для каждого видео
     for (const video of safeVideos.value) {
-      // Явная проверка полей видео
-      if (video !== null && 
-          video !== undefined && 
-          video.file !== null && 
-          video.file !== undefined) {
+      if (video && video.file) {
         await uploadVideo(video.file)
       }
     }

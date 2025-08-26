@@ -24,7 +24,7 @@ class CreateAdRequest extends FormRequest
     {
         return [
             'category' => 'required|string|max:100',
-            'title' => 'required|string|max:255|min:10',
+            'title' => 'required|string|max:255|min:2',
             'specialty' => 'nullable|string|max:200',
             'clients' => 'array',
             'clients.*' => 'string|max:50',
@@ -65,6 +65,7 @@ class CreateAdRequest extends FormRequest
             'eye_color' => 'nullable|string|max:50',
             'appearance' => 'nullable|string|max:100',
             'nationality' => 'nullable|string|max:100',
+            'bikini_zone' => 'nullable|string|max:50',
             'has_girlfriend' => 'nullable|boolean',
             
             // Услуги и расписание
@@ -90,9 +91,9 @@ class CreateAdRequest extends FormRequest
     {
         return [
             'category.required' => 'Выберите категорию услуг',
-            'title.required' => 'Введите название объявления',
-            'title.min' => 'Название должно содержать минимум 10 символов',
-            'title.max' => 'Название не должно превышать 255 символов',
+            'title.required' => 'Введите имя',
+            'title.min' => 'Имя должно содержать минимум 2 символа',
+            'title.max' => 'Имя не должно превышать 255 символов',
 
             'service_location.required' => 'Выберите место оказания услуг',
             'service_location.min' => 'Выберите хотя бы один тип услуг',

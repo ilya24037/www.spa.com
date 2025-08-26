@@ -1,7 +1,10 @@
 <!-- Р'Р°Р·РѕРІС‹Р№ textarea РІ СЃС‚РёР»Рµ РђРІРёС‚Рѕ -->
 <template>
   <div class="flex flex-col gap-1.5 w-full">
-    <label v-if="label" :for="textareaId" class="text-sm font-medium text-gray-900 leading-tight">{{ label }}</label>
+    <label v-if="label" :for="textareaId" class="text-sm font-medium text-gray-900 leading-tight">
+      {{ label }}
+      <span v-if="required" class="text-red-500 ml-1">*</span>
+    </label>
     
     <div class="relative flex items-start">
       <textarea
@@ -98,6 +101,10 @@ const props = defineProps({
     resizable: {
         type: Boolean,
         default: true
+    },
+    required: {
+        type: Boolean,
+        default: false
     }
 })
 

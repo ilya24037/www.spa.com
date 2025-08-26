@@ -1,7 +1,10 @@
 <!-- Базовый инпут в стиле Авито -->
 <template>
   <div class="w-full">
-    <label v-if="label" :for="inputId" class="block text-base font-medium text-gray-900 mb-2">{{ label }}</label>
+    <label v-if="label" :for="inputId" class="block text-base font-medium text-gray-900 mb-2">
+      {{ label }}
+      <span v-if="required" class="text-red-500 ml-1">*</span>
+    </label>
     
     <div
       class="relative w-full"
@@ -181,6 +184,10 @@ const props = defineProps({
     step: {
         type: [String, Number],
         default: null
+    },
+    required: {
+        type: Boolean,
+        default: false
     }
 })
 

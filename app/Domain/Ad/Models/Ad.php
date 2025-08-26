@@ -58,6 +58,7 @@ class Ad extends Model
         'eye_color',
         'appearance',
         'nationality',
+        'bikini_zone',
         'discount',
         'new_client_discount', 
         'gift',

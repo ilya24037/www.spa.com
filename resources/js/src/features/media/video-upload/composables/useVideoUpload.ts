@@ -17,6 +17,10 @@ export function useVideoUpload() {
   const error = ref('')
   const videoMetadata = ref<VideoMetadata | null>(null)
   const isUploading = ref(false)
+  
+  // Drag and drop состояния (как у фото)
+  const draggedIndex = ref<number | null>(null)
+  const dragOverIndex = ref<number | null>(null)
 
   const videoSources = computed((): VideoSource[] => {
     if (localVideos.value.length === 0) return []
@@ -60,88 +64,65 @@ export function useVideoUpload() {
         return
       }
       
-      const reader = new FileReader()
-      
-      reader.onload = (e) => {
-        const dataUrl = e.target?.result as string
-        const video: Video = {
-          id: Date.now(),
-          file: file,
-          url: dataUrl,           // Для воспроизведения
-          thumbnail: dataUrl,     // Для превью
-          format: file.type,
-          size: file.size,
-          isUploading: false
-        }
-        
-        console.log('🎥 processVideo: Создано видео:', {
-          id: video.id,
-          hasUrl: !!video.url,
-          hasThumbnail: !!video.thumbnail,
-          format: video.format,
-          size: video.size
-        })
-        
-        isUploading.value = false
-        resolve(video)
+      // ВАЖНО: Не используем FileReader для видео!
+      // Вместо этого сохраняем сам файл, VideoItem создаст blob URL
+      const video: Video = {
+        id: Date.now(),
+        file: file,              // Сохраняем файл для создания blob URL в VideoItem
+        url: null,               // URL будет создан на сервере после загрузки
+        thumbnail: null,         // Thumbnail будет создан позже если нужно
+        format: file.type,
+        size: file.size,
+        isUploading: false
       }
       
-      reader.onerror = () => {
-        error.value = 'Ошибка при загрузке файла'
-        isUploading.value = false
-        reject(new Error('FileReader error'))
-      }
+      // Видео успешно обработано
       
-      reader.readAsDataURL(file)
+      isUploading.value = false
+      resolve(video)
     })
   }
 
   const addVideos = async (files: File[]) => {
-    console.log('🎥 addVideos: Начало обработки файлов:', {
-      filesCount: files.length,
-      currentVideosCount: localVideos.value.length
-    })
+    // ИСПРАВЛЕНО: Добавляем новые видео к существующим
+    if (files.length === 0) return
     
-    const newVideos: Video[] = []
-    
+    // Обрабатываем все выбранные файлы
     for (const file of files) {
       try {
-        console.log('🎥 addVideos: Обрабатываем файл:', {
-          name: file.name,
-          type: file.type,
-          size: file.size
-        })
-        
         const video = await processVideo(file)
-        newVideos.push(video)
-        
-        console.log('🎥 addVideos: Видео успешно обработано:', video.id)
+        // Добавляем к существующим видео, а не заменяем
+        localVideos.value.push(video)
       } catch (err) {
-        console.error('🎥 addVideos: Ошибка обработки видео:', err)
+        // Ошибка обработки видео
       }
     }
-    
-    const oldLength = localVideos.value.length
-    localVideos.value = [...localVideos.value, ...newVideos]
-    
-    console.log('🎥 addVideos: Завершено:', {
-      newVideosAdded: newVideos.length,
-      totalVideosBefore: oldLength,
-      totalVideosAfter: localVideos.value.length
-    })
   }
 
   const addVideo = async (file: File) => {
     try {
       const video = await processVideo(file)
-      localVideos.value = [video] // Заменяем существующее видео
+      // ИСПРАВЛЕНО: Добавляем к существующим видео
+      localVideos.value.push(video)
     } catch (err) {
-      console.error('Error adding video:', err)
+      // Ошибка добавления видео
     }
   }
 
   const removeVideo = (id: string | number) => {
-    localVideos.value = localVideos.value.filter(v => v.id !== id)
+    // ИСПРАВЛЕНО: Удаляем только конкретное видео по ID
+    const index = localVideos.value.findIndex(v => v.id === id)
+    if (index !== -1) {
+      // Очищаем blob URL если есть
+      const video = localVideos.value[index]
+      if (video.url && video.url.startsWith('blob:')) {
+        URL.revokeObjectURL(video.url)
+      }
+      // Удаляем видео из массива
+      localVideos.value.splice(index, 1)
+    }
+    
+    // Очищаем метаданные если удалили последнее видео
     if (localVideos.value.length === 0) {
       videoMetadata.value = null
       error.value = ''
@@ -222,58 +203,69 @@ export function useVideoUpload() {
     return true
   }
 
-  const initializeFromProps = (videos: Video[] | any[]) => {
-    console.log('🎬 useVideoUpload: initializeFromProps вызван с:', {
-      videos,
-      videosType: typeof videos,
-      isArray: Array.isArray(videos),
-      length: videos?.length,
-      localVideosLength: localVideos.value.length
-    })
-    
-    if (localVideos.value.length === 0 && videos && videos.length > 0) {
+  const initializeFromProps = (videos: Array<string | Video>) => {
+    // ТОЧНАЯ копия логики из фото (без фильтрации!)
+    if (localVideos.value.length === 0 && videos.length > 0) {
       localVideos.value = videos.map((video, index) => {
-        console.log(`🎬 useVideoUpload: Обрабатываем видео ${index}:`, {
-          video,
-          videoType: typeof video,
-          isString: typeof video === 'string',
-          hasUrl: video?.url,
-          hasId: video?.id
-        })
-        
-        // Если это строка (URL) - преобразуем в объект Video
         if (typeof video === 'string') {
-          const convertedVideo = {
-            id: `video-${index}-${Date.now()}`,
+          return {
+            id: `existing-${index}`,
             url: video,
+            thumbnail: video, // аналог preview в фото
             file: null,
-            thumbnail: null,
-            format: 'video/mp4',
-            size: 0,
-            isUploading: false,
-            uploadProgress: 0,
-            error: null
+            isUploading: false
           }
-          console.log(`🎬 useVideoUpload: Преобразовали строку в объект:`, convertedVideo)
-          return convertedVideo
         }
-        
-        // Если объект, но без ID - добавляем ID
-        if (typeof video === 'object' && !video.id) {
-          const videoWithId = {
-            ...video,
-            id: `video-${index}-${Date.now()}`
-          }
-          console.log(`🎬 useVideoUpload: Добавили ID к объекту:`, videoWithId)
-          return videoWithId
-        }
-        
-        console.log(`🎬 useVideoUpload: Используем видео как есть:`, video)
-        return video
+        const videoObj = video as Partial<Video>
+        return {
+          ...videoObj,
+          id: videoObj.id || `video-${index}`,
+          isUploading: videoObj.isUploading || false
+        } as Video
       })
-      
-      console.log('🎬 useVideoUpload: Финальный localVideos:', localVideos.value)
     }
+  }
+
+  // Метод для изменения порядка видео (копия из фото)
+  const reorderVideos = (fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0 ||
+        fromIndex >= localVideos.value.length || toIndex >= localVideos.value.length) {
+      return
+    }
+    
+    const newVideos = [...localVideos.value]
+    const [movedVideo] = newVideos.splice(fromIndex, 1)
+    newVideos.splice(toIndex, 0, movedVideo)
+    
+    localVideos.value = newVideos
+  }
+
+  // Drag and drop handlers (точная копия из фото)
+  const handleDragStart = (index: number) => {
+    draggedIndex.value = index
+  }
+
+  const handleDragOver = (index: number) => {
+    if (draggedIndex.value !== null && draggedIndex.value !== index) {
+      dragOverIndex.value = index
+    }
+  }
+
+  const handleDragDrop = (targetIndex: number) => {
+    const sourceIndex = draggedIndex.value
+    
+    if (sourceIndex !== null && sourceIndex !== targetIndex) {
+      reorderVideos(sourceIndex, targetIndex)
+    }
+    
+    // Reset drag state
+    draggedIndex.value = null
+    dragOverIndex.value = null
+  }
+
+  const handleDragEnd = () => {
+    draggedIndex.value = null
+    dragOverIndex.value = null
   }
 
   return {
@@ -282,6 +274,10 @@ export function useVideoUpload() {
     videoMetadata,
     isUploading,
     videoSources,
+    // Drag and drop состояния
+    draggedIndex,
+    dragOverIndex,
+    // Методы
     processVideo,
     addVideos,
     addVideo,
@@ -292,6 +288,12 @@ export function useVideoUpload() {
     formatFileSize,
     getVideoErrorMessage,
     validateVideoFile,
-    initializeFromProps
+    initializeFromProps,
+    // Drag and drop методы
+    reorderVideos,
+    handleDragStart,
+    handleDragOver,
+    handleDragDrop,
+    handleDragEnd
   }
 }

@@ -8,15 +8,15 @@
  */
 export const validateTitle = (title) => {
     if (!title || title.trim().length === 0) {
-        return 'Название объявления обязательно'
+        return 'Имя обязательно'
     }
   
-    if (title.length < 10) {
-        return 'Название должно содержать минимум 10 символов'
+    if (title.length < 2) {
+        return 'Имя должно содержать минимум 2 символа'
     }
   
     if (title.length > 255) {
-        return 'Название не должно превышать 255 символов'
+        return 'Имя не должно превышать 255 символов'
     }
   
     return null

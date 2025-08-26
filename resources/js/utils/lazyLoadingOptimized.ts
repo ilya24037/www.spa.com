@@ -63,13 +63,9 @@ export function createLazyComponent(
  * Предзагрузка критических компонентов
  */
 export async function preloadCriticalComponents() {
-  logger.info('Starting critical components preload', null, 'LazyLoading')
-  
   const startTime = performance.now()
   await bundleOptimizer.preloadCritical(CRITICAL_COMPONENTS)
   const endTime = performance.now()
-  
-  logger.info(`Critical components preloaded in ${(endTime - startTime).toFixed(2)}ms`, null, 'LazyLoading')
 }
 
 /**
@@ -79,7 +75,6 @@ export function preloadRouteComponents(routeName: string) {
   const components = ROUTE_COMPONENTS[routeName as keyof typeof ROUTE_COMPONENTS]
   
   if (components) {
-    logger.debug(`Prefetching components for route: ${routeName}`, { count: components.length }, 'LazyLoading')
     bundleOptimizer.prefetchRoute(routeName, components)
   }
 }
@@ -217,7 +212,6 @@ export async function initializeOptimizedLoading() {
       preloadRouteComponents('home')
     }
     
-    logger.info('Optimized loading system initialized', null, 'LazyLoading')
   } catch (error) {
     logger.error('Failed to initialize optimized loading', error, 'LazyLoading')
   }

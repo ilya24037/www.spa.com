@@ -5,8 +5,9 @@
         v-model="localTitle"
         name="title"
         type="text"
-        label="Название объявления"
-        placeholder="Введите название объявления"
+        label="Имя"
+        placeholder="Введите имя"
+        :required="true"
         @update:modelValue="emitAll"
         :error="errors?.title || errors?.['parameters.title']"
       />
@@ -80,6 +81,16 @@
         @update:modelValue="emitAll"
         :error="errors?.nationality || errors?.['parameters.nationality']"
       />
+      
+      <BaseSelect
+        v-if="props.showFields.includes('bikini_zone')"
+        v-model="localBikiniZone"
+        label="Зона бикини"
+        placeholder="Выберите тип"
+        :options="bikiniZoneOptions"
+        @update:modelValue="emitAll"
+        :error="errors?.bikini_zone || errors?.['parameters.bikini_zone']"
+      />
     </div>
   </div>
 </template>
@@ -99,16 +110,18 @@ const props = defineProps({
       breast_size: '',
       hair_color: '',
       eye_color: '',
-      nationality: ''
+      nationality: '',
+      bikini_zone: ''
     })
   },
   showFields: { 
     type: Array, 
-    default: () => ['age', 'breast_size', 'hair_color', 'eye_color', 'nationality'] 
+    default: () => ['age', 'breast_size', 'hair_color', 'eye_color', 'nationality', 'bikini_zone'] 
   },
   errors: { type: Object, default: () => ({}) }
 })
 const emit = defineEmits(['update:parameters'])
+
 // Локальная копия параметров
 const localParameters = ref({ ...props.parameters })
 
@@ -151,6 +164,11 @@ const localEyeColor = computed({
 const localNationality = computed({
   get: () => localParameters.value.nationality,
   set: (value) => updateParameter('nationality', value)
+})
+
+const localBikiniZone = computed({
+  get: () => localParameters.value.bikini_zone,
+  set: (value) => updateParameter('bikini_zone', value)
 })
 
 // Опции для селектов
@@ -204,6 +222,15 @@ const nationalityOptions = computed(() => [
   { value: 'other', label: 'Другая' }
 ])
 
+const bikiniZoneOptions = computed(() => [
+  { value: '', label: 'Не указано' },
+  { value: 'natural', label: 'Натуральная' },
+  { value: 'bikini_line', label: 'Линия бикини' },
+  { value: 'triangle', label: 'Треугольник' },
+  { value: 'thin_strip', label: 'Тонкая полоска' },
+  { value: 'smooth', label: 'Гладкая' }
+])
+
 // Универсальная функция обновления параметра
 const updateParameter = (field, value) => {
   localParameters.value[field] = value
@@ -214,6 +241,7 @@ const updateParameter = (field, value) => {
 watch(() => props.parameters, (newParams) => {
   localParameters.value = { ...newParams }
 }, { deep: true })
+
 // Функция для отправки всех параметров
 const emitAll = () => {
   emit('update:parameters', { ...localParameters.value })

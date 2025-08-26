@@ -11,6 +11,7 @@
         placeholder="+7 (999) 999-99-99"
         hint="Основной номер для связи"
         pattern="^\+7 \([0-9]{3}\) [0-9]{3}-[0-9]{2}-[0-9]{2}$"
+        :required="true"
         :error="errors?.phone"
         @update:modelValue="emitAll"
       />
@@ -42,6 +43,7 @@
         label="Способ связи"
         :options="contactMethodOptions"
         hint="Как клиенты могут с вами связаться"
+        :required="true"
         :error="errors?.contact_method"
         @update:modelValue="emitAll"
       />

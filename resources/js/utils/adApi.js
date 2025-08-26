@@ -340,6 +340,7 @@ export const prepareFormData = (form) => {
     eye_color: form.parameters?.eye_color || '',
     appearance: form.appearance || '',
     nationality: form.parameters?.nationality || '',
+    bikini_zone: form.parameters?.bikini_zone || '',
     
     // Услуги
     services: form.services || {},
