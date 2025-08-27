@@ -24,17 +24,14 @@ export interface VideoFormat {
   }
 }
 
+// ✅ УПРОЩЕНИЕ: Простые props по паттерну DescriptionSection
 export interface VideoUploadProps {
-  videos?: Video[]
+  videos?: Video[] | string[]
   maxFiles?: number
   maxSize?: number // в байтах
-  acceptedFormats?: string[]
-  errors?: Record<string, string>
 }
 
+// ✅ УПРОЩЕНИЕ: Один emit как в DescriptionSection
 export interface VideoUploadEmits {
   'update:videos': [videos: Video[]]
-  'upload': [video: Video]
-  'remove': [id: string | number]
-  'error': [error: string]
 }

@@ -497,12 +497,116 @@ watch(() => form.video, (newVideos, oldVideos) => {
 
 // Обработчик прямой публикации черновика через Inertia
 const handlePublishDirect = async () => {
-  if (!props.adId) {
-    console.error('🟢 Нет ID объявления для публикации')
-    return
+  try {
+    console.log('🔵 handlePublishDirect НАЧАЛО')
+    console.log('  Режим:', isEditMode.value ? 'редактирование' : 'создание')
+    console.log('  adId:', props.adId)
+    console.log('  initialData?.id:', props.initialData?.id)
+    
+    // Для новых объявлений (не черновиков) используем handlePublish
+    if (!props.adId && !props.initialData?.id) {
+      console.log('📝 Это новое объявление, используем handlePublish')
+      console.log('🔍 Проверяем form перед вызовом handlePublish:', {
+        formExists: !!form,
+        hasTitle: !!form.parameters?.title,
+        hasPrice: !!form.price,
+        hasPhone: !!form.contacts?.phone,
+        hasCity: !!form.geo?.city
+      })
+      const result = handlePublish()
+      console.log('📊 handlePublish вернул:', result)
+      return result
+    }
+    
+    // Для черновиков проверяем наличие ID
+    if (!props.adId) {
+      console.error('❌ Нет ID черновика для публикации')
+      alert('Ошибка: не найден ID черновика')
+      return
+    }
+    
+    if (!form) {
+      console.error('❌ form не определен!')
+      alert('Ошибка инициализации формы')
+      return
+    }
+    
+    console.log('✅ Начинаем валидацию для объявления ID:', props.adId)
+    
+    // ВАЛИДАЦИЯ ОБЯЗАТЕЛЬНЫХ ПОЛЕЙ
+    const validationErrors: Record<string, string> = {}
+    
+    // 1. Проверка имени
+    if (!form.parameters?.title?.trim()) {
+      validationErrors.title = 'Укажите имя'
+      console.log('❌ Имя не заполнено')
+    } else {
+      console.log('✅ Имя:', form.parameters.title)
+    }
+    
+    // 2. Проверка цены
+    if (!form.price || Number(form.price) <= 0) {
+      validationErrors.price = 'Укажите цену (больше 0)'
+      console.log('❌ Цена не указана или некорректна:', form.price)
+    } else {
+      console.log('✅ Цена:', form.price)
+    }
+    
+    // 3. Проверка телефона
+    if (!form.contacts?.phone?.trim()) {
+      validationErrors.phone = 'Укажите телефон для связи'
+      console.log('❌ Телефон не заполнен')
+    } else {
+      console.log('✅ Телефон:', form.contacts.phone)
+    }
+    
+    // 4. Проверка города
+    if (!form.geo?.city) {
+      validationErrors.city = 'Выберите город'
+      console.log('❌ Город не выбран')
+    } else {
+      console.log('✅ Город:', form.geo.city)
+    }
+    
+    // 5. Проверка адреса
+    if (!form.geo?.address?.trim()) {
+      validationErrors.address = 'Укажите адрес'
+      console.log('❌ Адрес не заполнен')
+    } else {
+      console.log('✅ Адрес:', form.geo.address)
+    }
+    
+    // 6. Проверка фото
+    if (!form.photos || !Array.isArray(form.photos) || form.photos.length === 0) {
+      validationErrors.photos = 'Добавьте хотя бы одно фото'
+      console.log('❌ Фото не добавлены')
+    } else {
+      console.log('✅ Фото:', form.photos.length, 'шт.')
+    }
+    
+    console.log('📊 ИТОГ ВАЛИДАЦИИ:')
+    console.log('  Найдено ошибок:', Object.keys(validationErrors).length)
+    console.log('  Ошибки:', validationErrors)
+  
+  // Если есть ошибки - показываем и не публикуем
+  if (Object.keys(validationErrors).length > 0) {
+    const errorMessages = Object.values(validationErrors).join('\n• ')
+    const alertMessage = `❌ Заполните обязательные поля:\n\n• ${errorMessages}`
+    
+    console.log('❌ ВАЛИДАЦИЯ НЕ ПРОШЛА!')
+    alert(alertMessage)
+    
+    // Прокручиваем к первой ошибке
+    const firstError = Object.keys(validationErrors)[0]
+    console.log('📍 Прокручиваем к первой ошибке:', firstError)
+    
+    // Простая прокрутка вверх формы
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    
+    return // Прерываем публикацию
   }
   
-  console.log('🟢 Начинаем публикацию черновика ID:', props.adId)
+  console.log('✅ Валидация прошла успешно! Публикуем объявление...')
   
   saving.value = true
   
@@ -522,6 +626,11 @@ const handlePublishDirect = async () => {
       saving.value = false
     }
   })
+  } catch (error) {
+    console.error('❌❌❌ КРИТИЧЕСКАЯ ОШИБКА в handlePublishDirect:', error)
+    console.error('Stack trace:', error.stack)
+    alert('Произошла ошибка при валидации. Проверьте консоль.')
+  }
 }
 
 // Определяем активное объявление

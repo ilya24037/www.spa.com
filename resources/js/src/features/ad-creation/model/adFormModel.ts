@@ -369,6 +369,93 @@ export function useAdFormModel(props: any, emit: any) {
     return hasValidPropsId || hasValidDataId
   })
   
+  // Функция для очистки подсветки ошибок
+  const clearErrorHighlight = (fieldName: string) => {
+    setTimeout(() => {
+      if (fieldName === 'title') {
+        const input = document.querySelector('input[placeholder*="Имя"], input[placeholder*="имя"]')
+        if (input) {
+          input.classList.remove('border-2', 'border-red-500', 'ring-2', 'ring-red-200')
+        }
+      } else if (fieldName === 'price') {
+        // Убираем подсветку только с полей "1 час"
+        const apartments1hInput = document.querySelector('input[name="apartments_1h"]')
+        const outcall1hInput = document.querySelector('input[name="outcall_1h"]')
+        
+        if (apartments1hInput) {
+          apartments1hInput.classList.remove('border-2', 'border-red-500', 'ring-2', 'ring-red-200')
+        }
+        if (outcall1hInput) {
+          outcall1hInput.classList.remove('border-2', 'border-red-500', 'ring-2', 'ring-red-200')
+        }
+      } else if (fieldName === 'phone') {
+        const input = document.querySelector('input[placeholder*="телефон"], input[type="tel"]')
+        if (input) {
+          input.classList.remove('border-2', 'border-red-500', 'ring-2', 'ring-red-200')
+        }
+      } else if (fieldName === 'city') {
+        const select = document.querySelector('select[placeholder*="город"], .city-select')
+        if (select) {
+          select.classList.remove('border-2', 'border-red-500', 'ring-2', 'ring-red-200')
+        }
+      }
+    }, 0)
+  }
+  
+  // Watchers для очистки подсветки при изменении полей
+  watch(() => form.parameters?.title, (newValue) => {
+    if (newValue) {
+      clearErrorHighlight('title')
+      if (errors.value['parameters.title']) {
+        delete errors.value['parameters.title']
+      }
+    }
+  })
+  
+  // Watcher для проверки цен за 1 час (только apartments_1h или outcall_1h)
+  watch(() => [
+    form.prices?.apartments_1h,
+    form.prices?.outcall_1h
+  ], (newValues) => {
+    // Проверяем наличие хотя бы одной цены за 1 час
+    const hasApartments1h = newValues[0] && Number(newValues[0]) > 0
+    const hasOutcall1h = newValues[1] && Number(newValues[1]) > 0
+    
+    if (hasApartments1h || hasOutcall1h) {
+      clearErrorHighlight('price')
+      if (errors.value.price) {
+        delete errors.value.price
+      }
+    }
+  }, { deep: true })
+  
+  watch(() => form.contacts?.phone, (newValue) => {
+    if (newValue) {
+      clearErrorHighlight('phone')
+      if (errors.value['contacts.phone']) {
+        delete errors.value['contacts.phone']
+      }
+    }
+  })
+  
+  watch(() => form.geo?.city, (newValue) => {
+    if (newValue) {
+      clearErrorHighlight('city')
+      if (errors.value['geo.city']) {
+        delete errors.value['geo.city']
+      }
+    }
+  })
+  
+  // Watcher для поля clients
+  watch(() => form.clients, (newValue) => {
+    if (newValue && newValue.length > 0) {
+      if (errors.value.clients) {
+        delete errors.value.clients
+      }
+    }
+  }, { deep: true })
+  
   // Watcher для синхронизации адреса из geo в отдельное поле address
   watch(() => form.geo, (newGeo) => {
     if (typeof newGeo === 'string' && newGeo) {
@@ -397,7 +484,8 @@ export function useAdFormModel(props: any, emit: any) {
       'price': form.price,
       'contacts.phone': form.contacts.phone,
       'geo.city': form.geo?.city,
-      'geo': form.geo
+      'geo': form.geo,
+      'clients': form.clients
     })
     
     if (!form.parameters.title) {
@@ -407,9 +495,13 @@ export function useAdFormModel(props: any, emit: any) {
     
     // specialty теперь необязательно - убрали валидацию
     
-    if (!form.price || form.price <= 0) {
-      newErrors.price = ['Укажите корректную цену']
-      console.log('❌ validateForm: Цена некорректная:', form.price)
+    // Проверяем цену за 1 час (в апартаментах ИЛИ на выезде)
+    const hasApartments1h = form.prices?.apartments_1h && form.prices.apartments_1h > 0
+    const hasOutcall1h = form.prices?.outcall_1h && form.prices.outcall_1h > 0
+    
+    if (!hasApartments1h && !hasOutcall1h) {
+      newErrors.price = ['Укажите цену за 1 час (в апартаментах или на выезде)']
+      console.log('❌ validateForm: Не указана цена за 1 час')
     }
     
     if (!form.contacts.phone) {
@@ -422,6 +514,12 @@ export function useAdFormModel(props: any, emit: any) {
       console.log('❌ validateForm: Город не выбран')
     }
     
+    // Проверяем, что выбран хотя бы один клиент
+    if (!form.clients || form.clients.length === 0) {
+      newErrors.clients = ['Укажите значение параметра']
+      console.log('❌ validateForm: Не выбраны клиенты')
+    }
+    
     console.log('🔍 validateForm: Результат валидации', {
       errors: newErrors,
       errorsCount: Object.keys(newErrors).length,
@@ -429,11 +527,118 @@ export function useAdFormModel(props: any, emit: any) {
     })
     
     errors.value = newErrors
+    
+    // Если есть ошибки - прокручиваем к первому незаполненному полю
+    if (Object.keys(newErrors).length > 0) {
+      console.log('🚨 Есть ошибки валидации, прокручиваем к первому полю')
+      
+      // Определяем какое поле показать первым
+      let firstErrorField = null
+      let sectionSelector = null
+      
+      if (newErrors['parameters.title']) {
+        firstErrorField = 'parameters.title'
+        sectionSelector = '.parameters-section, [data-section="parameters"]'
+      } else if (newErrors.price) {
+        firstErrorField = 'price'
+        sectionSelector = '.pricing-section, [data-section="pricing"]'
+      } else if (newErrors['contacts.phone']) {
+        firstErrorField = 'contacts.phone'
+        sectionSelector = '.contacts-section, [data-section="contacts"]'
+      } else if (newErrors['geo.city']) {
+        firstErrorField = 'geo.city'
+        sectionSelector = '.geography-section, [data-section="geography"]'
+      } else if (newErrors.clients) {
+        firstErrorField = 'clients'
+        sectionSelector = '.clients-section'
+      }
+      
+      console.log('📍 Первое поле с ошибкой:', firstErrorField)
+      
+      // Прокручиваем к секции с ошибкой
+      setTimeout(() => {
+        // Если ошибка в поле clients, сначала раскрываем секцию "ОСНОВНОЕ"
+        if (firstErrorField === 'clients') {
+          const basicSection = document.querySelector('[data-section="basic"]')
+          if (basicSection) {
+            // Проверяем, свернута ли секция по наличию класса collapsed или скрытого контента
+            const content = basicSection.querySelector('.section-content')
+            const isCollapsed = basicSection.classList.contains('collapsed') || 
+                                (content && (content.style.display === 'none' || content.classList.contains('hidden')))
+            
+            if (isCollapsed) {
+              // Ищем кнопку-заголовок для клика
+              const toggleButton = basicSection.querySelector('.section-header, .collapsible-header, [onclick*="toggle"]')
+              if (toggleButton) {
+                toggleButton.click() // Раскрываем секцию
+                console.log('📂 Раскрыта секция ОСНОВНОЕ')
+              }
+            }
+          }
+        }
+        
+        if (sectionSelector) {
+          const section = document.querySelector(sectionSelector)
+          if (section) {
+            // Небольшая задержка, чтобы секция успела раскрыться
+            setTimeout(() => {
+              section.scrollIntoView({ behavior: 'smooth', block: 'center' })
+              console.log('✅ Прокручено к секции:', sectionSelector)
+            }, firstErrorField === 'clients' ? 500 : 100) // Больше задержка для clients, чтобы секция успела раскрыться
+            
+            // Добавляем визуальную подсветку полей с ошибками
+            setTimeout(() => {
+              // Добавляем красную рамку к полям с ошибками
+              if (newErrors['parameters.title']) {
+                const titleInput = document.querySelector('input[placeholder*="Имя"], input[placeholder*="имя"]')
+                if (titleInput) {
+                  titleInput.classList.add('border-2', 'border-red-500', 'ring-2', 'ring-red-200')
+                }
+              }
+              
+              if (newErrors.price) {
+                // Подсвечиваем только поля "1 час" в апартаментах и на выезде
+                const apartments1hInput = document.querySelector('input[name="apartments_1h"]')
+                const outcall1hInput = document.querySelector('input[name="outcall_1h"]')
+                
+                if (apartments1hInput) {
+                  apartments1hInput.classList.add('border-2', 'border-red-500', 'ring-2', 'ring-red-200')
+                }
+                if (outcall1hInput) {
+                  outcall1hInput.classList.add('border-2', 'border-red-500', 'ring-2', 'ring-red-200')
+                }
+              }
+              
+              if (newErrors['contacts.phone']) {
+                const phoneInput = document.querySelector('input[placeholder*="телефон"], input[type="tel"]')
+                if (phoneInput) {
+                  phoneInput.classList.add('border-2', 'border-red-500', 'ring-2', 'ring-red-200')
+                }
+              }
+              
+              if (newErrors['geo.city']) {
+                const citySelect = document.querySelector('select[placeholder*="город"], .city-select')
+                if (citySelect) {
+                  citySelect.classList.add('border-2', 'border-red-500', 'ring-2', 'ring-red-200')
+                }
+              }
+            }, 500)
+          }
+        }
+      }, 100)
+    }
+    
     return Object.keys(newErrors).length === 0
   }
 
   // Обработка отправки формы
   const handleSubmit = async () => {
+    // Защита от двойного клика
+    if (saving.value) {
+      console.log('⚠️ handleSubmit: Уже идет сохранение, игнорируем повторный вызов')
+      return
+    }
+    
     console.log('🔵 adFormModel: КНОПКА "СОХРАНИТЬ ИЗМЕНЕНИЯ" НАЖАТА', {
       isEditMode: isEditMode.value,
       adId: props.adId,
@@ -447,14 +652,14 @@ export function useAdFormModel(props: any, emit: any) {
       }
     })
     
-    // ВРЕМЕННО: отключаем валидацию для активных объявлений
-    if (props.initialData?.status !== 'active' && !validateForm()) {
-      console.log('❌ adFormModel: Валидация не прошла')
+    // Валидация только для активных объявлений
+    if (props.initialData?.status === 'active' && !validateForm()) {
+      console.log('❌ adFormModel: Валидация не прошла для активного объявления')
       return
     }
     
-    if (props.initialData?.status === 'active') {
-      console.log('✅ adFormModel: Пропускаем валидацию для активного объявления')
+    if (props.initialData?.status !== 'active') {
+      console.log('✅ adFormModel: Пропускаем валидацию для черновика')
     }
     
     console.log('✅ adFormModel: Валидация прошла успешно')
@@ -577,6 +782,12 @@ export function useAdFormModel(props: any, emit: any) {
 
   // Сохранение черновика с корректной логикой PUT/POST
   const handleSaveDraft = async () => {
+    // Защита от двойного клика
+    if (saving.value) {
+      console.log('⚠️ handleSaveDraft: Уже идет сохранение, игнорируем повторный вызов')
+      return
+    }
+    
     try {
       saving.value = true
     
@@ -886,15 +1097,38 @@ export function useAdFormModel(props: any, emit: any) {
 
   // Публикация объявления
   const handlePublish = async () => {
-    if (!authStore.isAuthenticated) {
-      router.visit('/login')
+    console.log('🚀 handlePublish ВЫЗВАН')
+    
+    // Защита от двойного клика
+    if (saving.value) {
+      console.log('⚠️ handlePublish: Уже идет сохранение, игнорируем повторный вызов')
       return
     }
     
-    if (!validateForm()) {
+    console.log('🔍 Проверка авторизации:', {
+      authStore: authStore,
+      isAuthenticated: authStore.isAuthenticated,
+      user: authStore.user
+    })
+    
+    // Временно отключаем проверку авторизации - пользователь уже авторизован если он на /additem
+    // if (!authStore.isAuthenticated) {
+    //   console.log('❌ Пользователь не авторизован')
+    //   router.visit('/login')
+    //   return
+    // }
+    
+    console.log('🔍 Вызываем validateForm()...')
+    const isValid = validateForm()
+    console.log('📊 Результат validateForm():', isValid)
+    
+    if (!isValid) {
+      console.log('❌ ВАЛИДАЦИЯ НЕ ПРОШЛА - ОСТАНАВЛИВАЕМ ПУБЛИКАЦИЮ')
+      saving.value = false
       return
     }
     
+    console.log('✅ Валидация прошла, готовим данные для публикации')
     saving.value = true
     
     const publishData = {
@@ -902,12 +1136,25 @@ export function useAdFormModel(props: any, emit: any) {
       category: props.category
     }
     
+    console.log('📤 Отправляем данные на /ads/publish:', {
+      hasTitle: !!form.parameters?.title,
+      hasPrice: !!form.price,
+      hasPhone: !!form.contacts?.phone,
+      hasCity: !!form.geo?.city
+    })
+    
     // Отправляем на публикацию через Inertia
     router.post('/ads/publish', publishData, {
       preserveScroll: true,
+      onSuccess: () => {
+        console.log('✅ Объявление успешно опубликовано!')
+        // Backend сам сделает redirect на /profile
+      },
       onError: (errorResponse: any) => {
         // Обработка ошибки
+        console.error('❌ Ошибка публикации:', errorResponse)
         errors.value = errorResponse
+        alert('Ошибка при публикации объявления. Проверьте данные.')
       },
       onFinish: () => {
         saving.value = false

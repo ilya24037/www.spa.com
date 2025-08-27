@@ -6,10 +6,11 @@
         :key="option.value"
         :model-value="localClients.includes(option.value)"
         :label="option.label"
+        :has-error="!!errors.clients"
         @update:modelValue="toggleClient(option.value, $event)"
       />
     </div>
-    <div v-if="errors.clients" class="error-message">{{ errors.clients }}</div>
+    <div v-if="errors.clients" class="error-message">Укажите значение параметра</div>
   </div>
 </template>
 
@@ -59,7 +60,7 @@ const toggleClient = (value, checked) => {
 .checkbox-group { 
   display: flex; 
   flex-direction: column; 
-  gap: 12px; 
+  gap: 12px;
 }
 
 .error-message { 

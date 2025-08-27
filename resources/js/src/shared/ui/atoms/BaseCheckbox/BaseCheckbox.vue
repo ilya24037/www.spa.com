@@ -22,7 +22,8 @@
         'bg-blue-500': modelValue,
         'bg-gray-200': !modelValue,
         'hover:bg-gray-300': !disabled && !modelValue,
-        'cursor-not-allowed opacity-50': disabled 
+        'cursor-not-allowed opacity-50': disabled,
+        'border-2 border-red-500': hasError && !modelValue
       }"
     >
       <svg 
@@ -70,13 +71,15 @@ interface BaseCheckboxProps {
   name?: string
   label?: string
   disabled?: boolean
+  hasError?: boolean
 }
 
 const props = withDefaults(defineProps<BaseCheckboxProps>(), {
     modelValue: false,
     name: '',
     label: '',
-    disabled: false
+    disabled: false,
+    hasError: false
 });
 
 // Generate unique ID if not provided
