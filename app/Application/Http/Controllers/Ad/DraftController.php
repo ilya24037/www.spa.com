@@ -316,11 +316,12 @@ class DraftController extends Controller
                 ->with('success', 'Черновик сохранен');
         }
 
-        // Для AJAX запросов
+        // Для AJAX запросов возвращаем полный объект
         return response()->json([
             'success' => true,
             'message' => 'Черновик создан',
-            'ad_id' => $ad->id
+            'ad' => $ad->toArray(), // КРИТИЧЕСКИ ВАЖНО: возвращаем весь объект для обновления формы
+            'ad_id' => $ad->id // Для совместимости
         ]);
     }
 
@@ -636,11 +637,12 @@ class DraftController extends Controller
                 return redirect()->route('profile.items.draft')->with('success', 'Черновик обновлен успешно');
             }
             
-            // Для обычных AJAX запросов возвращаем JSON
+            // Для обычных AJAX запросов возвращаем JSON с полным объектом
             return response()->json([
                 'success' => true,
                 'message' => 'Черновик обновлен успешно',
-                'draft_id' => $draft->id
+                'ad' => $draft->toArray(), // КРИТИЧЕСКИ ВАЖНО: возвращаем весь объект для обновления формы
+                'draft_id' => $draft->id // Для совместимости
             ]);
         } catch (\Exception $e) {
             // Для Inertia запросов

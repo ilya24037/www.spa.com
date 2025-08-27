@@ -105,6 +105,11 @@ Route::get('/search/services', [SearchController::class, 'services'])->name('sea
 Route::get('/search/global', [SearchController::class, 'global'])->name('search.global');
 Route::get('/search/advanced', [SearchController::class, 'advanced'])->name('search.advanced');
 
+/*  Публичная карточка объявления  →   /ads/<slug>-<id>  */
+Route::get('/ads/{slug}-{ad}', [AdController::class, 'showPublic'])
+    ->where(['ad' => '[0-9]+', 'slug' => '.*'])
+    ->name('ads.show.public');
+
 /*  Карточка мастера  →   /masters/<slug>-<id>  */
 Route::get('/masters/{slug}-{master}', [MasterController::class, 'show'])
     ->where(['master' => '[0-9]+', 'slug' => '.*'])

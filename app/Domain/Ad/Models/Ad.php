@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 /**
  * Основная модель объявления
@@ -25,6 +26,7 @@ class Ad extends Model
         'user_id',
         'category',
         'title',
+        'slug',
         'specialty',
         'clients',
         'service_provider',
@@ -129,6 +131,55 @@ class Ad extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(\App\Domain\User\Models\User::class);
+    }
+    
+    /**
+     * Получить фотографии объявления как коллекцию
+     * Фотографии хранятся в JSON поле photos
+     */
+    public function getPhotosCollectionAttribute()
+    {
+        $photos = collect();
+        
+        // Если есть поле photos с JSON данными
+        if ($this->photos) {
+            $photosData = is_string($this->photos) ? json_decode($this->photos, true) : $this->photos;
+            if (is_array($photosData)) {
+                foreach ($photosData as $index => $photoUrl) {
+                    if (is_string($photoUrl)) {
+                        $photos->push((object)[
+                            'id' => $index + 1,
+                            'url' => $photoUrl,
+                            'thumbnail_url' => $photoUrl,
+                            'position' => $index
+                        ]);
+                    }
+                }
+            }
+        }
+        
+        return $photos;
+    }
+    
+    /**
+     * Получить видео объявления как коллекцию
+     * Видео хранится в JSON поле video
+     */
+    public function getVideosCollectionAttribute()
+    {
+        $videos = collect();
+        
+        if ($this->video) {
+            $videoData = is_string($this->video) ? json_decode($this->video, true) : $this->video;
+            if ($videoData) {
+                $videos->push((object)[
+                    'id' => 1,
+                    'url' => is_array($videoData) ? ($videoData['url'] ?? '') : $videoData
+                ]);
+            }
+        }
+        
+        return $videos;
     }
 
 
@@ -395,8 +446,20 @@ class Ad extends Model
     {
         parent::boot();
         
-        // Логируем изменения важных полей
+        // Автоматически генерируем slug при создании
+        static::creating(function ($ad) {
+            if (!$ad->slug && $ad->title) {
+                $ad->slug = Str::slug($ad->title);
+            }
+        });
+        
+        // Логируем изменения важных полей и обновляем slug
         static::updating(function ($ad) {
+            // Обновляем slug при изменении title
+            if ($ad->isDirty('title') && !$ad->isDirty('slug')) {
+                $ad->slug = Str::slug($ad->title);
+            }
+            
             $watchedFields = ['service_provider', 'clients'];
             $changes = [];
             

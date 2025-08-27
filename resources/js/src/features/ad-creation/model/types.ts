@@ -4,6 +4,13 @@
  */
 
 export interface AdForm {
+  // Системные поля
+  id?: number | null
+  user_id?: number | null  
+  status?: string
+  category?: string
+  title?: string
+  
   // Основная информация (из оригинального AdFormData)
   specialty: string
   clients: string[]
@@ -53,8 +60,14 @@ export interface AdForm {
   }
   
   // Скидки и подарки
+  discount?: number | null
   new_client_discount: string
   gift: string
+  has_girlfriend?: boolean
+  
+  // Дополнительные поля
+  min_duration?: number | null
+  contacts_per_hour?: number | null
   
   // Медиа
   photos: any[]

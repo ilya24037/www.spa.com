@@ -218,12 +218,12 @@ const formatPrice = (price: number): string => {
 }
 
 const goToProfile = () => {
-  // Переходим на страницу профиля мастера
+  // Переходим на страницу объявления
   if (props.master.slug) {
-    router.visit(`/masters/${props.master.slug}-${props.master.id}`)
+    router.visit(`/ads/${props.master.slug}-${props.master.id}`)
   } else {
     // Fallback если slug отсутствует
-    router.visit(`/masters/master-${props.master.id}`)
+    router.visit(`/ads/ad-${props.master.id}`)
   }
 }
 

@@ -1,16 +1,39 @@
 import type { AdForm, ValidationRule } from '../types'
 import type { Ref } from 'vue'
+import { ref } from 'vue'
+import type { FormFieldRefs } from '../utils/domHelpers'
+import { 
+  highlightAllErrors, 
+  clearAllHighlights, 
+  scrollToFirstError,
+  clearHighlight
+} from '../utils/domHelpers'
 
 /**
  * Composable для валидации формы объявления
- * KISS: Простая валидация без сложной логики
+ * KISS: Простая валидация без сложной логики + интеграция с domHelpers
  */
 export function useAdFormValidation() {
+  
+  // ✅ REFS ДЛЯ ПОЛЕЙ (вместо querySelector)
+  const titleInputRef = ref<HTMLInputElement | null>(null)
+  const priceInputRef = ref<HTMLInputElement | null>(null)
+  const phoneInputRef = ref<HTMLInputElement | null>(null)
+  const citySelectRef = ref<HTMLSelectElement | null>(null)
+  const clientsSectionRef = ref<HTMLDivElement | null>(null)
+  
+  const fieldRefs: FormFieldRefs = {
+    titleInputRef,
+    priceInputRef,
+    phoneInputRef,
+    citySelectRef,
+    clientsSectionRef
+  }
   
   // ✅ ПРАВИЛА ВАЛИДАЦИИ ДЛЯ ПУБЛИКАЦИИ
   const publicationRules: ValidationRule[] = [
     // Основная информация
-    { field: 'title', rules: ['required'], message: 'Укажите заголовок объявления' },
+    { field: 'parameters.title', rules: ['required'], message: 'Укажите заголовок объявления' },
     { field: 'category', rules: ['required'], message: 'Выберите категорию' },
     { field: 'description', rules: ['required'], message: 'Добавьте описание' },
     
@@ -18,20 +41,19 @@ export function useAdFormValidation() {
     { field: 'photos', rules: ['required'], message: 'Добавьте хотя бы одно фото' },
     
     // Контакты  
-    { field: 'phone', rules: ['required', 'phone'], message: 'Укажите номер телефона' },
+    { field: 'contacts.phone', rules: ['required', 'phone'], message: 'Укажите номер телефона' },
     
     // Локация
     { field: 'address', rules: ['required'], message: 'Укажите адрес' },
+    { field: 'geo.city', rules: ['required'], message: 'Выберите город' },
     
     // Услуги и клиенты
     { field: 'services', rules: ['required'], message: 'Выберите хотя бы одну услугу' },
     { field: 'clients', rules: ['required'], message: 'Укажите для кого услуги' }
   ]
   
-  // ✅ ПРАВИЛА ВАЛИДАЦИИ ДЛЯ ЧЕРНОВИКА
-  const draftRules: ValidationRule[] = [
-    { field: 'title', rules: ['required'], message: 'Укажите заголовок для черновика' }
-  ]
+  // ✅ ПРАВИЛА ВАЛИДАЦИИ ДЛЯ ЧЕРНОВИКА (пустые - черновик можно сохранить без обязательных полей)
+  const draftRules: ValidationRule[] = []
   
   // ✅ ОСНОВНАЯ ФУНКЦИЯ ВАЛИДАЦИИ
   const validateForm = (form: AdForm, isPublishing = false): Record<string, string[]> => {
@@ -160,13 +182,42 @@ export function useAdFormValidation() {
     delete errors[field]
   }
   
+  // ✅ ФУНКЦИИ ДЛЯ РАБОТЫ С DOM (через domHelpers)
+  const handleValidationErrors = (errors: Record<string, string[]>): void => {
+    if (Object.keys(errors).length > 0) {
+      highlightAllErrors(errors, fieldRefs)
+      scrollToFirstError(errors, fieldRefs)
+    }
+  }
+  
+  const clearFieldHighlight = (fieldName: 'title' | 'price' | 'phone' | 'city' | 'clients'): void => {
+    clearHighlight(fieldName, fieldRefs)
+  }
+  
+  const clearAllFieldHighlights = (): void => {
+    clearAllHighlights(fieldRefs)
+  }
+  
   return {
+    // Основные функции валидации
     validateForm,
     validateField,
     hasErrors,
     getFirstError,
     clearFieldError,
     publicationRules,
-    draftRules
+    draftRules,
+    
+    // Функции для работы с DOM
+    handleValidationErrors,
+    clearFieldHighlight,
+    clearAllFieldHighlights,
+    
+    // Refs для полей (экспортируем для использования в template)
+    titleInputRef,
+    priceInputRef,
+    phoneInputRef,
+    citySelectRef,
+    clientsSectionRef
   }
 }

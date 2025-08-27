@@ -2,15 +2,16 @@ import type { AdForm } from '../types'
 
 /**
  * Утилита для построения FormData из формы объявления
- * KISS: Простое преобразование без сложной логики
+ * УПРОЩЕННАЯ ВЕРСИЯ: согласно плану, без лишних утилит
  */
 
 // ✅ ОСНОВНАЯ ФУНКЦИЯ ПОСТРОЕНИЯ
 export function buildFormData(form: AdForm, isPublishing = false): FormData {
   const formData = new FormData()
   
-  // Метод для Laravel (PUT/PATCH через POST)
+  // ID объявления (важно для обновления)
   if (form.id) {
+    formData.append('id', String(form.id))
     formData.append('_method', 'PUT')
   }
   
@@ -152,17 +153,22 @@ function appendAdditional(formData: FormData, form: AdForm): void {
     formData.append('additional_features', JSON.stringify(form.additional_features))
   }
   
-  // Числа
-  if (form.discount !== null) formData.append('discount', String(form.discount))
-  if (form.new_client_discount !== null) formData.append('new_client_discount', String(form.new_client_discount))
-  if (form.min_duration !== null) formData.append('min_duration', String(form.min_duration))
-  if (form.contacts_per_hour !== null) formData.append('contacts_per_hour', String(form.contacts_per_hour))
-  if (form.experience !== null) formData.append('experience', String(form.experience))
+  // Числа (проверка на null и undefined)
+  if (form.discount !== null && form.discount !== undefined) {
+    formData.append('discount', String(form.discount))
+  }
+  if (form.new_client_discount !== null && form.new_client_discount !== undefined) {
+    formData.append('new_client_discount', String(form.new_client_discount))
+  }
+  if (form.min_duration !== null && form.min_duration !== undefined) {
+    formData.append('min_duration', String(form.min_duration))
+  }
+  if (form.contacts_per_hour !== null && form.contacts_per_hour !== undefined) {
+    formData.append('contacts_per_hour', String(form.contacts_per_hour))
+  }
   
   // Строки
   if (form.gift) formData.append('gift', form.gift)
-  if (form.work_format) formData.append('work_format', form.work_format)
-  if (form.specialty) formData.append('specialty', form.specialty)
   
   // Булевы
   formData.append('has_girlfriend', form.has_girlfriend ? '1' : '0')

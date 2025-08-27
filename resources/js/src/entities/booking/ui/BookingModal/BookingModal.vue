@@ -236,7 +236,7 @@
                 name="client_email"
                 type="email"
                 label="Email"
-                placeholder="Р"Р»СЏ РѕС‚РїСЂР°РІРєРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ"
+                placeholder="Для отправки подтверждения"
                 :error="formErrors.client_email"
               />
             </div>
@@ -327,7 +327,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import { router } from '@inertiajs/vue3'
-import { vMaska } from 'maska'
+import { vMaska } from 'maska/vue'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
 import type { AxiosResponse } from 'axios'
 import axios from 'axios'

@@ -48,10 +48,10 @@
         <!-- Форма редактирования -->
         <div class="p-6">
           <AdForm 
-            :category="ad.data?.category || ad.category || 'erotic'"
+            :category="actualAd.category || 'erotic'"
             :categories="[]"
-            :ad-id="ad.data?.id || ad.id"
-            :initial-data="ad.data || ad"
+            :ad-id="actualAd.id"
+            :initial-data="actualAd"
             @success="handleSuccess"
             @cancel="handleCancel"
           />
@@ -88,6 +88,16 @@ const props = defineProps<EditAdProps>()
 // Props успешно принимаются и обрабатываются
 // ВАЖНО: Данные могут быть вложены в ключ 'data' если используется AdResource
 const actualAd = props.ad?.data || props.ad
+
+// ВРЕМЕННОЕ ЛОГИРОВАНИЕ для диагностики
+console.log('🔍 Edit.vue: props.ad структура:', {
+  hasData: !!props.ad?.data,
+  directId: props.ad?.id,
+  dataId: props.ad?.data?.id,
+  actualAdId: actualAd?.id,
+  actualAdStatus: actualAd?.status,
+  fullProp: props.ad
+})
 
 // Навигация
 const getBackUrl = () => {

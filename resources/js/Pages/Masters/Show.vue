@@ -11,7 +11,7 @@
     />
     
     <!-- Основной контент -->
-    <MasterProfile 
+    <MasterProfileDetailed 
       v-else
       :master="master" 
       @profile-loading="handleProfileLoading"
@@ -26,7 +26,7 @@
 import { logger } from '@/src/shared/lib/logger'
 import { onMounted } from 'vue'
 import MainLayout from '@/src/shared/layouts/MainLayout/MainLayout.vue'
-import MasterProfile from '@/src/widgets/master-profile/MasterProfile.vue'
+import MasterProfileDetailed from '@/src/widgets/master-profile/MasterProfileDetailed.vue'
 import PageLoader from '@/src/shared/ui/organisms/PageLoader/PageLoader.vue'
 import { usePageLoading } from '@/src/shared/composables/usePageLoading'
 

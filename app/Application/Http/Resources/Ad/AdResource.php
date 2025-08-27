@@ -62,7 +62,7 @@ class AdResource extends JsonResource
             
             // Рабочая информация (с парсингом JSON)
             'work' => [
-                'work_format' => $this->work_format,
+                'work_format' => $this->work_format?->value ?? $this->work_format, // Преобразуем enum в строку
                 'experience' => $this->experience,
                 'clients' => $parsedData['clients'] ?? $this->clients,
                 'service_provider' => $parsedData['service_provider'] ?? $this->service_provider,
@@ -77,6 +77,7 @@ class AdResource extends JsonResource
             'faq' => $parsedData['faq'] ?? $this->faq,
             
             // Параметры (для форм редактирования)
+            'work_format' => $this->work_format?->value ?? $this->work_format, // Дублируем для форм
             'title' => $this->title, // Дублируем для совместимости
             'age' => $this->age,
             'height' => $this->height,

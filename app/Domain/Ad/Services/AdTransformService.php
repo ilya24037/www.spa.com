@@ -61,7 +61,11 @@ class AdTransformService
         
         // Получаем данные о профиле мастера
         $masterProfile = $ad->user?->masterProfile;
-        $masterSlug = $masterProfile?->slug ?: \Illuminate\Support\Str::slug($ad->title ?: 'master');
+        $masterSlug = $masterProfile?->slug ?: null;
+        
+        // Используем slug из самого объявления, если он есть
+        // Иначе генерируем из title
+        $adSlug = $ad->slug ?: \Illuminate\Support\Str::slug($ad->title ?: 'ad');
         
         return new AdHomePageDTO([
             'id' => $ad->id,
@@ -84,7 +88,7 @@ class AdTransformService
             'master_profile_id' => $masterProfile?->id,
             'master_slug' => $masterSlug,
             'has_master_profile' => $masterProfile !== null,
-            'slug' => $masterSlug, // Дублируем для совместимости
+            'slug' => $adSlug, // Используем slug объявления
         ]);
     }
     

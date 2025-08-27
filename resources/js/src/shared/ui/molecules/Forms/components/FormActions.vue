@@ -14,7 +14,7 @@
         
         <button
           type="button"
-          @click="() => { console.log('🔵 Кнопка СОХРАНИТЬ ИЗМЕНЕНИЯ нажата!'); $emit('submit') }"
+          @click="$emit('submit')"
           class="px-6 py-3 rounded-lg text-base font-semibold cursor-pointer transition-all duration-200 flex items-center gap-2 min-w-[140px] justify-center bg-gradient-to-br from-blue-500 to-blue-700 text-white border-0 hover:from-blue-600 hover:to-blue-800 hover:-translate-y-px disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none sm:w-auto w-full"
           :disabled="submitting"
         >

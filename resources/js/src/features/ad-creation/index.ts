@@ -2,4 +2,4 @@
 export { default as AdForm } from './ui/AdForm.vue'
 export { useAdFormModel } from './model/adFormModel'
 export { adApi } from './api/adApi'
-export type { AdFormData } from './model/adFormModel'
+export type { AdForm, AdForm as AdFormData } from './model/types'

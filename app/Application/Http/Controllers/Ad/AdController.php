@@ -42,6 +42,60 @@ class AdController extends Controller
     }
 
     /**
+     * Публичный просмотр объявления (доступен без авторизации)
+     */
+    public function showPublic(string $slug, int $ad): Response
+    {
+        // Загружаем объявление
+        $adModel = Ad::with(['user'])->findOrFail($ad);
+        
+        // Проверяем, что объявление активно
+        // ВРЕМЕННО: разрешаем просмотр неоплаченных объявлений для тестирования
+        // if (!$adModel->isActive()) {
+        //     abort(404);
+        // }
+        
+        // Проверяем корректность slug
+        if ($adModel->slug !== $slug && $adModel->slug) {
+            return redirect()->route('ads.show.public', [
+                'slug' => $adModel->slug,
+                'ad' => $adModel->id
+            ], 301);
+        }
+        
+        // Увеличиваем просмотры
+        $this->adService->incrementViews($adModel);
+        
+        // Подготавливаем данные для отображения в стиле мастера
+        $masterData = [
+            'id' => $adModel->id,
+            'name' => $adModel->title ?? $adModel->name ?? 'Мастер',
+            'avatar' => $adModel->avatar ?? $adModel->photosCollection?->first()?->url ?? null,
+            'specialty' => $adModel->specialty ?? 'Массаж',
+            'description' => $adModel->description,
+            'rating' => $adModel->rating ?? 4.5,
+            'reviews_count' => $adModel->reviews_count ?? 0,
+            'services' => $this->prepareServices($adModel),
+            'photos' => $this->preparePhotos($adModel),
+            'location' => $adModel->address ?? $adModel->district ?? 'Москва',
+            'price' => $adModel->price ?? $adModel->price_from ?? 2000,
+            'phone' => $adModel->phone,
+            'whatsapp' => $adModel->whatsapp,
+            'telegram' => $adModel->telegram,
+            'experience' => $adModel->experience ?? '5+ лет',
+            'completion_rate' => '98%',
+            'geo' => $adModel->geo,
+            'parameters' => $adModel->parameters,
+            'amenities' => $adModel->amenities,
+            'comfort' => $adModel->comfort,
+        ];
+        
+        return Inertia::render('Masters/Show', [
+            'master' => $masterData
+        ]);
+    }
+    
+    /**
      * Просмотр объявления
      */
     public function show(Ad $ad): Response
@@ -139,8 +193,17 @@ class AdController extends Controller
             // ВАЖНО: Убедимся, что ID всегда присутствует и имеет правильный тип
             $preparedData['id'] = (int) $ad->id;
             
+            // ВАЖНО: Преобразуем enum work_format в строковое значение
+            if (isset($preparedData['work_format']) && is_object($preparedData['work_format'])) {
+                $preparedData['work_format'] = $preparedData['work_format']->value ?? 'individual';
+            }
+            
+            // УНИФИКАЦИЯ: Используем AdResource для черновиков тоже
+            // Но передаем подготовленные данные как массив, чтобы AdResource обернул их в 'data'
+            $ad->setRawAttributes($preparedData);
+            
             return Inertia::render('Ad/Edit', [
-                'ad' => $preparedData,
+                'ad' => new AdResource($ad),
                 'isActive' => false
             ]);
         }
@@ -221,5 +284,94 @@ class AdController extends Controller
         return redirect()
             ->route('profile.items')
             ->with('success', 'Объявление успешно удалено');
+    }
+    
+    /**
+     * Подготовка услуг для отображения
+     */
+    private function prepareServices(Ad $ad): array
+    {
+        $services = [];
+        
+        // Если есть поле services в JSON
+        if ($ad->services) {
+            $servicesData = is_string($ad->services) ? json_decode($ad->services, true) : $ad->services;
+            if (is_array($servicesData)) {
+                foreach ($servicesData as $key => $value) {
+                    if (is_array($value) && isset($value['name'])) {
+                        $services[] = [
+                            'id' => $key,
+                            'name' => $value['name'],
+                            'price' => $value['price'] ?? $ad->price ?? 2000,
+                            'duration' => $value['duration'] ?? 60
+                        ];
+                    } elseif (is_string($value)) {
+                        $services[] = [
+                            'id' => $key,
+                            'name' => $value,
+                            'price' => $ad->price ?? 2000,
+                            'duration' => 60
+                        ];
+                    }
+                }
+            }
+        }
+        
+        // Если услуг нет, добавляем дефолтную
+        if (empty($services)) {
+            $services[] = [
+                'id' => 1,
+                'name' => $ad->specialty ?? 'Классический массаж',
+                'price' => $ad->price ?? $ad->price_from ?? 2000,
+                'duration' => 60
+            ];
+        }
+        
+        return $services;
+    }
+    
+    /**
+     * Подготовка фотографий для галереи
+     */
+    private function preparePhotos(Ad $ad): array
+    {
+        $photos = [];
+        
+        // Используем новый аксессор photosCollection
+        $photosCollection = $ad->photosCollection;
+        if ($photosCollection && $photosCollection->count() > 0) {
+            foreach ($photosCollection as $photo) {
+                $photos[] = [
+                    'id' => $photo->id,
+                    'url' => $photo->url,
+                    'thumbnail_url' => $photo->thumbnail_url,
+                    'alt' => 'Фото ' . ($photo->position + 1),
+                    'caption' => null
+                ];
+            }
+        }
+        
+        // Если фотографий нет, добавляем заглушку
+        if (empty($photos)) {
+            // Пробуем получить из других полей
+            if ($ad->avatar) {
+                $photos[] = [
+                    'id' => 'avatar',
+                    'url' => $ad->avatar,
+                    'thumbnail_url' => $ad->avatar,
+                    'alt' => 'Главное фото'
+                ];
+            } else {
+                // Добавляем дефолтное изображение
+                $photos[] = [
+                    'id' => 'default',
+                    'url' => '/images/no-photo.svg',
+                    'thumbnail_url' => '/images/no-photo.svg',
+                    'alt' => 'Нет фото'
+                ];
+            }
+        }
+        
+        return $photos;
     }
 }

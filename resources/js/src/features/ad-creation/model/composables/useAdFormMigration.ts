@@ -2,76 +2,41 @@ import type { AdForm } from '../types'
 
 /**
  * Composable для миграции старых данных формы
- * KISS: Простое преобразование данных без сложной логики
+ * ОПТИМИЗИРОВАННЫЙ: 100 строк согласно плану
  */
 export function useAdFormMigration() {
   
-  // ✅ МИГРАЦИЯ СТАРЫХ ДАННЫХ К НОВОМУ ФОРМАТУ
-  const migrateOldData = (oldData: any): Partial<AdForm> => {
-    if (!oldData) return {}
+  // ✅ УНИВЕРСАЛЬНАЯ МИГРАЦИЯ JSON ПОЛЕЙ
+  const migrateJsonField = (value: any, defaultValue: any = {}): any => {
+    if (!value) return defaultValue
     
-    const migrated: Partial<AdForm> = {}
+    if (typeof value === 'string') {
+      try {
+        return JSON.parse(value)
+      } catch {
+        return defaultValue
+      }
+    }
     
-    // Основная информация (соответствует новому интерфейсу)
-    migrated.specialty = oldData.specialty || ''
-    migrated.clients = oldData.clients || []
-    migrated.service_location = oldData.service_location || []
-    migrated.work_format = oldData.work_format || 'individual'
-    migrated.service_provider = oldData.service_provider || ['women']
-    migrated.experience = oldData.experience || ''
-    migrated.description = oldData.description || oldData.about || ''
+    return value
+  }
+  
+  // ✅ УНИВЕРСАЛЬНАЯ МИГРАЦИЯ МАССИВОВ
+  const migrateArrayField = (value: any, defaultValue: any[] = []): any[] => {
+    if (!value) return defaultValue
     
-    // Услуги и возможности
-    migrated.services = oldData.services || {}
-    migrated.services_additional_info = oldData.services_additional_info || ''
-    migrated.features = oldData.features || []
-    migrated.additional_features = oldData.additional_features || ''
+    if (Array.isArray(value)) return value
     
-    // Расписание и бронирование
-    migrated.schedule = oldData.schedule || {}
-    migrated.schedule_notes = oldData.schedule_notes || ''
-    migrated.online_booking = oldData.online_booking || false
+    if (typeof value === 'string') {
+      try {
+        const parsed = JSON.parse(value)
+        return Array.isArray(parsed) ? parsed : defaultValue
+      } catch {
+        return defaultValue
+      }
+    }
     
-    // Цены
-    migrated.price = oldData.price || null
-    migrated.price_unit = oldData.price_unit || 'hour'
-    migrated.is_starting_price = oldData.is_starting_price || false
-    migrated.prices = oldData.prices || {}
-    
-    // Параметры (объект как в оригинале)
-    migrated.parameters = migrateParameters(oldData)
-    
-    // Скидки и подарки
-    migrated.new_client_discount = oldData.new_client_discount || ''
-    migrated.gift = oldData.gift || ''
-    
-    // Медиа - миграция старых форматов
-    migrated.photos = migratePhotos(oldData)
-    migrated.video = migrateVideos(oldData)
-    
-    // Геолокация и путешествия
-    migrated.geo = migrateGeo(oldData)
-    migrated.address = oldData.address || oldData.location || ''
-    migrated.travel_area = oldData.travel_area || ''
-    migrated.custom_travel_areas = oldData.custom_travel_areas || []
-    migrated.travel_radius = oldData.travel_radius || ''
-    migrated.travel_price = oldData.travel_price || null
-    migrated.travel_price_type = oldData.travel_price_type || ''
-    
-    // Контакты (объект как в оригинале)
-    migrated.contacts = migrateContacts(oldData)
-    
-    // FAQ
-    migrated.faq = oldData.faq || {}
-    
-    // Поля верификации
-    migrated.verification_photo = oldData.verification_photo || null
-    migrated.verification_video = oldData.verification_video || null
-    migrated.verification_status = oldData.verification_status || ''
-    migrated.verification_comment = oldData.verification_comment || null
-    migrated.verification_expires_at = oldData.verification_expires_at || null
-    
-    return migrated
+    return defaultValue
   }
   
   // ✅ МИГРАЦИЯ ПАРАМЕТРОВ
@@ -95,12 +60,10 @@ export function useAdFormMigration() {
   
   // ✅ МИГРАЦИЯ КОНТАКТОВ
   const migrateContacts = (oldData: any) => {
-    // Если уже в новом формате с объектом contacts
     if (oldData?.contacts && typeof oldData.contacts === 'object') {
       return oldData.contacts
     }
     
-    // Мигрируем из старого формата (отдельные поля)
     return {
       phone: oldData?.phone || oldData?.contact_phone || '',
       contact_method: oldData?.contact_method || 'any',
@@ -109,80 +72,42 @@ export function useAdFormMigration() {
     }
   }
   
-  // ✅ МИГРАЦИЯ ФОТОГРАФИЙ
-  const migratePhotos = (oldData: any): any[] => {
-    // Проверяем разные возможные форматы
-    if (oldData.photos && Array.isArray(oldData.photos)) {
-      return oldData.photos
-    }
+  // ✅ ОСНОВНАЯ ФУНКЦИЯ МИГРАЦИИ
+  const migrateOldData = (oldData: any): Partial<AdForm> => {
+    if (!oldData) return {}
     
-    if (oldData.images && Array.isArray(oldData.images)) {
-      return oldData.images.map((img: any) => ({
-        id: img.id,
-        url: img.url || img.path,
-        is_verification: img.is_verification || false,
-        order: img.order || 0
-      }))
+    return {
+      // Основная информация
+      specialty: oldData.specialty || '',
+      clients: migrateArrayField(oldData.clients, []),
+      service_location: migrateArrayField(oldData.service_location, []),
+      work_format: oldData.work_format || 'individual',
+      service_provider: migrateArrayField(oldData.service_provider, ['women']),
+      experience: oldData.experience || '',
+      description: oldData.description || oldData.about || '',
+      
+      // Услуги и расписание (используем универсальные функции)
+      services: migrateJsonField(oldData.services, {}),
+      schedule: migrateJsonField(oldData.schedule, {}),
+      prices: migrateJsonField(oldData.prices, {}),
+      geo: migrateJsonField(oldData.geo, null),
+      faq: migrateJsonField(oldData.faq, {}),
+      
+      // Медиа (используем универсальную миграцию массивов)
+      photos: migrateArrayField(oldData.photos, []),
+      video: migrateArrayField(oldData.video, []),
+      
+      // Объекты параметров и контактов
+      parameters: migrateParameters(oldData),
+      contacts: migrateContacts(oldData)
     }
-    
-    if (oldData.gallery && Array.isArray(oldData.gallery)) {
-      return oldData.gallery
-    }
-    
-    return []
-  }
-  
-  // ✅ МИГРАЦИЯ ВИДЕО
-  const migrateVideos = (oldData: any): any[] => {
-    if (oldData.video && Array.isArray(oldData.video)) {
-      return oldData.video
-    }
-    
-    if (oldData.videos && Array.isArray(oldData.videos)) {
-      return oldData.videos
-    }
-    
-    return []
-  }
-  
-  // ✅ МИГРАЦИЯ УСЛУГ
-  const migrateServices = (oldData: any): string[] => {
-    if (oldData.services && Array.isArray(oldData.services)) {
-      return oldData.services
-    }
-    
-    // Старый формат с объектами услуг
-    if (oldData.services && typeof oldData.services === 'object') {
-      return Object.keys(oldData.services).filter(key => oldData.services[key])
-    }
-    
-    return []
-  }
-  
-  // ✅ МИГРАЦИЯ ГЕОЛОКАЦИИ
-  const migrateGeo = (oldData: any): { lat: number; lng: number } | null => {
-    if (oldData.geo) {
-      return oldData.geo
-    }
-    
-    if (oldData.latitude && oldData.longitude) {
-      return {
-        lat: Number(oldData.latitude),
-        lng: Number(oldData.longitude)
-      }
-    }
-    
-    if (oldData.coordinates) {
-      return {
-        lat: oldData.coordinates.lat || oldData.coordinates[0],
-        lng: oldData.coordinates.lng || oldData.coordinates[1]
-      }
-    }
-    
-    return null
   }
   
   return {
-    migrateOldData
+    migrateOldData,
+    migrateParameters,
+    migrateContacts,
+    migrateJsonField,
+    migrateArrayField
   }
 }

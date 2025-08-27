@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { router } from '@inertiajs/vue3'
 import axios from 'axios'
 import type { AdForm, SubmissionResult } from '../types'
 import { buildFormData } from '../utils/formDataBuilder'
@@ -9,7 +9,6 @@ import { buildFormData } from '../utils/formDataBuilder'
  * KISS: Простая отправка без сложной логики
  */
 export function useAdFormSubmission() {
-  const router = useRouter()
   const abortController = ref<AbortController | null>(null)
   
   // ✅ СОХРАНЕНИЕ ЧЕРНОВИКА
@@ -22,6 +21,7 @@ export function useAdFormSubmission() {
       const isUpdate = !!form.id
       const url = isUpdate ? `/draft/${form.id}` : '/draft'
       const method = isUpdate ? 'put' : 'post'
+      
       
       // Отправка запроса
       const response = await axios({
@@ -55,8 +55,6 @@ export function useAdFormSubmission() {
       throw new Error('Неожиданный формат ответа')
       
     } catch (error: any) {
-      console.error('Ошибка сохранения черновика:', error)
-      
       // Обработка ошибок axios
       if (error.response?.data?.errors) {
         return {
@@ -69,7 +67,7 @@ export function useAdFormSubmission() {
       // Общая ошибка
       return {
         success: false,
-        message: error.message || 'Произошла ошибка при сохранении'
+        message: error.response?.data?.message || error.message || 'Произошла ошибка при сохранении'
       }
     }
   }
@@ -117,7 +115,7 @@ export function useAdFormSubmission() {
       throw new Error('Неожиданный формат ответа')
       
     } catch (error: any) {
-      console.error('Ошибка публикации:', error)
+      // Ошибка публикации
       
       // Обработка ошибок axios
       if (error.response?.data?.errors) {
@@ -151,7 +149,7 @@ export function useAdFormSubmission() {
       throw new Error('Объявление не найдено')
       
     } catch (error: any) {
-      console.error('Ошибка загрузки объявления:', error)
+      // Ошибка загрузки объявления
       
       return {
         success: false,
@@ -189,9 +187,10 @@ export function useAdFormSubmission() {
   // ✅ НАВИГАЦИЯ ПОСЛЕ СОХРАНЕНИЯ
   const navigateAfterSave = (adId: number, isDraft = false): void => {
     if (isDraft) {
-      router.push(`/ads/${adId}/edit`)
+      // После сохранения черновика перенаправляем в личный кабинет на вкладку черновиков
+      router.visit('/profile/items/draft/all')
     } else {
-      router.push(`/ads/${adId}`)
+      router.visit(`/ads/${adId}`)
     }
   }
   
@@ -202,7 +201,7 @@ export function useAdFormSubmission() {
     }
     
     if (error.response?.status === 401) {
-      router.push('/login')
+      router.visit('/login')
       return { auth: ['Необходима авторизация'] }
     }
     
