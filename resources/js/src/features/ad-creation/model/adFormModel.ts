@@ -17,8 +17,11 @@ import { useAdFormMigration } from './composables/useAdFormMigration'
 /**
  * Основной composable для управления формой объявления
  * Объединяет все модули и предоставляет единый API
+ * 
+ * @param props - props компонента (должны содержать adId, initialData)
+ * @param emit - emit функция компонента  
  */
-export function useAdFormModel() {
+export function useAdFormModel(props: any, emit: any) {
   const route = useRoute()
   const toast = useToast()
   
@@ -39,7 +42,7 @@ export function useAdFormModel() {
     setErrors,
     setGeneralError,
     markAsDirty
-  } = useAdFormState()
+  } = useAdFormState(props)
   
   const {
     validateForm,
@@ -268,14 +271,25 @@ export function useAdFormModel() {
     }
   })
   
-  // ✅ ПУБЛИЧНЫЙ API
+  // ✅ ОБРАБОТКА ОТПРАВКИ ФОРМЫ (alias для handlePublish)
+  const handleSubmit = async () => {
+    return handlePublish()
+  }
+  
+  // ✅ ОБРАБОТКА ОТМЕНЫ
+  const handleCancel = () => {
+    emit('cancel')
+    clearErrors()
+  }
+  
+  // ✅ ПУБЛИЧНЫЙ API (совместимость с AdForm.vue)
   return {
-    // Состояние
+    // Состояние (точные имена из AdForm.vue)
     form,
     errors,
     generalError,
     isLoading,
-    isSaving,
+    saving: isSaving,  // ✅ АЛИАС для совместимости
     isPublishing,
     isDirty,
     isEditMode,
@@ -283,10 +297,12 @@ export function useAdFormModel() {
     canSave,
     hasValidationErrors,
     
-    // Методы
+    // Методы (точные имена из AdForm.vue)
     initializeForm,
+    handleSubmit,      // ✅ ДОБАВЛЕН для совместимости
     handleSaveDraft,
     handlePublish,
+    handleCancel,      // ✅ ДОБАВЛЕН для совместимости
     handleFieldChange,
     clearErrors,
     resetForm,

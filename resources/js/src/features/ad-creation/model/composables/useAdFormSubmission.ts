@@ -173,9 +173,7 @@ export function useAdFormSubmission() {
     autosaveTimer = setTimeout(async () => {
       if (form.title && form.title.trim()) {
         const result = await saveDraft(form)
-        if (result.success) {
-          console.log('Автосохранение выполнено')
-        }
+        // Автосохранение выполнено
       }
     }, delay)
   }

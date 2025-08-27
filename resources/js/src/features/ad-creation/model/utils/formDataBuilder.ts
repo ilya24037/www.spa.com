@@ -46,8 +46,9 @@ export function buildFormData(form: AdForm, isPublishing = false): FormData {
 
 // ✅ ОСНОВНАЯ ИНФОРМАЦИЯ
 function appendBasicInfo(formData: FormData, form: AdForm): void {
-  if (form.title) formData.append('title', form.title)
-  if (form.category) formData.append('category', form.category)
+  if (form.specialty) formData.append('specialty', form.specialty)
+  if (form.work_format) formData.append('work_format', form.work_format)
+  if (form.experience) formData.append('experience', form.experience)
   if (form.description) formData.append('description', form.description)
 }
 

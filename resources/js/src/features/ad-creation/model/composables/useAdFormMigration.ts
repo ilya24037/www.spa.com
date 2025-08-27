@@ -12,63 +12,101 @@ export function useAdFormMigration() {
     
     const migrated: Partial<AdForm> = {}
     
-    // Основная информация
-    migrated.id = oldData.id || oldData.ad_id || null
-    migrated.user_id = oldData.user_id || null
-    migrated.title = oldData.title || oldData.name || ''
-    migrated.category = oldData.category || 'relax'
+    // Основная информация (соответствует новому интерфейсу)
+    migrated.specialty = oldData.specialty || ''
+    migrated.clients = oldData.clients || []
+    migrated.service_location = oldData.service_location || []
+    migrated.work_format = oldData.work_format || 'individual'
+    migrated.service_provider = oldData.service_provider || ['women']
+    migrated.experience = oldData.experience || ''
     migrated.description = oldData.description || oldData.about || ''
-    migrated.status = oldData.status || 'draft'
+    
+    // Услуги и возможности
+    migrated.services = oldData.services || {}
+    migrated.services_additional_info = oldData.services_additional_info || ''
+    migrated.features = oldData.features || []
+    migrated.additional_features = oldData.additional_features || ''
+    
+    // Расписание и бронирование
+    migrated.schedule = oldData.schedule || {}
+    migrated.schedule_notes = oldData.schedule_notes || ''
+    migrated.online_booking = oldData.online_booking || false
+    
+    // Цены
+    migrated.price = oldData.price || null
+    migrated.price_unit = oldData.price_unit || 'hour'
+    migrated.is_starting_price = oldData.is_starting_price || false
+    migrated.prices = oldData.prices || {}
+    
+    // Параметры (объект как в оригинале)
+    migrated.parameters = migrateParameters(oldData)
+    
+    // Скидки и подарки
+    migrated.new_client_discount = oldData.new_client_discount || ''
+    migrated.gift = oldData.gift || ''
     
     // Медиа - миграция старых форматов
     migrated.photos = migratePhotos(oldData)
     migrated.video = migrateVideos(oldData)
     
-    // Цены и услуги
-    migrated.prices = oldData.prices || oldData.pricing || {}
-    migrated.services = migrateServices(oldData)
-    migrated.clients = oldData.clients || []
-    
-    // Расписание
-    migrated.schedule = oldData.schedule || {}
-    migrated.schedule_notes = oldData.schedule_notes || ''
-    
-    // Контакты
-    migrated.phone = oldData.phone || oldData.contact_phone || ''
-    migrated.whatsapp = oldData.whatsapp || ''
-    migrated.telegram = oldData.telegram || ''
-    migrated.vk = oldData.vk || oldData.vkontakte || ''
-    migrated.instagram = oldData.instagram || oldData.insta || ''
-    
-    // Локация
-    migrated.address = oldData.address || oldData.location || ''
+    // Геолокация и путешествия
     migrated.geo = migrateGeo(oldData)
-    migrated.radius = oldData.radius || null
-    migrated.is_remote = oldData.is_remote || false
+    migrated.address = oldData.address || oldData.location || ''
+    migrated.travel_area = oldData.travel_area || ''
+    migrated.custom_travel_areas = oldData.custom_travel_areas || []
+    migrated.travel_radius = oldData.travel_radius || ''
+    migrated.travel_price = oldData.travel_price || null
+    migrated.travel_price_type = oldData.travel_price_type || ''
     
-    // Параметры
-    migrated.age = oldData.age || null
-    migrated.height = oldData.height || null
-    migrated.weight = oldData.weight || null
-    migrated.breast_size = oldData.breast_size || oldData.breast || null
-    migrated.hair_color = oldData.hair_color || ''
-    migrated.eye_color = oldData.eye_color || ''
-    migrated.nationality = oldData.nationality || ''
-    migrated.appearance = oldData.appearance || ''
+    // Контакты (объект как в оригинале)
+    migrated.contacts = migrateContacts(oldData)
     
-    // Дополнительно
-    migrated.additional_features = oldData.additional_features || oldData.features || []
-    migrated.discount = oldData.discount || null
-    migrated.gift = oldData.gift || ''
-    migrated.new_client_discount = oldData.new_client_discount || null
-    migrated.has_girlfriend = oldData.has_girlfriend || false
-    migrated.min_duration = oldData.min_duration || null
-    migrated.contacts_per_hour = oldData.contacts_per_hour || null
-    migrated.experience = oldData.experience || null
-    migrated.work_format = oldData.work_format || ''
-    migrated.specialty = oldData.specialty || ''
+    // FAQ
+    migrated.faq = oldData.faq || {}
+    
+    // Поля верификации
+    migrated.verification_photo = oldData.verification_photo || null
+    migrated.verification_video = oldData.verification_video || null
+    migrated.verification_status = oldData.verification_status || ''
+    migrated.verification_comment = oldData.verification_comment || null
+    migrated.verification_expires_at = oldData.verification_expires_at || null
     
     return migrated
+  }
+  
+  // ✅ МИГРАЦИЯ ПАРАМЕТРОВ
+  const migrateParameters = (oldData: any) => {
+    if (oldData?.parameters && typeof oldData.parameters === 'object') {
+      return oldData.parameters
+    }
+    
+    return {
+      title: oldData?.title || '',
+      age: oldData?.age || '',
+      height: oldData?.height || '',
+      weight: oldData?.weight || '',
+      breast_size: oldData?.breast_size || '',
+      hair_color: oldData?.hair_color || '',
+      eye_color: oldData?.eye_color || '',
+      nationality: oldData?.nationality || '',
+      bikini_zone: oldData?.bikini_zone || ''
+    }
+  }
+  
+  // ✅ МИГРАЦИЯ КОНТАКТОВ
+  const migrateContacts = (oldData: any) => {
+    // Если уже в новом формате с объектом contacts
+    if (oldData?.contacts && typeof oldData.contacts === 'object') {
+      return oldData.contacts
+    }
+    
+    // Мигрируем из старого формата (отдельные поля)
+    return {
+      phone: oldData?.phone || oldData?.contact_phone || '',
+      contact_method: oldData?.contact_method || 'any',
+      whatsapp: oldData?.whatsapp || '',
+      telegram: oldData?.telegram || ''
+    }
   }
   
   // ✅ МИГРАЦИЯ ФОТОГРАФИЙ
