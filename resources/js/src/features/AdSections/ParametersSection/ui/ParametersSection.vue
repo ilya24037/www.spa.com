@@ -83,6 +83,16 @@
       />
       
       <BaseSelect
+        v-if="props.showFields.includes('appearance')"
+        v-model="localAppearance"
+        label="Внешность"
+        placeholder="Выберите тип внешности"
+        :options="appearanceOptions"
+        @update:modelValue="emitAll"
+        :error="errors?.appearance || errors?.['parameters.appearance']"
+      />
+      
+      <BaseSelect
         v-if="props.showFields.includes('bikini_zone')"
         v-model="localBikiniZone"
         label="Зона бикини"
@@ -111,7 +121,8 @@ const props = defineProps({
       hair_color: '',
       eye_color: '',
       nationality: '',
-      bikini_zone: ''
+      bikini_zone: '',
+      appearance: ''
     })
   },
   showFields: { 
@@ -169,6 +180,11 @@ const localNationality = computed({
 const localBikiniZone = computed({
   get: () => localParameters.value.bikini_zone,
   set: (value) => updateParameter('bikini_zone', value)
+})
+
+const localAppearance = computed({
+  get: () => localParameters.value.appearance || '',
+  set: (value) => updateParameter('appearance', value)
 })
 
 // Опции для селектов
@@ -229,6 +245,22 @@ const bikiniZoneOptions = computed(() => [
   { value: 'triangle', label: 'Треугольник' },
   { value: 'thin_strip', label: 'Тонкая полоска' },
   { value: 'smooth', label: 'Гладкая' }
+])
+
+const appearanceOptions = computed(() => [
+  { value: '', label: 'Выберите тип внешности' },
+  { value: 'slavic', label: 'Славянская' },
+  { value: 'caucasian', label: 'Кавказская' },
+  { value: 'central_asian', label: 'Среднеазиатская' },
+  { value: 'east_asian', label: 'Восточноазиатская' },
+  { value: 'west_european', label: 'Западноевропейская' },
+  { value: 'scandinavian', label: 'Скандинавская' },
+  { value: 'mediterranean', label: 'Средиземноморская' },
+  { value: 'eastern', label: 'Восточная' },
+  { value: 'latin', label: 'Латинская' },
+  { value: 'mixed', label: 'Смешанная' },
+  { value: 'african', label: 'Африканская' },
+  { value: 'indian', label: 'Индийская' }
 ])
 
 // Универсальная функция обновления параметра

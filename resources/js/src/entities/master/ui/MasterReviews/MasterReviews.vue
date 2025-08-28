@@ -3,7 +3,7 @@
   <div :class="CONTAINER_CLASSES">
     <div :class="HEADER_CLASSES">
       <h3 :class="TITLE_CLASSES">
-        РћС‚Р·С‹РІС‹ ({{ totalReviews }})
+        Отзывы ({{ totalReviews }})
       </h3>
       <button
         v-if="hasMoreReviews"
@@ -15,7 +15,7 @@
       </button>
     </div>
 
-    <!-- РћР±С‰РёР№ СЂРµР№С‚РёРЅРі -->
+    <!-- Общий рейтинг -->
     <div :class="RATING_SUMMARY_CLASSES">
       <div :class="RATING_SCORE_CLASSES">
         <span :class="SCORE_NUMBER_CLASSES">{{ overallRating }}</span>
@@ -43,7 +43,7 @@
       >
         <div :class="REVIEW_HEADER_CLASSES">
           <div :class="REVIEWER_INFO_CLASSES">
-            <span :class="REVIEWER_NAME_CLASSES">{{ review.author_name || 'РђРЅРѕРЅРёРј' }}</span>
+            <span :class="REVIEWER_NAME_CLASSES">{{ review.author_name || 'Аноним' }}</span>
             <span :class="REVIEW_DATE_CLASSES">{{ formatDate(review.created_at) }}</span>
           </div>
           
@@ -64,10 +64,10 @@
           {{ review.comment }}
         </p>
 
-        <!-- РћС‚РІРµС‚ РјР°СЃС‚РµСЂР° -->
+        <!-- Ответ мастера -->
         <div v-if="review.response" :class="RESPONSE_CLASSES">
           <div :class="RESPONSE_HEADER_CLASSES">
-            <span :class="RESPONSE_AUTHOR_CLASSES">РћС‚РІРµС‚ РјР°СЃС‚РµСЂР°</span>
+            <span :class="RESPONSE_AUTHOR_CLASSES">Ответ мастера</span>
             <span :class="RESPONSE_DATE_CLASSES">{{ formatDate(review.response_date) }}</span>
           </div>
           <p :class="RESPONSE_TEXT_CLASSES">
@@ -109,36 +109,36 @@ import 'dayjs/locale/ru'
 
 dayjs.locale('ru')
 
-// рџЋЇ РЎС‚РёР»Рё СЃРѕРіР»Р°СЃРЅРѕ РґРёР·Р°Р№РЅ-СЃРёСЃС‚РµРјРµ
+// 🎯 Стили согласно дизайн-системе
 const CONTAINER_CLASSES = 'space-y-6'
 const HEADER_CLASSES = 'flex items-center justify-between'
-const TITLE_CLASSES = 'text-lg font-semibold text-gray-500'
+const TITLE_CLASSES = 'text-lg font-semibold text-gray-900'
 const LOAD_MORE_BUTTON_CLASSES = 'text-sm text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50'
-const RATING_SUMMARY_CLASSES = 'p-4 bg-gray-500 rounded-lg'
+const RATING_SUMMARY_CLASSES = 'p-4 bg-gray-50 rounded-lg'
 const RATING_SCORE_CLASSES = 'flex items-center gap-4'
-const SCORE_NUMBER_CLASSES = 'text-3xl font-bold text-gray-500'
+const SCORE_NUMBER_CLASSES = 'text-3xl font-bold text-gray-900'
 const STARS_CONTAINER_CLASSES = 'flex gap-0.5'
 const STAR_CLASSES = 'w-5 h-5'
 const STAR_FILLED_CLASSES = 'text-yellow-400'
-const STAR_EMPTY_CLASSES = 'text-gray-500'
-const REVIEWS_COUNT_CLASSES = 'text-sm text-gray-500'
+const STAR_EMPTY_CLASSES = 'text-gray-300'
+const REVIEWS_COUNT_CLASSES = 'text-sm text-gray-600'
 const REVIEWS_LIST_CLASSES = 'space-y-4'
-const REVIEW_ITEM_CLASSES = 'p-4 border border-gray-500 rounded-lg'
+const REVIEW_ITEM_CLASSES = 'p-4 border border-gray-200 rounded-lg'
 const REVIEW_HEADER_CLASSES = 'flex items-start justify-between mb-3'
 const REVIEWER_INFO_CLASSES = 'flex flex-col'
-const REVIEWER_NAME_CLASSES = 'font-medium text-gray-500'
+const REVIEWER_NAME_CLASSES = 'font-medium text-gray-900'
 const REVIEW_DATE_CLASSES = 'text-xs text-gray-500'
 const REVIEW_RATING_CLASSES = 'flex gap-0.5'
 const REVIEW_STAR_CLASSES = 'w-4 h-4'
-const REVIEW_TEXT_CLASSES = 'text-gray-500 leading-relaxed'
+const REVIEW_TEXT_CLASSES = 'text-gray-700 leading-relaxed'
 const RESPONSE_CLASSES = 'mt-4 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-200'
 const RESPONSE_HEADER_CLASSES = 'flex items-center justify-between mb-2'
 const RESPONSE_AUTHOR_CLASSES = 'text-sm font-medium text-blue-800'
 const RESPONSE_DATE_CLASSES = 'text-xs text-blue-600'
 const RESPONSE_TEXT_CLASSES = 'text-sm text-blue-900'
 const EMPTY_STATE_CLASSES = 'text-center py-12'
-const EMPTY_ICON_CLASSES = 'w-12 h-12 mx-auto text-gray-500 mb-4'
-const EMPTY_TEXT_CLASSES = 'text-gray-500 font-medium'
+const EMPTY_ICON_CLASSES = 'w-12 h-12 mx-auto text-gray-400 mb-4'
+const EMPTY_TEXT_CLASSES = 'text-gray-600 font-medium'
 const EMPTY_SUBTITLE_CLASSES = 'text-sm text-gray-500 mt-1'
 
 const props = defineProps({
@@ -154,11 +154,11 @@ const props = defineProps({
 
 const emit = defineEmits(['load-more'])
 
-// РЎРѕСЃС‚РѕСЏРЅРёРµ
+// Состояние
 const loading = ref(false)
 const reviews = ref([...props.initialReviews])
 
-// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
+// Вычисляемые свойства
 const displayReviews = computed(() => reviews.value)
 
 const totalReviews = computed(() => props.master.reviews_count || 0)
@@ -171,7 +171,7 @@ const hasMoreReviews = computed(() => {
     return reviews.value.length < totalReviews.value
 })
 
-// РњРµС‚РѕРґС‹
+// Методы
 const getStarClasses = (starNumber) => {
     const rating = props.master.rating || 0
     const isActive = starNumber <= Math.round(rating)

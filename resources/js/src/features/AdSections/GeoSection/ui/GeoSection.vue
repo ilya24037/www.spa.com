@@ -329,6 +329,12 @@ watch(() => props.geo, (newValue) => {
   Object.assign(geoData, parsed)
 }, { immediate: true })
 
+// ✅ ИСПРАВЛЕНИЕ: Следим за изменениями zones для сохранения районов выезда
+watch(() => geoData.zones, () => {
+  // При изменении zones через ZoneSelector нужно отправить данные
+  emitGeoData()
+}, { deep: true })
+
 // Принудительная инициализация карты (например, при открытии секции)
 const forceMapInit = async () => {
   if (mapRef.value && typeof mapRef.value.forceInit === 'function') {

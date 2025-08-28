@@ -78,7 +78,7 @@
 
 <script setup lang="ts">
 import { ref, computed, h } from 'vue'
-import BaseModal from './BaseModal.vue'
+import BaseModal from './Modal.vue'
 import { generateUniqueId } from '@/src/shared/lib/utils'
 
 type ConfirmVariant = 'info' | 'warning' | 'danger' | 'success'

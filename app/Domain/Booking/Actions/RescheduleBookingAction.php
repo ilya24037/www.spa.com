@@ -4,28 +4,28 @@ namespace App\Domain\Booking\Actions;
 
 use App\Domain\Booking\Models\Booking;
 use App\Domain\User\Models\User;
-use App\Domain\Booking\Services\RescheduleValidator;
-use App\Domain\Booking\Services\AvailabilityChecker;
-use App\Domain\Booking\Services\RescheduleExecutor;
-use App\Domain\Booking\Services\RescheduleNotificationHandler;
+use App\Domain\Booking\Services\BookingValidationService;
+use App\Domain\Booking\Services\BookingService;
+use App\Domain\Booking\Services\BookingNotificationService;
+use App\Domain\Booking\Enums\BookingStatus;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Упрощенный Action для переноса бронирования
- * Делегирует логику специализированным сервисам
+ * Action для переноса бронирования (упрощенная версия)
+ * Использует существующие сервисы без сложной логики
  */
 class RescheduleBookingAction
 {
     public function __construct(
-        private RescheduleValidator $validator,
-        private AvailabilityChecker $availabilityChecker,
-        private RescheduleExecutor $executor,
-        private RescheduleNotificationHandler $notificationHandler
+        private BookingValidationService $validationService,
+        private BookingService $bookingService,
+        private BookingNotificationService $notificationService
     ) {}
 
     /**
-     * Выполнить перенос бронирования
+     * Выполнить перенос бронирования (упрощенная версия)
      */
     public function execute(
         Booking $booking,
@@ -36,121 +36,59 @@ class RescheduleBookingAction
     ): Booking {
         Log::info('Rescheduling booking', [
             'booking_id' => $booking->id,
-            'booking_number' => $booking->booking_number,
             'user_id' => $user->id,
             'old_time' => $booking->start_time,
             'new_time' => $newStartTime,
             'reason' => $reason,
         ]);
 
-        // Валидация через специализированный сервис
-        $this->validator->validate($booking, $user, $newStartTime, $newDuration);
-
-        // Проверка доступности через специализированный сервис
-        $this->validateAvailability($booking, $newStartTime, $newDuration);
-
-        // Выполнение переноса через специализированный сервис
-        $result = $this->executor->execute($booking, $user, $newStartTime, $newDuration, $reason);
-
-        // Отправка уведомлений через специализированный сервис
-        $this->notificationHandler->sendRescheduleNotifications($booking, $user, $result['old_time']);
-
-        Log::info('Booking rescheduled successfully', [
-            'booking_id' => $booking->id,
-            'new_time' => $booking->start_time,
-            'reschedule_count' => $result['reschedule_count'],
-        ]);
-
-        return $booking->fresh();
-    }
-
-    /**
-     * Массовый перенос бронирований
-     */
-    public function bulkReschedule(
-        array $bookingIds, 
-        User $user, 
-        array $newTimes, 
-        string $reason
-    ): array {
-        $results = $this->executor->bulkReschedule($bookingIds, $user, $newTimes, $reason);
-
-        // Отправляем уведомления для успешных переносов
-        $successfulBookings = array_filter($results, fn($r) => $r['success']);
-        $this->notificationHandler->sendBulkRescheduleNotifications($successfulBookings, $user, $reason);
-
-        Log::info('Bulk reschedule completed', [
-            'total_bookings' => count($bookingIds),
-            'successful' => count($successfulBookings),
-        ]);
-
-        return $results;
-    }
-
-    /**
-     * Автоматический перенос при конфликтах
-     */
-    public function autoRescheduleConflicts(User $master, Carbon $conflictDate): array
-    {
-        // Находим конфликтующие бронирования через availability checker
-        $conflictBookings = $this->findConflictingBookings($master, $conflictDate);
-        $results = [];
-
-        foreach ($conflictBookings as $booking) {
+        return DB::transaction(function () use ($booking, $user, $newStartTime, $newDuration, $reason) {
+            // Базовая валидация
             try {
-                // Ищем ближайшее доступное время через availability checker
-                $newTime = $this->availabilityChecker->findNextAvailableSlot(
-                    $master->id,
-                    $booking->duration_minutes,
-                    $booking->start_time->copy()->addDay(),
-                    $booking->id
-                );
-                
-                if ($newTime) {
-                    $result = $this->executor->execute(
-                        $booking, 
-                        $master, 
-                        $newTime, 
-                        null, 
-                        'Автоматический перенос из-за изменения расписания'
-                    );
-                    
-                    $this->notificationHandler->sendAutoRescheduleNotification(
-                        $booking, 
-                        $result['old_time'], 
-                        'Изменение расписания мастера'
-                    );
-                    
-                    $results[] = [
-                        'booking_id' => $booking->id,
-                        'success' => true,
-                        'new_time' => $newTime->toISOString(),
-                    ];
-                } else {
-                    $results[] = [
-                        'booking_id' => $booking->id,
-                        'success' => false,
-                        'error' => 'Не найдено подходящее время для переноса',
-                    ];
-                }
+                $this->validationService->validateReschedule($booking, $user);
             } catch (\Exception $e) {
-                $results[] = [
-                    'booking_id' => $booking->id,
-                    'success' => false,
-                    'error' => $e->getMessage(),
-                ];
+                throw new \Exception('Нельзя перенести бронирование: ' . $e->getMessage());
             }
-        }
 
-        return $results;
+            // Простая проверка доступности
+            $this->validateSimpleAvailability($booking, $newStartTime, $newDuration);
+
+            // Сохраняем старое время для уведомлений
+            $oldTime = $booking->start_time;
+
+            // Простое выполнение переноса
+            $this->performSimpleReschedule($booking, $user, $newStartTime, $newDuration, $reason);
+
+            // Отправка уведомлений
+            try {
+                $this->notificationService->sendRescheduleNotifications($booking, $user, $oldTime);
+            } catch (\Exception $e) {
+                Log::warning('Failed to send reschedule notifications', [
+                    'booking_id' => $booking->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+
+            Log::info('Booking rescheduled successfully', [
+                'booking_id' => $booking->id,
+                'new_time' => $booking->start_time,
+            ]);
+
+            return $booking;
+        });
     }
 
     /**
-     * Проверить можно ли перенести бронирование
+     * Простая проверка возможности переноса
      */
     public function canReschedule(Booking $booking, User $user): bool
     {
-        return $this->validator->canReschedule($booking, $user);
+        try {
+            $this->validationService->validateReschedule($booking, $user);
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
     /**
@@ -158,65 +96,79 @@ class RescheduleBookingAction
      */
     public function getRescheduleError(Booking $booking, User $user): ?string
     {
-        return $this->validator->getRescheduleError($booking, $user);
-    }
-
-    /**
-     * Получить доступные слоты для переноса
-     */
-    public function getAvailableSlots(
-        Booking $booking, 
-        Carbon $date, 
-        ?int $durationMinutes = null
-    ): array {
-        $duration = $durationMinutes ?? $booking->duration_minutes;
-        
-        return $this->availabilityChecker->getAvailableSlotsForDay(
-            $booking->master_id,
-            $date,
-            $duration
-        );
-    }
-
-    /**
-     * Проверить доступность нового времени
-     */
-    private function validateAvailability(
-        Booking $booking, 
-        Carbon $newStartTime, 
-        ?int $newDuration
-    ): void {
-        $duration = $newDuration ?? $booking->duration_minutes;
-        
-        if (!$this->availabilityChecker->isMasterAvailable(
-            $booking->master_id,
-            $newStartTime,
-            $duration,
-            $booking->id
-        )) {
-            $reason = $this->availabilityChecker->getUnavailabilityReason(
-                $booking->master_id,
-                $newStartTime,
-                $duration
-            );
-            
-            throw new \Exception($reason ?? 'Новое время недоступно');
+        try {
+            $this->validationService->validateReschedule($booking, $user);
+            return null;
+        } catch (\Exception $e) {
+            return $e->getMessage();
         }
     }
 
     /**
-     * Найти конфликтующие бронирования
+     * Простая проверка доступности нового времени
      */
-    private function findConflictingBookings(User $master, Carbon $conflictDate): array
-    {
-        // Простая реализация - в реальном проекте это может быть в repository
-        return Booking::where('master_id', $master->id)
-            ->whereDate('start_time', $conflictDate)
-            ->whereIn('status', [
-                Booking::STATUS_PENDING,
-                Booking::STATUS_CONFIRMED
-            ])
-            ->get()
-            ->toArray();
+    private function validateSimpleAvailability(
+        Booking $booking, 
+        Carbon $newStartTime, 
+        ?int $newDuration
+    ): void {
+        $duration = $newDuration ?? $booking->duration_minutes ?? 60;
+        
+        // Простая проверка - не допускаем перенос на прошедшее время
+        if ($newStartTime->isPast()) {
+            throw new \Exception('Нельзя перенести на прошедшее время');
+        }
+
+        // Простая проверка на пересечение с другими бронированиями
+        $conflictingBookings = Booking::where('master_id', $booking->master_id)
+            ->where('id', '!=', $booking->id)
+            ->whereIn('status', ['pending', 'confirmed', 'active'])
+            ->where(function ($query) use ($newStartTime, $duration) {
+                $endTime = $newStartTime->copy()->addMinutes($duration);
+                $query->whereBetween('start_time', [$newStartTime, $endTime])
+                      ->orWhereBetween('end_time', [$newStartTime, $endTime])
+                      ->orWhere(function ($q) use ($newStartTime, $endTime) {
+                          $q->where('start_time', '<=', $newStartTime)
+                            ->where('end_time', '>=', $endTime);
+                      });
+            })
+            ->exists();
+
+        if ($conflictingBookings) {
+            throw new \Exception('На новое время уже есть другое бронирование');
+        }
+    }
+
+    /**
+     * Простое выполнение переноса
+     */
+    private function performSimpleReschedule(
+        Booking $booking, 
+        User $user, 
+        Carbon $newStartTime, 
+        ?int $newDuration, 
+        ?string $reason
+    ): void {
+        // Обновляем время и длительность
+        $booking->start_time = $newStartTime;
+        
+        if ($newDuration) {
+            $booking->duration_minutes = $newDuration;
+        }
+        
+        // Рассчитываем новое время окончания
+        $booking->end_time = $newStartTime->copy()->addMinutes($booking->duration_minutes ?? 60);
+
+        // Обновляем метаданные
+        $metadata = $booking->metadata ?? [];
+        $metadata['reschedule'] = [
+            'rescheduled_by' => $user->id,
+            'rescheduled_at' => now()->toDateTimeString(),
+            'reason' => $reason,
+            'reschedule_count' => ($metadata['reschedule']['reschedule_count'] ?? 0) + 1,
+        ];
+        $booking->metadata = $metadata;
+
+        $booking->save();
     }
 }

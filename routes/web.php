@@ -321,6 +321,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/draft', [DraftController::class, 'store'])->name('ads.draft');
     Route::get('/draft/{ad}', [DraftController::class, 'show'])->name('ads.draft.show');
     Route::put('/draft/{ad}', [DraftController::class, 'update'])->name('ads.draft.update');
+    // Дополнительный POST маршрут для FormData с _method=PUT 
+    Route::post('/draft/{ad}', [DraftController::class, 'update'])->name('ads.draft.update.post');
     Route::post('/draft/{ad}/publish', [DraftController::class, 'publish'])->name('ads.draft.publish');
     Route::delete('/draft/{ad}', [DraftController::class, 'destroy'])->name('ads.draft.destroy');
     
@@ -361,6 +363,12 @@ Route::get('/api/drafts-count', function () {
         return response()->json(['count' => 0, 'error' => $e->getMessage()]);
     }
 })->name('api.drafts-count');
+
+// 🔍 ПРОСТЕЙШИЙ ТЕСТОВЫЙ МАРШРУТ (БЕЗ CSRF)
+Route::post('/test-draft-simple', function() {
+    \Log::info('🟢 ТЕСТ: Простой POST запрос дошел!');
+    return response()->json(['success' => true, 'message' => 'Простой тест OK']);
+})->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 
 // Тестовый маршрут для черновиков БЕЗ middleware
 Route::post('/test-draft', function (Illuminate\Http\Request $request) {

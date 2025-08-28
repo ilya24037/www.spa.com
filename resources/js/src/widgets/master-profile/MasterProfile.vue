@@ -17,11 +17,11 @@
           </div>
           
           <div class="flex-1">
-            <h1 class="text-2xl font-bold text-gray-500 mb-2">
+            <h1 class="text-2xl font-bold text-gray-900 mb-2">
               {{ master.name || 'Мастер' }}
             </h1>
             
-            <p v-if="master.description" class="text-gray-500 mb-4">
+            <p v-if="master.description" class="text-gray-600 mb-4">
               {{ master.description }}
             </p>
             
@@ -30,7 +30,7 @@
                 <StarRating :rating="master.rating" :show-text="true" />
               </span>
               
-              <span v-if="master.reviewsCount" class="text-gray-500">
+              <span v-if="master.reviewsCount" class="text-gray-600">
                 {{ master.reviewsCount }} отзывов
               </span>
             </div>
@@ -45,7 +45,7 @@
           <!-- Gallery with PhotoViewer -->
           <div v-if="galleryImages.length" class="mb-8">
             <h3 class="text-xl font-semibold mb-4">
-              Р“Р°Р»РµСЂРµСЏ СЂР°Р±РѕС‚
+              Галерея работ
             </h3>
             <PhotoThumbnails :images="galleryImages" />
           </div>
@@ -64,18 +64,18 @@
     <!-- Empty -->
     <div v-else class="text-center py-12">
       <p class="text-gray-500">
-        РРЅС„РѕСЂРјР°С†РёСЏ Рѕ РјР°СЃС‚РµСЂРµ РЅРµРґРѕСЃС‚СѓРїРЅР°
+        Информация о мастере недоступна
       </p>
     </div>
   </div>
   
-  <!-- PhotoViewer - РіР»РѕР±Р°Р»СЊРЅС‹Р№ РєРѕРјРїРѕРЅРµРЅС‚ -->
+  <!-- PhotoViewer - глобальный компонент -->
   <PhotoViewer />
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import StarRating from '@/src/shared/ui/organisms/StarRating/StarRating.vue'
+import { StarRating } from '@/src/shared/ui/organisms'
 import MasterProfileSkeleton from './MasterProfileSkeleton.vue'
 
 // Gallery imports
@@ -115,7 +115,7 @@ const galleryImages = computed(() => {
         id: String(photo.id),
         url: photo.url,
         thumbnail: photo.thumbnail_url || photo.url,
-        alt: photo.alt || `Р¤РѕС‚Рѕ РјР°СЃС‚РµСЂР° ${props.master?.name} ${index + 1}`,
+        alt: photo.alt || `Фото мастера ${props.master?.name} ${index + 1}`,
         caption: photo.caption,
         type: 'photo' as const
     }))

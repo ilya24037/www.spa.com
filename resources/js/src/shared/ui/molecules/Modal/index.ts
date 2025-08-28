@@ -1,84 +1,16 @@
-// Main modal components export - для использования в шаблонах
-export { default as BaseModal } from './BaseModal.vue'
-export { default as ConfirmModal } from './ConfirmModal.vue'
-// AlertModal используется только программно через useAlert
+// Main modal component export
+export { default as Modal } from './Modal.vue'
+export type { ModalProps, ModalSize, ModalVariant } from './Modal.vue'
 
-// Modal composables export
-export {
-  useModal,
-  useNamedModal,
-  useConfirm,
-  useAlert,
-  useModalStack
-} from './composables/useModal'
+// Legacy exports for backward compatibility
+export { default as BaseModal } from './Modal.vue' // BaseModal теперь ссылается на Modal
+// ConfirmModal экспортируется отдельно чтобы избежать циклической зависимости
 
-// TypeScript types for modal system
-export interface ModalProps {
-  modelValue: boolean
-  title?: string
-  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
-  variant?: 'primary' | 'danger' | 'warning' | 'success'
-  centered?: boolean
-  fullscreen?: boolean
-  closable?: boolean
-  closeOnBackdrop?: boolean
-  closeOnEscape?: boolean
-  showHeader?: boolean
-  showFooter?: boolean
-  persistent?: boolean
-  zIndex?: number
-}
-
-export interface ConfirmModalProps extends Omit<ModalProps, 'variant'> {
-  message?: string
-  description?: string
-  variant?: 'info' | 'warning' | 'danger' | 'success'
-  confirmText?: string
-  cancelText?: string
-  requiresConfirmation?: boolean
-  confirmationText?: string
-  confirmationLabel?: string
-  confirmationPlaceholder?: string
-}
-
-export interface AlertModalProps extends Omit<ModalProps, 'variant'> {
-  message?: string
-  variant?: 'info' | 'warning' | 'danger' | 'success'
-  buttonText?: string
-}
-
-export interface ModalEmits {
-  'update:modelValue': [value: boolean]
-  open: []
-  close: []
-  confirm?: []
-  cancel?: []
-  backdrop: []
-  escape: []
-}
-
-// Utility types for programmatic modals
-export interface ConfirmOptions {
-  title?: string
-  message?: string
-  description?: string
-  variant?: 'info' | 'warning' | 'danger' | 'success'
-  confirmText?: string
-  cancelText?: string
-  requiresConfirmation?: boolean
-  confirmationText?: string
-}
-
-export interface AlertOptions {
-  title?: string
-  message?: string
-  variant?: 'info' | 'warning' | 'danger' | 'success'
-  buttonText?: string
-}
-
-export interface ConfirmResult {
-  confirmed: boolean
-}
-
-// Re-export utility functions
-export { generateUniqueId } from '@/src/shared/lib/utils'
+// Modal composables export (если есть)
+// export {
+//   useModal,
+//   useNamedModal,
+//   useConfirm,
+//   useAlert,
+//   useModalStack
+// } from './composables/useModal'

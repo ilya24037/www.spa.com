@@ -73,12 +73,10 @@
                 </div>
             </div>
             <div class="additional-info">
-                <BaseTextarea
-                    v-model="localNotes"
-                    label="Дополнительная информация о графике работы"
-                    placeholder="Например: возможны изменения графика по договоренности, предварительная запись обязательна и т.д."
-                    :rows="3"
-                    @update:modelValue="emitNotes"
+                <ScheduleNotesSection
+                    :schedule-notes="scheduleNotes"
+                    :errors="errors"
+                    @update:schedule-notes="$emit('update:schedule-notes', $event)"
                 />
             </div>
         </div>
@@ -88,7 +86,7 @@
 <script setup lang="ts">
 import { ref, reactive, watch, computed } from 'vue'
 import BaseSelect from '@/src/shared/ui/atoms/BaseSelect/BaseSelect.vue'
-import BaseTextarea from '@/src/shared/ui/atoms/BaseTextarea/BaseTextarea.vue'
+import ScheduleNotesSection from '@/src/features/AdSections/ScheduleNotesSection/ui/ScheduleNotesSection.vue'
 import BaseCheckbox from '@/src/shared/ui/atoms/BaseCheckbox/BaseCheckbox.vue'
 import BaseRadio from '@/src/shared/ui/atoms/BaseRadio/BaseRadio.vue'
 import SecondaryButton from '@/src/shared/ui/atoms/SecondaryButton/SecondaryButton.vue'
@@ -103,7 +101,7 @@ interface Props {
 
 interface Emits {
     'update:schedule': [value: Record<string, any>]
-    'update:scheduleNotes': [value: string]
+    'update:schedule-notes': [value: string]
     'update:online-booking': [value: boolean]
 }
 
@@ -158,7 +156,6 @@ const initSchedule = () => {
 
 // Локальное состояние для графика работы
 const localSchedule = reactive({ ...initSchedule() })
-const localNotes = ref('')
 const localOnlineBooking = ref(false)
 
 // Инициализация при монтировании
@@ -179,10 +176,7 @@ const initializeSchedule = () => {
         })
     }
     
-    // Загружаем заметки
-    if (props.scheduleNotes) {
-        localNotes.value = props.scheduleNotes
-    }
+    // Заметки теперь обрабатываются в отдельном компоненте ScheduleNotesSection
     
     // Загружаем онлайн запись
     if (props.onlineBooking !== undefined) {
@@ -201,11 +195,7 @@ watch(() => props.schedule, (newValue) => {
     }
 }, { deep: true })
 
-watch(() => props.scheduleNotes, (newValue) => {
-    if (newValue !== undefined) {
-        localNotes.value = newValue
-    }
-})
+// Заметки теперь обрабатываются в отдельном компоненте ScheduleNotesSection
 
 watch(() => props.onlineBooking, (newValue) => {
     if (newValue !== undefined) {
@@ -223,10 +213,7 @@ const emitSchedule = () => {
 
 
 
-const emitNotes = () => {
-    // ВАЖНО: Всегда отправляем строку, не null
-    emit('update:scheduleNotes', localNotes.value || '')
-}
+// emitNotes удален - заметки теперь обрабатываются в отдельном компоненте ScheduleNotesSection
 
 const emitOnlineBooking = () => {
     emit('update:online-booking', localOnlineBooking.value)

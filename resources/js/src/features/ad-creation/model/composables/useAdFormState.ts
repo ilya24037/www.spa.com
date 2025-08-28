@@ -2,9 +2,28 @@ import { ref, reactive, computed } from 'vue'
 import type { Ref } from 'vue'
 import type { AdForm } from '../types'
 
-// ✅ УПРОЩЕННАЯ ИНИЦИАЛИЗАЦИЯ (без парсинга - миграция в adFormModel.ts)
+// ✅ УПРОЩЕННАЯ ИНИЦИАЛИЗАЦИЯ с обработкой JSON полей
 const getValue = (saved: any, initial: any, field: string, defaultValue: any): any => {
-  return saved?.[field] ?? initial?.[field] ?? defaultValue
+  // Сначала проверяем сохраненные данные
+  if (saved?.[field] !== undefined) {
+    return saved[field]
+  }
+  
+  // Потом проверяем начальные данные
+  if (initial?.[field] !== undefined) {
+    // ✅ СПЕЦИАЛЬНАЯ ОБРАБОТКА JSON ПОЛЕЙ (как в оригинале)
+    if (field === 'prices' && typeof initial[field] === 'string') {
+      try {
+        return JSON.parse(initial[field])
+      } catch (e) {
+        // При ошибке парсинга возвращаем дефолтное значение
+        return defaultValue
+      }
+    }
+    return initial[field]
+  }
+  
+  return defaultValue
 }
 
 /**
@@ -53,9 +72,33 @@ export function useAdFormState(props: any) {
     photos: g('photos', []), video: g('video', []), custom_travel_areas: g('custom_travel_areas', []),
     
     // Объекты (прямая передача из props - миграция происходит в adFormModel.ts)
-    services: g('services', {}), schedule: g('schedule', {}), prices: g('prices', {}),
+    services: g('services', {}), 
+    schedule: g('schedule', {}), 
+    prices: g('prices', {
+      // ✅ ТОЛЬКО ЦЕНЫ (после миграции 2025_08_28)
+      // Места выезда теперь в geo (см. GeoSection.vue строки 227-232)
+      apartments_express: null,
+      apartments_1h: null,
+      apartments_2h: null,
+      apartments_night: null,
+      outcall_express: null,
+      outcall_1h: null,
+      outcall_2h: null,
+      outcall_night: null
+    }),
     geo: g('geo', null), faq: g('faq', {}),
-    parameters: g('parameters', {}),
+    parameters: g('parameters', {
+      title: '',
+      age: '',
+      height: '',
+      weight: '',
+      breast_size: '',
+      hair_color: '',
+      eye_color: '',
+      nationality: '',
+      bikini_zone: '',
+      appearance: ''
+    }),
     contacts: g('contacts', {}),
     
     // Остальные поля
@@ -102,13 +145,27 @@ export function useAdFormState(props: any) {
   }
   
   const setFormData = (data: Partial<AdForm>) => {
+    console.log('🔍 DEBUG setFormData START:', {
+      'data.id': data.id,
+      'form.id BEFORE': form.id,
+      'typeof data.id': typeof data.id
+    })
+    
     // КРИТИЧЕСКИ ВАЖНО: сохраняем ID для корректного обновления
-    if (data.id !== undefined) {
+    if (data.id !== undefined && data.id !== null) {
       form.id = data.id
+      console.log('🔍 DEBUG ID updated:', {
+        'form.id AFTER': form.id
+      })
     }
+    
     // Обновляем остальные поля
     Object.assign(form, data)
     isDirty.value = false
+    
+    console.log('🔍 DEBUG setFormData END:', {
+      'form.id FINAL': form.id
+    })
   }
   
   const clearErrors = () => {

@@ -169,10 +169,42 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(\App\Domain\Booking\Services\BookingPaymentService::class);
         $this->app->singleton(\App\Domain\Booking\Services\BookingStatisticsService::class);
         
-        // Привязка NotificationServiceInterface к реализации
-        $this->app->bind(
+        // Временная заглушка для NotificationServiceInterface (до реализации полной системы уведомлений)
+        $this->app->singleton(
             \App\Domain\Notification\Contracts\NotificationServiceInterface::class,
-            \App\Infrastructure\Notification\NotificationService::class
+            function ($app) {
+                return new class implements \App\Domain\Notification\Contracts\NotificationServiceInterface {
+                    public function send($user, string $type, array $data = []): void
+                    {
+                        \Log::info('Notification sent (stub)', [
+                            'user_id' => $user ? $user->id : null,
+                            'type' => $type,
+                            'data' => $data
+                        ]);
+                    }
+                    
+                    public function sendBookingCompleted(\App\Domain\Booking\Models\Booking $booking): void
+                    {
+                        \Log::info('Booking completed notification (stub)', [
+                            'booking_id' => $booking->id
+                        ]);
+                    }
+                    
+                    public function sendReviewRequest(\App\Domain\Booking\Models\Booking $booking): void
+                    {
+                        \Log::info('Review request sent (stub)', [
+                            'booking_id' => $booking->id
+                        ]);
+                    }
+                    
+                    public function sendCompletionSMS(\App\Domain\Booking\Models\Booking $booking): void
+                    {
+                        \Log::info('Completion SMS sent (stub)', [
+                            'booking_id' => $booking->id
+                        ]);
+                    }
+                };
+            }
         );
         
         // Booking Actions

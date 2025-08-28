@@ -28,11 +28,28 @@ const props = defineProps({
 
 const emit = defineEmits(['update:serviceProvider'])
 
+// Функция безопасного получения первого значения
+const getFirstValue = (value) => {
+  if (Array.isArray(value) && value.length > 0) {
+    return value[0]
+  }
+  if (typeof value === 'string') {
+    // Если пришла JSON строка, пробуем декодировать
+    try {
+      const parsed = JSON.parse(value)
+      return Array.isArray(parsed) && parsed.length > 0 ? parsed[0] : 'women'
+    } catch {
+      return 'women'
+    }
+  }
+  return 'women'
+}
+
 // Для радиокнопок используем строку вместо массива
-const selectedProvider = ref(props.serviceProvider[0] || 'women')
+const selectedProvider = ref(getFirstValue(props.serviceProvider))
 
 watch(() => props.serviceProvider, (val) => {
-  selectedProvider.value = val[0] || 'women'
+  selectedProvider.value = getFirstValue(val)
 })
 
 // Опции для радиокнопок

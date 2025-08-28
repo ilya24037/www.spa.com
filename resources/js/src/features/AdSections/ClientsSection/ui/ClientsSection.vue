@@ -23,8 +23,25 @@ const props = defineProps({
   errors: { type: Object, default: () => ({}) }
 })
 
+// Функция безопасного получения массива
+const safeArrayValue = (value) => {
+  if (Array.isArray(value)) {
+    return value
+  }
+  if (typeof value === 'string') {
+    // Если пришла JSON строка, пробуем декодировать
+    try {
+      const parsed = JSON.parse(value)
+      return Array.isArray(parsed) ? parsed : []
+    } catch {
+      return []
+    }
+  }
+  return []
+}
+
 const emit = defineEmits(['update:clients'])
-const localClients = ref([...props.clients])
+const localClients = ref(safeArrayValue(props.clients))
 
 // Опции для чекбоксов
 const clientOptions = computed(() => [
@@ -34,7 +51,7 @@ const clientOptions = computed(() => [
 ])
 
 watch(() => props.clients, (val) => { 
-  localClients.value = [...val] 
+  localClients.value = safeArrayValue(val)
 })
 
 const toggleClient = (value, checked) => {

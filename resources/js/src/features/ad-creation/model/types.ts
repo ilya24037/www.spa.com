@@ -36,14 +36,16 @@ export interface AdForm {
   price_unit: string
   is_starting_price: boolean
   prices?: {
+    // ✅ ТОЛЬКО ЦЕНЫ (после миграции 2025_08_28)
     apartments_express?: number | null
     apartments_1h?: number | null
     apartments_2h?: number | null
     apartments_night?: number | null
+    outcall_express?: number | null
     outcall_1h?: number | null
     outcall_2h?: number | null
     outcall_night?: number | null
-    taxi_included?: boolean
+    // ❌ УДАЛЕНО: outcall_apartment, outcall_hotel и т.д. - перенесены в geo
   }
   
   // Параметры (объект как в оригинале)
@@ -58,6 +60,9 @@ export interface AdForm {
     nationality: string
     bikini_zone: string
   }
+  
+  // Дополнительные параметры (на верхнем уровне согласно модели Ad)
+  appearance?: string
   
   // Скидки и подарки
   discount?: number | null
@@ -76,6 +81,8 @@ export interface AdForm {
   // Геолокация и путешествия
   geo: any
   address: string
+  radius?: number
+  is_remote?: boolean
   travel_area: string
   custom_travel_areas: string[]
   travel_radius: string | number
@@ -89,6 +96,10 @@ export interface AdForm {
     whatsapp: string
     telegram: string
   }
+  
+  // Дополнительные контакты (на верхнем уровне согласно модели Ad)
+  vk?: string
+  instagram?: string
   
   // FAQ
   faq?: Record<string, any>

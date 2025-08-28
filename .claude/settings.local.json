@@ -329,7 +329,8 @@
       "Bash(C:Usersuser1.configherdbinphp.bat C:www.spa.comtest-photo-fix.php)",
       "Bash(where claude)",
       "Read(/C:\\РАБОЧАЯ\\Sites\\Сайт досуг\\Проверочное фото/**)",
-      "Read(/C:\\РАБОЧАЯ\\Sites\\Сайт досуг\\Проверочное фото/**)"
+      "Read(/C:\\РАБОЧАЯ\\Sites\\Сайт досуг\\Проверочное фото/**)",
+      "Bash(Get-Content \"C:\\www.spa.com\\app\\Application\\Http\\Controllers\\Ad\\DraftController.php\" -Tail 50)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

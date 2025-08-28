@@ -295,7 +295,7 @@ import { ref, computed } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import PhotoGallery from '@/src/features/gallery/ui/PhotoGallery/PhotoGallery.vue'
 import Breadcrumbs from '@/src/shared/ui/molecules/Breadcrumbs/Breadcrumbs.vue'
-import ConfirmModal from '@/src/shared/ui/organisms/ConfirmModal/ConfirmModal.vue'
+import { ConfirmModal } from '@/src/shared/ui/molecules'
 
 // Props
 interface Props {

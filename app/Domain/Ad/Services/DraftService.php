@@ -82,14 +82,6 @@ class DraftService
      */
     public function prepareForDisplay(Ad $ad): array
     {
-        // ✅ ПРИНУДИТЕЛЬНОЕ ЛОГИРОВАНИЕ ВХОДА
-        Log::info("📸 DraftService::prepareForDisplay НАЧАЛО", [
-            'ad_id' => $ad->id,
-            'ad_status' => $ad->status,
-            'ad_exists' => $ad->exists,
-            'ad_attributes' => $ad->getAttributes(),
-            'ad_keys' => array_keys($ad->getAttributes())
-        ]);
         
         $data = $ad->toArray();
         
@@ -99,22 +91,7 @@ class DraftService
         // Декодируем JSON поля
         $jsonFields = ['clients', 'services', 'features', 'photos', 'video', 'geo', 'prices', 'schedule', 'faq'];
         
-        // Логируем данные schedule для отладки
-        if (isset($data['schedule'])) {
-            Log::info("📅 DraftService::prepareForDisplay: Данные schedule", [
-                'schedule_exists' => isset($data['schedule']),
-                'schedule_value' => $data['schedule'],
-                'schedule_type' => gettype($data['schedule']),
-                'schedule_is_string' => is_string($data['schedule']),
-                'schedule_is_array' => is_array($data['schedule']),
-                'schedule_is_null' => is_null($data['schedule'])
-            ]);
-        } else {
-            Log::info("📅 DraftService::prepareForDisplay: Поле schedule НЕ НАЙДЕНО в данных", [
-                'available_fields' => array_keys($data),
-                'data_keys_count' => count(array_keys($data))
-            ]);
-        }
+        // Обработка поля schedule
         
         foreach ($jsonFields as $field) {
             if (isset($data[$field]) && is_string($data[$field])) {
@@ -147,66 +124,28 @@ class DraftService
                     $data[$field] = $decoded;
                 }
                 
-                // Логируем результат декодирования для schedule
-                if ($field === 'schedule') {
-                    Log::info("📅 DraftService::prepareForDisplay: Результат декодирования schedule", [
-                        'field' => $field,
-                        'original_value' => $ad->getAttribute($field),
-                        'decoded_value' => $data[$field],
-                        'decoded_type' => gettype($data[$field]),
-                        'decoded_is_array' => is_array($data[$field])
-                    ]);
-                }
+                // Поле успешно декодировано
             }
         }
         
-        // При загрузке данных переносим поля из prices в geo для фронтенда
-        if (isset($data['prices']) && is_array($data['prices']) && isset($data['geo']) && is_array($data['geo'])) {
-            // Поля для переноса из prices в geo при загрузке
-            $fieldsToMove = ['outcall_apartment', 'outcall_hotel', 'outcall_house', 
-                           'outcall_sauna', 'outcall_office', 'taxi_included'];
-            
-            foreach ($fieldsToMove as $field) {
-                if (isset($data['prices'][$field])) {
-                    $data['geo'][$field] = $data['prices'][$field];
-                }
-            }
-        }
+        // ✅ АРХИТЕКТУРНО ПРАВИЛЬНОЕ РЕШЕНИЕ:
+        // После миграции 2025_08_28 outcall поля теперь хранятся в geo, где им и место!
+        // Больше не нужен костыль с переносом данных между prices и geo
         
-        // Переносим поля типов мест и такси из geo в prices
+        // Преобразуем строковые boolean значения в geo в настоящие boolean
         if (isset($data['geo']) && is_array($data['geo'])) {
-            // Инициализируем prices если его нет
-            if (!isset($data['prices']) || !is_array($data['prices'])) {
-                $data['prices'] = [];
-            }
-            
-            // Поля для переноса из geo в prices
-            $fieldsToMove = ['outcall_apartment', 'outcall_hotel', 'outcall_house', 
-                           'outcall_sauna', 'outcall_office', 'taxi_included'];
-            
-            foreach ($fieldsToMove as $field) {
-                if (isset($data['geo'][$field])) {
-                    $data['prices'][$field] = $data['geo'][$field];
-                    // Удаляем из geo, чтобы избежать дублирования
-                    unset($data['geo'][$field]);
-                }
-            }
-        }
-        
-        // Преобразуем строковые boolean значения в prices в настоящие boolean
-        if (isset($data['prices']) && is_array($data['prices'])) {
-            // Поля которые должны быть boolean
+            // Поля которые должны быть boolean в geo (после миграции)
             $booleanFields = ['taxi_included', 'outcall_apartment', 'outcall_hotel', 
                             'outcall_house', 'outcall_sauna', 'outcall_office'];
             
             foreach ($booleanFields as $boolField) {
-                if (isset($data['prices'][$boolField])) {
-                    $value = $data['prices'][$boolField];
+                if (isset($data['geo'][$boolField])) {
+                    $value = $data['geo'][$boolField];
                     // Преобразуем '1', 1, true в true; '0', 0, false, null в false
                     if ($value === '1' || $value === 1 || $value === true) {
-                        $data['prices'][$boolField] = true;
+                        $data['geo'][$boolField] = true;
                     } else {
-                        $data['prices'][$boolField] = false;
+                        $data['geo'][$boolField] = false;
                     }
                 }
             }
@@ -231,11 +170,18 @@ class DraftService
             $data['description'] = '';
         }
         
-        // ✅ ПРИНУДИТЕЛЬНОЕ ЛОГИРОВАНИЕ В КОНЦЕ
-        Log::info("📸 DraftService::prepareForDisplay ЗАВЕРШЕНО", [
-            'final_data_keys' => array_keys($data),
-            'final_data_count' => count($data)
-        ]);
+        // ИСПРАВЛЕНИЕ: Убедимся что schedule_notes всегда присутствует (даже если пустое)
+        if (!isset($data['schedule_notes'])) {
+            $data['schedule_notes'] = '';
+        }
+        
+        // ИСПРАВЛЕНИЕ: Убедимся что поля акций и скидок всегда присутствуют (даже если пустые)
+        if (!isset($data['new_client_discount'])) {
+            $data['new_client_discount'] = '';
+        }
+        if (!isset($data['gift'])) {
+            $data['gift'] = '';
+        }
         
         return $data;
     }
@@ -278,11 +224,7 @@ class DraftService
                     // Оставляем только "Нет", убираем все остальные опции
                     $faq[$questionId] = [$noValue];
                     
-                    Log::info("FAQ взаимоисключение: Очищены конфликтующие опции", [
-                        'question_id' => $questionId,
-                        'original_values' => $values,
-                        'cleaned_values' => [$noValue]
-                    ]);
+                    // Очищены конфликтующие опции в FAQ
                 }
             }
         }
@@ -304,19 +246,18 @@ class DraftService
         // Исключаем 'faq' из ручного кодирования, так как модель обрабатывает его автоматически через $jsonFields
         $jsonFields = ['clients', 'service_provider', 'services', 'features', 'photos', 'video', 'geo', 'prices', 'schedule'];
         
-        // Логируем данные schedule перед обработкой
-        if (isset($data['schedule'])) {
-            Log::info("📅 DraftService: Данные schedule перед JSON кодированием", [
-                'schedule_data' => $data['schedule'],
-                'schedule_type' => gettype($data['schedule']),
-                'schedule_is_array' => is_array($data['schedule'])
-            ]);
-        }
+        // Подготовка schedule для сохранения
         
         foreach ($jsonFields as $field) {
             if (isset($data[$field])) {
+                // КРИТИЧЕСКИ ВАЖНО: Проверяем что поле не null и не пустое
+                if ($data[$field] === null || $data[$field] === '') {
+                    $data[$field] = in_array($field, ['services', 'prices', 'geo', 'faq']) ? '{}' : '[]';
+                    continue;
+                }
+                
                 // Особая обработка для geo чтобы избежать двойного экранирования
-                if ($field === 'geo' && is_string($data[$field])) {
+                if ($field === 'geo' && is_string($data[$field]) && !empty($data[$field])) {
                     // Проверяем, является ли строка валидным JSON
                     $decoded = json_decode($data[$field], true);
                     if (json_last_error() === JSON_ERROR_NONE) {
@@ -347,13 +288,7 @@ class DraftService
                             $data[$field] = $encoded;
                         }
                         
-                        // Логируем результат JSON кодирования для schedule
-                        if ($field === 'schedule') {
-                            Log::info("📅 DraftService: Результат JSON кодирования schedule", [
-                                'encoded_schedule' => $data[$field],
-                                'encoded_length' => strlen($data[$field])
-                            ]);
-                        }
+                        // JSON кодирование завершено
                     } catch (\Exception $e) {
                         // В случае ошибки кодирования устанавливаем пустое значение
                         $data[$field] = in_array($field, ['services', 'prices', 'geo']) ? '{}' : '[]';

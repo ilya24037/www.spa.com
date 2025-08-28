@@ -148,7 +148,7 @@
 import { ref, computed, watch } from 'vue'
 import { format, addDays, isToday, isTomorrow, parseISO } from 'date-fns'
 import { ru } from 'date-fns/locale'
-import Modal from '@/src/shared/ui/organisms/Modal/Modal.vue'
+import { Modal } from '@/src/shared/ui/molecules'
 import { BookingCalendar } from '@/src/features/booking'
 
 const props = defineProps({

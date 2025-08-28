@@ -2,11 +2,11 @@
 <template>
   <div :class="CONTAINER_CLASSES">
     <h3 :class="TITLE_CLASSES">
-      РљРѕРЅС‚Р°РєС‚С‹
+      Контакты
     </h3>
     
     <div :class="CONTACT_LIST_CLASSES">
-      <!-- РўРµР»РµС„РѕРЅ -->
+      <!-- Телефон -->
       <div v-if="master.phone" :class="CONTACT_ITEM_CLASSES">
         <div :class="CONTACT_INFO_CLASSES">
           <svg
@@ -24,7 +24,7 @@
           </svg>
           <div>
             <p :class="CONTACT_LABEL_CLASSES">
-              РўРµР»РµС„РѕРЅ
+              Телефон
             </p>
             <p :class="CONTACT_VALUE_CLASSES">
               {{ formatPhone(master.phone) }}
@@ -35,7 +35,7 @@
           :class="CALL_BUTTON_CLASSES"
           @click="callPhone"
         >
-          РџРѕР·РІРѕРЅРёС‚СЊ
+          Позвонить
         </button>
       </div>
 
@@ -58,7 +58,7 @@
           :class="WHATSAPP_BUTTON_CLASSES"
           @click="openWhatsApp"
         >
-          РќР°РїРёСЃР°С‚СЊ
+          Написать
         </button>
       </div>
 
@@ -81,25 +81,25 @@
           :class="TELEGRAM_BUTTON_CLASSES"
           @click="openTelegram"
         >
-          РќР°РїРёСЃР°С‚СЊ
+          Написать
         </button>
       </div>
     </div>
 
-    <!-- РЎРїРѕСЃРѕР±С‹ СЃРІСЏР·Рё -->
+    <!-- Способы связи -->
     <div v-if="master.contact_method" :class="CONTACT_METHOD_CLASSES">
       <h4 :class="METHOD_TITLE_CLASSES">
-        РџСЂРµРґРїРѕС‡С‚РёС‚РµР»СЊРЅС‹Р№ СЃРїРѕСЃРѕР± СЃРІСЏР·Рё
+        Предпочтительный способ связи
       </h4>
       <p :class="METHOD_TEXT_CLASSES">
         {{ getContactMethodLabel(master.contact_method) }}
       </p>
     </div>
 
-    <!-- Р“СЂР°С„РёРє СЂР°Р±РѕС‚С‹ -->
+    <!-- График работы -->
     <div v-if="hasSchedule" :class="SCHEDULE_CLASSES">
       <h4 :class="SCHEDULE_TITLE_CLASSES">
-        Р“СЂР°С„РёРє СЂР°Р±РѕС‚С‹
+        График работы
       </h4>
       <div :class="SCHEDULE_LIST_CLASSES">
         <div
@@ -124,7 +124,7 @@
 <script setup>
 import { computed } from 'vue'
 
-// рџЋЇ РЎС‚РёР»Рё СЃРѕРіР»Р°СЃРЅРѕ РґРёР·Р°Р№РЅ-СЃРёСЃС‚РµРјРµ
+// 🎯 Стили согласно дизайн-системе
 const CONTAINER_CLASSES = 'space-y-6'
 const TITLE_CLASSES = 'text-lg font-semibold text-gray-500'
 const CONTACT_LIST_CLASSES = 'space-y-4'
@@ -155,7 +155,7 @@ const props = defineProps({
     }
 })
 
-// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
+// Вычисляемые свойства
 const schedule = computed(() => {
     if (!props.master.schedule) return {}
   
@@ -174,14 +174,14 @@ const hasSchedule = computed(() => {
     return Object.keys(schedule.value).length > 0
 })
 
-// РњРµС‚РѕРґС‹
+// Методы
 const formatPhone = (phone) => {
     if (!phone) return ''
   
-    // РЈР±РёСЂР°РµРј РІСЃРµ РЅРµС†РёС„СЂРѕРІС‹Рµ СЃРёРјРІРѕР»С‹
+    // Убираем все нецифровые символы
     const cleaned = phone.replace(/\D/g, '')
   
-    // Р¤РѕСЂРјР°С‚РёСЂСѓРµРј СЂРѕСЃСЃРёР№СЃРєРёР№ РЅРѕРјРµСЂ
+    // Форматируем российский номер
     if (cleaned.length === 11 && cleaned.startsWith('7')) {
         return `+7 (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7, 9)}-${cleaned.slice(9, 11)}`
     }
@@ -191,9 +191,9 @@ const formatPhone = (phone) => {
 
 const getContactMethodLabel = (method) => {
     const methods = {
-        calls: 'РџСЂРµРґРїРѕС‡РёС‚Р°СЋ Р·РІРѕРЅРєРё',
-        messages: 'РџСЂРµРґРїРѕС‡РёС‚Р°СЋ СЃРѕРѕР±С‰РµРЅРёСЏ',
-        both: 'Р—РІРѕРЅРєРё Рё СЃРѕРѕР±С‰РµРЅРёСЏ'
+        calls: 'Предпочитаю звонки',
+        messages: 'Предпочитаю сообщения',
+        both: 'Звонки и сообщения'
     }
   
     return methods[method] || method
@@ -201,20 +201,20 @@ const getContactMethodLabel = (method) => {
 
 const getDayLabel = (day) => {
     const days = {
-        monday: 'РџРѕРЅРµРґРµР»СЊРЅРёРє',
-        tuesday: 'Р’С‚РѕСЂРЅРёРє',
-        wednesday: 'РЎСЂРµРґР°',
-        thursday: 'Р§РµС‚РІРµСЂРі',
-        friday: 'РџСЏС‚РЅРёС†Р°',
-        saturday: 'РЎСѓР±Р±РѕС‚Р°',
-        sunday: 'Р’РѕСЃРєСЂРµСЃРµРЅСЊРµ'
+        monday: 'Понедельник',
+        tuesday: 'Вторник',
+        wednesday: 'Среда',
+        thursday: 'Четверг',
+        friday: 'Пятница',
+        saturday: 'Суббота',
+        sunday: 'Воскресенье'
     }
   
     return days[day] || day
 }
 
 const formatScheduleHours = (hours) => {
-    if (!hours) return 'Р’С‹С…РѕРґРЅРѕР№'
+    if (!hours) return 'Выходной'
   
     if (typeof hours === 'object' && hours.from && hours.to) {
         return `${hours.from} - ${hours.to}`
@@ -224,7 +224,7 @@ const formatScheduleHours = (hours) => {
         return hours
     }
   
-    return 'РљСЂСѓРіР»РѕСЃСѓС‚РѕС‡РЅРѕ'
+    return 'Круглосуточно'
 }
 
 const callPhone = () => {
@@ -237,7 +237,7 @@ const callPhone = () => {
 const openWhatsApp = () => {
     if (props.master.whatsapp) {
         const cleanPhone = props.master.whatsapp.replace(/\D/g, '')
-        const message = `Р—РґСЂР°РІСЃС‚РІСѓР№С‚Рµ! РРЅС‚РµСЂРµСЃСѓРµС‚ РјР°СЃСЃР°Р¶.`
+        const message = `Здравствуйте! Интересует массаж.`
         window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank')
     }
 }

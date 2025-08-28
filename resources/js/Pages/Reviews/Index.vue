@@ -275,7 +275,7 @@ import { ref, computed } from 'vue'
 import { Head, Link } from '@inertiajs/vue3'
 import { usePage } from '@inertiajs/vue3'
 // 🎯 FSD Импорты
-import SidebarWrapper from '@/src/shared/ui/organisms/SidebarWrapper/SidebarWrapper.vue'
+import { SidebarWrapper } from '@/src/shared/ui/organisms'
 
 const page = usePage()
 const user = computed(() => page.props.auth.user)

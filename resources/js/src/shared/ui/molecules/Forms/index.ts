@@ -4,6 +4,7 @@
 
 // Основные компоненты
 export { default as FormSection } from './FormSection.vue'
+export { default as FormField } from './FormField.vue'
 export { default as FormFieldGroup } from './components/FormFieldGroup.vue'
 export { default as DynamicFieldList } from './components/DynamicFieldList.vue'
 

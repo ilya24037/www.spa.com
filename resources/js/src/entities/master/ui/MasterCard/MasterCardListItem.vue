@@ -2,7 +2,7 @@
 <template>
   <div :class="CARD_CLASSES" @click="goToProfile">
     <div :class="CONTAINER_CLASSES">
-      <!-- Р¤РѕС‚Рѕ -->
+      <!-- Фото -->
       <div :class="PHOTO_CONTAINER_CLASSES">
         <img
           :src="masterPhoto"
@@ -12,7 +12,7 @@
         >
       </div>
 
-      <!-- РРЅС„РѕСЂРјР°С†РёСЏ -->
+      <!-- Информация -->
       <div :class="INFO_CONTAINER_CLASSES">
         <div :class="INFO_HEADER_CLASSES">
           <div>
@@ -30,18 +30,18 @@
             </div>
           </div>
           
-          <!-- Р¦РµРЅР° -->
+          <!-- Цена -->
           <div :class="PRICE_CONTAINER_CLASSES">
             <div :class="PRICE_CLASSES">
-              РѕС‚ {{ formatPrice(master.price_from || master.min_price) }} в‚Ѕ
+              от {{ formatPrice(master.price_from || master.min_price) }} ₽
             </div>
             <div :class="PRICE_UNIT_CLASSES">
-              Р·Р° СЃРµР°РЅСЃ
+              за сеанс
             </div>
           </div>
         </div>
 
-        <!-- РЈСЃР»СѓРіРё -->
+        <!-- Услуги -->
         <div :class="SERVICES_CONTAINER_CLASSES">
           <span
             v-for="(service, index) in displayServices"
@@ -58,13 +58,13 @@
           </span>
         </div>
 
-        <!-- Р”РµР№СЃС‚РІРёСЏ -->
+        <!-- Действия -->
         <div :class="ACTIONS_CONTAINER_CLASSES">
           <button 
             :class="BOOKING_BUTTON_CLASSES"
             @click.stop="openBooking"
           >
-            Р—Р°РїРёСЃР°С‚СЊСЃСЏ
+            Записаться
           </button>
           <button 
             :class="FAVORITE_BUTTON_CLASSES"
@@ -94,7 +94,7 @@
 import { ref, computed } from 'vue'
 import { router } from '@inertiajs/vue3'
 
-// рџЋЇ РЎС‚РёР»Рё СЃРѕРіР»Р°СЃРЅРѕ РґРёР·Р°Р№РЅ-СЃРёСЃС‚РµРјРµ
+// 🎯 Стили согласно дизайн-системе
 const CARD_CLASSES = 'bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 cursor-pointer'
 const CONTAINER_CLASSES = 'flex gap-4'
 const PHOTO_CONTAINER_CLASSES = 'w-24 h-24 flex-shrink-0'
@@ -111,7 +111,7 @@ const PRICE_CONTAINER_CLASSES = 'text-right'
 const PRICE_CLASSES = 'font-bold text-xl'
 const PRICE_UNIT_CLASSES = 'text-sm text-gray-500'
 const SERVICES_CONTAINER_CLASSES = 'mt-2 flex flex-wrap gap-1'
-const SERVICE_TAG_CLASSES = 'text-xs bg-gray-500 text-gray-500 px-2 py-1 rounded'
+const SERVICE_TAG_CLASSES = 'text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded'
 const MORE_SERVICES_CLASSES = 'text-xs text-gray-500 px-2 py-1'
 const ACTIONS_CONTAINER_CLASSES = 'mt-3 flex items-center gap-3'
 const BOOKING_BUTTON_CLASSES = 'flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium'
@@ -125,10 +125,10 @@ const props = defineProps({
     }
 })
 
-// РЎРѕСЃС‚РѕСЏРЅРёРµ
+// Состояние
 const imageError = ref(false)
 
-// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
+// Вычисляемые свойства
 const isFavorite = computed(() => props.master.is_favorite || false)
 
 const masterPhoto = computed(() => {
@@ -151,7 +151,7 @@ const hasMoreServices = computed(() => {
     return props.master.services && props.master.services.length > 3
 })
 
-// РњРµС‚РѕРґС‹
+// Методы
 const formatPrice = (price) => {
     if (!price) return '0'
     return new Intl.NumberFormat('ru-RU').format(price)

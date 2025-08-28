@@ -29,6 +29,66 @@ trait JsonFieldsTrait
     }
 
     /**
+     * КРИТИЧЕСКИ ВАЖНО: Исправление поврежденных JSON полей
+     * Проверяет и исправляет JSON поля, которые содержат неправильные типы данных
+     */
+    public function fixCorruptedJsonFields(): bool
+    {
+        // ЗАЩИТА ОТ БЕСКОНЕЧНОГО ЦИКЛА: Проверяем флаг
+        if ($this->isFixingJsonFields ?? false) {
+            return false;
+        }
+        
+        $this->isFixingJsonFields = true;
+        $fixed = false;
+        $corruptedFields = [];
+        
+        if (property_exists($this, 'jsonFields')) {
+            foreach ($this->jsonFields as $field) {
+                try {
+                    $value = $this->getOriginal($field);
+                    
+                    // Если поле содержит не-строку и не null, это проблема
+                    if ($value !== null && !is_string($value)) {
+                        $corruptedFields[] = $field;
+                        
+                        // Исправляем поле напрямую в БД, избегая Eloquent события
+                        if (is_array($value) || is_object($value)) {
+                            $jsonValue = json_encode($value, JSON_UNESCAPED_UNICODE);
+                        } else {
+                            // Для других типов ставим дефолт
+                            $jsonValue = in_array($field, ['services', 'prices', 'geo', 'faq']) ? '{}' : '[]';
+                        }
+                        
+                        // Обновляем напрямую в БД без вызова событий Eloquent
+                        \DB::table($this->getTable())
+                            ->where('id', $this->id)
+                            ->update([$field => $jsonValue]);
+                        
+                        $fixed = true;
+                    }
+                } catch (\Exception $e) {
+                    Log::warning("Error processing JSON field {$field}: " . $e->getMessage());
+                    continue;
+                }
+            }
+        }
+        
+        if ($fixed) {
+            Log::info("Fixed corrupted JSON fields for model " . get_class($this), [
+                'id' => $this->id,
+                'corrupted_fields' => $corruptedFields
+            ]);
+            
+            // Перезагружаем модель из БД
+            $this->refresh();
+        }
+        
+        $this->isFixingJsonFields = false;
+        return $fixed;
+    }
+
+    /**
      * Получить значение JSON поля с проверкой
      * 
      * @param string $field
@@ -46,6 +106,16 @@ trait JsonFieldsTrait
         // Если значение уже массив (после cast)
         if (is_array($value)) {
             return $value;
+        }
+
+        // КРИТИЧЕСКИ ВАЖНО: Проверяем что значение является строкой перед json_decode
+        if (!is_string($value)) {
+            Log::warning("Field {$field} is not a string, cannot decode JSON for model " . get_class($this), [
+                'id' => $this->id,
+                'value' => $value,
+                'type' => gettype($value)
+            ]);
+            return $default;
         }
 
         // Пытаемся декодировать JSON

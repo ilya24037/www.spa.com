@@ -1,6 +1,5 @@
 import { ref } from 'vue'
 import { router } from '@inertiajs/vue3'
-import axios from 'axios'
 import type { AdForm, SubmissionResult } from '../types'
 import { buildFormData } from '../utils/formDataBuilder'
 
@@ -11,138 +10,309 @@ import { buildFormData } from '../utils/formDataBuilder'
 export function useAdFormSubmission() {
   const abortController = ref<AbortController | null>(null)
   
-  // ✅ СОХРАНЕНИЕ ЧЕРНОВИКА
+  /**
+   * Проверяет наличие файлов в форме (фото или видео)
+   * Основано на оригинальной логике из backup
+   */
+  const hasFiles = (form: AdForm): boolean => {
+    // Проверка фото файлов
+    const hasPhotoFiles = form.photos?.some((p: any) => {
+      if (p instanceof File) return true
+      if (typeof p === 'object' && p !== null && p.file instanceof File) return true
+      return false
+    }) || false
+    
+    // Проверка видео файлов  
+    const hasVideoFiles = form.video?.some((v: any) => {
+      if (v instanceof File) return true
+      if (typeof v === 'object' && v !== null && v.file instanceof File) return true
+      // Строка base64
+      if (typeof v === 'string' && v.startsWith('data:video/')) return true
+      return false
+    }) || false
+    
+    return hasPhotoFiles || hasVideoFiles
+  }
+  
+  // ✅ СОХРАНЕНИЕ ЧЕРНОВИКА (ВОССТАНОВЛЕНО из backup: используем Inertia router как в оригинале)
   const saveDraft = async (form: AdForm): Promise<SubmissionResult> => {
-    try {
+    return new Promise((resolve) => {
+      console.log('🔍 saveDraft НАЧАЛО с form:', form)
+      
+      // Флаг для предотвращения дублирования resolve
+      let resolved = false
+      
       // Подготовка данных
       const formData = buildFormData(form, false) // false = черновик
+      console.log('🔍 saveDraft buildFormData завершен, formData создан')
       
       // Определение URL и метода
       const isUpdate = !!form.id
-      const url = isUpdate ? `/draft/${form.id}` : '/draft'
-      const method = isUpdate ? 'put' : 'post'
       
-      
-      // Отправка запроса
-      const response = await axios({
-        method,
-        url,
-        data: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data'
+      if (isUpdate) {
+        const adId = form.id
+        const filesPresent = hasFiles(form)
+        
+        console.log('🔍 saveDraft ОБНОВЛЕНИЕ черновика:', { 
+          adId, 
+          hasFiles: filesPresent,
+          method: filesPresent ? 'POST с _method=PUT' : 'PUT'
+        })
+        
+        if (filesPresent) {
+          // Если есть файлы - используем FormData с POST и _method=PUT (как в оригинале)
+          formData.append('_method', 'PUT')
+          
+          router.post(`/draft/${adId}`, formData as any, {
+            preserveScroll: true,
+            preserveState: true,
+            forceFormData: true,
+            only: ['ad'],
+            onSuccess: (page: any) => {
+              console.log('✅ saveDraft: Черновик успешно обновлен (с файлами)', page)
+              if (!resolved) {
+                resolved = true
+                resolve({
+                  success: true,
+                  // ИСПРАВЛЕНО: для Inertia запросов данные приходят через flash session в page.props
+                  data: page.props?.ad || page.props?.flash?.ad || page.props,
+                  message: page.props?.flash?.success || page.props?.success || 'Черновик сохранен'
+                })
+              }
+            },
+            onError: (errors: any) => {
+              console.error('❌ saveDraft: Ошибка обновления черновика', errors)
+              if (!resolved) {
+                resolved = true
+                resolve({
+                  success: false,
+                  errors: errors,
+                  message: 'Ошибка сохранения черновика'
+                })
+              }
+            },
+            onFinish: () => {
+              console.log('🏁 saveDraft: Запрос с файлами завершен')
+              // Если не был резолвлен в onSuccess или onError
+              if (!resolved) {
+                resolved = true
+                resolve({
+                  success: true,
+                  message: 'Черновик сохранен'
+                })
+              }
+            }
+          })
+        } else {
+          // Если файлов нет - используем обычный PUT с объектом (как в оригинале)
+          const plainData = convertFormDataToPlainObject(formData)
+          
+          router.put(`/draft/${adId}`, plainData, {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: (page: any) => {
+              console.log('✅ saveDraft: Черновик успешно обновлен (без файлов)', page)
+              if (!resolved) {
+                resolved = true
+                resolve({
+                  success: true,
+                  // ИСПРАВЛЕНО: для Inertia запросов данные приходят через flash session в page.props
+                  data: page.props?.ad || page.props?.flash?.ad || page.props,
+                  message: page.props?.flash?.success || page.props?.success || 'Черновик сохранен'
+                })
+              }
+            },
+            onError: (errors: any) => {
+              console.error('❌ saveDraft: Ошибка обновления черновика', errors)
+              if (!resolved) {
+                resolved = true
+                resolve({
+                  success: false,
+                  errors: errors,
+                  message: 'Ошибка сохранения черновика'
+                })
+              }
+            },
+            onFinish: () => {
+              console.log('🏁 saveDraft: Запрос завершен')
+              // Если не был резолвлен в onSuccess или onError
+              if (!resolved) {
+                resolved = true
+                resolve({
+                  success: true,
+                  message: 'Черновик сохранен'
+                })
+              }
+            }
+          })
         }
-      })
-      
-      // Обработка успешного ответа
-      if (response.data.success) {
-        return {
-          success: true,
-          data: response.data.ad,
-          message: response.data.message || 'Черновик сохранен'
-        }
+      } else {
+        // Создание нового черновика - всегда POST с FormData (как в оригинале)
+        console.log('🔍 saveDraft СОЗДАНИЕ нового черновика')
+        
+        router.post('/draft', formData as any, {
+          preserveScroll: true,
+          forceFormData: true,
+          onSuccess: (response: any) => {
+            console.log('✅ saveDraft: Новый черновик создан')
+            resolve({
+              success: true,
+              data: response.props?.ad || response,
+              message: 'Черновик создан'
+            })
+          },
+          onError: (errors: any) => {
+            console.error('❌ saveDraft: Ошибка создания черновика', errors)
+            resolve({
+              success: false,
+              errors: errors,
+              message: 'Ошибка создания черновика'
+            })
+          }
+        })
       }
-      
-      // Обработка ошибок валидации
-      if (response.data.errors) {
-        return {
-          success: false,
-          errors: response.data.errors,
-          message: response.data.message || 'Ошибка валидации'
-        }
-      }
-      
-      // Неожиданный ответ
-      throw new Error('Неожиданный формат ответа')
-      
-    } catch (error: any) {
-      // Обработка ошибок axios
-      if (error.response?.data?.errors) {
-        return {
-          success: false,
-          errors: error.response.data.errors,
-          message: error.response.data.message || 'Ошибка сохранения'
-        }
-      }
-      
-      // Общая ошибка
-      return {
-        success: false,
-        message: error.response?.data?.message || error.message || 'Произошла ошибка при сохранении'
-      }
-    }
+    })
   }
   
-  // ✅ ПУБЛИКАЦИЯ ОБЪЯВЛЕНИЯ
+  // ✅ ПУБЛИКАЦИЯ ОБЪЯВЛЕНИЯ (используем Inertia router)
   const publishAd = async (form: AdForm): Promise<SubmissionResult> => {
-    try {
+    return new Promise((resolve) => {
+      console.log('🔍 publishAd НАЧАЛО с form:', form)
+      
       // Подготовка данных
       const formData = buildFormData(form, true) // true = публикация
       
       // Определение URL и метода
       const isUpdate = !!form.id
-      const url = isUpdate ? `/ads/${form.id}` : '/ads'
-      const method = isUpdate ? 'put' : 'post'
       
-      // Отправка запроса
-      const response = await axios({
-        method,
-        url,
-        data: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data'
+      if (isUpdate) {
+        const adId = form.id
+        const filesPresent = hasFiles(form)
+        
+        console.log('🔍 publishAd ОБНОВЛЕНИЕ объявления:', { 
+          adId,
+          hasFiles: filesPresent
+        })
+        
+        if (filesPresent) {
+          // Если есть файлы - используем FormData с POST и _method=PUT
+          formData.append('_method', 'PUT')
+          
+          router.post(`/ads/${adId}`, formData as any, {
+            preserveScroll: true,
+            forceFormData: true,
+            onSuccess: (response: any) => {
+              console.log('✅ publishAd: Объявление успешно обновлено (с файлами)')
+              resolve({
+                success: true,
+                data: response.props?.ad || response,
+                message: 'Объявление опубликовано'
+              })
+            },
+            onError: (errors: any) => {
+              console.error('❌ publishAd: Ошибка обновления объявления', errors)
+              resolve({
+                success: false,
+                errors: errors,
+                message: 'Ошибка публикации'
+              })
+            }
+          })
+        } else {
+          // Если файлов нет - используем обычный PUT с объектом
+          const plainData = convertFormDataToPlainObject(formData)
+          
+          router.put(`/ads/${adId}`, plainData, {
+            preserveScroll: true,
+            onSuccess: (response: any) => {
+              console.log('✅ publishAd: Объявление успешно обновлено (без файлов)')
+              resolve({
+                success: true,
+                data: response.props?.ad || response,
+                message: 'Объявление опубликовано'
+              })
+            },
+            onError: (errors: any) => {
+              console.error('❌ publishAd: Ошибка обновления объявления', errors)
+              resolve({
+                success: false,
+                errors: errors,
+                message: 'Ошибка публикации'
+              })
+            }
+          })
         }
-      })
-      
-      // Обработка успешного ответа
-      if (response.data.success) {
-        return {
-          success: true,
-          data: response.data.ad,
-          message: response.data.message || 'Объявление опубликовано'
-        }
+      } else {
+        // Создание нового объявления - всегда POST с FormData
+        console.log('🔍 publishAd СОЗДАНИЕ нового объявления')
+        
+        router.post('/ads', formData as any, {
+          preserveScroll: true,
+          forceFormData: true,
+          onSuccess: (response: any) => {
+            console.log('✅ publishAd: Новое объявление создано')
+            resolve({
+              success: true,
+              data: response.props?.ad || response,
+              message: 'Объявление опубликовано'
+            })
+          },
+          onError: (errors: any) => {
+            console.error('❌ publishAd: Ошибка создания объявления', errors)
+            resolve({
+              success: false,
+              errors: errors,
+              message: 'Ошибка публикации'
+            })
+          }
+        })
       }
-      
-      // Обработка ошибок валидации
-      if (response.data.errors) {
-        return {
-          success: false,
-          errors: response.data.errors,
-          message: response.data.message || 'Заполните обязательные поля'
-        }
-      }
-      
-      // Неожиданный ответ
-      throw new Error('Неожиданный формат ответа')
-      
-    } catch (error: any) {
-      // Ошибка публикации
-      
-      // Обработка ошибок axios
-      if (error.response?.data?.errors) {
-        return {
-          success: false,
-          errors: error.response.data.errors,
-          message: error.response.data.message || 'Ошибка публикации'
-        }
-      }
-      
-      // Общая ошибка
-      return {
-        success: false,
-        message: error.message || 'Произошла ошибка при публикации'
-      }
-    }
+    })
   }
   
   // ✅ ЗАГРУЗКА ДАННЫХ ОБЪЯВЛЕНИЯ
   const loadAd = async (id: number): Promise<SubmissionResult> => {
     try {
-      const response = await axios.get(`/ads/${id}/edit`)
+      const response = await axios.get(`/ads/${id}/edit`, {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'Accept': 'application/json'
+        }
+      })
       
       if (response.data) {
+        // Обработка структуры ответа от Inertia
+        
+        // Проверяем разные варианты структуры ответа от Inertia
+        let adData = null
+        
+        if (response.data.props?.ad?.data) {
+          // Inertia structure with AdResource: { props: { ad: { data: {...} } } }
+          adData = response.data.props.ad.data
+          // Found Inertia props structure with Resource
+        } else if (response.data.props?.ad) {
+          // Inertia structure: { props: { ad: {...} } }
+          adData = response.data.props.ad
+          // Found Inertia props structure
+        } else if (response.data.ad?.data) {
+          // Direct structure with AdResource: { ad: { data: {...} } }
+          adData = response.data.ad.data
+          // Found direct Resource structure
+        } else if (response.data.ad) {
+          // Direct structure: { ad: {...} }
+          adData = response.data.ad
+          // Found direct structure
+        } else {
+          // Fallback to full response.data
+          adData = response.data
+          // Using fallback structure
+        }
+        
+        // Получены данные объявления
+        
         return {
           success: true,
-          data: response.data.ad || response.data
+          data: adData
         }
       }
       
@@ -221,4 +391,40 @@ export function useAdFormSubmission() {
     navigateAfterSave,
     handleSubmissionError
   }
+}
+
+/**
+ * Конвертирует FormData в обычный объект для исправления проблемы PUT + FormData
+ * Основано на решении из DRAFT_FIELDS_SAVING_FIX_REPORT.md
+ */
+function convertFormDataToPlainObject(formData: FormData): Record<string, any> {
+  const plainData: Record<string, any> = {}
+  
+  formData.forEach((value, key) => {
+    // Обработка массивов (photos[0], photos[1])
+    if (key.includes('[')) {
+      const match = key.match(/^(.+?)\[(\d+)\]$/)
+      if (match) {
+        const fieldName = match[1]
+        const index = parseInt(match[2], 10)
+        if (!plainData[fieldName]) {
+          plainData[fieldName] = []
+        }
+        plainData[fieldName][index] = value
+      }
+    } else {
+      // Парсинг JSON строк
+      if (typeof value === 'string' && (value.startsWith('{') || value.startsWith('['))) {
+        try {
+          plainData[key] = JSON.parse(value)
+        } catch (e) {
+          plainData[key] = value
+        }
+      } else {
+        plainData[key] = value
+      }
+    }
+  })
+  
+  return plainData
 }

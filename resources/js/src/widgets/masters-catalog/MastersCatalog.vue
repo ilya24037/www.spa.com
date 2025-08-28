@@ -109,7 +109,7 @@ import BaseCheckbox from '@/src/shared/ui/atoms/BaseCheckbox/BaseCheckbox.vue'
 import SecondaryButton from '@/src/shared/ui/atoms/SecondaryButton/SecondaryButton.vue'
 import GridControls from '@/src/shared/ui/molecules/GridControls/GridControls.vue'
 import type { GridView } from '@/src/shared/ui/molecules/GridControls/GridControls.vue'
-import { VirtualScroll } from '@/src/shared/ui/organisms/VirtualScroll'
+import { VirtualScroll } from '@/src/shared/ui/organisms'
 import { MasterCardList } from '@/src/entities/master/ui/MasterCard'
 
 interface Props {

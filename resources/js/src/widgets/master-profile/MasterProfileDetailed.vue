@@ -13,11 +13,9 @@
           <!-- Photo Gallery -->
           <div class="bg-white rounded-lg overflow-hidden shadow-sm mb-6">
             <div v-if="galleryImages.length" class="relative">
-              <PhotoGallery 
+              <MasterGallery 
                 :images="galleryImages"
-                :show-thumbnails="true"
-                :auto-play="false"
-                class="aspect-w-4 aspect-h-3"
+                @open-viewer="handleOpenViewer"
               />
             </div>
             <div v-else class="aspect-w-4 aspect-h-3 bg-gray-100 flex items-center justify-center">
@@ -197,11 +195,12 @@
 import { ref, computed } from 'vue'
 
 // Импорты компонентов
-import StarRating from '@/src/shared/ui/organisms/StarRating/StarRating.vue'
+import { StarRating } from '@/src/shared/ui/organisms'
 import MasterProfileSkeleton from './MasterProfileSkeleton.vue'
 
 // Gallery imports
-import { PhotoGallery, PhotoViewer } from '@/src/features/gallery'
+import MasterGallery from '@/src/entities/master/ui/MasterGallery/MasterGallery.vue'
+import { PhotoViewer } from '@/src/features/gallery'
 
 // Master components
 import MasterServices from '@/src/entities/master/ui/MasterServices/MasterServices.vue'
@@ -249,6 +248,14 @@ const props = withDefaults(defineProps<Props>(), {
   loading: false
 })
 
+// Объявление событий
+const emit = defineEmits<{
+  profileLoading: []
+  galleryLoading: []
+  reviewsLoading: []
+  contentLoaded: []
+}>()
+
 // Состояние компонента
 const showBookingModal = ref(false)
 
@@ -256,13 +263,14 @@ const showBookingModal = ref(false)
 const galleryImages = computed(() => {
   if (!props.master?.photos?.length) return []
   
-  return props.master.photos.map((photo, index) => ({
-    id: String(photo.id),
+  // MasterGallery может принимать как строки так и объекты Photo
+  // Возвращаем объекты Photo для большей гибкости
+  return props.master.photos.map((photo) => ({
+    id: photo.id,
     url: photo.url,
-    thumbnail: photo.thumbnail_url || photo.url,
-    alt: photo.alt || `Фото мастера ${props.master?.name} ${index + 1}`,
-    caption: photo.caption,
-    type: 'photo' as const
+    thumbnail_url: photo.thumbnail_url,
+    alt: photo.alt,
+    caption: photo.caption
   }))
 })
 
@@ -296,6 +304,12 @@ const handleBookingCreated = (booking: any) => {
   console.log('Booking created:', booking)
   closeBookingModal()
   // Здесь можно добавить уведомление об успешном создании записи
+}
+
+const handleOpenViewer = (index: number) => {
+  // Обработка открытия PhotoViewer через глобальное событие
+  // MasterGallery уже эмитит глобальное событие 'open-photo-viewer'
+  console.log('Opening photo viewer at index:', index)
 }
 </script>
 

@@ -59,9 +59,27 @@ export function useVideoUpload() {
   }
   
   // ✅ УПРОЩЕНИЕ: Простая инициализация из props
-  const initializeFromProps = (videos: Array<string | Video>) => {
-    if (localVideos.value.length === 0 && (videos || []).length > 0) {
-      localVideos.value = videos.map((video, index) => {
+  const initializeFromProps = (videos: Array<string | Video> | string | null | undefined) => {
+    // Функция безопасного получения массива видео
+    const safeVideosArray = (value: any): Array<string | Video> => {
+      if (Array.isArray(value)) {
+        return value
+      }
+      if (typeof value === 'string') {
+        // Если пришла JSON строка, пробуем декодировать
+        try {
+          const parsed = JSON.parse(value)
+          return Array.isArray(parsed) ? parsed : []
+        } catch {
+          return []
+        }
+      }
+      return []
+    }
+    
+    const safeVideos = safeVideosArray(videos)
+    if (localVideos.value.length === 0 && safeVideos.length > 0) {
+      localVideos.value = safeVideos.map((video, index) => {
         if (typeof video === 'string') {
           return {
             id: `existing-${index}`,

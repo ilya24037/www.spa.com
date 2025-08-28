@@ -121,8 +121,7 @@
 import { ref, computed } from 'vue'
 import { Head, Link, usePage } from '@inertiajs/vue3'
 // 🎯 FSD Импорты
-import SidebarWrapper from '@/src/shared/ui/organisms/SidebarWrapper/SidebarWrapper.vue'
-import ContentCard from '@/src/shared/ui/organisms/ContentCard/ContentCard.vue'
+import { SidebarWrapper, ContentCard } from '@/src/shared/ui/organisms'
 
 const showSidebar = ref(false)
 const page = usePage()

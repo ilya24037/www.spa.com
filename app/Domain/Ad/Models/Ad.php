@@ -41,10 +41,14 @@ class Ad extends Model
         'online_booking',
         'address',
         'geo',
+        'radius',
+        'is_remote',
         'phone',
         'contact_method',
         'whatsapp',
         'telegram',
+        'vk',
+        'instagram',
         'description',
         'price_unit',
         'is_starting_price',
@@ -104,6 +108,7 @@ class Ad extends Model
         'faq',
         'verification_metadata'
     ];
+
 
     protected $casts = [
         // JSON поля обрабатываются через JsonFieldsTrait
@@ -445,6 +450,14 @@ class Ad extends Model
     protected static function boot()
     {
         parent::boot();
+        
+        // ВРЕМЕННО ОТКЛЮЧЕНО: Автоматическое исправление JSON полей
+        // Используйте команду: php artisan tinker --execute="App\Domain\Ad\Models\Ad::fixAllCorruptedJsonFields()"
+        // static::retrieved(function ($ad) {
+        //     if (method_exists($ad, 'fixCorruptedJsonFields')) {
+        //         $ad->fixCorruptedJsonFields();
+        //     }
+        // });
         
         // Автоматически генерируем slug при создании
         static::creating(function ($ad) {

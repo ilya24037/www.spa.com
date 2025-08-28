@@ -404,7 +404,7 @@ import { route } from 'ziggy-js'
 
 import { ref, computed } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
-import Modal from '@/src/shared/ui/organisms/Modal/Modal.vue'
+import { Modal } from '@/src/shared/ui/molecules'
 import { 
     StarIcon, 
     PhoneIcon, 

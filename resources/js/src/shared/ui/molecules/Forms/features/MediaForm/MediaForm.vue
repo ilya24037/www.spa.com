@@ -116,7 +116,7 @@ const MediaPreview = defineAsyncComponent(() => import('./components/MediaPrevie
 // Базовые компоненты формы (уже загружены)
 import FormSection from '@/src/shared/ui/molecules/Forms/FormSection.vue'
 import FormFieldGroup from '@/src/shared/ui/molecules/Forms/components/FormFieldGroup.vue'
-import FormField from '@/src/shared/ui/organisms/Forms/FormField.vue'
+import FormField from '@/src/shared/ui/molecules/Forms/FormField.vue'
 
 
 // Types

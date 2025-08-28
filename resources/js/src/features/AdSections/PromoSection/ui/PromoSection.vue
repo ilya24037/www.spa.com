@@ -27,16 +27,20 @@ import { ref, watch } from 'vue'
 import BaseInput from '@/src/shared/ui/atoms/BaseInput/BaseInput.vue'
 const props = defineProps({
   newClientDiscount: { type: String, default: '' },
+  'new-client-discount': { type: String, default: '' },
   gift: { type: String, default: '' },
   errors: { type: Object, default: () => ({}) }
 })
-const emit = defineEmits(['update:newClientDiscount', 'update:gift'])
-const localDiscount = ref(props.newClientDiscount)
-const localGift = ref(props.gift)
-watch(() => props.newClientDiscount, val => { localDiscount.value = val })
-watch(() => props.gift, val => { localGift.value = val })
+
+const emit = defineEmits(['update:newClientDiscount', 'update:gift', 'update:new-client-discount'])
+// Используем kebab-case версию если она есть, иначе camelCase
+const localDiscount = ref(props['new-client-discount'] || props.newClientDiscount || '')
+const localGift = ref(props.gift || '')
+watch(() => props['new-client-discount'] || props.newClientDiscount, val => { localDiscount.value = val || '' })
+watch(() => props.gift, val => { localGift.value = val || '' })
 const emitAll = () => {
   emit('update:newClientDiscount', localDiscount.value)
+  emit('update:new-client-discount', localDiscount.value) // Для v-model с дефисом
   emit('update:gift', localGift.value)
 }
 </script>

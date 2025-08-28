@@ -1,7 +1,7 @@
 <!-- resources/js/src/widgets/profile-dashboard/tabs/MyAdsTab.vue -->
 <template>
   <div :class="CONTAINER_CLASSES">
-    <!-- Р¤РёР»СЊС‚СЂС‹ СЃС‚Р°С‚СѓСЃРѕРІ -->
+    <!-- Фильтры статусов -->
     <div :class="FILTERS_CLASSES">
       <button
         v-for="status in statuses"
@@ -16,7 +16,7 @@
       </button>
     </div>
 
-    <!-- РЎРїРёСЃРѕРє РѕР±СЉСЏРІР»РµРЅРёР№ -->
+    <!-- Список объявлений -->
     <div v-if="filteredAds.length > 0" :class="ADS_LIST_CLASSES">
       <AdCard
         v-for="ad in filteredAds"
@@ -29,11 +29,11 @@
       />
     </div>
 
-    <!-- РџСѓСЃС‚РѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ -->
+    <!-- Пустое состояние -->
     <div v-else :class="EMPTY_STATE_CLASSES">
       <CollectionIcon :class="EMPTY_ICON_CLASSES" />
       <h3 :class="EMPTY_TITLE_CLASSES">
-        РќРµС‚ РѕР±СЉСЏРІР»РµРЅРёР№
+        Нет объявлений
       </h3>
       <p :class="EMPTY_DESCRIPTION_CLASSES">
         {{ getEmptyMessage() }}
@@ -42,7 +42,7 @@
         :class="CREATE_BUTTON_CLASSES"
         @click="createNewAd"
       >
-        РЎРѕР·РґР°С‚СЊ РѕР±СЉСЏРІР»РµРЅРёРµ
+        Создать объявление
       </button>
     </div>
   </div>
@@ -54,46 +54,42 @@ import { router } from '@inertiajs/vue3'
 import { CollectionIcon } from '@heroicons/vue/outline'
 import AdCard from '@/src/entities/ad/ui/AdCard/AdCard.vue'
 
-// рџЋЇ РЎС‚РёР»Рё
-const CONTAINER_CLASSES = 'space-y-6'
-const FILTERS_CLASSES = 'flex flex-wrap gap-2'
-const STATUS_BUTTON_BASE_CLASSES = 'px-4 py-2 rounded-lg font-medium text-sm transition-colors'
-const STATUS_BUTTON_ACTIVE_CLASSES = 'bg-blue-600 text-white'
-const STATUS_BUTTON_INACTIVE_CLASSES = 'bg-gray-500 text-gray-500 hover:bg-gray-500'
-const STATUS_COUNT_CLASSES = 'ml-1 px-2 py-0.5 text-xs bg-white/20 rounded-full'
-const ADS_LIST_CLASSES = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
-const EMPTY_STATE_CLASSES = 'text-center py-12'
-const EMPTY_ICON_CLASSES = 'w-12 h-12 mx-auto text-gray-500 mb-4'
-const EMPTY_TITLE_CLASSES = 'text-lg font-medium text-gray-500 mb-2'
-const EMPTY_DESCRIPTION_CLASSES = 'text-gray-500 mb-4'
-const CREATE_BUTTON_CLASSES = 'px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors'
-
+// 🎯 Props
 const props = defineProps({
     ads: {
         type: Array,
         default: () => []
-    },
-    counts: {
-        type: Object,
-        default: () => ({})
     }
 })
 
-const emit = defineEmits(['refresh'])
+// 🎯 Стили
+const CONTAINER_CLASSES = 'space-y-6'
+const FILTERS_CLASSES = 'flex flex-wrap gap-3'
+const STATUS_BUTTON_BASE = 'px-4 py-2 rounded-lg font-medium text-sm transition-colors relative'
+const STATUS_BUTTON_ACTIVE = 'bg-blue-500 text-white'
+const STATUS_BUTTON_INACTIVE = 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+const STATUS_COUNT_CLASSES = 'ml-2 px-2 py-0.5 bg-white/20 rounded-full text-xs'
+const ADS_LIST_CLASSES = 'space-y-4'
+const EMPTY_STATE_CLASSES = 'text-center py-16'
+const EMPTY_ICON_CLASSES = 'w-16 h-16 mx-auto text-gray-300 mb-4'
+const EMPTY_TITLE_CLASSES = 'text-xl font-semibold text-gray-900 mb-2'
+const EMPTY_DESCRIPTION_CLASSES = 'text-gray-500 mb-6'
+const CREATE_BUTTON_CLASSES = 'px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors'
 
-// РЎРѕСЃС‚РѕСЏРЅРёРµ
+// 🎯 Состояние
 const activeStatus = ref('all')
 
-// РЎС‚Р°С‚СѓСЃС‹
+// 🎯 Статусы
 const statuses = [
-    { key: 'all', label: 'Р’СЃРµ' },
-    { key: 'active', label: 'РђРєС‚РёРІРЅС‹Рµ' },
-    { key: 'drafts', label: 'ЧерновикРё' },
-    { key: 'waiting', label: 'РќР° РјРѕРґРµСЂР°С†РёРё' },
-    { key: 'archived', label: 'РђСЂС…РёРІ' }
+    { key: 'all', label: 'Все' },
+    { key: 'active', label: 'Активные' },
+    { key: 'draft', label: 'Черновики' },
+    { key: 'moderation', label: 'На модерации' },
+    { key: 'rejected', label: 'Отклоненные' },
+    { key: 'archived', label: 'В архиве' }
 ]
 
-// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
+// 🎯 Вычисления
 const filteredAds = computed(() => {
     if (activeStatus.value === 'all') {
         return props.ads
@@ -101,54 +97,57 @@ const filteredAds = computed(() => {
     return props.ads.filter(ad => ad.status === activeStatus.value)
 })
 
-// РњРµС‚РѕРґС‹
-const getStatusButtonClasses = (statusKey) => {
+// 🎯 Методы
+const getStatusCount = (status) => {
+    if (status === 'all') return props.ads.length
+    return props.ads.filter(ad => ad.status === status).length
+}
+
+const getStatusButtonClasses = (status) => {
     return [
-        STATUS_BUTTON_BASE_CLASSES,
-        activeStatus.value === statusKey ? STATUS_BUTTON_ACTIVE_CLASSES : STATUS_BUTTON_INACTIVE_CLASSES
+        STATUS_BUTTON_BASE,
+        status === activeStatus.value ? STATUS_BUTTON_ACTIVE : STATUS_BUTTON_INACTIVE
     ].join(' ')
 }
 
-const getStatusCount = (statusKey) => {
-    if (statusKey === 'all') {
-        return props.counts.ads || 0
-    }
-    return props.counts[statusKey] || 0
-}
-
 const getEmptyMessage = () => {
-    switch (activeStatus.value) {
-    case 'active':
-        return 'РЈ РІР°СЃ РЅРµС‚ Р°РєС‚РёРІРЅС‹С… РѕР±СЉСЏРІР»РµРЅРёР№'
-    case 'drafts':
-        return 'РЈ РІР°СЃ РЅРµС‚ С‡РµСЂРЅРѕРІРёРєРѕРІ'
-    case 'waiting':
-        return 'РќРµС‚ РѕР±СЉСЏРІР»РµРЅРёР№ РЅР° РјРѕРґРµСЂР°С†РёРё'
-    case 'archived':
-        return 'Р’ Р°СЂС…РёРІРµ РїСѓСЃС‚Рѕ'
-    default:
-        return 'РЈ РІР°СЃ РїРѕРєР° РЅРµС‚ РѕР±СЉСЏРІР»РµРЅРёР№'
+    const messages = {
+        all: 'У вас пока нет объявлений. Создайте первое!',
+        active: 'Нет активных объявлений',
+        draft: 'Нет черновиков',
+        moderation: 'Нет объявлений на модерации',
+        rejected: 'Нет отклоненных объявлений',
+        archived: 'Нет архивных объявлений'
     }
-}
-
-const createNewAd = () => {
-    router.visit('/ads/create')
+    return messages[activeStatus.value] || messages.all
 }
 
 const handleEdit = (ad) => {
     router.visit(`/ads/${ad.id}/edit`)
 }
 
-const handleDelete = async (ad) => {
-    if (confirm('РЈРґР°Р»РёС‚СЊ РѕР±СЉСЏРІР»РµРЅРёРµ?')) {
-    // API РІС‹Р·РѕРІ РґР»СЏ СѓРґР°Р»РµРЅРёСЏ
-        emit('refresh')
+const handleDelete = (ad) => {
+    if (confirm('Вы уверены, что хотите удалить это объявление?')) {
+        router.delete(`/ads/${ad.id}`, {
+            onSuccess: () => {
+                // Обновление будет через props из родителя
+            }
+        })
     }
 }
 
-const handleToggleStatus = async (ad) => {
-    // API РІС‹Р·РѕРІ РґР»СЏ РёР·РјРµРЅРµРЅРёСЏ СЃС‚Р°С‚СѓСЃР°
-    emit('refresh')
+const handleToggleStatus = (ad) => {
+    const newStatus = ad.status === 'active' ? 'archived' : 'active'
+    router.patch(`/ads/${ad.id}`, {
+        status: newStatus
+    }, {
+        onSuccess: () => {
+            // Обновление будет через props из родителя
+        }
+    })
+}
+
+const createNewAd = () => {
+    router.visit('/ads/create')
 }
 </script>
-

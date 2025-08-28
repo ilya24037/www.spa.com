@@ -5,7 +5,7 @@ namespace App\Domain\Booking\Models;
 use App\Domain\Booking\Enums\BookingStatus;
 use App\Domain\Booking\Enums\BookingType;
 use App\Domain\Booking\Services\BookingStatusManager;
-use App\Domain\Booking\Services\BookingValidator;
+use App\Domain\Booking\Services\BookingValidationService;
 use App\Domain\Booking\Services\BookingFormatter;
 use App\Support\Traits\JsonFieldsTrait;
 use App\Domain\User\Models\User;
@@ -237,7 +237,9 @@ class Booking extends Model
      */
     public function canModify(): bool
     {
-        return app(BookingValidator::class)->canModifyBooking($this);
+        // Можно изменить только ожидающие подтверждения или подтвержденные бронирования
+        return in_array($this->status, [BookingStatus::PENDING, BookingStatus::CONFIRMED])
+            && $this->start_time > now()->addHours(2);
     }
 
     /**
@@ -245,7 +247,11 @@ class Booking extends Model
      */
     public function canLeaveReview(int $userId): bool
     {
-        return app(BookingValidator::class)->canLeaveReview($this, $userId);
+        // Отзыв можно оставить только после завершения бронирования
+        // и только клиент или мастер могут оставить отзыв
+        return $this->status === BookingStatus::COMPLETED 
+            && ($this->client_id === $userId || $this->master_id === $userId)
+            && !$this->reviews()->where('user_id', $userId)->exists();
     }
 
     /**
@@ -253,7 +259,11 @@ class Booking extends Model
      */
     public function canRefund(): bool
     {
-        return app(BookingValidator::class)->canRefund($this);
+        // Возврат возможен для отмененных бронирований с предоплатой
+        return $this->status === BookingStatus::CANCELLED 
+            && $this->deposit_amount > 0
+            && $this->paid_amount > 0
+            && $this->cancelled_at > now()->subDays(7); // в течение 7 дней после отмены
     }
 
     // =================== АТРИБУТЫ ЧЕРЕЗ СЕРВИСЫ ===================
@@ -355,6 +365,24 @@ class Booking extends Model
      */
     public function calculateRefundAmount(): float
     {
-        return app(BookingValidator::class)->calculateRefundAmount($this);
+        if (!$this->canRefund()) {
+            return 0.0;
+        }
+
+        // Простая логика возврата - возвращаем предоплату за вычетом комиссии
+        $refundRate = 1.0; // 100% если отмена за 24+ часов
+        
+        if ($this->cancelled_at) {
+            $hoursSinceCancellation = $this->cancelled_at->diffInHours($this->start_time, false);
+            
+            if ($hoursSinceCancellation < 24) {
+                $refundRate = 0.5; // 50% если отмена менее чем за 24 часа
+            }
+            if ($hoursSinceCancellation < 2) {
+                $refundRate = 0.0; // 0% если отмена менее чем за 2 часа
+            }
+        }
+
+        return round($this->deposit_amount * $refundRate, 2);
     }
 }

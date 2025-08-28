@@ -136,9 +136,27 @@ export function usePhotoUpload() {
     return true
   }
 
-  const initializeFromProps = (photos: Array<string | Photo>) => {
-    if (localPhotos.value.length === 0 && photos.length > 0) {
-      localPhotos.value = photos.map((photo, index) => {
+  const initializeFromProps = (photos: Array<string | Photo> | string | null | undefined) => {
+    // Функция безопасного получения массива фото
+    const safePhotosArray = (value: any): Array<string | Photo> => {
+      if (Array.isArray(value)) {
+        return value
+      }
+      if (typeof value === 'string') {
+        // Если пришла JSON строка, пробуем декодировать
+        try {
+          const parsed = JSON.parse(value)
+          return Array.isArray(parsed) ? parsed : []
+        } catch {
+          return []
+        }
+      }
+      return []
+    }
+    
+    const safePhotos = safePhotosArray(photos)
+    if (localPhotos.value.length === 0 && safePhotos.length > 0) {
+      localPhotos.value = safePhotos.map((photo, index) => {
         if (typeof photo === 'string') {
           return {
             id: `existing-${index}`,

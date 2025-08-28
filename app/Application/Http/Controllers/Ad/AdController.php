@@ -198,12 +198,11 @@ class AdController extends Controller
                 $preparedData['work_format'] = $preparedData['work_format']->value ?? 'individual';
             }
             
-            // УНИФИКАЦИЯ: Используем AdResource для черновиков тоже
-            // Но передаем подготовленные данные как массив, чтобы AdResource обернул их в 'data'
-            $ad->setRawAttributes($preparedData);
+            // УНИФИКАЦИЯ: Возвращаем подготовленные данные напрямую для черновиков
+            // AdResource не нужен для черновиков, так как DraftService уже подготовил данные
             
             return Inertia::render('Ad/Edit', [
-                'ad' => new AdResource($ad),
+                'ad' => ['data' => $preparedData], // Структура как в AdResource  
                 'isActive' => false
             ]);
         }

@@ -109,6 +109,36 @@ class DraftController extends Controller
             unset($data['media_settings']); // Удаляем, т.к. такого поля нет в БД
         }
         
+        // ИСПРАВЛЕНО: Адаптивная логика для JSON полей
+        // Поддерживаем как строки (прямые запросы), так и массивы (через convertFormDataToPlainObject)
+        $jsonFields = ['clients', 'service_provider', 'services', 'features', 'geo', 'prices', 'schedule'];
+        foreach ($jsonFields as $field) {
+            if (isset($data[$field])) {
+                if (is_string($data[$field])) {
+                    // Если строка - декодируем
+                    $decoded = json_decode($data[$field], true);
+                    if (json_last_error() === JSON_ERROR_NONE) {
+                        $data[$field] = $decoded;
+                    }
+                } elseif (is_array($data[$field])) {
+                    // Если уже массив - оставляем как есть
+                    // (пришел через convertFormDataToPlainObject)
+                }
+            }
+        }
+        
+        // ОТЛАДКА: Логируем что передаем в DraftService
+        \Log::info('🔍 DraftController::store - данные перед saveOrUpdate:', [
+            'data_keys' => array_keys($data),
+            'services_type' => gettype($data['services'] ?? 'not_set'),
+            'services_is_array' => is_array($data['services'] ?? null),
+            'services_sample' => is_array($data['services'] ?? null) ? 'array with ' . count($data['services']) . ' items' : ($data['services'] ?? 'not_set'),
+            'clients_type' => gettype($data['clients'] ?? 'not_set'),
+            'clients_is_array' => is_array($data['clients'] ?? null),
+            'has_complex_services' => isset($data['services']['hygiene_amenities']),
+            'first_services_keys' => is_array($data['services'] ?? null) ? array_keys($data['services']) : 'not_array'
+        ]);
+        
         // Обработка полей верификации
         if ($request->has('verification_photo')) {
             $verificationPhoto = $request->input('verification_photo');
@@ -320,7 +350,7 @@ class DraftController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Черновик создан',
-            'ad' => $ad->toArray(), // КРИТИЧЕСКИ ВАЖНО: возвращаем весь объект для обновления формы
+            'ad' => $this->draftService->prepareForDisplay($ad), // ИСПРАВЛЕНО: используем подготовленные данные
             'ad_id' => $ad->id // Для совместимости
         ]);
     }
@@ -330,6 +360,8 @@ class DraftController extends Controller
      */
     public function update(Request $request, $id)
     {
+        \Log::info('🟢 DraftController::update ВЫЗВАН!', ['id' => $id, 'method' => $request->method()]);
+        
         try {
             $data = $request->all();
             
@@ -629,21 +661,50 @@ class DraftController extends Controller
                 }
             }
             
+            // ИСПРАВЛЕНО: Адаптивная логика для JSON полей
+            // Поддерживаем как строки (прямые запросы), так и массивы (через convertFormDataToPlainObject)
+            $jsonFields = ['clients', 'service_provider', 'services', 'features', 'geo', 'prices', 'schedule'];
+            foreach ($jsonFields as $field) {
+                if (isset($data[$field])) {
+                    if (is_string($data[$field])) {
+                        // Если строка - декодируем
+                        $decoded = json_decode($data[$field], true);
+                        if (json_last_error() === JSON_ERROR_NONE) {
+                            $data[$field] = $decoded;
+                        }
+                    } elseif (is_array($data[$field])) {
+                        // Если уже массив - оставляем как есть
+                        // (пришел через convertFormDataToPlainObject)
+                    }
+                }
+            }
+            
             // Используем метод saveOrUpdate, который существует в DraftService
             $draft = $this->draftService->saveOrUpdate($data, Auth::user(), $id);
             
-            // Для Inertia запросов возвращаем редирект на список черновиков
+            // Для Inertia запросов используем back() для сохранения состояния страницы
+            // Inertia обработает это как успешный ответ и вызовет onSuccess
             if ($request->header('X-Inertia')) {
-                return redirect()->route('profile.items.draft')->with('success', 'Черновик обновлен успешно');
+                // Добавляем данные объявления в сессию для доступа через props
+                session()->flash('ad', $this->draftService->prepareForDisplay($draft));
+                session()->flash('success', 'Черновик обновлен успешно');
+                
+                // back() сохраняет текущую страницу и состояние
+                return back();
             }
             
-            // Для обычных AJAX запросов возвращаем JSON с полным объектом
-            return response()->json([
-                'success' => true,
-                'message' => 'Черновик обновлен успешно',
-                'ad' => $draft->toArray(), // КРИТИЧЕСКИ ВАЖНО: возвращаем весь объект для обновления формы
-                'draft_id' => $draft->id // Для совместимости
-            ]);
+            // Для обычных AJAX запросов (XMLHttpRequest)
+            if ($request->header('X-Requested-With') === 'XMLHttpRequest' || $request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Черновик обновлен успешно',
+                    'ad' => $this->draftService->prepareForDisplay($draft),
+                    'draft_id' => $draft->id
+                ]);
+            }
+            
+            // Fallback - редирект для обычных запросов
+            return redirect()->route('profile.items.draft')->with('success', 'Черновик обновлен успешно');
         } catch (\Exception $e) {
             // Для Inertia запросов
             if ($request->header('X-Inertia')) {

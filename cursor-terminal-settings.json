@@ -1,0 +1,40 @@
+{
+  "// Настройки терминала Cursor для исправления кодировки": "",
+  "// Скопируйте эти настройки в settings.json Cursor": "",
+  
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "terminal.integrated.profiles.windows": {
+    "PowerShell": {
+      "source": "PowerShell",
+      "args": [
+        "-NoLogo",
+        "-NoProfile",
+        "-ExecutionPolicy", "Bypass",
+        "-File", "C:\\Users\\user1\\Documents\\WindowsPowerShell\\Microsoft.PowerShell_profile.ps1"
+      ]
+    },
+    "PowerShell (исправленный)": {
+      "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "args": [
+        "-NoLogo",
+        "-ExecutionPolicy", "Bypass"
+      ]
+    }
+  },
+  
+  "terminal.integrated.env.windows": {
+    "PYTHONUTF8": "1",
+    "PYTHONIOENCODING": "utf-8",
+    "LC_ALL": "C.UTF-8"
+  },
+  
+  "terminal.integrated.fontSize": 14,
+  "terminal.integrated.fontFamily": "Consolas, 'Courier New', monospace",
+  "terminal.integrated.cursorStyle": "block",
+  "terminal.integrated.cursorBlinking": true,
+  
+  "// Дополнительные настройки для комфортной работы": "",
+  "terminal.integrated.scrollback": 10000,
+  "terminal.integrated.copyOnSelection": true,
+  "terminal.integrated.rightClickBehavior": "paste"
+}

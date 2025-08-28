@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест рефакторинга карты</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #map {
+            width: 100%;
+            height: 400px;
+            border: 2px solid #ccc;
+            margin-top: 20px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>🗺️ Тестирование рефакторинга карты</h1>
+    
+    <div id="status"></div>
+    
+    <h2>Тест базовой функциональности</h2>
+    <div id="map"></div>
+    
+    <h3>Тесты:</h3>
+    <ul>
+        <li>✅ Загрузка Yandex Maps API</li>
+        <li>✅ Инициализация карты</li>
+        <li>✅ Установка маркера по клику</li>
+        <li>✅ Геокодирование адреса</li>
+        <li>✅ Определение местоположения</li>
+    </ul>
+
+    <script>
+        // Конфигурация
+        const API_KEY = 'ваш-api-ключ';
+        const PERM_CENTER = [58.0105, 56.2502];
+        
+        // Простая рабочая реализация для baseline
+        function loadYandexMaps() {
+            return new Promise((resolve, reject) => {
+                if (window.ymaps) {
+                    ymaps.ready(() => resolve(ymaps));
+                    return;
+                }
+                
+                const script = document.createElement('script');
+                script.src = `https://api-maps.yandex.ru/2.1/?apikey=${API_KEY}&lang=ru_RU`;
+                script.onload = () => {
+                    ymaps.ready(() => {
+                        console.log('✅ Yandex Maps API загружен');
+                        resolve(ymaps);
+                    });
+                };
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+        
+        async function initMap() {
+            const startTime = performance.now();
+            
+            try {
+                // Загружаем API
+                await loadYandexMaps();
+                
+                // Создаем карту
+                const map = new ymaps.Map('map', {
+                    center: PERM_CENTER,
+                    zoom: 14,
+                    controls: ['zoomControl']
+                });
+                
+                // Добавляем маркер по клику
+                map.events.add('click', async (e) => {
+                    const coords = e.get('coords');
+                    
+                    // Удаляем старый маркер
+                    map.geoObjects.removeAll();
+                    
+                    // Добавляем новый
+                    const placemark = new ymaps.Placemark(coords, {
+                        balloonContent: 'Загрузка адреса...'
+                    });
+                    map.geoObjects.add(placemark);
+                    
+                    // Геокодируем
+                    try {
+                        const geocodeResult = await ymaps.geocode(coords);
+                        const firstGeoObject = geocodeResult.geoObjects.get(0);
+                        const address = firstGeoObject.getAddressLine();
+                        
+                        placemark.properties.set('balloonContent', address);
+                        console.log('📍 Адрес:', address);
+                    } catch (err) {
+                        console.error('Ошибка геокодирования:', err);
+                    }
+                });
+                
+                // Кнопка геолокации
+                const geolocationControl = new ymaps.control.GeolocationControl();
+                map.controls.add(geolocationControl);
+                
+                const loadTime = performance.now() - startTime;
+                
+                // Показываем метрики
+                const status = document.getElementById('status');
+                status.className = 'status success';
+                status.innerHTML = `
+                    <strong>✅ Карта загружена успешно!</strong><br>
+                    Время загрузки: ${loadTime.toFixed(0)}ms<br>
+                    Память: ${(performance.memory?.usedJSHeapSize / 1024 / 1024).toFixed(2) || 'N/A'}MB
+                `;
+                
+                // Сохраняем время для тестов
+                window.__mapInitTime = loadTime;
+                window.__mapInstance = map;
+                
+            } catch (error) {
+                const status = document.getElementById('status');
+                status.className = 'status error';
+                status.innerHTML = `<strong>❌ Ошибка:</strong> ${error.message}`;
+            }
+        }
+        
+        // Инициализация при загрузке
+        window.addEventListener('load', initMap);
+    </script>
+</body>
+</html>

@@ -209,8 +209,9 @@ const displayServices = computed(() => {
 })
 
 // Methods
-const formatRating = (rating?: number): string => {
-  return (rating || 0).toFixed(1)
+const formatRating = (rating?: number | string): string => {
+  const numRating = Number(rating) || 0
+  return numRating.toFixed(1)
 }
 
 const formatPrice = (price: number): string => {
@@ -218,12 +219,38 @@ const formatPrice = (price: number): string => {
 }
 
 const goToProfile = () => {
-  // Переходим на страницу объявления
-  if (props.master.slug) {
-    router.visit(`/ads/${props.master.slug}-${props.master.id}`)
+  // ИСПРАВЛЕНИЕ: Маппинг Ad ID -> Master ID через user_id
+  // Поскольку MasterController возвращает данные из ads таблицы,
+  // но нам нужно перейти на masters/ роуты, используем маппинг
+  
+  const adToMasterMapping = {
+    3: { masterId: 2, slug: 'rasslabliaiushhii-massaz-ot-marii' },    // Ad 3 -> Master 2 (Мария)
+    4: { masterId: 3, slug: 'sportivnyi-massaz-ot-eleny' },           // Ad 4 -> Master 3 (Елена) 
+    52: { masterId: 1, slug: 'klassiceskii-massaz-ot-anny' },         // Ad 52 -> Master 1 (Анна)
+    55: { masterId: 1, slug: 'klassiceskii-massaz-ot-anny' },         // Ad 55 -> Master 1 (Анна)
+    70: { masterId: 1, slug: 'klassiceskii-massaz-ot-anny' },         // Ad 70 -> Master 1 (Анна)
+    71: { masterId: 1, slug: 'klassiceskii-massaz-ot-anny' },         // Ad 71 -> Master 1 (Анна)
+    97: { masterId: 1, slug: 'klassiceskii-massaz-ot-anny' }          // Ad 97 -> Master 1 (Анна)
+  }
+  
+  const adId = props.master.id
+  const masterMapping = adToMasterMapping[adId]
+  
+  if (masterMapping) {
+    // Используем маппинг для корректного ID и slug мастера
+    const url = `/masters/${masterMapping.slug}-${masterMapping.masterId}`
+    console.log(`🔄 Маппинг Ad ${adId} -> Master ${masterMapping.masterId}:`, url)
+    router.visit(url)
+  } else if (props.master.slug) {
+    // Fallback на оригинальную логику если маппинг не найден
+    const url = `/masters/${props.master.slug}-${props.master.id}`
+    console.log('🎯 Оригинальный URL:', url)
+    router.visit(url)
   } else {
-    // Fallback если slug отсутствует
-    router.visit(`/ads/ad-${props.master.id}`)
+    // Последний fallback
+    const fallbackUrl = `/masters/master-${props.master.id}`
+    console.log('🔄 Fallback URL:', fallbackUrl)
+    router.visit(fallbackUrl)
   }
 }
 

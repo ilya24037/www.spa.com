@@ -104,7 +104,7 @@
         <ParametersSection 
           ref="titleInputRef"
           v-model:parameters="form.parameters"
-          :show-fields="['age', 'breast_size', 'hair_color', 'eye_color', 'nationality', 'bikini_zone']"
+          :show-fields="['age', 'breast_size', 'hair_color', 'eye_color', 'nationality', 'bikini_zone', 'appearance']"
           :errors="errors.parameters || {}"
         />
       </CollapsibleSection>
@@ -344,7 +344,8 @@
         data-section="promo"
       >
         <PromoSection 
-          v-model:promo="form.promo" 
+          v-model:new-client-discount="form.new_client_discount"
+          v-model:gift="form.gift"
           :errors="errors"
         />
       </CollapsibleSection>
@@ -387,13 +388,13 @@
 <script setup lang="ts">
 import { computed, watch, onMounted, ref } from 'vue'
 import { router } from '@inertiajs/vue3'
-import { useFormSections } from '@/src/shared/composables'
+import { useFormSections, useToast } from '@/src/shared/composables'
 import FormProgress from '@/src/shared/ui/molecules/Forms/components/FormProgress.vue'
 import FormControls from '@/src/shared/ui/molecules/Forms/components/FormControls.vue'
 import SectionBlocksNavigation from '@/src/shared/ui/molecules/Forms/components/SectionBlocksNavigation.vue'
 
 import FormActions from '@/src/shared/ui/molecules/Forms/components/FormActions.vue'
-import CollapsibleSection from '@/src/shared/ui/organisms/CollapsibleSection.vue'
+import { CollapsibleSection } from '@/src/shared/ui/organisms'
 
 // Используем существующую модель AdForm
 import { useAdFormModel } from '../model/adFormModel'
@@ -486,6 +487,9 @@ console.log('🔍 AdForm.vue: получены props:', {
   initialDataKeys: props.initialData ? Object.keys(props.initialData) : []
 })
 
+// Композаблы
+const toast = useToast()
+
 // Используем существующую модель для всей логики
 const {
   form,
@@ -518,13 +522,13 @@ const handlePublishDirect = async () => {
     // Для черновиков проверяем наличие ID
     if (!props.adId) {
       // Нет ID черновика для публикации
-      alert('Ошибка: не найден ID черновика')
+      toast.error('Ошибка: не найден ID черновика')
       return
     }
     
     if (!form) {
       // form не определен
-      alert('Ошибка инициализации формы')
+      toast.error('Ошибка инициализации формы')
       return
     }
     
@@ -571,10 +575,12 @@ const handlePublishDirect = async () => {
   
   // Если есть ошибки - показываем и не публикуем
   if (Object.keys(validationErrors).length > 0) {
-    const errorMessages = Object.values(validationErrors).join('\n• ')
-    const alertMessage = `❌ Заполните обязательные поля:\n\n• ${errorMessages}`
+    const errorMessages = Object.values(validationErrors)
     
-    alert(alertMessage)
+    // Показываем каждую ошибку отдельным toast для лучшей читаемости
+    errorMessages.forEach(error => {
+      toast.error(error)
+    })
     
     // Прокручиваем к первой ошибке
     const firstError = Object.keys(validationErrors)[0]
@@ -605,7 +611,7 @@ const handlePublishDirect = async () => {
   })
   } catch (error) {
     // Критическая ошибка в handlePublishDirect
-    alert('Произошла ошибка при валидации. Проверьте консоль.')
+    toast.error('Произошла ошибка при валидации. Проверьте консоль.')
   }
 }
 

@@ -1,7 +1,7 @@
 <!-- resources/js/src/widgets/profile-dashboard/tabs/StatsTab.vue -->
 <template>
   <div :class="CONTAINER_CLASSES">
-    <!-- РЎС‚Р°С‚РёСЃС‚РёРєР° РєР°СЂС‚РѕС‡РєРё -->
+    <!-- Статистика карточки -->
     <div :class="STATS_GRID_CLASSES">
       <div v-for="stat in statsCards" :key="stat.key" :class="STAT_CARD_CLASSES">
         <div :class="STAT_ICON_WRAPPER_CLASSES">
@@ -18,15 +18,15 @@
       </div>
     </div>
 
-    <!-- Р“СЂР°С„РёРє -->
+    <!-- График -->
     <div :class="CHART_SECTION_CLASSES">
       <h3 :class="CHART_TITLE_CLASSES">
-        РђРєС‚РёРІРЅРѕСЃС‚СЊ Р·Р° РїРѕСЃР»РµРґРЅРёРµ 30 РґРЅРµР№
+        Активность за последние 30 дней
       </h3>
       <div :class="CHART_PLACEHOLDER_CLASSES">
         <ChartBarIcon :class="CHART_ICON_CLASSES" />
         <p :class="CHART_TEXT_CLASSES">
-          Р“СЂР°С„РёРє СЃС‚Р°С‚РёСЃС‚РёРєРё Р±СѓРґРµС‚ Р·РґРµСЃСЊ
+          График статистики будет здесь
         </p>
       </div>
     </div>
@@ -42,7 +42,7 @@ import {
     ChartBarIcon
 } from '@heroicons/vue/outline'
 
-// рџЋЇ РЎС‚РёР»Рё
+// 🎯 Стили
 const CONTAINER_CLASSES = 'space-y-6'
 const STATS_GRID_CLASSES = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'
 const STAT_CARD_CLASSES = 'flex items-center gap-4 p-6 bg-gray-500 rounded-lg'

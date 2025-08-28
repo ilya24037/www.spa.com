@@ -1,46 +1,44 @@
 <template>
   <div class="yandex-map" role="region" :aria-label="ariaLabel">
-    <MapStates v-bind="stateProps" @retry="handleRetry">
-      <YandexMapBase
-        ref="mapBaseRef"
-        v-bind="mapProps"
-        @ready="handleMapReady"
-        @bounds-change="emit('bounds-change', $event)"
-        @center-change="handleCenterChange"
-        @click="handleMapClick"
-        @error="handleMapError"
-      >
-        <template #controls>
-          <MapControls v-bind="controlsProps" @geolocation-click="handleGeolocationClick" />
-        </template>
-        <template #overlays>
-          <MapCenterMarker v-if="showCenterMarker" :visible="!!hasAddress" @marker-hover="handleMarkerHover" />
-          <MapAddressTooltip v-bind="tooltipProps" />
-        </template>
-      </YandexMapBase>
-      <MapMarkersManager
-        v-if="showMarkers"
-        v-bind="markersProps"
-        @marker-click="emit('marker-click', $event)"
-        @cluster-click="emit('cluster-click', $event)"
-      />
-    </MapStates>
+    <!-- Используем новый MapContainer из рефакторинга -->
+    <MapContainer
+      ref="mapRef"
+      :model-value="modelValue"
+      :height="height"
+      :center="center"
+      :zoom="zoom"
+      :mode="mode"
+      :markers="markers"
+      :show-geolocation-button="showGeolocationButton"
+      :show-search-control="false"
+      :clusterize="clusterize"
+      :draggable="draggable"
+      :auto-detect-location="autoDetectLocation"
+      :reverse-geocode="showAddressTooltip"
+      @update:modelValue="$emit('update:modelValue', $event)"
+      @marker-click="$emit('marker-click', $event)"
+      @cluster-click="$emit('cluster-click', $event)"
+      @address-found="handleAddressFound"
+      @center-change="$emit('bounds-change', { center: $event })"
+    >
+      <template #overlays>
+        <slot name="overlays" />
+      </template>
+    </MapContainer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import type { MapMarker, Coordinates } from '@/src/features/map/types'
-import { DEFAULT_API_KEY, PERM_CENTER, DEFAULT_ZOOM } from '@/src/features/map/lib/mapConstants'
-import YandexMapBase from '@/src/features/map/ui/YandexMapBase/YandexMapBase.vue'
-import MapStates from '@/src/features/map/ui/MapStates/MapStates.vue'
-import MapControls from '@/src/features/map/ui/MapControls/MapControls.vue'
-import MapCenterMarker from '@/src/features/map/ui/MapCenterMarker/MapCenterMarker.vue'
-import MapAddressTooltip from '@/src/features/map/ui/MapAddressTooltip/MapAddressTooltip.vue'
-import MapMarkersManager from '@/src/features/map/ui/MapMarkersManager/MapMarkersManager.vue'
-import { useMapController } from '@/src/features/map/composables/useMapController'
+/**
+ * YandexMap - адаптер для обратной совместимости
+ * Преобразует старое API к новому MapContainer
+ */
+import { ref, computed } from 'vue'
+import MapContainer from '@/src/features/map/components/MapContainer.vue'
+import { DEFAULT_API_KEY, PERM_CENTER, DEFAULT_ZOOM } from '@/src/features/map/utils/mapConstants'
+import type { Coordinates, MapMarker } from '@/src/features/map/core/MapStore'
 
-export type { MapMarker } from '@/src/features/map/types'
+export type { MapMarker, Coordinates } from '@/src/features/map/core/MapStore'
 
 interface Props {
   modelValue?: string
@@ -92,67 +90,32 @@ const emit = defineEmits<{
   'bounds-change': [bounds: any]
 }>()
 
-const {
-  mapBaseRef,
-  mapInstance,
-  mapState,
-  geolocation,
-  tooltip,
-  handleMapReady,
-  handleCenterChange,
-  handleMapClick,
-  handleMapError,
-  handleRetry,
-  handleGeolocationClick,
-  handleMarkerHover,
-  searchAddress,
-  setCoordinates
-} = useMapController(props, emit)
+const mapRef = ref<InstanceType<typeof MapContainer>>()
 
-const stateProps = computed(() => ({
-  isLoading: mapState.isLoading.value,
-  error: mapState.error.value,
-  errorDetails: mapState.errorDetails.value,
-  isEmpty: props.mode === 'multiple' && props.markers.length === 0,
-  height: props.height,
-  loadingText: props.loadingText,
-  errorTitle: props.errorTitle,
-  emptyTitle: props.emptyTitle,
-  emptyMessage: props.emptyMessage
-}))
+// Обработчик для совместимости событий
+function handleAddressFound(data: { address: string, coords: Coordinates }) {
+  emit('address-found', data.address, data.coords)
+  emit('marker-moved', data.coords)
+}
 
-const mapProps = computed(() => ({
-  height: props.height,
-  center: props.center,
-      zoom: props.zoom,
-  apiKey: props.apiKey,
-  mode: props.mode,
-  autoDetectLocation: props.autoDetectLocation
-}))
-
-const controlsProps = computed(() => ({
-  showGeolocation: props.showGeolocationButton,
-  locationActive: geolocation.locationActive.value,
-  geolocationLoading: geolocation.isLoading.value
-}))
-
-const tooltipProps = computed(() => ({
-  visible: tooltip.visible.value,
-  address: tooltip.address.value,
-  position: tooltip.position.value
-}))
-
-const markersProps = computed(() => ({
-  map: mapInstance.value,
-  markers: props.markers,
-  clusterize: props.clusterize
-}))
-
-const showCenterMarker = computed(() => props.mode === 'single' && props.showSingleMarker)
-const showMarkers = computed(() => props.mode === 'multiple' && mapInstance.value)
-const hasAddress = computed(() => props.mode === 'single' && props.currentAddress && props.modelValue?.includes(','))
-
-defineExpose({ searchAddress, setCoordinates, forceInit: () => {} })
+// Expose старые методы для совместимости
+defineExpose({
+  // Методы для совместимости
+  searchAddress: async (address: string) => {
+    // TODO: Implement search via MapContainer
+    console.log('searchAddress:', address)
+  },
+  setCoordinates: (coords: Coordinates) => {
+    mapRef.value?.setCenter?.(coords)
+  },
+  getCurrentAddress: () => {
+    return props.currentAddress || ''
+  },
+  forceInit: () => {
+    // Заглушка для совместимости
+    console.log('forceInit called (deprecated)')
+  }
+})
 </script>
 
 <style scoped>

@@ -108,15 +108,41 @@ export function useAdFormModel(props: AdFormProps, emit: AdFormEmits) {
       return
     }
     
+    // КРИТИЧЕСКИ ВАЖНО: Если есть initialData с нужным ID, используем их вместо загрузки
+    if (props.initialData?.id === adId) {
+      console.log('🔍 DEBUG initializeForm: Using props.initialData instead of loading')
+      console.log('🔍 DEBUG props.initialData.id:', props.initialData.id)
+      
+      // Мигрируем данные из props
+      const migrated = migrateOldData(props.initialData)
+      console.log('🔍 DEBUG initializeForm after migration from props:', {
+        'migrated.id': migrated.id,
+        'originalId': props.initialData.id
+      })
+      
+      setFormData(migrated)
+      return
+    }
+    
     isLoading.value = true
     clearErrors()
     
     try {
       const result = await loadAd(adId)
       
+      console.log('🔍 DEBUG initializeForm loadAd result:', {
+        'success': result.success,
+        'result.data.id': result.data?.id,
+        'adId requested': adId
+      })
+      
       if (result.success && result.data) {
         // Мигрируем старые данные если нужно
         const migrated = migrateOldData(result.data)
+        console.log('🔍 DEBUG initializeForm after migration:', {
+          'migrated.id': migrated.id,
+          'originalId': result.data.id
+        })
         // КРИТИЧЕСКИ ВАЖНО: сохраняем ID для обновлений
         setFormData(migrated)
       } else {
@@ -132,6 +158,12 @@ export function useAdFormModel(props: AdFormProps, emit: AdFormEmits) {
   // ✅ СОХРАНЕНИЕ ЧЕРНОВИКА
   const handleSaveDraft = async () => {
     if (isSaving.value) return
+    
+    console.log('🔍 DEBUG handleSaveDraft START:', {
+      'form.id BEFORE': form.id,
+      'props.adId': props.adId,
+      'props.initialData?.id': props.initialData?.id
+    })
     
     // Валидация для черновика (теперь пустая - без обязательных полей)
     const validationErrors = validateForm(form, false)
@@ -150,7 +182,18 @@ export function useAdFormModel(props: AdFormProps, emit: AdFormEmits) {
     clearErrors()
     
     try {
+      console.log('🔍 DEBUG before saveDraft:', {
+        'form.id': form.id,
+        'typeof form.id': typeof form.id
+      })
+      
       const result = await saveDraft(form)
+      
+      console.log('🔍 DEBUG saveDraft result:', {
+        'success': result.success,
+        'result.data?.id': result.data?.id,
+        'form.id AFTER response': form.id
+      })
       
       if (result.success) {
         toast.success(result.message || 'Черновик сохранен')
@@ -158,10 +201,21 @@ export function useAdFormModel(props: AdFormProps, emit: AdFormEmits) {
         if (result.data) {
           // КРИТИЧЕСКИ ВАЖНО: обновляем ID формы для последующих обновлений
           if (result.data.id && !form.id) {
+            console.log('🔍 DEBUG updating form.id:', {
+              'OLD form.id': form.id,
+              'NEW form.id': result.data.id
+            })
             form.id = result.data.id
           }
+          // Мигрируем данные перед обновлением формы
+          const migratedData = migrateOldData(result.data)
           // Обновляем все данные формы
-          setFormData(result.data)
+          setFormData(migratedData)
+          
+          console.log('🔍 DEBUG after setFormData:', {
+            'form.id FINAL': form.id
+          })
+          
           // После сохранения черновика перенаправляем в личный кабинет
           navigateAfterSave(result.data.id, true)
         }
@@ -254,6 +308,12 @@ export function useAdFormModel(props: AdFormProps, emit: AdFormEmits) {
   onMounted(() => {
     // Используем props.adId или initialData.id для инициализации
     const adId = props.adId || props.initialData?.id
+    console.log('🔍 DEBUG onMounted:', {
+      'props.adId': props.adId,
+      'props.initialData?.id': props.initialData?.id,
+      'final adId': adId,
+      'form.id at mount': form.id
+    })
     if (adId) {
       initializeForm(adId)
     }

@@ -56,6 +56,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { router, Link } from '@inertiajs/vue3'
+import { useToast } from '@/src/shared/composables/useToast'
 import ItemImage from '@/src/shared/ui/molecules/ItemImage.vue'
 import ItemContent from '@/src/shared/ui/molecules/ItemContent.vue'
 import ItemStats from './components/ItemStats.vue'
@@ -69,6 +70,9 @@ interface Props {
 
 const props = defineProps<Props>()
 const emit = defineEmits<ItemCardEmits>()
+
+// Композаблы
+const toast = useToast()
 
 // Состояние компонента
 const showDeleteModal = ref(false)
@@ -115,7 +119,7 @@ const markIrrelevant = () => {
     },
     onError: (errors) => {
       console.error('Ошибка при пометке как неактуальное:', errors)
-      alert('Ошибка при обновлении статуса объявления')
+      toast.error('Ошибка при обновлении статуса объявления')
     }
   })
 }
@@ -141,7 +145,7 @@ const deleteItem = () => {
     },
     onError: (errors) => {
       console.error('Ошибка при удалении:', errors)
-      alert('Ошибка при удалении объявления')
+      toast.error('Ошибка при удалении объявления')
     }
   })
 }
