@@ -10,6 +10,16 @@ export interface ClusterOptions {
   minClusterSize?: number
   maxZoom?: number
   preset?: string
+  groupByCoordinates?: boolean
+  clusterDisableClickZoom?: boolean
+  clusterHideIconOnBalloonOpen?: boolean
+  geoObjectHideIconOnBalloonOpen?: boolean
+  clusterBalloonContentLayout?: string
+  clusterBalloonPanelMaxMapArea?: number
+  clusterBalloonContentLayoutWidth?: number
+  clusterBalloonContentLayoutHeight?: number
+  clusterBalloonPagerSize?: number
+  clusterBalloonPagerVisible?: boolean
 }
 
 export class ClusterPlugin implements MapPlugin {
@@ -25,6 +35,16 @@ export class ClusterPlugin implements MapPlugin {
       minClusterSize: 2,
       maxZoom: 18,
       preset: 'islands#invertedRedClusterIcons',
+      groupByCoordinates: false,
+      clusterDisableClickZoom: false,
+      clusterHideIconOnBalloonOpen: false,
+      geoObjectHideIconOnBalloonOpen: false,
+      clusterBalloonContentLayout: 'cluster#balloonCarousel',
+      clusterBalloonPanelMaxMapArea: 0,
+      clusterBalloonContentLayoutWidth: 200,
+      clusterBalloonContentLayoutHeight: 130,
+      clusterBalloonPagerSize: 5,
+      clusterBalloonPagerVisible: true,
       ...options
     }
   }
@@ -41,13 +61,19 @@ export class ClusterPlugin implements MapPlugin {
       return
     }
 
-    // Создаем кластеризатор
+    // Создаем кластеризатор с полными опциями
     this.clusterer = new window.ymaps.Clusterer({
       preset: this.options.preset,
-      groupByCoordinates: false,
-      clusterDisableClickZoom: false,
-      clusterHideIconOnBalloonOpen: false,
-      geoObjectHideIconOnBalloonOpen: false,
+      groupByCoordinates: this.options.groupByCoordinates,
+      clusterDisableClickZoom: this.options.clusterDisableClickZoom,
+      clusterHideIconOnBalloonOpen: this.options.clusterHideIconOnBalloonOpen,
+      geoObjectHideIconOnBalloonOpen: this.options.geoObjectHideIconOnBalloonOpen,
+      clusterBalloonContentLayout: this.options.clusterBalloonContentLayout,
+      clusterBalloonPanelMaxMapArea: this.options.clusterBalloonPanelMaxMapArea,
+      clusterBalloonContentLayoutWidth: this.options.clusterBalloonContentLayoutWidth,
+      clusterBalloonContentLayoutHeight: this.options.clusterBalloonContentLayoutHeight,
+      clusterBalloonPagerSize: this.options.clusterBalloonPagerSize,
+      clusterBalloonPagerVisible: this.options.clusterBalloonPagerVisible,
       gridSize: this.options.gridSize,
       minClusterSize: this.options.minClusterSize,
       maxZoom: this.options.maxZoom
@@ -69,6 +95,7 @@ export class ClusterPlugin implements MapPlugin {
     // Подписываемся на события маркеров
     store.on('marker-add', this.handleMarkerAdd.bind(this))
     store.on('marker-remove', this.handleMarkerRemove.bind(this))
+    store.on('marker-update', this.handleMarkerUpdate.bind(this))
     store.on('markers-clear', this.handleClearMarkers.bind(this))
 
     console.log('[ClusterPlugin] Installed with options:', this.options)
@@ -123,12 +150,70 @@ export class ClusterPlugin implements MapPlugin {
   }
 
   /**
+   * Обновление маркера в кластере
+   */
+  private handleMarkerUpdate(marker: MapMarker) {
+    // Для обновления маркера в кластере нужно его удалить и добавить заново
+    const geoObject = this.geoObjects.find(obj => 
+      obj.properties.get('markerId') === marker.id
+    )
+    
+    if (geoObject && this.clusterer) {
+      // Удаляем старый
+      this.clusterer.remove(geoObject)
+      const index = this.geoObjects.indexOf(geoObject)
+      if (index > -1) {
+        this.geoObjects.splice(index, 1)
+      }
+      
+      // Добавляем обновленный
+      this.handleMarkerAdd(marker)
+    }
+  }
+
+  /**
    * Очистка всех маркеров
    */
   private handleClearMarkers() {
     if (this.clusterer) {
       this.clusterer.removeAll()
       this.geoObjects = []
+    }
+  }
+
+  /**
+   * Обновление опций кластеризатора
+   */
+  updateOptions(options: Partial<ClusterOptions>) {
+    this.options = { ...this.options, ...options }
+    
+    if (this.clusterer) {
+      // Применяем новые опции к существующему кластеризатору
+      Object.entries(options).forEach(([key, value]) => {
+        if (this.clusterer.options.get(key) !== undefined) {
+          this.clusterer.options.set(key, value)
+        }
+      })
+    }
+  }
+
+  /**
+   * Получение всех кластеров
+   */
+  getClusters() {
+    if (!this.clusterer) return []
+    return this.clusterer.getClusters()
+  }
+
+  /**
+   * Перерисовка кластеров
+   */
+  refresh() {
+    if (this.clusterer) {
+      // Принудительная перерисовка кластеров
+      const objects = [...this.geoObjects]
+      this.clusterer.removeAll()
+      this.clusterer.add(objects)
     }
   }
 
