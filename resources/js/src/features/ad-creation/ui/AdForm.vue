@@ -486,12 +486,7 @@ const {
 
 // Отладка: отслеживание изменений form.video
 watch(() => form.video, (newVideos, oldVideos) => {
-  console.log('🎥 AdForm: form.video изменено:', {
-    newVideos,
-    oldVideos,
-    newCount: newVideos?.length || 0,
-    oldCount: oldVideos?.length || 0
-  })
+  // Form video changed
 }, { deep: true })
 
 // Обработчик прямой публикации черновика через Inertia
@@ -501,7 +496,6 @@ const handlePublishDirect = async () => {
     return
   }
   
-  console.log('🟢 Начинаем публикацию черновика ID:', props.adId)
   
   saving.value = true
   
@@ -509,7 +503,6 @@ const handlePublishDirect = async () => {
   router.post(`/draft/${props.adId}/publish`, {}, {
     preserveScroll: true,
     onSuccess: (page) => {
-      console.log('🟢 Публикация успешна!', page)
       // Inertia сам перенаправит по redirect из контроллера
       saving.value = false
     },
@@ -677,21 +670,7 @@ const isFormValid = computed(() => {
 // Хук монтирования компонента (если нужна дополнительная инициализация)
 onMounted(() => {
   // ✅ ДОБАВЛЯЕМ ЛОГИРОВАНИЕ ДЛЯ ОТЛАДКИ ФОТО
-  console.log('🔍 AdForm: onMounted - props.initialData:', {
-    hasInitialData: !!props.initialData,
-    initialDataKeys: props.initialData ? Object.keys(props.initialData) : 'undefined',
-    photosInInitialData: props.initialData?.photos,
-    photosType: typeof props.initialData?.photos,
-    photosIsArray: Array.isArray(props.initialData?.photos),
-    photosLength: props.initialData?.photos?.length || 0
-  })
   
-  console.log('🔍 AdForm: onMounted - form.photos:', {
-    formPhotos: form.photos,
-    formPhotosType: typeof form.photos,
-    formPhotosIsArray: Array.isArray(form.photos),
-    formPhotosLength: form.photos?.length || 0
-  })
 })
 
 </script>

@@ -50,8 +50,7 @@ export class MapLoader {
 
       script.onload = () => {
         window.ymaps.ready(() => {
-          console.log('[MapLoader] Yandex Maps API loaded')
-          resolve(window.ymaps)
+            resolve(window.ymaps)
         })
       }
 

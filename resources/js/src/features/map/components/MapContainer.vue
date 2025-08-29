@@ -191,11 +191,9 @@ function handleRetry() {
 }
 
 function handleGeolocationClick() {
-  console.log('Geolocation clicked')
 }
 
 function handleSearch(query: string) {
-  console.log('Search:', query)
 }
 
 // Watchers

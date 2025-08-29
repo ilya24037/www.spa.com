@@ -1,139 +1,150 @@
 <template>
   <div class="map-states">
+    <!-- Loading состояние -->
     <div v-if="loading" class="map-states__loading">
-      <div class="skeleton" :style="{ height: `${height || 400}px` }">
-        <div class="skeleton__content">
-          <div class="skeleton__spinner"></div>
-          <p class="skeleton__text">Загрузка карты...</p>
-        </div>
+      <div class="map-states__spinner">
+        <svg class="animate-spin h-8 w-8 text-blue-600" viewBox="0 0 24 24">
+          <circle 
+            class="opacity-25" 
+            cx="12" 
+            cy="12" 
+            r="10" 
+            stroke="currentColor" 
+            stroke-width="4"
+          />
+          <path 
+            class="opacity-75" 
+            fill="currentColor" 
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+          />
+        </svg>
       </div>
+      <p class="map-states__loading-text">
+        {{ loadingText }}
+      </p>
     </div>
-    
+
+    <!-- Error состояние -->
     <div v-else-if="error" class="map-states__error">
-      <div class="error" :style="{ height: `${height || 400}px` }">
-        <div class="error__content">
-          <div class="error__icon">❌</div>
-          <h3 class="error__title">Ошибка загрузки карты</h3>
-          <p class="error__message">{{ error }}</p>
-          <button 
-            v-if="showRetry" 
-            @click="$emit('retry')" 
-            class="error__retry"
-          >
-            Попробовать снова
-          </button>
-        </div>
+      <div class="map-states__error-icon">
+        <svg class="w-12 h-12 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" 
+          />
+        </svg>
       </div>
+      <h3 class="map-states__error-title">{{ errorTitle }}</h3>
+      <p class="map-states__error-message">{{ error }}</p>
+      <button 
+        @click="$emit('retry')"
+        class="map-states__retry-button"
+      >
+        Попробовать снова
+      </button>
     </div>
-    
-    <slot v-else />
+
+    <!-- Content -->
+    <div v-else class="map-states__content">
+      <slot />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+/**
+ * MapStates - управление состояниями карты
+ * Показывает loading, error или content
+ * Размер: 40 строк
+ */
 interface Props {
   loading?: boolean
   error?: string | null
-  height?: number
-  showRetry?: boolean
+  loadingText?: string
+  errorTitle?: string
 }
 
 withDefaults(defineProps<Props>(), {
   loading: false,
   error: null,
-  height: 400,
-  showRetry: true
+  loadingText: 'Загрузка карты...',
+  errorTitle: 'Ошибка загрузки карты'
 })
 
-defineEmits<{ retry: [] }>()
+defineEmits<{
+  retry: []
+}>()
 </script>
 
-<style scoped>
+<style lang="scss">
 .map-states {
   position: relative;
   width: 100%;
-}
-
-.skeleton {
-  width: 100%;
-  background: #f5f5f5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.skeleton__content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-}
-
-.skeleton__spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid #e2e8f0;
-  border-top: 3px solid #3b82f6;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-.skeleton__text {
-  color: #64748b;
-  font-size: 14px;
-  margin: 0;
-}
-
-.error {
-  width: 100%;
-  background: #fef2f2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #fecaca;
-}
-
-.error__content {
-  text-align: center;
-  padding: 2rem;
-}
-
-.error__icon {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-}
-
-.error__title {
-  color: #dc2626;
-  font-size: 18px;
-  font-weight: 600;
-  margin: 0 0 0.5rem 0;
-}
-
-.error__message {
-  color: #7f1d1d;
-  font-size: 14px;
-  margin: 0 0 1rem 0;
-}
-
-.error__retry {
-  background: #dc2626;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.2s;
-}
-
-.error__retry:hover {
-  background: #b91c1c;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  height: 100%;
+  
+  &__loading,
+  &__error {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.95);
+    z-index: 1000;
+  }
+  
+  &__spinner {
+    margin-bottom: 1rem;
+  }
+  
+  &__loading-text {
+    color: #6b7280;
+    font-size: 0.875rem;
+  }
+  
+  &__error-icon {
+    margin-bottom: 1rem;
+  }
+  
+  &__error-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+  }
+  
+  &__error-message {
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    max-width: 300px;
+  }
+  
+  &__retry-button {
+    padding: 0.5rem 1rem;
+    background: #3b82f6;
+    color: white;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: background 0.2s;
+    
+    &:hover {
+      background: #2563eb;
+    }
+    
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+  
+  &__content {
+    width: 100%;
+    height: 100%;
+  }
 }
 </style>

@@ -107,7 +107,6 @@ async function initMap() {
     // Устанавливаем плагины
     for (const plugin of plugins.values()) {
       if (plugin.install) {
-        console.log(`[MapCore] Installing plugin: ${plugin.name}`)
         await plugin.install(map, store)
       }
     }
