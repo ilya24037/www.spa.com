@@ -31,7 +31,7 @@
                   :key="category.id"
                   :model-value="false"
                   :label="category.name"
-                  @update:modelValue="handleCategoryToggle(category.id, $event)"
+                  @update:modelValue="handleCategoryToggle(String(category.id), $event)"
                 />
               </div>
             </FilterCategory>
@@ -72,7 +72,7 @@
                 </button>
                 <MasterCard
                   :master="mapSelectedMaster"
-                  :is-favorite="isFavorite(mapSelectedMaster.id)"
+                  :is-favorite="isFavorite(Number(mapSelectedMaster.id))"
                   @toggle-favorite="toggleFavorite"
                   @booking="handleBooking"
                 />

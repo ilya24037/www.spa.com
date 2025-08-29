@@ -197,7 +197,7 @@
 import { Head, Link } from '@inertiajs/vue3'
 import PhotoGallery from '@/src/features/gallery/ui/PhotoGallery/PhotoGallery.vue'
 
-const _props = defineProps({
+defineProps({
     ad: {
         type: Object,
         required: true

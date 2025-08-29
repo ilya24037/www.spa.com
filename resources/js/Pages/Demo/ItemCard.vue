@@ -78,13 +78,34 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Head } from '@inertiajs/vue3'
+// import { Head } from '@inertiajs/vue3' // Удалено - не используется
 // 🎯 FSD Импорты
 import AdCard from '@/src/entities/ad/ui/AdCard/AdCard.vue'
 
-const items = ref([])
+interface DemoItem {
+  id: number | string
+  name: string
+  description: string
+  price_from: number
+  avatar: string
+  photos_count: number
+  company_name: string
+  address: string
+  district: string
+  home_service: boolean
+  status: string
+  is_premium: boolean
+  is_verified: boolean
+  views_count: number
+  subscribers_count: number
+  favorites_count: number
+  new_messages_count: number
+  expires_at: string
+}
 
-const sampleItems = [
+const items = ref<DemoItem[]>([])
+
+const sampleItems: DemoItem[] = [
     {
         id: 1,
         name: "Расслабляющий массаж всего тела",
@@ -101,7 +122,9 @@ const sampleItems = [
         subscribers_count: 3,
         favorites_count: 12,
         new_messages_count: 2,
-        expires_at: "2024-02-15T12:00:00Z"
+        expires_at: "2024-02-15T12:00:00Z",
+        is_premium: true,
+        is_verified: true
     },
     {
         id: 2,
@@ -119,7 +142,9 @@ const sampleItems = [
         subscribers_count: 7,
         favorites_count: 23,
         new_messages_count: 0,
-        expires_at: "2024-01-20T12:00:00Z"
+        expires_at: "2024-01-20T12:00:00Z",
+        is_premium: false,
+        is_verified: true
     },
     {
         id: 3,
@@ -137,7 +162,9 @@ const sampleItems = [
         subscribers_count: 15,
         favorites_count: 34,
         new_messages_count: 5,
-        expires_at: "2024-01-10T12:00:00Z"
+        expires_at: "2024-01-10T12:00:00Z",
+        is_premium: true,
+        is_verified: false
     },
     {
         id: 4,
@@ -155,7 +182,9 @@ const sampleItems = [
         subscribers_count: 28,
         favorites_count: 67,
         new_messages_count: 8,
-        expires_at: "2024-03-01T12:00:00Z"
+        expires_at: "2024-03-01T12:00:00Z",
+        is_premium: false,
+        is_verified: false
     },
     {
         id: 5,
@@ -172,7 +201,10 @@ const sampleItems = [
         subscribers_count: 5,
         favorites_count: 18,
         new_messages_count: 1,
-        expires_at: "2024-02-28T12:00:00Z"
+        expires_at: "2024-02-28T12:00:00Z",
+        description: "Профилактический спортивный массаж для активных людей.",
+        is_premium: true,
+        is_verified: true
     },
     {
         id: 6,
@@ -189,7 +221,10 @@ const sampleItems = [
         subscribers_count: 12,
         favorites_count: 45,
         new_messages_count: 3,
-        expires_at: "2024-02-20T12:00:00Z"
+        expires_at: "2024-02-20T12:00:00Z",
+        description: "Массаж для беременных женщин с учетом всех особенностей.",
+        is_premium: false,
+        is_verified: true
     }
 ]
 
@@ -214,7 +249,7 @@ const clearItems = () => {
     items.value = []
 }
 
-const handleItemDeleted = (itemId) => {
+const handleItemDeleted = (itemId: number | string) => {
     items.value = items.value.filter(item => item.id !== itemId)
 }
 
