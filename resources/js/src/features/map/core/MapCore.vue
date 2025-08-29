@@ -72,8 +72,7 @@ const plugins = new Map<string, MapPlugin>()
 
 // Public API
 async function use(plugin: MapPlugin) {
-  console.log(`[MapCore] Installing plugin: ${plugin.name}`)
-  plugins.set(plugin.name, plugin)
+    plugins.set(plugin.name, plugin)
   
   // Если карта уже инициализирована, устанавливаем плагин сразу
   const mapInstance = store.getMapInstance()
