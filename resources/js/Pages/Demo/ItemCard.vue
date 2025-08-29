@@ -78,11 +78,29 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Head } from '@inertiajs/vue3'
 // 🎯 FSD Импорты
 import AdCard from '@/src/entities/ad/ui/AdCard/AdCard.vue'
 
-const items = ref([])
+interface DemoItem {
+  id: number
+  name: string
+  description?: string
+  price_from: number
+  avatar: string
+  photos_count: number
+  company_name: string
+  address: string
+  district: string
+  home_service: boolean
+  status: string
+  views_count: number
+  subscribers_count: number
+  favorites_count: number
+  new_messages_count: number
+  expires_at: string
+}
+
+const items = ref<DemoItem[]>([])
 
 const sampleItems = [
     {
@@ -214,7 +232,7 @@ const clearItems = () => {
     items.value = []
 }
 
-const handleItemDeleted = (itemId) => {
+const handleItemDeleted = (itemId: number) => {
     items.value = items.value.filter(item => item.id !== itemId)
 }
 

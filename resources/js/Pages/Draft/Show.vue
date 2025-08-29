@@ -291,7 +291,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import PhotoGallery from '@/src/features/gallery/ui/PhotoGallery/PhotoGallery.vue'
 import Breadcrumbs from '@/src/shared/ui/molecules/Breadcrumbs/Breadcrumbs.vue'
@@ -315,6 +315,7 @@ const handleEditClick = (event: any) => {
     event.stopPropagation()
     return false
   }
+  return true
 }
 
 // Обработчик клика по кнопке удаления
@@ -340,14 +341,6 @@ const formatPrice = (price: any) => {
   return new Intl.NumberFormat('ru-RU').format(price)
 }
 
-const formatDate = (date: any) => {
-  if (!date) return ''
-  return new Date(date).toLocaleDateString('ru-RU', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
-}
 
 const getDayName = (dayOfWeek: any) => {
   const days = [
@@ -389,14 +382,6 @@ const getContactMethodText = (method: any) => {
   return (methods as any)[method] || method
 }
 
-const showPhone = () => {
-  if (props.ad.phone) {
-    (window as any).location.href = `tel:${props.ad.phone.replace(/\D/g, '')}`
-  } else {
-    // Используем простой alert вместо toast
-    alert('Телефон будет доступен после публикации объявления')
-  }
-}
 
 // Удаление черновика
 const deleteDraft = () => {
@@ -409,7 +394,7 @@ const deleteDraft = () => {
     preserveState: false,
     onStart: () => {
     },
-    onSuccess: (page) => {
+    onSuccess: () => {
       // Закрываем модалку только при успехе
       showDeleteModal.value = false
       // Контроллер перенаправляет в личный кабинет

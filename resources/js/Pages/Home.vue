@@ -1,13 +1,13 @@
 <!-- Главная страница - полная FSD миграция -->
 <template>
   <div>
-    <Head :title="`Массаж в ${currentCity} — найти мастера`" />
+    <Head :title="`Массаж в ${currentCity || 'городе'} — найти мастера`" />
     
     <div>
       <!-- Заголовок -->
       <div class="mb-6">
         <h1 class="text-3xl font-bold text-gray-900">
-          Мастера массажа в {{ currentCity }}
+          Мастера массажа в {{ currentCity || 'городе' }}
         </h1>
         <p class="text-gray-600 mt-2">
           Найдите лучших мастеров массажа в вашем городе
@@ -31,7 +31,7 @@
                   :key="category.id"
                   :model-value="false"
                   :label="category.name"
-                  @update:modelValue="handleCategoryToggle(category.id, $event)"
+                  @update:modelValue="handleCategoryToggle(String(category.id), $event)"
                 />
               </div>
             </FilterCategory>
@@ -71,9 +71,9 @@
                   </svg>
                 </button>
                 <MasterCard
-                  :master="mapSelectedMaster"
-                  :is-favorite="isFavorite(mapSelectedMaster.id)"
-                  @toggle-favorite="toggleFavorite"
+                  :master="mapSelectedMaster as any"
+                  :is-favorite="isFavorite(Number(mapSelectedMaster.id))"
+                  @toggle-favorite="(master: any) => toggleFavorite(typeof master === 'number' ? master : master.id)"
                   @booking="handleBooking"
                 />
               </div>
@@ -86,7 +86,7 @@
               :masters="allMasters"
               :categories="categories"
               :districts="districts"
-              :current-city="currentCity"
+              :current-city="currentCity || undefined"
               :loading="isLoading"
               :error="error"
               :enable-virtual-scroll="enableVirtualScroll"
@@ -106,7 +106,7 @@
                   :master="master"
                   :index="index"
                   :is-favorite="isFavorite(master.id)"
-                  @toggle-favorite="toggleFavorite"
+                  @toggle-favorite="(master: any) => toggleFavorite(typeof master === 'number' ? master : master.id)"
                   @booking="() => handleBooking(master.id)"
                   @quick-view="openQuickView"
                 />
@@ -195,7 +195,7 @@ interface HomePageProps {
     links?: any
     meta?: any
   }
-  currentCity?: string
+  currentCity?: string | null
   categories?: Category[]
   districts?: string[]
 }
