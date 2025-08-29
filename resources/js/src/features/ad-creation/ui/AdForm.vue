@@ -442,7 +442,6 @@ const toggleVerificationSection = () => {
 
 const handleVerificationUploaded = (path: string) => {
   form.verification_status = 'pending'
-  console.log('Проверочное фото загружено:', path)
 }
 
 // Методы для подсчета количества медиа

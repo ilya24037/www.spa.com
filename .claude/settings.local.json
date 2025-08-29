@@ -329,7 +329,8 @@
       "Bash(C:Usersuser1.configherdbinphp.bat C:www.spa.comtest-photo-fix.php)",
       "Bash(where claude)",
       "Read(/C:\\РАБОЧАЯ\\Sites\\Сайт досуг\\Проверочное фото/**)",
-      "Read(/C:\\РАБОЧАЯ\\Sites\\Сайт досуг\\Проверочное фото/**)"
+      "Read(/C:\\РАБОЧАЯ\\Sites\\Сайт досуг\\Проверочное фото/**)",
+      "Bash(git remote get-url:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"
