@@ -1,19 +1,12 @@
 import type { MapPlugin, MapStore, Coordinates } from '../core/MapStore'
-
 export class SearchPlugin implements MapPlugin {
   name = 'search'
   private geocoder: any = null
   private searchControl: any = null
   private map: any = null
-
   constructor(private options: any = {}) {
-    this.options = {
-      showSearchControl: false,
-      reverseGeocode: true,
-      ...options
-    }
+    this.options = { showSearchControl: false, reverseGeocode: true, ...options }
   }
-
   async install(map: any, store: MapStore) {
     this.map = map
     if (this.options.showSearchControl) {
@@ -39,7 +32,6 @@ export class SearchPlugin implements MapPlugin {
       })
     }
   }
-
   async reverseGeocode(coords: number[], store: MapStore) {
     try {
       const geocodeResult = await ymaps.geocode(coords)
@@ -47,16 +39,12 @@ export class SearchPlugin implements MapPlugin {
       if (firstGeoObject) {
         const address = firstGeoObject.getAddressLine()
         store.setAddress(address)
-        store.emit('address-found', {
-          address,
-          coords: { lat: coords[0], lng: coords[1] }
-        })
+        store.emit('address-found', { address, coords: { lat: coords[0], lng: coords[1] } })
       }
     } catch (error) {
       console.error('[SearchPlugin] Reverse geocode failed:', error)
     }
   }
-
   async searchAddress(address: string): Promise<Coordinates | null> {
     try {
       const geocodeResult = await ymaps.geocode(address)
@@ -70,7 +58,6 @@ export class SearchPlugin implements MapPlugin {
     }
     return null
   }
-
   destroy() {
     if (this.searchControl && this.map) {
       this.map.controls.remove(this.searchControl)
