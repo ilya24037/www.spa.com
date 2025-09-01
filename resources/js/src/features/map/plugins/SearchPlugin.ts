@@ -18,7 +18,7 @@ export class SearchPlugin implements MapPlugin {
     }
   }
 
-  async install(map: any, store: MapStore) {
+  install(map: any, store: MapStore) {
     this.map = map
 
     if (!window.ymaps) return

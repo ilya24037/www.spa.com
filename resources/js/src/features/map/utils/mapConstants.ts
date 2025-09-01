@@ -3,7 +3,7 @@
  * Размер: 30 строк
  */
 
-export const DEFAULT_API_KEY = ''
+export const DEFAULT_API_KEY = '23ff8acc-835f-4e99-8b19-d33c5d346e18'
 
 export const PERM_CENTER = {
   lat: 58.0105,

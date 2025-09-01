@@ -139,6 +139,18 @@ export default defineConfig({
         assetsInlineLimit: 4096, // Инлайн ассеты < 4KB
     },
     
+    // Настройки CSS и Sass
+    css: {
+        preprocessorOptions: {
+            scss: {
+                // Используем новый современный API вместо legacy
+                api: 'modern-compiler',
+                // Отключаем предупреждения о deprecated функциях
+                silenceDeprecations: ['legacy-js-api']
+            }
+        }
+    },
+    
     // Оптимизация зависимостей
     optimizeDeps: {
         include: [

@@ -18,7 +18,7 @@ export class GeolocationPlugin implements MapPlugin {
     }
   }
 
-  async install(map: any, store: MapStore) {
+  install(map: any, store: MapStore) {
     this.map = map
 
     // Добавляем кнопку геолокации
@@ -60,6 +60,12 @@ export class GeolocationPlugin implements MapPlugin {
       return
     }
 
+    // Проверяем, что сайт работает по HTTPS (требование для геолокации)
+    if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+      console.info('[GeolocationPlugin] Geolocation requires HTTPS. Skipping auto-detect on HTTP.')
+      return
+    }
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const coords: Coordinates = {
@@ -72,7 +78,12 @@ export class GeolocationPlugin implements MapPlugin {
         store.emit('geolocation-auto-detected', coords)
       },
       (error) => {
-        console.warn('[GeolocationPlugin] Auto-detect failed:', error)
+        // Не выводим ошибку в консоль для известной проблемы с HTTPS
+        if (error.code === 1 && error.message?.includes('secure origins')) {
+          console.info('[GeolocationPlugin] Geolocation blocked: HTTPS required. Use https:// to enable geolocation.')
+        } else {
+          console.warn('[GeolocationPlugin] Auto-detect failed:', error.message)
+        }
       }
     )
   }

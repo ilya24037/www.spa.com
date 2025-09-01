@@ -21,7 +21,7 @@ export class ClusterPlugin implements MapPlugin {
     }
   }
 
-  async install(map: any, store: MapStore) {
+  install(map: any, store: MapStore) {
     this.map = map
     this.store = store
 

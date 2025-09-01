@@ -66,7 +66,7 @@ export interface AdFormData {
     outcall_1h?: number | null
     outcall_2h?: number | null
     outcall_night?: number | null
-    taxi_included?: boolean
+    [key: string]: any
   }
   // Объединяем параметры в единый объект
   parameters: {
@@ -85,7 +85,21 @@ export interface AdFormData {
   photos: any[]
   video: any[]
 
-  geo: any
+  geo: {
+    address?: string
+    city?: string
+    coordinates?: { lat: number, lng: number }
+    zones?: string[]
+    metro_stations?: string[]
+    // Типы мест для выезда
+    outcall_apartment?: boolean
+    outcall_hotel?: boolean
+    outcall_house?: boolean
+    outcall_sauna?: boolean
+    outcall_office?: boolean
+    taxi_included?: boolean
+    [key: string]: any
+  }
   address: string
   travel_area: string
   custom_travel_areas: string[]
@@ -319,7 +333,18 @@ export function useAdFormModel(props: any, emit: any) {
       return []
     })(),
 
-    geo: props.initialData?.geo || {},
+    geo: (() => {
+    // Парсим geo и извлекаем только нужные поля
+    const geoData = props.initialData?.geo || {}
+    if (typeof geoData === 'string') {
+      try {
+        return JSON.parse(geoData)
+      } catch {
+        return {}
+      }
+    }
+    return geoData
+  })(),
     address: props.initialData?.address || '',
     travel_area: props.initialData?.travel_area || 'no_travel',
     custom_travel_areas: props.initialData?.custom_travel_areas || [],

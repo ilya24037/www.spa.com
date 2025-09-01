@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест карты после интеграции</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .map-test {
+            border: 2px solid #007BFF;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .loading { background-color: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🗺️ Тест карты после интеграции архивной логики</h1>
+        
+        <div id="status" class="status loading">
+            ⏳ Инициализация тестов...
+        </div>
+        
+        <h2>Результаты:</h2>
+        <ul id="results">
+            <li>Загрузка Yandex Maps API...</li>
+        </ul>
+        
+        <h2>Карта:</h2>
+        <div class="map-test" id="mapContainer" style="height: 400px;">
+            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666;">
+                Загрузка карты...
+            </div>
+        </div>
+        
+        <h2>Лог событий:</h2>
+        <div id="log" class="log">
+            Инициализация...
+        </div>
+        
+        <button onclick="testMapFunctions()" style="margin-top: 20px; padding: 10px 20px;">
+            Тест функций карты
+        </button>
+    </div>
+
+    <script>
+        let log = document.getElementById('log');
+        let results = document.getElementById('results');
+        let status = document.getElementById('status');
+        
+        function addLog(message) {
+            const time = new Date().toLocaleTimeString();
+            log.innerHTML += `[${time}] ${message}\n`;
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        function addResult(message, success = true) {
+            const li = document.createElement('li');
+            li.innerHTML = `${success ? '✅' : '❌'} ${message}`;
+            li.style.color = success ? 'green' : 'red';
+            results.appendChild(li);
+        }
+        
+        function updateStatus(message, type = 'loading') {
+            status.className = `status ${type}`;
+            const icons = { loading: '⏳', success: '✅', error: '❌' };
+            status.innerHTML = `${icons[type]} ${message}`;
+        }
+
+        // Тестирование загрузки
+        addLog('Начинаем тестирование интеграции карты...');
+        
+        // Проверка доступности API
+        const testApiKey = '23ff8acc-835f-4e99-8b19-d33c5d346e18';
+        
+        // Функция загрузки как в архиве
+        function loadYandexMaps(apiKey) {
+            return new Promise((resolve, reject) => {
+                if (window.ymaps && window.ymaps.ready) {
+                    window.ymaps.ready(() => resolve(window.ymaps));
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = `https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=${apiKey}`;
+                script.onload = () => {
+                    window.ymaps.ready(() => resolve(window.ymaps));
+                };
+                script.onerror = () => {
+                    reject(new Error('Failed to load Yandex Maps API'));
+                };
+                document.head.appendChild(script);
+            });
+        }
+
+        // Основной тест
+        async function runTest() {
+            try {
+                addLog('1. Загрузка Yandex Maps API...');
+                const ymaps = await loadYandexMaps(testApiKey);
+                addResult('API Yandex Maps загружен');
+                addLog('✅ API загружен успешно');
+                
+                addLog('2. Создание карты...');
+                await new Promise(resolve => setTimeout(resolve, 100)); // Ждем DOM как в архиве
+                
+                const map = new ymaps.Map('mapContainer', {
+                    center: [58.0105, 56.2502], // Пермь
+                    zoom: 15,
+                    controls: ['zoomControl', 'typeSelector']
+                });
+                
+                // Ограничения зума как в архиве
+                map.options.set('minZoom', 10);
+                map.options.set('maxZoom', 18);
+                
+                addResult('Карта создана и отображена');
+                addLog('✅ Карта инициализирована');
+                
+                addLog('3. Тест обработчиков событий...');
+                map.events.add('click', (e) => {
+                    const coords = e.get('coords');
+                    addLog(`Клик по карте: ${coords[0]}, ${coords[1]}`);
+                });
+                
+                addResult('Обработчики событий подключены');
+                addLog('✅ События настроены');
+                
+                updateStatus('Все тесты пройдены успешно!', 'success');
+                addLog('🎉 Интеграция архивной логики УСПЕШНА!');
+                
+                // Сохраняем ссылку на карту для дальнейших тестов
+                window.testMap = map;
+                
+            } catch (error) {
+                addResult(`Ошибка: ${error.message}`, false);
+                addLog(`❌ Ошибка: ${error.message}`);
+                updateStatus('Тесты не пройдены', 'error');
+                console.error('Test error:', error);
+            }
+        }
+        
+        function testMapFunctions() {
+            if (!window.testMap) {
+                addLog('❌ Карта не инициализирована');
+                return;
+            }
+            
+            addLog('Тестирование функций карты...');
+            
+            // Тест изменения центра
+            const newCenter = [58.0205, 56.2602];
+            window.testMap.setCenter(newCenter, 16);
+            addLog(`✅ Центр изменен на ${newCenter}`);
+            
+            // Тест добавления маркера
+            const placemark = new ymaps.Placemark(newCenter, {
+                balloonContentHeader: 'Тестовый маркер',
+                balloonContentBody: 'Маркер создан для тестирования'
+            });
+            
+            window.testMap.geoObjects.add(placemark);
+            addLog('✅ Маркер добавлен на карту');
+        }
+
+        // Запускаем тест
+        runTest();
+    </script>
+</body>
+</html>

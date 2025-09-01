@@ -1,0 +1,75 @@
+---
+description: Coding Standards for SPA Platform
+globs: 
+alwaysApply: true
+---
+
+# Coding Standards (стандарты кодирования)
+
+## Principles (принципы)
+- KISS - Keep it simple (делай просто)
+- YAGNI - No overengineering (без переусложнения)  
+- DRY - Don't repeat (не повторяйся)
+- SOLID principles (принципы SOLID)
+
+## Code Requirements (требования к коду)
+- Clear naming (понятные имена)
+- Single responsibility (единая ответственность)
+- Comments in English (комментарии на английском)
+- Error handling (обработка ошибок)
+- Input validation (валидация входных данных)
+
+## Forbidden (запрещено)
+- Complex nested structures (сложные вложенные структуры)
+- Magic numbers (магические числа)
+- Global variables (глобальные переменные)
+- Code duplication (дублирование кода)
+
+## Project Specific Rules (правила проекта)
+
+### Laravel Backend
+- Use Resource Controllers for CRUD operations
+- Implement Form Requests for validation
+- Create Service classes for business logic
+- Use API Resources for response formatting
+- Always add fields to $fillable array in models
+- Use $casts for JSON fields as 'array'
+
+### Vue.js Frontend
+- Use Composition API with <script setup>
+- Type all props with TypeScript interfaces
+- Emit events, never modify props directly
+- Use Pinia stores for module state
+- Mobile-first approach in Tailwind CSS
+
+### Database
+- Create atomic migrations (one table = one migration)
+- Add indexes on foreign keys
+- Use soft deletes for important data
+- Create seeders for test data
+
+### Error Handling
+- Always wrap operations in try-catch blocks
+- Return proper HTTP status codes
+- Log errors with context information
+- Provide user-friendly error messages
+
+### Testing
+- Write unit tests for services
+- Write feature tests for API endpoints
+- Test edge cases and error scenarios
+- Maintain 90%+ test coverage
+
+## File Organization (организация файлов)
+- Keep related files open (держи связанные файлы открытыми)
+- Maximum 5-7 files (максимум 5-7 файлов) in context
+- Close irrelevant tabs (закрой нерелевантные вкладки)
+
+## Naming Conventions (соглашения по именованию)
+- Controllers: PascalCase + Controller suffix (AdController)
+- Services: PascalCase + Service suffix (AdService)
+- Models: PascalCase singular (Ad, User)
+- Migrations: snake_case with timestamp (create_ads_table)
+- Vue components: PascalCase (AdForm, UserProfile)
+- Methods: camelCase (getUserData, createAd)
+- Constants: UPPER_SNAKE_CASE (MAX_PRICE, ALLOWED_FIELDS)

@@ -1,0 +1,79 @@
+{
+  "ai.model": "",
+  "ai.alternativeModel": "",
+  "ai.longContextChat": true,
+  "ai.includeImages": true,
+  "ai.copilotPlus": true,
+  "ai.partialAccepts": true,
+  "ai.triggerDelay": 200,
+  "privacy.mode": "strict",
+  "telemetry.enabled": false,
+  "codebase.indexing": "local-only",
+  "git.autoStage": false,
+  "git.commitTemplate": "type(scope): description",
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "terminal.integrated.runCommands": "ask",
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.git": true,
+    "**/vendor": true,
+    "**/storage/logs": true,
+    "**/storage/framework/cache": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/vendor": true,
+    "**/storage": true
+  },
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/vendor/**": true,
+    "**/storage/**": true
+  },
+  "emmet.includeLanguages": {
+    "vue": "html",
+    "vue-html": "html"
+  },
+  "typescript.preferences.includePackageJsonAutoImports": "on",
+  "typescript.suggest.autoImports": true,
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "files.associations": {
+    "*.vue": "vue",
+    "*.php": "php",
+    "*.blade.php": "blade"
+  },
+  "php.validate.enable": true,
+  "php.suggest.basic": false,
+  "php.executablePath": "php",
+  "php.validate.executablePath": "php",
+  "blade.format.enable": true,
+  "vue.codeActions.enabled": true,
+  "vue.complete.casing.props": "camel",
+  "vue.complete.casing.tags": "pascal",
+  "tailwindCSS.includeLanguages": {
+    "vue": "html",
+    "vue-html": "html",
+    "blade": "html"
+  },
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
+  ],
+  "tailwindCSS.includeLanguages": {
+    "vue": "html",
+    "vue-html": "html",
+    "blade": "html"
+  }
+}

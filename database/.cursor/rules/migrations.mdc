@@ -1,0 +1,94 @@
+# Database Migrations Rules (правила миграций)
+
+## Migration Structure (структура миграции)
+- One table per migration
+- Use descriptive names
+- Include up() and down() methods
+- Add proper indexes
+
+Use this template when creating migrations:
+@migration-template.php
+
+## Migration Template (шаблон миграции)
+```php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('ads', function (Blueprint $table) {
+            $table->id();
+            $table->string('title');
+            $table->text('description');
+            $table->decimal('price', 10, 2);
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('category_id')->constrained();
+            $table->json('photos')->nullable();
+            $table->json('schedule')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
+            
+            // Indexes
+            $table->index(['user_id', 'is_active']);
+            $table->index(['category_id', 'is_active']);
+            $table->index('price');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('ads');
+    }
+};
+```
+
+## Table Design (дизайн таблиц)
+- Use appropriate column types
+- Set proper lengths for strings
+- Use nullable() for optional fields
+- Set default values where appropriate
+
+## Foreign Keys (внешние ключи)
+- Always add foreign key constraints
+- Use onDelete() and onUpdate()
+- Add indexes on foreign keys
+- Handle cascading properly
+
+## Indexes (индексы)
+- Index frequently queried columns
+- Index foreign keys
+- Use composite indexes for common queries
+- Avoid over-indexing
+
+## Data Types (типы данных)
+- Use JSON for complex data
+- Use ENUM for limited choices
+- Use DECIMAL for money
+- Use TIMESTAMP for dates
+
+## Rollback Strategy (стратегия отката)
+- Implement proper down() method
+- Test rollbacks before deployment
+- Handle data loss scenarios
+- Document rollback procedures
+
+## Performance (производительность)
+- Avoid long-running migrations
+- Use batch operations for large datasets
+- Test on production-like data
+- Monitor execution time
+
+## Testing (тестирование)
+- Test migrations on test data
+- Verify rollback functionality
+- Check index creation
+- Validate constraints
+description:
+globs:
+alwaysApply: true
+---

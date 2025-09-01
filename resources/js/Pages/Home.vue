@@ -181,7 +181,7 @@ import { FilterPanel, FilterCategory } from '@/src/features/masters-filter'
 import { BaseCheckbox } from '@/src/shared/ui/atoms'
 import { logger } from '@/src/shared/utils/logger'
 import YandexMap from '@/src/shared/ui/molecules/YandexMapPicker/YandexMap.vue'
-import { useMapWithMasters } from '@/src/features/map/composables/useMapWithMasters'
+import { useMapWithMasters } from '@/src/shared/ui/molecules/YandexMapPicker'
 import type { GridView } from '@/src/shared/ui/molecules/GridControls/GridControls.vue'
 
 // Stores - используем основные TypeScript stores

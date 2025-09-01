@@ -43,14 +43,16 @@
       </button>
     </div>
 
-    <!-- Content -->
-    <div v-else class="map-states__content">
+    <!-- Content (ВСЕГДА рендерим, чтобы MapCore мог начать загрузку) -->
+    <div class="map-states__content" :class="{ 'map-states__content--hidden': loading || error }">
       <slot />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { onMounted, watch } from 'vue'
+
 /**
  * MapStates - управление состояниями карты
  * Показывает loading, error или content
@@ -63,7 +65,7 @@ interface Props {
   errorTitle?: string
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   loading: false,
   error: null,
   loadingText: 'Загрузка карты...',
@@ -73,6 +75,24 @@ withDefaults(defineProps<Props>(), {
 defineEmits<{
   retry: []
 }>()
+
+// Логирование состояний
+onMounted(() => {
+  console.log('[MapStates] 🚀 MapStates компонент смонтирован')
+  console.log('[MapStates] 📋 Состояние:', {
+    loading: props.loading,
+    error: props.error,
+    loadingText: props.loadingText
+  })
+})
+
+watch(() => props.loading, (newValue) => {
+  console.log('[MapStates] ⏳ loading изменился на:', newValue)
+})
+
+watch(() => props.error, (newValue) => {
+  console.log('[MapStates] ❌ error изменился на:', newValue)
+})
 </script>
 
 <style lang="scss">
@@ -145,6 +165,12 @@ defineEmits<{
   &__content {
     width: 100%;
     height: 100%;
+    
+    &--hidden {
+      visibility: hidden;
+      position: absolute;
+      z-index: -1;
+    }
   }
 }
 </style>

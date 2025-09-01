@@ -1,0 +1,98 @@
+# Testing Rules (правила тестирования)
+
+## Test Structure (структура тестов)
+- Write tests for all functionality
+- Use descriptive test names
+- Follow AAA pattern (Arrange, Act, Assert)
+- Keep tests focused and independent
+
+## Test Naming (именование тестов)
+```php
+// Good names
+public function test_user_can_create_ad_with_valid_data()
+public function test_user_cannot_create_ad_without_title()
+public function test_ad_is_deactivated_when_user_is_banned()
+
+// Bad names
+public function test_create()
+public function test_it_works()
+public function test_something()
+```
+
+## Test Organization (организация тестов)
+- Group related tests in classes
+- Use setUp() for common setup
+- Use data providers for multiple scenarios
+- Keep test methods small
+
+## Laravel Testing (тестирование Laravel)
+```php
+class AdTest extends TestCase
+{
+    use RefreshDatabase;
+    
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->user = User::factory()->create();
+    }
+    
+    public function test_user_can_create_ad(): void
+    {
+        // Arrange
+        $adData = Ad::factory()->make()->toArray();
+        
+        // Act
+        $response = $this->actingAs($this->user)
+            ->postJson('/api/ads', $adData);
+        
+        // Assert
+        $response->assertStatus(201);
+        $this->assertDatabaseHas('ads', $adData);
+    }
+}
+```
+
+## Frontend Testing (тестирование фронтенда)
+```typescript
+import { mount } from '@vue/test-utils'
+import AdForm from '@/Components/AdForm.vue'
+
+describe('AdForm', () => {
+  it('emits submit event with form data', async () => {
+    const wrapper = mount(AdForm)
+    
+    await wrapper.find('[data-test="title"]').setValue('Test Ad')
+    await wrapper.find('[data-test="submit"]').trigger('click')
+    
+    expect(wrapper.emitted('submit')).toBeTruthy()
+    expect(wrapper.emitted('submit')[0][0]).toEqual({
+      title: 'Test Ad'
+    })
+  })
+})
+```
+
+## Test Coverage (покрытие тестами)
+- Aim for 90%+ coverage
+- Test happy path scenarios
+- Test edge cases
+- Test error conditions
+
+## Mocking (мокирование)
+- Mock external dependencies
+- Mock API calls
+- Mock time-dependent functions
+- Use factories for test data
+
+## Database Testing (тестирование БД)
+- Use RefreshDatabase trait
+- Create factories for test data
+- Test database constraints
+- Verify data integrity
+
+## Performance Testing (тестирование производительности)
+- Test response times
+- Test memory usage
+- Test database query count
+- Use profiling tools

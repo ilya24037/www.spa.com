@@ -1,0 +1,89 @@
+---
+description: Development Workflow for SPA Platform
+globs: 
+alwaysApply: true
+---
+
+# Development Process (процесс разработки)
+
+## Workflow (рабочий процесс)
+1. Analyze task (анализируй задачу)
+2. Propose solution (предложи решение) with code snippets
+3. Wait confirmation (жди подтверждения)
+4. Implement step-by-step (реализуй пошагово)
+5. Test immediately (тестируй сразу)
+6. Update progress (обнови прогресс)
+7. Commit with message (коммить с сообщением)
+
+## Testing (тестирование)
+- Unit tests required (юнит-тесты обязательны)
+- Edge cases coverage (покрытие граничных случаев)
+- Error scenarios (сценарии ошибок)
+
+## Project Specific Workflow (рабочий процесс проекта)
+
+### Step-by-Step Implementation (пошаговая реализация)
+1. **Create one file at a time** (создавай по одному файлу)
+2. **Wait for user confirmation** (жди подтверждения пользователя)
+3. **Test immediately after creation** (тестируй сразу после создания)
+4. **Only proceed to next file after verification** (переходи к следующему только после проверки)
+
+### File Creation Order (порядок создания файлов)
+1. **Backend first** (сначала backend):
+   - Model (если нужна)
+   - Migration (если нужна)
+   - Service class
+   - Controller
+   - API routes
+
+2. **Frontend second** (потом frontend):
+   - TypeScript interfaces
+   - Pinia store
+   - Vue components
+   - API integration
+
+### Testing Requirements (требования к тестированию)
+- **Backend**: Test API endpoints manually
+- **Frontend**: Test in browser with real data
+- **Integration**: Verify data flow end-to-end
+- **Error handling**: Test validation and error scenarios
+
+### User Interaction (взаимодействие с пользователем)
+- **Always ask before running terminal commands** (всегда спрашивай перед запуском команд)
+- **Wait for user to execute commands** (жди пока пользователь выполнит команды)
+- **Verify results together** (проверяй результаты вместе)
+- **Only proceed after confirmation** (продолжай только после подтверждения)
+
+## Code Quality Checks (проверки качества кода)
+
+### Before Implementation (перед реализацией)
+- [ ] Task is clearly understood (задача понятна)
+- [ ] Solution approach is confirmed (подход к решению подтвержден)
+- [ ] Required files are identified (определены необходимые файлы)
+- [ ] Dependencies are checked (проверены зависимости)
+
+### During Implementation (во время реализации)
+- [ ] Code follows project conventions (код следует конвенциям проекта)
+- [ ] Error handling is implemented (реализована обработка ошибок)
+- [ ] Input validation is added (добавлена валидация входных данных)
+- [ ] Comments are in English (комментарии на английском)
+
+### After Implementation (после реализации)
+- [ ] Code is tested manually (код протестирован вручную)
+- [ ] All functionality works (вся функциональность работает)
+- [ ] No console errors (нет ошибок в консоли)
+- [ ] User confirms success (пользователь подтверждает успех)
+
+## Communication Rules (правила общения)
+- **Always respond in Russian** (всегда отвечай на русском)
+- **Explain each step in detail** (объясняй каждый шаг подробно)
+- **Warn about potential issues** (предупреждай о возможных проблемах)
+- **Provide step-by-step instructions** (давай пошаговые инструкции)
+- **Wait for user confirmation** (жди подтверждения пользователя)
+
+## Error Handling (обработка ошибок)
+- **Identify the issue** (определи проблему)
+- **Explain the root cause** (объясни причину)
+- **Provide step-by-step fix** (предложи пошаговое исправление)
+- **Test the solution** (протестируй решение)
+- **Document the fix** (задокументируй исправление)

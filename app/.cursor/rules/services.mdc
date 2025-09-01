@@ -1,0 +1,68 @@
+# Laravel Services Rules (правила сервисов)
+
+## Service Structure (структура сервиса)
+- Create service classes for business logic
+- Keep controllers thin
+- Use dependency injection
+- Follow single responsibility principle
+
+Use this template when creating services:
+@service-template.php
+
+## Naming Conventions (соглашения по именованию)
+- Services: PascalCase + Service suffix (AdService, UserService)
+- Methods: camelCase (createAd, updateUser, processPayment)
+- Use descriptive method names
+
+## Service Class Template (шаблон сервиса)
+```php
+class AdService
+{
+    protected $adRepository;
+    protected $userService;
+    
+    public function __construct(
+        AdRepository $adRepository,
+        UserService $userService
+    ) {
+        $this->adRepository = $adRepository;
+        $this->userService = $userService;
+    }
+    
+    public function createAd(array $data): Ad
+    {
+        // Business logic here
+        return $this->adRepository->create($data);
+    }
+}
+```
+
+## Business Logic (бизнес-логика)
+- Handle complex business rules
+- Validate business constraints
+- Manage transactions
+- Handle side effects
+
+## Error Handling (обработка ошибок)
+- Use custom exceptions
+- Log business errors
+- Return meaningful error messages
+- Handle edge cases gracefully
+
+## Data Preparation (подготовка данных)
+- Transform input data
+- Set default values
+- Validate business rules
+- Prepare data for storage
+
+## Repository Pattern (паттерн репозитория)
+- Use repositories for data access
+- Keep services focused on business logic
+- Inject repositories as dependencies
+- Use interfaces for testability
+
+## Testing (тестирование)
+- Write unit tests for services
+- Mock dependencies
+- Test business logic thoroughly
+- Cover edge cases and errors

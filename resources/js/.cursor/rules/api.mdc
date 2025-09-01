@@ -1,0 +1,84 @@
+# API Integration Rules (правила API)
+
+## API Structure (структура API)
+- Create dedicated API classes
+- Use TypeScript interfaces
+- Handle errors consistently
+- Implement proper request/response types
+
+## API Class Template (шаблон API класса)
+```typescript
+interface ApiResponse<T> {
+  data: T
+  message?: string
+  success: boolean
+}
+
+class AdApi {
+  private baseUrl = '/api/ads'
+  
+  async getAds(params?: SearchParams): Promise<ApiResponse<Ad[]>> {
+    try {
+      const response = await axios.get(this.baseUrl, { params })
+      return response.data
+    } catch (error) {
+      throw new ApiError('Failed to fetch ads', error)
+    }
+  }
+  
+  async createAd(data: CreateAdData): Promise<ApiResponse<Ad>> {
+    try {
+      const response = await axios.post(this.baseUrl, data)
+      return response.data
+    } catch (error) {
+      throw new ApiError('Failed to create ad', error)
+    }
+  }
+}
+```
+
+## Request/Response Types (типы запросов/ответов)
+- Define interfaces for all data
+- Use consistent naming conventions
+- Include optional fields properly
+- Handle nullable values
+
+## Error Handling (обработка ошибок)
+- Create custom error classes
+- Handle network errors
+- Provide user-friendly messages
+- Log errors for debugging
+
+## HTTP Methods (HTTP методы)
+- Use appropriate HTTP verbs
+- Handle status codes properly
+- Implement proper error responses
+- Use consistent URL patterns
+
+## Data Transformation (трансформация данных)
+- Transform data before sending
+- Validate data structure
+- Handle file uploads properly
+- Format dates consistently
+
+## Authentication (аутентификация)
+- Include auth tokens
+- Handle token refresh
+- Secure sensitive endpoints
+- Implement proper logout
+
+## Caching (кеширование)
+- Cache GET requests
+- Invalidate cache on updates
+- Use appropriate cache keys
+- Handle cache expiration
+
+## Testing (тестирование)
+- Mock API responses
+- Test error scenarios
+- Verify data transformation
+- Test authentication flows
+description:
+globs:
+alwaysApply: true
+---

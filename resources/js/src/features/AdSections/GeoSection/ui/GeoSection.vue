@@ -22,7 +22,7 @@
           name="service-address"
           :error="errors?.geo?.[0]"
           :show-search-button="false"
-          :show-address-icon="true"
+          :show-address-icon="false"
           :full-address="fullAddressForTooltip"
           :loading="searchLoading"
           @update:modelValue="updateAddress"
@@ -42,8 +42,8 @@
         :height="360"
         :center="mapCenter"
         :api-key="mapApiKey"
-        :show-geolocation-button="true"
-        :auto-detect-location="true"
+        :show-geolocation-button="false"
+        :auto-detect-location="false"
         :draggable="true"
         :current-address="geoData.address"
         @address-found="handleAddressFound"
@@ -62,21 +62,21 @@
       
       <div class="flex flex-col gap-2">
         <BaseRadio
-          v-model="geoData.outcall"
+          :model-value="geoData.outcall"
           value="none"
           name="outcall"
           label="Не выезжаю"
           @update:modelValue="updateOutcall"
         />
         <BaseRadio
-          v-model="geoData.outcall"
+          :model-value="geoData.outcall"
           value="city"
           name="outcall"
           label="По всему городу"
           @update:modelValue="updateOutcall"
         />
         <BaseRadio
-          v-model="geoData.outcall"
+          :model-value="geoData.outcall"
           value="zones"
           name="outcall"
           label="В выбранные зоны"
@@ -94,6 +94,17 @@
           :zones="availableZones"
         />
       </div>
+
+      <!-- Станции метро -->
+      <div v-if="geoData.outcall !== 'none'" class="mt-4">
+        <p class="text-sm text-gray-600 mb-3">
+          Выберите станции метро, к которым вы готовы выезжать:
+        </p>
+        <MetroSelector 
+          v-model="geoData.metro_stations"
+          :stations="moscowMetroStations"
+        />
+      </div>
       
       <!-- Типы мест для выезда -->
       <div v-if="geoData.outcall !== 'none'" class="mt-6 pt-6 border-t border-gray-200">
@@ -104,34 +115,29 @@
         
         <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
           <BaseCheckbox
-            v-model="geoData.outcall_apartment"
+            v-model="localOutcallApartment"
             name="outcall_apartment"
             label="На квартиру"
-            @update:modelValue="(value) => updateOutcallPlaceType('outcall_apartment', value)"
           />
           <BaseCheckbox
-            v-model="geoData.outcall_hotel"
+            v-model="localOutcallHotel"
             name="outcall_hotel"
             label="В гостиницу"
-            @update:modelValue="(value) => updateOutcallPlaceType('outcall_hotel', value)"
           />
           <BaseCheckbox
-            v-model="geoData.outcall_office"
+            v-model="localOutcallOffice"
             name="outcall_office"
             label="В офис"
-            @update:modelValue="(value) => updateOutcallPlaceType('outcall_office', value)"
           />
           <BaseCheckbox
-            v-model="geoData.outcall_sauna"
+            v-model="localOutcallSauna"
             name="outcall_sauna"
             label="В сауну"
-            @update:modelValue="(value) => updateOutcallPlaceType('outcall_sauna', value)"
           />
           <BaseCheckbox
-            v-model="geoData.outcall_house"
+            v-model="localOutcallHouse"
             name="outcall_house"
             label="В загородный дом"
-            @update:modelValue="(value) => updateOutcallPlaceType('outcall_house', value)"
           />
         </div>
         
@@ -144,18 +150,16 @@
           
           <div class="flex flex-col gap-2">
             <BaseRadio
-              v-model="geoData.taxi_included"
+              v-model="localTaxiIncluded"
               :value="false"
               label="Оплачивается отдельно"
               name="taxi"
-              @update:modelValue="updateTaxiIncluded"
             />
             <BaseRadio
-              v-model="geoData.taxi_included"
+              v-model="localTaxiIncluded"
               :value="true"
               label="Включено в стоимость"
               name="taxi"
-              @update:modelValue="updateTaxiIncluded"
             />
           </div>
         </div>
@@ -165,13 +169,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed, reactive } from 'vue'
+import { ref, watch, computed, reactive, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import Badge from '@/src/shared/ui/atoms/Badge/Badge.vue'
 import BaseRadio from '@/src/shared/ui/atoms/BaseRadio/BaseRadio.vue'
 import BaseCheckbox from '@/src/shared/ui/atoms/BaseCheckbox/BaseCheckbox.vue'
 import AddressInput from '@/src/shared/ui/molecules/AddressInput/AddressInput.vue'
 import YandexMap from '@/src/shared/ui/molecules/YandexMapPicker/YandexMap.vue'
 import ZoneSelector from '@/src/shared/ui/molecules/ZoneSelector/ZoneSelector.vue'
+import MetroSelector from '@/src/shared/ui/molecules/MetroSelector/MetroSelector.vue'
+import { useMetroData } from '@/src/shared/ui/molecules/MetroSelector/composables/useMetroData'
 
 // Типы
 interface GeoData {
@@ -179,6 +185,7 @@ interface GeoData {
   coordinates: { lat: number; lng: number } | null
   outcall: 'none' | 'city' | 'zones'
   zones: string[]
+  metro_stations: string[]
   // Типы мест для выезда
   outcall_apartment: boolean
   outcall_hotel: boolean
@@ -206,6 +213,95 @@ const props = withDefaults(defineProps<Props>(), {
 // Emits
 const emit = defineEmits<Emits>()
 
+// Вспомогательные функции для парсинга (должны быть объявлены до использования)
+const toBoolean = (value: any, defaultValue: boolean = false): boolean => {
+  if (typeof value === 'boolean') return value
+  if (typeof value === 'string') {
+    if (value === '1' || value === 'true') return true
+    if (value === '0' || value === 'false') return false
+  }
+  if (typeof value === 'number') return value === 1
+  return defaultValue
+}
+
+const safeJsonParse = (str: string): any => {
+  try {
+    return JSON.parse(str)
+  } catch {
+    return str
+  }
+}
+
+const parseGeoData = (value: string | Record<string, any>): GeoData => {
+  if (typeof value === 'string') {
+    // Если строка, пробуем распарсить JSON
+    if (value) {
+      try {
+        const parsed = JSON.parse(value)
+        return {
+          address: parsed.address || '',
+          coordinates: parsed.coordinates || null,
+          outcall: parsed.outcall || 'none',
+          zones: parsed.zones || [],
+          metro_stations: parsed.metro_stations || [],
+          // Явное преобразование в boolean с правильными дефолтами
+          outcall_apartment: toBoolean(parsed.outcall_apartment, true),
+          outcall_hotel: toBoolean(parsed.outcall_hotel, false),
+          outcall_house: toBoolean(parsed.outcall_house, false),
+          outcall_sauna: toBoolean(parsed.outcall_sauna, false),
+          outcall_office: toBoolean(parsed.outcall_office, false),
+          taxi_included: toBoolean(parsed.taxi_included, false)
+        }
+      } catch {
+        // Если не JSON, считаем что это просто адрес
+        return {
+          address: value,
+          coordinates: null,
+          outcall: 'none',
+          zones: [],
+          metro_stations: [],
+          outcall_apartment: true,
+          outcall_hotel: false,
+          outcall_house: false,
+          outcall_sauna: false,
+          outcall_office: false,
+          taxi_included: false
+        }
+      }
+    }
+  } else if (value && typeof value === 'object') {
+    // Если объект, извлекаем данные
+    return {
+      address: value.address || '',
+      coordinates: value.coordinates || null,
+      outcall: value.outcall || 'none',
+      zones: value.zones || [],
+      metro_stations: value.metro_stations || [],
+      // Явное преобразование в boolean с правильными дефолтами
+      outcall_apartment: toBoolean(value.outcall_apartment, true),
+      outcall_hotel: toBoolean(value.outcall_hotel, false),
+      outcall_house: toBoolean(value.outcall_house, false),
+      outcall_sauna: toBoolean(value.outcall_sauna, false),
+      outcall_office: toBoolean(value.outcall_office, false),
+      taxi_included: toBoolean(value.taxi_included, false)
+    }
+  }
+  
+  return {
+    address: '',
+    coordinates: null,
+    outcall: 'none',
+    zones: [],
+    metro_stations: [],
+    outcall_apartment: true,
+    outcall_hotel: false,
+    outcall_house: false,
+    outcall_sauna: false,
+    outcall_office: false,
+    taxi_included: false
+  }
+}
+
 // Доступные зоны города (Пермь)
 const availableZones = [
   'Дзержинский район',
@@ -217,13 +313,14 @@ const availableZones = [
   'Свердловский район'
 ]
 
-// Локальные данные
+// Локальные данные - основные поля остаются в reactive для карты и других компонентов
 const geoData = reactive<GeoData>({
   address: '',
   coordinates: null,
   outcall: 'none',
   zones: [],
-  // Типы мест для выезда - значения по умолчанию
+  metro_stations: [],
+  // Эти поля теперь будут управляться через локальные ref (для совместимости структуры)
   outcall_apartment: true,
   outcall_hotel: false,
   outcall_house: false,
@@ -231,6 +328,31 @@ const geoData = reactive<GeoData>({
   outcall_office: false,
   taxi_included: false
 })
+
+// Локальные ref переменные для outcall полей (паттерн из DescriptionSection)
+const localOutcallApartment = ref(true)
+const localOutcallHotel = ref(false)
+const localOutcallHouse = ref(false)
+const localOutcallSauna = ref(false)
+const localOutcallOffice = ref(false)
+const localTaxiIncluded = ref(false)
+
+// Инициализируем локальные ref из props при монтировании (паттерн из DescriptionSection)
+if (props.geo) {
+  const parsed = parseGeoData(props.geo)
+  Object.assign(geoData, parsed)
+  
+  // Синхронизируем локальные ref переменные
+  localOutcallApartment.value = parsed.outcall_apartment
+  localOutcallHotel.value = parsed.outcall_hotel
+  localOutcallHouse.value = parsed.outcall_house
+  localOutcallSauna.value = parsed.outcall_sauna
+  localOutcallOffice.value = parsed.outcall_office
+  localTaxiIncluded.value = parsed.taxi_included
+}
+
+// Данные станций метро
+const { moscowMetroStations } = useMetroData()
 
 // Дополнительное состояние
 const searchLoading = ref(false)
@@ -254,80 +376,51 @@ const fullAddressForTooltip = computed(() => {
   return geoData.address
 })
 
-// Парсинг входных данных
-const parseGeoData = (value: string | Record<string, any>): GeoData => {
-  if (typeof value === 'string') {
-    // Если строка, пробуем распарсить JSON
-    if (value) {
-      try {
-        const parsed = JSON.parse(value)
-        return {
-          address: parsed.address || '',
-          coordinates: parsed.coordinates || null,
-          outcall: parsed.outcall || 'none',
-          zones: parsed.zones || [],
-          outcall_apartment: parsed.outcall_apartment ?? true,
-          outcall_hotel: parsed.outcall_hotel ?? false,
-          outcall_house: parsed.outcall_house ?? false,
-          outcall_sauna: parsed.outcall_sauna ?? false,
-          outcall_office: parsed.outcall_office ?? false,
-          taxi_included: parsed.taxi_included ?? false
-        }
-      } catch {
-        // Если не JSON, считаем что это просто адрес
-        return {
-          address: value,
-          coordinates: null,
-          outcall: 'none',
-          zones: [],
-          outcall_apartment: true,
-          outcall_hotel: false,
-          outcall_house: false,
-          outcall_sauna: false,
-          outcall_office: false,
-          taxi_included: false
-        }
-      }
-    }
-  } else if (value && typeof value === 'object') {
-    // Если объект, извлекаем данные
-    return {
-      address: value.address || '',
-      coordinates: value.coordinates || null,
-      outcall: value.outcall || 'none',
-      zones: value.zones || [],
-      outcall_apartment: value.outcall_apartment ?? true,
-      outcall_hotel: value.outcall_hotel ?? false,
-      outcall_house: value.outcall_house ?? false,
-      outcall_sauna: value.outcall_sauna ?? false,
-      outcall_office: value.outcall_office ?? false,
-      taxi_included: value.taxi_included ?? false
-    }
-  }
-  
-  return {
-    address: '',
-    coordinates: null,
-    outcall: 'none',
-    zones: [],
-    outcall_apartment: true,
-    outcall_hotel: false,
-    outcall_house: false,
-    outcall_sauna: false,
-    outcall_office: false,
-    taxi_included: false
-  }
-}
+
 
 // Инициализация данных из props
 const initData = parseGeoData(props.geo)
+
+// Применяем начальные данные к reactive объекту
 Object.assign(geoData, initData)
 
-// Следим за изменениями props
+// Следим за изменениями props (убираем immediate, так как уже применили начальные данные)
 watch(() => props.geo, (newValue) => {
   const parsed = parseGeoData(newValue)
   Object.assign(geoData, parsed)
-}, { immediate: true })
+  
+  // Синхронизируем локальные ref переменные (паттерн из DescriptionSection)
+  localOutcallApartment.value = parsed.outcall_apartment
+  localOutcallHotel.value = parsed.outcall_hotel
+  localOutcallHouse.value = parsed.outcall_house
+  localOutcallSauna.value = parsed.outcall_sauna
+  localOutcallOffice.value = parsed.outcall_office
+  localTaxiIncluded.value = parsed.taxi_included
+})
+
+// ВАЖНО: Следим за изменениями локальных ref и автоматически сохраняем
+watch([localOutcallApartment, localOutcallHotel, localOutcallHouse, localOutcallSauna, localOutcallOffice, localTaxiIncluded], () => {
+  // Обновляем geoData из локальных ref переменных
+  geoData.outcall_apartment = localOutcallApartment.value
+  geoData.outcall_hotel = localOutcallHotel.value
+  geoData.outcall_house = localOutcallHouse.value
+  geoData.outcall_sauna = localOutcallSauna.value
+  geoData.outcall_office = localOutcallOffice.value
+  geoData.taxi_included = localTaxiIncluded.value
+  
+  // Эмитим изменения geo
+  emitGeoData()
+})
+
+// Автосохранение при изменении zones и metro_stations
+// Эти поля используют v-model без @update:modelValue, поэтому нужны watcher'ы
+watch(() => geoData.zones, () => {
+  emitGeoData()
+}, { deep: true })
+
+watch(() => geoData.metro_stations, () => {
+  emitGeoData()
+}, { deep: true })
 
 // Принудительная инициализация карты (например, при открытии секции)
 const forceMapInit = async () => {
@@ -371,7 +464,32 @@ const coordinatesString = computed({
   }
 })
 
+// При монтировании компонента центрируем карту если есть адрес
+onMounted(async () => {
+  // Ждем пока карта инициализируется
+  await nextTick()
+  
+  // Небольшая задержка для гарантии полной инициализации карты
+  setTimeout(() => {
+    // Если есть адрес при загрузке, центрируем карту на нем
+    if (geoData.address && geoData.address.length > 3) {
+      console.log('[GeoSection] 🎯 Центрирование карты на начальном адресе:', geoData.address)
+      searchAddressOnMap(geoData.address)
+    } else if (geoData.coordinates) {
+      // Если есть координаты но нет адреса, центрируем по координатам
+      console.log('[GeoSection] 📍 Центрирование карты на начальных координатах:', geoData.coordinates)
+      if (mapRef.value) {
+        mapRef.value.setCoordinates(geoData.coordinates, 15)
+      }
+    }
+  }, 1000) // Даем карте время полностью загрузиться
+})
+
 // Методы
+// Таймер для debounce поиска
+let searchTimer: ReturnType<typeof setTimeout> | null = null
+let lastSearchedAddress = '' // Для предотвращения дублирования поиска
+
 const updateAddress = (value: string) => {
   // Сохраняем предыдущий адрес для сравнения
   const previousAddress = geoData.address
@@ -384,13 +502,60 @@ const updateAddress = (value: string) => {
     detailedAddress.value = ''
   }
   
+  // Отменяем предыдущий поиск если он был
+  if (searchTimer) {
+    clearTimeout(searchTimer)
+  }
+  
+  // Если адрес не пустой и отличается от последнего искомого, запускаем поиск
+  if (value && value.length > 3 && value !== lastSearchedAddress) {
+    searchTimer = setTimeout(async () => {
+      lastSearchedAddress = value // Запоминаем, что искали
+      await searchAddressOnMap(value)
+    }, 800) // Задержка 800мс после последнего ввода
+  }
+  
   emitGeoData()
 }
 
+// Функция поиска адреса на карте
+const searchAddressOnMap = async (address: string) => {
+  if (!mapRef.value || !address) return
+  
+  searchLoading.value = true
+  try {
+    console.log('[GeoSection] 🔍 Автоматический поиск адреса:', address)
+    
+    // Вызываем метод searchAddress у карты
+    const found = await mapRef.value.searchAddress(address)
+    
+    if (found) {
+      console.log('[GeoSection] ✅ Адрес найден и карта отцентрирована')
+      // Карта сама отцентрируется и обновит координаты через события
+    } else {
+      console.log('[GeoSection] ⚠️ Адрес не найден на карте')
+    }
+  } catch (error) {
+    console.error('[GeoSection] ❌ Ошибка поиска адреса:', error)
+  } finally {
+    searchLoading.value = false
+  }
+}
+
 const clearAddress = () => {
+  console.log('[GeoSection] 🗑️ Очистка адреса')
   geoData.address = ''
-  geoData.coordinates = null
+  // НЕ очищаем координаты сразу, чтобы карта не пропала
+  // Координаты обнулятся при следующем выборе адреса
   detailedAddress.value = ''
+  
+  // Возвращаем карту к дефолтному центру (Пермь)
+  if (mapRef.value && mapRef.value.setCoordinates) {
+    const defaultCenter = { lat: 58.0105, lng: 56.2502 }
+    mapRef.value.setCoordinates(defaultCenter, 12)
+    geoData.coordinates = defaultCenter
+  }
+  
   emitGeoData()
 }
 
@@ -412,15 +577,7 @@ const toggleZone = (zone: string) => {
   emitGeoData()
 }
 
-const updateOutcallPlaceType = (field: keyof GeoData, value: boolean) => {
-  geoData[field] = value
-  emitGeoData()
-}
-
-const updateTaxiIncluded = (value: boolean) => {
-  geoData.taxi_included = value
-  emitGeoData()
-}
+// Функция emitOutcallChanges больше не нужна, так как есть watch на локальные ref
 
 // Новые методы для работы с Яндекс.Картами
 const handleAddressSearch = async (address: string) => {
@@ -447,8 +604,43 @@ const handleAddressSearch = async (address: string) => {
 }
 
 const handleSuggestionSelected = async (suggestion: any) => {
-  // Автоматически ищем выбранный адрес на карте
-  await handleAddressSearch(suggestion.value)
+  console.log('[GeoSection] 📍 Выбрана подсказка:', suggestion.value)
+  
+  // Обновляем адрес в поле
+  geoData.address = suggestion.value
+  
+  // Запоминаем, что уже ищем этот адрес (предотвращаем дублирование)
+  lastSearchedAddress = suggestion.value
+  
+  // Отменяем любой ожидающий поиск
+  if (searchTimer) {
+    clearTimeout(searchTimer)
+    searchTimer = null
+  }
+  
+  // Автоматически ищем выбранный адрес на карте и центрируем
+  searchLoading.value = true
+  
+  try {
+    if (mapRef.value && typeof mapRef.value.searchAddress === 'function') {
+      const success = await mapRef.value.searchAddress(suggestion.value)
+      
+      if (success) {
+        console.log('[GeoSection] ✅ Карта отцентрирована на адресе:', suggestion.value)
+      } else {
+        console.log('[GeoSection] ❌ Не удалось найти адрес на карте')
+        if (addressInputRef.value) {
+          addressInputRef.value.setSearchStatus('Адрес не найден на карте')
+        }
+      }
+    } else {
+      console.error('[GeoSection] ❌ mapRef или searchAddress недоступны')
+    }
+  } catch (error) {
+    console.error('[GeoSection] ❌ Ошибка при центрировании карты:', error)
+  } finally {
+    searchLoading.value = false
+  }
 }
 
 const handleAddressFound = (address: string, coordinates: { lat: number; lng: number }) => {
@@ -488,22 +680,58 @@ const handleMarkerAddressHover = (address: string) => {
   emitGeoData()
 }
 
+// Таймер для debounce emit
+let emitTimer: ReturnType<typeof setTimeout> | null = null
+
 const emitGeoData = () => {
-  // Формируем JSON строку для отправки
-  const dataToEmit = JSON.stringify({
-    address: geoData.address,
-    coordinates: geoData.coordinates,
-    outcall: geoData.outcall,
-    zones: geoData.zones,
-    outcall_apartment: geoData.outcall_apartment,
-    outcall_hotel: geoData.outcall_hotel,
-    outcall_house: geoData.outcall_house,
-    outcall_sauna: geoData.outcall_sauna,
-    outcall_office: geoData.outcall_office,
-    taxi_included: geoData.taxi_included
-  })
-  emit('update:geo', dataToEmit)
+  // Отменяем предыдущий таймер если есть
+  if (emitTimer) {
+    clearTimeout(emitTimer)
+  }
+  
+  // Устанавливаем новый таймер с задержкой
+  emitTimer = setTimeout(() => {
+    // Формируем JSON строку для отправки
+    const dataToEmit = JSON.stringify({
+      address: geoData.address,
+      coordinates: geoData.coordinates,
+      outcall: geoData.outcall,
+      zones: geoData.zones,
+      metro_stations: geoData.metro_stations,
+      outcall_apartment: geoData.outcall_apartment,
+      outcall_hotel: geoData.outcall_hotel,
+      outcall_house: geoData.outcall_house,
+      outcall_sauna: geoData.outcall_sauna,
+      outcall_office: geoData.outcall_office,
+      taxi_included: geoData.taxi_included
+    })
+    emit('update:geo', dataToEmit)
+  }, 300) // Задержка 300мс для группировки обновлений
 }
+
+// Cleanup при размонтировании компонента
+onBeforeUnmount(() => {
+  // Очищаем таймер поиска если он активен
+  if (searchTimer) {
+    clearTimeout(searchTimer)
+    searchTimer = null
+  }
+  
+  // Очищаем таймер emit если он активен
+  if (emitTimer) {
+    clearTimeout(emitTimer)
+    emitTimer = null
+  }
+  
+  // Очищаем ссылку на карту если она существует
+  if (mapRef.value) {
+    mapRef.value = null
+  }
+  // Очищаем ссылки на другие компоненты
+  if (addressInputRef.value) {
+    addressInputRef.value = null
+  }
+})
 </script>
 
 <!-- Все стили мигрированы на Tailwind CSS в template с адаптивностью -->

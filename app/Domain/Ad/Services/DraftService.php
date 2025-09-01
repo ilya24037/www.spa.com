@@ -160,57 +160,40 @@ class DraftService
             }
         }
         
-        // При загрузке данных переносим поля из prices в geo для фронтенда
-        if (isset($data['prices']) && is_array($data['prices']) && isset($data['geo']) && is_array($data['geo'])) {
-            // Поля для переноса из prices в geo при загрузке
-            $fieldsToMove = ['outcall_apartment', 'outcall_hotel', 'outcall_house', 
-                           'outcall_sauna', 'outcall_office', 'taxi_included'];
-            
-            foreach ($fieldsToMove as $field) {
-                if (isset($data['prices'][$field])) {
-                    $data['geo'][$field] = $data['prices'][$field];
-                }
-            }
-        }
-        
-        // Переносим поля типов мест и такси из geo в prices
+        // При загрузке данных проверяем наличие outcall полей
+        // Они могут быть как в prices (старый формат), так и в geo (новый формат)
         if (isset($data['geo']) && is_array($data['geo'])) {
-            // Инициализируем prices если его нет
-            if (!isset($data['prices']) || !is_array($data['prices'])) {
-                $data['prices'] = [];
-            }
-            
-            // Поля для переноса из geo в prices
-            $fieldsToMove = ['outcall_apartment', 'outcall_hotel', 'outcall_house', 
+            // Поля которые должны быть в geo
+            $outcallFields = ['outcall_apartment', 'outcall_hotel', 'outcall_house', 
                            'outcall_sauna', 'outcall_office', 'taxi_included'];
             
-            foreach ($fieldsToMove as $field) {
-                if (isset($data['geo'][$field])) {
-                    $data['prices'][$field] = $data['geo'][$field];
-                    // Удаляем из geo, чтобы избежать дублирования
-                    unset($data['geo'][$field]);
+            // Если поля есть в prices но не в geo - переносим (обратная совместимость)
+            if (isset($data['prices']) && is_array($data['prices'])) {
+                foreach ($outcallFields as $field) {
+                    if (!isset($data['geo'][$field]) && isset($data['prices'][$field])) {
+                        $data['geo'][$field] = $data['prices'][$field];
+                    }
                 }
             }
-        }
-        
-        // Преобразуем строковые boolean значения в prices в настоящие boolean
-        if (isset($data['prices']) && is_array($data['prices'])) {
-            // Поля которые должны быть boolean
-            $booleanFields = ['taxi_included', 'outcall_apartment', 'outcall_hotel', 
-                            'outcall_house', 'outcall_sauna', 'outcall_office'];
             
-            foreach ($booleanFields as $boolField) {
-                if (isset($data['prices'][$boolField])) {
-                    $value = $data['prices'][$boolField];
-                    // Преобразуем '1', 1, true в true; '0', 0, false, null в false
-                    if ($value === '1' || $value === 1 || $value === true) {
-                        $data['prices'][$boolField] = true;
+            // Убедимся что все outcall поля имеют правильный boolean тип
+            foreach ($outcallFields as $field) {
+                if (isset($data['geo'][$field])) {
+                    $value = $data['geo'][$field];
+                    
+                    // Преобразуем в boolean
+                    if ($value === '1' || $value === 1 || $value === true || $value === 'true') {
+                        $data['geo'][$field] = true;
+                    } elseif ($value === '0' || $value === 0 || $value === false || $value === 'false' || $value === null) {
+                        $data['geo'][$field] = false;
                     } else {
-                        $data['prices'][$boolField] = false;
+                        $data['geo'][$field] = (bool)$value;
                     }
                 }
             }
         }
+        
+        
         
         // Преобразуем другие boolean поля на верхнем уровне
         $topLevelBooleanFields = ['is_starting_price', 'online_booking'];

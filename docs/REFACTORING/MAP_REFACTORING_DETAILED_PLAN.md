@@ -1,4 +1,4 @@
-# 🗺️ МАКСИМАЛЬНО ДЕТАЛЬНЫЙ ПЛАН РЕФАКТОРИНГА КАРТ
+﻿# 🗺️ МАКСИМАЛЬНО ДЕТАЛЬНЫЙ ПЛАН РЕФАКТОРИНГА КАРТ
 
 ## 📋 ОГЛАВЛЕНИЕ
 1. [Исходный анализ](#исходный-анализ)
@@ -2642,17 +2642,810 @@ git push origin feature/map-refactoring-core-plugins
 
 ---
 
-## 🎯 РЕЗУЛЬТАТ
+## 🔥 ДОПОЛНИТЕЛЬНАЯ ФАЗА 6: ИНТЕГРАЦИЯ ЛУЧШЕГО ИЗ AV PATERN
 
-После выполнения этого плана мы получим:
+**📅 СТАТУС ПЛАНА НА 31.08.2025: 85% выполнено**
+- ✅ Фазы 0-4 завершены  
+- ❌ Фаза 5 (оптимизация) НЕ выполнена
+- 🚨 MapCore.vue 544 строки вместо плановых 150
+- 🚨 40+ console.log в production коде
 
-1. **Работающую карту** с простой архитектурой
-2. **Модульную систему** с плагинами
-3. **Улучшенную производительность** (в 3 раза быстрее)
-4. **Уменьшенный bundle** (в 2 раза меньше)
-5. **Полную обратную совместимость**
-6. **Покрытие тестами >80%**
-7. **Документированный код**
-8. **Возможность легкого расширения**
+### 🎯 **ГИБРИДНАЯ АРХИТЕКТУРА: Vue 3 + Av patern алгоритмы**
 
-Архитектура "Ядро + Плагины" позволит в будущем легко добавлять новую функциональность без изменения основного кода.
+После анализа `C:\Проект SPA\Av patern\ymaps-components` выявлены критически важные функции, отсутствующие в текущей реализации:
+
+#### **6.1: Добавление продвинутой анимации panTo() (День 6, 4 часа)**
+
+```typescript
+// features/map/lib/AnimationEngine.ts - НОВЫЙ ФАЙЛ
+/**
+ * Движок анимаций карты
+ * Адаптированный из Av patern Map.js:330-396
+ * Добавляет плавные переходы между точками
+ */
+import type { Coordinates, PanToOptions } from '../types'
+
+interface AnimationAction {
+  center: Coordinates
+  duration: number
+  delay: number
+  zoom?: number
+}
+
+export class AnimationEngine {
+  private map: any
+  private isAnimating = false
+  
+  constructor(map: any) {
+    this.map = map
+  }
+
+  /**
+   * Плавное перемещение по нескольким точкам
+   * Портированная логика из Av patern Map.js
+   */
+  async panTo(points: Coordinates[], options: PanToOptions = {}): Promise<void> {
+    if (this.isAnimating) {
+      console.warn('[AnimationEngine] Animation already in progress')
+      return
+    }
+
+    const {
+      duration = 500,
+      delay = 1000,
+      flying = true,
+      zoom
+    } = options
+
+    this.isAnimating = true
+
+    try {
+      // Подготавливаем действия (логика из Av patern)
+      const actions: AnimationAction[] = points.map((point, index) => ({
+        center: point,
+        duration,
+        delay: index > 0 ? delay : 0,
+        zoom: zoom || this.map.getZoom()
+      }))
+
+      // Выполняем плавные переходы
+      if (flying) {
+        await this.executeFlyingAnimation(actions)
+      } else {
+        await this.executeLinearAnimation(actions)
+      }
+    } finally {
+      this.isAnimating = false
+    }
+  }
+
+  /**
+   * Установка границ с учетом отступов
+   * Адаптированная логика из Av patern Map.js:442-485
+   */
+  setBounds(bounds: [[number, number], [number, number]], options: any = {}) {
+    const {
+      zoomMargin = 0,
+      useMapMargin = true,
+      checkZoomRange = true,
+      duration = 300
+    } = options
+
+    // Вычисляем центр и зум с учетом отступов
+    const containerSize = this.map.container.getSize()
+    let margin = zoomMargin
+
+    // Учитываем отступы карты (логика из Av patern)
+    if (useMapMargin) {
+      const mapMargin = this.map.margin?.getMargin() || 0
+      margin = this.sumMargins(margin, mapMargin)
+    }
+
+    // Вычисляем оптимальный центр и зум
+    const { center, zoom } = this.calculateBoundsCenter(bounds, containerSize, margin)
+
+    // Проверка диапазона зума (из Av patern)
+    if (checkZoomRange) {
+      const validZoom = this.validateZoomRange(zoom)
+      return this.map.setCenter(center, validZoom, { duration })
+    }
+
+    return this.map.setCenter(center, zoom, { duration })
+  }
+
+  private async executeFlyingAnimation(actions: AnimationAction[]) {
+    // Алгоритм плавных переходов из Av patern
+    for (const action of actions) {
+      await new Promise(resolve => {
+        setTimeout(() => {
+          this.map.setCenter(
+            [action.center.lat, action.center.lng], 
+            action.zoom,
+            { duration: action.duration }
+          )
+          // Слушаем завершение анимации
+          const handler = () => {
+            this.map.events.remove('actionend', handler)
+            resolve(void 0)
+          }
+          this.map.events.add('actionend', handler)
+        }, action.delay)
+      })
+    }
+  }
+
+  // Вспомогательные методы из Av patern
+  private sumMargins(margin1: number | number[], margin2: number | number[]) {
+    // Логика сложения отступов из Av patern
+    if (typeof margin1 === 'number' && typeof margin2 === 'number') {
+      return margin1 + margin2
+    }
+    // Обработка массивов отступов [top, right, bottom, left]
+    return [
+      (margin1[0] || 0) + (margin2[0] || 0),
+      (margin1[1] || 0) + (margin2[1] || 0), 
+      (margin1[2] || 0) + (margin2[2] || 0),
+      (margin1[3] || 0) + (margin2[3] || 0)
+    ]
+  }
+}
+```
+
+#### **6.2: ObjectManager для больших данных (День 7, 6 часов)**
+
+```typescript
+// features/map/plugins/ObjectManagerPlugin.ts - НОВЫЙ ФАЙЛ  
+/**
+ * Высокопроизводительный менеджер объектов
+ * Адаптированный из Av patern ObjectManager.js
+ * Для работы с 10,000+ маркеров
+ */
+import type { MapPlugin, MapStore, MapMarker } from '../types'
+
+export class ObjectManagerPlugin implements MapPlugin {
+  name = 'objectManager'
+  private objectManager: any = null
+  private map: any = null
+  private store: MapStore | null = null
+  private filterFunction: ((object: any) => boolean) | null = null
+
+  constructor(private options: any = {}) {
+    this.options = {
+      clusterize: true,
+      gridSize: 64,
+      clusterDisableClickZoom: true,
+      clusterOpenBalloonOnClick: false,
+      preset: 'islands#invertedVioletClusterIcons',
+      ...options
+    }
+  }
+
+  async install(map: any, store: MapStore) {
+    this.map = map
+    this.store = store
+
+    // Создаем ObjectManager (логика из Av patern)
+    this.objectManager = new ymaps.ObjectManager(this.options)
+    
+    // Добавляем на карту
+    map.geoObjects.add(this.objectManager)
+
+    // События ObjectManager
+    this.setupObjectManagerEvents()
+
+    // Слушаем события store
+    store.on('bulk-markers-add', this.addBulkMarkers.bind(this))
+    store.on('markers-filter', this.setFilter.bind(this))
+    store.on('markers-clear', this.clearAll.bind(this))
+  }
+
+  /**
+   * Добавление множества маркеров (оптимизированно)
+   * Адаптированная логика из Av patern ObjectManager.js:388-410
+   */
+  addBulkMarkers(markers: MapMarker[]) {
+    if (!this.objectManager) return
+
+    // Преобразуем в формат GeoJSON для ObjectManager
+    const features = markers.map(marker => ({
+      type: 'Feature',
+      id: marker.id,
+      geometry: {
+        type: 'Point',
+        coordinates: [marker.coordinates.lng, marker.coordinates.lat]
+      },
+      properties: {
+        balloonContentHeader: marker.title,
+        balloonContentBody: marker.description,
+        hintContent: marker.title,
+        markerId: marker.id,
+        masterData: marker.masterData // Для интеграции с мастерами
+      },
+      options: {
+        preset: marker.preset || 'islands#blueIcon',
+        iconColor: marker.color || '#0095b6'
+      }
+    }))
+
+    // Добавляем все маркеры одним вызовом (высокая производительность)
+    this.objectManager.add({
+      type: 'FeatureCollection',
+      features
+    })
+  }
+
+  /**
+   * Установка фильтра объектов
+   * Логика из Av patern ObjectManager.js:127-159
+   */
+  setFilter(filterFunction: (object: any) => boolean) {
+    this.filterFunction = filterFunction
+    this.objectManager.setFilter(this.filterFunction)
+  }
+
+  /**
+   * Получение состояния объекта  
+   * Логика из Av patern ObjectManager.js:174-188
+   */
+  getObjectState(objectId: string) {
+    if (!this.objectManager) {
+      return { found: false }
+    }
+
+    return {
+      found: true,
+      isFilteredOut: this.filterFunction ? 
+        !this.filterFunction({ id: objectId }) : false,
+      inCluster: this.objectManager.clusters.state.get(objectId) !== undefined
+    }
+  }
+
+  private setupObjectManagerEvents() {
+    // Клик по объекту
+    this.objectManager.objects.events.add('click', (e: any) => {
+      const objectId = e.get('objectId')
+      const object = this.objectManager.objects.getById(objectId)
+      
+      if (object && this.store) {
+        this.store.emit('object-click', {
+          id: objectId,
+          properties: object.properties,
+          coordinates: {
+            lat: object.geometry.coordinates[1],
+            lng: object.geometry.coordinates[0]
+          }
+        })
+      }
+    })
+
+    // Клик по кластеру  
+    this.objectManager.clusters.events.add('click', (e: any) => {
+      const cluster = e.get('target')
+      const objects = cluster.properties.geoObjects
+      
+      if (this.store) {
+        this.store.emit('cluster-click', objects)
+      }
+    })
+  }
+
+  clearAll() {
+    if (this.objectManager) {
+      this.objectManager.removeAll()
+    }
+  }
+
+  destroy() {
+    if (this.objectManager && this.map) {
+      this.map.geoObjects.remove(this.objectManager)
+      this.objectManager = null
+    }
+  }
+}
+```
+
+#### **6.3: Расширение MapStore для продвинутых возможностей (День 8, 3 часа)**
+
+```typescript
+// features/map/core/MapStore.ts - ДОПОЛНЕНИЕ К СУЩЕСТВУЮЩЕМУ
+/**
+ * ДОПОЛНИТЕЛЬНЫЕ методы из Av patern
+ * Добавляем к существующему MapStore
+ */
+
+// Дополнительные методы (добавить в класс MapStore)
+export class MapStore {
+  // ... существующие методы ...
+
+  /**
+   * Система событий как в Av patern
+   * Детальные события с полной информацией
+   */
+  private eventListeners = new Map<string, Function[]>()
+
+  on(event: string, handler: Function) {
+    if (!this.eventListeners.has(event)) {
+      this.eventListeners.set(event, [])
+    }
+    this.eventListeners.get(event)!.push(handler)
+  }
+
+  off(event: string, handler?: Function) {
+    if (!handler) {
+      this.eventListeners.delete(event)
+      return
+    }
+    
+    const handlers = this.eventListeners.get(event)
+    if (handlers) {
+      const index = handlers.indexOf(handler)
+      if (index > -1) {
+        handlers.splice(index, 1)
+      }
+    }
+  }
+
+  emit(event: string, data?: any) {
+    const handlers = this.eventListeners.get(event) || []
+    handlers.forEach(handler => handler(data))
+  }
+
+  /**
+   * Продвинутое управление границами
+   * Адаптированная логика из Av patern Map.js:442-485
+   */
+  setBounds(bounds: [[number, number], [number, number]], options: any = {}) {
+    const map = this.getMapInstance()
+    if (!map) return
+
+    const {
+      zoomMargin = 0,
+      useMapMargin = true, 
+      checkZoomRange = true,
+      duration = 300
+    } = options
+
+    // Интеграция с AnimationEngine
+    if (this.animationEngine) {
+      return this.animationEngine.setBounds(bounds, options)
+    }
+
+    // Fallback к обычному методу
+    return map.setBounds(bounds, { duration })
+  }
+
+  /**
+   * Плавное перемещение по точкам
+   * Интеграция с AnimationEngine из Av patern
+   */
+  async panTo(points: Coordinates[], options?: any) {
+    if (this.animationEngine) {
+      return this.animationEngine.panTo(points, options)
+    }
+    
+    // Fallback - простое перемещение к последней точке
+    const lastPoint = points[points.length - 1]
+    this.setCenter(lastPoint)
+  }
+
+  /**
+   * Bulk операции для ObjectManager
+   */
+  addBulkMarkers(markers: MapMarker[]) {
+    this.emit('bulk-markers-add', markers)
+  }
+
+  setMarkersFilter(filterFn: (marker: MapMarker) => boolean) {
+    this.emit('markers-filter', filterFn)
+  }
+
+  // Инициализация AnimationEngine
+  private animationEngine: any = null
+  
+  setAnimationEngine(engine: any) {
+    this.animationEngine = engine
+  }
+}
+```
+
+#### **6.4: Улучшенная система плагинов с lazy loading (День 9, 3 часа)**
+
+```typescript
+// features/map/core/PluginManager.ts - НОВЫЙ ФАЙЛ
+/**
+ * Менеджер плагинов с lazy loading
+ * Inspired by Av patern модульной системы
+ */
+export class PluginManager {
+  private plugins = new Map<string, MapPlugin>()
+  private loadedPlugins = new Set<string>()
+  private map: any = null
+  private store: MapStore | null = null
+
+  constructor(map: any, store: MapStore) {
+    this.map = map
+    this.store = store
+  }
+
+  /**
+   * Lazy loading плагинов по требованию
+   */
+  async use(pluginName: string, options?: any) {
+    if (this.loadedPlugins.has(pluginName)) {
+      console.warn(`[PluginManager] Plugin ${pluginName} already loaded`)
+      return
+    }
+
+    try {
+      // Динамический импорт плагина
+      const { default: PluginClass } = await this.importPlugin(pluginName)
+      const plugin = new PluginClass(options)
+      
+      // Устанавливаем плагин
+      if (plugin.install) {
+        await plugin.install(this.map, this.store!)
+      }
+
+      this.plugins.set(pluginName, plugin)
+      this.loadedPlugins.add(pluginName)
+      
+      console.log(`[PluginManager] ✅ Plugin ${pluginName} loaded`)
+    } catch (error) {
+      console.error(`[PluginManager] ❌ Failed to load plugin ${pluginName}:`, error)
+      throw error
+    }
+  }
+
+  private async importPlugin(name: string) {
+    switch (name) {
+      case 'cluster':
+        return import(
+          /* webpackChunkName: "map-cluster" */
+          '../plugins/ClusterPlugin'
+        )
+      case 'objectManager':
+        return import(
+          /* webpackChunkName: "map-object-manager" */
+          '../plugins/ObjectManagerPlugin'
+        )
+      case 'geolocation':
+        return import(
+          /* webpackChunkName: "map-geolocation" */  
+          '../plugins/GeolocationPlugin'
+        )
+      case 'search':
+        return import(
+          /* webpackChunkName: "map-search" */
+          '../plugins/SearchPlugin'
+        )
+      case 'markers':
+        return import(
+          /* webpackChunkName: "map-markers" */
+          '../plugins/MarkersPlugin'
+        )
+      default:
+        throw new Error(`Unknown plugin: ${name}`)
+    }
+  }
+
+  /**
+   * Получение плагина (для доступа к API)
+   */
+  getPlugin<T = any>(name: string): T | null {
+    return this.plugins.get(name) as T || null
+  }
+
+  /**
+   * Проверка загрузки плагина
+   */
+  isPluginLoaded(name: string): boolean {
+    return this.loadedPlugins.has(name)
+  }
+
+  /**
+   * Уничтожение всех плагинов
+   */
+  destroy() {
+    for (const plugin of this.plugins.values()) {
+      if (plugin.destroy) {
+        plugin.destroy()
+      }
+    }
+    this.plugins.clear()
+    this.loadedPlugins.clear()
+  }
+}
+```
+
+#### **6.5: Интеграция в MapCore.vue (День 10, 2 часа)**
+
+```vue
+<!-- Обновление MapCore.vue для интеграции новых возможностей -->
+<script setup lang="ts">
+// ... существующие импорты ...
+import { AnimationEngine } from '../lib/AnimationEngine'
+import { PluginManager } from '../core/PluginManager'
+
+// ... существующий код ...
+
+// Добавляем новые возможности
+let animationEngine: AnimationEngine | null = null
+let pluginManager: PluginManager | null = null
+
+// Обновляем инициализацию
+async function initMap() {
+  try {
+    store.setLoading(true)
+    
+    const ymaps = await mapLoader.load(props.apiKey)
+    const map = new ymaps.Map(mapId, mapConfig)
+    
+    // НОВОЕ: Инициализируем движки
+    animationEngine = new AnimationEngine(map)
+    pluginManager = new PluginManager(map, store)
+    
+    // Связываем с store
+    store.setAnimationEngine(animationEngine)
+    store.setMapInstance(map)
+    
+    setupBaseHandlers(map)
+    store.setReady(true)
+    emit('ready', map)
+    
+  } catch (error) {
+    // ... обработка ошибки ...
+  }
+}
+
+// НОВОЕ: Расширенное публичное API
+function panTo(points: Coordinates[], options?: any) {
+  return animationEngine?.panTo(points, options)
+}
+
+function setBounds(bounds: any, options?: any) {
+  const map = store.getMapInstance()
+  return animationEngine?.setBounds(bounds, options)
+}
+
+async function usePlugin(name: string, options?: any) {
+  return pluginManager?.use(name, options)
+}
+
+function getPlugin<T = any>(name: string): T | null {
+  return pluginManager?.getPlugin<T>(name) || null
+}
+
+// Обновляем expose
+defineExpose({
+  // Старые методы
+  use: usePlugin, // Совместимость
+  setCenter,
+  getCenter,
+  destroy,
+  store,
+  
+  // НОВЫЕ методы из Av patern
+  panTo,
+  setBounds,
+  usePlugin,
+  getPlugin,
+  
+  // Доступ к движкам
+  animationEngine,
+  pluginManager
+})
+</script>
+```
+
+---
+
+## 🏆 **ОБНОВЛЕННАЯ ЦЕЛЕВАЯ АРХИТЕКТУРА: Гибридная**
+
+### **📁 Финальная структура (15 файлов, ~900 строк)**
+
+```
+/features/map/
+├── core/ (4 файла, ~350 строк)
+│   ├── MapCore.vue          // 150 строк - оптимизированное ядро
+│   ├── MapStore.ts          // 120 строк - расширенный store
+│   ├── MapLoader.ts         // 50 строк - singleton загрузчик
+│   └── PluginManager.ts     // 80 строк - менеджер плагинов
+├── lib/ (2 файла, ~200 строк)  
+│   ├── AnimationEngine.ts   // 150 строк - движок анимаций из Av patern
+│   └── mapHelpers.ts        // 50 строк - утилиты
+├── plugins/ (5 файлов, ~300 строк)
+│   ├── ClusterPlugin.ts     // 60 строк
+│   ├── GeolocationPlugin.ts // 40 строк
+│   ├── SearchPlugin.ts      // 50 строк
+│   ├── MarkersPlugin.ts     // 70 строк
+│   └── ObjectManagerPlugin.ts // 80 строк - НОВЫЙ для больших данных
+├── components/ (3 файла, ~190 строк)
+│   ├── MapContainer.vue     // 100 строк - главный контейнер
+│   ├── MapControls.vue      // 50 строк - UI контролы
+│   └── MapStates.vue        // 40 строк - состояния
+└── types/ (1 файл, ~100 строк)
+    └── index.ts             // Все TypeScript типы
+```
+
+### **⚡ Ключевые преимущества гибридной архитектуры:**
+
+1. **Vue 3 реактивность + Av patern алгоритмы** 💎
+2. **TypeScript типизация + нативная производительность** 🚀  
+3. **Модульность FSD + функциональная полнота** 🏗️
+4. **Lazy loading плагинов + минимальный ядро** ⚡
+5. **Обратная совместимость + расширяемость** 🔄
+
+---
+
+## 📋 **ПЛАН ДОРАБОТКИ НА ОСНОВЕ ТЕКУЩЕГО СОСТОЯНИЯ**
+
+### **🚨 СОСТОЯНИЕ НА 31.08.2025:**
+- ✅ **Фазы 0-4 выполнены на 100%**
+- ❌ **Фаза 5 (оптимизация) НЕ ВЫПОЛНЕНА**  
+- 🚨 **MapCore.vue: 544 строки (план: 150)**
+- 🚨 **Console.log в production**
+
+### **⚡ ФАЗА 5: КРИТИЧЕСКАЯ ОПТИМИЗАЦИЯ (1-2 дня)**
+
+#### **День 11 (СРОЧНО): Техническая очистка**
+
+**Утро (2 часа):**
+```bash
+# 1. Убрать ALL console.log из production (30 мин)
+find resources/js/src/features/map -name "*.vue" -o -name "*.ts" | \
+  xargs sed -i '/console\.log/d'
+
+# 2. Проверить что карта работает (30 мин)  
+npm run dev
+# Открыть /ad/create и проверить функциональность
+
+# 3. Замерить performance baseline (1 час)
+node scripts/measure-map-performance.js
+```
+
+**День (4 часа):**  
+```vue
+<!-- 4. Разбить MapCore.vue на composables -->
+<!-- features/map/core/MapCore.vue (ЦЕЛЬ: 150 строк) -->
+<script setup lang="ts">
+// Вместо 544 строк в одном файле
+import { useMapInitializer } from '../composables/useMapInitializer'  // 140 строк
+import { useMapHandlers } from '../composables/useMapHandlers'        // 100 строк  
+import { useMapLifecycle } from '../composables/useMapLifecycle'      // 60 строк
+
+const { initMap, loading, error } = useMapInitializer(props)
+const { setupHandlers } = useMapHandlers()  
+const { onMount, onUnmount } = useMapLifecycle()
+
+// Основной код: только 150 строк!
+</script>
+```
+
+### **🚀 ФАЗА 6: ИНТЕГРАЦИЯ AV PATERN (2-3 дня)**
+
+#### **День 12: AnimationEngine**
+- Портировать panTo() из Av patern Map.js:330-396
+- Портировать setBounds() из Av patern Map.js:442-485
+- Интегрировать в MapCore через animationEngine
+
+#### **День 13: ObjectManagerPlugin**  
+- Адаптировать ObjectManager из Av patern ObjectManager.js
+- Добавить поддержку 10,000+ маркеров
+- Интегрировать фильтрацию и кластеризацию
+
+#### **День 14: Расширенные события**
+- Портировать систему событий из Av patern
+- Добавить детальные события boundschange, statechange
+- Обновить все плагины для новых событий
+
+---
+
+## 🎯 **ОБНОВЛЕННЫЕ МЕТРИКИ УСПЕХА**
+
+### **📊 Текущие показатели (оценочно):**
+- Файлов: ~15 
+- Строк кода: ~1200  
+- Bundle size: ~150KB (нужна проверка)
+- Время загрузки: ~1.5 сек (нужна проверка)
+- Покрытие тестами: ~60%
+- Работает: ✅ (с избыточным логированием)
+
+### **🎯 Целевые показатели после доработки:**
+- Файлов: 15 (стабильно)
+- Строк кода: ~900 ✨ **(-25%)**
+- Bundle size: <100KB ✨ **(-33%)**  
+- Время загрузки: <1 секунда ✨ **(-33%)**
+- Покрытие тестами: >80% ✨ **+20%**
+- **НОВОЕ**: Поддержка 10,000+ маркеров ⚡
+- **НОВОЕ**: Плавные анимации panTo() 🎬
+- **НОВОЕ**: Расширенные границы setBounds() 📐
+
+---
+
+## 📚 **ОБНОВЛЕННАЯ ДОКУМЕНТАЦИЯ**
+
+### **Новые примеры использования:**
+
+```vue
+<!-- Базовая карта (как было) -->
+<YandexMap v-model="coordinates" />
+
+<!-- С продвинутыми анимациями (НОВОЕ) -->
+<YandexMap 
+  ref="mapRef"
+  v-model="coordinates"
+  @ready="setupAnimations"
+/>
+<script>
+async function setupAnimations() {
+  // Плавный тур по нескольким точкам
+  await mapRef.value.panTo([
+    { lat: 55.7558, lng: 37.6176 }, // Москва
+    { lat: 59.9311, lng: 30.3609 }, // СПб  
+    { lat: 55.8431, lng: 37.3806 }  // Зеленоград
+  ], {
+    duration: 1000,
+    delay: 2000,
+    flying: true
+  })
+}
+</script>
+
+<!-- Карта с большими данными (НОВОЕ) -->
+<YandexMap
+  ref="bigDataMapRef" 
+  mode="big-data"
+  :markers="tenThousandMarkers"
+  @ready="setupBigDataMode"
+/>
+<script>
+async function setupBigDataMode() {
+  // Включаем ObjectManager для производительности
+  await mapRef.value.usePlugin('objectManager', {
+    clusterize: true,
+    gridSize: 64
+  })
+  
+  // Добавляем фильтр
+  mapRef.value.setMarkersFilter(marker => 
+    marker.rating > 4.5 && marker.isActive
+  )
+}
+</script>
+
+<!-- Карта с умными границами (НОВОЕ) -->  
+<YandexMap
+  ref="boundsMapRef"
+  @ready="setupSmartBounds"
+/>
+<script>
+async function setupSmartBounds() {
+  // Установка границ с отступами и автозумом
+  mapRef.value.setBounds([
+    [55.55, 37.42], // ЮЗ угол
+    [55.95, 37.82]  // СВ угол
+  ], {
+    zoomMargin: 50,        // Отступ в пикселях
+    useMapMargin: true,    // Учесть отступы карты
+    checkZoomRange: true,  // Проверить диапазон
+    duration: 500          // Анимация
+  })
+}
+</script>
+```
+
+---
+
+## 🎯 РЕЗУЛЬТАТ ПОСЛЕ ДОРАБОТКИ
+
+Получим **ULTIMATE карту** с лучшим из двух миров:
+
+1. ✅ **Современная архитектура** (Vue 3 + TypeScript + FSD)
+2. ✅ **Продвинутая функциональность** (panTo, setBounds, ObjectManager) 
+3. ✅ **Высокая производительность** (lazy loading, оптимизация памяти)
+4. ✅ **Простота использования** (минимальное API для простых задач)
+5. ✅ **Расширяемость** (плагинная система + composables)
+6. ✅ **Обратная совместимость** (100% сохранена)
+7. ✅ **Enterprise готовность** (тесты, документация, производительность)
+
+**🚨 КРИТИЧЕСКИ ВАЖНО: Сначала выполнить Фазу 5 (очистка), потом Фазу 6 (интеграция)!**

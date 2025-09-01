@@ -26,7 +26,7 @@ export interface MapConfig {
 
 export interface MapPlugin {
   name: string
-  install?(map: any, store: MapStore): Promise<void> | void
+  install?(map: any, store: MapStore): void
   destroy?(): void
 }
 

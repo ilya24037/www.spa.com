@@ -1,0 +1,53 @@
+# Laravel Controllers Rules (правила контроллеров)
+
+## Controller Structure (структура контроллера)
+- Use Resource Controllers for CRUD operations
+- Extend BaseController or Controller
+- Follow single responsibility principle
+- Keep controllers thin - business logic in services
+
+Use this template when creating controllers:
+@controller-template.php
+
+## Naming Conventions (соглашения по именованию)
+- Controllers: PascalCase + Controller suffix (AdController, UserController)
+- Methods: camelCase (getUserData, createAd, updateProfile)
+- Resource methods: index, show, create, store, edit, update, destroy
+
+## Required Methods (обязательные методы)
+```php
+class AdController extends Controller
+{
+    public function index()     // List all ads
+    public function show(Ad $ad) // Show specific ad
+    public function create()    // Show create form
+    public function store(Request $request) // Save new ad
+    public function edit(Ad $ad) // Show edit form
+    public function update(Request $request, Ad $ad) // Update ad
+    public function destroy(Ad $ad) // Delete ad
+}
+```
+
+## Form Requests (валидация)
+- Always use Form Requests for validation
+- Create separate request classes for store/update
+- Validate all input data
+- Return proper error messages
+
+## Response Formatting (форматирование ответов)
+- Use API Resources for consistent responses
+- Return proper HTTP status codes
+- Include success/error messages
+- Handle exceptions gracefully
+
+## Error Handling (обработка ошибок)
+- Wrap operations in try-catch blocks
+- Log errors with context
+- Return user-friendly error messages
+- Use proper HTTP status codes (400, 404, 422, 500)
+
+## Authorization (авторизация)
+- Use policies for model authorization
+- Check permissions in controllers
+- Return 403 for unauthorized access
+- Log security violations

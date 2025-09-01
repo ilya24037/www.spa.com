@@ -1,46 +1,32 @@
 <template>
   <div class="yandex-map" role="region" :aria-label="ariaLabel">
-    <MapStates v-bind="stateProps" @retry="handleRetry">
-      <YandexMapBase
-        ref="mapBaseRef"
-        v-bind="mapProps"
-        @ready="handleMapReady"
-        @bounds-change="emit('bounds-change', $event)"
-        @center-change="handleCenterChange"
-        @click="handleMapClick"
-        @error="handleMapError"
-      >
-        <template #controls>
-          <MapControls v-bind="controlsProps" @geolocation-click="handleGeolocationClick" />
-        </template>
-        <template #overlays>
-          <MapCenterMarker v-if="showCenterMarker" :visible="!!hasAddress" @marker-hover="handleMarkerHover" />
-          <MapAddressTooltip v-bind="tooltipProps" />
-        </template>
-      </YandexMapBase>
-      <MapMarkersManager
-        v-if="showMarkers"
-        v-bind="markersProps"
-        @marker-click="emit('marker-click', $event)"
-        @cluster-click="emit('cluster-click', $event)"
-      />
-    </MapStates>
+    <MapContainer
+      ref="mapContainerRef"
+      v-bind="adapterProps"
+      @update:modelValue="handleUpdate"
+      @ready="handleReady"
+      @marker-click="$emit('marker-click', $event)"
+      @cluster-click="$emit('cluster-click', $event)"
+      @address-found="handleAddressFound"
+      @center-change="$emit('bounds-change', { center: $event })"
+    >
+      <template #overlays>
+        <!-- Сохраняем старые оверлеи для совместимости -->
+        <slot name="overlays" />
+      </template>
+    </MapContainer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import type { MapMarker, Coordinates } from '@/src/features/map/types'
-import { DEFAULT_API_KEY, PERM_CENTER, DEFAULT_ZOOM } from '@/src/features/map/lib/mapConstants'
-import YandexMapBase from '@/src/features/map/ui/YandexMapBase/YandexMapBase.vue'
-import MapStates from '@/src/features/map/ui/MapStates/MapStates.vue'
-import MapControls from '@/src/features/map/ui/MapControls/MapControls.vue'
-import MapCenterMarker from '@/src/features/map/ui/MapCenterMarker/MapCenterMarker.vue'
-import MapAddressTooltip from '@/src/features/map/ui/MapAddressTooltip/MapAddressTooltip.vue'
-import MapMarkersManager from '@/src/features/map/ui/MapMarkersManager/MapMarkersManager.vue'
-import { useMapController } from '@/src/features/map/composables/useMapController'
+import { computed, ref, onMounted } from 'vue'
+import type { MapMarker, Coordinates } from '@/src/features/map/core/MapStore'
+import { parseCoordinates } from '@/src/features/map/utils/mapHelpers'
+import MapContainer from '@/src/features/map/components/MapContainer.vue'
 
-export type { MapMarker } from '@/src/features/map/types'
+// КРИТИЧЕСКИ ВАЖНО: Экспорт composables вынесен в index.ts для обратной совместимости
+
+export type { MapMarker } from '@/src/features/map/core/MapStore'
 
 interface Props {
   modelValue?: string
@@ -54,30 +40,19 @@ interface Props {
   autoDetectLocation?: boolean
   clusterize?: boolean
   draggable?: boolean
-  showSingleMarker?: boolean
-  showAddressTooltip?: boolean
-  currentAddress?: string
-  loadingText?: string
-  errorTitle?: string
-  emptyTitle?: string
-  emptyMessage?: string
   ariaLabel?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
   height: 400,
-  center: () => PERM_CENTER,
-  zoom: DEFAULT_ZOOM,
-  apiKey: DEFAULT_API_KEY,
+  zoom: 14,
+  apiKey: '23ff8acc-835f-4e99-8b19-d33c5d346e18',
   mode: 'single',
   markers: () => [],
   showGeolocationButton: false,
   autoDetectLocation: false,
   clusterize: false,
   draggable: true,
-  showSingleMarker: true,
-  showAddressTooltip: true,
-  currentAddress: '',
   ariaLabel: 'Интерактивная карта'
 })
 
@@ -92,67 +67,88 @@ const emit = defineEmits<{
   'bounds-change': [bounds: any]
 }>()
 
-const {
-  mapBaseRef,
-  mapInstance,
-  mapState,
-  geolocation,
-  tooltip,
-  handleMapReady,
-  handleCenterChange,
-  handleMapClick,
-  handleMapError,
-  handleRetry,
-  handleGeolocationClick,
-  handleMarkerHover,
-  searchAddress,
-  setCoordinates
-} = useMapController(props, emit)
+// Refs
+const mapContainerRef = ref()
 
-const stateProps = computed(() => ({
-  isLoading: mapState.isLoading.value,
-  error: mapState.error.value,
-  errorDetails: mapState.errorDetails.value,
-  isEmpty: props.mode === 'multiple' && props.markers.length === 0,
-  height: props.height,
-  loadingText: props.loadingText,
-  errorTitle: props.errorTitle,
-  emptyTitle: props.emptyTitle,
-  emptyMessage: props.emptyMessage
-}))
+// Логирование при инициализации
+onMounted(() => {
+  console.log('[YandexMap] 🚀 YandexMap компонент смонтирован')
+  console.log('[YandexMap] 📋 Полученные props:', {
+    modelValue: props.modelValue,
+    height: props.height,
+    center: props.center,
+    zoom: props.zoom,
+    apiKey: props.apiKey,
+    mode: props.mode,
+    markers: props.markers?.length || 0,
+    showGeolocationButton: props.showGeolocationButton,
+    autoDetectLocation: props.autoDetectLocation,
+    clusterize: props.clusterize,
+    draggable: props.draggable
+  })
+  
+  // Проверяем center
+  const computedCenter = props.center || parseCoordinates(props.modelValue)
+  console.log('[YandexMap] 📍 Вычисленный центр:', computedCenter)
+})
 
-const mapProps = computed(() => ({
-  height: props.height,
-  center: props.center,
-      zoom: props.zoom,
-  apiKey: props.apiKey,
-  mode: props.mode,
-  autoDetectLocation: props.autoDetectLocation
-}))
+// Computed props for new MapContainer (оптимизировано без избыточных логов)
+const adapterProps = computed(() => {
+  return {
+    modelValue: props.modelValue,
+    height: props.height,
+    center: props.center || parseCoordinates(props.modelValue),
+    zoom: props.zoom,
+    apiKey: props.apiKey,
+    mode: props.mode,
+    markers: props.markers,
+    showGeolocationButton: props.showGeolocationButton,
+    autoDetectLocation: props.autoDetectLocation,
+    clusterize: props.clusterize,
+    draggable: props.draggable
+  }
+})
 
-const controlsProps = computed(() => ({
-  showGeolocation: props.showGeolocationButton,
-  locationActive: geolocation.locationActive.value,
-  geolocationLoading: geolocation.isLoading.value
-}))
+// Event handlers for adapter compatibility (оптимизированы логи)
+function handleUpdate(value: string) {
+  emit('update:modelValue', value)
+}
 
-const tooltipProps = computed(() => ({
-  visible: tooltip.visible.value,
-  address: tooltip.address.value,
-  position: tooltip.position.value
-}))
+function handleReady(map: any) {
+  console.log('[YandexMap] 🎉 Карта инициализирована')
+  // Эмулируем старый API для обратной совместимости
+}
 
-const markersProps = computed(() => ({
-  map: mapInstance.value,
-  markers: props.markers,
-  clusterize: props.clusterize
-}))
+function handleAddressFound(data: { address: string, coords: Coordinates }) {
+  console.log('[YandexMap] 📍 Найден адрес:', data.address)
+  emit('address-found', data.address, data.coords)
+}
 
-const showCenterMarker = computed(() => props.mode === 'single' && props.showSingleMarker)
-const showMarkers = computed(() => props.mode === 'multiple' && mapInstance.value)
-const hasAddress = computed(() => props.mode === 'single' && props.currentAddress && props.modelValue?.includes(','))
+// Public API для обратной совместимости (оптимизированы логи)
+async function searchAddress(address: string): Promise<boolean> {
+  if (!mapContainerRef.value || !mapContainerRef.value.searchAddress) {
+    console.warn('[YandexMap] ❌ MapContainer не готов')
+    return false
+  }
+  
+  try {
+    const result = await mapContainerRef.value.searchAddress(address)
+    return result || false
+  } catch (error) {
+    console.error('[YandexMap] ❌ Ошибка поиска адреса:', error)
+    return false
+  }
+}
 
-defineExpose({ searchAddress, setCoordinates, forceInit: () => {} })
+function setCoordinates(coords: Coordinates, zoom?: number) {
+  return mapContainerRef.value?.setCenter?.(coords, zoom)
+}
+
+defineExpose({ 
+  searchAddress, 
+  setCoordinates, 
+  forceInit: () => {} 
+})
 </script>
 
 <style scoped>

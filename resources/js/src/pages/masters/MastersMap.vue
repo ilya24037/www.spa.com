@@ -115,6 +115,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Head } from '@inertiajs/vue3'
 import YandexMap from '@/src/shared/ui/molecules/YandexMapPicker/YandexMap.vue'
+import { useMapWithMasters } from '@/src/shared/ui/molecules/YandexMapPicker'
 import FilterPanel from '@/src/features/masters-filter/ui/FilterPanel/FilterPanel.vue'
 import SearchBar from '@/src/features/search/ui/SearchBar/SearchBar.vue'
 import MasterCard from '@/src/entities/master/ui/MasterCard/MasterCard.vue'
@@ -122,7 +123,6 @@ import MasterDetailCard from '@/src/entities/master/ui/MasterDetailCard/MasterDe
 import BookingModal from '@/src/entities/booking/ui/BookingModal/BookingModal.vue'
 import PageHeader from '@/src/shared/ui/molecules/PageHeader/PageHeader.vue'
 import SecondaryButton from '@/src/shared/ui/atoms/SecondaryButton/SecondaryButton.vue'
-import { useMapWithMasters } from '@/src/features/map/composables/useMapWithMasters'
 import { useFilterStore } from '@/src/features/masters-filter/model/filter.store'
 
 // Composables

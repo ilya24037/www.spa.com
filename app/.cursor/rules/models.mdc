@@ -1,0 +1,66 @@
+# Laravel Models Rules (правила моделей)
+
+## Model Structure (структура модели)
+- Extend Eloquent Model
+- Use proper namespacing
+- Follow single responsibility principle
+- Keep models focused on data relationships
+
+Use this template when creating models:
+@model-template.php
+
+## Required Properties (обязательные свойства)
+```php
+class Ad extends Model
+{
+    protected $fillable = [
+        'title', 'description', 'price', 'user_id',
+        'category_id', 'location', 'photos', 'schedule'
+    ];
+    
+    protected $casts = [
+        'photos' => 'array',
+        'schedule' => 'array',
+        'price' => 'decimal:2',
+        'is_active' => 'boolean'
+    ];
+    
+    protected $dates = ['created_at', 'updated_at'];
+}
+```
+
+## Fillable Fields (заполняемые поля)
+- Always add new fields to $fillable array
+- Never use $guarded = ['*']
+- Include all user-input fields
+- Exclude sensitive fields (password, tokens)
+
+## Type Casting (приведение типов)
+- Use $casts for JSON fields as 'array'
+- Cast dates to 'datetime'
+- Cast booleans to 'boolean'
+- Cast numbers to 'decimal' or 'integer'
+
+## Relationships (отношения)
+- Define relationships clearly
+- Use proper relationship methods
+- Add indexes on foreign keys
+- Use eager loading to prevent N+1 queries
+
+## Scopes (области видимости)
+- Create scopes for common queries
+- Use local scopes for filtering
+- Use global scopes sparingly
+- Document all custom scopes
+
+## Accessors & Mutators (аксессоры и мутаторы)
+- Use accessors for computed fields
+- Use mutators for data transformation
+- Follow naming conventions
+- Keep logic simple and readable
+
+## Validation Rules (правила валидации)
+- Define validation rules in models
+- Use Form Requests for complex validation
+- Validate relationships exist
+- Handle unique constraints properly

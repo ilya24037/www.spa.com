@@ -1,0 +1,147 @@
+# Claude Code Ignore File
+# Оптимизация контекста для большой кодовой базы (37k+ строк)
+
+# ============================================
+# Dependencies (экономим ~40% токенов)
+# ============================================
+node_modules/
+vendor/
+
+# ============================================
+# Build outputs and compiled files
+# ============================================
+dist/
+public/build/
+public/hot/
+public/mix-manifest.json
+public/js/app.js
+public/css/app.css
+*.min.js
+*.min.css
+
+# ============================================
+# Storage and cache (не нужны для анализа)
+# ============================================
+storage/logs/
+storage/framework/cache/
+storage/framework/sessions/
+storage/framework/views/
+storage/framework/testing/
+storage/app/public/uploads/
+storage/app/public/media/
+storage/debugbar/
+bootstrap/cache/
+
+# ============================================
+# IDE and system files
+# ============================================
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ============================================
+# Environment and sensitive files
+# ============================================
+.env
+.env.backup
+.env.production
+.env.local
+.env.*.local
+auth.json
+
+# ============================================
+# Logs and debug files
+# ============================================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+laravel.log
+php_errors.log
+
+# ============================================
+# Testing and coverage
+# ============================================
+coverage/
+.phpunit.result.cache
+.phpunit.cache/
+tests/Browser/screenshots/
+tests/Browser/console/
+
+# ============================================
+# Temporary files
+# ============================================
+*.tmp
+*.temp
+*.cache
+~*
+*.bak
+*.backup
+*.old
+
+# ============================================
+# Large media files (бинарные файлы)
+# ============================================
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+*.mp3
+*.wav
+*.flac
+*.zip
+*.rar
+*.7z
+*.tar
+*.gz
+*.iso
+*.dmg
+*.exe
+*.msi
+
+# ============================================
+# Database files
+# ============================================
+*.sql
+*.sqlite
+*.db
+database/*.sqlite
+
+# ============================================
+# Documentation builds
+# ============================================
+docs/_build/
+docs/.vuepress/dist/
+_site/
+
+# ============================================
+# Package manager files
+# ============================================
+package-lock.json
+yarn.lock
+composer.lock
+pnpm-lock.yaml
+
+# ============================================
+# Specific project folders to ignore
+# ============================================
+extracted_atomic/
+atomic_components/
+AVITO_CODE_ANALYSIS/
+Mirror/
+nul
+
+# ============================================
+# Old/Archive folders
+# ============================================
+archive/
+backup/
+old/
+deprecated/
+_OLD/
+_BACKUP/

@@ -1,0 +1,14 @@
+Map Imports Migration Report
+Generated: 2025-08-29T07:51:29.266Z
+
+Files updated: 1
+Old imports replaced:
+- @/src/features/map/ui/YandexMapBase/YandexMapBase.vue
+- @/src/features/map/ui/UniversalMap/UniversalMap.vue
+- @/src/features/map/composables/useMapController
+- @/src/features/map/composables/useMapWithMasters
+
+New import:
+- @/src/shared/ui/molecules/YandexMapPicker/YandexMap.vue
+
+Files processed: 577

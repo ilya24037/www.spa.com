@@ -15,24 +15,41 @@ export class MarkersPlugin implements MapPlugin {
     }
   }
 
-  async install(map: any, store: MapStore) {
+  install(map: any, store: MapStore) {
     this.map = map
     this.store = store
+    
     if (this.options.mode === 'single') {
+      // Обработчик клика по карте
       map.events.add('click', (e: any) => {
         const coords = e.get('coords')
         this.setSingleMarker({ lat: coords[0], lng: coords[1] })
       })
+      
+      // Обработчик изменения координат через store (например, при поиске адреса)
+      store.on('coordinates-change', (coords: Coordinates) => {
+        console.log('[MarkersPlugin] Получены новые координаты из store:', coords)
+        if (coords) {
+          this.setSingleMarker(coords)
+        }
+      })
     }
+    
     store.on('markers-add', this.addMarker.bind(this))
     store.on('markers-remove', this.removeMarker.bind(this))
     store.on('markers-clear', this.clearMarkers.bind(this))
   }
 
   setSingleMarker(coords: Coordinates) {
+    console.log('[MarkersPlugin] Установка маркера на координаты:', coords)
+    
+    // Удаляем старый маркер если есть
     if (this.singleMarker) {
       this.map.geoObjects.remove(this.singleMarker)
+      this.singleMarker = null
     }
+    
+    // Создаем новый маркер
     this.singleMarker = new ymaps.Placemark(
       [coords.lat, coords.lng],
       {
@@ -44,6 +61,8 @@ export class MarkersPlugin implements MapPlugin {
         draggable: this.options.draggable
       }
     )
+    
+    // Добавляем обработчик перетаскивания
     if (this.options.draggable) {
       this.singleMarker.events.add('dragend', () => {
         const newCoords = this.singleMarker.geometry.getCoordinates()
@@ -52,8 +71,21 @@ export class MarkersPlugin implements MapPlugin {
         this.store?.emit('marker-moved', coordinates)
       })
     }
+    
+    // Добавляем маркер на карту
     this.map.geoObjects.add(this.singleMarker)
-    this.store?.setCoordinates(coords)
+    
+    // Форсируем перерисовку карты
+    if (this.map.container) {
+      this.map.container.fitToViewport()
+    }
+    
+    console.log('[MarkersPlugin] Маркер добавлен на карту')
+    
+    // Обновляем координаты в store (но не эмитим событие чтобы избежать цикла)
+    if (this.store) {
+      this.store.coordinates = coords
+    }
   }
 
   addMarker(marker: MapMarker) {
