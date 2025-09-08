@@ -15,8 +15,10 @@ export interface PhotoUploadProps {
   maxFiles?: number
   errors?: Record<string, string>
   isLoading?: boolean
+  forceValidation?: boolean
 }
 
 export interface PhotoUploadEmits {
   'update:photos': [photos: Photo[]]
+  'clear-force-validation': []
 }

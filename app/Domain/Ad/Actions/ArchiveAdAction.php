@@ -35,7 +35,7 @@ class ArchiveAdAction
                 ];
             }
 
-            // Проверяем статус
+            // Проверяем статус - можно архивировать из любого статуса, кроме уже архивированного
             if ($ad->status === AdStatus::ARCHIVED->value) {
                 return [
                     'success' => false,
@@ -43,12 +43,12 @@ class ArchiveAdAction
                 ];
             }
 
-            if (!in_array($ad->status, [AdStatus::ACTIVE->value, AdStatus::DRAFT->value])) {
-                return [
-                    'success' => false,
-                    'message' => 'Невозможно архивировать объявление в текущем статусе',
-                ];
-            }
+            // Логируем текущий статус для отладки
+            Log::info('Archiving ad with status', [
+                'ad_id' => $ad->id,
+                'current_status' => $ad->status,
+                'user_id' => $userId,
+            ]);
 
             // Архивируем через репозиторий
             $this->adRepository->updateAd($ad, [

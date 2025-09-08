@@ -6,10 +6,13 @@
         :key="option.value"
         :model-value="localClients.includes(option.value)"
         :label="option.label"
+        :error="showError && !hasSelection"
         @update:modelValue="toggleClient(option.value, $event)"
       />
     </div>
-    <div v-if="errors.clients" class="error-message">{{ errors.clients }}</div>
+    <div v-if="showError && !hasSelection" class="text-sm text-red-600 mt-2">
+      Выберите, с какими клиентами работаете
+    </div>
   </div>
 </template>
 
@@ -19,11 +22,21 @@ import BaseCheckbox from '@/src/shared/ui/atoms/BaseCheckbox/BaseCheckbox.vue'
 
 const props = defineProps({
   clients: { type: Array, default: () => [] },
-  errors: { type: Object, default: () => ({}) }
+  errors: { type: Object, default: () => ({}) },
+  forceValidation: { type: Boolean, default: false }
 })
 
-const emit = defineEmits(['update:clients'])
+const emit = defineEmits(['update:clients', 'clearForceValidation'])
 const localClients = ref([...props.clients])
+
+// Состояние для валидации
+const touched = ref(false)
+
+// Проверка наличия выбора
+const hasSelection = computed(() => localClients.value.length > 0)
+
+// Показывать ошибку если поле тронуто, есть ошибка от родителя или принудительная валидация
+const showError = computed(() => touched.value || !!props.errors?.clients || props.forceValidation)
 
 // Опции для чекбоксов
 const clientOptions = computed(() => [
@@ -37,6 +50,8 @@ watch(() => props.clients, (val) => {
 })
 
 const toggleClient = (value, checked) => {
+  touched.value = true // Помечаем что поле тронуто
+  
   if (checked) {
     if (!localClients.value.includes(value)) {
       localClients.value.push(value)
@@ -48,6 +63,11 @@ const toggleClient = (value, checked) => {
     }
   }
   emit('update:clients', localClients.value)
+  
+  // Сбрасываем флаг принудительной валидации если выбран хотя бы один клиент
+  if (props.forceValidation && localClients.value.length > 0) {
+    emit('clearForceValidation')
+  }
 }
 </script>
 

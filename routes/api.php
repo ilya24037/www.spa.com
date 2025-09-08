@@ -8,6 +8,8 @@ use App\Application\Http\Controllers\SearchController;
 use App\Application\Http\Controllers\MasterController;
 use App\Application\Http\Controllers\FavoriteController;
 use App\Application\Http\Controllers\Api\ReviewController;
+use App\Application\Http\Controllers\Api\GeoLocationController;
+use App\Http\Controllers\Api\YandexGeocodeController;
 
 Route::middleware('api')->group(function () {
     // Тестовый маршрут
@@ -122,6 +124,15 @@ Route::middleware('api')->group(function () {
     Route::get('/search/similar/{id}', [SearchController::class, 'similar']);
     Route::post('/search/geo', [SearchController::class, 'geo']);
     Route::get('/search/export', [SearchController::class, 'export']);
+    
+    // =================== ГЕОЛОКАЦИЯ ===================
+    // Определение местоположения по IP адресу
+    Route::get('/geo/detect-country', [GeoLocationController::class, 'detectCountry']);
+    
+    // =================== YANDEX GEOCODE API ===================
+    // Подсказки адресов через Geocoder (бесплатная альтернатива Suggest API)
+    Route::get('/yandex/geocode/suggest', [YandexGeocodeController::class, 'suggest']);
+    Route::post('/yandex/geocode', [YandexGeocodeController::class, 'geocode']);
 
     // Защищенные API
     Route::middleware('auth:sanctum')->group(function () {

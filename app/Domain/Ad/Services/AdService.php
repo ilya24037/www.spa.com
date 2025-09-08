@@ -198,7 +198,7 @@ class AdService
      */
     public function restore(Ad $ad): Ad
     {
-        return $this->adRepository->update($ad, [
+        return $this->adRepository->updateAd($ad, [
             'status' => AdStatus::ACTIVE->value,
             'archived_at' => null
         ]);

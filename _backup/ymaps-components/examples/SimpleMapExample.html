@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Простой пример Yandex Maps компонентов</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .map-container {
+            width: 100%;
+            height: 500px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            background: #007bff;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        button.danger {
+            background: #dc3545;
+        }
+        
+        button.danger:hover {
+            background: #c82333;
+        }
+        
+        button.success {
+            background: #28a745;
+        }
+        
+        button.success:hover {
+            background: #218838;
+        }
+        
+        .info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .info h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .stat-card {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+        }
+        
+        .stat-card h4 {
+            margin: 0 0 10px 0;
+            color: #6c757d;
+            font-size: 14px;
+            font-weight: normal;
+        }
+        
+        .stat-card .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #212529;
+        }
+        
+        .log {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .log-item {
+            padding: 5px 0;
+            border-bottom: 1px solid #f1f3f5;
+            font-size: 14px;
+            color: #495057;
+        }
+        
+        .log-item:last-child {
+            border-bottom: none;
+        }
+        
+        .log-item .time {
+            color: #868e96;
+            margin-right: 10px;
+        }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 500px;
+            color: #6c757d;
+            font-size: 18px;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗺️ Простой пример использования Yandex Maps компонентов</h1>
+        
+        <div class="info">
+            <h3>📖 Описание</h3>
+            <p>Это демонстрация базового использования извлеченных компонентов Yandex Maps без фреймворков.</p>
+            <p>Используются модули: YMapsCore, Placemark, Balloon, Clusterer, MapBehaviors</p>
+        </div>
+        
+        <div class="controls">
+            <button onclick="addMarkers(10)">Добавить 10 меток</button>
+            <button onclick="addMarkers(50)">Добавить 50 меток</button>
+            <button onclick="clearMarkers()" class="danger">Очистить все</button>
+            <button onclick="toggleClustering()" class="success">Вкл/Выкл кластеризацию</button>
+            <button onclick="toggleDragging()">Вкл/Выкл перетаскивание</button>
+            <button onclick="showBalloon()">Показать Balloon</button>
+            <button onclick="centerMap()">Центрировать</button>
+            <button onclick="fitAllMarkers()">Показать все метки</button>
+        </div>
+        
+        <div id="map" class="map-container">
+            <div class="loading">Загрузка карты...</div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <h4>Всего меток</h4>
+                <div class="value" id="marker-count">0</div>
+            </div>
+            <div class="stat-card">
+                <h4>Кластеризация</h4>
+                <div class="value" id="clustering-status">Выкл</div>
+            </div>
+            <div class="stat-card">
+                <h4>Текущий зум</h4>
+                <div class="value" id="current-zoom">10</div>
+            </div>
+            <div class="stat-card">
+                <h4>Перетаскивание</h4>
+                <div class="value" id="drag-status">Вкл</div>
+            </div>
+        </div>
+        
+        <h3>📊 Лог событий</h3>
+        <div class="log" id="event-log">
+            <div class="log-item">
+                <span class="time">--:--:--</span>
+                События будут отображаться здесь...
+            </div>
+        </div>
+    </div>
+
+    <!-- Подключаем модули -->
+    <script type="module">
+        import YMapsCore from '../core/YMapsCore.js'
+        import MapBehaviors from '../behaviors/MapBehaviors.js'
+        import Placemark from '../modules/Placemark/Placemark.js'
+        import Balloon from '../modules/Balloon/Balloon.js'
+        import Clusterer from '../modules/Clusterer/Clusterer.js'
+        
+        // Глобальные переменные
+        let map = null
+        let mapsCore = null
+        let behaviors = null
+        let clusterer = null
+        let balloon = null
+        let markers = []
+        let useClusterin
+g = false
+        let isDraggingEnabled = true
+        
+        // Инициализация карты
+        async function initMap() {
+            try {
+                logEvent('Инициализация карты...')
+                
+                // Создаем ядро системы
+                mapsCore = new YMapsCore({
+                    apiKey: '', // Укажите ваш API ключ
+                    lang: 'ru_RU',
+                    coordorder: 'latlong'
+                })
+                
+                // Загружаем API
+                await mapsCore.loadAPI()
+                logEvent('API загружен')
+                
+                // Создаем карту
+                const mapContainer = document.getElementById('map')
+                mapContainer.innerHTML = '' // Очищаем loading
+                
+                map = await mapsCore.createMap('map', {
+                    center: [55.753994, 37.622093],
+                    zoom: 10,
+                    controls: ['zoomControl', 'fullscreenControl']
+                })
+                
+                logEvent('Карта создана')
+                
+                // Создаем менеджер поведений
+                behaviors = new MapBehaviors(map, {
+                    drag: true,
+                    dblClickZoom: true,
+                    scrollZoom: true,
+                    multiTouch: true
+                })
+                
+                logEvent('Менеджер поведений создан')
+                
+                // Создаем balloon
+                balloon = new Balloon(map, {
+                    closeButton: true,
+                    autoPan: true,
+                    maxWidth: 300
+                })
+                
+                // Слушаем события карты
+                map.events.add('boundschange', (e) => {
+                    const zoom = Math.round(e.get('newZoom'))
+                    document.getElementById('current-zoom').textContent = zoom
+                })
+                
+                // Добавляем начальные метки
+                addMarkers(5)
+                
+                logEvent('Инициализация завершена')
+                
+            } catch (error) {
+                console.error('Ошибка инициализации:', error)
+                showError('Ошибка инициализации карты: ' + error.message)
+            }
+        }
+        
+        // Добавление меток
+        window.addMarkers = function(count) {
+            const center = map.getCenter()
+            const newMarkers = []
+            
+            for (let i = 0; i < count; i++) {
+                const lat = center[0] + (Math.random() - 0.5) * 0.2
+                const lng = center[1] + (Math.random() - 0.5) * 0.2
+                
+                const placemark = new Placemark(
+                    [lat, lng],
+                    {
+                        balloonContent: `
+                            <div style="padding: 10px;">
+                                <h4>Метка ${markers.length + i + 1}</h4>
+                                <p>Координаты: ${lat.toFixed(4)}, ${lng.toFixed(4)}</p>
+                            </div>
+                        `,
+                        hintContent: `Метка ${markers.length + i + 1}`
+                    },
+                    {
+                        preset: 'islands#blueIcon',
+                        draggable: false
+                    }
+                )
+                
+                // Добавляем обработчик клика
+                placemark.on('click', (e) => {
+                    logEvent(`Клик по метке ${markers.length + i + 1}`)
+                })
+                
+                newMarkers.push(placemark)
+            }
+            
+            if (useClustering && clusterer) {
+                clusterer.add(newMarkers)
+            } else {
+                newMarkers.forEach(pm => pm.addToMap(map))
+            }
+            
+            markers.push(...newMarkers)
+            updateMarkerCount()
+            logEvent(`Добавлено ${count} меток`)
+        }
+        
+        // Очистка меток
+        window.clearMarkers = function() {
+            if (clusterer) {
+                clusterer.removeAll()
+            } else {
+                markers.forEach(pm => pm.removeFromMap())
+            }
+            
+            markers = []
+            updateMarkerCount()
+            logEvent('Все метки удалены')
+        }
+        
+        // Переключение кластеризации
+        window.toggleClustering = function() {
+            useClustering = !useClustering
+            
+            if (useClustering) {
+                // Создаем кластеризатор
+                if (!clusterer) {
+                    clusterer = new Clusterer(map, {
+                        preset: 'islands#blueClusterIcons',
+                        gridSize: 60,
+                        minClusterSize: 2
+                    })
+                }
+                
+                // Удаляем метки с карты
+                markers.forEach(pm => pm.removeFromMap())
+                
+                // Добавляем в кластеризатор
+                clusterer.add(markers)
+                
+            } else {
+                // Удаляем из кластеризатора
+                if (clusterer) {
+                    clusterer.removeAll()
+                }
+                
+                // Добавляем метки на карту
+                markers.forEach(pm => pm.addToMap(map))
+            }
+            
+            document.getElementById('clustering-status').textContent = useClustering ? 'Вкл' : 'Выкл'
+            logEvent(`Кластеризация ${useClustering ? 'включена' : 'отключена'}`)
+        }
+        
+        // Переключение перетаскивания
+        window.toggleDragging = function() {
+            isDraggingEnabled = !isDraggingEnabled
+            
+            if (isDraggingEnabled) {
+                behaviors.enableDrag()
+            } else {
+                behaviors.disableDrag()
+            }
+            
+            document.getElementById('drag-status').textContent = isDraggingEnabled ? 'Вкл' : 'Выкл'
+            logEvent(`Перетаскивание ${isDraggingEnabled ? 'включено' : 'отключено'}`)
+        }
+        
+        // Показать balloon
+        window.showBalloon = async function() {
+            const center = map.getCenter()
+            
+            await balloon.open(
+                center,
+                `
+                    <div style="padding: 15px;">
+                        <h3 style="margin-top: 0;">🎈 Пример Balloon</h3>
+                        <p>Это демонстрация компонента Balloon</p>
+                        <p><strong>Центр карты:</strong><br>
+                        ${center[0].toFixed(4)}, ${center[1].toFixed(4)}</p>
+                        <p><strong>Текущий зум:</strong> ${map.getZoom()}</p>
+                        <button onclick="balloon.close()" style="
+                            padding: 5px 10px;
+                            background: #007bff;
+                            color: white;
+                            border: none;
+                            border-radius: 4px;
+                            cursor: pointer;
+                        ">Закрыть</button>
+                    </div>
+                `
+            )
+            
+            logEvent('Balloon открыт')
+        }
+        
+        // Центрировать карту
+        window.centerMap = function() {
+            map.setCenter([55.753994, 37.622093], 10, {
+                duration: 500
+            })
+            logEvent('Карта центрирована')
+        }
+        
+        // Показать все метки
+        window.fitAllMarkers = function() {
+            if (markers.length === 0) {
+                logEvent('Нет меток для показа')
+                return
+            }
+            
+            if (useClustering && clusterer) {
+                clusterer.fitToViewport()
+            } else {
+                // Вычисляем границы
+                const bounds = markers.reduce((acc, marker) => {
+                    const pos = marker.getPosition()
+                    if (!acc) {
+                        return [[pos[0], pos[1]], [pos[0], pos[1]]]
+                    }
+                    return [
+                        [Math.min(acc[0][0], pos[0]), Math.min(acc[0][1], pos[1])],
+                        [Math.max(acc[1][0], pos[0]), Math.max(acc[1][1], pos[1])]
+                    ]
+                }, null)
+                
+                if (bounds) {
+                    map.setBounds(bounds, {
+                        checkZoomRange: true,
+                        zoomMargin: 50
+                    })
+                }
+            }
+            
+            logEvent('Карта масштабирована по меткам')
+        }
+        
+        // Обновление счетчика меток
+        function updateMarkerCount() {
+            document.getElementById('marker-count').textContent = markers.length
+        }
+        
+        // Логирование событий
+        function logEvent(message) {
+            const time = new Date().toLocaleTimeString('ru-RU')
+            const logContainer = document.getElementById('event-log')
+            
+            const logItem = document.createElement('div')
+            logItem.className = 'log-item'
+            logItem.innerHTML = `<span class="time">${time}</span>${message}`
+            
+            // Добавляем в начало
+            if (logContainer.firstChild) {
+                logContainer.insertBefore(logItem, logContainer.firstChild)
+            } else {
+                logContainer.innerHTML = ''
+                logContainer.appendChild(logItem)
+            }
+            
+            // Ограничиваем количество записей
+            while (logContainer.children.length > 20) {
+                logContainer.removeChild(logContainer.lastChild)
+            }
+        }
+        
+        // Показ ошибки
+        function showError(message) {
+            const container = document.querySelector('.container')
+            const errorDiv = document.createElement('div')
+            errorDiv.className = 'error'
+            errorDiv.textContent = message
+            container.insertBefore(errorDiv, container.firstChild)
+        }
+        
+        // Запуск при загрузке страницы
+        document.addEventListener('DOMContentLoaded', initMap)
+        
+        // Экспортируем для использования в консоли
+        window.mapComponents = {
+            map,
+            mapsCore,
+            behaviors,
+            clusterer,
+            balloon,
+            markers
+        }
+    </script>
+</body>
+</html>

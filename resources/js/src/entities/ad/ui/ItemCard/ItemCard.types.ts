@@ -25,7 +25,7 @@ export interface AdItem {
   name: string
   title?: string
   description?: string
-  status: 'active' | 'draft' | 'inactive' | 'pending' | 'archive' | 'old'
+  status: 'active' | 'draft' | 'inactive' | 'pending' | 'archived' | 'old' | 'waiting_payment'
   photos?: ItemPhoto[] | string[]
   photo?: string
   price?: number | ItemPrice
@@ -47,6 +47,7 @@ export interface AdItem {
 export interface ItemCardEmits {
   (e: 'item-updated', itemId: number, data: any): void
   (e: 'item-deleted', itemId: number): void
+  (e: 'item-error', itemId: number, message: string): void
   (e: 'pay', itemId: number): void
   (e: 'promote', itemId: number): void
   (e: 'edit', itemId: number): void
@@ -54,4 +55,5 @@ export interface ItemCardEmits {
   (e: 'delete', itemId: number): void
   (e: 'mark-irrelevant', itemId: number): void
   (e: 'book', itemId: number): void
+  (e: 'restore', itemId: number): void
 }

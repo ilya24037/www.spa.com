@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="address-input">
     <!-- Скрытый label для доступности -->
     <label v-if="label" :for="inputId" class="sr-only">{{ label }}</label>
@@ -247,39 +247,80 @@ const getSuggestions = async (query: string): Promise<Suggestion[]> => {
   }
 
   try {
+    // Проверяем, что ymaps.geocode существует
+    if (!window.ymaps.geocode) {
+      return []
+    }
+    
     // Определяем тип поиска: если есть запятая и цифры, то ищем дома
     const hasCommaAndNumbers = query.includes(',') && /\d/.test(query)
     const searchKind = hasCommaAndNumbers ? 'house' : 'locality'
     
+    // Добавляем префикс для поиска в России (только для городов, не для адресов)
+    const isSearchingInRussia = props.prioritizeCountry === 'Russia' || userCountry.value === 'Россия'
+    const searchQuery = isSearchingInRussia && !query.includes(',') && !hasCommaAndNumbers
+      ? `Россия, ${query}` 
+      : query
+    
     // Получаем результаты для приоритетной страны и глобальные
     const [priorityResults, globalResults] = await Promise.all([
-      // Поиск в приоритетной стране
-      window.ymaps.geocode(query, { 
+      // Поиск в приоритетной стране с явным указанием страны
+      window.ymaps.geocode(searchQuery, { 
         results: hasCommaAndNumbers ? 5 : 3,
         kind: searchKind,
+        strictBounds: false,
         boundedBy: props.prioritizeCountry === 'Russia' || userCountry.value === 'Россия' 
-          ? [[41.151416, 19.607544], [81.857361, 180.0]] // Границы России
+          ? [[36.0, 19.0], [82.0, 180.0]] // Исправленные границы России
           : undefined
       }),
-      // Глобальный поиск
+      // Глобальный поиск без префикса
       window.ymaps.geocode(query, { 
         results: hasCommaAndNumbers ? 7 : 5,
         kind: searchKind
       })
     ])
     
+    // Проверяем результаты
+    
     const suggestions: Suggestion[] = []
     const addedAddresses = new Set<string>()
     
     // Обрабатываем результаты приоритетного поиска
     const priorityGeoObjects = priorityResults.geoObjects
+    
+    // ВРЕМЕННАЯ ОТЛАДКА
+    if (query === 'пенз' || query === 'Пенз') {
+      console.warn('[DEBUG] Ищем Пензу. Количество результатов:', priorityGeoObjects.getLength())
+      console.warn('[DEBUG] searchQuery был:', searchQuery)
+      for (let j = 0; j < priorityGeoObjects.getLength(); j++) {
+        const obj = priorityGeoObjects.get(j)
+        const address = obj.getAddressLine()
+        const country = obj.getCountry()
+        const localities = obj.getLocalities()
+        console.warn(`[DEBUG] Результат ${j}:`)
+        console.warn('  - Адрес:', address)
+        console.warn('  - Страна:', country)
+        console.warn('  - Населенные пункты:', localities)
+        console.warn('  - Тип:', obj.getKind ? obj.getKind() : 'unknown')
+      }
+    }
+    
     for (let i = 0; i < priorityGeoObjects.getLength(); i++) {
       const geoObject = priorityGeoObjects.get(i)
+      
+      
       const name = geoObject.getAddressLine()
       const country = geoObject.getCountry()
       const administrativeArea = geoObject.getAdministrativeAreas()
       
-      if (!addedAddresses.has(name)) {
+      // ОТЛАДКА: проверяем что приходит в name
+      if ((query === 'пенз' || query === 'Пенз') && i === 0) {
+        console.warn('[DEBUG] Первый name из API:', name)
+        console.warn('[DEBUG] Тип name:', typeof name)
+      }
+      
+      // Проверяем, что адрес не содержит странные пути к файлам
+      if (!addedAddresses.has(name) && !name.includes('\\') && !name.includes('C:')) {
         let description = ''
         if (hasCommaAndNumbers) {
           // Для домов показываем город в описании
@@ -293,12 +334,16 @@ const getSuggestions = async (query: string): Promise<Suggestion[]> => {
           }
         }
         
+        // Приоритет для российских результатов
+        const isRussian = country === 'Россия' || country === 'Russia' || 
+                         name.includes('Россия') || description.includes('Россия')
+        
         suggestions.push({
           displayName: name,
           description: description,
           value: name,
           country: country,
-          priority: country === props.prioritizeCountry || country === userCountry.value ? 1 : 2
+          priority: isRussian ? 1 : 3
         })
         
         addedAddresses.add(name)
@@ -314,7 +359,8 @@ const getSuggestions = async (query: string): Promise<Suggestion[]> => {
       const country = geoObject.getCountry()
       const administrativeArea = geoObject.getAdministrativeAreas()
       
-      if (!addedAddresses.has(name)) {
+      // Проверяем, что адрес не содержит странные пути к файлам
+      if (!addedAddresses.has(name) && !name.includes('\\') && !name.includes('C:')) {
         let description = ''
         if (hasCommaAndNumbers) {
           // Для домов показываем город в описании
@@ -328,12 +374,16 @@ const getSuggestions = async (query: string): Promise<Suggestion[]> => {
           }
         }
         
+        // Приоритет для российских результатов
+        const isRussian = country === 'Россия' || country === 'Russia' || 
+                         name.includes('Россия') || description.includes('Россия')
+        
         suggestions.push({
           displayName: name,
           description: description,
           value: name,
           country: country,
-          priority: country === props.prioritizeCountry || country === userCountry.value ? 1 : 2
+          priority: isRussian ? 1 : 3
         })
         
         addedAddresses.add(name)
@@ -341,7 +391,20 @@ const getSuggestions = async (query: string): Promise<Suggestion[]> => {
     }
     
     // Сортируем по приоритету (сначала приоритетная страна)
-    return suggestions.sort((a, b) => (a.priority || 2) - (b.priority || 2))
+    const sorted = suggestions.sort((a, b) => (a.priority || 2) - (b.priority || 2))
+    
+    // ВРЕМЕННАЯ ОТЛАДКА финального результата
+    if (query === 'пенз' || query === 'Пенз') {
+      console.warn('[DEBUG] Финальные suggestions:', sorted.map(s => ({
+        displayName: s.displayName,
+        value: s.value,
+        description: s.description,
+        country: s.country,
+        priority: s.priority
+      })))
+    }
+    
+    return sorted
     
   } catch (error) {
     console.error('Ошибка получения подсказок:', error)
@@ -377,6 +440,13 @@ const updateSuggestions = async (query: string) => {
   // Задержка 300ms для уменьшения количества запросов к API
   suggestionTimeout.value = setTimeout(async () => {
     const newSuggestions = await getSuggestions(query)
+    
+    // ВРЕМЕННАЯ ОТЛАДКА
+    if (query === 'пенз' || query === 'Пенз') {
+      console.warn('[DEBUG] newSuggestions от getSuggestions:', newSuggestions)
+      console.warn('[DEBUG] Устанавливаем suggestions.value')
+    }
+    
     suggestions.value = newSuggestions
     showSuggestions.value = newSuggestions.length > 0
     selectedIndex.value = -1
@@ -385,6 +455,14 @@ const updateSuggestions = async (query: string) => {
 
 // Выбор подсказки
 const selectSuggestion = (suggestion: Suggestion) => {
+  // ВРЕМЕННАЯ ОТЛАДКА
+  console.warn('[DEBUG] Выбрана подсказка:', {
+    displayName: suggestion.displayName,
+    value: suggestion.value,
+    description: suggestion.description,
+    country: suggestion.country
+  })
+  
   localValue.value = suggestion.value
   
   // Немедленно скрываем подсказки
@@ -438,6 +516,12 @@ const handleKeydown = (event: KeyboardEvent) => {
 
 // Следим за изменениями props
 watch(() => props.modelValue, (newValue) => {
+  // ВРЕМЕННАЯ ОТЛАДКА
+  if (newValue && newValue.includes('\\')) {
+    console.error('[DEBUG] ВНИМАНИЕ! modelValue содержит путь:', newValue)
+    console.trace('[DEBUG] Стек вызовов modelValue:')
+  }
+  
   localValue.value = newValue
 })
 
@@ -450,6 +534,12 @@ watch(() => props.error, (newError) => {
 
 // Обработчики
 const handleInput = () => {
+  // ВРЕМЕННАЯ ОТЛАДКА
+  if (localValue.value && localValue.value.includes('\\')) {
+    console.error('[DEBUG] ВНИМАНИЕ! В поле попал путь к файлу:', localValue.value)
+    console.trace('[DEBUG] Стек вызовов:')
+  }
+  
   searchStatus.value = ''
   emit('update:modelValue', localValue.value)
   

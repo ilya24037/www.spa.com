@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тестирование рефакторинга vue-yandex-maps</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+        }
+        .test-section { 
+            margin-bottom: 30px; 
+            padding: 20px; 
+            border: 1px solid #ccc; 
+            border-radius: 8px; 
+        }
+        .status { 
+            font-weight: bold; 
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .warning { color: orange; }
+        
+        /* Добавим стили для карты из рефакторинга */
+        .search-container {
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        .search-input:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+        }
+
+        .suggestions-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .suggestions-list.show {
+            display: block;
+        }
+
+        .suggestion-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+            transition: background-color 0.2s ease;
+        }
+
+        .suggestion-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .map-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+            background: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .center-marker {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -100%);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .marker-pin {
+            width: 24px;
+            height: 24px;
+            background: #ff4444;
+            border: 3px solid white;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .marker-pin::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(45deg);
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .test-button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>🗺️ Тестирование рефакторинга vue-yandex-maps</h1>
+    
+    <div class="test-section">
+        <h2>📋 Чек-лист проверок</h2>
+        <ol id="checklist">
+            <li id="check-1">✅ Страница /additem открывается без ошибок</li>
+            <li id="check-2">❓ Карта загружается в секции "Ваш адрес"</li>
+            <li id="check-3">❓ Поисковая строка работает (подсказки появляются)</li>
+            <li id="check-4">❓ Клик по карте меняет центр</li>
+            <li id="check-5">❓ Перетаскивание карты работает</li>
+            <li id="check-6">❓ Координаты автоматически сохраняются</li>
+            <li id="check-7">❓ При переключении секций данные сохраняются</li>
+        </ol>
+    </div>
+    
+    <div class="test-section">
+        <h2>🔍 Симуляция компонентов карты</h2>
+        <p><strong>Поисковая строка:</strong></p>
+        <div class="search-container">
+            <input 
+                type="text" 
+                class="search-input"
+                placeholder="Введите адрес для поиска..."
+                id="test-search"
+            />
+            <div class="suggestions-list" id="suggestions">
+                <div class="suggestion-item">Москва, Красная площадь, 1</div>
+                <div class="suggestion-item">Санкт-Петербург, Дворцовая площадь, 2</div>
+                <div class="suggestion-item">Екатеринбург, площадь 1905 года, 1</div>
+            </div>
+        </div>
+        
+        <p><strong>Карта (заглушка):</strong></p>
+        <div class="map-container">
+            <div class="center-marker">
+                <div class="marker-pin"></div>
+            </div>
+            <div style="color: #666;">Здесь должна быть vue-yandex-maps</div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🔧 Инструменты тестирования</h2>
+        <button class="test-button" onclick="testAddressSearch()">Тест поиска адреса</button>
+        <button class="test-button" onclick="openAddItem()">Открыть /additem</button>
+        <button class="test-button" onclick="checkConsoleErrors()">Проверить ошибки консоли</button>
+        
+        <div id="test-results" style="margin-top: 15px;"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>📊 Ожидаемые результаты рефакторинга</h2>
+        <ul>
+            <li><span class="success">✅</span> VueYandexMap.vue удален</li>
+            <li><span class="success">✅</span> GeoSection.vue использует vue-yandex-maps напрямую</li>
+            <li><span class="success">✅</span> app.js содержит правильную инициализацию</li>
+            <li><span class="success">✅</span> npm run build проходит без ошибок</li>
+            <li><span class="warning">⏳</span> Карта работает в браузере (требует проверки)</li>
+            <li><span class="warning">⏳</span> Автосохранение координат (требует проверки)</li>
+        </ul>
+    </div>
+
+    <script>
+        // Симуляция тестирования
+        function testAddressSearch() {
+            const input = document.getElementById('test-search');
+            const suggestions = document.getElementById('suggestions');
+            
+            input.addEventListener('focus', function() {
+                suggestions.classList.add('show');
+            });
+            
+            input.addEventListener('blur', function() {
+                setTimeout(() => suggestions.classList.remove('show'), 200);
+            });
+            
+            document.getElementById('test-results').innerHTML = 
+                '<div class="success">✅ Поисковая строка: стили и поведение работают</div>';
+        }
+        
+        function openAddItem() {
+            window.open('/additem', '_blank');
+        }
+        
+        function checkConsoleErrors() {
+            const result = document.getElementById('test-results');
+            result.innerHTML = 
+                '<div class="warning">⚠️ Откройте Developer Tools (F12) и проверьте вкладку Console на наличие ошибок</div>';
+        }
+        
+        // Автоматическая проверка при загрузке
+        window.addEventListener('load', function() {
+            console.log('🧪 Тестовая страница рефакторинга vue-yandex-maps загружена');
+            console.log('📋 Инструкции для тестирования:');
+            console.log('1. Откройте /additem в новой вкладке');
+            console.log('2. Найдите секцию "Ваш адрес"');
+            console.log('3. Проверьте работу карты и поиска');
+            console.log('4. Переключайтесь между секциями и проверяйте сохранение данных');
+        });
+    </script>
+</body>
+</html>

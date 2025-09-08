@@ -61,8 +61,9 @@
 
     
     <!-- Ошибки -->
-    <div v-if="error" class="rounded-md bg-red-50 p-3">
-      <p class="text-sm text-red-800">{{ error }}</p>
+    <div v-if="error || validationError" class="rounded-md bg-red-50 p-3">
+      <p v-if="error" class="text-sm text-red-800">{{ error }}</p>
+      <p v-if="validationError" class="text-sm text-red-800">{{ validationError }}</p>
     </div>
     </section>
   </ErrorBoundary>
@@ -83,7 +84,8 @@ import type { PhotoUploadProps, PhotoUploadEmits, Photo } from '../model/types'
 const props = withDefaults(defineProps<PhotoUploadProps>(), {
   photos: () => [],
   maxFiles: 10,
-  isLoading: false
+  isLoading: false,
+  forceValidation: false
 })
 
 // Константы для PhotoUploadZone
@@ -126,6 +128,14 @@ const safePhotos = computed(() => {
 
 const safePhotosCount = computed(() => {
   return safePhotos.value.length
+})
+
+// Computed для показа валидационной ошибки
+const validationError = computed(() => {
+  if (props.forceValidation && safePhotosCount.value === 0) {
+    return 'Добавьте минимум одну фотографию'
+  }
+  return ''
 })
 
 const isLoading = computed(() => props.isLoading || isUploading.value)
@@ -190,6 +200,13 @@ const onDragDrop = (index: number) => {
 const onDragEnd = () => {
   handleDragEnd()
 }
+
+// Следим за добавлением фотографий для сброса валидации
+watch(() => safePhotosCount.value, (newCount) => {
+  if (props.forceValidation && newCount > 0) {
+    emit('clear-force-validation')
+  }
+})
 
 // Метод для открытия диалога выбора файлов
 const openFileDialog = () => {

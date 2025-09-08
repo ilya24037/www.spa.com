@@ -56,11 +56,17 @@ class AdStatusController extends Controller
     {
         $this->authorize('update', $ad);
 
-        $this->archiveAction->execute($ad);
+        $result = $this->archiveAction->execute($ad->id, auth()->id());
+
+        if (!$result['success']) {
+            return back()->withErrors([
+                'error' => $result['message']
+            ]);
+        }
 
         return redirect()
             ->route('profile.items.archive')
-            ->with('success', 'Объявление перемещено в архив');
+            ->with('success', $result['message']);
     }
 
     /**

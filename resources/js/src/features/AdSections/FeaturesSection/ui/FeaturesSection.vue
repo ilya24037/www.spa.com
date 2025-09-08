@@ -81,7 +81,7 @@ const emitFeatures = () => {
 
 <style scoped>
 .features-section {
-  background: white;
+
   border-radius: 8px;
   padding: 20px;
 }

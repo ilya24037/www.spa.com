@@ -1,4 +1,4 @@
-<!-- Р'Р°Р·РѕРІР°СЏ СЂР°РґРёРѕРєРЅРѕРїРєР° РІ СЃС‚РёР»Рµ РђРІРёС‚Рѕ -->
+<!-- Base Radio Component -->
 <template>
   <div 
     class="flex items-start cursor-pointer py-3 gap-3 select-none"
@@ -17,15 +17,17 @@
       :aria-describedby="description ? `${radioId}-description` : undefined"
       :aria-checked="isSelected"
       :required="required"
-      class="absolute w-px h-px p-0 -m-px overflow-hidden clip-rect-0 whitespace-nowrap border-0"
+      class="sr-only"
       @change="select"
     >
     <div 
-      class="w-5 h-5 border-2 rounded-full flex items-center justify-center transition-all duration-200 bg-white flex-shrink-0 cursor-pointer"
+      class="w-5 h-5 border-2 rounded-full flex items-center justify-center transition-all duration-200 flex-shrink-0 cursor-pointer"
       :class="{ 
         'border-gray-500': isSelected,
-        'border-gray-300 hover:border-gray-400': !isSelected && !disabled,
-        'cursor-not-allowed bg-gray-50 border-gray-300': disabled 
+        'border-gray-300 hover:border-gray-400': !isSelected && !disabled && !error,
+        'border-red-300 bg-red-50': !isSelected && error,
+        'cursor-not-allowed bg-gray-50 border-gray-300': disabled,
+        'bg-white': !error || isSelected
       }"
     >
       <div v-if="isSelected" class="w-2 h-2 bg-gray-500 rounded-full transition-all duration-200" />
@@ -78,6 +80,10 @@ const props = defineProps({
         default: false
     },
     required: {
+        type: Boolean,
+        default: false
+    },
+    error: {
         type: Boolean,
         default: false
     }

@@ -42,7 +42,7 @@ const emitAll = () => {
 </script>
 
 <style scoped>
-.promo-section { background: white; border-radius: 8px; padding: 20px; }
+.promo-section { border-radius: 8px; padding: 20px; }
 .form-group-title { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 16px; }
 .promo-fields { 
   display: grid;

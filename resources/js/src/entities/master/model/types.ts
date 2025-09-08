@@ -40,6 +40,11 @@ export interface Master {
   gallery?: MasterPhoto[]
   photo_placeholder?: string
   avatar_placeholder?: string
+  // Координаты для отображения на карте (поддержка разных форматов API)
+  lat?: number
+  lng?: number
+  latitude?: number  // альтернативное название из некоторых API
+  longitude?: number // альтернативное название из некоторых API
 }
 
 export interface MasterSchedule {

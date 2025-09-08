@@ -12,10 +12,11 @@
             label="Экспресс (30 мин)"
             placeholder="0"
             :min="0"
+            :clearable="true"
+            suffix="₽"
             @update:modelValue="updatePrices"
-          >
-            <template #suffix>₽</template>
-          </BaseInput>
+            class="max-w-[160px]"
+          />
         </div>
         <div class="price-item">
           <BaseInput
@@ -26,10 +27,12 @@
             placeholder="0"
             :min="0"
             :required="true"
+            :clearable="true"
+            :error="showPriceError ? 'Нужно заполнить цену за час в апартаментах и/или на выезд' : ''"
+            suffix="₽"
             @update:modelValue="updatePrices"
-          >
-            <template #suffix>₽</template>
-          </BaseInput>
+            class="max-w-[160px]"
+          />
         </div>
         <div class="price-item">
           <BaseInput
@@ -39,10 +42,11 @@
             label="2 часа"
             placeholder="0"
             :min="0"
+            :clearable="true"
+            suffix="₽"
             @update:modelValue="updatePrices"
-          >
-            <template #suffix>₽</template>
-          </BaseInput>
+            class="max-w-[160px]"
+          />
         </div>
         <div class="price-item">
           <BaseInput
@@ -52,10 +56,11 @@
             label="Ночь"
             placeholder="0"
             :min="0"
+            :clearable="true"
+            suffix="₽"
             @update:modelValue="updatePrices"
-          >
-            <template #suffix>₽</template>
-          </BaseInput>
+            class="max-w-[160px]"
+          />
         </div>
       </div>
     </div>
@@ -72,10 +77,11 @@
             label="Экспресс (30 мин)"
             placeholder="0"
             :min="0"
+            :clearable="true"
+            suffix="₽"
             @update:modelValue="updatePrices"
-          >
-            <template #suffix>₽</template>
-          </BaseInput>
+            class="max-w-[160px]"
+          />
         </div>
         <div class="price-item">
           <BaseInput
@@ -85,10 +91,11 @@
             label="1 час"
             placeholder="0"
             :min="0"
+            :clearable="true"
+            suffix="₽"
             @update:modelValue="updatePrices"
-          >
-            <template #suffix>₽</template>
-          </BaseInput>
+            class="max-w-[160px]"
+          />
         </div>
         <div class="price-item">
           <BaseInput
@@ -98,10 +105,11 @@
             label="2 часа"
             placeholder="0"
             :min="0"
+            :clearable="true"
+            suffix="₽"
             @update:modelValue="updatePrices"
-          >
-            <template #suffix>₽</template>
-          </BaseInput>
+            class="max-w-[160px]"
+          />
         </div>
         <div class="price-item">
           <BaseInput
@@ -111,25 +119,22 @@
             label="Ночь"
             placeholder="0"
             :min="0"
+            :clearable="true"
+            suffix="₽"
             @update:modelValue="updatePrices"
-          >
-            <template #suffix>₽</template>
-          </BaseInput>
+            class="max-w-[160px]"
+          />
         </div>
       </div>
-
     </div>
 
-    <!-- Ошибки валидации -->
-    <div v-if="errors.prices" class="error-message">
-      {{ errors.prices }}
-    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, watch, reactive, computed } from 'vue'
 import BaseInput from '@/src/shared/ui/atoms/BaseInput/BaseInput.vue'
+import BaseRadio from '@/src/shared/ui/atoms/BaseRadio/BaseRadio.vue'
 
 const props = defineProps({
   prices: {
@@ -145,15 +150,21 @@ const props = defineProps({
       outcall_night: null
     })
   },
+  startingPrice: {
+    type: String,
+    default: null
+  },
   errors: {
+    type: Object,
+    default: () => ({})
+  },
+  forceValidation: {
     type: Object,
     default: () => ({})
   }
 })
 
-const emit = defineEmits(['update:prices'])
-
-
+const emit = defineEmits(['update:prices', 'update:startingPrice', 'clearForceValidation'])
 
 // Хелпер для преобразования значения в булевое
 const toBoolean = (value) => {
@@ -200,6 +211,46 @@ watch(() => props.prices, (newPrices) => {
 const updatePrices = () => {
   emit('update:prices', { ...localPrices })
 }
+
+// Следим за заполнением поля "1 час в апартаментах" для сброса валидации
+watch(() => localPrices.apartments_1h, (newValue) => {
+  if (props.forceValidation?.apartments_1h && newValue && Number(newValue) > 0) {
+    emit('clearForceValidation', 'apartments_1h')
+  }
+})
+
+// Следим за заполнением поля "1 час выезд к клиенту" для сброса валидации
+watch(() => localPrices.outcall_1h, (newValue) => {
+  if (props.forceValidation?.outcall_1h && newValue && Number(newValue) > 0) {
+    emit('clearForceValidation', 'outcall_1h')
+  }
+})
+
+// Локальное состояние для начальной цены
+const localStartingPrice = ref(props.startingPrice)
+
+// Проверка заполненности хотя бы одного поля "1 час"
+const hasRequiredHourPrice = computed(() => {
+  const apartmentPrice = localPrices.apartments_1h && Number(localPrices.apartments_1h) > 0
+  const outcallPrice = localPrices.outcall_1h && Number(localPrices.outcall_1h) > 0
+  return apartmentPrice || outcallPrice
+})
+
+// Показывать общую ошибку если есть принудительная валидация и не заполнены цены
+const showPriceError = computed(() => {
+  return (props.forceValidation?.apartments_1h || props.forceValidation?.outcall_1h) && !hasRequiredHourPrice.value
+})
+
+// Следим за изменениями startingPrice
+watch(() => props.startingPrice, (newValue) => {
+  localStartingPrice.value = newValue
+}, { immediate: true })
+
+// Обновляем начальную цену
+const updateStartingPrice = (value) => {
+  localStartingPrice.value = value
+  emit('update:startingPrice', value)
+}
 </script>
 
 <style scoped>
@@ -210,7 +261,6 @@ const updatePrices = () => {
 }
 
 .pricing-block {
-  background: #f8f9fa;
   border-radius: 8px;
   padding: 20px;
 }
@@ -231,7 +281,7 @@ const updatePrices = () => {
 .price-item {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 .price-label {
@@ -340,10 +390,39 @@ const updatePrices = () => {
   margin-top: 8px;
 }
 
+/* Стили для начальной цены */
+.starting-price-section {
+  margin-top: 4px;
+}
+
+.starting-price-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+}
+
+.radio-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  align-items: center;
+}
+
+.radio-item {
+  display: flex;
+  justify-content: center;
+}
+
 /* Мобильная адаптация */
 @media (max-width: 640px) {
   .pricing-grid {
     grid-template-columns: 1fr 1fr;
+  }
+  
+  .radio-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
   }
   
   .radio-group {

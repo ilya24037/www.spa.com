@@ -89,6 +89,7 @@ return new class extends Migration
             $table->boolean('is_paid')->default(false);
             $table->timestamp('paid_at')->nullable();
             $table->timestamp('expires_at')->nullable();
+            $table->timestamp('archived_at')->nullable();
             
             // === СТАТИСТИКА ===
             $table->integer('views_count')->default(0);

@@ -200,7 +200,7 @@ const deselectAll = (questionId: string) => {
 
 <style scoped>
 .faq-section {
-  background: white;
+
   border-radius: 12px;
   padding: 24px;
   margin-bottom: 24px;

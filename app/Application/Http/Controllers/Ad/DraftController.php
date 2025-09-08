@@ -62,6 +62,11 @@ class DraftController extends Controller
             $data['prices'] = $prices;
         }
         
+        // Обработка начальной цены
+        if ($request->has('starting_price')) {
+            $data['starting_price'] = $request->starting_price ?: null;
+        }
+        
         // Логируем все входящие данные для отладки bikini_zone
         \Log::info("🔍 DraftController: Входящие данные для создания черновика", [
             'all_data' => $request->all(),
@@ -331,6 +336,23 @@ class DraftController extends Controller
     {
         try {
             $data = $request->all();
+            
+            // Обработка полей prices (они приходят как prices[key])
+            $prices = [];
+            foreach ($request->all() as $key => $value) {
+                if (str_starts_with($key, 'prices[')) {
+                    $fieldName = str_replace(['prices[', ']'], '', $key);
+                    $prices[$fieldName] = $value;
+                }
+            }
+            if (!empty($prices)) {
+                $data['prices'] = $prices;
+            }
+            
+            // Обработка начальной цены
+            if ($request->has('starting_price')) {
+                $data['starting_price'] = $request->starting_price ?: null;
+            }
             
             // 🔍 ДИАГНОСТИКА: Логируем все входящие данные
             \Log::info('🔍 DraftController: ВСЕ ВХОДЯЩИЕ ДАННЫЕ', [

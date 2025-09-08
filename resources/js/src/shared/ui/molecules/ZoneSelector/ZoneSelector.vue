@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="zone-selector">
     <button 
       @click="openModal"

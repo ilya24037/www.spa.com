@@ -31,8 +31,12 @@
       :class="{ 'active': isOpen, 'disabled': disabled }"
     >
       <div 
-        class="w-full px-4 py-3 pr-10 border-2 border-gray-300 rounded-lg bg-gray-50 cursor-pointer flex items-center justify-between min-h-[48px] transition-all duration-200 hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:bg-white disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-50"
-        :class="{ 'border-blue-500 bg-white rounded-b-none': isOpen }"
+        class="w-full px-3 py-1.5 pr-10 border-2 rounded-lg cursor-pointer flex items-center justify-between min-h-[40px] transition-all duration-200 hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:bg-white disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-50"
+        :class="[
+          isOpen ? 'border-blue-500 bg-white rounded-b-none' : '',
+          error && !isOpen ? 'border-red-300 bg-red-50' : '',
+          !error && !isOpen ? 'border-gray-300 bg-gray-50' : ''
+        ]"
         :tabindex="disabled ? -1 : 0"
         @click.stop="toggleDropdown"
         @keydown.enter="toggleDropdown"

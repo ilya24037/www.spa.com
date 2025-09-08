@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="metro-selector">
     <button 
       @click="openModal"

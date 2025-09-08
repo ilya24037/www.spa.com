@@ -1,5 +1,10 @@
 <template>
   <div class="services-module">
+    
+    <!-- Подсказка валидации -->
+    <div v-if="showServicesError" class="text-sm text-red-600 mb-3">
+      Выберите минимум одну услугу
+    </div>
 
     <div v-if="allowedCategories.length > 0 && allowedCategories.length < allCategories.length" class="category-filters mb-6">
       <div class="text-sm text-gray-700 mb-2">Доступные категории:</div>
@@ -101,10 +106,14 @@ const props = defineProps({
   errors: { 
     type: Object, 
     default: () => ({}) 
+  },
+  forceValidation: { 
+    type: Object, 
+    default: () => ({}) 
   }
 })
 
-const emit = defineEmits(['update:services'])
+const emit = defineEmits(['update:services', 'clearForceValidation'])
 
 const allCategories = servicesConfig.categories as Category[]
 
@@ -123,6 +132,25 @@ const localServices = reactive<Record<string, Record<string, ServiceData>>>({})
 
 // Состояние раскрытия дополнительных услуг
 const isAdditionalExpanded = ref(false)
+
+// Показывать ошибку валидации услуг
+const showServicesError = computed(() => {
+  return !!props.errors?.services || !!props.forceValidation?.services
+})
+
+// Подсчет общего количества выбранных услуг
+const totalSelectedServices = computed(() => {
+  let count = 0
+  filteredCategories.value.forEach(category => {
+    const categoryServices = localServices[category.id]
+    if (categoryServices) {
+      Object.values(categoryServices).forEach(service => {
+        if (service?.enabled) count++
+      })
+    }
+  })
+  return count
+})
 
 // Основная категория (Популярные услуги)
 const mainCategory = computed(() => {
@@ -192,6 +220,13 @@ watch(() => props.services, (val) => {
 const emitAll = () => {
   emit('update:services', JSON.parse(JSON.stringify(localServices)))
 }
+
+// Автосброс валидации при выборе услуги
+watch(() => totalSelectedServices.value, (newCount) => {
+  if (newCount > 0 && showServicesError.value) {
+    emit('clearForceValidation')
+  }
+}, { immediate: true })
 
 // Инициализация
 // 1. Сначала инициализируем структуру всех категорий

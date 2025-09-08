@@ -7,7 +7,7 @@
   ]">
     
     <!-- Обертка для ограничения ширины всего контента -->
-    <div class="max-w-[1400px] mx-auto w-full flex flex-col min-h-screen px-4">
+    <div class="max-w-[1400px] mx-auto w-full flex flex-col min-h-screen px-4 bg-transparent">
       <!-- Header с отступами и закруглением как у Ozon -->
       <header v-if="!isAuthPage" class="sticky top-0 z-50 -mx-4 px-4 pb-4 header-sticky">
         <div class="bg-white rounded-b-[24px] shadow-lg border border-gray-100 overflow-hidden" style="box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);">
@@ -16,7 +16,7 @@
       </header>
       
       <!-- Main контент -->
-      <main class="flex-1">
+      <main class="flex-1 bg-transparent">
         <slot />
       </main>
       

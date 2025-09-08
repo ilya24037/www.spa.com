@@ -1,7 +1,8 @@
 <template>
   <Head title="Создание объявления" />
   
-  <div class="min-h-screen bg-gray-50">
+  <MainLayout>
+    <div>
     <div class="max-w-4xl mx-auto py-6 lg:py-8">
       <!-- Хлебные крошки в стиле Avito -->
       <nav class="flex items-center mb-6" aria-label="Breadcrumb">
@@ -36,7 +37,7 @@
       </nav>
       
       <!-- Основной контент -->
-      <div class="bg-white rounded-lg shadow-sm">
+      <div class="rounded-lg bg-transparent">
         <!-- Заголовок страницы -->
         <div class="px-6 py-4 border-b border-gray-200">
           <h1 class="text-2xl font-bold text-gray-900">Создание нового объявления</h1>
@@ -59,12 +60,14 @@
       </div>
     </div>
   </div>
+  </MainLayout>
 </template>
 
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
 import { onMounted } from 'vue'
 import AdForm from '@/src/features/ad-creation/ui/AdForm.vue'
+import MainLayout from '@/src/shared/layouts/MainLayout/MainLayout.vue'
 
 // Очищаем все старые данные из localStorage при монтировании
 onMounted(() => {

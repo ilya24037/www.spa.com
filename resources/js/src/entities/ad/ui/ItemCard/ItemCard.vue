@@ -35,6 +35,7 @@
             @delete="showDeleteModal = true"
             @mark-irrelevant="markIrrelevant"
             @book="bookItem"
+            @restore="restoreItem"
           />
         </div>
       </div>
@@ -72,6 +73,7 @@ const emit = defineEmits<ItemCardEmits>()
 
 // Состояние компонента
 const showDeleteModal = ref(false)
+const isArchiving = ref(false)
 
 // Вычисляемые свойства
 const itemUrl = computed(() => {
@@ -98,11 +100,80 @@ const editItem = () => {
   emit('edit', props.item.id)
 }
 
-const deactivateItem = () => {
-  router.post(`/ads/${props.item.id}/deactivate`, {}, {
+/**
+ * Восстановление объявления из архива
+ * Использует существующий backend endpoint и паттерн из deactivateItem
+ * Принцип KISS: минимальные изменения, максимальная надежность
+ */
+const restoreItem = () => {
+  // Frontend валидация входных данных (security by default из CLAUDE.md)
+  if (!props.item.id || typeof props.item.id !== 'number') {
+    console.error('Некорректный ID объявления:', props.item.id)
+    return
+  }
+  
+  // Проверяем что объявление действительно в архиве
+  if (props.item.status !== 'archived') {
+    console.warn(`Нельзя восстановить объявление со статусом: ${props.item.status}`)
+    return
+  }
+  
+  // API запрос с complete error handling (паттерн из deactivateItem)
+  router.post(`/ads/${props.item.id}/restore`, {}, {
+    preserveState: false,
+    preserveScroll: true,
     onSuccess: () => {
-      emit('item-updated', props.item.id, { status: 'inactive' })
+      emit('item-updated', props.item.id, { status: 'active' })
+      emit('restore', props.item.id)
+    },
+    onError: (errors) => {
+      console.error('Ошибка API при восстановлении:', errors)
+      emit('item-error', props.item.id, 'Не удалось восстановить объявление')
+    }
+  })
+}
+
+/**
+ * Архивация объявления через API с полной валидацией
+ * Реализует принцип KISS: простая логика с comprehensive error handling
+ * Следует цепочке данных: Component → API → Backend → Database → UI Update
+ */
+const deactivateItem = () => {
+  // Frontend валидация входных данных (security by default)
+  if (!props.item.id || typeof props.item.id !== 'number') {
+    console.error('Некорректный ID объявления:', props.item.id)
+    return
+  }
+  
+  // Проверяем бизнес-правила архивации (edge cases handling)
+  if (!['active', 'draft'].includes(props.item.status)) {
+    console.warn(`Нельзя архивировать объявление со статусом: ${props.item.status}`)
+    return
+  }
+  
+  // Предотвращаем повторные запросы (debouncing)
+  if (isArchiving.value) {
+    console.warn('Архивация уже выполняется, игнорируем повторный запрос')
+    return
+  }
+  
+  isArchiving.value = true
+  
+  // API запрос с complete error handling
+  router.post(`/ads/${props.item.id}/archive`, {}, {
+    preserveState: false,  // Обновляем состояние приложения
+    preserveScroll: true,  // UX: сохраняем позицию скролла
+    onSuccess: () => {
+      isArchiving.value = false
+      // Optimistic UI update - сразу обновляем интерфейс
+      emit('item-updated', props.item.id, { status: 'archived' })
       emit('deactivate', props.item.id)
+    },
+    onError: (errors) => {
+      isArchiving.value = false
+      console.error('Ошибка API при архивации:', errors)
+      // Production-ready error handling без debug alert
+      emit('item-error', props.item.id, 'Не удалось переместить в архив')
     }
   })
 }

@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Выбор адреса на карте</title>
+    
+    <!-- Yandex Maps API -->
+    <script 
+        src="https://api-maps.yandex.ru/2.1/?apikey=23ff8acc-835f-4e99-8b19-d33c5d346e18&lang=ru_RU"
+        onerror="console.error('❌ [AddressPicker] Ошибка загрузки Yandex Maps API'); showError('Ошибка загрузки карты. Проверьте подключение к интернету.');"
+        onload="console.log('✅ [AddressPicker] Yandex Maps API загружен')"
+    ></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .search-container {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            z-index: 1000;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        #addressSearch {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            outline: none;
+        }
+        
+        #addressSearch:focus {
+            border-color: #007bff;
+        }
+        
+        #map {
+            width: 100%;
+            height: 100vh;
+            min-height: 400px;
+            background: #f0f0f0;
+        }
+        
+        .center-marker {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 500;
+            width: 30px;
+            height: 30px;
+            background: #ff4444;
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        .center-marker::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+        }
+        
+        .error-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #ff4444;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            z-index: 1000;
+            max-width: 80%;
+        }
+        
+        .loading-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #007bff;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="search-container">
+        <input 
+            type="text" 
+            id="addressSearch" 
+            placeholder="Введите адрес для поиска..."
+            autocomplete="off"
+        >
+    </div>
+    
+    <div id="map"></div>
+    
+    <!-- Центральный маркер поверх карты -->
+    <div class="center-marker"></div>
+    
+    <script>
+        let myMap;
+        let geocoder;
+        let moveTimeout;
+        let isGeocoding = false;
+        let isProgrammaticMove = false;
+        let mapInitialized = false;
+        let apiLoadAttempts = 0;
+        const maxApiLoadAttempts = 50; // 5 секунд максимум
+        
+        console.log('🗺️ [AddressPicker] Инициализация карты...');
+        console.log('🔧 [AddressPicker] window.parent exists:', !!window.parent);
+        console.log('🔧 [AddressPicker] Current URL:', window.location.href);
+        
+        // Функция показа ошибки
+        function showError(message) {
+            const existingError = document.querySelector('.error-message');
+            if (existingError) {
+                existingError.remove();
+            }
+            
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+            document.body.appendChild(errorDiv);
+            
+            // Убираем ошибку через 10 секунд
+            setTimeout(() => {
+                if (errorDiv.parentNode) {
+                    errorDiv.remove();
+                }
+            }, 10000);
+        }
+        
+        // Функция показа загрузки
+        function showLoading(message) {
+            const existingLoading = document.querySelector('.loading-message');
+            if (existingLoading) {
+                existingLoading.remove();
+            }
+            
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'loading-message';
+            loadingDiv.textContent = message;
+            document.body.appendChild(loadingDiv);
+            
+            return loadingDiv;
+        }
+        
+        // Ждем загрузки Yandex Maps API
+        function waitForYandexMaps() {
+            apiLoadAttempts++;
+            
+            if (typeof ymaps === 'undefined') {
+                if (apiLoadAttempts === 1) {
+                    showLoading('Загрузка карты...');
+                }
+                
+                if (apiLoadAttempts >= maxApiLoadAttempts) {
+                    showError('Не удалось загрузить карту. Проверьте подключение к интернету и API ключ.');
+                    return;
+                }
+                
+                console.log('⏳ [AddressPicker] Ждем загрузки API... попытка', apiLoadAttempts);
+                setTimeout(waitForYandexMaps, 100);
+                return;
+            }
+            
+            console.log('✅ [AddressPicker] API загружен, инициализируем...');
+            
+            // Убираем сообщение о загрузке
+            const loadingDiv = document.querySelector('.loading-message');
+            if (loadingDiv) {
+                loadingDiv.remove();
+            }
+            
+            try {
+                ymaps.ready(init);
+            } catch (error) {
+                console.error('❌ [AddressPicker] Ошибка при вызове ymaps.ready:', error);
+                showError('Ошибка инициализации карты: ' + error.message);
+            }
+        }
+        
+        // Проверяем, загружен ли API при загрузке страницы
+        window.addEventListener('load', function() {
+            console.log('📄 [AddressPicker] Страница загружена');
+            if (typeof ymaps === 'undefined') {
+                console.log('⏳ [AddressPicker] API еще не загружен, ждем...');
+                waitForYandexMaps();
+            } else {
+                console.log('✅ [AddressPicker] API уже загружен');
+                ymaps.ready(init);
+            }
+        });
+        
+        function init() {
+            console.log('🚀 [AddressPicker] Создание карты...');
+            console.log('🔧 [AddressPicker] Элемент #map:', document.getElementById('map'));
+            console.log('🔧 [AddressPicker] Размеры элемента #map:', {
+                width: document.getElementById('map').offsetWidth,
+                height: document.getElementById('map').offsetHeight,
+                clientWidth: document.getElementById('map').clientWidth,
+                clientHeight: document.getElementById('map').clientHeight
+            });
+            
+            try {
+                // Создаем карту с центром в Москве (максимально упрощенные настройки)
+                myMap = new ymaps.Map('map', {
+                    center: [55.7558, 37.6176], // Москва
+                    zoom: 12
+                }, {
+                    suppressMapOpenBlock: true,
+                    yandexMapDisablePoiInteractivity: true,
+                    suppressObsoleteBrowserNotifier: true,
+                    suppressMapOpenBlock: true,
+                    yandexMapDisablePoiInteractivity: true
+                });
+                
+                // Принудительно обновляем карту сразу после создания
+                setTimeout(() => {
+                    if (myMap) {
+                        try {
+                            // Принудительно обновляем карту
+                            myMap.setCenter([55.7558, 37.6176], 12, {
+                                checkZoomRange: true
+                            });
+                            
+                            // Добавляем контролы
+                            myMap.controls.add('zoomControl', {
+                                position: {top: 10, left: 10}
+                            });
+                            
+                            console.log('🔧 [AddressPicker] Карта принудительно обновлена и контролы добавлены');
+                        } catch (error) {
+                            console.error('❌ [AddressPicker] Ошибка обновления карты:', error);
+                        }
+                    }
+                }, 50);
+                
+                console.log('✅ [AddressPicker] Карта создана успешно:', !!myMap);
+                console.log('🔧 [AddressPicker] Размеры карты:', {
+                    width: myMap.container.getSize()[0],
+                    height: myMap.container.getSize()[1]
+                });
+                
+                // Создаем геокодер
+                geocoder = ymaps.geocode;
+                console.log('✅ [AddressPicker] Геокодер настроен:', !!geocoder);
+                
+                mapInitialized = true;
+                
+            } catch (error) {
+                console.error('❌ [AddressPicker] Ошибка создания карты:', error);
+                showError('Ошибка создания карты: ' + error.message);
+                return;
+            }
+            
+            console.log('✅ [AddressPicker] Карта создана');
+            
+            // Принудительно обновляем размеры карты
+            setTimeout(() => {
+                if (myMap) {
+                    try {
+                        myMap.container.fitToViewport();
+                        console.log('🔧 [AddressPicker] Размеры карты обновлены');
+                        
+                        // Принудительно обновляем карту
+                        myMap.setCenter([55.7558, 37.6176], 12, {
+                            checkZoomRange: true
+                        });
+                        
+                        console.log('🔧 [AddressPicker] Карта принудительно обновлена');
+                    } catch (error) {
+                        console.error('❌ [AddressPicker] Ошибка обновления карты:', error);
+                    }
+                }
+            }, 200);
+            
+            // Настраиваем поиск
+            setupSearch();
+            
+            // Добавляем обработчик движения карты для передачи адреса
+            myMap.events.add('actionend', handleMapMove);
+            console.log('🎯 [AddressPicker] Обработчик actionend добавлен для передачи адреса');
+            
+            // Сообщаем родителю что карта готова
+            notifyParent('mapReady', { status: 'ready' });
+            
+            // Выполняем обратное геокодирование для текущего центра карты с задержкой
+            const initialCenter = myMap.getCenter();
+            setTimeout(() => {
+                geocodeCoordinates(initialCenter);
+            }, 300);
+        }
+        
+        function setupSearch() {
+            const searchInput = document.getElementById('addressSearch');
+            let searchTimeout;
+            
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                const query = this.value.trim();
+                
+                if (query.length < 3) return;
+                
+                searchTimeout = setTimeout(() => {
+                    searchAddress(query);
+                }, 500);
+            });
+            
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    clearTimeout(searchTimeout);
+                    const query = this.value.trim();
+                    if (query.length >= 3) {
+                        searchAddress(query);
+                    }
+                }
+            });
+        }
+        
+        function searchAddress(query) {
+            console.log('🔍 [AddressPicker] Поиск адреса:', query);
+            
+            if (!geocoder) {
+                console.error('❌ [AddressPicker] Геокодер не инициализирован');
+                return;
+            }
+            
+            geocoder(query, {
+                results: 1,
+                boundedBy: myMap.getBounds()
+            }).then(function (res) {
+                const firstGeoObject = res.geoObjects.get(0);
+                
+                if (firstGeoObject) {
+                    const coords = firstGeoObject.geometry.getCoordinates();
+                    const address = firstGeoObject.getAddressLine();
+                    
+                    console.log('✅ [AddressPicker] Найден адрес:', address, coords);
+                    
+                    isProgrammaticMove = true;
+                    
+                    myMap.setCenter(coords, {
+                        checkZoomRange: true
+                    });
+                    
+                    document.getElementById('addressSearch').value = address;
+                    
+                    notifyParent('addressSelected', {
+                        coordinates: coords,
+                        address: address,
+                        precision: 'search'
+                    });
+                } else {
+                    console.warn('⚠️ [AddressPicker] Адрес не найден:', query);
+                }
+            }).catch(function (error) {
+                console.error('❌ [AddressPicker] Ошибка поиска:', error);
+            });
+        }
+        
+        function handleMapMove(e) {
+            clearTimeout(moveTimeout);
+            
+            if (isProgrammaticMove) {
+                isProgrammaticMove = false;
+                return;
+            }
+            
+            if (isGeocoding) {
+                return;
+            }
+            
+            moveTimeout = setTimeout(() => {
+                const currentCenter = myMap.getCenter();
+                geocodeCoordinates(currentCenter);
+            }, 800);
+        }
+        
+        async function geocodeCoordinates(coordinates) {
+            isGeocoding = true;
+            
+            try {
+                const result = await geocoder(coordinates, {
+                    results: 1,
+                    kind: 'house'
+                });
+                
+                const firstGeoObject = result.geoObjects.get(0);
+                if (firstGeoObject) {
+                    const address = firstGeoObject.getAddressLine();
+                    
+                    notifyParent('addressSelected', {
+                        coordinates: coordinates,
+                        address: address,
+                        precision: 'house'
+                    });
+                } else {
+                    console.warn('⚠️ [AddressPicker] Адрес не найден, отправляем координаты');
+                    notifyParent('addressSelected', {
+                        coordinates: coordinates,
+                        address: 'Координаты: ' + coordinates[0].toFixed(6) + ', ' + coordinates[1].toFixed(6),
+                        precision: 'unknown'
+                    });
+                }
+            } catch (error) {
+                console.error('❌ [AddressPicker] Ошибка геокодирования:', error);
+                
+                notifyParent('addressSelected', {
+                    coordinates: coordinates,
+                    address: 'Координаты: ' + coordinates[0].toFixed(6) + ', ' + coordinates[1].toFixed(6),
+                    precision: 'error'
+                });
+            } finally {
+                isGeocoding = false;
+            }
+        }
+        
+        function notifyParent(type, data) {
+            if (window.parent && window.parent !== window) {
+                const message = {
+                    type: type,
+                    data: data,
+                    source: 'address-picker',
+                    timestamp: Date.now()
+                };
+                
+                try {
+                    window.parent.postMessage(message, '*');
+                } catch (error) {
+                    console.error('❌ [AddressPicker] Ошибка отправки сообщения:', error);
+                }
+            }
+        }
+        
+        // Обработчик сообщений от родительского окна
+        window.addEventListener('message', function(event) {
+            if (event.origin !== window.location.origin) {
+                console.warn('⚠️ [AddressPicker] Сообщение от неподходящего origin:', event.origin);
+                return;
+            }
+            
+            const { type, data } = event.data || {};
+            console.log('📨 [AddressPicker] Получена команда от родителя:', { type, data });
+            
+            if (!mapInitialized) {
+                console.warn('⚠️ [AddressPicker] Карта еще не инициализирована');
+                return;
+            }
+            
+            switch (type) {
+                case 'setMarker':
+                    handleSetMarker(data);
+                    break;
+                    
+                case 'searchAddress':
+                    handleSearchAddress(data);
+                    break;
+                    
+                case 'clearMarker':
+                    handleClearMarker();
+                    break;
+                    
+                default:
+                    console.log('🤷 [AddressPicker] Неизвестная команда:', type);
+            }
+        });
+        
+        function handleSetMarker(data) {
+            console.log('📍 [AddressPicker] handleSetMarker вызван:', data);
+            
+            if (!data || !data.coordinates) {
+                console.error('❌ [AddressPicker] Некорректные данные для setMarker:', data);
+                return;
+            }
+            
+            const [lat, lng] = data.coordinates;
+            
+            try {
+                isProgrammaticMove = true;
+                
+                myMap.setCenter([lat, lng], {
+                    checkZoomRange: true,
+                    duration: 500
+                });
+                
+                console.log('✅ [AddressPicker] Маркер установлен успешно');
+            } catch (error) {
+                console.error('❌ [AddressPicker] Ошибка установки маркера:', error);
+            }
+        }
+        
+        function handleSearchAddress(data) {
+            if (data && data.query) {
+                searchAddress(data.query);
+            }
+        }
+        
+        function handleClearMarker() {
+            // Центральный маркер - это CSS элемент, он всегда виден
+        }
+        
+        // Обработчик изменения размеров окна
+        window.addEventListener('resize', function() {
+            if (myMap && mapInitialized) {
+                setTimeout(() => {
+                    try {
+                        myMap.container.fitToViewport();
+                        console.log('🔧 [AddressPicker] Размеры карты обновлены после resize');
+                    } catch (error) {
+                        console.error('❌ [AddressPicker] Ошибка обновления размеров:', error);
+                    }
+                }, 100);
+            }
+        });
+        
+        // Глобальная обработка ошибок для предотвращения краха карты
+        window.addEventListener('error', function(event) {
+            if (event.filename && event.filename.includes('full.js')) {
+                console.warn('⚠️ [AddressPicker] Подавлена ошибка Yandex Maps:', event.message);
+                event.preventDefault();
+                return false;
+            }
+        });
+        
+        // Обработка необработанных промисов
+        window.addEventListener('unhandledrejection', function(event) {
+            if (event.reason && event.reason.toString().includes('distance')) {
+                console.warn('⚠️ [AddressPicker] Подавлена ошибка промиса Yandex Maps:', event.reason);
+                event.preventDefault();
+            }
+        });
+        
+        // Принудительное обновление карты каждые 2 секунды для стабильности
+        setInterval(() => {
+            if (myMap && mapInitialized) {
+                try {
+                    myMap.container.fitToViewport();
+                    console.log('🔄 [AddressPicker] Периодическое обновление карты');
+                } catch (error) {
+                    console.warn('⚠️ [AddressPicker] Ошибка периодического обновления:', error);
+                }
+            }
+        }, 2000);
+        
+        // Запускаем инициализацию
+        // Не запускаем waitForYandexMaps() здесь, так как теперь это делается в window.addEventListener('load')
+    </script>
+</body>
+</html>

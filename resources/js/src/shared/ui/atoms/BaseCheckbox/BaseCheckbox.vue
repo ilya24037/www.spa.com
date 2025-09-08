@@ -1,4 +1,4 @@
-<!-- Р'Р°Р·РѕРІС‹Р№ С‡РµРєР±РѕРєСЃ РґР»СЏ Boolean Р·РЅР°С‡РµРЅРёР№ (РєР°Рє РЅР° РђРІРёС‚Рѕ) -->
+<!-- Base Checkbox Component -->
 <template>
   <div 
     class="flex items-center cursor-pointer gap-2 py-1 select-none min-h-[26px]" 
@@ -19,9 +19,11 @@
     <div 
       class="w-[18px] h-[18px] rounded flex items-center justify-center transition-all duration-200 flex-shrink-0 cursor-pointer"
       :class="{ 
-        'bg-blue-500': modelValue,
-        'bg-gray-200': !modelValue,
-        'hover:bg-gray-300': !disabled && !modelValue,
+        'bg-blue-500': modelValue && !error,
+        'bg-blue-500 border-2 border-red-300': modelValue && error,
+        'bg-gray-200': !modelValue && !error,
+        'bg-red-50 border-2 border-red-300': !modelValue && error,
+        'hover:bg-gray-300': !disabled && !modelValue && !error,
         'cursor-not-allowed opacity-50': disabled 
       }"
     >
@@ -70,13 +72,15 @@ interface BaseCheckboxProps {
   name?: string
   label?: string
   disabled?: boolean
+  error?: boolean
 }
 
 const props = withDefaults(defineProps<BaseCheckboxProps>(), {
     modelValue: false,
     name: '',
     label: '',
-    disabled: false
+    disabled: false,
+    error: false
 });
 
 // Generate unique ID if not provided

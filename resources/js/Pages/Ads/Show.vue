@@ -2,7 +2,7 @@
 <template>
   <Head :title="ad.title" />
   
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen">
     <div class="max-w-4xl mx-auto py-8 px-4">
       <!-- Заголовок -->
       <div class="bg-white rounded-lg p-6 mb-6 shadow-sm">
@@ -100,6 +100,23 @@
               </div>
             </dl>
           </div>
+
+          <!-- Местоположение на карте -->
+          <div v-if="adLocation" class="bg-white rounded-lg p-6 shadow-sm">
+            <h2 class="text-xl font-semibold mb-4 text-gray-900">
+              Местоположение услуги
+            </h2>
+            <div class="rounded-lg overflow-hidden bg-gray-200 h-75 flex items-center justify-center">
+              <div class="text-center">
+                <div class="text-gray-500 text-lg mb-2">🗺️ Карта временно недоступна</div>
+                <div class="text-gray-400 text-sm">YandexMapNative удален из проекта</div>
+                <div class="text-gray-400 text-xs mt-2">Координаты: {{ adLocation.join(', ') }}</div>
+              </div>
+            </div>
+            <p class="text-sm text-gray-600 mt-3">
+              {{ ad.address || 'Адрес не указан' }}
+            </p>
+          </div>
         </div>
 
         <!-- Правая колонка - контактная информация и цена -->
@@ -195,9 +212,11 @@
 
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3'
+import { computed } from 'vue'
 import PhotoGallery from '@/src/features/gallery/ui/PhotoGallery/PhotoGallery.vue'
+// import YandexMapNative from '@/src/features/map/components/YandexMapNative.vue' // УДАЛЕН
 
-defineProps({
+const props = defineProps({
     ad: {
         type: Object,
         required: true
@@ -206,6 +225,22 @@ defineProps({
         type: Boolean,
         default: false
     }
+})
+
+// Computed свойства
+const adLocation = computed(() => {
+    // Пытаемся получить координаты из объявления
+    if (props.ad.coordinates) {
+        return [props.ad.coordinates.lat, props.ad.coordinates.lng]
+    }
+    
+    // Альтернативный формат координат
+    if (props.ad.lat && props.ad.lng) {
+        return [props.ad.lat, props.ad.lng]
+    }
+    
+    // Если координат нет, карта не отображается
+    return null
 })
 
 // Утилиты форматирования

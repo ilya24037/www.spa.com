@@ -5,7 +5,7 @@ namespace App\Domain\Payment\Services;
 use App\Domain\Payment\Models\Payment;
 use App\Domain\Payment\Models\Transaction;
 use App\Domain\Payment\Repositories\PaymentRepository;
-use App\Domain\Payment\Services\PaymentGatewayManager;
+use App\Domain\Payment\Gateways\PaymentGatewayManager;
 use App\Domain\Payment\DTOs\CreatePaymentDTO;
 use App\Domain\Payment\DTOs\RefundPaymentDTO;
 use App\Domain\Payment\Enums\PaymentStatus;

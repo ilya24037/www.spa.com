@@ -48,18 +48,14 @@
                 <span class="ml-3">Загрузка карты...</span>
               </div>
             </div>
-            <div v-else>
-              <YandexMap
-                :markers="mapMarkers"
-                mode="multiple"
-                :clusterize="false"
-                :show-single-marker="false"
-                :height="400"
-                :center="mapCenter"
-                :zoom="mapZoom"
-                @marker-click="handleMapMarkerClick"
-                @bounds-change="handleBoundsChange"
-              />
+            <div v-else class="relative">
+              <!-- Заглушка вместо YandexMapNative -->
+              <div class="h-96 bg-gray-200 rounded-lg flex items-center justify-center">
+                <div class="text-center">
+                  <div class="text-gray-500 text-lg mb-2">🗺️ Карта временно недоступна</div>
+                  <div class="text-gray-400 text-sm">YandexMapNative удален из проекта</div>
+                </div>
+              </div>
             </div>
             
             <!-- Панель информации о выбранном мастере -->
@@ -86,7 +82,7 @@
               :masters="allMasters"
               :categories="categories"
               :districts="districts"
-              :current-city="currentCity || undefined"
+              :current-city="currentCity ?? undefined"
               :loading="isLoading"
               :error="error"
               :enable-virtual-scroll="enableVirtualScroll"
@@ -153,6 +149,11 @@
         @quick-view="openQuickView"
       />
       
+      <!-- A/B Тестирование карт - УДАЛЕНО -->
+      <!-- <div class="mt-12 mb-8">
+        <MapComparisonTest />
+      </div> -->
+      
       <!-- Quick View Modal -->
       <QuickViewModal
         :is-open="quickView.isOpen.value"
@@ -173,6 +174,7 @@ import { ref, computed, onMounted } from 'vue'
 // FSD imports
 import { MastersCatalog } from '@/src/widgets/masters-catalog'
 import { RecommendedSection } from '@/src/widgets/recommended-section'
+// import { MapComparisonTest } from '@/src/widgets/MapComparisonTest' // УДАЛЕН
 import { MasterCard } from '@/src/entities/master/ui/MasterCard'
 import { Pagination } from '@/src/shared/ui/molecules/Pagination'
 import { QuickViewModal, useQuickView } from '@/src/features/quick-view'
@@ -180,8 +182,7 @@ import RecommendationService from '@/src/shared/services/RecommendationService'
 import { FilterPanel, FilterCategory } from '@/src/features/masters-filter'
 import { BaseCheckbox } from '@/src/shared/ui/atoms'
 import { logger } from '@/src/shared/utils/logger'
-import YandexMap from '@/src/shared/ui/molecules/YandexMapPicker/YandexMap.vue'
-import { useMapWithMasters } from '@/src/shared/ui/molecules/YandexMapPicker'
+// import YandexMapNative from '@/src/features/map/components/YandexMapNative.vue' // УДАЛЕН
 import type { GridView } from '@/src/shared/ui/molecules/GridControls/GridControls.vue'
 
 // Stores - используем основные TypeScript stores
@@ -228,16 +229,15 @@ const allMasters = ref<Master[]>(props.masters?.data || []) // Все загру
 const currentPage = ref(1) // Текущая страница для виртуального скролла
 const viewMode = ref<GridView>('grid') // Режим отображения: карта, сетка или список
 
-// Map composable - передаем данные мастеров с сервера
-const {
-  mapMarkers,
-  mapCenter,
-  mapZoom,
-  selectedMaster: mapSelectedMaster,
-  handleMarkerClick: handleMapMarkerClick,
-  handleClusterClick,
-  handleBoundsChange
-} = useMapWithMasters(props.masters?.data || [])
+// Локальное состояние для карты (заменяет отключенный useMapWithMasters)
+const mapRef = ref()
+const mapSelectedMaster = ref<Master | null>(null)
+
+// Обработчик клика по маркеру на карте
+const handleMapMarkerClick = (master: any) => {
+  mapSelectedMaster.value = master
+  console.log('🎯 [Home] Выбран мастер на карте:', master.name)
+}
 
 // Computed
 const favoriteIds = computed(() => favoritesStore.favoriteIds)

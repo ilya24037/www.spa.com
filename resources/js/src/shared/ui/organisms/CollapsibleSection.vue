@@ -1,5 +1,5 @@
 <template>
-  <div class="mb-3 border rounded-xl bg-white overflow-visible" :class="[
+  <div class="mb-3 border rounded-xl overflow-visible" :class="[
     isRequired ? 'border-blue-500' : 'border-gray-200',
     isFilled ? 'border-green-500' : '',
     hasErrors ? 'border-red-500' : ''
@@ -20,7 +20,7 @@
       </div>
       
       <div class="flex items-center gap-3">
-        <span v-if="filledCount !== undefined" class="text-sm text-gray-500 bg-white px-2 py-1 rounded">
+        <span v-if="filledCount !== undefined" class="text-sm text-gray-500 px-2 py-1 rounded">
           {{ filledCount }}/{{ totalCount }}
         </span>
         <span class="w-6 h-6 flex items-center justify-center">
@@ -32,7 +32,7 @@
     </div>
     
     <transition name="collapse">
-      <div v-show="isOpen" class="p-5 bg-white rounded-b-xl relative overflow-visible min-h-[100px]">
+      <div v-show="isOpen" class="p-0 rounded-b-xl relative overflow-visible min-h-[100px] bg-white">
         <slot></slot>
       </div>
     </transition>
@@ -72,5 +72,11 @@ defineEmits<{
 .collapse-enter-from,
 .collapse-leave-to {
   opacity: 0;
+}
+
+/* Белый фон для секций */
+.collapse-enter-active,
+.collapse-leave-active {
+  background: white !important;
 }
 </style>

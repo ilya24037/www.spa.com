@@ -133,17 +133,17 @@ export function useCard(initialOptions?: CardOptions) {
  * Композабл для коллекции карточек
  */
 export function useCardCollection<T = any>(items: T[] = []) {
-  const selectedIds =<Set<string | number>>(new Set())
-  const loadingIds =<Set<string | number>>(new Set())
+  const selectedIds = ref<Set<string | number>>(new Set())
+  const loadingIds = ref<Set<string | number>>(new Set())
 
   /**
    * Выбрать/снять выбор карточки
    */
   const toggleSelection = (id: string | number) => {
-    if (selectedIds.has(id)) {
-      selectedIds.delete(id)
+    if (selectedIds.value.has(id)) {
+      selectedIds.value.delete(id)
     } else {
-      selectedIds.add(id)
+      selectedIds.value.add(id)
     }
   }
 
@@ -152,7 +152,7 @@ export function useCardCollection<T = any>(items: T[] = []) {
    */
   const selectAll = (getIdFn: (item: T) => string | number) => {
     items.forEach(item => {
-      selectedIds.add(getIdFn(item))
+      selectedIds.value.add(getIdFn(item))
     })
   }
 
@@ -160,14 +160,14 @@ export function useCardCollection<T = any>(items: T[] = []) {
    * Снять выбор со всех карточек
    */
   const clearSelection = () => {
-    selectedIds.clear()
+    selectedIds.value.clear()
   }
 
   /**
    * Проверить выбрана ли карточка
    */
   const isSelected = (id: string | number) => {
-    return selectedIds.has(id)
+    return selectedIds.value.has(id)
   }
 
   /**
@@ -175,9 +175,9 @@ export function useCardCollection<T = any>(items: T[] = []) {
    */
   const setLoading = (id: string | number, loading: boolean) => {
     if (loading) {
-      loadingIds.add(id)
+      loadingIds.value.add(id)
     } else {
-      loadingIds.delete(id)
+      loadingIds.value.delete(id)
     }
   }
 
@@ -185,7 +185,7 @@ export function useCardCollection<T = any>(items: T[] = []) {
    * Проверить загружается ли карточка
    */
   const isLoading = (id: string | number) => {
-    return loadingIds.has(id)
+    return loadingIds.value.has(id)
   }
 
   /**
@@ -194,7 +194,7 @@ export function useCardCollection<T = any>(items: T[] = []) {
   const executeForSelected = async <R>(
     action: (id: string | number) => Promise<R>
   ): Promise<R[]> => {
-    const selectedArray = Array.from(selectedIds)
+    const selectedArray = Array.from(selectedIds.value)
     
     return Promise.all(
       selectedArray.map(id => action(id))
@@ -203,12 +203,12 @@ export function useCardCollection<T = any>(items: T[] = []) {
 
   return {
     // Состояние
-    selectedIds: readonly(ref(selectedIds)),
-    loadingIds: readonly(ref(loadingIds)),
+    selectedIds: readonly(selectedIds),
+    loadingIds: readonly(loadingIds),
     
     // Вычисляемые свойства
-    selectedCount: computed(() => selectedIds.size),
-    hasSelected: computed(() => selectedIds.size > 0),
+    selectedCount: computed(() => selectedIds.value.size),
+    hasSelected: computed(() => selectedIds.value.size > 0),
     
     // Методы выбора
     toggleSelection,

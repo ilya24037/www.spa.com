@@ -263,7 +263,7 @@ const clearAll = () => {
 
 <style scoped>
 .schedule-section {
-    background: white;
+
     border-radius: 8px;
     padding: 20px;
 }
@@ -396,7 +396,7 @@ const clearAll = () => {
     width: 18px;
     left: 3px;
     bottom: 3px;
-    background-color: white;
+
     transition: 0.3s;
     border-radius: 50%;
 }

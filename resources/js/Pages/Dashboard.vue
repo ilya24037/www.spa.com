@@ -214,6 +214,7 @@
               :item="profile"
               @item-updated="handleItemUpdate"
               @item-deleted="handleItemDelete"
+              @item-error="handleItemError"
               @pay="handleItemPay"
               @promote="handleItemPromote"
               @edit="handleItemEdit"
@@ -360,6 +361,14 @@ const handleItemDelete = (itemId: number) => {
   addToast(`Объявление #${itemId} удалено`, 'info')
 }
 
+/**
+ * Production-ready обработка ошибок вместо alert()
+ * Показывает Toast уведомление пользователю
+ */
+const handleItemError = (itemId: number, message: string) => {
+  addToast(`Объявление #${itemId}: ${message}`, 'error')
+}
+
 const handleItemPay = (itemId: number) => {
   addToast(`Переход к оплате объявления #${itemId}`, 'info')
 }
@@ -373,7 +382,7 @@ const handleItemEdit = (itemId: number) => {
 }
 
 const handleItemDeactivate = (itemId: number) => {
-  addToast(`Объявление #${itemId} снято с публикации`, 'success')
+  addToast(`Объявление #${itemId} перемещено в архив`, 'success')
 }
 
 const handleItemMarkIrrelevant = (itemId: number) => {

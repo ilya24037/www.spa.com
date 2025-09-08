@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white rounded-lg p-5">
+  <div class="rounded-lg p-5">
     <h2 class="text-lg font-semibold text-gray-900 mb-4">Контакты</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
       <!-- Все телефонные поля используют единую маску +7 (###) ###-##-## -->

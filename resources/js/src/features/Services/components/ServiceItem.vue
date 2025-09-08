@@ -1,8 +1,8 @@
 <template>
   <tr class="service-item border-b border-gray-100 hover:bg-gray-50">
     <!-- Чекбокс -->
-    <td class="py-3 px-2 w-10">
-      <div class="flex items-center h-8">
+    <td class="py-3 px-2 w-10 align-top">
+      <div class="flex items-center h-12">
         <input 
           :id="checkboxId"
           v-model="enabled"
@@ -15,8 +15,8 @@
     </td>
 
     <!-- Название услуги -->
-    <td class="py-3 px-2">
-      <div class="flex items-center h-8">
+    <td class="py-3 px-2 align-top">
+      <div class="flex items-center h-12">
         <label 
           :for="checkboxId" 
           class="text-sm font-medium text-gray-700 cursor-pointer inline-flex items-center"
@@ -81,92 +81,74 @@
       </div>
     </td>
 
-    <!-- Доплата -->
-    <td class="py-3 px-2 w-48">
-      <div v-if="enabled" class="flex items-center gap-2 h-8">
+    <!-- Доплата и Комментарий -->
+    <td colspan="2" class="py-3 px-2 align-top">
+      <div v-if="enabled" class="flex items-center gap-2 h-12">
+        <!-- Кнопка + для цены -->
         <button 
           @click="increasePrice"
           type="button"
-          class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-all"
+          class="w-10 h-10 border-2 border-gray-300 flex items-center justify-center text-gray-500 hover:text-blue-600 hover:bg-blue-50 hover:border-gray-400 rounded-lg transition-all flex-shrink-0 focus:outline-none"
           title="Добавить 1000₽"
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
             <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
           </svg>
         </button>
-        <div class="relative flex items-center">
-          <label :for="priceInputId" class="sr-only">Доплата за {{ service.name }}</label>
-          <input 
-            :id="priceInputId"
-            v-model="serviceData.price"
-            :name="`service_price_${service.id}`"
-            @input="emitUpdate"
-            type="number"
-            placeholder="0"
-            :aria-label="`Доплата за ${service.name}`"
-            :class="[
-              'w-24 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-8',
-              serviceData.price && serviceData.price > 0 ? 'pr-12' : 'pr-6'
-            ]"
-            min="0"
-            step="1000"
-          >
-          <!-- Символ рубля всегда видим -->
-          <span 
-            class="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-gray-500 pointer-events-none"
-            :class="{ 'right-7': serviceData.price && serviceData.price > 0 }"
-          >₽</span>
-          <!-- Кнопка сброса -->
-
-        </div>
-      </div>
-    </td>
-
-    <!-- Комментарий -->
-    <td class="py-3 px-2">
-      <div v-if="enabled" class="flex items-center h-8">
-        <!-- Кнопка показать/скрыть комментарий -->
-        <button 
-          v-if="!showComment"
-          @click="showComment = true"
-          type="button"
-          class="w-full px-3 py-1 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 border border-dashed border-blue-300 rounded transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center h-8"
-        >
-          + Добавить комментарий
-        </button>
         
-        <!-- Поле комментария -->
-        <div v-else class="w-full flex items-center gap-2">
-          <div class="relative flex-1 flex items-center">
-            <label :for="commentInputId" class="sr-only">Комментарий к {{ service.name }}</label>
-            <input 
-              :id="commentInputId"
-              v-model="serviceData.comment"
-              :name="`service_comment_${service.id}`"
-              @input="emitUpdate"
-              type="text"
-              placeholder="Максимум 100 символов"
-              :aria-label="`Комментарий к ${service.name}`"
-              :class="[
-                'w-full px-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-8',
-                serviceData.comment ? 'pr-12' : 'pr-3'
-              ]"
-              :maxlength="100"
-            >
-            <!-- Кнопка сброса комментария -->
-
-          </div>
+        <!-- Поле цены -->
+        <BaseInput
+          :id="priceInputId"
+          v-model="serviceData.price"
+          :name="`service_price_${service.id}`"
+          type="number"
+          :clearable="true"
+          suffix="₽"
+          placeholder="0"
+          :min="0"
+          :max="999999"
+          :step="1000"
+          :aria-label="`Доплата за ${service.name}`"
+          @update:modelValue="emitUpdate"
+          class="max-w-[160px] h-10"
+        />
+        
+        <!-- Поле комментария или кнопка добавить -->
+        <template v-if="!showComment">
+          <button 
+            @click="showComment = true"
+            type="button"
+            class="flex-1 h-10 px-4 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 border-2 border-dashed border-blue-300 rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center"
+          >
+            + Добавить комментарий
+          </button>
+        </template>
+        <template v-else>
+          <BaseInput
+            :id="commentInputId"
+            v-model="serviceData.comment"
+            :name="`service_comment_${service.id}`"
+            type="text"
+            :clearable="true"
+            placeholder="Максимум 100 символов"
+            :maxlength="100"
+            :show-counter="true"
+            :aria-label="`Комментарий к ${service.name}`"
+            @update:modelValue="emitUpdate"
+            class="flex-1 h-10"
+          />
           <button 
             @click="hideComment"
             type="button"
-            class="text-xs text-gray-500 hover:text-gray-700 transition-colors whitespace-nowrap"
+            class="w-10 h-10 border-2 border-gray-200 hover:bg-gray-50 rounded-lg flex items-center justify-center transition-colors focus:outline-none"
+            title="Скрыть комментарий"
+            aria-label="Скрыть комментарий"
           >
-            Скрыть
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
           </button>
-          <span class="text-xs text-gray-400 whitespace-nowrap">
-            {{ serviceData.comment.length }}/100
-          </span>
-        </div>
+        </template>
       </div>
     </td>
   </tr>
@@ -176,6 +158,7 @@
 import { ref, computed, watch } from 'vue'
 import Tooltip from '@/src/shared/ui/molecules/Tooltip/Tooltip.vue'
 import InfoIcon from '@/src/shared/ui/atoms/InfoIcon/InfoIcon.vue'
+import BaseInput from '@/src/shared/ui/atoms/BaseInput/BaseInput.vue'
 import { getCharacteristicInfo, hasServiceTooltip } from '@/src/shared/config/characteristicsInfo'
 import { useId } from '@/src/shared/composables/useId'
 
@@ -264,7 +247,9 @@ const enabled = computed({
 // Функция увеличения цены на 1000
 const increasePrice = () => {
   const currentPrice = parseInt(serviceData.value.price) || 0
-  serviceData.value.price = currentPrice + 1000
+  const newPrice = currentPrice + 1000
+  // Ограничиваем максимальным значением 9999999 (7 цифр)
+  serviceData.value.price = Math.min(newPrice, 9999999)
   emitUpdate()
 }
 
@@ -413,7 +398,6 @@ input[type="number"] {
 .tooltip-image {
   margin: 12px -12px;
   text-align: center;
-  background: white;
   padding: 8px;
 }
 
@@ -468,4 +452,4 @@ input[type="number"] {
   line-height: 1.4;
   color: #ff9800;
 }
-</style> 
+</style>

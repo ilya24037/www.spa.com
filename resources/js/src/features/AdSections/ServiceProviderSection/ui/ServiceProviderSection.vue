@@ -8,11 +8,12 @@
         :value="option.value"
         :label="option.label"
         name="service_provider"
+        :error="showError && !hasSelection"
         @update:modelValue="handleProviderChange"
       />
     </div>
-    <div v-if="errors.service_provider" class="error-message">
-      {{ errors.service_provider }}
+    <div v-if="showError && !hasSelection" class="text-sm text-red-600 mt-2">
+      Выберите, кто будет оказывать услуги
     </div>
   </div>
 </template>
@@ -23,16 +24,26 @@ import BaseRadio from '@/src/shared/ui/atoms/BaseRadio/BaseRadio.vue'
 
 const props = defineProps({
   serviceProvider: { type: Array, default: () => [] },
-  errors: { type: Object, default: () => ({}) }
+  errors: { type: Object, default: () => ({}) },
+  forceValidation: { type: Boolean, default: false }
 })
 
-const emit = defineEmits(['update:serviceProvider'])
+const emit = defineEmits(['update:serviceProvider', 'clearForceValidation'])
 
 // Для радиокнопок используем строку вместо массива
-const selectedProvider = ref(props.serviceProvider[0] || 'women')
+const selectedProvider = ref(props.serviceProvider[0] || '')
+
+// Состояние для валидации
+const touched = ref(false)
+
+// Проверка наличия выбора
+const hasSelection = computed(() => !!selectedProvider.value)
+
+// Показывать ошибку если поле тронуто, есть ошибка от родителя или принудительная валидация
+const showError = computed(() => touched.value || !!props.errors?.service_provider || props.forceValidation)
 
 watch(() => props.serviceProvider, (val) => {
-  selectedProvider.value = val[0] || 'women'
+  selectedProvider.value = val[0] || ''
 })
 
 // Опции для радиокнопок
@@ -43,9 +54,15 @@ const providerOptions = computed(() => [
 ])
 
 const handleProviderChange = (value) => {
+  touched.value = true // Помечаем что поле тронуто
   selectedProvider.value = value
   // Отправляем массив с одним элементом для совместимости
   emit('update:serviceProvider', [value])
+  
+  // Сбрасываем флаг принудительной валидации если выбрано значение
+  if (props.forceValidation && value) {
+    emit('clearForceValidation')
+  }
 }
 </script>
 

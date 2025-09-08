@@ -1,7 +1,10 @@
-﻿<template>
+<template>
   <div class="universal-ad-form">
-    <!-- Прогресс заполнения -->
-    <FormProgress :progress="formProgress" />
+    <!-- Прогресс заполнения обязательных полей -->
+    <FormProgress 
+      :progress="requiredFieldsProgress" 
+      :title="`Заполнено обязательных полей: ${filledRequiredFields} из 15`"
+    />
     
     <!-- Навигация по блокам -->
     <SectionBlocksNavigation
@@ -39,6 +42,8 @@
             <ServiceProviderSection 
               v-model:serviceProvider="form.service_provider" 
               :errors="errors"
+              :forceValidation="forceValidation.service_provider"
+              @clearForceValidation="forceValidation.service_provider = false"
             />
           </div>
 
@@ -51,19 +56,43 @@
             <WorkFormatSection 
               v-model:workFormat="form.work_format" 
               :errors="errors"
+              :forceValidation="forceValidation.work_format"
+              @clearForceValidation="forceValidation.work_format = false"
             />
           </div>
 
           <!-- Опыт работы -->
           <div class="subsection">
-            <h3 class="subsection-title">
-              Опыт работы
-              <span class="required-mark">*</span>
+            <h3 
+              class="subsection-title cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center justify-between"
+              @click="experienceVisible = !experienceVisible"
+            >
+              <span>Опыт работы</span>
+              <svg 
+                class="w-5 h-5 text-gray-500 transition-transform duration-200"
+                :class="{ 'rotate-180': experienceVisible }"
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
             </h3>
-            <ExperienceSection 
-              v-model:experience="form.experience" 
-              :errors="errors"
-            />
+            <Transition
+              enter-active-class="transition-all duration-300 ease-out"
+              enter-from-class="opacity-0 -translate-y-2"
+              enter-to-class="opacity-100 translate-y-0"
+              leave-active-class="transition-all duration-200 ease-in"
+              leave-from-class="opacity-100 translate-y-0"
+              leave-to-class="opacity-0 -translate-y-2"
+            >
+              <div v-if="experienceVisible" class="mt-2">
+                <ExperienceSection 
+                  v-model:experience="form.experience" 
+                  :errors="errors"
+                />
+              </div>
+            </Transition>
           </div>
 
           <!-- Ваши клиенты -->
@@ -75,15 +104,22 @@
             <ClientsSection 
               v-model:clients="form.clients" 
               :errors="errors"
+              :forceValidation="forceValidation.clients"
+              @clearForceValidation="forceValidation.clients = false"
             />
           </div>
 
           <!-- Описание -->
           <div class="subsection">
-            <h3 class="subsection-title">Описание</h3>
+            <h3 class="subsection-title">
+              Описание
+              <span class="required-mark">*</span>
+            </h3>
             <DescriptionSection 
               v-model:description="form.description" 
               :errors="errors"
+              :forceValidation="forceValidation.description"
+              @clearForceValidation="forceValidation.description = false"
             />
           </div>
         </div>
@@ -104,6 +140,8 @@
           v-model:parameters="form.parameters"
           :show-fields="['age', 'breast_size', 'hair_color', 'eye_color', 'nationality', 'bikini_zone']"
           :errors="errors.parameters || {}"
+          :forceValidation="forceValidation.parameters"
+          @clearForceValidation="(field) => forceValidation.parameters[field] = false"
         />
       </CollapsibleSection>
 
@@ -117,8 +155,11 @@
         data-section="price"
       >
         <PricingSection 
-          v-model:prices="form.prices" 
+          v-model:prices="form.prices"
+          v-model:startingPrice="form.startingPrice" 
           :errors="errors"
+          :forceValidation="forceValidation.price"
+          @clearForceValidation="(field) => forceValidation.price[field] = false"
         />
       </CollapsibleSection>
 
@@ -142,6 +183,8 @@
               v-model:servicesAdditionalInfo="form.services_additional_info"
               :allowedCategories="[]"
               :errors="errors"
+              :forceValidation="forceValidation"
+              @clearForceValidation="forceValidation.services = false"
             />
             
             <!-- Комфорт без отступа -->
@@ -153,7 +196,7 @@
         </div>
 
         <!-- Общая статистика услуг в конце секции -->
-        <div class="services-total-stats mt-6 p-4 bg-gray-50 rounded-lg">
+        <div class="services-total-stats mt-6 p-4 rounded-lg">
           <div class="flex items-center justify-between">
             <span class="text-sm text-gray-700">
               Выбрано услуг: <strong>{{ getTotalSelectedServices() }}</strong>
@@ -185,7 +228,7 @@
         <div class="media-subsections">
           <!-- Фотографии - раскрывающаяся подкатегория -->
           <div class="media-category mb-6">
-            <div class="border border-gray-200 rounded-lg px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors duration-200 mb-3 cursor-pointer select-none" @click="togglePhotosSection">
+            <div class="border border-gray-200 rounded-lg px-4 py-3 transition-colors duration-200 mb-3 cursor-pointer select-none" @click="togglePhotosSection">
               <div class="flex items-center justify-between">
                 <h3 class="text-base font-semibold text-gray-900 flex items-center">
                   Фотографии
@@ -211,13 +254,15 @@
               <PhotoUpload 
                 v-model:photos="form.photos" 
                 :errors="errors"
+                :force-validation="forceValidation.media"
+                @clear-force-validation="forceValidation.media = false"
               />
             </div>
           </div>
 
           <!-- Видео - раскрывающаяся подкатегория -->
           <div class="media-category mb-6">
-            <div class="border border-gray-200 rounded-lg px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors duration-200 mb-3 cursor-pointer select-none" @click="toggleVideoSection">
+            <div class="border border-gray-200 rounded-lg px-4 py-3 transition-colors duration-200 mb-3 cursor-pointer select-none" @click="toggleVideoSection">
               <div class="flex items-center justify-between">
                 <h3 class="text-base font-semibold text-gray-900 flex items-center">
                   Видео
@@ -248,7 +293,7 @@
 
           <!-- Проверочное фото - раскрывающаяся подкатегория -->
           <div class="media-category mb-6">
-            <div class="border border-gray-200 rounded-lg px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors duration-200 mb-3 cursor-pointer select-none" @click="toggleVerificationSection">
+            <div class="border border-gray-200 rounded-lg px-4 py-3 transition-colors duration-200 mb-3 cursor-pointer select-none" @click="toggleVerificationSection">
               <div class="flex items-center justify-between">
                 <h3 class="text-base font-semibold text-gray-900 flex items-center">
                   Проверочное фото
@@ -295,6 +340,8 @@
         <GeoSection 
           v-model:geo="form.geo" 
           :errors="errors"
+          :force-validation="forceValidation.geo"
+          @clear-force-validation="forceValidation.geo = false"
         />
       </CollapsibleSection>
 
@@ -363,24 +410,24 @@
 
     <!-- Кнопки действий -->
     <FormActions
-      :can-submit="isActiveAd ? true : isFormValid"
+      :can-submit="isActiveAd ? true : true"
       :submitting="saving"
       :saving-draft="saving"
       :publishing="saving"
       :show-progress="true"
-      :progress-hint="`Заполнено ${formProgress}% формы`"
+      :progress-hint="`Заполнено обязательных полей: ${filledRequiredFields} из 15 (${requiredFieldsProgress}%)`"
       :submit-label="isEditMode ? 'Обновить объявление' : 'Разместить объявление'"
       :is-active-ad="isActiveAd"
       @submit="handleSubmit"
       @save-draft="handleSaveDraft"
-      @publish="handlePublishDirect"
+      @publish="handlePublishWithValidation"
       @cancel="handleCancel"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, watch, onMounted, ref } from 'vue'
+import { computed, watch, onMounted, ref, reactive } from 'vue'
 import { router } from '@inertiajs/vue3'
 import { useFormSections } from '@/src/shared/composables'
 import FormProgress from '@/src/shared/ui/molecules/Forms/components/FormProgress.vue'
@@ -484,10 +531,40 @@ const {
   handleCancel
 } = useAdFormModel(props, emit)
 
+// Объект для принудительной валидации полей при автопрокрутке
+const forceValidation = reactive({
+  work_format: false,
+  service_provider: false,
+  clients: false,
+  description: false,
+  services: false,
+  media: false,
+  // Для секции параметров - подсветка всех незаполненных полей
+  parameters: {
+    title: false,
+    age: false,
+    height: false,
+    weight: false,
+    breast_size: false,
+    hair_color: false
+  },
+  // Для секции цен - подсветка обязательных полей "1 час" (хотя бы одно)
+  price: {
+    apartments_1h: false,
+    outcall_1h: false
+  },
+  // Для секции географии
+  geo: false
+})
+
+// Состояние видимости секции "Опыт работы"
+const experienceVisible = ref(false)
+
 // Отладка: отслеживание изменений form.video
 watch(() => form.video, (newVideos, oldVideos) => {
   // Form video changed
 }, { deep: true })
+
 
 // Обработчик прямой публикации черновика через Inertia
 const handlePublishDirect = async () => {
@@ -527,7 +604,7 @@ const sectionsConfig = [
     key: 'basic',
     title: 'ОСНОВНОЕ',
     required: true,
-    fields: ['service_provider', 'work_format', 'experience', 'clients', 'description']
+    fields: ['service_provider', 'work_format', 'clients', 'description']
   },
   {
     key: 'parameters',
@@ -592,14 +669,267 @@ const {
   expandAll,
   collapseAll,
   expandRequired,
-  checkSectionFilled,
+  checkSectionFilled: checkSectionFilledOriginal,
   getFilledCount,
   formProgress
 } = useFormSections(sectionsConfig, form)
 
+// Подсчет заполненных обязательных полей для прогресс-бара
+const filledRequiredFields = computed(() => {
+  let count = 0
+  
+  // Параметры (6 полей)
+  if (form.parameters?.title) count++
+  if (form.parameters?.age) count++
+  if (form.parameters?.height) count++
+  if (form.parameters?.weight) count++
+  if (form.parameters?.breast_size) count++
+  if (form.parameters?.hair_color) count++
+  
+  // Описание (1 поле)
+  if (form.description) count++
+  
+  // Контакты (1 поле)
+  if (form.contacts?.phone) count++
+  
+  // Услуги (1 поле)
+  if (getTotalSelectedServices() > 0) count++
+  
+  // Основная информация (3 поля)
+  if (form.service_provider?.length) count++
+  if (form.work_format) count++
+  if (form.clients?.length) count++
+  
+  // Цены (1 поле) - обязательно "1 час в апартаментах" ИЛИ "1 час выезд к клиенту"
+  if ((form.prices?.apartments_1h && Number(form.prices.apartments_1h) > 0) ||
+      (form.prices?.outcall_1h && Number(form.prices.outcall_1h) > 0)) count++
+  
+  // Медиа (1 поле) - обязательно минимум одно фото
+  if (form.photos?.length > 0) count++
+  
+  return count
+})
+
+// Обновленный прогресс для 15 обязательных полей
+const requiredFieldsProgress = computed(() => {
+  return Math.round((filledRequiredFields.value / 15) * 100)
+})
+
+// Автоскролл к первому незаполненному обязательному полю
+const scrollToFirstMissingField = () => {
+  // Порядок проверки 15 обязательных полей (сверху вниз по форме)
+  const requiredFields = [
+    // 1. ОСНОВНОЕ (самая верхняя секция)
+    { section: 'basic', field: 'service_provider', name: 'service_provider' },
+    { section: 'basic', field: 'work_format', name: 'work_format' },
+    { section: 'basic', field: 'clients', name: 'clients' },
+    
+    // 2. Параметры (вторая секция)
+    { section: 'parameters', field: 'title', name: 'title' },
+    { section: 'parameters', field: 'age', name: 'age' },
+    { section: 'parameters', field: 'height', name: 'height' },
+    { section: 'parameters', field: 'weight', name: 'weight' },
+    { section: 'parameters', field: 'breast_size', name: 'breast_size' },
+    { section: 'parameters', field: 'hair_color', name: 'hair_color' },
+    { section: 'basic', field: 'description', name: 'description' },
+    
+    // 3. Стоимость услуг
+    { section: 'price', field: 'price', name: 'price' },
+    
+    // 4. Услуги
+    { section: 'services', field: 'services', name: 'services' },
+    
+    // 5. МЕДИА (фотографии)
+    { section: 'media', field: 'photos', name: 'photos' },
+    
+    // 6. География (адрес)
+    { section: 'geo', field: 'address', name: 'address' },
+    
+    // 7. Контакты (внизу формы)
+    { section: 'contacts', field: 'phone', name: 'phone' }
+  ]
+  
+  for (const field of requiredFields) {
+    let isEmpty = false
+    
+    // Проверяем заполненность поля
+    switch (field.section) {
+      case 'parameters':
+        isEmpty = !form.parameters?.[field.field]
+        break
+      case 'contacts':
+        isEmpty = !form.contacts?.phone
+        break
+      case 'services':
+        isEmpty = getTotalSelectedServices() === 0
+        break
+      case 'basic':
+        if (field.field === 'service_provider') {
+          isEmpty = !form.service_provider?.length
+        } else if (field.field === 'work_format') {
+          isEmpty = !form.work_format
+        } else if (field.field === 'clients') {
+          isEmpty = !form.clients?.length
+        } else if (field.field === 'description') {
+          isEmpty = !form.description
+        }
+        break
+      case 'price':
+        // Обязательно хотя бы одно поле: "1 час в апартаментах" ИЛИ "1 час выезд к клиенту"
+        isEmpty = !((form.prices?.apartments_1h && Number(form.prices.apartments_1h) > 0) ||
+                   (form.prices?.outcall_1h && Number(form.prices.outcall_1h) > 0))
+        break
+      case 'media':
+        isEmpty = !form.photos?.length
+        break
+      case 'geo':
+        // Проверяем наличие адреса в geo объекте
+        const geoData = typeof form.geo === 'string' ? JSON.parse(form.geo || '{}') : form.geo
+        isEmpty = !geoData?.address
+        break
+    }
+    
+    if (isEmpty) {
+      // Для секции ОСНОВНОЕ подсвечиваем ВСЕ незаполненные обязательные поля
+      if (field.section === 'basic') {
+        if (!form.service_provider?.length) forceValidation.service_provider = true
+        if (!form.work_format) forceValidation.work_format = true
+        if (!form.clients?.length) forceValidation.clients = true
+        if (!form.description) forceValidation.description = true
+      }
+      
+      // Для секции параметров подсвечиваем ВСЕ незаполненные обязательные поля
+      if (field.section === 'parameters') {
+        if (!form.parameters?.title) forceValidation.parameters.title = true
+        if (!form.parameters?.age) forceValidation.parameters.age = true
+        if (!form.parameters?.height) forceValidation.parameters.height = true
+        if (!form.parameters?.weight) forceValidation.parameters.weight = true
+        if (!form.parameters?.breast_size) forceValidation.parameters.breast_size = true
+        if (!form.parameters?.hair_color) forceValidation.parameters.hair_color = true
+      }
+      
+      // Для секции цены подсвечиваем оба поля "1 час" если ни одно не заполнено
+      if (field.section === 'price') {
+        const apartmentsEmpty = !(form.prices?.apartments_1h && Number(form.prices.apartments_1h) > 0)
+        const outcallEmpty = !(form.prices?.outcall_1h && Number(form.prices.outcall_1h) > 0)
+        
+        // Подсвечиваем оба поля если ни одно не заполнено
+        if (apartmentsEmpty && outcallEmpty) {
+          forceValidation.price.apartments_1h = true
+          forceValidation.price.outcall_1h = true
+        }
+      }
+      
+      // Для секции услуг подсвечиваем валидацию
+      if (field.section === 'services') {
+        forceValidation.services = true
+      }
+      
+      // Для секции медиа подсвечиваем валидацию
+      if (field.section === 'media') {
+        forceValidation.media = true
+      }
+      
+      // Для секции географии подсвечиваем валидацию
+      if (field.section === 'geo') {
+        forceValidation.geo = true
+      }
+      
+      // Открываем секцию
+      sectionsState[field.section] = true
+      
+      // Прокручиваем сразу без задержки для мгновенного появления рамки
+      const sectionElement = document.querySelector(`[data-section="${field.section}"]`)
+      if (sectionElement) {
+        // Автоскролл с отступом от шапки
+        const headerHeight = 120 // примерная высота шапки
+        const elementTop = sectionElement.offsetTop - headerHeight
+        window.scrollTo({
+          top: Math.max(0, elementTop), // не уходим выше верха страницы
+          behavior: 'smooth'
+        })
+        
+        // Фокусируем поле с небольшой задержкой после прокрутки
+        setTimeout(() => {
+          const fieldElement = document.querySelector(`[name="${field.name}"], input[placeholder*="${field.field}"], select[name="${field.name}"]`)
+          if (fieldElement) {
+            fieldElement.focus()
+          }
+        }, 500)
+      }
+      
+      // Показываем подсказку
+      console.info(`📍 Необходимо заполнить: ${field.field} в секции "${field.section}"`)
+      
+      return field // Возвращаем первое найденное незаполненное поле
+    }
+  }
+  
+  return null // Все поля заполнены
+}
+
+// Обработчик публикации с валидацией и автоскроллом
+const handlePublishWithValidation = async () => {
+  // Сначала проверяем валидность формы
+  if (!isFormValid.value) {
+    const missingField = scrollToFirstMissingField()
+    if (missingField) {
+      const remainingFields = 15 - filledRequiredFields.value
+      console.warn(`⚠️ Необходимо заполнить еще ${remainingFields} обязательных полей`)
+      
+      // Можно добавить визуальное уведомление (toast)
+      // toast.warning(`Заполните еще ${remainingFields} обязательных полей`)
+    }
+    return
+  }
+  
+  // Если форма валидна - выполняем публикацию
+  await handlePublishDirect()
+}
+
+// Переопределяем checkSectionFilled для новых требований
+const checkSectionFilled = (sectionKey: string): boolean => {
+  switch(sectionKey) {
+    case 'parameters':
+      // Проверяем все 6 обязательных полей параметров
+      return !!(
+        form.parameters?.title &&
+        form.parameters?.age &&
+        form.parameters?.height &&
+        form.parameters?.weight &&
+        form.parameters?.breast_size &&
+        form.parameters?.hair_color
+      )
+    
+    case 'services':
+      // Минимум одна услуга должна быть выбрана
+      return getTotalSelectedServices() > 0
+    
+    case 'price':
+      // Хотя бы одна цена за час (апартаменты или выезд)
+      return !!(
+        (form.prices?.apartments_1h && Number(form.prices.apartments_1h) > 0) ||
+        (form.prices?.outcall_1h && Number(form.prices.outcall_1h) > 0)
+      )
+    
+    case 'contacts':
+      // Телефон обязателен
+      return !!form.contacts?.phone
+    
+    case 'geo':
+      // Город больше не обязателен (убрали из валидации)
+      return !!form.geo?.city || !!form.geo?.address
+    
+    default:
+      // Для остальных секций используем оригинальную проверку
+      return checkSectionFilledOriginal(sectionKey)
+  }
+}
+
 // Проверка заполненности объединенной секции ОСНОВНОЕ
 const checkBasicSectionFilled = () => {
-  const basicFields = ['service_provider', 'work_format', 'experience', 'clients']
+  // experience больше не обязательное поле (KISS принцип)
+  const basicFields = ['service_provider', 'work_format', 'clients']
   return basicFields.every(field => {
     const value = form[field]
     if (Array.isArray(value)) {
@@ -699,7 +1029,6 @@ onMounted(() => {
 
 /* Стили для медиа подкатегорий (как у услуг) */
 .media-category {
-  background: #ffffff;
   border-radius: 8px;
   overflow: hidden;
 }
@@ -717,7 +1046,6 @@ onMounted(() => {
 .media-category .photo-upload-zone,
 .media-category .video-upload-zone {
   border: 2px dashed #d1d5db !important;
-  background: white !important;
 }
 
 .media-category .photo-upload-zone:hover,
@@ -727,19 +1055,17 @@ onMounted(() => {
 }
 
 .subsection {
-  padding: 16px;
-  background: #f8fafc;
+  padding: 20px;
   border-radius: 8px;
   transition: all 0.2s ease;
 }
 
 .subsection:hover {
-  background: #f1f5f9;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .subsection-title {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   color: #1f2937;
   margin: 0 0 12px 0;
@@ -760,11 +1086,11 @@ onMounted(() => {
   }
   
   .subsection {
-    padding: 12px;
+    padding: 0px;
   }
   
   .subsection-title {
-    font-size: 14px;
+    font-size: 16px;
   }
 }
 </style>

@@ -92,8 +92,26 @@
       </ActionDropdown>
     </template>
     
+    <!-- Кнопки для архивированных объявлений -->
+    <template v-else-if="item.status === 'archived'">
+      <Button 
+        @click="$emit('restore')"
+        variant="success"
+        size="sm"
+      >
+        Восстановить
+      </Button>
+      <Button 
+        @click="$emit('delete')"
+        variant="danger"
+        size="sm"
+      >
+        Удалить
+      </Button>
+    </template>
+    
     <!-- Кнопки для неактивных и прочих статусов -->
-    <template v-else-if="item.status === 'inactive' || item.status === 'archived' || item.status === 'old'">
+    <template v-else-if="item.status === 'inactive' || item.status === 'old'">
       <Button 
         @click="$emit('edit')"
         variant="light"
@@ -131,6 +149,7 @@ defineEmits<{
   delete: []
   'mark-irrelevant': []
   book: []
+  restore: []
 }>()
 </script>
 

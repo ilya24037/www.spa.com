@@ -31,7 +31,25 @@ use Inertia\Inertia;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// Тестовая страница для проверки кодировки убрана
+// Тестовая страница для проверки карты
+Route::get('/test-map', function() {
+    return Inertia::render('TestMap');
+})->name('test.map');
+
+// Статические файлы карты с CORS
+Route::get('/maps/{path}', function($path) {
+    $filePath = public_path('maps/' . $path);
+    if (file_exists($filePath)) {
+        $response = response()->file($filePath);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+        $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
+        $response->headers->set('Content-Security-Policy', "frame-ancestors 'self'");
+        return $response;
+    }
+    abort(404);
+})->where('path', '.*');
 
 // CSRF токен для AJAX запросов
 Route::get('/csrf-token', function() {
@@ -63,10 +81,15 @@ if (!app()->isProduction()) {
     Route::get('/test-map', fn() => Inertia::render('TestMap'))->name('test-map');
     Route::get('/test/add-photos', [TestController::class, 'addPhotos'])->name('test.add-photos');
     Route::get('/demo/item-card', fn() => Inertia::render('Demo/ItemCard'))->name('demo.item-card');
+    Route::get('/demo/map-core-test', fn() => Inertia::render('Demo/MapCoreTest'))->name('demo.map-core-test');
     Route::get('/test/add-local-photos', [TestController::class, 'addLocalPhotos'])->name('test.add-local-photos');
     
     // Тестовая страница для секции География
     Route::get('/test-geo', fn() => Inertia::render('TestGeo'))->name('test.geo');
+    
+    // Тест гибридного компонента AddressSearchWithMap
+    Route::get('/test-address-search', fn() => Inertia::render('Demo/AddressSearchTest'))->name('test.address-search');
+    
     // Публичный маршрут для тестовой загрузки фото мастера
     Route::post('/masters/{master}/upload/photos/test', function(\Illuminate\Http\Request $request, $masterId) {
         $master = \App\Domain\Master\Models\MasterProfile::findOrFail($masterId);

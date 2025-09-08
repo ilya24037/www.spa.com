@@ -35,7 +35,7 @@ class AdRepository extends BaseRepository
         $query = Ad::query();
         
         if ($withComponents) {
-            $query->with(['content', 'pricing', 'schedule', 'media', 'user']);
+            $query->with(['user']);
         }
         
         return $query->find($id);
@@ -49,7 +49,7 @@ class AdRepository extends BaseRepository
         $query = Ad::query();
         
         if ($withComponents) {
-            $query->with(['content', 'pricing', 'schedule', 'media', 'user']);
+            $query->with(['user']);
         }
         
         return $query->findOrFail($id);
@@ -93,7 +93,7 @@ class AdRepository extends BaseRepository
     public function findByUser(User $user, ?AdStatus $status = null, int $perPage = 15): LengthAwarePaginator
     {
         $query = Ad::where('user_id', $user->id)
-            ->with(['content', 'pricing', 'schedule', 'media'])
+            ->with(['user'])
             ->orderBy('created_at', 'desc');
 
         if ($status) {
@@ -108,7 +108,7 @@ class AdRepository extends BaseRepository
      */
     public function search(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = Ad::with(['content', 'pricing', 'media', 'user'])
+        $query = Ad::with(['user'])
             ->where('status', AdStatus::ACTIVE);
 
         // Фильтр по категории
@@ -203,7 +203,7 @@ class AdRepository extends BaseRepository
      */
     public function getPopular(int $limit = 10): Collection
     {
-        return Ad::with(['content', 'pricing', 'media', 'user'])
+        return Ad::with(['user'])
             ->where('status', AdStatus::ACTIVE)
             ->orderBy('views_count', 'desc')
             ->orderBy('favorites_count', 'desc')
@@ -232,7 +232,7 @@ class AdRepository extends BaseRepository
      */
     public function getRecent(int $limit = 10): Collection
     {
-        return Ad::with(['content', 'pricing', 'media', 'user'])
+        return Ad::with(['user'])
             ->where('status', AdStatus::ACTIVE)
             ->orderBy('created_at', 'desc')
             ->limit($limit)
@@ -244,7 +244,7 @@ class AdRepository extends BaseRepository
      */
     public function getPendingModeration(int $perPage = 15): LengthAwarePaginator
     {
-        return Ad::with(['content', 'pricing', 'media', 'user'])
+        return Ad::with(['user'])
             ->where('status', AdStatus::WAITING_PAYMENT)
             ->orderBy('created_at', 'asc')
             ->paginate($perPage);
@@ -255,7 +255,7 @@ class AdRepository extends BaseRepository
      */
     public function getExpiring(int $days = 3): Collection
     {
-        return Ad::with(['content', 'pricing', 'media', 'user'])
+        return Ad::with(['user'])
             ->where('status', AdStatus::ACTIVE)
             ->whereNotNull('expires_at')
             ->whereBetween('expires_at', [now(), now()->addDays($days)])
@@ -268,7 +268,7 @@ class AdRepository extends BaseRepository
      */
     public function findSimilar(Ad $ad, int $limit = 5): Collection
     {
-        return Ad::with(['content', 'pricing', 'media'])
+        return Ad::with(['user'])
             ->where('status', AdStatus::ACTIVE)
             ->where('id', '!=', $ad->id)
             ->where('category', $ad->category)
@@ -328,7 +328,7 @@ class AdRepository extends BaseRepository
         $query = Ad::whereIn('id', $ids);
         
         if ($withComponents) {
-            $query->with(['content', 'pricing', 'schedule', 'media', 'user']);
+            $query->with(['user']);
         }
         
         return $query->get();
@@ -347,7 +347,7 @@ class AdRepository extends BaseRepository
      */
     public function getForExport(array $filters = []): Collection
     {
-        $query = Ad::with(['content', 'pricing', 'schedule', 'media', 'user']);
+        $query = Ad::with(['user']);
 
         if (!empty($filters['status'])) {
             $query->where('status', $filters['status']);
@@ -398,7 +398,7 @@ class AdRepository extends BaseRepository
     public function findActive(int $perPage = 15): LengthAwarePaginator
     {
         return Ad::where('status', AdStatus::ACTIVE)
-            ->with(['content', 'pricing', 'media', 'user'])
+            ->with(['user'])
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
     }

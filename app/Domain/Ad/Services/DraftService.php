@@ -214,6 +214,11 @@ class DraftService
             $data['description'] = '';
         }
         
+        // Обработка starting_price - убедимся что поле передается во frontend
+        if (!isset($data['starting_price'])) {
+            $data['starting_price'] = null;
+        }
+        
         // ✅ ПРИНУДИТЕЛЬНОЕ ЛОГИРОВАНИЕ В КОНЦЕ
         Log::info("📸 DraftService::prepareForDisplay ЗАВЕРШЕНО", [
             'final_data_keys' => array_keys($data),

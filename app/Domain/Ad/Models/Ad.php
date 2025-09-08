@@ -47,6 +47,7 @@ class Ad extends Model
         'price_unit',
         'is_starting_price',
         'prices',
+        'starting_price',
         'min_duration',
         'contacts_per_hour',
         'has_girlfriend',
@@ -83,7 +84,9 @@ class Ad extends Model
         'verified_at',
         'verification_expires_at',
         'verification_comment',
-        'verification_metadata'
+        'verification_metadata',
+        // Поля архивации
+        'archived_at'
     ];
 
     /**
@@ -121,6 +124,8 @@ class Ad extends Model
         // Поля верификации
         'verified_at' => 'datetime',
         'verification_expires_at' => 'datetime',
+        // Поля архивации
+        'archived_at' => 'datetime',
     ];
 
     /**

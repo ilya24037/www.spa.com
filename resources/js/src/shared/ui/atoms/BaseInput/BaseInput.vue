@@ -30,14 +30,17 @@
         :min="min"
         :max="max"
         :step="step"
-        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-gray-50 text-base text-gray-900 transition-all duration-200 min-h-[48px] box-border focus:outline-none focus:border-blue-500 focus:bg-white hover:border-gray-400 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 readonly:cursor-default readonly:bg-gray-100 placeholder:text-gray-500"
+        class="w-full border-gray-300 rounded-lg bg-gray-50 text-gray-900 transition-all duration-200 box-border focus:outline-none focus:border-blue-500 focus:bg-white hover:border-gray-400 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 readonly:cursor-default readonly:bg-gray-100 placeholder:text-gray-500"
         :class="{
-          'pr-10': clearable && inputValue,
+          'pr-10': clearable && inputValue && !suffix,
           'pl-12': prefix,
-          'pr-12': suffix,
-          'pr-20': suffix && clearable && inputValue,
+          'pr-12': suffix && inputValue && !clearable,
+          'pr-14': suffix && clearable && inputValue,
           'border-red-500 focus:border-red-500': error,
-          'border-gray-300': !error
+          'border-gray-300': !error,
+          // Размеры
+          'px-3 py-1.5 border-2 text-base min-h-[40px]': size === 'md',
+          'px-2 py-1 border text-sm h-8': size === 'sm'
         }"
         @input="handleInput"
         @focus="handleFocus"
@@ -45,17 +48,45 @@
         @keydown.enter="$emit('enter')"
       >
       
+      <!-- Индикатор успешной валидации -->
+      <div 
+        v-if="showSuccess && !clearable"
+        class="absolute top-1/2 -translate-y-1/2 pointer-events-none"
+        :class="{
+          'right-3': size === 'md',
+          'right-2': size === 'sm'
+        }"
+      >
+        <svg 
+          class="text-green-500" 
+          :width="size === 'sm' ? 16 : 20"
+          :height="size === 'sm' ? 16 : 20"
+          fill="currentColor" 
+          viewBox="0 0 20 20"
+        >
+          <path 
+            fill-rule="evenodd" 
+            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" 
+            clip-rule="evenodd"
+          />
+        </svg>
+      </div>
+      
       <!-- Кнопка очистки -->
       <button
         v-if="clearable && inputValue && !disabled && !readonly"
         type="button"
-        class="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-0 cursor-pointer p-1.5 text-gray-400 hover:text-gray-600 transition-colors"
+        class="absolute top-1/2 -translate-y-1/2 bg-transparent border-0 cursor-pointer text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-colors focus:outline-none"
+        :class="{
+          'right-3 p-1.5': size === 'md',
+          'right-1 p-1': size === 'sm'
+        }"
         tabindex="-1"
         @click="clearInput"
       >
         <svg
-          width="20"
-          height="20"
+          :width="size === 'sm' ? 16 : 20"
+          :height="size === 'sm' ? 16 : 20"
           viewBox="0 0 16 16"
           fill="none"
         >
@@ -75,7 +106,16 @@
       </div>
       
       <!-- Суффикс -->
-      <div v-if="suffix" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">
+      <div 
+        v-if="suffix && inputValue" 
+        class="absolute top-1/2 -translate-y-1/2 text-gray-500 font-medium"
+        :class="{
+          'right-3 text-sm': size === 'md' && !clearable,
+          'right-2 text-xs': size === 'sm' && !clearable,
+          'right-10': clearable && inputValue && size === 'md',
+          'right-7': clearable && inputValue && size === 'sm'
+        }"
+      >
         {{ suffix }}
       </div>
     </div>
@@ -91,14 +131,14 @@
     </div>
     
     <!-- Счетчик символов -->
-    <div v-if="maxlength && showCounter" class="mt-2 text-xs text-gray-400 text-right">
+    <div v-if="maxlength && showCounter" class="mt-0.5 text-xs text-gray-400 text-right">
       {{ inputValue.length }}/{{ maxlength }}
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed } from 'vue'
 import { useId } from '@/src/shared/composables/useId'
 
 // Props
@@ -149,6 +189,11 @@ const props = defineProps({
         type: Boolean,
         default: false
     },
+    size: {
+        type: String,
+        default: 'md',
+        validator: (value) => ['sm', 'md'].includes(value)
+    },
     error: {
         type: String,
         default: ''
@@ -196,6 +241,7 @@ const emit = defineEmits(['update:modelValue', 'input', 'focus', 'blur', 'enter'
 
 // Refs
 const inputRef = ref(null)
+const touched = ref(false)
 
 // Computed
 const inputId = computed(() => props.id || useId('input'))
@@ -203,6 +249,15 @@ const inputName = computed(() => props.name || inputId.value)
 const inputValue = computed({
     get: () => props.modelValue,
     set: (value) => emit('update:modelValue', value)
+})
+
+// Показывать галочку успеха при успешной валидации
+const showSuccess = computed(() => {
+    return !props.error && 
+           props.modelValue && 
+           props.modelValue.toString().length > 0 && 
+           touched.value &&
+           props.required // Только для обязательных полей
 })
 
 // Methods
@@ -230,6 +285,7 @@ const handleFocus = (event) => {
 }
 
 const handleBlur = (event) => {
+    touched.value = true
     emit('blur', event)
 }
 
@@ -237,12 +293,8 @@ const clearInput = () => {
     inputValue.value = ''
     emit('clear')
     
-    // Фокусируемся на поле после очистки
-    nextTick(() => {
-        if (inputRef.value) {
-            inputRef.value.focus()
-        }
-    })
+    // Убираем автоматическую фокусировку после очистки
+    // чтобы не появлялась синяя подсветка
 }
 
 const focus = () => {
@@ -263,6 +315,21 @@ defineExpose({
     blur
 })
 </script>
+
+<style scoped>
+/* Удаляем стрелочки из числовых полей для Chrome, Safari, Edge */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Удаляем стрелочки из числовых полей для Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+</style>
 
 <!-- Все стили мигрированы на Tailwind CSS с полной адаптивностью -->
 

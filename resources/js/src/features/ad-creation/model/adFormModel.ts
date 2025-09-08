@@ -68,6 +68,7 @@ export interface AdFormData {
     outcall_night?: number | null
     [key: string]: any
   }
+  startingPrice?: string | null
   // Объединяем параметры в единый объект
   parameters: {
     title: string
@@ -157,20 +158,20 @@ export function useAdFormModel(props: any, emit: any) {
       return []
     })(),
     service_location: savedFormData?.service_location || props.initialData?.service_location || [],
-    work_format: savedFormData?.work_format || props.initialData?.work_format || 'individual',
+    work_format: savedFormData?.work_format || props.initialData?.work_format || '',
     service_provider: (() => {
       if (savedFormData?.service_provider) return savedFormData.service_provider
-      if (!props.initialData?.service_provider) return ['women']
+      if (!props.initialData?.service_provider) return []
       if (Array.isArray(props.initialData.service_provider)) return props.initialData.service_provider
       if (typeof props.initialData.service_provider === 'string') {
         try {
           const parsed = JSON.parse(props.initialData.service_provider)
-          return Array.isArray(parsed) ? parsed : ['women']
+          return Array.isArray(parsed) ? parsed : []
         } catch (e) {
-          return ['women']
+          return []
         }
       }
-      return ['women']
+      return []
     })(),
     experience: savedFormData?.experience || props.initialData?.experience || '',
     description: savedFormData?.description || props.initialData?.description || '',
@@ -280,6 +281,7 @@ export function useAdFormModel(props: any, emit: any) {
         outcall_office: false
       }
     })(),
+    startingPrice: savedFormData?.startingPrice || props.initialData?.startingPrice || props.initialData?.starting_price || null,
     // Используем функцию миграции для обратной совместимости
     parameters: (() => {
       const migratedParams = migrateParameters(savedFormData || props.initialData);
@@ -418,33 +420,96 @@ export function useAdFormModel(props: any, emit: any) {
     
     console.log('🔍 validateForm: Проверяем поля формы', {
       'parameters.title': form.parameters.title,
-      'specialty': form.specialty,
-      'price': form.price,
+      'parameters.age': form.parameters.age,
+      'parameters.height': form.parameters.height,
+      'parameters.weight': form.parameters.weight,
+      'parameters.breast_size': form.parameters.breast_size,
+      'parameters.hair_color': form.parameters.hair_color,
       'contacts.phone': form.contacts.phone,
-      'geo.city': form.geo?.city,
-      'geo': form.geo
+      'service_provider': form.service_provider,
+      'work_format': form.work_format,
+      'clients': form.clients,
+      'services': form.services,
+      'prices': form.prices
     })
     
+    // 1. Параметры мастера (6 полей) - ОБЯЗАТЕЛЬНЫЕ
     if (!form.parameters.title) {
       newErrors['parameters.title'] = ['Имя обязательно']
       console.log('❌ validateForm: Имя пустое')
     }
     
-    // specialty теперь необязательно - убрали валидацию
-    
-    if (!form.price || form.price <= 0) {
-      newErrors.price = ['Укажите корректную цену']
-      console.log('❌ validateForm: Цена некорректная:', form.price)
+    if (!form.parameters.age || form.parameters.age === '') {
+      newErrors['parameters.age'] = ['Возраст обязателен']
+      console.log('❌ validateForm: Возраст не указан')
     }
     
+    if (!form.parameters.height || form.parameters.height === '') {
+      newErrors['parameters.height'] = ['Рост обязателен']
+      console.log('❌ validateForm: Рост не указан')
+    }
+    
+    if (!form.parameters.weight || form.parameters.weight === '') {
+      newErrors['parameters.weight'] = ['Вес обязателен']
+      console.log('❌ validateForm: Вес не указан')
+    }
+    
+    if (!form.parameters.breast_size || form.parameters.breast_size === '') {
+      newErrors['parameters.breast_size'] = ['Размер груди обязателен']
+      console.log('❌ validateForm: Размер груди не указан')
+    }
+    
+    if (!form.parameters.hair_color || form.parameters.hair_color === '') {
+      newErrors['parameters.hair_color'] = ['Цвет волос обязателен']
+      console.log('❌ validateForm: Цвет волос не указан')
+    }
+    
+    // 2. Контакты - ОБЯЗАТЕЛЬНЫЕ
     if (!form.contacts.phone) {
       newErrors['contacts.phone'] = ['Телефон обязателен']
       console.log('❌ validateForm: Телефон пустой')
     }
     
-    if (!form.geo?.city) {
-      newErrors['geo.city'] = ['Выберите город']
-      console.log('❌ validateForm: Город не выбран')
+    // 3. Услуги - минимум одна услуга должна быть выбрана
+    let hasSelectedService = false
+    if (form.services && typeof form.services === 'object') {
+      Object.values(form.services).forEach(categoryServices => {
+        if (categoryServices && typeof categoryServices === 'object') {
+          Object.values(categoryServices).forEach((service: any) => {
+            if (service?.enabled) {
+              hasSelectedService = true
+            }
+          })
+        }
+      })
+    }
+    if (!hasSelectedService) {
+      newErrors['services'] = ['Выберите хотя бы одну услугу']
+      console.log('❌ validateForm: Услуги не выбраны')
+    }
+    
+    // 4. Основная информация - ОБЯЗАТЕЛЬНЫЕ
+    if (!form.service_provider || (Array.isArray(form.service_provider) && form.service_provider.length === 0)) {
+      newErrors['service_provider'] = ['Укажите, кто оказывает услуги']
+      console.log('❌ validateForm: Кто оказывает услуги не указано')
+    }
+    
+    if (!form.work_format || form.work_format === '') {
+      newErrors['work_format'] = ['Выберите формат работы']
+      console.log('❌ validateForm: Формат работы не указан')
+    }
+    
+    if (!form.clients || (Array.isArray(form.clients) && form.clients.length === 0)) {
+      newErrors['clients'] = ['Укажите ваших клиентов']
+      console.log('❌ validateForm: Клиенты не указаны')
+    }
+    
+    // 5. Стоимость услуг - минимум одна цена (1 час апартаменты ИЛИ 1 час выезд)
+    const hasApartmentPrice = form.prices?.apartments_1h && Number(form.prices.apartments_1h) > 0
+    const hasOutcallPrice = form.prices?.outcall_1h && Number(form.prices.outcall_1h) > 0
+    if (!hasApartmentPrice && !hasOutcallPrice) {
+      newErrors['prices'] = ['Укажите стоимость за 1 час (апартаменты или выезд)']
+      console.log('❌ validateForm: Цены не указаны')
     }
     
     console.log('🔍 validateForm: Результат валидации', {
@@ -454,6 +519,35 @@ export function useAdFormModel(props: any, emit: any) {
     })
     
     errors.value = newErrors
+    
+    // Если есть ошибки, прокручиваем к первой незаполненной секции
+    if (Object.keys(newErrors).length > 0) {
+      // Находим первое поле с ошибкой и прокручиваем к его секции
+      const firstErrorField = Object.keys(newErrors)[0]
+      let sectionToScroll = ''
+      
+      // Определяем к какой секции относится поле
+      if (firstErrorField.startsWith('parameters')) {
+        sectionToScroll = 'parameters'
+      } else if (firstErrorField === 'services') {
+        sectionToScroll = 'services'
+      } else if (firstErrorField === 'prices') {
+        sectionToScroll = 'price'
+      } else if (firstErrorField.startsWith('contacts')) {
+        sectionToScroll = 'contacts'
+      } else if (['service_provider', 'work_format', 'clients'].includes(firstErrorField)) {
+        sectionToScroll = 'basic'
+      }
+      
+      // Прокручиваем к секции с ошибкой
+      if (sectionToScroll) {
+        const errorSection = document.querySelector(`[data-section="${sectionToScroll}"]`)
+        if (errorSection) {
+          errorSection.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+      }
+    }
+    
     return Object.keys(newErrors).length === 0
   }
 
@@ -653,6 +747,9 @@ export function useAdFormModel(props: any, emit: any) {
       formData.append('prices[outcall_sauna]', form.prices.outcall_sauna ? '1' : '0')
       formData.append('prices[outcall_office]', form.prices.outcall_office ? '1' : '0')
     }
+    
+    // Добавляем начальную цену (всегда, даже если null)
+    formData.append('starting_price', form.startingPrice || '')
     
     // Добавляем параметры (из объекта parameters для обратной совместимости с backend)
     

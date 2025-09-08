@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карта феи - Эталон плавности (SPA Platform)</title>
+    
+    <!-- Yandex Maps API -->
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=23ff8acc-835f-4e99-8b19-d33c5d346e18&lang=ru_RU" async defer></script>
+    
+    <!-- Локальная версия (если нужна офлайн работа) -->
+    <!-- <script src="js/yandex-maps.js"></script> -->
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+        }
+        
+        .header {
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .map-container {
+            display: flex;
+            gap: 20px;
+            height: 600px;
+        }
+        
+        .filters-panel {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            width: 300px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+        
+        .map-wrapper {
+            flex: 1;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+            min-height: 600px;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        
+        .filter-group {
+            margin-bottom: 20px;
+        }
+        
+        .filter-group h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .filter-checkbox {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+        
+        .filter-checkbox input {
+            margin-right: 8px;
+        }
+        
+        .price-range {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .price-range input {
+            width: 100px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .btn {
+            background: #ffdb4d;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #ffd633;
+        }
+        
+        .master-balloon {
+            padding: 10px;
+            max-width: 250px;
+        }
+        
+        .master-balloon h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        
+        .master-balloon .services {
+            margin: 10px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .master-balloon .price {
+            font-weight: bold;
+            color: #ff6b35;
+            margin: 5px 0;
+        }
+        
+        .master-balloon .btn-book {
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .map-container {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .filters-panel {
+                width: 100%;
+                max-height: 300px;
+            }
+            
+            .map-wrapper {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Убираем header для встраивания в iframe -->
+    <div class="container" style="padding: 10px;">
+        <div class="map-container">
+            <!-- Панель фильтров -->
+            <div class="filters-panel">
+                <div class="filter-group">
+                    <h3>Услуги</h3>
+                    <label class="filter-checkbox">
+                        <input type="checkbox" value="massage" checked>
+                        <span>Массаж</span>
+                    </label>
+                    <label class="filter-checkbox">
+                        <input type="checkbox" value="spa">
+                        <span>SPA процедуры</span>
+                    </label>
+                    <label class="filter-checkbox">
+                        <input type="checkbox" value="thai">
+                        <span>Тайский массаж</span>
+                    </label>
+                    <label class="filter-checkbox">
+                        <input type="checkbox" value="relax">
+                        <span>Релакс массаж</span>
+                    </label>
+                </div>
+                
+                <div class="filter-group">
+                    <h3>Район</h3>
+                    <label class="filter-checkbox">
+                        <input type="checkbox" value="center" checked>
+                        <span>Центр</span>
+                    </label>
+                    <label class="filter-checkbox">
+                        <input type="checkbox" value="north">
+                        <span>Север</span>
+                    </label>
+                    <label class="filter-checkbox">
+                        <input type="checkbox" value="south">
+                        <span>Юг</span>
+                    </label>
+                </div>
+                
+                <div class="filter-group">
+                    <h3>Цена (руб/час)</h3>
+                    <div class="price-range">
+                        <input type="number" id="price-from" placeholder="От" value="1000">
+                        <span>—</span>
+                        <input type="number" id="price-to" placeholder="До" value="5000">
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="applyFilters()">Применить фильтры</button>
+            </div>
+            
+            <!-- Карта -->
+            <div class="map-wrapper">
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Инициализация карты
+        let myMap;
+        let placemarks = [];
+        
+        // Тестовые данные мастеров
+        const masters = [
+            {
+                id: 1,
+                name: "Анна Иванова",
+                coords: [55.753994, 37.622093],
+                services: ["Классический массаж", "Релакс"],
+                price: "2500 руб/час",
+                rating: 4.8,
+                photo: "assets/master1.jpg",
+                district: "center",
+                type: ["massage", "relax"]
+            },
+            {
+                id: 2,
+                name: "Мария Петрова",
+                coords: [55.761994, 37.632093],
+                services: ["Тайский массаж", "SPA"],
+                price: "3500 руб/час",
+                rating: 4.9,
+                photo: "assets/master2.jpg",
+                district: "north",
+                type: ["thai", "spa"]
+            },
+            {
+                id: 3,
+                name: "Елена Сидорова",
+                coords: [55.743994, 37.612093],
+                services: ["Антицеллюлитный массаж"],
+                price: "3000 руб/час",
+                rating: 4.7,
+                photo: "assets/master3.jpg",
+                district: "south",
+                type: ["massage"]
+            },
+            {
+                id: 4,
+                name: "Ольга Николаева",
+                coords: [55.749994, 37.618093],
+                services: ["SPA процедуры", "Релакс"],
+                price: "4000 руб/час",
+                rating: 5.0,
+                photo: "assets/master4.jpg",
+                district: "center",
+                type: ["spa", "relax"]
+            }
+        ];
+        
+        // Инициализация Yandex Maps
+        console.log('🎯 [FeipiterMap] Запуск инициализации карты...');
+        
+        // Проверяем доступность ymaps с задержкой
+        let checkAttempts = 0;
+        function checkYandexMaps() {
+            checkAttempts++;
+            
+            if (typeof ymaps === 'undefined') {
+                if (checkAttempts > 20) { // 10 секунд максимум
+                    console.error('❌ [FeipiterMap] Yandex Maps API не загрузился за 10 секунд');
+                    document.getElementById('map').innerHTML = `
+                        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #ef4444; font-weight: bold; text-align: center; padding: 20px;">
+                            <div style="font-size: 48px; margin-bottom: 16px;">🗺️</div>
+                            <div>❌ Не удалось загрузить Yandex Maps API</div>
+                            <div style="margin-top: 8px; font-size: 14px; color: #6b7280;">Проверьте интернет-соединение и API ключ</div>
+                            <button onclick="location.reload()" style="margin-top: 16px; padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                                🔄 Перезагрузить
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                console.warn('⚠️ [FeipiterMap] Yandex Maps API ещё не загружен, попытка ' + checkAttempts + '/20...');
+                setTimeout(checkYandexMaps, 500);
+                return;
+            }
+            
+            console.log('✅ [FeipiterMap] Yandex Maps API загружен, ожидаем готовности...');
+            ymaps.ready(init);
+        }
+        
+        checkYandexMaps();
+        
+        function init() {
+            console.log('🚀 [FeipiterMap] Инициализация карты началась...');
+            
+            try {
+                // Создание карты
+                myMap = new ymaps.Map("map", {
+                    center: [55.753994, 37.622093], // Москва
+                    zoom: 12,
+                    controls: ['zoomControl', 'searchControl', 'geolocationControl']
+                });
+                
+                console.log('✅ [FeipiterMap] Карта создана успешно');
+                
+                // Добавляем индикатор в заголовок страницы
+                document.title = '✅ Карта феи загружена - ' + document.title;
+                
+                // Принудительное обновление размеров карты
+                setTimeout(() => {
+                    if (myMap && myMap.container) {
+                        myMap.container.fitToViewport();
+                        console.log('🔧 [FeipiterMap] Обновил размеры контейнера карты');
+                    }
+                }, 100);
+                
+            } catch (error) {
+                console.error('❌ [FeipiterMap] Ошибка создания карты:', error);
+                document.getElementById('map').innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: red; font-weight: bold;">❌ Ошибка создания карты: ' + error.message + '</div>';
+                return;
+            }
+            
+            // Добавление меток мастеров
+            try {
+                console.log('📍 [FeipiterMap] Добавляю метки мастеров...');
+                addMasterMarkers();
+                console.log('✅ [FeipiterMap] Метки добавлены успешно');
+            } catch (error) {
+                console.error('❌ [FeipiterMap] Ошибка добавления меток:', error);
+            }
+            
+            // Кластеризация меток (если их много)
+            const clusterer = new ymaps.Clusterer({
+                preset: 'islands#invertedYellowClusterIcons',
+                groupByCoordinates: false,
+                clusterDisableClickZoom: false,
+                clusterHideIconOnBalloonOpen: false,
+                geoObjectHideIconOnBalloonOpen: false
+            });
+            
+            clusterer.add(placemarks);
+            myMap.geoObjects.add(clusterer);
+            
+            // Определение местоположения пользователя
+            ymaps.geolocation.get({
+                provider: 'browser',
+                mapStateAutoApply: false
+            }).then(function (result) {
+                // Добавляем метку местоположения пользователя
+                const userLocation = result.geoObjects.get(0);
+                userLocation.properties.set({
+                    balloonContentHeader: 'Ваше местоположение',
+                    balloonContentBody: 'Вы находитесь здесь'
+                });
+                myMap.geoObjects.add(userLocation);
+            });
+        }
+        
+        function addMasterMarkers() {
+            masters.forEach(master => {
+                const placemark = new ymaps.Placemark(master.coords, {
+                    balloonContentHeader: master.name,
+                    balloonContentBody: createBalloonContent(master),
+                    hintContent: master.name
+                }, {
+                    iconLayout: 'default#image',
+                    iconImageHref: 'assets/291089699412.svg', // Иконка метки
+                    iconImageSize: [40, 40],
+                    iconImageOffset: [-20, -40],
+                    // Данные для фильтрации
+                    masterData: master
+                });
+                
+                placemarks.push(placemark);
+            });
+        }
+        
+        function createBalloonContent(master) {
+            return `
+                <div class="master-balloon">
+                    <div class="services">${master.services.join(', ')}</div>
+                    <div class="price">${master.price}</div>
+                    <div>Рейтинг: ${master.rating} ⭐</div>
+                    <button class="btn btn-book" onclick="bookMaster(${master.id})">
+                        Забронировать
+                    </button>
+                </div>
+            `;
+        }
+        
+        function bookMaster(masterId) {
+            const master = masters.find(m => m.id === masterId);
+            alert(`Бронирование мастера: ${master.name}\nЦена: ${master.price}`);
+            // Здесь будет интеграция с системой бронирования SPA Platform
+        }
+        
+        function applyFilters() {
+            // Получаем выбранные фильтры
+            const selectedServices = Array.from(document.querySelectorAll('.filter-checkbox input:checked'))
+                .map(cb => cb.value);
+            
+            const priceFrom = parseInt(document.getElementById('price-from').value) || 0;
+            const priceTo = parseInt(document.getElementById('price-to').value) || 999999;
+            
+            // Фильтрация меток
+            placemarks.forEach(placemark => {
+                const masterData = placemark.options.get('masterData');
+                const price = parseInt(masterData.price.replace(/\D/g, ''));
+                
+                const matchesService = masterData.type.some(t => selectedServices.includes(t));
+                const matchesPrice = price >= priceFrom && price <= priceTo;
+                
+                placemark.options.set('visible', matchesService && matchesPrice);
+            });
+            
+            console.log('Фильтры применены:', {
+                services: selectedServices,
+                priceRange: [priceFrom, priceTo]
+            });
+        }
+        
+        // Обработка изменения размера окна
+        window.addEventListener('resize', () => {
+            if (myMap) {
+                myMap.container.fitToViewport();
+            }
+        });
+    </script>
+</body>
+</html>

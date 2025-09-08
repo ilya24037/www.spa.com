@@ -11,6 +11,7 @@
           name="work_format"
           :value="option.value"
           :label="option.label"
+          :error="showError && !hasSelection"
           @update:modelValue="emitWorkFormat"
         />
         <p class="work-format-description">
@@ -18,8 +19,8 @@
         </p>
       </div>
     </div>
-    <div v-if="errors.work_format" class="error-message">
-      {{ errors.work_format }}
+    <div v-if="showError && !hasSelection" class="text-sm text-red-600 mt-2">
+      Выберите формат работы
     </div>
   </div>
 </template>
@@ -30,11 +31,21 @@ import BaseRadio from '@/src/shared/ui/atoms/BaseRadio/BaseRadio.vue'
 
 const props = defineProps({
   workFormat: { type: String, default: '' },
-  errors: { type: Object, default: () => ({}) }
+  errors: { type: Object, default: () => ({}) },
+  forceValidation: { type: Boolean, default: false }
 })
 
-const emit = defineEmits(['update:workFormat'])
+const emit = defineEmits(['update:workFormat', 'clearForceValidation'])
 const localWorkFormat = ref(props.workFormat)
+
+// Состояние для валидации
+const touched = ref(false)
+
+// Проверка наличия выбора
+const hasSelection = computed(() => !!localWorkFormat.value)
+
+// Показывать ошибку если поле тронуто, есть ошибка от родителя или принудительная валидация
+const showError = computed(() => touched.value || !!props.errors?.work_format || props.forceValidation)
 
 // Опции для радио-кнопок (согласно скриншоту и backend валидации)
 const workFormatOptions = computed(() => [
@@ -60,7 +71,13 @@ watch(() => props.workFormat, val => {
 })
 
 const emitWorkFormat = () => {
+  touched.value = true // Помечаем что поле тронуто
   emit('update:workFormat', localWorkFormat.value)
+  
+  // Сбрасываем флаг принудительной валидации если выбрано значение
+  if (props.forceValidation && localWorkFormat.value) {
+    emit('clearForceValidation')
+  }
 }
 </script>
 

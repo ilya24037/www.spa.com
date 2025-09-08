@@ -16,7 +16,7 @@
         :readonly="readonly"
         :rows="rows"
         :maxlength="maxlength"
-        class="w-full min-h-[80px] p-3 text-base leading-relaxed text-gray-900 bg-white border border-gray-300 rounded-lg outline-none transition-all duration-200 font-inherit placeholder-gray-400"
+        class="w-full min-h-[80px] px-3 py-1.5 text-base leading-relaxed text-gray-900 bg-white border-2 border-gray-300 rounded-lg outline-none transition-all duration-200 font-inherit placeholder-gray-400"
         :class="{
           'bg-gray-50 text-gray-400 cursor-not-allowed border-gray-200': disabled,
           'bg-gray-50 cursor-default border-gray-200': readonly && !disabled,

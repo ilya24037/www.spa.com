@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отладка карты</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .debug-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        iframe {
+            width: 100%;
+            height: 400px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .console-output {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Отладка карты</h1>
+    
+    <div class="debug-section">
+        <h2>1. Проверка доступности файлов</h2>
+        <div id="file-check" class="status info">Проверяем...</div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>2. Проверка Yandex Maps API</h2>
+        <div id="api-check" class="status info">Загружаем API...</div>
+        <div id="api-console" class="console-output"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>3. Тест iframe</h2>
+        <iframe id="test-iframe" src="/maps/address-picker/index.html"></iframe>
+        <div id="iframe-check" class="status info">Загружаем iframe...</div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>4. Консоль браузера</h2>
+        <div id="browser-console" class="console-output"></div>
+    </div>
+    
+    <script>
+        // Перехватываем console.log для отображения
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        function addToConsole(message, type = 'log') {
+            const consoleDiv = document.getElementById('browser-console');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#dc3545' : type === 'warn' ? '#ffc107' : '#28a745';
+            consoleDiv.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToConsole(args.join(' '), 'log');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToConsole(args.join(' '), 'error');
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addToConsole(args.join(' '), 'warn');
+        };
+        
+        // Тест 1: Проверка доступности файлов
+        async function checkFiles() {
+            const files = [
+                '/maps/address-picker/index.html',
+                '/test-map.html',
+                '/test-iframe.html'
+            ];
+            
+            const results = [];
+            for (const file of files) {
+                try {
+                    const response = await fetch(file);
+                    results.push({
+                        file: file,
+                        status: response.status,
+                        ok: response.ok
+                    });
+                } catch (error) {
+                    results.push({
+                        file: file,
+                        status: 'ERROR',
+                        ok: false,
+                        error: error.message
+                    });
+                }
+            }
+            
+            const fileCheckDiv = document.getElementById('file-check');
+            let html = '';
+            results.forEach(result => {
+                const statusClass = result.ok ? 'success' : 'error';
+                const statusText = result.ok ? '✅' : '❌';
+                html += `<div class="status ${statusClass}">${statusText} ${result.file} - ${result.status}</div>`;
+            });
+            fileCheckDiv.innerHTML = html;
+        }
+        
+        // Тест 2: Проверка Yandex Maps API
+        function checkYandexAPI() {
+            const apiCheckDiv = document.getElementById('api-check');
+            const apiConsoleDiv = document.getElementById('api-console');
+            
+            // Проверяем, загружен ли уже API
+            if (typeof ymaps !== 'undefined') {
+                apiCheckDiv.innerHTML = '<div class="status success">✅ Yandex Maps API уже загружен</div>';
+                apiConsoleDiv.innerHTML = 'ymaps объект доступен';
+                return;
+            }
+            
+            // Загружаем API
+            const script = document.createElement('script');
+            script.src = 'https://api-maps.yandex.ru/2.1/?apikey=23ff8acc-835f-4e99-8b19-d33c5d346e18&lang=ru_RU';
+            
+            script.onload = function() {
+                apiCheckDiv.innerHTML = '<div class="status success">✅ Yandex Maps API загружен успешно</div>';
+                apiConsoleDiv.innerHTML = 'API загружен, проверяем объекты...';
+                
+                if (typeof ymaps !== 'undefined') {
+                    apiConsoleDiv.innerHTML += '\n✅ ymaps объект доступен';
+                    apiConsoleDiv.innerHTML += '\n✅ ymaps.Map доступен: ' + (typeof ymaps.Map !== 'undefined');
+                    apiConsoleDiv.innerHTML += '\n✅ ymaps.geocode доступен: ' + (typeof ymaps.geocode !== 'undefined');
+                } else {
+                    apiConsoleDiv.innerHTML += '\n❌ ymaps объект недоступен';
+                }
+            };
+            
+            script.onerror = function() {
+                apiCheckDiv.innerHTML = '<div class="status error">❌ Ошибка загрузки Yandex Maps API</div>';
+                apiConsoleDiv.innerHTML = 'Не удалось загрузить API';
+            };
+            
+            document.head.appendChild(script);
+        }
+        
+        // Тест 3: Проверка iframe
+        function checkIframe() {
+            const iframe = document.getElementById('test-iframe');
+            const iframeCheckDiv = document.getElementById('iframe-check');
+            
+            iframe.onload = function() {
+                iframeCheckDiv.innerHTML = '<div class="status success">✅ iframe загружен успешно</div>';
+            };
+            
+            iframe.onerror = function() {
+                iframeCheckDiv.innerHTML = '<div class="status error">❌ Ошибка загрузки iframe</div>';
+            };
+            
+            // Таймаут для iframe
+            setTimeout(() => {
+                if (iframeCheckDiv.innerHTML.includes('Загружаем iframe')) {
+                    iframeCheckDiv.innerHTML = '<div class="status warning">⚠️ iframe загружается слишком долго</div>';
+                }
+            }, 10000);
+        }
+        
+        // Запускаем все тесты
+        console.log('🔍 Начинаем отладку карты...');
+        checkFiles();
+        checkYandexAPI();
+        checkIframe();
+        
+        // Обработчик сообщений от iframe
+        window.addEventListener('message', function(event) {
+            console.log('📨 Получено сообщение от iframe:', event.data);
+        });
+    </script>
+</body>
+</html>

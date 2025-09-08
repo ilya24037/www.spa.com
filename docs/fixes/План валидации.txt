@@ -1,0 +1,57 @@
+План синхронизации валидации формы объявления                               │
+     │                                                                                │
+     │ Обязательные поля для публикации (новые требования):                           │
+     │                                                                                │
+     │ 1. Имя (parameters.title)                                                      │
+     │ 2. Возраст (parameters.age)                                                    │
+     │ 3. Рост (parameters.height)                                                    │
+     │ 4. Вес (parameters.weight)                                                     │
+     │ 5. Размер груди (parameters.breast_size)                                       │
+     │ 6. Цвет волос (parameters.hair_color)                                          │
+     │ 
+7. Телефон (contacts.phone)                                                    │
+     │ 
+8. Услуги (services - минимум одна)                                            │
+     │ 9. Кто оказывает услуги (service_provider)                                     │
+     │ 10. Формат работы (work_format)                                                │
+     │ 11. Ваши клиенты (clients)                                                     │
+     │ 12. Стоимость услуг (prices.apartments_1h ИЛИ prices.outcall_1h)               │
+     │                                                                                │
+     │ Что буду делать:                                                               │
+     │                                                                                │
+     │ 1. Обновлю frontend валидацию (adFormModel.ts):                                │
+     │                                                                                │
+     │ - Добавлю проверку всех 12 обязательных полей в функцию validateForm()         │
+     │ - Добавлю проверку хотя бы одной выбранной услуги                              │
+     │ - Добавлю проверку цены (1 час апартаменты ИЛИ 1 час выезд)                    │
+     │ - Направление на обязательное поле не заполненое                           │
+     │                                                                                │
+     │ 2. Обновлю backend валидацию (CreateAdRequest.php):                            │
+     │                                                                                │
+     │ - Синхронизирую с frontend - те же 12 полей                                    │
+     │ - Сделаю обязательными: age, height, weight, breast_size, hair_color           │
+     │ - Добавлю проверку минимум одной услуги                                        │
+     │ - Добавлю проверку наличия цены за час (апартаменты ИЛИ выезд)                        │
+     │ - Уберу обязательность полей: category, description, experience, address,      │
+     │ travel_area                                                                    │
+     │                                                                                │
+     │ 3. Обновлю UI компоненты (AdForm.vue):                                         │
+     │                                                                                │
+     │ - Добавлю звездочки (*) к новым обязательным полям в секции "Параметры"        │
+     │ - Обновлю метод checkSectionFilled() для корректной проверки                   │
+     │ - Обновлю подсчет прогресса заполнения формы                                   │
+     │                                                                                │
+     │ 4. Обновлю конфигурацию секций:                                                │
+     │                                                                                │
+     │                          │
+     │ - Секция "Услуги" - минимум одна услуга обязательна                            │
+     │ - Секция "Стоимость" - хотя бы одна цена обязательна 1 час апартаменты ИЛИ 1 час выезд                            │
+     │                                                                                │
+     │ Файлы для изменения:                                                           │
+     │                                                                                │
+     │ 1. resources/js/src/features/ad-creation/model/adFormModel.ts - валидация      │
+     │ frontend                                                                       │
+     │ 2. app/Application/Http/Requests/Ad/CreateAdRequest.php - валидация backend    │
+     │ 3. resources/js/src/features/ad-creation/ui/AdForm.vue - UI обновления         │
+     │ 4. resources/js/src/features/AdSections/ParametersSection/ui/ParametersSection │
+     │ .vue - добавление звездочек          

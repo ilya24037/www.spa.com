@@ -28,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Регистрация middleware алиасов
         $middleware->alias([
             'guest' => \App\Application\Http\Middleware\RedirectIfAuthenticated::class,
+            'cors' => \App\Http\Middleware\CorsMiddleware::class,
         ]);
 
         // Глобальные middleware (временно отключено)

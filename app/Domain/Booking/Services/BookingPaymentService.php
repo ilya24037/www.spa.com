@@ -4,7 +4,7 @@ namespace App\Domain\Booking\Services;
 
 use App\Domain\Booking\Models\Booking;
 use App\Domain\Payment\Services\PaymentService;
-use App\Domain\Payment\Services\PaymentGatewayManager;
+use App\Domain\Payment\Gateways\PaymentGatewayManager;
 use App\Domain\User\Models\User;
 use App\Domain\Notification\Contracts\NotificationServiceInterface;
 use Carbon\Carbon;

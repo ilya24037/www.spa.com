@@ -1,7 +1,7 @@
 <template>
   <Head title="Новое объявление — Объявления на сайте Massagist" />
   
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen">
     <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
       <!-- Кнопка назад -->
       <Link href="/" class="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6">
@@ -24,7 +24,7 @@
       </div>
 
       <!-- Модульная форма -->
-      <div class="bg-white rounded-lg shadow-sm">
+      <div class="rounded-lg">
         <div class="p-6">
           <AdForm 
             category="erotic"

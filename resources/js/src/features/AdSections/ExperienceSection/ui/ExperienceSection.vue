@@ -2,10 +2,9 @@
   <div class="experience-section">
     <BaseSelect
       v-model="localExperience"
-      label="Опыт (лет)"
       placeholder="Выберите опыт"
       :options="experienceOptions"
-      :required="true"
+      :required="false"
       :error="errors.experience"
       @update:modelValue="emitExperience"
     />

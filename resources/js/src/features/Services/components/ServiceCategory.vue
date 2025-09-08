@@ -1,7 +1,7 @@
 <template>
   <div :class="isSubcategory ? 'mb-4' : 'mb-6'">
     <!-- Заголовок категории -->
-    <div class="border border-gray-200 rounded-lg px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors duration-200 mb-3 cursor-pointer select-none" @click="toggleExpanded">
+    <div class="border border-gray-200 rounded-lg px-4 py-3 hover:bg-gray-50 transition-colors duration-200 mb-3 cursor-pointer select-none" @click="toggleExpanded">
       <div class="flex items-center justify-between">
         <h3 :class="[
           'flex items-center',
@@ -35,9 +35,9 @@
     </p>
 
     <!-- Список услуг в виде таблицы -->
-    <div v-show="isExpanded" class="bg-white rounded-lg overflow-hidden border border-gray-200 mt-4 md:overflow-x-auto">
+    <div v-show="isExpanded" class="rounded-lg overflow-hidden border border-gray-200 mt-4 md:overflow-x-auto">
       <table class="w-full border-collapse md:min-w-[500px]">
-        <thead class="bg-gray-50 border-b border-gray-200">
+        <thead class="border-b border-gray-200">
           <tr class="text-left text-xs text-gray-500 uppercase tracking-wider">
             <th class="py-2 px-2 w-10"></th>
             <th class="py-2 px-2">Услуга</th>
@@ -58,7 +58,7 @@
         </tbody>
       </table>
       <!-- Подсказка под таблицей -->
-      <div class="px-2 py-2 text-xs text-gray-500 bg-gray-50 border-t border-gray-100">
+      <div class="px-2 py-2 text-xs text-gray-500 border-t border-gray-100">
         <div class="flex">
           <div class="w-10"></div>
           <div class="flex-1"></div>

@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white rounded-lg p-5">
+  <div class="rounded-lg p-5">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
       <BaseInput
         v-model="localTitle"
@@ -9,7 +9,8 @@
         placeholder="Введите имя"
         :required="true"
         @update:modelValue="emitAll"
-        :error="errors?.title || errors?.['parameters.title']"
+        @blur="validateField('title')"
+        :error="fieldErrors.title || errors?.title || errors?.['parameters.title'] || (props.forceValidation?.title && !localTitle ? 'Имя обязательно' : '')"
       />
       <BaseInput
         v-if="props.showFields.includes('age')"
@@ -18,10 +19,12 @@
         type="number"
         label="Возраст"
         placeholder="25"
+        :required="true"
         :min="18"
         :max="65"
         @update:modelValue="emitAll"
-        :error="errors?.age || errors?.['parameters.age']"
+        @blur="validateField('age')"
+        :error="fieldErrors.age || errors?.age || errors?.['parameters.age'] || (props.forceValidation?.age && !localAge ? 'Возраст обязателен' : '')"
       />
       <BaseInput
         v-model="localHeight"
@@ -29,10 +32,12 @@
         type="number"
         label="Рост (см)"
         placeholder="170"
+        :required="true"
         :min="100"
         :max="250"
         @update:modelValue="emitAll"
-        :error="errors?.height || errors?.['parameters.height']"
+        @blur="validateField('height')"
+        :error="fieldErrors.height || errors?.height || errors?.['parameters.height'] || (props.forceValidation?.height && !localHeight ? 'Рост обязателен' : '')"
       />
       <BaseInput
         v-model="localWeight"
@@ -40,28 +45,34 @@
         type="number"
         label="Вес (кг)"
         placeholder="60"
+        :required="true"
         :min="30"
         :max="200"
         @update:modelValue="emitAll"
-        :error="errors?.weight || errors?.['parameters.weight']"
+        @blur="validateField('weight')"
+        :error="fieldErrors.weight || errors?.weight || errors?.['parameters.weight'] || (props.forceValidation?.weight && !localWeight ? 'Вес обязателен' : '')"
       />
       <BaseSelect
         v-if="props.showFields.includes('breast_size')"
         v-model="localBreastSize"
         label="Размер груди"
         placeholder="Не указано"
+        :required="true"
         :options="breastSizeOptions"
         @update:modelValue="emitAll"
-        :error="errors?.breast_size || errors?.['parameters.breast_size']"
+        @blur="validateField('breast_size')"
+        :error="fieldErrors.breast_size || errors?.breast_size || errors?.['parameters.breast_size'] || (props.forceValidation?.breast_size && !localBreastSize ? 'Размер груди обязателен' : '')"
       />
       <BaseSelect
         v-if="props.showFields.includes('hair_color')"
         v-model="localHairColor"
         label="Цвет волос"
         placeholder="Выберите цвет"
+        :required="true"
         :options="hairColorOptions"
         @update:modelValue="emitAll"
-        :error="errors?.hair_color || errors?.['parameters.hair_color']"
+        @blur="validateField('hair_color')"
+        :error="fieldErrors.hair_color || errors?.hair_color || errors?.['parameters.hair_color'] || (props.forceValidation?.hair_color && !localHairColor ? 'Цвет волос обязателен' : '')"
       />
       <BaseSelect
         v-if="props.showFields.includes('eye_color')"
@@ -96,7 +107,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, reactive } from 'vue'
 import BaseInput from '@/src/shared/ui/atoms/BaseInput/BaseInput.vue'
 import BaseSelect from '@/src/shared/ui/atoms/BaseSelect/BaseSelect.vue'
 const props = defineProps({
@@ -118,12 +129,26 @@ const props = defineProps({
     type: Array, 
     default: () => ['age', 'breast_size', 'hair_color', 'eye_color', 'nationality', 'bikini_zone'] 
   },
-  errors: { type: Object, default: () => ({}) }
+  errors: { type: Object, default: () => ({}) },
+  forceValidation: {
+    type: Object,
+    default: () => ({
+      title: false,
+      age: false,
+      height: false,
+      weight: false,
+      breast_size: false,
+      hair_color: false
+    })
+  }
 })
-const emit = defineEmits(['update:parameters'])
+const emit = defineEmits(['update:parameters', 'clearForceValidation'])
 
 // Локальная копия параметров
 const localParameters = ref({ ...props.parameters })
+
+// Локальные ошибки для валидации на лету
+const fieldErrors = reactive({})
 
 // Computed свойства для удобства доступа к полям
 const localTitle = computed({
@@ -231,6 +256,70 @@ const bikiniZoneOptions = computed(() => [
   { value: 'smooth', label: 'Гладкая' }
 ])
 
+// Простая валидация на blur (KISS принцип)
+const validateField = (field) => {
+  let error = null
+  
+  switch(field) {
+    case 'title':
+      if (!localTitle.value) {
+        error = 'Имя обязательно'
+      } else if (localTitle.value.length < 2) {
+        error = 'Минимум 2 символа'
+      }
+      break
+    
+    case 'age':
+      if (!localAge.value) {
+        error = 'Возраст обязателен'
+      } else if (localAge.value < 18) {
+        error = 'Минимум 18 лет'
+      } else if (localAge.value > 99) {
+        error = 'Максимум 99 лет'
+      }
+      break
+    
+    case 'height':
+      if (!localHeight.value) {
+        error = 'Рост обязателен'
+      } else if (localHeight.value < 140) {
+        error = 'Минимум 140 см'
+      } else if (localHeight.value > 220) {
+        error = 'Максимум 220 см'
+      }
+      break
+    
+    case 'weight':
+      if (!localWeight.value) {
+        error = 'Вес обязателен'
+      } else if (localWeight.value < 40) {
+        error = 'Минимум 40 кг'
+      } else if (localWeight.value > 200) {
+        error = 'Максимум 200 кг'
+      }
+      break
+    
+    case 'breast_size':
+      if (!localBreastSize.value) {
+        error = 'Размер груди обязателен'
+      }
+      break
+    
+    case 'hair_color':
+      if (!localHairColor.value) {
+        error = 'Цвет волос обязателен'
+      }
+      break
+  }
+  
+  // Обновляем или удаляем ошибку
+  if (error) {
+    fieldErrors[field] = error
+  } else {
+    delete fieldErrors[field]
+  }
+}
+
 // Универсальная функция обновления параметра
 const updateParameter = (field, value) => {
   localParameters.value[field] = value
@@ -246,6 +335,43 @@ watch(() => props.parameters, (newParams) => {
 const emitAll = () => {
   emit('update:parameters', { ...localParameters.value })
 }
+
+// Следим за изменениями локальных полей и сбрасываем флаг принудительной валидации
+watch(() => localTitle.value, (value) => {
+  if (value && props.forceValidation?.title) {
+    emit('clearForceValidation', 'title')
+  }
+})
+
+watch(() => localAge.value, (value) => {
+  if (value && props.forceValidation?.age) {
+    emit('clearForceValidation', 'age')
+  }
+})
+
+watch(() => localHeight.value, (value) => {
+  if (value && props.forceValidation?.height) {
+    emit('clearForceValidation', 'height')
+  }
+})
+
+watch(() => localWeight.value, (value) => {
+  if (value && props.forceValidation?.weight) {
+    emit('clearForceValidation', 'weight')
+  }
+})
+
+watch(() => localBreastSize.value, (value) => {
+  if (value && props.forceValidation?.breast_size) {
+    emit('clearForceValidation', 'breast_size')
+  }
+})
+
+watch(() => localHairColor.value, (value) => {
+  if (value && props.forceValidation?.hair_color) {
+    emit('clearForceValidation', 'hair_color')
+  }
+})
 </script>
 
 <!-- Все стили мигрированы на Tailwind CSS в template --> 

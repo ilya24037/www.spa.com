@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест Yandex Maps API (прямой)</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        #map {
+            width: 100%;
+            height: 400px;
+            border: 2px solid #ccc;
+            background: #f0f0f0;
+        }
+        .info {
+            margin: 20px 0;
+            padding: 10px;
+            background: #e8f4f8;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Тест Yandex Maps API (прямой)</h1>
+    
+    <div class="info">
+        <p><strong>Цель:</strong> Проверить работу Yandex Maps API без iframe</p>
+        <p><strong>API Key:</strong> <span id="api-key">Загрузка...</span></p>
+        <p><strong>Статус:</strong> <span id="status">Инициализация...</span></p>
+    </div>
+    
+    <div id="map"></div>
+    
+    <div class="info">
+        <p><strong>Логи:</strong></p>
+        <div id="logs" style="background: #f9f9f9; padding: 10px; border-radius: 3px; font-family: monospace; font-size: 12px; max-height: 200px; overflow-y: auto;"></div>
+    </div>
+
+    <script>
+        // Функция для логирования
+        function log(message) {
+            const logs = document.getElementById('logs');
+            const time = new Date().toLocaleTimeString();
+            logs.innerHTML += `[${time}] ${message}<br>`;
+            logs.scrollTop = logs.scrollHeight;
+            console.log(message);
+        }
+        
+        // Получаем API ключ из переменной окружения
+        const apiKey = 'YOUR_YANDEX_MAPS_API_KEY'; // Замените на ваш ключ
+        document.getElementById('api-key').textContent = apiKey;
+        
+        let myMap = null;
+        
+        // Функция инициализации карты
+        function initMap() {
+            log('🚀 Начинаем инициализацию карты...');
+            
+            try {
+                // Создаем карту с минимальными настройками
+                myMap = new ymaps.Map('map', {
+                    center: [55.7558, 37.6176], // Москва
+                    zoom: 12
+                }, {
+                    suppressMapOpenBlock: true,
+                    yandexMapDisablePoiInteractivity: true,
+                    suppressObsoleteBrowserNotifier: true
+                });
+                
+                log('✅ Карта создана успешно');
+                
+                // Добавляем маркер
+                const marker = new ymaps.Placemark([55.7558, 37.6176], {
+                    balloonContent: 'Москва, Красная площадь, 1'
+                });
+                
+                myMap.geoObjects.add(marker);
+                log('✅ Маркер добавлен');
+                
+                // Добавляем контролы
+                myMap.controls.add('zoomControl', {
+                    position: {top: 10, left: 10}
+                });
+                log('✅ Контролы добавлены');
+                
+                document.getElementById('status').textContent = 'Карта загружена успешно';
+                document.getElementById('status').style.color = 'green';
+                
+            } catch (error) {
+                log('❌ Ошибка создания карты: ' + error.message);
+                document.getElementById('status').textContent = 'Ошибка: ' + error.message;
+                document.getElementById('status').style.color = 'red';
+            }
+        }
+        
+        // Загружаем Yandex Maps API
+        function loadYandexMaps() {
+            log('📡 Загружаем Yandex Maps API...');
+            
+            const script = document.createElement('script');
+            script.src = `https://api-maps.yandex.ru/2.1/?apikey=${apiKey}&lang=ru_RU`;
+            script.onload = function() {
+                log('✅ Yandex Maps API загружен');
+                ymaps.ready(initMap);
+            };
+            script.onerror = function() {
+                log('❌ Ошибка загрузки Yandex Maps API');
+                document.getElementById('status').textContent = 'Ошибка загрузки API';
+                document.getElementById('status').style.color = 'red';
+            };
+            
+            document.head.appendChild(script);
+        }
+        
+        // Запускаем загрузку
+        loadYandexMaps();
+    </script>
+</body>
+</html>

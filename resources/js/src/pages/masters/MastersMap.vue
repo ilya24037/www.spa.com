@@ -52,20 +52,13 @@
         <!-- Карта или список -->
         <div class="map-content">
           <!-- Режим карты -->
-          <YandexMap
-            v-if="!showList"
-            ref="mapRef"
-            mode="multiple"
-            :markers="mapMarkers"
-            :clusterize="true"
-            :show-single-marker="false"
-            :height="mapHeight"
-            :center="mapCenter"
-            :zoom="mapZoom"
-            @marker-click="handleMarkerClick"
-            @cluster-click="handleClusterClick"
-            @bounds-change="handleBoundsChange"
-          />
+          <div v-if="!showList" class="bg-gray-200 rounded-lg flex items-center justify-center" :style="{ height: mapHeight + 'px' }">
+            <div class="text-center">
+              <div class="text-gray-500 text-lg mb-2">🗺️ Карта временно недоступна</div>
+              <div class="text-gray-400 text-sm">YandexMapNative удален из проекта</div>
+              <div class="text-gray-400 text-xs mt-2">Найдено мастеров: {{ mapMarkers.length }}</div>
+            </div>
+          </div>
           
           <!-- Режим списка -->
           <div v-else class="masters-list">
@@ -114,8 +107,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Head } from '@inertiajs/vue3'
-import YandexMap from '@/src/shared/ui/molecules/YandexMapPicker/YandexMap.vue'
-import { useMapWithMasters } from '@/src/shared/ui/molecules/YandexMapPicker'
+// import YandexMapNative from '@/src/features/map/components/YandexMapNative.vue' // УДАЛЕН
+import { masterApi } from '@/src/entities/master/api/masterApi'
 import FilterPanel from '@/src/features/masters-filter/ui/FilterPanel/FilterPanel.vue'
 import SearchBar from '@/src/features/search/ui/SearchBar/SearchBar.vue'
 import MasterCard from '@/src/entities/master/ui/MasterCard/MasterCard.vue'
@@ -125,21 +118,55 @@ import PageHeader from '@/src/shared/ui/molecules/PageHeader/PageHeader.vue'
 import SecondaryButton from '@/src/shared/ui/atoms/SecondaryButton/SecondaryButton.vue'
 import { useFilterStore } from '@/src/features/masters-filter/model/filter.store'
 
-// Composables
-const {
-  masters,
-  mapMarkers,
-  isLoading,
-  error,
-  selectedMaster,
-  mapCenter,
-  mapZoom,
-  loadMasters,
-  handleMarkerClick,
-  handleClusterClick,
-  handleBoundsChange,
-  updateFilterLocation
-} = useMapWithMasters()
+// Direct data management (без лишних composables)
+const masters = ref([])
+const isLoading = ref(false)
+const error = ref(null)
+const selectedMaster = ref(null)
+const mapCenter = ref({ lat: 58.0105, lng: 56.2502 }) // Пермь
+const mapZoom = ref(12)
+
+// Simple computed for map markers
+const mapMarkers = computed(() => {
+  return masters.value.map(master => ({
+    id: master.id,
+    lat: master.lat,
+    lng: master.lng,
+    name: master.name,
+    photo: master.photo
+  })).filter(marker => marker.lat && marker.lng)
+})
+
+// Direct API call
+async function loadMasters() {
+  isLoading.value = true
+  error.value = null
+  
+  try {
+    const response = await masterApi.getMasters({
+      with_geo: true, // запрашиваем координаты
+      per_page: 100
+    })
+    masters.value = response.data || []
+  } catch (err) {
+    error.value = err.message || 'Ошибка загрузки мастеров'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// Simple event handlers
+function handleMarkerClick(master) {
+  selectedMaster.value = master
+}
+
+function handleClusterClick(markers) {
+  console.log('Cluster clicked:', markers.length)
+}
+
+function handleBoundsChange(bounds) {
+  console.log('Bounds changed:', bounds)
+}
 
 const filterStore = useFilterStore()
 
@@ -168,9 +195,8 @@ const handleFiltersReset = () => {
 }
 
 const handleAddressSearch = async (query: string) => {
-  if (mapRef.value) {
-    await mapRef.value.searchAddress(query)
-  }
+  // Упрощенный поиск - центрируем карту на найденном адресе
+  console.log('Search:', query)
 }
 
 const toggleListView = () => {
@@ -180,9 +206,10 @@ const toggleListView = () => {
 const selectMaster = (master: any) => {
   selectedMaster.value = master
   
-  // Если в режиме карты - центрируем на мастере
+  // Если в режиме карты - центрируем на мастере (используем API YandexMapCore)
   if (!showList.value && mapRef.value && master.lat && master.lng) {
-    mapRef.value.updateCenter({ lat: master.lat, lng: master.lng }, 16)
+    mapRef.value.setCenter([master.lat, master.lng])
+    console.log('🎯 [MastersMap] Центрируем карту на мастере:', master.name)
   }
 }
 
@@ -213,6 +240,9 @@ onMounted(() => {
   
   // Загружаем фильтры из localStorage
   filterStore.loadFiltersFromStorage()
+  
+  // Загружаем мастеров для карты
+  loadMasters()
 })
 
 onUnmounted(() => {
