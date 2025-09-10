@@ -1,6 +1,6 @@
 <template>
   <div class="rounded-lg p-5">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+    <div class="grid grid-cols-4 gap-3">
       <BaseInput
         v-model="localTitle"
         name="title"
@@ -11,6 +11,7 @@
         @update:modelValue="emitAll"
         @blur="validateField('title')"
         :error="fieldErrors.title || errors?.title || errors?.['parameters.title'] || (props.forceValidation?.title && !localTitle ? 'Имя обязательно' : '')"
+        class="w-[170px]"
       />
       <BaseInput
         v-if="props.showFields.includes('age')"
@@ -25,6 +26,7 @@
         @update:modelValue="emitAll"
         @blur="validateField('age')"
         :error="fieldErrors.age || errors?.age || errors?.['parameters.age'] || (props.forceValidation?.age && !localAge ? 'Возраст обязателен' : '')"
+        class="w-[170px]"
       />
       <BaseInput
         v-model="localHeight"
@@ -38,6 +40,7 @@
         @update:modelValue="emitAll"
         @blur="validateField('height')"
         :error="fieldErrors.height || errors?.height || errors?.['parameters.height'] || (props.forceValidation?.height && !localHeight ? 'Рост обязателен' : '')"
+        class="w-[170px]"
       />
       <BaseInput
         v-model="localWeight"
@@ -51,56 +54,73 @@
         @update:modelValue="emitAll"
         @blur="validateField('weight')"
         :error="fieldErrors.weight || errors?.weight || errors?.['parameters.weight'] || (props.forceValidation?.weight && !localWeight ? 'Вес обязателен' : '')"
+        class="w-[170px]"
       />
       <BaseSelect
         v-if="props.showFields.includes('breast_size')"
         v-model="localBreastSize"
         label="Размер груди"
-        placeholder="Не указано"
+        placeholder="Не выбрано"
         :required="true"
         :options="breastSizeOptions"
         @update:modelValue="emitAll"
         @blur="validateField('breast_size')"
         :error="fieldErrors.breast_size || errors?.breast_size || errors?.['parameters.breast_size'] || (props.forceValidation?.breast_size && !localBreastSize ? 'Размер груди обязателен' : '')"
+        class="w-[170px]"
       />
       <BaseSelect
         v-if="props.showFields.includes('hair_color')"
         v-model="localHairColor"
         label="Цвет волос"
-        placeholder="Выберите цвет"
+        placeholder="Не выбрано"
         :required="true"
         :options="hairColorOptions"
         @update:modelValue="emitAll"
         @blur="validateField('hair_color')"
         :error="fieldErrors.hair_color || errors?.hair_color || errors?.['parameters.hair_color'] || (props.forceValidation?.hair_color && !localHairColor ? 'Цвет волос обязателен' : '')"
+        class="w-[170px]"
       />
       <BaseSelect
         v-if="props.showFields.includes('eye_color')"
         v-model="localEyeColor"
         label="Цвет глаз"
-        placeholder="Выберите цвет"
+        placeholder="Не выбрано"
         :options="eyeColorOptions"
         @update:modelValue="emitAll"
         :error="errors?.eye_color || errors?.['parameters.eye_color']"
+        class="w-[170px]"
       />
       <BaseSelect
         v-if="props.showFields.includes('nationality')"
         v-model="localNationality"
         label="Национальность"
-        placeholder="Выберите национальность"
+        placeholder="Не выбрано"
         :options="nationalityOptions"
         @update:modelValue="emitAll"
         :error="errors?.nationality || errors?.['parameters.nationality']"
+        class="w-[170px]"
+      />
+      
+      <BaseSelect
+        v-if="props.showFields.includes('appearance')"
+        v-model="localAppearance"
+        label="Внешность"
+        placeholder="Не выбрано"
+        :options="appearanceOptions"
+        @update:modelValue="emitAll"
+        :error="errors?.appearance || errors?.['parameters.appearance']"
+        class="w-[170px]"
       />
       
       <BaseSelect
         v-if="props.showFields.includes('bikini_zone')"
         v-model="localBikiniZone"
         label="Зона бикини"
-        placeholder="Выберите тип"
+        placeholder="Не выбрано"
         :options="bikiniZoneOptions"
         @update:modelValue="emitAll"
         :error="errors?.bikini_zone || errors?.['parameters.bikini_zone']"
+        class="w-[170px]"
       />
     </div>
   </div>
@@ -122,6 +142,7 @@ const props = defineProps({
       hair_color: '',
       eye_color: '',
       nationality: '',
+      appearance: '',
       bikini_zone: ''
     })
   },
@@ -191,6 +212,11 @@ const localNationality = computed({
   set: (value) => updateParameter('nationality', value)
 })
 
+const localAppearance = computed({
+  get: () => localParameters.value.appearance,
+  set: (value) => updateParameter('appearance', value)
+})
+
 const localBikiniZone = computed({
   get: () => localParameters.value.bikini_zone,
   set: (value) => updateParameter('bikini_zone', value)
@@ -198,7 +224,7 @@ const localBikiniZone = computed({
 
 // Опции для селектов
 const breastSizeOptions = computed(() => [
-  { value: '', label: 'Не указано' },
+  { value: '', label: 'Не выбрано' },
   { value: '1', label: '1' },
   { value: '2', label: '2' },
   { value: '3', label: '3' },
@@ -208,7 +234,7 @@ const breastSizeOptions = computed(() => [
 ])
 
 const hairColorOptions = computed(() => [
-  { value: '', label: 'Выберите цвет' },
+  { value: '', label: 'Не выбрано' },
   { value: 'blonde', label: 'Блондинка' },
   { value: 'brunette', label: 'Брюнетка' },
   { value: 'redhead', label: 'Рыжая' },
@@ -219,7 +245,7 @@ const hairColorOptions = computed(() => [
 ])
 
 const eyeColorOptions = computed(() => [
-  { value: '', label: 'Выберите цвет' },
+  { value: '', label: 'Не выбрано' },
   { value: 'blue', label: 'Голубые' },
   { value: 'green', label: 'Зеленые' },
   { value: 'brown', label: 'Карие' },
@@ -229,7 +255,7 @@ const eyeColorOptions = computed(() => [
 ])
 
 const nationalityOptions = computed(() => [
-  { value: '', label: 'Выберите национальность' },
+  { value: '', label: 'Не выбрано' },
   { value: 'russian', label: 'Русская' },
   { value: 'ukrainian', label: 'Украинка' },
   { value: 'belarusian', label: 'Белоруска' },
@@ -239,16 +265,29 @@ const nationalityOptions = computed(() => [
   { value: 'armenian', label: 'Армянка' },
   { value: 'georgian', label: 'Грузинка' },
   { value: 'azerbaijani', label: 'Азербайджанка' },
-  { value: 'asian', label: 'Азиатка' },
-  { value: 'european', label: 'Европейка' },
-  { value: 'latin', label: 'Латиноамериканка' },
-  { value: 'african', label: 'Африканка' },
-  { value: 'mixed', label: 'Метиска' },
   { value: 'other', label: 'Другая' }
 ])
 
+const appearanceOptions = computed(() => [
+  { value: '', label: 'Не выбрано' },
+  { value: 'slavic', label: 'Славянская' },
+  { value: 'caucasian', label: 'Кавказская' },
+  { value: 'central_asian', label: 'Среднеазиатская' },
+  { value: 'east_asian', label: 'Восточноазиатская' },
+  { value: 'west_european', label: 'Западноевропейская' },
+  { value: 'scandinavian', label: 'Скандинавская' },
+  { value: 'mediterranean', label: 'Средиземноморская' },
+  { value: 'oriental', label: 'Восточная' },
+  { value: 'latin', label: 'Латинская' },
+  { value: 'mixed', label: 'Смешанная' },
+  { value: 'african', label: 'Африканская' },
+  { value: 'indian', label: 'Индийская' },
+  { value: 'mestiza', label: 'Метиска' },
+  { value: 'mulatto', label: 'Мулатка' }
+])
+
 const bikiniZoneOptions = computed(() => [
-  { value: '', label: 'Не указано' },
+  { value: '', label: 'Не выбрано' },
   { value: 'natural', label: 'Натуральная' },
   { value: 'bikini_line', label: 'Линия бикини' },
   { value: 'triangle', label: 'Треугольник' },
@@ -374,4 +413,17 @@ watch(() => localHairColor.value, (value) => {
 })
 </script>
 
-<!-- Все стили мигрированы на Tailwind CSS в template --> 
+<style scoped>
+/* Мобильная адаптация для 4-колоночной сетки */
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style> 

@@ -1,7 +1,7 @@
 <!-- Base Radio Component -->
 <template>
   <div 
-    class="flex items-start cursor-pointer py-3 gap-3 select-none"
+    class="flex items-start cursor-pointer py-1 gap-2 select-none"
     :class="{ 'cursor-not-allowed opacity-50': disabled }"
     @click="select"
   >
@@ -34,10 +34,10 @@
     </div>
     
     <label v-if="label || $slots.default" :for="radioId" class="flex-1 min-w-0">
-      <div v-if="label" class="text-base text-gray-900 font-normal leading-relaxed mb-1" :class="{ 'text-gray-500': disabled }">
+      <div v-if="label" class="text-gray-700 font-medium leading-tight" :class="{ 'text-gray-500': disabled }" style="font-size: 16px">
         {{ label }}
       </div>
-      <div v-if="description" :id="`${radioId}-description`" class="text-sm text-gray-500 leading-relaxed" :class="{ 'text-gray-300': disabled }">
+      <div v-if="description" :id="`${radioId}-description`" class="text-gray-500 leading-tight mt-1" :class="{ 'text-gray-300': disabled }" style="font-size: 14px">
         {{ description }}
       </div>
       <slot />
@@ -119,5 +119,4 @@ const select = () => {
 }
 </script>
 
-<!-- Компонент полностью мигрирован на Tailwind CSS --> 
-
+<!-- Компонент полностью мигрирован на Tailwind CSS -->

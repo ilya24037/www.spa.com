@@ -1,23 +1,17 @@
 <template>
   <div class="work-format-section">
     <div class="work-format-fields">
-      <div
+      <BaseRadio
         v-for="option in workFormatOptions"
         :key="option.value"
-        class="work-format-option"
-      >
-        <BaseRadio
-          v-model="localWorkFormat"
-          name="work_format"
-          :value="option.value"
-          :label="option.label"
-          :error="showError && !hasSelection"
-          @update:modelValue="emitWorkFormat"
-        />
-        <p class="work-format-description">
-          {{ option.description }}
-        </p>
-      </div>
+        v-model="localWorkFormat"
+        name="work_format"
+        :value="option.value"
+        :label="option.label"
+        :description="option.description"
+        :error="showError && !hasSelection"
+        @update:modelValue="emitWorkFormat"
+      />
     </div>
     <div v-if="showError && !hasSelection" class="text-sm text-red-600 mt-2">
       Выберите формат работы
@@ -89,21 +83,7 @@ const emitWorkFormat = () => {
 .work-format-fields { 
   display: flex; 
   flex-direction: column;
-  gap: 16px; 
-}
-
-.work-format-option {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.work-format-description {
-  color: #6b7280;
-  font-size: 0.875rem;
-  line-height: 1.4;
-  margin: 0;
-  margin-left: 24px; /* Выравнивание с текстом радио-кнопки */
+  gap: 8px; 
 }
 
 .error-message {

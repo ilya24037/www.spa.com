@@ -28,6 +28,14 @@ Homestead.yaml
 npm-debug.log
 Thumbs.db
 yarn-error.log
+
+# Отладочные и тестовые файлы
+debug*.php
+test*.php
+debug*.js
+test*.js
+*.debug.php
+*.test.php
 /storage/ai-sessions/*
 !/storage/ai-sessions/.gitkeep
 

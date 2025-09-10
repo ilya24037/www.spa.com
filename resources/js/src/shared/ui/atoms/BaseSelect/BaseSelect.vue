@@ -31,7 +31,7 @@
       :class="{ 'active': isOpen, 'disabled': disabled }"
     >
       <div 
-        class="w-full px-3 py-1.5 pr-10 border-2 rounded-lg cursor-pointer flex items-center justify-between min-h-[40px] transition-all duration-200 hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:bg-white disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-50"
+        class="w-full px-3 py-1.5 pr-1 border-2 rounded-lg cursor-pointer flex items-center justify-between min-h-[40px] transition-all duration-200 hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:bg-white disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-50"
         :class="[
           isOpen ? 'border-blue-500 bg-white rounded-b-none' : '',
           error && !isOpen ? 'border-red-300 bg-red-50' : '',
@@ -43,7 +43,7 @@
         @keydown.space="toggleDropdown"
         @keydown.escape="isOpen = false"
       >
-        <span class="text-base text-gray-900 font-normal flex-1 text-left">
+        <span class="text-base text-gray-900 font-normal text-left flex-1">
           {{ selectedOption?.label || placeholder }}
         </span>
         <svg 

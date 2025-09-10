@@ -25,6 +25,7 @@
         @update:modelValue="handleOutcallChange"
       />
       <BaseRadio
+        v-if="showZonesOption"
         :model-value="currentOutcall"
         value="zones"
         name="outcall"
@@ -51,8 +52,9 @@
  * - Автосохранение (делегируется родителю)
  */
 
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import BaseRadio from '@/src/shared/ui/atoms/BaseRadio/BaseRadio.vue'
+import { citySupportsDistricts } from '@/src/shared/config/cities'
 
 // Типы
 type OutcallType = 'none' | 'city' | 'zones'
@@ -60,6 +62,7 @@ type OutcallType = 'none' | 'city' | 'zones'
 // Интерфейсы
 interface Props {
   initialOutcall?: OutcallType
+  currentCity?: string
 }
 
 interface Emits {
@@ -69,7 +72,8 @@ interface Emits {
 
 // Props с дефолтными значениями
 const props = withDefaults(defineProps<Props>(), {
-  initialOutcall: 'none'
+  initialOutcall: 'none',
+  currentCity: ''
 })
 
 // Emits
@@ -77,6 +81,12 @@ const emit = defineEmits<Emits>()
 
 // Реактивное состояние
 const currentOutcall = ref<OutcallType>(props.initialOutcall)
+
+// Показывать ли опцию "В выбранные зоны" (только для крупных городов)
+const showZonesOption = computed(() => {
+  if (!props.currentCity) return false
+  return citySupportsDistricts(props.currentCity)
+})
 
 // Обработка изменения типа выезда
 const handleOutcallChange = (value: OutcallType) => {
@@ -98,6 +108,14 @@ const handleOutcallChange = (value: OutcallType) => {
 watch(() => props.initialOutcall, (newOutcall) => {
   if (newOutcall) {
     currentOutcall.value = newOutcall
+  }
+})
+
+// Автоматически сбрасываем "zones" если город больше не поддерживает зоны
+watch(() => showZonesOption.value, (canShowZones) => {
+  if (!canShowZones && currentOutcall.value === 'zones') {
+    // Сбрасываем на "city" если зоны больше недоступны
+    handleOutcallChange('city')
   }
 })
 </script>

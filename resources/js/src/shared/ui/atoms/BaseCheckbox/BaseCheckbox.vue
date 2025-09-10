@@ -49,8 +49,9 @@
     <label 
       v-if="label || $slots.label" 
       :for="checkboxId"
-      class="text-sm text-gray-700 font-normal leading-relaxed cursor-pointer select-none"
+      class="text-gray-700 font-medium leading-relaxed cursor-pointer select-none"
       :class="{ 'text-gray-500 cursor-not-allowed': disabled }"
+      style="font-size: 16px"
     >
       <slot name="label">
         {{ label }}
@@ -65,7 +66,7 @@
 import { computed } from 'vue'
 import { useId } from '@/src/shared/composables/useId'
 
-// TypeScript РёРЅС‚РµСЂС„РµР№СЃС‹
+// TypeScript интерфейсы
 interface BaseCheckboxProps {
   modelValue?: boolean
   id?: string
@@ -105,7 +106,7 @@ if (process.env.NODE_ENV !== 'production') {
     }
 }
 
-// TypeScript С‚РёРїРёР·Р°С†РёСЏ emits
+// TypeScript типизация emits
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
 }>();
@@ -117,5 +118,4 @@ const toggle = (): void => {
 }
 </script>
 
-<!-- Компонент полностью мигрирован на Tailwind CSS --> 
-
+<!-- Компонент полностью мигрирован на Tailwind CSS -->

@@ -96,28 +96,39 @@ export default defineConfig({
                         return 'vendor-misc'
                     }
                     
-                    // UI компоненты отдельно
+                    // ВАЖНО: UI компоненты в строгом порядке для избежания циклических зависимостей
                     if (id.includes('/src/shared/ui/')) {
-                        if (id.includes('atoms')) return 'ui-atoms'
-                        if (id.includes('molecules')) return 'ui-molecules'
-                        if (id.includes('organisms')) return 'ui-organisms'
+                        // Атомы - базовые компоненты без зависимостей
+                        if (id.includes('/atoms/')) return 'ui-atoms'
+                        // Молекулы могут использовать только атомы
+                        if (id.includes('/molecules/')) return 'ui-molecules'
+                        // Организмы могут использовать атомы и молекулы, но НЕ entities
+                        if (id.includes('/organisms/')) return 'ui-organisms'
                         return 'ui-shared'
                     }
                     
-                    // Виджеты отдельными чанками
-                    if (id.includes('/src/widgets/masters-catalog')) return 'widget-catalog'
-                    if (id.includes('/src/widgets/booking-calendar')) return 'widget-booking'
-                    if (id.includes('/src/widgets/profile-dashboard')) return 'widget-dashboard'
-                    if (id.includes('/src/widgets/')) return 'widgets-misc'
+                    // Entities отдельно - могут использовать shared/ui, но не наоборот
+                    if (id.includes('/src/entities/')) {
+                        return 'entities'
+                    }
                     
-                    // Фичи отдельно
-                    if (id.includes('/src/features/')) return 'features'
+                    // Features - могут использовать entities и shared
+                    if (id.includes('/src/features/')) {
+                        return 'features'
+                    }
                     
-                    // Сущности отдельно
-                    if (id.includes('/src/entities/')) return 'entities'
+                    // Виджеты - могут использовать features, entities и shared
+                    if (id.includes('/src/widgets/')) {
+                        if (id.includes('/masters-catalog')) return 'widget-catalog'
+                        if (id.includes('/booking-calendar')) return 'widget-booking'
+                        if (id.includes('/profile-dashboard')) return 'widget-dashboard'
+                        return 'widgets-misc'
+                    }
                     
-                    // Страницы отдельно
-                    if (id.includes('/Pages/')) return 'pages'
+                    // Страницы - самый верхний уровень
+                    if (id.includes('/Pages/')) {
+                        return 'pages'
+                    }
                 },
                 // Оптимизация имен файлов
                 entryFileNames: 'js/[name]-[hash].js',

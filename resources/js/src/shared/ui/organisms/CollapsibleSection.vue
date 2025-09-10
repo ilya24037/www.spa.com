@@ -9,11 +9,8 @@
       :class="{ 'bg-blue-50/90 border-b border-gray-200': isOpen }"
       @click="$emit('toggle')"
     >
-      <div class="flex items-center gap-3">
-        <span class="text-xs text-gray-500 transition-transform duration-300 w-4 text-center">
-          {{ isOpen ? '▼' : '▶' }}
-        </span>
-        <span class="text-lg font-medium text-gray-900 sm:text-xl">
+      <div class="flex items-center">
+        <span class="text-xl font-bold text-gray-900 sm:text-2xl">
           {{ title }}
           <span v-if="isRequired" class="text-red-500 ml-1 text-2xl">*</span>
         </span>
@@ -27,6 +24,9 @@
           <span v-if="isFilled" class="text-green-500 text-lg font-bold">✓</span>
           <span v-else-if="hasErrors" class="text-amber-500 text-lg">⚠</span>
           <span v-else class="text-gray-300 text-lg">○</span>
+        </span>
+        <span class="text-xs text-gray-500 transition-transform duration-300 w-4 text-center ml-2">
+          {{ isOpen ? '▼' : '▶' }}
         </span>
       </div>
     </div>

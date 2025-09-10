@@ -1,5 +1,5 @@
 <template>
-  <div class="experience-section">
+  <div class="w-[170px]">
     <BaseSelect
       v-model="localExperience"
       placeholder="Выберите опыт"
@@ -7,6 +7,7 @@
       :required="false"
       :error="errors.experience"
       @update:modelValue="emitExperience"
+      class="w-[170px]"
     />
   </div>
 </template>
@@ -43,7 +44,5 @@ const emitExperience = () => {
 </script>
 
 <style scoped>
-.experience-section {
-  /* Убираем лишние стили, теперь это подсекция */
-}
+/* Стили убраны, используется только Tailwind класс w-[170px] */
 </style>

@@ -1,1 +1,0 @@
-export { default as ProfileNavigationLegacy } from './ProfileNavigation.vue'

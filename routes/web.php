@@ -36,6 +36,11 @@ Route::get('/test-map', function() {
     return Inertia::render('TestMap');
 })->name('test.map');
 
+// Тестовая страница для демонстрации принципов Фибоначчи в дизайне
+Route::get('/test/fibonacci-design', function() {
+    return Inertia::render('Test/FibonacciDesignTest');
+})->name('test.fibonacci');
+
 // Статические файлы карты с CORS
 Route::get('/maps/{path}', function($path) {
     $filePath = public_path('maps/' . $path);

@@ -54,8 +54,10 @@
     "dependencies": {
         "@heroicons/vue": "^2.2.0",
         "@vueuse/core": "^13.3.0",
+        "cors": "^2.8.5",
         "date-fns": "^4.1.0",
         "dayjs": "^1.11.13",
+        "express": "^5.1.0",
         "lodash": "^4.17.21",
         "maska": "^3.2.0",
         "pinia": "^2.3.1",

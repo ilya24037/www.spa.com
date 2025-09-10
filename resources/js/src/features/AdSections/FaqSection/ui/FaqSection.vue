@@ -1,12 +1,5 @@
 <template>
   <div class="faq-section">
-    <div class="faq-header">
-      <h2 class="faq-title">
-        Особенности мастера
-        <span class="faq-icon">⭐</span>
-      </h2>
-    </div>
-    
     <div class="faq-body">
       <div v-for="question in faqQuestions" :key="question.id" class="faq-item">
         <div class="faq-question">{{ question.question }}</div>
@@ -200,32 +193,8 @@ const deselectAll = (questionId: string) => {
 
 <style scoped>
 .faq-section {
-
-  border-radius: 12px;
-  padding: 24px;
-  margin-bottom: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.faq-header {
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 2px solid #f0f0f0;
-}
-
-.faq-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.faq-icon {
-  font-size: 18px;
-  opacity: 0.7;
+  /* Убраны отступы, так как теперь компонент внутри обертки */
+  padding: 0;
 }
 
 .faq-body {
@@ -333,11 +302,7 @@ const deselectAll = (questionId: string) => {
 
 @media (max-width: 767px) {
   .faq-section {
-    padding: 16px;
-  }
-  
-  .faq-title {
-    font-size: 18px;
+    padding: 0;
   }
   
   .faq-question {

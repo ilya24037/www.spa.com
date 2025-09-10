@@ -79,6 +79,7 @@ export function useGeoData(options: UseGeoDataOptions = {}) {
   const geoData = reactive<GeoData>(createDefaultGeoData())
   const isLoading = ref(false)
   const error = ref<string | null>(null)
+  const isInitializing = ref(false) // 🛡️ Флаг для предотвращения автосохранения во время инициализации
 
   // Computed для удобства работы с типами выезда
   const outcallTypes = computed<OutcallTypes>({
@@ -105,6 +106,22 @@ export function useGeoData(options: UseGeoDataOptions = {}) {
    */
   const updateAddress = (address: string) => {
     geoData.address = address
+    
+    // 🔄 При очистке адреса - автоматически устанавливаем "Не выезжаю"
+    if (!address || address === '') {
+      geoData.outcall = 'none'
+      // Также очищаем зоны и станции метро, так как они не актуальны без адреса
+      geoData.zones = []
+      geoData.metro_stations = []
+      // Сбрасываем типы мест на дефолтные значения
+      geoData.outcall_apartment = true
+      geoData.outcall_hotel = false
+      geoData.outcall_house = false
+      geoData.outcall_sauna = false
+      geoData.outcall_office = false
+      geoData.taxi_included = false
+      console.log('🔄 [updateAddress] Адрес очищен - установлен тип выезда "Не выезжаю"')
+    }
   }
 
   const updateCoordinates = (coords: { lat: number; lng: number } | null) => {
@@ -170,7 +187,19 @@ export function useGeoData(options: UseGeoDataOptions = {}) {
     try {
       if (!jsonString) return
 
+      // 🛡️ Устанавливаем флаг инициализации
+      isInitializing.value = true
+      console.log('🔒 [loadFromJson] Начало инициализации - автосохранение отключено')
+
       const parsed = JSON.parse(jsonString)
+      
+      // 🔍 ОТЛАДОЧНЫЕ ЛОГИ для диагностики проблемы редактирования
+      console.log('📥 [loadFromJson] Загружаем данные:', {
+        jsonString_length: jsonString.length,
+        parsed_address: parsed.address,
+        parsed_keys: Object.keys(parsed),
+        current_address_before: geoData.address
+      })
       
       // Обновляем данные безопасно
       Object.assign(geoData, {
@@ -188,10 +217,23 @@ export function useGeoData(options: UseGeoDataOptions = {}) {
         taxi_included: parsed.taxi_included ?? false
       })
 
+      console.log('✅ [loadFromJson] Данные обновлены:', {
+        current_address_after: geoData.address,
+        coordinates: geoData.coordinates
+      })
+
       error.value = null
+      
+      // 🛡️ Снимаем флаг инициализации через небольшую задержку
+      setTimeout(() => {
+        isInitializing.value = false
+        console.log('🔓 [loadFromJson] Инициализация завершена - автосохранение включено')
+      }, 100)
+      
     } catch (err) {
       error.value = 'Ошибка загрузки данных: ' + (err as Error).message
-      console.error('Ошибка парсинга geo данных:', err)
+      console.error('❌ [loadFromJson] Ошибка парсинга geo данных:', err)
+      isInitializing.value = false
     }
   }
 
@@ -249,6 +291,13 @@ export function useGeoData(options: UseGeoDataOptions = {}) {
     watch(
       geoData,
       (newData) => {
+        // 🛡️ Предотвращаем автосохранение во время инициализации
+        if (isInitializing.value) {
+          console.log('⏸️ [useGeoData] Автосохранение пропущено - идет инициализация')
+          return
+        }
+        
+        console.log('💾 [useGeoData] Автосохранение активировано')
         onDataChange(newData)
       },
       { deep: true }
@@ -261,6 +310,7 @@ export function useGeoData(options: UseGeoDataOptions = {}) {
     geoData,
     isLoading,
     error,
+    isInitializing, // 🔍 Для диагностики
     outcallTypes,
 
     // Методы обновления

@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/www.spa.com/**)",
+      "Bash(where claude)",
+      "Bash(claude --version)",
+      "WebSearch",
+      "Bash(move ai-team-server.js ai-team-server.cjs)",
+      "Bash(node:*)",
+      "Bash(dir)",
+      "Bash(start /b node:*)",
+      "Bash(npm ls:*)",
+      "Bash(curl:*)",
+      "Bash(dir \"C:\\www.spa.com\\resources\\js\\src\\shared\\data\")",
+      "WebFetch(domain:www.avito.ru)",
+      "Bash(dir \"C:\\www.spa.com\\_backup\\GeoSection_With_IP_Geolocation_2025-09-08\")",
+      "Bash(dir \"C:\\www.spa.com\\resources\\js\\src\\features\\AdSections\\GeoSection\\ui\\composables\" /b)",
+      "Bash(dir \"C:\\www.spa.com\\_backup\\GeoSection_With_IP_Geolocation_2025-09-08\\composables\" /s)",
+      "Bash(dir:*)",
+      "Read(//c/Проект SPA/Av patern/ymaps-components/**)",
+      "Read(//c/Проект SPA/Av patern/**)",
+      "Bash(php artisan migrate:*)",
+      "Bash(findstr:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -44,6 +44,7 @@ class CreateAdRequest extends FormRequest
             'work_format' => 'required|string|in:individual,duo,group',
             'clients' => 'required|array|min:1',
             'clients.*' => 'string|max:50',
+            'client_age_from' => 'nullable|integer|min:18|max:120',
             
             // Цены - ОБЯЗАТЕЛЬНЫЕ (проверка в withValidator)
             'prices' => 'required|array',

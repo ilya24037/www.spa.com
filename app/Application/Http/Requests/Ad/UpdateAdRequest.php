@@ -43,6 +43,7 @@ class UpdateAdRequest extends FormRequest
             'specialty' => 'nullable|string|max:200',
             'clients' => 'array',
             'clients.*' => 'string|max:50',
+            'client_age_from' => 'nullable|integer|min:18|max:120',
             'service_location' => $isActive ? 'nullable|array' : 'required|array|min:1',
             'service_location.*' => 'string|in:home,salon,both',
             'outcall_locations' => 'nullable|array',

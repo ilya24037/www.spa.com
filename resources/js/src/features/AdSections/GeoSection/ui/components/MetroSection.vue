@@ -9,7 +9,7 @@
       <!-- Использую существующий MetroSelector -->
       <MetroSelector 
         :model-value="currentStations"
-        :stations="moscowMetroStations"
+        :stations="availableStations"
         @update:modelValue="handleStationsChange"
       />
     </div>
@@ -32,7 +32,7 @@
  * - Внутреннюю логику селектора метро (делегируется MetroSelector)
  */
 
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import MetroSelector, { useMetroData } from '@/src/shared/ui/molecules/MetroSelector'
 
 // Типы
@@ -42,6 +42,7 @@ type OutcallType = 'none' | 'city' | 'zones'
 interface Props {
   outcallType?: OutcallType
   initialStations?: string[]
+  currentCity?: string
 }
 
 interface Emits {
@@ -52,20 +53,29 @@ interface Emits {
 // Props с дефолтными значениями
 const props = withDefaults(defineProps<Props>(), {
   outcallType: 'none',
-  initialStations: () => []
+  initialStations: () => [],
+  currentCity: ''
 })
 
 // Emits
 const emit = defineEmits<Emits>()
 
 // Получение данных станций метро через composable
-const { moscowMetroStations } = useMetroData()
+const { hasCityMetro, getStationsForCity, updateCity } = useMetroData(props.currentCity)
 
 // Реактивное состояние
 const currentStations = ref<string[]>([...props.initialStations])
+const availableStations = ref<string[]>([])
 
-// Показывать секцию когда outcallType НЕ равен 'none'
-const shouldShow = computed(() => props.outcallType !== 'none')
+// 🛡️ Флаг инициализации для предотвращения очистки данных при первой загрузке
+const isInitializing = ref(true)
+
+// Показывать секцию когда outcallType НЕ равен 'none' И в городе есть метро
+const shouldShow = computed(() => 
+  props.outcallType !== 'none' && 
+  props.currentCity && 
+  hasCityMetro(props.currentCity)
+)
 
 // Обработка изменения выбранных станций
 const handleStationsChange = (stations: string[]) => {
@@ -90,6 +100,38 @@ watch(() => props.outcallType, (newType, oldType) => {
     emit('update:stations', [])
     emit('stations-changed', { stations: [] })
   }
+})
+
+// Обновляем доступные станции при изменении города
+watch(() => props.currentCity, (newCity, oldCity) => {
+  if (newCity && hasCityMetro(newCity)) {
+    availableStations.value = getStationsForCity(newCity)
+    updateCity(newCity)
+    
+    // 🛡️ НЕ очищаем станции при первой инициализации
+    if (isInitializing.value) {
+      console.log('🔒 [MetroSection] Инициализация - сохраняем существующие станции:', currentStations.value)
+      return
+    }
+    
+    // Очищаем выбранные станции ТОЛЬКО при реальной смене города
+    if (oldCity && oldCity !== newCity) {
+      console.log('🔄 [MetroSection] Смена города с', oldCity, 'на', newCity, '- очищаем станции')
+      currentStations.value = []
+      emit('update:stations', [])
+      emit('stations-changed', { stations: [] })
+    }
+  } else {
+    availableStations.value = []
+  }
+}, { immediate: true })
+
+// 🛡️ Снимаем флаг инициализации после монтирования компонента
+onMounted(() => {
+  setTimeout(() => {
+    isInitializing.value = false
+    console.log('🔓 [MetroSection] Инициализация завершена')
+  }, 100)
 })
 </script>
 

@@ -1,10 +1,10 @@
 <template>
-  <div class="pricing-section">
-    <!-- В апартаментах -->
-    <div class="pricing-block">
-      <h3 class="pricing-block-title">В апартаментах</h3>
-      <div class="pricing-grid">
-        <div class="price-item">
+  <div class="pricing-section p-5">
+    <div class="pricing-container">
+      <!-- В апартаментах -->
+      <div class="pricing-group">
+        <h4 class="pricing-subtitle">В апартаментах</h4>
+        <div class="pricing-grid">
           <BaseInput
             v-model="localPrices.apartments_express"
             type="number"
@@ -15,10 +15,8 @@
             :clearable="true"
             suffix="₽"
             @update:modelValue="updatePrices"
-            class="max-w-[160px]"
+            class="w-[170px]"
           />
-        </div>
-        <div class="price-item">
           <BaseInput
             v-model="localPrices.apartments_1h"
             type="number"
@@ -31,10 +29,8 @@
             :error="showPriceError ? 'Нужно заполнить цену за час в апартаментах и/или на выезд' : ''"
             suffix="₽"
             @update:modelValue="updatePrices"
-            class="max-w-[160px]"
+            class="w-[170px]"
           />
-        </div>
-        <div class="price-item">
           <BaseInput
             v-model="localPrices.apartments_2h"
             type="number"
@@ -45,10 +41,8 @@
             :clearable="true"
             suffix="₽"
             @update:modelValue="updatePrices"
-            class="max-w-[160px]"
+            class="w-[170px]"
           />
-        </div>
-        <div class="price-item">
           <BaseInput
             v-model="localPrices.apartments_night"
             type="number"
@@ -59,17 +53,15 @@
             :clearable="true"
             suffix="₽"
             @update:modelValue="updatePrices"
-            class="max-w-[160px]"
+            class="w-[170px]"
           />
         </div>
       </div>
-    </div>
 
-    <!-- Выезд к клиенту -->
-    <div class="pricing-block">
-      <h3 class="pricing-block-title">Выезд к клиенту</h3>
-      <div class="pricing-grid">
-        <div class="price-item">
+      <!-- Выезд к клиенту -->
+      <div class="pricing-group">
+        <h4 class="pricing-subtitle">Выезд к клиенту</h4>
+        <div class="pricing-grid">
           <BaseInput
             v-model="localPrices.outcall_express"
             type="number"
@@ -80,10 +72,8 @@
             :clearable="true"
             suffix="₽"
             @update:modelValue="updatePrices"
-            class="max-w-[160px]"
+            class="w-[170px]"
           />
-        </div>
-        <div class="price-item">
           <BaseInput
             v-model="localPrices.outcall_1h"
             type="number"
@@ -94,10 +84,8 @@
             :clearable="true"
             suffix="₽"
             @update:modelValue="updatePrices"
-            class="max-w-[160px]"
+            class="w-[170px]"
           />
-        </div>
-        <div class="price-item">
           <BaseInput
             v-model="localPrices.outcall_2h"
             type="number"
@@ -108,10 +96,8 @@
             :clearable="true"
             suffix="₽"
             @update:modelValue="updatePrices"
-            class="max-w-[160px]"
+            class="w-[170px]"
           />
-        </div>
-        <div class="price-item">
           <BaseInput
             v-model="localPrices.outcall_night"
             type="number"
@@ -122,12 +108,58 @@
             :clearable="true"
             suffix="₽"
             @update:modelValue="updatePrices"
-            class="max-w-[160px]"
+            class="w-[170px]"
           />
         </div>
       </div>
-    </div>
 
+      <!-- Финалов в час -->
+      <div class="pricing-grid mt-3">
+        <BaseSelect
+          v-model="localPrices.finishes_per_hour"
+          label="Финалов в час"
+          placeholder="– Выбрать –"
+          :options="finishesPerHourOptions"
+          @update:modelValue="updatePrices"
+          class="w-[170px]"
+        />
+      </div>
+
+      <!-- Акции и скидки -->
+      <div class="promo-section mt-6">
+        <h4 class="promo-subtitle">Акции и скидки</h4>
+        <div class="pricing-grid">
+          <BaseInput
+            v-model="localPromo.newClientDiscount"
+            type="number"
+            label="Скидка новым клиентам %"
+            placeholder="%"
+            :min="1"
+            :max="100"
+            :clearable="true"
+            :error="errors?.newClientDiscount"
+            @update:modelValue="updatePromo"
+            @blur="validateAndCorrectDiscount"
+            class="w-[170px]"
+          />
+          <div></div> <!-- Пустая колонка 2 -->
+          <div class="gift-field-container">
+            <BaseInput
+              v-model="localPromo.gift"
+              type="text"
+              label="Подарок"
+              placeholder="Что и на каких условиях дарите"
+              :clearable="true"
+              :error="errors?.gift"
+              @update:modelValue="updatePromo"
+              class="w-[340px]"
+            />
+            <div class="field-hint">Можно не заполнять, если у вас нет такой акции</div>
+          </div>
+          <div></div> <!-- Пустая колонка 4 -->
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -135,6 +167,7 @@
 import { ref, watch, reactive, computed } from 'vue'
 import BaseInput from '@/src/shared/ui/atoms/BaseInput/BaseInput.vue'
 import BaseRadio from '@/src/shared/ui/atoms/BaseRadio/BaseRadio.vue'
+import BaseSelect from '@/src/shared/ui/atoms/BaseSelect/BaseSelect.vue'
 
 const props = defineProps({
   prices: {
@@ -147,7 +180,8 @@ const props = defineProps({
       outcall_express: null,
       outcall_1h: null,
       outcall_2h: null,
-      outcall_night: null
+      outcall_night: null,
+      finishes_per_hour: ''
     })
   },
   startingPrice: {
@@ -161,10 +195,19 @@ const props = defineProps({
   forceValidation: {
     type: Object,
     default: () => ({})
+  },
+  // Добавляем props для акций
+  newClientDiscount: {
+    type: String,
+    default: ''
+  },
+  gift: {
+    type: String,
+    default: ''
   }
 })
 
-const emit = defineEmits(['update:prices', 'update:startingPrice', 'clearForceValidation'])
+const emit = defineEmits(['update:prices', 'update:startingPrice', 'clearForceValidation', 'update:newClientDiscount', 'update:gift'])
 
 // Хелпер для преобразования значения в булевое
 const toBoolean = (value) => {
@@ -182,6 +225,17 @@ const toBoolean = (value) => {
   return Boolean(value)
 }
 
+// Опции для выпадающего списка "Финалов в час"
+const finishesPerHourOptions = computed(() => [
+  { value: '', label: '– Выбрать –' },
+  { value: '1', label: '1' },
+  { value: '2', label: 'до 2-х' },
+  { value: '3', label: 'до 3-х' },
+  { value: '4', label: 'до 4-х' },
+  { value: '5', label: 'до 5-ти' },
+  { value: 'unlimited', label: 'безгранично' }
+])
+
 // Локальное состояние цен
 const localPrices = reactive({
   apartments_express: props.prices?.apartments_express ?? null,
@@ -191,7 +245,14 @@ const localPrices = reactive({
   outcall_express: props.prices?.outcall_express ?? null,
   outcall_1h: props.prices?.outcall_1h ?? null,
   outcall_2h: props.prices?.outcall_2h ?? null,
-  outcall_night: props.prices?.outcall_night ?? null
+  outcall_night: props.prices?.outcall_night ?? null,
+  finishes_per_hour: props.prices?.finishes_per_hour ?? ''
+})
+
+// Локальное состояние акций
+const localPromo = reactive({
+  newClientDiscount: props.newClientDiscount ?? '',
+  gift: props.gift ?? ''
 })
 
 
@@ -199,17 +260,31 @@ const localPrices = reactive({
 // Следим за изменениями props
 watch(() => props.prices, (newPrices) => {
   if (newPrices) {
+    // Сохраняем текущее значение finishes_per_hour если оно есть
+    const currentFinishesPerHour = localPrices.finishes_per_hour
+    
     Object.keys(newPrices).forEach(key => {
       if (newPrices[key] !== undefined) {
         localPrices[key] = newPrices[key]
       }
     })
+    
+    // Восстанавливаем finishes_per_hour если его не было в newPrices
+    if (newPrices.finishes_per_hour === undefined && currentFinishesPerHour) {
+      localPrices.finishes_per_hour = currentFinishesPerHour
+    }
   }
 }, { deep: true, immediate: true })
 
 // Обновляем родительский компонент
 const updatePrices = () => {
   emit('update:prices', { ...localPrices })
+}
+
+// Обновляем акции
+const updatePromo = () => {
+  emit('update:newClientDiscount', localPromo.newClientDiscount)
+  emit('update:gift', localPromo.gift)
 }
 
 // Следим за заполнением поля "1 час в апартаментах" для сброса валидации
@@ -224,6 +299,15 @@ watch(() => localPrices.outcall_1h, (newValue) => {
   if (props.forceValidation?.outcall_1h && newValue && Number(newValue) > 0) {
     emit('clearForceValidation', 'outcall_1h')
   }
+})
+
+// Следим за изменениями props акций
+watch(() => props.newClientDiscount, (newValue) => {
+  localPromo.newClientDiscount = newValue ?? ''
+})
+
+watch(() => props.gift, (newValue) => {
+  localPromo.gift = newValue ?? ''
 })
 
 // Локальное состояние для начальной цены
@@ -246,6 +330,18 @@ watch(() => props.startingPrice, (newValue) => {
   localStartingPrice.value = newValue
 }, { immediate: true })
 
+// Валидация скидки при потере фокуса
+const validateAndCorrectDiscount = () => {
+  if (localPromo.newClientDiscount !== null && localPromo.newClientDiscount !== undefined && localPromo.newClientDiscount !== '') {
+    let numVal = Number(localPromo.newClientDiscount)
+    if (numVal < 1) {
+      localPromo.newClientDiscount = 1
+    } else if (numVal > 100) {
+      localPromo.newClientDiscount = 100
+    }
+  }
+}
+
 // Обновляем начальную цену
 const updateStartingPrice = (value) => {
   localStartingPrice.value = value
@@ -257,32 +353,68 @@ const updateStartingPrice = (value) => {
 .pricing-section {
   display: flex;
   flex-direction: column;
-  gap: 24px;
 }
 
-.pricing-block {
-  border-radius: 8px;
-  padding: 20px;
+.pricing-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.pricing-block-title {
-  font-size: 16px;
+.pricing-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pricing-subtitle {
+  font-size: 14px;
   font-weight: 600;
-  color: #1a1a1a;
-  margin: 0 0 16px 0;
+  color: #666;
+  margin: 0;
+  padding-bottom: 4px;
 }
 
 .pricing-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(4, 170px);
+  gap: 12px;
 }
 
-.price-item {
+/* Стили для секции акций */
+.promo-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.promo-subtitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  margin: 0 0 12px 0;
+}
+
+/* Принудительно одна строка для заголовка "Скидка новым клиентам" */
+.promo-section :deep(label) {
+  white-space: nowrap;
+}
+
+/* Стили для поля подарка с подсказкой */
+.gift-field-container {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
+
+.field-hint {
+  font-size: 9px;
+  color: #666;
+  margin-top: 4px;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
 
 .price-label {
   font-size: 14px;
@@ -417,7 +549,7 @@ const updateStartingPrice = (value) => {
 /* Мобильная адаптация */
 @media (max-width: 640px) {
   .pricing-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, 170px);
   }
   
   .radio-grid {

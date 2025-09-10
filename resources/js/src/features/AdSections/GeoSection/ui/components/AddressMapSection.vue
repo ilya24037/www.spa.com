@@ -136,6 +136,7 @@ interface Props {
   initialAddress?: string
   initialCoordinates?: { lat: number; lng: number }
   initialZoom?: number
+  isEditMode?: boolean
 }
 
 interface Emits {
@@ -154,7 +155,8 @@ interface Suggestion {
 const props = withDefaults(defineProps<Props>(), {
   initialAddress: '',
   initialCoordinates: () => ({ lat: 55.7558, lng: 37.6176 }), // Москва по умолчанию
-  initialZoom: 12
+  initialZoom: 12,
+  isEditMode: false
 })
 
 const emit = defineEmits<Emits>()
@@ -425,10 +427,17 @@ watch(() => props.initialZoom, (newZoom) => {
 
 // Автоопределение города пользователя по IP при монтировании
 onMounted(async () => {
-  // Определяем город только если нет начального адреса
+  // НЕ запускаем IP-геолокацию если:
+  // 1. Это режим редактирования существующего объявления
+  // 2. Уже есть начальный адрес
+  if (props.isEditMode) {
+    console.log('📝 [AddressMapSection] Режим редактирования - IP-геолокация отключена')
+    return
+  }
+  
   if (!searchQuery.value && !props.initialAddress) {
     try {
-      console.log('🌍 [AddressMapSection] Запуск IP-геолокации...')
+      console.log('🌍 [AddressMapSection] Запуск IP-геолокации для нового объявления...')
       const location: IpLocationResult = await detectUserLocation()
       
       // Используем результат только если это не fallback (если город реально определился)

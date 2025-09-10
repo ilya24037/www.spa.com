@@ -2,6 +2,7 @@
  * SPA Platform Design Tokens System
  * Архитектура: Core → Semantic → Component (по образцу Ozon)
  * Дата создания: Январь 2025
+ * Шрифт: Onest (как в Ozon)
  */
 
 :root {
@@ -80,7 +81,10 @@
   --spacing-20: 5rem;      /* 80px */
   --spacing-24: 6rem;      /* 96px */
   
-  /* Типографика */
+  /* Типографика - Onest (как в Ozon) */
+  --font-family-primary: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-family-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  
   --font-size-xs: 0.75rem;     /* 12px */
   --font-size-sm: 0.875rem;    /* 14px */
   --font-size-base: 1rem;      /* 16px */
@@ -186,6 +190,7 @@
   --button-padding-lg: var(--spacing-4) var(--spacing-6);
   --button-radius: var(--radius-md);
   --button-font-weight: var(--font-weight-medium);
+  --button-font-family: var(--font-family-primary);
   
   /* Primary кнопка */
   --button-primary-bg: var(--bg-primary);
@@ -227,6 +232,7 @@
   --input-padding: var(--spacing-3) var(--spacing-4);
   --input-radius: var(--radius-md);
   --input-shadow-focus: 0 0 0 3px rgb(59 130 246 / 0.1);
+  --input-font-family: var(--font-family-primary);
   
   /* Навигация */
   --nav-bg: var(--bg-surface);
@@ -236,6 +242,7 @@
   --nav-link-text: var(--text-secondary);
   --nav-link-text-hover: var(--text-primary);
   --nav-link-text-active: var(--text-brand);
+  --nav-font-family: var(--font-family-primary);
   
   /* Модальные окна */
   --modal-bg: var(--bg-surface);
@@ -270,6 +277,7 @@
   --table-header-text: var(--text-secondary);
   --table-row-hover: var(--bg-subtle);
   --table-padding: var(--spacing-3) var(--spacing-4);
+  --table-font-family: var(--font-family-primary);
   
   /* Чекбоксы и радио */
   --checkbox-bg: var(--bg-surface);

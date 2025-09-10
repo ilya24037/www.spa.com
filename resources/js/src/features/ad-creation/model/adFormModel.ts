@@ -17,6 +17,7 @@ const migrateParameters = (data: any): any => {
     hair_color: data?.hair_color || '',
     eye_color: data?.eye_color || '',
     nationality: data?.nationality || '',
+    appearance: data?.appearance || '',
     bikini_zone: data?.bikini_zone || ''
   };
   
@@ -43,6 +44,7 @@ const migrateContacts = (data: any): any => {
 export interface AdFormData {
   specialty: string
   clients: string[]
+  client_age_from: number | null
   service_location: string[]
   work_format: string
   service_provider: string[]
@@ -79,10 +81,16 @@ export interface AdFormData {
     hair_color: string
     eye_color: string
     nationality: string
+    appearance: string
     bikini_zone: string
   }
   new_client_discount: string
   gift: string
+  // Объект promo для совместимости с PricingSection
+  promo: {
+    newClientDiscount: string
+    gift: string
+  }
   photos: any[]
   video: any[]
 
@@ -157,6 +165,7 @@ export function useAdFormModel(props: any, emit: any) {
       }
       return []
     })(),
+    client_age_from: savedFormData?.client_age_from || props.initialData?.client_age_from || null,
     service_location: savedFormData?.service_location || props.initialData?.service_location || [],
     work_format: savedFormData?.work_format || props.initialData?.work_format || '',
     service_provider: (() => {
@@ -278,7 +287,8 @@ export function useAdFormModel(props: any, emit: any) {
         outcall_hotel: false,
         outcall_house: false,
         outcall_sauna: false,
-        outcall_office: false
+        outcall_office: false,
+        finishes_per_hour: ''
       }
     })(),
     startingPrice: savedFormData?.startingPrice || props.initialData?.startingPrice || props.initialData?.starting_price || null,
@@ -289,6 +299,11 @@ export function useAdFormModel(props: any, emit: any) {
     })(),
     new_client_discount: props.initialData?.new_client_discount || '',
     gift: props.initialData?.gift || '',
+    // Добавляем объект promo для совместимости с PricingSection
+    promo: {
+      newClientDiscount: props.initialData?.new_client_discount || '',
+      gift: props.initialData?.gift || ''
+    },
     photos: (() => {
       if (!props.initialData?.photos) return []
       if (Array.isArray(props.initialData.photos)) return props.initialData.photos
@@ -411,6 +426,23 @@ export function useAdFormModel(props: any, emit: any) {
       form.address = newGeo.address
     }
   }, { deep: true, immediate: true })
+
+  // Watchers для синхронизации promo объекта с отдельными полями
+  watch(() => form.promo.newClientDiscount, (newValue) => {
+    form.new_client_discount = newValue
+  })
+
+  watch(() => form.promo.gift, (newValue) => {
+    form.gift = newValue
+  })
+
+  watch(() => form.new_client_discount, (newValue) => {
+    form.promo.newClientDiscount = newValue
+  })
+
+  watch(() => form.gift, (newValue) => {
+    form.promo.gift = newValue
+  })
 
 
 
@@ -746,6 +778,7 @@ export function useAdFormModel(props: any, emit: any) {
       formData.append('prices[outcall_house]', form.prices.outcall_house ? '1' : '0')
       formData.append('prices[outcall_sauna]', form.prices.outcall_sauna ? '1' : '0')
       formData.append('prices[outcall_office]', form.prices.outcall_office ? '1' : '0')
+      formData.append('prices[finishes_per_hour]', form.prices.finishes_per_hour || '')
     }
     
     // Добавляем начальную цену (всегда, даже если null)
@@ -760,6 +793,7 @@ export function useAdFormModel(props: any, emit: any) {
     formData.append('hair_color', form.parameters.hair_color || '')
     formData.append('eye_color', form.parameters.eye_color || '')
     formData.append('nationality', form.parameters.nationality || '')
+    formData.append('appearance', form.parameters.appearance || '')
     formData.append('bikini_zone', form.parameters.bikini_zone || '')
     formData.append('new_client_discount', form.new_client_discount || '')
     formData.append('gift', form.gift || '')
@@ -784,6 +818,9 @@ export function useAdFormModel(props: any, emit: any) {
     // Добавляем массивы как JSON
     try {
       if (form.clients) formData.append('clients', JSON.stringify(form.clients))
+      if (form.client_age_from !== null && form.client_age_from !== undefined) {
+        formData.append('client_age_from', String(form.client_age_from))
+      }
       if (form.service_location) formData.append('service_location', JSON.stringify(form.service_location))
       if (form.service_provider) formData.append('service_provider', JSON.stringify(form.service_provider))
       if (form.services) formData.append('services', JSON.stringify(form.services))

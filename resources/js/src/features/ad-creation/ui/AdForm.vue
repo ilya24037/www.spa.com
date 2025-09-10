@@ -22,9 +22,9 @@
 
     <!-- Форма -->
     <form @submit.prevent="handleSubmit" novalidate class="ad-form-sections">
-      <!-- ОСНОВНОЕ - объединенная секция -->
+      <!-- Основное - объединенная секция -->
       <CollapsibleSection
-        title="ОСНОВНОЕ"
+        title="Основное"
         :is-open="sectionsState.basic"
         :is-required="true"
         :is-filled="checkBasicSectionFilled()"
@@ -63,36 +63,13 @@
 
           <!-- Опыт работы -->
           <div class="subsection">
-            <h3 
-              class="subsection-title cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors flex items-center justify-between"
-              @click="experienceVisible = !experienceVisible"
-            >
-              <span>Опыт работы</span>
-              <svg 
-                class="w-5 h-5 text-gray-500 transition-transform duration-200"
-                :class="{ 'rotate-180': experienceVisible }"
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
+            <h3 class="subsection-title">
+              Опыт работы
             </h3>
-            <Transition
-              enter-active-class="transition-all duration-300 ease-out"
-              enter-from-class="opacity-0 -translate-y-2"
-              enter-to-class="opacity-100 translate-y-0"
-              leave-active-class="transition-all duration-200 ease-in"
-              leave-from-class="opacity-100 translate-y-0"
-              leave-to-class="opacity-0 -translate-y-2"
-            >
-              <div v-if="experienceVisible" class="mt-2">
-                <ExperienceSection 
-                  v-model:experience="form.experience" 
-                  :errors="errors"
-                />
-              </div>
-            </Transition>
+            <ExperienceSection 
+              v-model:experience="form.experience" 
+              :errors="errors"
+            />
           </div>
 
           <!-- Ваши клиенты -->
@@ -102,7 +79,8 @@
               <span class="required-mark">*</span>
             </h3>
             <ClientsSection 
-              v-model:clients="form.clients" 
+              v-model:clients="form.clients"
+              v-model:client-age-from="form.client_age_from"
               :errors="errors"
               :forceValidation="forceValidation.clients"
               @clearForceValidation="forceValidation.clients = false"
@@ -138,7 +116,7 @@
       >
         <ParametersSection 
           v-model:parameters="form.parameters"
-          :show-fields="['age', 'breast_size', 'hair_color', 'eye_color', 'nationality', 'bikini_zone']"
+          :show-fields="['age', 'breast_size', 'hair_color', 'eye_color', 'nationality', 'appearance', 'bikini_zone']"
           :errors="errors.parameters || {}"
           :forceValidation="forceValidation.parameters"
           @clearForceValidation="(field) => forceValidation.parameters[field] = false"
@@ -157,6 +135,8 @@
         <PricingSection 
           v-model:prices="form.prices"
           v-model:startingPrice="form.startingPrice" 
+          v-model:newClientDiscount="form.promo.newClientDiscount"
+          v-model:gift="form.promo.gift"
           :errors="errors"
           :forceValidation="forceValidation.price"
           @clearForceValidation="(field) => forceValidation.price[field] = false"
@@ -175,7 +155,7 @@
         data-section="services"
         class="services-group-section"
       >
-                <div class="services-subsections">
+        <div class="services-subsections">
           <!-- Основные услуги -->
           <div class="subsection">
             <ServicesModule 
@@ -192,6 +172,42 @@
               v-model="form.services"
               :errors="errors"
             />
+            
+            <!-- Особенности мастера как подкатегория услуг -->
+            <div class="service-category mt-4">
+              <div 
+                class="border border-gray-200 rounded-lg px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors duration-200 mb-3 cursor-pointer select-none" 
+                @click="isFeaturesExpanded = !isFeaturesExpanded"
+              >
+                <div class="flex items-center justify-between">
+                  <h3 class="text-base font-semibold text-gray-900 flex items-center">
+                    Особенности мастера
+                    <span 
+                      v-if="totalFaqSelected > 0" 
+                      class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded-full"
+                    >
+                      {{ totalFaqSelected }}
+                    </span>
+                  </h3>
+                  <svg 
+                    class="w-5 h-5 text-gray-500 transition-transform duration-200" 
+                    :class="{ 'rotate-180': isFeaturesExpanded }"
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+              
+              <div v-show="isFeaturesExpanded" class="mt-4 pl-6">
+                <FaqSection 
+                  v-model:faq="form.faq"
+                  :errors="errors"
+                />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -213,9 +229,9 @@
         </div>
       </CollapsibleSection>
 
-      <!-- МЕДИА - объединенная секция -->
+      <!-- Медиа - объединенная секция -->
       <CollapsibleSection
-        title="МЕДИА"
+        title="Медиа"
         :is-open="sectionsState.media"
         :is-required="true"
         :is-filled="checkMediaSectionFilled()"
@@ -341,6 +357,7 @@
           v-model:geo="form.geo" 
           :errors="errors"
           :force-validation="forceValidation.geo"
+          :is-edit-mode="!!props.adId"
           @clear-force-validation="forceValidation.geo = false"
         />
       </CollapsibleSection>
@@ -362,35 +379,7 @@
         />
       </CollapsibleSection>
 
-      <!-- Особенности мастера (объединенная секция) -->
-      <CollapsibleSection
-        title="Особенности мастера"
-        :is-open="sectionsState.features"
-        :is-required="false"
-        :is-filled="checkSectionFilled('features')"
-        @toggle="toggleSection('features')"
-        data-section="features"
-      >
-        <FaqSection 
-          v-model:faq="form.faq"
-          :errors="errors"
-        />
-      </CollapsibleSection>
 
-      <!-- Акции (необязательная) -->
-      <CollapsibleSection
-        title="Акции и скидки"
-        :is-open="sectionsState.promo"
-        :is-required="false"
-        :is-filled="checkSectionFilled('promo')"
-        @toggle="toggleSection('promo')"
-        data-section="promo"
-      >
-        <PromoSection 
-          v-model:promo="form.promo" 
-          :errors="errors"
-        />
-      </CollapsibleSection>
 
       <!-- Контакты (в самом низу) -->
       <CollapsibleSection
@@ -456,7 +445,6 @@ import ServiceProviderSection from '@/src/features/AdSections/ServiceProviderSec
 import WorkFormatSection from '@/src/features/AdSections/WorkFormatSection/ui/WorkFormatSection.vue'
 import ExperienceSection from '@/src/features/AdSections/ExperienceSection/ui/ExperienceSection.vue'
 import ClientsSection from '@/src/features/AdSections/ClientsSection/ui/ClientsSection.vue'
-import PromoSection from '@/src/features/AdSections/PromoSection/ui/PromoSection.vue'
 
 // Импорт компонента верификации (упрощенная версия)
 import VerificationPhotoSection from '@/src/features/verification-upload/ui/VerificationPhotoSection.vue'
@@ -560,6 +548,29 @@ const forceValidation = reactive({
 // Состояние видимости секции "Опыт работы"
 const experienceVisible = ref(false)
 
+// Состояние раскрытия "Особенности мастера" в услугах
+const isFeaturesExpanded = ref(false)
+
+// Подсчет выбранных особенностей для счетчика
+const totalFaqSelected = computed(() => {
+  if (!form.faq) return 0
+  
+  let count = 0
+  Object.entries(form.faq).forEach(([key, value]) => {
+    // Считаем только заполненные значения
+    if (value !== null && value !== undefined && value !== '' && value !== 0) {
+      // Для массивов проверяем длину
+      if (Array.isArray(value)) {
+        if (value.length > 0) count++
+      } else {
+        count++
+      }
+    }
+  })
+  
+  return count
+})
+
 // Отладка: отслеживание изменений form.video
 watch(() => form.video, (newVideos, oldVideos) => {
   // Form video changed
@@ -602,7 +613,7 @@ const isActiveAd = computed(() => {
 const sectionsConfig = [
   {
     key: 'basic',
-    title: 'ОСНОВНОЕ',
+    title: 'Основное',
     required: true,
     fields: ['service_provider', 'work_format', 'clients', 'description']
   },
@@ -626,7 +637,7 @@ const sectionsConfig = [
   },
   {
     key: 'media',
-    title: 'МЕДИА',
+    title: 'Медиа',
     required: true,
     fields: ['photos', 'media_settings', 'video']
   },
@@ -641,18 +652,6 @@ const sectionsConfig = [
     title: 'График работы',
     required: false,
     fields: ['schedule', 'schedule_notes', 'online_booking']
-  },
-  {
-    key: 'features',
-    title: 'Особенности мастера',
-    required: false,
-    fields: ['faq']
-  },
-  {
-    key: 'promo',
-    title: 'Акции и скидки',
-    required: false,
-    fields: ['promo']
   },
   {
     key: 'contacts',
@@ -902,8 +901,9 @@ const checkSectionFilled = (sectionKey: string): boolean => {
       )
     
     case 'services':
-      // Минимум одна услуга должна быть выбрана
-      return getTotalSelectedServices() > 0
+      // Секция считается заполненной, если выбрана хотя бы одна услуга 
+      // ИЛИ заполнена хотя бы одна особенность мастера
+      return getTotalSelectedServices() > 0 || totalFaqSelected.value > 0
     
     case 'price':
       // Хотя бы одна цена за час (апартаменты или выезд)
@@ -1024,7 +1024,7 @@ onMounted(() => {
 .media-subsections {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 8px;
 }
 
 /* Стили для медиа подкатегорий (как у услуг) */
@@ -1057,11 +1057,6 @@ onMounted(() => {
 .subsection {
   padding: 20px;
   border-radius: 8px;
-  transition: all 0.2s ease;
-}
-
-.subsection:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .subsection-title {
@@ -1090,7 +1085,7 @@ onMounted(() => {
   }
   
   .subsection-title {
-    font-size: 16px;
+    font-size: 14px;
   }
 }
 </style>

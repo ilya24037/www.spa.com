@@ -5,6 +5,7 @@
       :initial-address="geoData.address"
       :initial-coordinates="geoData.coordinates"
       :initial-zoom="geoData.zoom"
+      :is-edit-mode="props.isEditMode"
       @update:address="handleAddressUpdate"
       @update:coordinates="handleCoordinatesUpdate"
       @data-changed="handleMapDataChange"
@@ -14,6 +15,7 @@
     <div class="pt-6 border-t border-gray-200">
       <OutcallSection 
         :initial-outcall="geoData.outcall"
+        :current-city="currentCity"
         @update:outcall="handleOutcallUpdate"
         @outcall-changed="handleOutcallChange"
       />
@@ -23,6 +25,7 @@
         <ZonesSection 
           :outcall-type="geoData.outcall"
           :initial-zones="geoData.zones"
+          :current-city="currentCity"
           @update:zones="handleZonesUpdate"
           @zones-changed="handleZonesChange"
         />
@@ -33,6 +36,7 @@
         <MetroSection 
           :outcall-type="geoData.outcall"
           :initial-stations="geoData.metro_stations"
+          :current-city="currentCity"
           @update:stations="handleStationsUpdate"
           @stations-changed="handleStationsChange"
         />
@@ -72,6 +76,7 @@
 
 import { computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useGeoData } from './composables/useGeoData'
+import { CITIES_WITH_DISTRICTS } from '@/src/shared/config/cities'
 import AddressMapSection from './components/AddressMapSection.vue'
 import OutcallSection from './components/OutcallSection.vue'
 import ZonesSection from './components/ZonesSection.vue'
@@ -83,6 +88,7 @@ interface Props {
   geo?: string | Record<string, any>
   errors?: Record<string, string[]>
   forceValidation?: boolean
+  isEditMode?: boolean
 }
 
 interface Emits {
@@ -94,7 +100,8 @@ interface Emits {
 const props = withDefaults(defineProps<Props>(), {
   geo: () => '',
   errors: () => ({}),
-  forceValidation: false
+  forceValidation: false,
+  isEditMode: false
 })
 
 // Emits
@@ -103,6 +110,7 @@ const emit = defineEmits<Emits>()
 // Инициализация useGeoData composable с автосохранением
 const {
   geoData,
+  isInitializing, // 🔍 Для диагностики конфликтов
   updateAddress,
   updateCoordinates,
   updateOutcall,
@@ -127,18 +135,77 @@ let emitTimer: ReturnType<typeof setTimeout> | null = null
 
 // Debounced отправка данных родителю (точно как в оригинале)
 const emitGeoData = () => {
+  // 🛡️ Дополнительная защита от emit во время инициализации
+  if (isInitializing.value) {
+    console.log('⏸️ [GeoSection] emitGeoData пропущен - идет инициализация')
+    return
+  }
+
   // Отменяем предыдущий таймер если есть
   if (emitTimer) {
     clearTimeout(emitTimer)
   }
   
+  console.log('⏰ [GeoSection] emitGeoData вызван, запуск таймера 300ms')
+  
   // Устанавливаем новый таймер с задержкой  
   emitTimer = setTimeout(() => {
+    // Финальная проверка перед отправкой
+    if (isInitializing.value) {
+      console.log('⏸️ [GeoSection] emit отменен - все еще инициализация')
+      return
+    }
+    
     // Отправляем JSON строку как в оригинале
     const jsonData = toJson()
+    const parsedData = JSON.parse(jsonData)
+    console.log('📤 [GeoSection] Отправляем данные родителю:', {
+      address: parsedData.address,
+      zones: parsedData.zones,
+      metro_stations: parsedData.metro_stations,
+      outcall: parsedData.outcall,
+      json_length: jsonData.length,
+      full_data: parsedData
+    })
     emit('update:geo', jsonData)
   }, 300) // Задержка 300мс для группировки обновлений как в оригинале
 }
+
+// Извлечение города из адреса (исправлено для Yandex Geocoder)
+const extractCityFromAddress = (address: string): string => {
+  if (!address) return ''
+  
+  const parts = address.split(',').map(p => p.trim())
+  
+  // Формат Yandex Geocoder: "Россия, Москва, улица Тверская, 1"
+  // или "Россия, Санкт-Петербург, Невский проспект, 50"
+  // Берем вторую часть как город (пропускаем страну "Россия")
+  if (parts.length >= 2) {
+    const cityPart = parts[1]
+    
+    // Проверяем что это не область/край/республика
+    if (!cityPart.match(/^(область|обл\.|край|республика|респ\.|автономный)/i)) {
+      return cityPart
+    }
+  }
+  
+  // Fallback: поиск известного города в любой части адреса
+  // Используем список городов из централизованной конфигурации
+  for (const part of parts) {
+    if (CITIES_WITH_DISTRICTS.includes(part as any)) {
+      return part
+    }
+  }
+  
+  return ''
+}
+
+// ✅ ПРАВИЛЬНОЕ определение города через computed (без бесконечных циклов)
+const currentCity = computed(() => {
+  const city = extractCityFromAddress(geoData.address)
+  console.log('🏙️ [GeoSection] Определен город:', city, 'из адреса:', geoData.address)
+  return city
+})
 
 // Обработчики событий от компонентов
 
@@ -179,10 +246,12 @@ const handleOutcallChange = (data: { outcall: 'none' | 'city' | 'zones'; shouldC
  */
 const handleZonesUpdate = (zones: string[]) => {
   updateZones(zones)
+  emitGeoData() // 🔥 Отправляем изменения родителю для сохранения
 }
 
 const handleZonesChange = (data: { zones: string[] }) => {
   updateZones(data.zones)
+  emitGeoData() // 🔥 Отправляем изменения родителю для сохранения
 }
 
 /**
@@ -190,10 +259,12 @@ const handleZonesChange = (data: { zones: string[] }) => {
  */
 const handleStationsUpdate = (stations: string[]) => {
   updateMetroStations(stations)
+  emitGeoData() // 🔥 Отправляем изменения родителю для сохранения
 }
 
 const handleStationsChange = (data: { stations: string[] }) => {
   updateMetroStations(data.stations)
+  emitGeoData() // 🔥 Отправляем изменения родителю для сохранения
 }
 
 /**
@@ -217,24 +288,45 @@ const handleTypesChange = (data: {
 
 // Загрузка начальных данных при монтировании
 onMounted(() => {
+  console.log('🚀 [GeoSection] onMounted вызван:', {
+    props_geo_type: typeof props.geo,
+    props_geo_value: props.geo,
+    props_geo_length: typeof props.geo === 'string' ? props.geo.length : 'not string'
+  })
+  
   if (props.geo) {
     if (typeof props.geo === 'string') {
+      console.log('📊 [GeoSection] Загружаем из строки')
       loadFromJson(props.geo)
     } else {
       // Если передан объект, конвертируем в JSON
+      console.log('📊 [GeoSection] Загружаем из объекта')
       loadFromJson(JSON.stringify(props.geo))
     }
+  } else {
+    console.log('⚠️ [GeoSection] props.geo пустой при монтировании')
   }
 })
 
 // Следим за изменениями props.geo для обновления данных извне
-watch(() => props.geo, (newGeo) => {
+watch(() => props.geo, (newGeo, oldGeo) => {
+  console.log('👁️ [GeoSection] watch props.geo сработал:', {
+    newGeo_type: typeof newGeo,
+    newGeo_value: newGeo,
+    oldGeo_type: typeof oldGeo,
+    has_changed: newGeo !== oldGeo
+  })
+  
   if (newGeo) {
     if (typeof newGeo === 'string') {
+      console.log('📊 [GeoSection] Watch загружаем из строки')
       loadFromJson(newGeo)
     } else {
+      console.log('📊 [GeoSection] Watch загружаем из объекта')
       loadFromJson(JSON.stringify(newGeo))
     }
+  } else {
+    console.log('⚠️ [GeoSection] newGeo пустой в watch')
   }
 }, { deep: true })
 

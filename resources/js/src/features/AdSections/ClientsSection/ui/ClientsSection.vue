@@ -13,21 +13,40 @@
     <div v-if="showError && !hasSelection" class="text-sm text-red-600 mt-2">
       Выберите, с какими клиентами работаете
     </div>
+    
+    <!-- Возраст клиента от -->
+    <div class="mt-4 w-[170px]">
+      <BaseInput
+        v-model="localClientAgeFrom"
+        type="number"
+        name="client_age_from"
+        label="Возраст клиента от"
+        placeholder="18"
+        :min="18"
+        :max="120"
+        :clearable="true"
+        @blur="validateAndCorrectAge"
+        class="w-[170px]"
+      />
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, watch, computed } from 'vue'
 import BaseCheckbox from '@/src/shared/ui/atoms/BaseCheckbox/BaseCheckbox.vue'
+import BaseInput from '@/src/shared/ui/atoms/BaseInput/BaseInput.vue'
 
 const props = defineProps({
   clients: { type: Array, default: () => [] },
+  clientAgeFrom: { type: [Number, String], default: null },
   errors: { type: Object, default: () => ({}) },
   forceValidation: { type: Boolean, default: false }
 })
 
-const emit = defineEmits(['update:clients', 'clearForceValidation'])
+const emit = defineEmits(['update:clients', 'update:clientAgeFrom', 'clearForceValidation'])
 const localClients = ref([...props.clients])
+const localClientAgeFrom = ref(props.clientAgeFrom)
 
 // Состояние для валидации
 const touched = ref(false)
@@ -48,6 +67,26 @@ const clientOptions = computed(() => [
 watch(() => props.clients, (val) => { 
   localClients.value = [...val] 
 })
+
+watch(() => props.clientAgeFrom, (val) => {
+  localClientAgeFrom.value = val
+})
+
+watch(() => localClientAgeFrom.value, (val) => {
+  emit('update:clientAgeFrom', val)
+})
+
+// Валидация при потере фокуса
+const validateAndCorrectAge = () => {
+  if (localClientAgeFrom.value !== null && localClientAgeFrom.value !== undefined && localClientAgeFrom.value !== '') {
+    let numVal = Number(localClientAgeFrom.value)
+    if (numVal < 18) {
+      localClientAgeFrom.value = 18
+    } else if (numVal > 120) {
+      localClientAgeFrom.value = 120
+    }
+  }
+}
 
 const toggleClient = (value, checked) => {
   touched.value = true // Помечаем что поле тронуто

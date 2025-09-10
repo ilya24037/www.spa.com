@@ -27,6 +27,7 @@ class Ad extends Model
         'title',
         'specialty',
         'clients',
+        'client_age_from',
         'service_provider',
         'work_format',
         'experience',
