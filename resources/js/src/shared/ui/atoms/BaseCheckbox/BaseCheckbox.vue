@@ -49,9 +49,8 @@
     <label 
       v-if="label || $slots.label" 
       :for="checkboxId"
-      class="text-gray-700 font-medium leading-relaxed cursor-pointer select-none"
+      class="text-sm text-gray-700 font-medium leading-relaxed cursor-pointer select-none"
       :class="{ 'text-gray-500 cursor-not-allowed': disabled }"
-      style="font-size: 16px"
     >
       <slot name="label">
         {{ label }}

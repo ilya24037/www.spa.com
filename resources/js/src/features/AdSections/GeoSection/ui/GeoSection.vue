@@ -6,9 +6,11 @@
       :initial-coordinates="geoData.coordinates"
       :initial-zoom="geoData.zoom"
       :is-edit-mode="props.isEditMode"
+      :force-validation="props.forceValidation"
       @update:address="handleAddressUpdate"
       @update:coordinates="handleCoordinatesUpdate"
       @data-changed="handleMapDataChange"
+      @clearForceValidation="emit('clear-force-validation')"
     />
 
     <!-- Секция выезда -->

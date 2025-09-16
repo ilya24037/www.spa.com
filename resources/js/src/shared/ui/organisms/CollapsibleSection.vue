@@ -6,7 +6,7 @@
   ]">
     <div 
       class="px-5 py-4 bg-gray-50/80 cursor-pointer flex justify-between items-center select-none transition-colors duration-200 rounded-t-xl hover:bg-gray-100/90"
-      :class="{ 'bg-blue-50/90 border-b border-gray-200': isOpen }"
+      :class="{ 'bg-blue-50/90': isOpen }"
       @click="$emit('toggle')"
     >
       <div class="flex items-center">

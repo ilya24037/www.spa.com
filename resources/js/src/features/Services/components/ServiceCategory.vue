@@ -6,7 +6,7 @@
         <h3 :class="[
           'flex items-center',
           isSubcategory 
-            ? 'text-sm font-normal text-gray-600' 
+            ? 'text-sm font-semibold text-gray-900' 
             : 'text-base font-semibold text-gray-900'
         ]">
           {{ category.name }}

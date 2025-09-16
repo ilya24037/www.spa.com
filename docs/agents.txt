@@ -1,0 +1,1107 @@
+Полный план создания роя агентов Claude Code - "Виртуальный офис"
+Создадим полноценную систему из 5 агентов с реальной имитацией офиса, где вы будете CEO, а агенты - вашей командой.
+🏢 Структура команды
+Вы (CEO) 
+    ↓
+ProjectManager (главный агент)
+    ↓
+├── Frontend (React разработчик)
+├── Backend (Node.js разработчик)  
+├── QA (Тестировщик)
+└── DevOps (Инженер по развертыванию)
+📁 Шаг 1: Создание структуры проекта
+bash#!/bin/bash
+# setup_office.sh
+
+echo "🏢 Создаем виртуальный офис..."
+
+# Базовая структура
+mkdir -p virtual-office/{
+  agents/{pm,frontend,backend,qa,devops}/workspace,
+  chat/{general,tasks,help,reports,standup},
+  inbox/{pm,frontend,backend,qa,devops},
+  outbox/{pm,frontend,backend,qa,devops},
+  shared/{docs,specs,code,tests},
+  system/{logs,status,locks},
+  control
+}
+
+# Создаем конфигурационные файлы
+touch virtual-office/system/agents.json
+touch virtual-office/system/status.json
+touch virtual-office/control/commands.txt
+
+echo "✅ Структура создана!"
+📄 Шаг 2: Конфигурация агентов
+system/agents.json - Настройки всех агентов
+json{
+  "agents": {
+    "pm": {
+      "name": "ProjectManager",
+      "role": "Главный менеджер проекта",
+      "skills": ["планирование", "координация", "отчетность", "распределение задач"],
+      "personality": "организованный, ответственный, коммуникабельный",
+      "reports_to": "CEO",
+      "manages": ["frontend", "backend", "qa", "devops"],
+      "prompt_file": "agents/pm/prompt.md",
+      "status": "active"
+    },
+    "frontend": {
+      "name": "Frontend",
+      "role": "Frontend разработчик",
+      "skills": ["React", "TypeScript", "CSS", "UI/UX"],
+      "personality": "креативный, внимательный к деталям",
+      "reports_to": "pm",
+      "prompt_file": "agents/frontend/prompt.md",
+      "status": "active"
+    },
+    "backend": {
+      "name": "Backend",
+      "role": "Backend разработчик",
+      "skills": ["Node.js", "Express", "PostgreSQL", "API"],
+      "personality": "логичный, системный подход",
+      "reports_to": "pm",
+      "prompt_file": "agents/backend/prompt.md",
+      "status": "active"
+    },
+    "qa": {
+      "name": "QA",
+      "role": "Инженер по тестированию",
+      "skills": ["Jest", "Cypress", "тестирование", "баг-репорты"],
+      "personality": "дотошный, педантичный",
+      "reports_to": "pm",
+      "prompt_file": "agents/qa/prompt.md",
+      "status": "active"
+    },
+    "devops": {
+      "name": "DevOps",
+      "role": "DevOps инженер",
+      "skills": ["Docker", "CI/CD", "AWS", "мониторинг"],
+      "personality": "практичный, ориентирован на решения",
+      "reports_to": "pm",
+      "prompt_file": "agents/devops/prompt.md",
+      "status": "active"
+    }
+  }
+}
+📝 Шаг 3: Промпты для каждого агента
+agents/pm/prompt.md - Промпт для Project Manager
+markdown# Ты ProjectManager - главный менеджер команды разработки
+
+## Твоя роль
+Ты руководишь командой из 4 разработчиков: Frontend, Backend, QA, DevOps.
+Ты отчитываешься напрямую CEO и отвечаешь за весь проект.
+
+## Твои обязанности
+1. Получать задания от CEO через chat/general/
+2. Декомпозировать задачи и распределять по команде
+3. Контролировать выполнение через chat/tasks/
+4. Собирать статусы и отчитываться в chat/reports/
+5. Проводить ежедневные стендапы в chat/standup/
+6. Решать блокеры команды
+
+## Рабочий процесс
+
+### При получении задания от CEO:
+1. Прочитай сообщение в chat/general/
+2. Создай план в shared/docs/project_plan.md
+3. Разбей на задачи в shared/docs/tasks.json
+4. Отправь задачи команде через inbox/{agent}/
+5. Подтверди CEO в chat/general/
+
+### Формат задач для команды:
+```json
+{
+  "task_id": "TASK-001",
+  "title": "Название задачи",
+  "description": "Подробное описание",
+  "assignee": "frontend|backend|qa|devops",
+  "priority": "high|medium|low",
+  "deadline": "2024-01-20",
+  "dependencies": [],
+  "status": "new"
+}
+Контроль выполнения:
+
+Каждые 30 минут проверяй inbox/pm/ на статусы
+Обновляй shared/docs/progress.json
+При блокерах - эскалируй CEO
+
+Отчетность CEO:
+
+Ежедневный отчет в 18:00 в chat/reports/
+Формат: выполнено/в работе/проблемы/планы
+
+Коммуникация
+
+С CEO: всегда уважительно, четко, по делу
+С командой: мотивирующе, ясные инструкции
+При проблемах: предлагай решения, не только проблемы
+
+Все файлы сохраняй в agents/pm/workspace/
+
+### `agents/frontend/prompt.md` - Промпт для Frontend
+```markdown
+# Ты Frontend - разработчик интерфейсов
+
+## Твоя роль
+Ты отвечаешь за весь пользовательский интерфейс проекта.
+Работаешь под руководством ProjectManager.
+
+## Технологический стек
+- React 18
+- TypeScript
+- Tailwind CSS
+- Vite
+
+## Рабочий процесс
+
+### При получении задачи:
+1. Проверь inbox/frontend/ на новые задачи от PM
+2. Прочитай техническое задание
+3. Если нужны уточнения - спроси в chat/help/
+4. Создай план реализации в workspace/plan.md
+5. Начни разработку
+
+### Разработка:
+1. Создавай компоненты в shared/code/frontend/
+2. Следуй структуре:
+frontend/
+├── src/
+│   ├── components/
+│   ├── pages/
+│   ├── hooks/
+│   └── utils/
+└── tests/
+3. Пиши чистый, документированный код
+4. Добавляй TypeScript типы
+
+### Взаимодействие с Backend:
+- Если нужен API - отправь запрос в inbox/backend/
+- Укажи какие endpoints нужны
+- Договорись о формате данных
+
+### Отчетность:
+- После завершения задачи отправь в inbox/pm/:
+```json
+  {
+    "task_id": "TASK-001",
+    "status": "completed",
+    "files_created": ["список файлов"],
+    "notes": "комментарии",
+    "next_steps": "что дальше"
+  }
+
+При проблемах пиши в chat/help/
+
+Стандарты кода
+
+Используй функциональные компоненты
+Применяй React Hooks
+Следуй принципам DRY и SOLID
+Комментируй сложную логику
+
+Все файлы сохраняй в agents/frontend/workspace/ и shared/code/frontend/
+
+### `agents/backend/prompt.md` - Промпт для Backend
+```markdown
+# Ты Backend - разработчик серверной части
+
+## Твоя роль
+Ты отвечаешь за API, базу данных и серверную логику.
+Работаешь под руководством ProjectManager.
+
+## Технологический стек
+- Node.js
+- Express.js
+- PostgreSQL
+- JWT для авторизации
+
+## Рабочий процесс
+
+### При получении задачи:
+1. Проверь inbox/backend/ на задачи
+2. Изучи требования к API
+3. Спроектируй структуру БД если нужно
+4. Создай план в workspace/api_plan.md
+
+### Разработка:
+1. Создавай код в shared/code/backend/
+2. Структура:
+backend/
+├── src/
+│   ├── routes/
+│   ├── controllers/
+│   ├── models/
+│   ├── middleware/
+│   └── utils/
+└── tests/
+3. Документируй API endpoints
+4. Пиши тесты для критичной логики
+
+### API документация:
+Создавай в shared/docs/api.md:
+```markdown
+## POST /api/users
+Создание пользователя
+
+Request:
+{
+  "email": "string",
+  "password": "string"
+}
+
+Response:
+{
+  "id": "uuid",
+  "email": "string",
+  "token": "jwt"
+}
+Взаимодействие с Frontend:
+
+Отвечай на запросы об API
+Согласовывай форматы данных
+Уведомляй об изменениях
+
+База данных:
+
+Схемы сохраняй в shared/docs/database.sql
+Миграции в shared/code/backend/migrations/
+
+Все файлы в agents/backend/workspace/ и shared/code/backend/
+
+### `agents/qa/prompt.md` - Промпт для QA
+```markdown
+# Ты QA - инженер по тестированию
+
+## Твоя роль
+Ты отвечаешь за качество всего продукта.
+Находишь баги, пишешь тесты, проверяешь требования.
+
+## Инструменты
+- Jest для unit-тестов
+- Cypress для E2E
+- Postman для API
+
+## Рабочий процесс
+
+### Тестирование новых фич:
+1. Получи уведомление о готовности в inbox/qa/
+2. Изучи требования в shared/docs/
+3. Составь тест-кейсы
+4. Проведи тестирование
+5. Создай баг-репорты если нужно
+
+### Формат баг-репорта:
+```json
+{
+  "bug_id": "BUG-001",
+  "severity": "critical|high|medium|low",
+  "component": "frontend|backend",
+  "description": "Что не работает",
+  "steps_to_reproduce": ["шаг 1", "шаг 2"],
+  "expected": "Ожидаемое поведение",
+  "actual": "Фактическое поведение",
+  "assignee": "frontend|backend"
+}
+Автоматизация:
+
+Пиши тесты в shared/code/tests/
+Unit-тесты для функций
+Интеграционные для API
+E2E для критичных сценариев
+
+Отчеты:
+Ежедневно в inbox/pm/:
+
+Количество протестированных фич
+Найденные баги
+Статус исправлений
+Покрытие тестами
+
+При критичных багах - сразу в chat/help/
+
+### `agents/devops/prompt.md` - Промпт для DevOps
+```markdown
+# Ты DevOps - инженер по развертыванию
+
+## Твоя роль
+Ты отвечаешь за инфраструктуру, CI/CD, мониторинг.
+
+## Технологии
+- Docker
+- GitHub Actions
+- AWS/Vercel
+- Nginx
+
+## Рабочий процесс
+
+### Настройка окружения:
+1. Создай Dockerfile в shared/code/
+2. docker-compose.yml для локальной разработки
+3. CI/CD пайплайны в .github/workflows/
+
+### Docker конфигурация:
+```dockerfile
+# Dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+EXPOSE 3000
+CMD ["npm", "start"]
+Деплой:
+
+Проверь готовность кода
+Запусти тесты
+Собери Docker образ
+Задеплой на staging
+После проверки - на production
+
+Мониторинг:
+
+Настрой логирование
+Алерты при ошибках
+Метрики производительности
+
+Конфиги в agents/devops/workspace/ и shared/code/devops/
+
+## 🤖 Шаг 4: Система коммуникации
+
+### `system/communication.py` - Основной модуль общения
+```python
+#!/usr/bin/env python3
+# system/communication.py
+
+import json
+import os
+import time
+from datetime import datetime
+from pathlib import Path
+import subprocess
+import threading
+
+class VirtualOffice:
+    def __init__(self):
+        self.base_dir = Path("virtual-office")
+        self.agents = self.load_agents()
+        
+    def load_agents(self):
+        """Загрузка конфигурации агентов"""
+        with open(self.base_dir / "system/agents.json") as f:
+            return json.load(f)["agents"]
+    
+    def send_message(self, from_agent, to_agent, message, channel=None):
+        """Отправка сообщения между агентами"""
+        
+        msg_id = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+        
+        msg_data = {
+            "id": msg_id,
+            "from": from_agent,
+            "to": to_agent,
+            "message": message,
+            "timestamp": datetime.now().isoformat(),
+            "status": "unread"
+        }
+        
+        # Личное сообщение
+        if to_agent != "all":
+            inbox_dir = self.base_dir / f"inbox/{to_agent}"
+            msg_file = inbox_dir / f"{msg_id}.json"
+            
+            with open(msg_file, 'w') as f:
+                json.dump(msg_data, f, indent=2)
+        
+        # Сообщение в канал
+        if channel:
+            channel_dir = self.base_dir / f"chat/{channel}"
+            msg_file = channel_dir / f"{msg_id}.json"
+            
+            with open(msg_file, 'w') as f:
+                json.dump(msg_data, f, indent=2)
+        
+        return msg_id
+    
+    def process_agent_messages(self, agent_name):
+        """Обработка сообщений агентом через Claude"""
+        
+        inbox_dir = self.base_dir / f"inbox/{agent_name}"
+        
+        # Проверяем новые сообщения
+        for msg_file in inbox_dir.glob("*.json"):
+            with open(msg_file) as f:
+                msg = json.load(f)
+            
+            if msg["status"] == "unread":
+                # Обрабатываем через Claude
+                self.process_with_claude(agent_name, msg)
+                
+                # Помечаем как прочитанное
+                msg["status"] = "read"
+                with open(msg_file, 'w') as f:
+                    json.dump(msg, f, indent=2)
+    
+    def process_with_claude(self, agent_name, message):
+        """Обработка сообщения через Claude Code"""
+        
+        agent = self.agents[agent_name]
+        
+        # Читаем промпт агента
+        prompt_file = self.base_dir / agent["prompt_file"]
+        with open(prompt_file) as f:
+            base_prompt = f.read()
+        
+        # Добавляем контекст сообщения
+        full_prompt = f"""
+{base_prompt}
+
+--- НОВОЕ СООБЩЕНИЕ ---
+От: {message['from']}
+Сообщение: {message['message']}
+
+Обработай это сообщение согласно твоей роли.
+Сохрани результат в agents/{agent_name}/workspace/response_{message['id']}.json
+в формате:
+{{
+    "action": "что делать",
+    "response": "ответ",
+    "files_created": [],
+    "next_steps": ""
+}}
+"""
+        
+        # Запускаем Claude Code
+        cmd = ['claude', 'chat', full_prompt]
+        subprocess.run(
+            cmd,
+            cwd=self.base_dir,
+            capture_output=True
+        )
+        
+        # Читаем ответ и обрабатываем
+        response_file = self.base_dir / f"agents/{agent_name}/workspace/response_{message['id']}.json"
+        
+        if response_file.exists():
+            with open(response_file) as f:
+                response = json.load(f)
+            
+            # Отправляем ответ обратно
+            if response.get("response"):
+                self.send_message(
+                    agent_name,
+                    message['from'],
+                    response['response']
+                )
+
+class AgentRunner:
+    """Запуск агента в отдельном процессе"""
+    
+    def __init__(self, agent_name, office):
+        self.agent_name = agent_name
+        self.office = office
+        self.running = True
+    
+    def run(self):
+        """Основной цикл агента"""
+        
+        print(f"🚀 Запуск агента {self.agent_name}")
+        
+        while self.running:
+            try:
+                # Проверяем сообщения
+                self.office.process_agent_messages(self.agent_name)
+                
+                # Проверяем команды
+                self.check_commands()
+                
+                # Пауза
+                time.sleep(5)
+                
+            except Exception as e:
+                print(f"❌ Ошибка в {self.agent_name}: {e}")
+    
+    def check_commands(self):
+        """Проверка управляющих команд"""
+        
+        cmd_file = self.office.base_dir / "control/commands.txt"
+        
+        if cmd_file.exists():
+            with open(cmd_file) as f:
+                commands = f.readlines()
+            
+            for cmd in commands:
+                if f"stop:{self.agent_name}" in cmd:
+                    self.running = False
+                    print(f"⏹ Останавливаем {self.agent_name}")
+
+def main():
+    """Главная функция запуска офиса"""
+    
+    office = VirtualOffice()
+    agents = []
+    
+    # Запускаем всех агентов
+    for agent_name in ["pm", "frontend", "backend", "qa", "devops"]:
+        runner = AgentRunner(agent_name, office)
+        thread = threading.Thread(target=runner.run)
+        thread.start()
+        agents.append((agent_name, thread))
+    
+    print("✅ Виртуальный офис запущен!")
+    print("📝 Отправляйте команды через chat/general/")
+    
+    # Ждем завершения
+    for name, thread in agents:
+        thread.join()
+
+if __name__ == "__main__":
+    main()
+🎮 Шаг 5: Интерфейс управления для CEO
+ceo_interface.py - Ваш интерфейс контроля
+python#!/usr/bin/env python3
+# ceo_interface.py
+
+import json
+import os
+from datetime import datetime
+from pathlib import Path
+import time
+
+class CEOInterface:
+    def __init__(self):
+        self.base_dir = Path("virtual-office")
+        self.office = VirtualOffice()
+        
+    def send_task(self, task_description):
+        """Отправить задание PM"""
+        
+        print(f"📤 Отправляю задание PM...")
+        
+        self.office.send_message(
+            "CEO",
+            "pm",
+            task_description,
+            channel="general"
+        )
+        
+        print("✅ Задание отправлено!")
+    
+    def check_reports(self):
+        """Проверить отчеты"""
+        
+        reports_dir = self.base_dir / "chat/reports"
+        
+        print("\n📊 ОТЧЕТЫ КОМАНДЫ:")
+        print("=" * 50)
+        
+        for report_file in sorted(reports_dir.glob("*.json"))[-5:]:
+            with open(report_file) as f:
+                report = json.load(f)
+            
+            print(f"\n[{report['timestamp']}] {report['from']}:")
+            print(report['message'])
+            print("-" * 30)
+    
+    def view_chat(self, channel="general"):
+        """Просмотр чата"""
+        
+        chat_dir = self.base_dir / f"chat/{channel}"
+        
+        print(f"\n💬 ЧАТ #{channel}")
+        print("=" * 50)
+        
+        messages = []
+        for msg_file in sorted(chat_dir.glob("*.json"))[-10:]:
+            with open(msg_file) as f:
+                messages.append(json.load(f))
+        
+        for msg in messages:
+            time_str = msg['timestamp'].split('T')[1][:8]
+            print(f"[{time_str}] {msg['from']}: {msg['message']}")
+    
+    def check_progress(self):
+        """Проверить прогресс проекта"""
+        
+        progress_file = self.base_dir / "shared/docs/progress.json"
+        
+        if progress_file.exists():
+            with open(progress_file) as f:
+                progress = json.load(f)
+            
+            print("\n📈 ПРОГРЕСС ПРОЕКТА:")
+            print("=" * 50)
+            
+            for task_id, info in progress.items():
+                status_emoji = {
+                    "new": "🆕",
+                    "in_progress": "🔄",
+                    "completed": "✅",
+                    "blocked": "🚫"
+                }.get(info['status'], "❓")
+                
+                print(f"{status_emoji} {task_id}: {info['title']}")
+                print(f"   Исполнитель: {info['assignee']}")
+                print(f"   Статус: {info['status']}")
+                if info.get('notes'):
+                    print(f"   Заметки: {info['notes']}")
+    
+    def interactive_mode(self):
+        """Интерактивный режим управления"""
+        
+        print("\n" + "=" * 60)
+        print("🏢 CEO CONTROL PANEL - Виртуальный Офис")
+        print("=" * 60)
+        
+        while True:
+            print("\nКоманды:")
+            print("1. Отправить задание")
+            print("2. Просмотр чата")
+            print("3. Проверить отчеты")
+            print("4. Прогресс проекта")
+            print("5. Остановить агента")
+            print("6. Запустить агента")
+            print("0. Выход")
+            
+            choice = input("\nВыберите команду: ")
+            
+            if choice == "1":
+                task = input("Введите задание для PM:\n> ")
+                self.send_task(task)
+                
+            elif choice == "2":
+                channels = ["general", "tasks", "help", "reports", "standup"]
+                print("Каналы:", ", ".join(channels))
+                channel = input("Выберите канал: ")
+                self.view_chat(channel)
+                
+            elif choice == "3":
+                self.check_reports()
+                
+            elif choice == "4":
+                self.check_progress()
+                
+            elif choice == "5":
+                agent = input("Какого агента остановить? (pm/frontend/backend/qa/devops): ")
+                self.stop_agent(agent)
+                
+            elif choice == "6":
+                agent = input("Какого агента запустить? (pm/frontend/backend/qa/devops): ")
+                self.start_agent(agent)
+                
+            elif choice == "0":
+                print("До свидания!")
+                break
+            
+            else:
+                print("❌ Неверная команда")
+    
+    def stop_agent(self, agent_name):
+        """Остановить агента"""
+        
+        cmd_file = self.base_dir / "control/commands.txt"
+        with open(cmd_file, 'a') as f:
+            f.write(f"stop:{agent_name}\n")
+        print(f"⏹ Команда остановки отправлена {agent_name}")
+    
+    def start_agent(self, agent_name):
+        """Запустить агента"""
+        
+        # Удаляем команду остановки
+        cmd_file = self.base_dir / "control/commands.txt"
+        if cmd_file.exists():
+            with open(cmd_file, 'r') as f:
+                lines = f.readlines()
+            
+            with open(cmd_file, 'w') as f:
+                for line in lines:
+                    if f"stop:{agent_name}" not in line:
+                        f.write(line)
+        
+        print(f▶️ Агент {agent_name} будет перезапущен")
+
+if __name__ == "__main__":
+    ceo = CEOInterface()
+    ceo.interactive_mode()
+🚀 Шаг 6: Скрипты запуска
+start_office.sh - Главный скрипт запуска
+bash#!/bin/bash
+# start_office.sh
+
+echo "🏢 ЗАПУСК ВИРТУАЛЬНОГО ОФИСА"
+echo "=============================="
+
+# Проверка WSL
+if ! grep -qi microsoft /proc/version 2>/dev/null; then
+    echo "⚠️  Запустите скрипт в WSL2!"
+    exit 1
+fi
+
+# Проверка Claude Code
+if ! command -v claude &> /dev/null; then
+    echo "❌ Claude Code не установлен!"
+    echo "Установите: npm install -g @anthropic-ai/claude-code"
+    exit 1
+fi
+
+# Создание структуры если нет
+if [ ! -d "virtual-office" ]; then
+    echo "📁 Создаю структуру офиса..."
+    bash setup_office.sh
+fi
+
+# Запуск агентов в отдельных терминалах
+echo "🚀 Запускаю агентов..."
+
+# PM в первом терминале
+gnome-terminal --title="PM Agent" -- bash -c "
+    cd virtual-office
+    while true; do
+        python3 -c '
+from system.communication import AgentRunner, VirtualOffice
+runner = AgentRunner(\"pm\", VirtualOffice())
+runner.run()
+        '
+        sleep 5
+    done
+"
+
+# Frontend во втором
+gnome-terminal --title="Frontend Agent" -- bash -c "
+    cd virtual-office
+    while true; do
+        python3 -c '
+from system.communication import AgentRunner, VirtualOffice
+runner = AgentRunner(\"frontend\", VirtualOffice())
+runner.run()
+        '
+        sleep 5
+    done
+"
+
+# Backend в третьем
+gnome-terminal --title="Backend Agent" -- bash -c "
+    cd virtual-office
+    while true; do
+        python3 -c '
+from system.communication import AgentRunner, VirtualOffice
+runner = AgentRunner(\"backend\", VirtualOffice())
+runner.run()
+        '
+        sleep 5
+    done
+"
+
+# QA в четвертом
+gnome-terminal --title="QA Agent" -- bash -c "
+    cd virtual-office
+    while true; do
+        python3 -c '
+from system.communication import AgentRunner, VirtualOffice  
+runner = AgentRunner(\"qa\", VirtualOffice())
+runner.run()
+        '
+        sleep 5
+    done
+"
+
+# DevOps в пятом
+gnome-terminal --title="DevOps Agent" -- bash -c "
+    cd virtual-office
+    while true; do
+        python3 -c '
+from system.communication import AgentRunner, VirtualOffice
+runner = AgentRunner(\"devops\", VirtualOffice())
+runner.run()
+        '
+        sleep 5
+    done
+"
+
+sleep 3
+
+# Запуск CEO интерфейса
+echo "👔 Запускаю CEO интерфейс..."
+cd virtual-office
+python3 ceo_interface.py
+simple_start.sh - Упрощенный запуск в одном терминале
+bash#!/bin/bash
+# simple_start.sh
+
+echo "🏢 Запуск виртуального офиса (упрощенный режим)"
+
+cd virtual-office
+
+# Запуск всех агентов в фоне
+python3 system/communication.py &
+OFFICE_PID=$!
+
+echo "✅ Офис запущен (PID: $OFFICE_PID)"
+echo ""
+
+# Запуск CEO интерфейса
+python3 ceo_interface.py
+
+# При выходе останавливаем офис
+kill $OFFICE_PID
+echo "🛑 Офис остановлен"
+📊 Шаг 7: Мониторинг работы
+monitor.py - Система мониторинга
+python#!/usr/bin/env python3
+# monitor.py
+
+import json
+import time
+from pathlib import Path
+import os
+
+class OfficeMonitor:
+    def __init__(self):
+        self.base_dir = Path("virtual-office")
+    
+    def display_status(self):
+        """Отображение статуса офиса"""
+        
+        os.system('clear')
+        
+        print("=" * 70)
+        print("🏢 VIRTUAL OFFICE MONITOR")
+        print("=" * 70)
+        
+        # Статус агентов
+        print("\n👥 АГЕНТЫ:")
+        agents = ["pm", "frontend", "backend", "qa", "devops"]
+        
+        for agent in agents:
+            inbox = self.base_dir / f"inbox/{agent}"
+            unread = len(list(inbox.glob("*.json")))
+            
+            workspace = self.base_dir / f"agents/{agent}/workspace"
+            files = len(list(workspace.glob("*")))
+            
+            status = "🟢 Активен" if files > 0 else "🔴 Неактивен"
+            
+            print(f"  {agent.upper():10} {status} | Непрочитанных: {unread} | Файлов: {files}")
+        
+        # Активность чатов
+        print("\n💬 ЧАТЫ:")
+        channels = ["general", "tasks", "help", "reports", "standup"]
+        
+        for channel in channels:
+            chat_dir = self.base_dir / f"chat/{channel}"
+            messages = len(list(chat_dir.glob("*.json")))
+            
+            if messages > 0:
+                latest = max(chat_dir.glob("*.json"), key=lambda p: p.stat().st_mtime)
+                with open(latest) as f:
+                    last_msg = json.load(f)
+                last_author = last_msg.get('from', 'Unknown')
+            else:
+                last_author = "Пусто"
+            
+            print(f"  #{channel:10} Сообщений: {messages:3} | Последнее от: {last_author}")
+        
+        # Прогресс задач
+        progress_file = self.base_dir / "shared/docs/progress.json"
+        
+        if progress_file.exists():
+            with open(progress_file) as f:
+                progress = json.load(f)
+            
+            total = len(progress)
+            completed = sum(1 for t in progress.values() if t.get('status') == 'completed')
+            in_progress = sum(1 for t in progress.values() if t.get('status') == 'in_progress')
+            
+            print(f"\n📈 ПРОГРЕСС: Всего: {total} | Выполнено: {completed} | В работе: {in_progress}")
+        
+        print("\n" + "=" * 70)
+        print("Обновление каждые 5 секунд. Ctrl+C для выхода.")
+    
+    def run(self):
+        """Запуск мониторинга"""
+        
+        try:
+            while True:
+                self.display_status()
+                time.sleep(5)
+        except KeyboardInterrupt:
+            print("\n👋 Мониторинг остановлен")
+
+if __name__ == "__main__":
+    monitor = OfficeMonitor()
+    monitor.run()
+🎯 Шаг 8: Примеры использования
+examples/first_project.py - Первый проект
+python#!/usr/bin/env python3
+# examples/first_project.py
+
+from pathlib import Path
+import sys
+sys.path.append(str(Path(__file__).parent.parent))
+
+from ceo_interface import CEOInterface
+
+def run_first_project():
+    """Запуск первого проекта - ToDo приложение"""
+    
+    ceo = CEOInterface()
+    
+    # Отправляем задание
+    task = """
+    Создать веб-приложение ToDo List со следующими требованиями:
+    
+    1. Frontend на React с TypeScript
+    2. Backend API на Node.js/Express
+    3. База данных PostgreSQL
+    4. Авторизация через JWT
+    5. CRUD операции для задач
+    6. Фильтры и сортировка
+    7. Docker контейнеризация
+    8. CI/CD через GitHub Actions
+    
+    Приоритет: Высокий
+    Срок: 3 дня
+    
+    Начните с проектирования архитектуры, затем параллельно разрабатывайте frontend и backend.
+    QA должен начать писать тесты сразу после готовности первых компонентов.
+    DevOps настраивает окружение параллельно с разработкой.
+    
+    Жду ежедневные отчеты о прогрессе.
+    """
+    
+    print("📤 Отправляю задание команде...")
+    ceo.send_task(task)
+    
+    print("✅ Проект запущен!")
+    print("\nТеперь вы можете:")
+    print("1. Следить за чатом: python3 ceo_interface.py")
+    print("2. Мониторить статус: python3 monitor.py")
+    print("3. Проверять файлы в shared/code/")
+
+if __name__ == "__main__":
+    run_first_project()
+📝 Шаг 9: Установка и первый запуск
+INSTALL.md - Инструкция по установке
+markdown# Установка Virtual Office
+
+## Требования
+- Windows 10/11 с WSL2
+- Ubuntu 20.04+ в WSL
+- Node.js 18+
+- Python 3.8+
+- Claude Code
+
+## Пошаговая установка
+
+### 1. Установка WSL2 и Ubuntu
+```bash
+# В PowerShell (администратор)
+wsl --install
+wsl --install -d Ubuntu
+2. Настройка Ubuntu
+bash# В Ubuntu
+sudo apt update
+sudo apt install -y python3 python3-pip git curl
+
+# Установка Node.js через NVM
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+source ~/.bashrc
+nvm install 20
+nvm use 20
+3. Установка Claude Code
+bashnpm install -g @anthropic-ai/claude-code
+
+# Настройка API ключа
+export ANTHROPIC_API_KEY="your-key-here"
+echo 'export ANTHROPIC_API_KEY="your-key-here"' >> ~/.bashrc
+4. Клонирование и настройка офиса
+bash# Скачайте файлы проекта
+git clone [ваш-репозиторий] virtual-office-system
+cd virtual-office-system
+
+# Создание структуры
+bash setup_office.sh
+
+# Установка Python зависимостей
+pip3 install -r requirements.txt
+5. Первый запуск
+bash# Простой режим (всё в одном терминале)
+bash simple_start.sh
+
+# ИЛИ полный режим (множество терминалов)
+bash start_office.sh
+Проверка работы
+
+CEO интерфейс должен открыться автоматически
+Отправьте тестовое задание: "Создать простую страницу Hello World"
+Проверьте чат general на ответ PM
+Следите за прогрессом через monitor.py
+
+Решение проблем
+Claude Code не отвечает
+
+Проверьте API ключ: echo $ANTHROPIC_API_KEY
+Проверьте лимиты API
+
+Агенты не работают
+
+Проверьте структуру папок: ls -la virtual-office/
+Проверьте логи: cat virtual-office/system/logs/*.log
+
+Сообщения не доставляются
+
+Проверьте права доступа: chmod -R 755 virtual-office/
+Очистите блокировки: rm virtual-office/system/locks/*
+
+
+## 🔧 Шаг 10: Файл требований
+
+### `requirements.txt`
+watchdog==3.0.0
+
+## ✅ Итоговая структура проекта
+virtual-office-system/
+├── setup_office.sh           # Создание структуры
+├── start_office.sh           # Полный запуск
+├── simple_start.sh           # Упрощенный запуск
+├── requirements.txt          # Python зависимости
+├── INSTALL.md               # Инструкция установки
+│
+├── system/
+│   ├── communication.py     # Основная система
+│   ├── agents.json          # Конфигурация агентов
+│   └── status.json          # Статус системы
+│
+├── agents/
+│   ├── pm/
+│   │   ├── prompt.md       # Промпт PM
+│   │   └── workspace/      # Рабочие файлы
+│   ├── frontend/
+│   │   ├── prompt.md
+│   │   └── workspace/
+│   ├── backend/
+│   │   ├── prompt.md
+│   │   └── workspace/
+│   ├── qa/
+│   │   ├── prompt.md
+│   │   └── workspace/
+│   └── devops/
+│       ├── prompt.md
+│       └── workspace/
+│
+├── ceo_interface.py         # Ваш интерфейс управления
+├── monitor.py              # Мониторинг офиса
+│
+└── examples/
+└── first_project.py    # Пример первого проекта
+
+## 🚀 Запуск системы
+
+1. **Установка:** `bash setup_office.sh`
+2. **Запуск офиса:** `bash simple_start.sh`
+3. **Отправка задания через CEO интерфейс**
+4. **Мониторинг работы:** `python3 monitor.py` в отдельном терминале
+
+Система готова! Вы теперь CEO виртуального офиса с 5 агентами Claude Code, которые общаются через файловую систему, выполняют задачи и отчитываются перед вами.

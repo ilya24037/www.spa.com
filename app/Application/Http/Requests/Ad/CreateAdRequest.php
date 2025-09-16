@@ -98,8 +98,8 @@ class CreateAdRequest extends FormRequest
             'online_booking' => 'nullable|boolean',
             
             // Медиа
-            'photos' => 'nullable|array|max:20',
-            'photos.*' => 'string|max:1000',
+            'photos' => 'required|array|min:3|max:20',
+            'photos.*' => 'file|mimes:jpeg,jpg,png,bmp,gif,webp,heic,heif|max:10240',
             'video' => 'nullable|array',
             'show_photos_in_gallery' => 'nullable|boolean',
             'allow_download_photos' => 'nullable|boolean',
@@ -174,8 +174,14 @@ class CreateAdRequest extends FormRequest
             'prices.apartments_1h.numeric' => 'Цена должна быть числом',
             'prices.outcall_1h.numeric' => 'Цена должна быть числом',
             
-            // Остальные поля
+            // Медиа
+            'photos.required' => 'Добавьте минимум 3 фотографии',
+            'photos.min' => 'Минимум 3 фотографии',
             'photos.max' => 'Максимум 20 фотографий',
+            'photos.*.max' => 'Размер фото не должен превышать 10 МБ',
+            'photos.*.mimes' => 'Неподдерживаемый формат. Разрешены: JPG, PNG, BMP, GIF, WebP, HEIC',
+            
+            // Остальные поля
             'whatsapp.regex' => 'Некорректный формат номера WhatsApp',
             'discount.min' => 'Скидка не может быть отрицательной',
             'discount.max' => 'Скидка не может быть больше 100%',

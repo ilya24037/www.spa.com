@@ -2,7 +2,7 @@
   <div class="outcall-section">
     <!-- Заголовок секции -->
     <div class="mb-4">
-      <h3 class="text-base font-medium text-gray-900 mb-2">Куда выезжаете</h3>
+      <h3 class="subtitle-form">Куда выезжаете</h3>
       <p class="text-sm text-gray-600 leading-relaxed">
         Укажите все зоны выезда, чтобы клиенты понимали, доберётесь ли вы до них.
       </p>

@@ -396,7 +396,7 @@ const paymentMethods: PaymentMethodOption[] = [
 
 // Computed для опций селектов
 const serviceOptions = computed(() => {
-    const options = [{ value: '', label: 'Выберите услугу' }]
+    const options = [{ value: '', label: 'Не выбрано' }]
     if (props.master.services) {
         props.master.services.forEach(service => {
             options.push({
@@ -411,7 +411,7 @@ const serviceOptions = computed(() => {
 const timeSlotOptions = computed(() => {
     const options = [{ 
         value: '', 
-        label: state.value.loadingSlots ? 'Загрузка...' : 'Выберите время' 
+        label: state.value.loadingSlots ? 'Загрузка...' : 'Не выбрано' 
     }]
     state.value.availableSlots.forEach(slot => {
         options.push({ value: slot, label: slot })

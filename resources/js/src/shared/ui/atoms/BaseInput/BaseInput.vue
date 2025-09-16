@@ -1,9 +1,9 @@
 <!-- Базовый инпут в стиле Авито -->
 <template>
   <div class="w-full">
-    <label v-if="label" :for="inputId" class="block text-base font-medium text-gray-900 mb-2">
+    <label v-if="label" :for="inputId" class="subtitle-form label-field">
       {{ label }}
-      <span v-if="required" class="text-red-500 ml-1">*</span>
+      <span v-if="required" class="text-red-500 ml-1 text-base">*</span>
     </label>
     
     <div
@@ -30,7 +30,7 @@
         :min="min"
         :max="max"
         :step="step"
-        class="w-full border-gray-300 rounded-lg bg-gray-50 text-gray-900 transition-all duration-200 box-border focus:outline-none focus:border-blue-500 focus:bg-white hover:border-gray-400 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 readonly:cursor-default readonly:bg-gray-100 placeholder:text-gray-500"
+        class="w-full border-gray-400 rounded-lg bg-gray-50 text-gray-900 transition-all duration-200 box-border focus:outline-none focus:border-blue-500 focus:bg-white hover:border-gray-400 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 readonly:cursor-default readonly:bg-gray-100 placeholder:text-gray-400"
         :class="{
           'pr-10': clearable && inputValue && !suffix,
           'pl-12': prefix,
@@ -39,7 +39,7 @@
           'border-red-500 focus:border-red-500': error,
           'border-gray-300': !error,
           // Размеры
-          'px-3 py-1.5 border-2 text-base min-h-[40px]': size === 'md',
+          'px-3 py-1.5 border-2 text-sm min-h-[40px]': size === 'md',
           'px-2 py-1 border text-sm h-8': size === 'sm'
         }"
         @input="handleInput"
@@ -121,7 +121,7 @@
     </div>
     
     <!-- Ошибка -->
-    <div v-if="error" :id="`${inputId}-error`" class="mt-2 text-sm text-red-600" role="alert">
+    <div v-if="error" :id="`${inputId}-error`" class="mt-0 text-sm text-red-600" role="alert">
       {{ error }}
     </div>
     

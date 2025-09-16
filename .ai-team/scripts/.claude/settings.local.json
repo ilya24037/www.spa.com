@@ -20,7 +20,8 @@
       "Read(//c/Проект SPA/Av patern/ymaps-components/**)",
       "Read(//c/Проект SPA/Av patern/**)",
       "Bash(php artisan migrate:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(powershell:*)"
     ],
     "deny": [],
     "ask": []

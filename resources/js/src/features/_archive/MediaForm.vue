@@ -77,12 +77,10 @@
                 <strong>Рекомендации:</strong>
               </p>
               <ul class="text-xs text-gray-500 list-disc list-inside space-y-1 mt-2">
-                <li>Минимум 3 фотографии</li>
-                <li>Максимум {{ maxPhotos }} фотографий</li>
-                <li>Размер до 10 МБ на файл</li>
-                <li>Форматы: JPG, PNG, WEBP</li>
-                <li>Хорошее освещение</li>
-                <li>Высокое разрешение (от 1080x720)</li>
+                <li>Минимум 3 фото, максимум 20</li>
+                <li>Без водяных знаков других сайтов</li>
+                <li>На фото не должны быть видны гениталии</li>
+                <li>Фото должны соответствовать услугам</li>
               </ul>
             </div>
           </div>
@@ -487,7 +485,7 @@ const photosInput = ref<HTMLInputElement>()
 const videoInput = ref<HTMLInputElement>()
 
 // Ограничения
-const maxPhotos = 15
+const maxPhotos = 20
 const maxPhotoSize = 10 * 1024 * 1024 // 10MB
 const maxVideoSize = 100 * 1024 * 1024 // 100MB
 

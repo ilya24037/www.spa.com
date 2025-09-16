@@ -4,7 +4,7 @@
     <div v-if="comfortCategories.length > 0" class="service-category">
       <div class="border border-gray-200 rounded-lg px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors duration-200 mb-3 cursor-pointer select-none" @click="toggleComfortServices">
         <div class="flex items-center justify-between">
-          <h3 class="text-base font-semibold text-gray-900 flex items-center">
+          <h3 class="text-base font-semibold text-gray-900">
             Комфорт
             <span v-if="totalSelectedComfort > 0" class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded-full">
               {{ totalSelectedComfort }}

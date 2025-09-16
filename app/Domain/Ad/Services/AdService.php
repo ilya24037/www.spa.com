@@ -370,10 +370,7 @@ class AdService
             }
         }
         
-        // Убеждаемся что есть обязательные поля для черновика
-        if (!isset($adData['title']) || empty($adData['title'])) {
-            $adData['title'] = 'Черновик объявления';
-        }
+        // Не устанавливаем дефолтный title - оставляем пустым если не передан
         
         if (!isset($adData['category']) || empty($adData['category'])) {
             $adData['category'] = 'erotic';

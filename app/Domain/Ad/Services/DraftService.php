@@ -209,6 +209,11 @@ class DraftService
             }
         }
         
+        // Убедимся что title всегда присутствует (даже если пустое)
+        if (!isset($data['title'])) {
+            $data['title'] = '';
+        }
+        
         // Убедимся что description всегда присутствует (даже если пустое)
         if (!isset($data['description'])) {
             $data['description'] = '';
@@ -350,8 +355,7 @@ class DraftService
             }
         }
         
-        // Устанавливаем значение по умолчанию для заголовка
-        $data['title'] = $data['title'] ?? 'Черновик';
+        // Не устанавливаем значение по умолчанию для заголовка - оставляем пустым
         
         return $data;
     }

@@ -2,14 +2,14 @@
   <div class="address-map-section">
     <!-- Заголовок секции -->
     <div class="mb-6">
-      <h3 class="text-base font-medium text-gray-900 mb-2">Ваш адрес</h3>
+      <h3 class="subtitle-form">Ваш адрес</h3>
       <p class="text-sm text-gray-600 leading-relaxed mb-4">
         Клиенты выбирают исполнителя по точному адресу, когда ищут услуги поблизости.
       </p>
     </div>
 
     <!-- Поисковая строка -->
-    <div class="search-container relative mb-4">
+    <div class="search-container relative mb-1">
       <input
         v-model="searchQuery"
         @input="handleSearchInput"
@@ -17,8 +17,13 @@
         @blur="hideSuggestions"
         type="text"
         :placeholder="isDetectingLocation ? 'Определяем ваше местоположение...' : 'Введите адрес для поиска...'"
-        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-        :class="{ 'pr-10': searchQuery, 'animate-pulse': isDetectingLocation }"
+        class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+        :class="{ 
+          'pr-10': searchQuery, 
+          'animate-pulse': isDetectingLocation,
+          'border-2 border-red-500': props.forceValidation && !searchQuery,
+          'border-gray-300': !props.forceValidation || searchQuery
+        }"
         :disabled="isDetectingLocation"
       />
       
@@ -46,9 +51,20 @@
         </div>
       </div>
     </div>
+    
+    <!-- Текст валидации -->
+    <div v-if="props.forceValidation && !searchQuery" class="text-red-500 text-sm mb-3">
+      Укажите адрес
+    </div>
 
     <!-- Карта -->
-    <div class="map-container rounded-lg overflow-hidden border border-gray-200">
+    <div 
+      class="map-container rounded-lg overflow-hidden border"
+      :class="{
+        'border-2 border-red-500': props.forceValidation && !searchQuery,
+        'border-gray-200': !props.forceValidation || searchQuery
+      }"
+    >
       <!-- Vue Yandex Maps компонент с обработкой ошибок -->
       <Suspense>
         <template #default>
@@ -137,12 +153,14 @@ interface Props {
   initialCoordinates?: { lat: number; lng: number }
   initialZoom?: number
   isEditMode?: boolean
+  forceValidation?: boolean
 }
 
 interface Emits {
   'update:address': [address: string]
   'update:coordinates': [coords: { lat: number; lng: number }]
   'data-changed': [data: { address: string; coordinates: { lat: number; lng: number } | null }]
+  'clearForceValidation': []
 }
 
 interface Suggestion {
@@ -344,6 +362,11 @@ const performReverseGeocoding = async (lat: number, lng: number) => {
 let searchTimeout: ReturnType<typeof setTimeout> | null = null
 
 const handleSearchInput = () => {
+  // Сбрасываем валидацию при начале ввода
+  if (props.forceValidation && searchQuery.value && searchQuery.value.length > 0) {
+    emit('clearForceValidation')
+  }
+  
   if (searchTimeout) {
     clearTimeout(searchTimeout)
   }

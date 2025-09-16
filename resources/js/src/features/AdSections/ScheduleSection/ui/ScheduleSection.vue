@@ -4,7 +4,7 @@
         
         <!-- Онлайн запись -->
         <div class="online-booking-section">
-            <h3 class="subsection-title">Онлайн запись</h3>
+            <h3 class="subtitle-form">Онлайн запись</h3>
             <p class="subsection-description">
                 Разрешить клиентам записываться к вам онлайн через сайт
             </p>

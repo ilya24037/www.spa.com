@@ -35,7 +35,7 @@
         <div class="basic-subsections">
           <!-- Кто оказывает услуги -->
           <div class="subsection">
-            <h3 class="subsection-title">
+            <h3 class="subtitle-form">
               Кто оказывает услуги
               <span class="required-mark">*</span>
             </h3>
@@ -49,7 +49,7 @@
 
           <!-- Формат работы -->
           <div class="subsection">
-            <h3 class="subsection-title">
+            <h3 class="subtitle-form">
               Формат работы
               <span class="required-mark">*</span>
             </h3>
@@ -63,18 +63,34 @@
 
           <!-- Опыт работы -->
           <div class="subsection">
-            <h3 class="subsection-title">
+            <h3 
+              class="subtitle-form cursor-pointer transition-colors duration-200"
+              @click="toggleExperienceField"
+            >
               Опыт работы
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width="20" 
+                height="20" 
+                viewBox="0 0 24 24" 
+                class="text-gray-500 ml-2 transition-transform duration-200"
+                :class="{ 'rotate-180': isExperienceExpanded }"
+                fill="currentColor"
+              >
+                <path d="M6.497 9.385a1.5 1.5 0 0 1 2.118.112L12 13.257l3.385-3.76a1.5 1.5 0 0 1 2.23 2.006l-4.5 5a1.5 1.5 0 0 1-2.23 0l-4.5-5a1.5 1.5 0 0 1 .112-2.118"></path>
+              </svg>
             </h3>
-            <ExperienceSection 
-              v-model:experience="form.experience" 
-              :errors="errors"
-            />
+            <div v-show="isExperienceExpanded" class="mt-3">
+              <ExperienceSection 
+                v-model:experience="form.experience" 
+                :errors="errors"
+              />
+            </div>
           </div>
 
           <!-- Ваши клиенты -->
           <div class="subsection">
-            <h3 class="subsection-title">
+            <h3 class="subtitle-form">
               Ваши клиенты
               <span class="required-mark">*</span>
             </h3>
@@ -89,7 +105,7 @@
 
           <!-- Описание -->
           <div class="subsection">
-            <h3 class="subsection-title">
+            <h3 class="subtitle-form">
               Описание
               <span class="required-mark">*</span>
             </h3>
@@ -180,7 +196,7 @@
                 @click="isFeaturesExpanded = !isFeaturesExpanded"
               >
                 <div class="flex items-center justify-between">
-                  <h3 class="text-base font-semibold text-gray-900 flex items-center">
+                  <h3 class="text-base font-semibold text-gray-900">
                     Особенности мастера
                     <span 
                       v-if="totalFaqSelected > 0" 
@@ -241,14 +257,14 @@
         data-section="media"
         class="media-group-section"
       >
-        <div class="media-subsections">
+        <div class="media-subsections p-5">
           <!-- Фотографии - раскрывающаяся подкатегория -->
           <div class="media-category mb-6">
             <div class="border border-gray-200 rounded-lg px-4 py-3 transition-colors duration-200 mb-3 cursor-pointer select-none" @click="togglePhotosSection">
               <div class="flex items-center justify-between">
-                <h3 class="text-base font-semibold text-gray-900 flex items-center">
+                <h3 class="text-lg font-semibold text-gray-800">
                   Фотографии
-                  <span class="required-mark ml-1">*</span>
+                  <span class="required-mark">*</span>
                   <span v-if="getPhotosCount() > 0" class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded-full">
                     {{ getPhotosCount() }}
                   </span>
@@ -280,7 +296,7 @@
           <div class="media-category mb-6">
             <div class="border border-gray-200 rounded-lg px-4 py-3 transition-colors duration-200 mb-3 cursor-pointer select-none" @click="toggleVideoSection">
               <div class="flex items-center justify-between">
-                <h3 class="text-base font-semibold text-gray-900 flex items-center">
+                <h3 class="text-lg font-semibold text-gray-800">
                   Видео
                   <span v-if="getVideosCount() > 0" class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded-full">
                     {{ getVideosCount() }}
@@ -311,7 +327,7 @@
           <div class="media-category mb-6">
             <div class="border border-gray-200 rounded-lg px-4 py-3 transition-colors duration-200 mb-3 cursor-pointer select-none" @click="toggleVerificationSection">
               <div class="flex items-center justify-between">
-                <h3 class="text-base font-semibold text-gray-900 flex items-center">
+                <h3 class="text-lg font-semibold text-gray-800">
                   Проверочное фото
                   <span class="text-sm font-normal text-gray-500 ml-2">(повышает доверие)</span>
                   <span v-if="form.verification_photo" class="ml-2 px-2 py-1 text-xs bg-green-100 text-green-600 rounded-full">
@@ -457,6 +473,9 @@ const isPhotosExpanded = ref(true) // Фотографии развернуты 
 const isVideoExpanded = ref(false) // Видео свернуто по умолчанию
 const isVerificationExpanded = ref(false) // Проверочное фото свернуто по умолчанию
 
+// Состояние раскрытия поля опыта работы
+const isExperienceExpanded = ref(false) // Опыт работы свернуто по умолчанию
+
 // Обработчик смены блока
 const handleBlockChange = (blockKey) => {
   currentActiveBlock.value = blockKey
@@ -473,6 +492,10 @@ const toggleVideoSection = () => {
 
 const toggleVerificationSection = () => {
   isVerificationExpanded.value = !isVerificationExpanded.value
+}
+
+const toggleExperienceField = () => {
+  isExperienceExpanded.value = !isExperienceExpanded.value
 }
 
 const handleVerificationUploaded = (path: string) => {
@@ -703,8 +726,8 @@ const filledRequiredFields = computed(() => {
   if ((form.prices?.apartments_1h && Number(form.prices.apartments_1h) > 0) ||
       (form.prices?.outcall_1h && Number(form.prices.outcall_1h) > 0)) count++
   
-  // Медиа (1 поле) - обязательно минимум одно фото
-  if (form.photos?.length > 0) count++
+  // Медиа (1 поле) - обязательно минимум 3 фото
+  if (form.photos?.length >= 3) count++
   
   return count
 })
@@ -779,7 +802,7 @@ const scrollToFirstMissingField = () => {
                    (form.prices?.outcall_1h && Number(form.prices.outcall_1h) > 0))
         break
       case 'media':
-        isEmpty = !form.photos?.length
+        isEmpty = !form.photos?.length || form.photos.length < 3
         break
       case 'geo':
         // Проверяем наличие адреса в geo объекте
@@ -1059,15 +1082,7 @@ onMounted(() => {
   border-radius: 8px;
 }
 
-.subsection-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1f2937;
-  margin: 0 0 12px 0;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
+/* .subsection-title заменен на .subtitle-form в typography.css */
 
 .required-mark {
   color: #ef4444;
@@ -1084,8 +1099,8 @@ onMounted(() => {
     padding: 0px;
   }
   
-  .subsection-title {
-    font-size: 14px;
+  .subtitle-form {
+    font-size: 16px;
   }
 }
 </style>

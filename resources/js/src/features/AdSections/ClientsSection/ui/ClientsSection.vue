@@ -15,19 +15,37 @@
     </div>
     
     <!-- Возраст клиента от -->
-    <div class="mt-4 w-[170px]">
-      <BaseInput
-        v-model="localClientAgeFrom"
-        type="number"
-        name="client_age_from"
-        label="Возраст клиента от"
-        placeholder="18"
-        :min="18"
-        :max="120"
-        :clearable="true"
-        @blur="validateAndCorrectAge"
-        class="w-[170px]"
-      />
+    <div class="mt-4">
+      <h3 
+        class="subtitle-form cursor-pointer transition-colors duration-200"
+        @click="toggleClientAgeField"
+      >
+        Возраст клиента от
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          class="text-gray-500 ml-2 transition-transform duration-200"
+          :class="{ 'rotate-180': isClientAgeExpanded }"
+          fill="currentColor"
+        >
+          <path d="M6.497 9.385a1.5 1.5 0 0 1 2.118.112L12 13.257l3.385-3.76a1.5 1.5 0 0 1 2.23 2.006l-4.5 5a1.5 1.5 0 0 1-2.23 0l-4.5-5a1.5 1.5 0 0 1 .112-2.118"></path>
+        </svg>
+      </h3>
+      <div v-show="isClientAgeExpanded" class="w-[170px]">
+        <BaseInput
+          v-model="localClientAgeFrom"
+          type="number"
+          name="client_age_from"
+          placeholder="18 лет"
+          :min="18"
+          :max="120"
+          :clearable="true"
+          @blur="validateAndCorrectAge"
+          class="w-[170px]"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -47,6 +65,14 @@ const props = defineProps({
 const emit = defineEmits(['update:clients', 'update:clientAgeFrom', 'clearForceValidation'])
 const localClients = ref([...props.clients])
 const localClientAgeFrom = ref(props.clientAgeFrom)
+
+// Состояние для сворачивания поля возраста
+const isClientAgeExpanded = ref(false)
+
+// Функция переключения поля возраста
+const toggleClientAgeField = () => {
+  isClientAgeExpanded.value = !isClientAgeExpanded.value
+}
 
 // Состояние для валидации
 const touched = ref(false)

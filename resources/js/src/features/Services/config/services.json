@@ -11,8 +11,8 @@
           "popular": true
         },
         {
-          "id": "oral_sex",
-          "name": "Оральный секс",
+          "id": "blowjob_with_condom",
+          "name": "Минет с презервативом",
           "price_placeholder": "Укажите цену, комментарий"
         },
         {
@@ -68,11 +68,6 @@
         "icon": "",
         "description": "",
         "services": [
-        {
-          "id": "blowjob_with_condom",
-          "name": "Минет с презервативом",
-          "price_placeholder": "Укажите цену, комментарий"
-        },
         {
           "id": "blowjob_without_condom", 
           "name": "Минет без презерватива",

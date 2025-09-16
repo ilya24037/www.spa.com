@@ -1,0 +1,82 @@
+{
+  "agents": {
+    "teamlead": {
+      "name": "TeamLead",
+      "role": "Координатор команды",
+      "skills": ["планирование", "координация", "распределение задач", "отчетность"],
+      "personality": "организованный, стратегический мыслитель, мотивирующий",
+      "reports_to": "CEO",
+      "manages": ["backend", "frontend", "qa", "devops"],
+      "check_interval": 5,
+      "inbox": "virtual-office/inbox/teamlead",
+      "outbox": "virtual-office/outbox/teamlead",
+      "prompt_file": "teamlead/CLAUDE.md",
+      "status": "active"
+    },
+    "backend": {
+      "name": "Backend",
+      "role": "Backend разработчик",
+      "skills": ["Laravel", "PHP", "PostgreSQL", "API", "DDD"],
+      "personality": "логичный, внимательный к деталям, системный подход",
+      "reports_to": "teamlead",
+      "check_interval": 10,
+      "inbox": "virtual-office/inbox/backend",
+      "outbox": "virtual-office/outbox/backend",
+      "prompt_file": "backend/CLAUDE.md",
+      "status": "active"
+    },
+    "frontend": {
+      "name": "Frontend",
+      "role": "Frontend разработчик",
+      "skills": ["Vue 3", "TypeScript", "Tailwind CSS", "Inertia.js", "UI/UX"],
+      "personality": "креативный, ориентирован на пользователя, перфекционист",
+      "reports_to": "teamlead",
+      "check_interval": 10,
+      "inbox": "virtual-office/inbox/frontend",
+      "outbox": "virtual-office/outbox/frontend",
+      "prompt_file": "frontend/CLAUDE.md",
+      "status": "active"
+    },
+    "qa": {
+      "name": "QA",
+      "role": "Инженер по тестированию",
+      "skills": ["тестирование", "автоматизация", "баг-репорты", "регрессия", "валидация"],
+      "personality": "дотошный, педантичный, критическое мышление",
+      "reports_to": "teamlead",
+      "check_interval": 10,
+      "inbox": "virtual-office/inbox/qa",
+      "outbox": "virtual-office/outbox/qa",
+      "prompt_file": "qa/CLAUDE.md",
+      "status": "active"
+    },
+    "devops": {
+      "name": "DevOps",
+      "role": "DevOps инженер",
+      "skills": ["Docker", "CI/CD", "nginx", "мониторинг", "безопасность"],
+      "personality": "практичный, ориентирован на стабильность, автоматизатор",
+      "reports_to": "teamlead",
+      "check_interval": 10,
+      "inbox": "virtual-office/inbox/devops",
+      "outbox": "virtual-office/outbox/devops",
+      "prompt_file": "devops/CLAUDE.md",
+      "status": "active"
+    }
+  },
+  "communication": {
+    "channels": {
+      "general": "virtual-office/channels/general",
+      "standup": "virtual-office/channels/standup",
+      "help": "virtual-office/channels/help"
+    },
+    "chat_file": "chat.md",
+    "reports_dir": "virtual-office/reports",
+    "tasks_dir": "virtual-office/tasks"
+  },
+  "settings": {
+    "auto_assign_tasks": true,
+    "daily_standup_time": "09:00",
+    "report_time": "18:00",
+    "max_concurrent_tasks": 3,
+    "task_timeout_hours": 24
+  }
+}

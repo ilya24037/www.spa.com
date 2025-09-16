@@ -80,7 +80,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                   d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
           </svg>
-          <span class="text-sm text-gray-600">
+          <span class="text-sm text-gray-500">
             {{ isDragOver ? 'Отпустите файлы здесь' : 'Перетащите видео в эту область или нажмите выбрать видео' }}
           </span>
         </div>
@@ -94,10 +94,12 @@
     </div>
     
     <!-- Информация об ограничениях -->
-    <div class="text-xs text-gray-500 space-y-1">
-      <p>• Максимум {{ maxFiles }} видео</p>
-      <p>• Размер файла до {{ maxSizeInMB }}MB</p>
-      <p>• Поддерживаемые форматы: MP4, WebM, OGG</p>
+    <div class="text-sm text-gray-800 space-y-1">
+      <p>• Максимум 3 видео</p>
+      <p>• Длительность: от 5 секунд до 60 секунд</p>
+      <p>• Не должны содержать водяные знаки других сайтов</p>
+      <p>• Видео должны соответствовать описанию услуг</p>
+      <p class="text-amber-600 font-medium">• Без проверочной фотографии видеофайл не будет размещен</p>
     </div>
     
     <!-- Ошибки загрузки -->
@@ -119,9 +121,9 @@ import type { VideoUploadProps, VideoUploadEmits } from '../model/types'
 
 const props = withDefaults(defineProps<VideoUploadProps>(), {
   videos: () => [],
-  maxFiles: 5,
-  maxSize: 100 * 1024 * 1024, // 100MB
-  acceptedFormats: () => ['video/mp4', 'video/webm', 'video/ogg']
+  maxFiles: 3,
+  maxSize: 50 * 1024 * 1024, // 50MB
+  acceptedFormats: () => ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-msvideo']
 })
 
 const emit = defineEmits<VideoUploadEmits>()

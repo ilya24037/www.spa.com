@@ -52,10 +52,11 @@
     </div>
     
     <!-- Информация об ограничениях -->
-    <div class="text-xs text-gray-500 space-y-1">
-      <p>• Максимум {{ maxFiles }} фотографий</p>
-      <p>• Размер файла до 5MB</p>
-      <p>• Поддерживаемые форматы: JPG, PNG, WebP</p>
+    <div class="text-sm text-gray-800 space-y-1">
+      <p>• Минимум 3 фото, максимум 20</p>
+      <p>• Без водяных знаков других сайтов</p>
+      <p>• На фото не должны быть видны гениталии</p>
+      <p>• Фото должны соответствовать услугам</p>
     </div>
     
 
@@ -83,14 +84,22 @@ import type { PhotoUploadProps, PhotoUploadEmits, Photo } from '../model/types'
 
 const props = withDefaults(defineProps<PhotoUploadProps>(), {
   photos: () => [],
-  maxFiles: 10,
+  maxFiles: 20,
   isLoading: false,
   forceValidation: false
 })
 
 // Константы для PhotoUploadZone
 const maxSize = 10 * 1024 * 1024 // 10MB (унифицировано с backend)
-const acceptedFormats = ['image/jpeg', 'image/png', 'image/webp']
+const acceptedFormats = [
+  'image/jpeg',
+  'image/png',
+  'image/bmp',
+  'image/gif',
+  'image/webp',
+  'image/heic',
+  'image/heif'
+]
 
 const emit = defineEmits<PhotoUploadEmits>()
 
@@ -133,7 +142,10 @@ const safePhotosCount = computed(() => {
 // Computed для показа валидационной ошибки
 const validationError = computed(() => {
   if (props.forceValidation && safePhotosCount.value === 0) {
-    return 'Добавьте минимум одну фотографию'
+    return 'Добавьте минимум 3 фотографии'
+  }
+  if (props.forceValidation && safePhotosCount.value < 3) {
+    return `Добавьте еще ${3 - safePhotosCount.value} фото (минимум 3)`
   }
   return ''
 })
@@ -203,7 +215,7 @@ const onDragEnd = () => {
 
 // Следим за добавлением фотографий для сброса валидации
 watch(() => safePhotosCount.value, (newCount) => {
-  if (props.forceValidation && newCount > 0) {
+  if (props.forceValidation && newCount >= 3) {
     emit('clear-force-validation')
   }
 })

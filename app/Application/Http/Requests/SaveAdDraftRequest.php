@@ -94,16 +94,5 @@ class SaveAdDraftRequest extends FormRequest
         ];
     }
 
-    /**
-     * Подготовить данные для валидации
-     */
-    protected function prepareForValidation(): void
-    {
-        // Устанавливаем title по умолчанию, если не указан
-        if (!$this->has('title') || empty($this->title)) {
-            $this->merge([
-                'title' => 'Черновик объявления'
-            ]);
-        }
-    }
+    // Метод prepareForValidation удален - не устанавливаем дефолтный title
 }

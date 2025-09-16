@@ -161,7 +161,7 @@ const customTravelAreasOptions = [
 
 // Опции для селектов
 const travelRadiusOptions = computed(() => [
-  { value: '', label: 'Выберите радиус' },
+  { value: '', label: 'Не выбрано' },
   { value: '5', label: 'До 5 км' },
   { value: '10', label: 'До 10 км' },
   { value: '15', label: 'До 15 км' },

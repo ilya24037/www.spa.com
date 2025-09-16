@@ -1,48 +1,68 @@
 <template>
   <div class="verification-photo-upload">
-    <!-- Инструкции -->
-    <div class="instructions-grid grid md:grid-cols-2 gap-4 mb-6">
-      <!-- Шаг 1 -->
-      <div class="instruction-card bg-gray-50 rounded-lg p-4">
+    <!-- Блок преимуществ -->
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4 mb-6">
+      <div class="flex items-start gap-3">
+        <div class="text-2xl">✨</div>
+        <div>
+          <h3 class="font-semibold text-blue-900 mb-2">Получите значок "Фото проверено"</h3>
+          <ul class="text-sm text-blue-800 space-y-1">
+            <li>📈 +40% больше просмотров анкеты</li>
+            <li>🔝 Приоритет в выдаче результатов</li>
+            <li>🔒 Фото остается конфиденциальным (не публикуется)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Простая инструкция -->
+    <div class="bg-white border-2 border-gray-200 rounded-lg p-6 mb-6">
+      <h3 class="font-semibold text-lg mb-4 text-center">Как сделать проверочное фото?</h3>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <!-- Шаг 1 -->
         <div class="flex items-start gap-3">
-          <div class="flex-shrink-0 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold">
+          <div class="flex-shrink-0 w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-lg">
             1
           </div>
           <div class="flex-1">
-            <h3 class="font-semibold mb-2">Подготовка</h3>
-            <p class="text-sm text-gray-600 mb-2">На листке бумаги напишите от руки:</p>
-            <div class="bg-white border border-gray-200 rounded p-3 font-mono text-sm">
-              <div class="font-bold">{{ currentDate }}</div>
-              <div class="font-bold">для FEIPITER</div>
+            <h4 class="font-semibold mb-2">Подготовьте листок</h4>
+            <div class="bg-gray-50 border border-gray-300 rounded p-3 mb-2">
+              <p class="text-sm mb-1">Напишите от руки:</p>
+              <div class="font-mono bg-white p-2 rounded border">
+                <div class="font-bold">{{ currentDate }}</div>
+                <div class="font-bold">для FEIPITER</div>
+              </div>
             </div>
-            <p class="text-xs text-gray-500 mt-2">Надписи должны быть написаны от руки</p>
+            <p class="text-xs text-gray-600">✍️ Обязательно пишите от руки</p>
           </div>
         </div>
-      </div>
-      
-      <!-- Шаг 2 -->
-      <div class="instruction-card bg-gray-50 rounded-lg p-4">
+
+        <!-- Шаг 2 -->
         <div class="flex items-start gap-3">
-          <div class="flex-shrink-0 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold">
+          <div class="flex-shrink-0 w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-lg">
             2
           </div>
           <div class="flex-1">
-            <h3 class="font-semibold mb-2">Съёмка</h3>
-            <p class="text-sm text-gray-600 mb-2">Сделайте фото с листком:</p>
-            <ul class="text-sm text-gray-600 space-y-1">
-              <li>• Лицо и листок должны быть видны</li>
-              <li>• Фото в полный рост приветствуется</li>
-              <li>• Хорошее освещение</li>
-              <li>• Четкое изображение</li>
+            <h4 class="font-semibold mb-2">Сделайте фото</h4>
+            <ul class="text-sm text-gray-700 space-y-2">
+              <li class="flex items-start gap-2">
+                <span class="text-green-500">✓</span>
+                <span>Держите листок в руке</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-green-500">✓</span>
+                <span>Должно быть видно ваше тело</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-green-500">✓</span>
+                <span>Текст должен читаться</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-green-500">✓</span>
+                <span>Как на фото в анкете</span>
+              </li>
             </ul>
-            <div class="mt-2 text-center">
-              <img 
-                src="/images/verification-example.jpg" 
-                alt="Пример проверочного фото"
-                class="inline-block w-24 h-32 object-cover rounded border border-gray-300"
-                @error="handleImageError"
-              >
-            </div>
           </div>
         </div>
       </div>
@@ -50,9 +70,9 @@
     
     <!-- Зона загрузки -->
     <div v-if="!currentFile && !uploadedPath" class="upload-zone">
-      <label 
-        class="upload-label"
-        :class="{ 'dragging': isDragging }"
+      <label
+        class="upload-label bg-gray-50 hover:bg-blue-50"
+        :class="{ 'dragging': isDragging, 'bg-blue-50 border-blue-400': isDragging }"
         @dragover.prevent="isDragging = true"
         @dragleave.prevent="isDragging = false"
         @drop.prevent="handleDrop"
@@ -65,20 +85,23 @@
           @change="handleFileSelect"
           :disabled="uploading"
         >
-        
+
         <div class="upload-content">
-          <svg class="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-12 h-12 text-gray-400 mb-3 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
           </svg>
-          
+
           <p class="text-lg font-medium text-gray-700 mb-1">
-            Загрузить проверочное фото
+            Перетащите фото в эту область
           </p>
-          <p class="text-sm text-gray-500">
-            JPG, PNG до 10MB
+          <p class="text-sm text-gray-500 mb-3">
+            или нажмите кнопку
           </p>
-          <p class="text-xs text-gray-400 mt-2">
-            Нажмите или перетащите файл
+          <button type="button" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium">
+            Выбрать проверочное фото
+          </button>
+          <p class="text-xs text-gray-400 mt-3">
+            JPG, PNG до 15 МБ
           </p>
         </div>
       </label>
@@ -128,25 +151,65 @@
       <p class="text-sm text-red-600">{{ error }}</p>
     </div>
     
-    <!-- Важные замечания -->
-    <div class="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-      <div class="flex">
-        <div class="flex-shrink-0">
-          <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-          </svg>
+    <!-- Важная информация -->
+    <div class="mt-6 flex flex-col sm:flex-row gap-4 text-xs text-gray-600">
+      <div class="flex items-start gap-2">
+        <span>⏰</span>
+        <div>
+          <strong>Актуальность:</strong><br>
+          Для новых анкет - не старше недели
         </div>
-        <div class="ml-3">
-          <h3 class="text-sm font-medium text-yellow-800">Важные замечания</h3>
-          <ul class="mt-2 text-sm text-yellow-700 space-y-1">
-            <li>• Фотосессия должна быть актуальной</li>
-            <li>• Проверочное фото действует 4 месяца</li>
-            <li>• Типажные фотографии запрещены</li>
-            <li>• Фото не будет показано в анкете</li>
-          </ul>
+      </div>
+      <div class="flex items-start gap-2">
+        <span>📅</span>
+        <div>
+          <strong>Срок действия:</strong><br>
+          4 месяца (рекомендуем обновлять)
+        </div>
+      </div>
+      <div class="flex items-start gap-2">
+        <span>⚡</span>
+        <div>
+          <strong>Проверка:</strong><br>
+          До 24 часов
         </div>
       </div>
     </div>
+
+    <!-- Примеры фото (спойлер) -->
+    <details class="mt-6">
+      <summary class="cursor-pointer text-sm text-gray-600 hover:text-gray-800 select-none">
+        Показать примеры правильных и неправильных фото
+      </summary>
+      <div class="mt-4 grid md:grid-cols-2 gap-4">
+        <!-- Правильный пример -->
+        <div class="border-2 border-green-200 rounded-lg p-3 bg-green-50">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-green-500 text-xl">✓</span>
+            <span class="font-semibold text-green-700">Правильно</span>
+          </div>
+          <ul class="text-xs text-gray-600 space-y-1">
+            <li>• Видно лицо и тело</li>
+            <li>• Листок с датой в руке</li>
+            <li>• Текст читается четко</li>
+            <li>• Соответствует фото в анкете</li>
+          </ul>
+        </div>
+        <!-- Неправильный пример -->
+        <div class="border-2 border-red-200 rounded-lg p-3 bg-red-50">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-red-500 text-xl">✗</span>
+            <span class="font-semibold text-red-700">Неправильно</span>
+          </div>
+          <ul class="text-xs text-gray-600 space-y-1">
+            <li>• Только листок без человека</li>
+            <li>• Нечитаемый текст</li>
+            <li>• Старая дата</li>
+            <li>• Не видно тело</li>
+          </ul>
+        </div>
+      </div>
+    </details>
   </div>
 </template>
 
@@ -286,15 +349,19 @@ watch(() => props.currentPhoto, (newVal) => {
 .upload-label {
   @apply block w-full cursor-pointer;
   @apply border-2 border-dashed border-gray-300 rounded-lg;
-  @apply hover:border-gray-400 transition-colors;
+  @apply hover:border-blue-400 transition-all duration-200;
   @apply p-8 text-center;
 }
 
 .upload-label.dragging {
-  @apply border-blue-500 bg-blue-50;
+  @apply border-blue-500;
 }
 
 .upload-content {
   @apply flex flex-col items-center;
+}
+
+.upload-content button {
+  @apply pointer-events-none;
 }
 </style>

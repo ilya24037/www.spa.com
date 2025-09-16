@@ -2,7 +2,7 @@
   <div class="w-[170px]">
     <BaseSelect
       v-model="localExperience"
-      placeholder="Выберите опыт"
+      placeholder="Не выбрано"
       :options="experienceOptions"
       :required="false"
       :error="errors.experience"
@@ -26,7 +26,7 @@ const localExperience = ref(props.experience)
 
 // Опции для опыта (согласно backend валидации)
 const experienceOptions = computed(() => [
-  { value: '', label: 'Выберите опыт' },
+  { value: '', label: 'Не выбрано' },
   { value: '3260137', label: 'Без опыта' },
   { value: '3260142', label: '1-2 года' },
   { value: '3260146', label: '3-5 лет' },

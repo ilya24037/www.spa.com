@@ -115,6 +115,24 @@ body {
   font-family: var(--font-family-primary);
 }
 
+/* Подзаголовки форм - стандартизированный стиль */
+.subtitle-form {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-family-primary);
+}
+
+/* Лейблы полей - используют тот же стиль что и подзаголовки */
+.subtitle-form.label-field {
+  font-size: 16px; /* Меньший размер для лейблов полей */
+  margin: 0 0 8px 0; /* Меньший отступ для лейблов полей */
+}
+
 /* Основной текст */
 .text-body {
   @apply text-base;

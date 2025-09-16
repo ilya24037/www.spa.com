@@ -48,7 +48,7 @@ class CreateAdDTO
         
         return new self(
             userId: $data['user_id'] ?? auth()->id(),
-            title: $data['title'] ?? 'Черновик',
+            title: $data['title'] ?? '',
             category: $data['category'] ?? 'erotic',
             specialty: $data['specialty'] ?? '',
             clients: $data['clients'] ?? [],

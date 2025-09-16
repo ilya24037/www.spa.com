@@ -341,23 +341,6 @@ export const serviceCharacteristics: Record<string, CharacteristicInfo> = {
     valueFormat: 'boolean'
   },
 
-  oral_sex: {
-    key: 'oral_sex',
-    name: 'Оральный секс',
-    title: 'Оральные ласки',
-    description: 'Интимная услуга с использованием рта и языка.',
-    image: '/images/services/oral_sex.jpg',
-    items: [
-      'Соблюдение гигиены обязательно',
-      'Использование защитных средств',
-      'Взаимное согласие на услугу',
-      'Деликатность и профессионализм'
-    ],
-    note: 'Популярная дополнительная услуга',
-    examples: ['Минет', 'Кунилингус', 'Взаимные ласки'],
-    valueFormat: 'boolean'
-  },
-
   anal_sex: {
     key: 'anal_sex',
     name: 'Анальный секс',

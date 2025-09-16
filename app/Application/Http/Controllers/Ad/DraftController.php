@@ -77,6 +77,13 @@ class DraftController extends Controller
         ]);
         
         // Обеспечиваем наличие текстовых полей (даже если пустые)
+        if (!isset($data['title'])) {
+            $data['title'] = '';
+        }
+        // Если title явно передан, используем его значение (даже если пустой)
+        if ($request->has('title')) {
+            $data['title'] = $request->input('title', '');
+        }
         if (!isset($data['description'])) {
             $data['description'] = '';
         }
@@ -352,6 +359,15 @@ class DraftController extends Controller
             // Обработка начальной цены
             if ($request->has('starting_price')) {
                 $data['starting_price'] = $request->starting_price ?: null;
+            }
+            
+            // Обработка title - гарантируем сохранение пустого значения
+            if (!isset($data['title'])) {
+                $data['title'] = '';
+            }
+            // Если title явно передан, используем его значение (даже если пустой)
+            if ($request->has('title')) {
+                $data['title'] = $request->input('title', '');
             }
             
             // 🔍 ДИАГНОСТИКА: Логируем все входящие данные

@@ -156,7 +156,7 @@ const props = withDefaults(defineProps<Props>(), {
   collapsed: false,
   maxPhotos: 10,
   maxVideos: 3,
-  maxFileSize: 10 * 1024 * 1024 // 10MB
+  maxFileSize: 50 * 1024 * 1024 // 50MB для видео
 })
 
 // Emits

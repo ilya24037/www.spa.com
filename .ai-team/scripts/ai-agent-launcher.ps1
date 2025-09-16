@@ -11,27 +11,32 @@ $roles = @{
     "Backend" = @{
         Color = "0A"
         CheckInterval = 10
-        Instruction = "You are Backend developer. Monitor .ai-team/chat.md file every 10 seconds. When you see @backend or @all, respond with your expertise in Laravel and DDD. Format your messages as [HH:MM] [BACKEND]: your response. Focus on backend implementation."
+        Instruction = "You are Backend developer. Monitor .ai-team/chat.md and virtual-office/inbox/backend/ every 10 seconds. When you see @backend or @all, respond with Laravel expertise. Check virtual-office/tasks/ for assigned tasks. Update metrics with scripts\metrics-updater.ps1. Work with @qa for testing. Format: [HH:MM] [BACKEND]: response. Read backend/CLAUDE-VIRTUAL-OFFICE.md for full instructions."
     }
     "Frontend" = @{
         Color = "0B"
         CheckInterval = 10
-        Instruction = "You are Frontend developer. Monitor .ai-team/chat.md file every 10 seconds. When you see @frontend or @all, respond with Vue 3 and TypeScript expertise. Format your messages as [HH:MM] [FRONTEND]: your response. Focus on UI implementation."
+        Instruction = "You are Frontend developer. Monitor .ai-team/chat.md and virtual-office/inbox/frontend/ every 10 seconds. When you see @frontend or @all, respond with Vue 3 expertise. Check virtual-office/tasks/ for UI tasks. Work with @qa on UI testing. Update metrics with scripts\metrics-updater.ps1. Format: [HH:MM] [FRONTEND]: response. Read frontend/CLAUDE-VIRTUAL-OFFICE.md for details."
+    }
+    "QA" = @{
+        Color = "0C"
+        CheckInterval = 10
+        Instruction = "You are QA Engineer. Monitor .ai-team/chat.md and virtual-office/inbox/qa/ every 10 seconds. Test features from @backend and @frontend. Report bugs, run tests, validate quality. Update metrics: scripts\metrics-updater.ps1 -Agent qa -Action bug_found/test_run. Post to channels/standup daily. Format: [HH:MM] [QA]: response. Read qa/CLAUDE.md for full instructions."
     }
     "DevOps" = @{
         Color = "0E"
         CheckInterval = 10
-        Instruction = "You are DevOps engineer. Monitor .ai-team/chat.md file every 10 seconds. When you see @devops or @all, respond with Docker and CI/CD expertise. Format your messages as [HH:MM] [DEVOPS]: your response. Focus on infrastructure."
+        Instruction = "You are DevOps engineer. Monitor .ai-team/chat.md and virtual-office/inbox/devops/ every 10 seconds. Handle infrastructure, CI/CD, deployments. Work with @qa for test automation. Update metrics: scripts\metrics-updater.ps1 -Agent devops -Action deployment. Monitor system/status.json. Format: [HH:MM] [DEVOPS]: response. Read devops/CLAUDE-VIRTUAL-OFFICE.md for details."
     }
     "TeamLead" = @{
         Color = "0D"
         CheckInterval = 5
-        Instruction = "You are Team Lead coordinator. Monitor .ai-team/chat.md file every 5 seconds. When you see @teamlead or @all, analyze the request and coordinate the team. Use @backend, @frontend, @devops to delegate tasks. Format messages as [HH:MM] [TEAMLEAD]: your response. Never write code yourself, only coordinate!"
+        Instruction = "You are Team Lead coordinator of 5 agents. Monitor .ai-team/chat.md, virtual-office/inbox/teamlead/, and all channels every 5 seconds. Create tasks in virtual-office/tasks/, distribute via inbox, track progress. Coordinate @backend @frontend @qa @devops. Run daily standup in channels/standup. NEVER write code! Format: [HH:MM] [TEAMLEAD]: response. Read teamlead/CLAUDE-VIRTUAL-OFFICE.md for Virtual Office instructions."
     }
 }
 
 if (-not $roles.ContainsKey($Role)) {
-    Write-Host "Invalid role. Use: Backend, Frontend, DevOps, or TeamLead" -ForegroundColor Red
+    Write-Host "Invalid role. Use: Backend, Frontend, QA, DevOps, or TeamLead" -ForegroundColor Red
     exit 1
 }
 

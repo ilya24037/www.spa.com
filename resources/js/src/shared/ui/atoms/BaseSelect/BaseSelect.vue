@@ -1,9 +1,9 @@
 <!-- Базовый селект в стиле Авито -->
 <template>
   <div class="w-full" ref="selectRef">
-    <label v-if="label" :for="selectId" class="block text-base font-normal text-gray-900 mb-2">
+    <label v-if="label" :for="selectId" class="subtitle-form label-field">
       {{ label }}
-      <span v-if="required" class="text-red-500 ml-1">*</span>
+      <span v-if="required" class="text-red-500 ml-1 text-base">*</span>
     </label>
     
     <!-- Скрытый select для форм -->
@@ -43,23 +43,19 @@
         @keydown.space="toggleDropdown"
         @keydown.escape="isOpen = false"
       >
-        <span class="text-base text-gray-900 font-normal text-left flex-1">
+        <span class="text-sm text-gray-900 font-normal text-left flex-1">
           {{ selectedOption?.label || placeholder }}
         </span>
         <svg 
-          class="text-gray-500 transition-transform duration-200 flex-shrink-0" 
-          :class="{ 'rotate-180': isOpen }"
+          xmlns="http://www.w3.org/2000/svg" 
           width="20" 
           height="20" 
-          viewBox="0 0 20 20"
+          viewBox="0 0 24 24" 
+          class="text-gray-500 transition-transform duration-200 flex-shrink-0"
+          :class="{ 'rotate-180': isOpen }"
+          fill="currentColor"
         >
-          <path 
-            d="M5 7.5L10 12.5L15 7.5" 
-            stroke="currentColor" 
-            stroke-width="2" 
-            stroke-linecap="round" 
-            stroke-linejoin="round"
-          />
+          <path d="M6.497 9.385a1.5 1.5 0 0 1 2.118.112L12 13.257l3.385-3.76a1.5 1.5 0 0 1 2.23 2.006l-4.5 5a1.5 1.5 0 0 1-2.23 0l-4.5-5a1.5 1.5 0 0 1 .112-2.118"></path>
         </svg>
       </div>
 
@@ -132,7 +128,7 @@ const props = defineProps({
     },
     placeholder: {
         type: String,
-        default: 'Выберите...'
+        default: 'Не выбрано'
     },
     label: {
         type: String,

@@ -20,13 +20,17 @@ class VideoProcessor
     {
         $this->videoRepository = $videoRepository;
     }
-    private const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100MB
+    private const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
+    private const MIN_VIDEO_DURATION = 5; // 5 секунд
+    private const MAX_VIDEO_DURATION = 60; // 60 секунд
+    private const MAX_VIDEO_COUNT = 3; // Максимум 3 видео
     
     private const ALLOWED_MIME_TYPES = [
         'video/mp4',
         'video/webm',
+        'video/ogg',
         'video/avi',
-        'video/quicktime',
+        'video/quicktime',  // MOV
         'video/x-msvideo',
         'video/x-ms-wmv'
     ];
@@ -102,13 +106,25 @@ class VideoProcessor
     private function validateVideoFile(UploadedFile $file): void
     {
         if ($file->getSize() > self::MAX_VIDEO_SIZE) {
-            throw new \Exception('Файл слишком большой. Максимальный размер: 100MB');
+            throw new \Exception('Файл слишком большой. Максимальный размер: 50MB');
         }
 
         if (!in_array($file->getMimeType(), self::ALLOWED_MIME_TYPES)) {
             throw new \Exception(
-                'Неподдерживаемый формат файла. Разрешены: MP4, WebM, AVI, MOV'
+                'Неподдерживаемый формат файла. Разрешены: MP4, MOV, AVI, WebM, OGG'
             );
+        }
+        
+        // Проверка длительности видео
+        $videoInfo = $this->getVideoInfo($file);
+        $duration = $videoInfo['duration'] ?? 0;
+        
+        if ($duration < self::MIN_VIDEO_DURATION) {
+            throw new \Exception('Видео слишком короткое. Минимальная длительность: 5 секунд');
+        }
+        
+        if ($duration > self::MAX_VIDEO_DURATION) {
+            throw new \Exception('Видео слишком длинное. Максимальная длительность: 60 секунд');
         }
     }
 

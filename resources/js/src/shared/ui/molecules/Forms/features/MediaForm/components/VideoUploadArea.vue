@@ -14,7 +14,7 @@
       ref="videoInput"
       type="file"
       multiple
-      accept="video/*"
+      accept="video/mp4,video/quicktime,video/x-msvideo,video/webm,video/ogg"
       class="hidden"
       @change="handleVideoSelect"
     />
@@ -40,9 +40,12 @@
             выберите файлы
           </button>
         </p>
-        <p class="text-xs text-gray-400 mt-2">
-          MP4, WEBM, MOV до 100 МБ
-        </p>
+        <div class="text-xs text-gray-500 mt-3 space-y-1">
+          <p>• Максимум 3 видео</p>
+          <p>• Длительность: от 5 секунд до 60 секунд</p>
+          <p>• Не должно содержать водяные знаки других сайтов</p>
+          <p class="text-amber-600 font-medium">• Без проверочной фотографии видеофайл не будет размещен, поэтому подтверждайте свою анкету.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -110,8 +113,8 @@ const handleFiles = (files: File[]) => {
       return false
     }
     
-    // Проверка размера (100MB)
-    if (file.size > 100 * 1024 * 1024) {
+    // Проверка размера (50MB)
+    if (file.size > 50 * 1024 * 1024) {
       return false
     }
     

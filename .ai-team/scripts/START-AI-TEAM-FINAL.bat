@@ -52,6 +52,10 @@ echo   Starting Frontend...
 start "Frontend Launcher" /min powershell -ExecutionPolicy Bypass -File "ai-agent-launcher.ps1" -Role "Frontend"
 timeout /t 2 >nul
 
+echo   Starting QA...
+start "QA Launcher" /min powershell -ExecutionPolicy Bypass -File "ai-agent-launcher.ps1" -Role "QA"
+timeout /t 2 >nul
+
 echo   Starting DevOps...
 start "DevOps Launcher" /min powershell -ExecutionPolicy Bypass -File "ai-agent-launcher.ps1" -Role "DevOps"
 timeout /t 2 >nul
@@ -63,7 +67,7 @@ echo     AI TEAM STARTED SUCCESSFULLY!
 echo ========================================
 echo.
 echo Chat: http://localhost:8082
-echo Team: TeamLead, Backend, Frontend, DevOps
+echo Team: TeamLead, Backend, Frontend, QA, DevOps
 echo.
 echo Test the system:
 echo   1. Go to the browser dashboard

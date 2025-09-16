@@ -3,7 +3,10 @@
     <div class="pricing-container">
       <!-- В апартаментах -->
       <div class="pricing-group">
-        <h4 class="pricing-subtitle">В апартаментах</h4>
+        <h4 class="pricing-subtitle">АПАРТАМЕНТЫ</h4>
+        <div v-if="showPriceError" class="text-sm text-red-600 mb-2">
+          Нужно заполнить цену за час в апартаментах и/или на выезд
+        </div>
         <div class="pricing-grid">
           <BaseInput
             v-model="localPrices.apartments_express"
@@ -26,7 +29,6 @@
             :min="0"
             :required="true"
             :clearable="true"
-            :error="showPriceError ? 'Нужно заполнить цену за час в апартаментах и/или на выезд' : ''"
             suffix="₽"
             @update:modelValue="updatePrices"
             class="w-[170px]"
@@ -60,8 +62,24 @@
 
       <!-- Выезд к клиенту -->
       <div class="pricing-group">
-        <h4 class="pricing-subtitle">Выезд к клиенту</h4>
-        <div class="pricing-grid">
+        <h4 
+          class="pricing-subtitle cursor-pointer transition-colors duration-200"
+          @click="toggleOutcallField"
+        >
+          ВЫЕЗД
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            class="text-gray-500 ml-2 transition-transform duration-200"
+            :class="{ 'rotate-180': isOutcallExpanded }"
+            fill="currentColor"
+          >
+            <path d="M6.497 9.385a1.5 1.5 0 0 1 2.118.112L12 13.257l3.385-3.76a1.5 1.5 0 0 1 2.23 2.006l-4.5 5a1.5 1.5 0 0 1-2.23 0l-4.5-5a1.5 1.5 0 0 1 .112-2.118"></path>
+          </svg>
+        </h4>
+        <div v-show="isOutcallExpanded" class="pricing-grid">
           <BaseInput
             v-model="localPrices.outcall_express"
             type="number"
@@ -114,21 +132,55 @@
       </div>
 
       <!-- Финалов в час -->
-      <div class="pricing-grid mt-3">
-        <BaseSelect
-          v-model="localPrices.finishes_per_hour"
-          label="Финалов в час"
-          placeholder="– Выбрать –"
-          :options="finishesPerHourOptions"
-          @update:modelValue="updatePrices"
-          class="w-[170px]"
-        />
+      <div>
+        <h4 
+          class="pricing-subtitle cursor-pointer transition-colors duration-200"
+          @click="toggleFinishesField"
+        >
+          Финалов в час
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            class="text-gray-500 ml-2 transition-transform duration-200"
+            :class="{ 'rotate-180': isFinishesExpanded }"
+            fill="currentColor"
+          >
+            <path d="M6.497 9.385a1.5 1.5 0 0 1 2.118.112L12 13.257l3.385-3.76a1.5 1.5 0 0 1 2.23 2.006l-4.5 5a1.5 1.5 0 0 1-2.23 0l-4.5-5a1.5 1.5 0 0 1 .112-2.118"></path>
+          </svg>
+        </h4>
+        <div v-show="isFinishesExpanded" class="pricing-grid">
+          <BaseSelect
+            v-model="localPrices.finishes_per_hour"
+            placeholder="Не выбрано"
+            :options="finishesPerHourOptions"
+            @update:modelValue="updatePrices"
+            class="w-[170px]"
+          />
+        </div>
       </div>
 
       <!-- Акции и скидки -->
-      <div class="promo-section mt-6">
-        <h4 class="promo-subtitle">Акции и скидки</h4>
-        <div class="pricing-grid">
+      <div class="promo-section">
+        <h4 
+          class="promo-subtitle cursor-pointer transition-colors duration-200"
+          @click="togglePromoField"
+        >
+          Акции и скидки
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            class="text-gray-500 ml-2 transition-transform duration-200"
+            :class="{ 'rotate-180': isPromoExpanded }"
+            fill="currentColor"
+          >
+            <path d="M6.497 9.385a1.5 1.5 0 0 1 2.118.112L12 13.257l3.385-3.76a1.5 1.5 0 0 1 2.23 2.006l-4.5 5a1.5 1.5 0 0 1-2.23 0l-4.5-5a1.5 1.5 0 0 1 .112-2.118"></path>
+          </svg>
+        </h4>
+        <div v-show="isPromoExpanded" class="pricing-grid promo-grid">
           <BaseInput
             v-model="localPromo.newClientDiscount"
             type="number"
@@ -156,7 +208,6 @@
             />
             <div class="field-hint">Можно не заполнять, если у вас нет такой акции</div>
           </div>
-          <div></div> <!-- Пустая колонка 4 -->
         </div>
       </div>
     </div>
@@ -168,6 +219,30 @@ import { ref, watch, reactive, computed } from 'vue'
 import BaseInput from '@/src/shared/ui/atoms/BaseInput/BaseInput.vue'
 import BaseRadio from '@/src/shared/ui/atoms/BaseRadio/BaseRadio.vue'
 import BaseSelect from '@/src/shared/ui/atoms/BaseSelect/BaseSelect.vue'
+
+// Состояние для сворачивания поля "Финалов в час"
+const isFinishesExpanded = ref(false)
+
+// Функция переключения поля "Финалов в час"
+const toggleFinishesField = () => {
+  isFinishesExpanded.value = !isFinishesExpanded.value
+}
+
+// Состояние для сворачивания секции "ВЫЕЗД"
+const isOutcallExpanded = ref(false)
+
+// Функция переключения секции "ВЫЕЗД"
+const toggleOutcallField = () => {
+  isOutcallExpanded.value = !isOutcallExpanded.value
+}
+
+// Состояние для сворачивания секции "Акции и скидки"
+const isPromoExpanded = ref(false)
+
+// Функция переключения секции "Акции и скидки"
+const togglePromoField = () => {
+  isPromoExpanded.value = !isPromoExpanded.value
+}
 
 const props = defineProps({
   prices: {
@@ -227,7 +302,7 @@ const toBoolean = (value) => {
 
 // Опции для выпадающего списка "Финалов в час"
 const finishesPerHourOptions = computed(() => [
-  { value: '', label: '– Выбрать –' },
+  { value: '', label: 'Не выбрано' },
   { value: '1', label: '1' },
   { value: '2', label: 'до 2-х' },
   { value: '3', label: 'до 3-х' },
@@ -358,41 +433,58 @@ const updateStartingPrice = (value) => {
 .pricing-container {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 42px;
 }
 
 .pricing-group {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 18px;
 }
 
 .pricing-subtitle {
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 600;
-  color: #666;
+  color: #1f2937;
   margin: 0;
-  padding-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-family-primary);
 }
 
 .pricing-grid {
   display: grid;
   grid-template-columns: repeat(4, 170px);
   gap: 12px;
+  align-items: start;
+}
+
+/* Выравнивание полей в секции АПАРТАМЕНТЫ - все поля начинаются с одной линии */
+.pricing-group:first-child .pricing-grid {
+  align-items: stretch; /* растягиваем все элементы на полную высоту */
+}
+
+/* Фиксированная высота для всех labels чтобы выровнять inputs */
+.pricing-group:first-child .pricing-grid :deep(.label-field) {
+  height: 28px; /* фиксированная высота для всех labels */
+  display: flex;
+  align-items: center;
 }
 
 /* Стили для секции акций */
 .promo-section {
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid #e5e7eb;
 }
 
 .promo-subtitle {
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 600;
-  color: #666;
+  color: #1f2937;
   margin: 0 0 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-family-primary);
 }
 
 /* Принудительно одна строка для заголовка "Скидка новым клиентам" */
@@ -408,7 +500,7 @@ const updateStartingPrice = (value) => {
 }
 
 .field-hint {
-  font-size: 9px;
+  font-size: 12px;
   color: #666;
   margin-top: 4px;
   line-height: 1.3;
@@ -566,4 +658,9 @@ const updateStartingPrice = (value) => {
     grid-template-columns: 1fr;
   }
 }
+
+.promo-grid {
+  grid-template-columns: 170px 170px 340px;
+}
+
 </style>

@@ -137,7 +137,12 @@ class UpdateAdRequest extends FormRequest
             'height.max' => 'Рост должен быть не более 220 см',
             'weight.min' => 'Вес должен быть не менее 40 кг',
             'weight.max' => 'Вес должен быть не более 200 кг',
+            
+            // Медиа
+            'photos.min' => 'Минимум 3 фотографии',
             'photos.max' => 'Максимум 20 фотографий',
+            'photos.*.max' => 'Размер фото не должен превышать 10 МБ',
+            'photos.*.mimes' => 'Неподдерживаемый формат. Разрешены: JPG, PNG, BMP, GIF, WebP, HEIC',
         ];
     }
 
