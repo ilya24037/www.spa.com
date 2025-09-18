@@ -116,6 +116,7 @@
         .teamlead-avatar { background: #E91E63; }
         .backend-avatar { background: #4CAF50; }
         .frontend-avatar { background: #2196F3; }
+        .qa-avatar { background: #9C27B0; }
         .devops-avatar { background: #FF9800; }
 
         .status-badge {
@@ -857,6 +858,20 @@
                     </div>
                 </div>
 
+                <!-- QA -->
+                <div class="member-card idle" id="member-qa">
+                    <div class="member-header">
+                        <div class="member-name">
+                            <div class="member-avatar qa-avatar">Q</div>
+                            QA
+                        </div>
+                        <span class="status-badge status-idle">Idle</span>
+                    </div>
+                    <div class="member-task">
+                        <div class="task-title">Ожидает задачи...</div>
+                    </div>
+                </div>
+
                 <!-- DevOps -->
                 <div class="member-card idle" id="member-devops">
                     <div class="member-header">
@@ -917,7 +932,7 @@
                 " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(255, 107, 107, 0.4)'" onmouseout="this.style.transform=''; this.style.boxShadow='0 4px 15px rgba(255, 107, 107, 0.3)'">
                     <span style="font-size: 20px;">👥</span>
                     <span>Запустить ПОЛНУЮ КОМАНДУ</span>
-                    <span style="font-size: 12px; opacity: 0.9;">(4 агента)</span>
+                    <span style="font-size: 12px; opacity: 0.9;">(5 агентов)</span>
                 </button>
                 
                 <!-- Auto Responder Button -->
@@ -986,6 +1001,19 @@
                         transition: all 0.2s;
                     " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform=''">
                         🎨 Frontend
+                    </button>
+                    <button onclick="directLaunch('qa-agent.ps1')" style="
+                        padding: 8px;
+                        background: #9C27B0;
+                        color: white;
+                        font-size: 12px;
+                        font-weight: bold;
+                        border: none;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                    " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform=''">
+                        🧪 QA
                     </button>
                     <button onclick="directLaunch('launch-real-devops.ps1')" style="
                         padding: 8px;
@@ -1126,6 +1154,11 @@
                         <span class="channel-name"># frontend</span>
                         <span class="unread-badge">0</span>
                     </div>
+                    <div class="channel" data-channel="qa" onclick="switchChannel('qa')">
+                        <span class="channel-indicator"></span>
+                        <span class="channel-name"># qa</span>
+                        <span class="unread-badge">0</span>
+                    </div>
                     <div class="channel" data-channel="devops" onclick="switchChannel('devops')">
                         <span class="channel-indicator"></span>
                         <span class="channel-name"># devops</span>
@@ -1208,6 +1241,7 @@
             teamlead: { status: 'idle', task: '' },
             backend: { status: 'idle', task: '' },
             frontend: { status: 'idle', task: '' },
+            qa: { status: 'idle', task: '' },
             devops: { status: 'idle', task: '' }
         };
         let completedTasks = 0;
@@ -1217,6 +1251,7 @@
             general: { title: '# general', desc: 'Общий канал для всей команды' },
             backend: { title: '# backend', desc: 'Laravel, API, база данных, Domain логика' },
             frontend: { title: '# frontend', desc: 'Vue.js, TypeScript, UI/UX, компоненты' },
+            qa: { title: '# qa', desc: 'Тестирование, баги, автоматизация, валидация' },
             devops: { title: '# devops', desc: 'Docker, CI/CD, инфраструктура, деплой' },
             urgent: { title: '# urgent', desc: '🔥 Срочные задачи и критические проблемы' }
         };

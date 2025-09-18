@@ -12,8 +12,9 @@
         hint="Основной номер для связи"
         pattern="^\+7 \([0-9]{3}\) [0-9]{3}-[0-9]{2}-[0-9]{2}$"
         :required="true"
-        :error="errors?.phone"
+        :error="errors?.phone || (props.forceValidation?.phone && !localPhone ? 'Телефон обязателен' : '')"
         @update:modelValue="emitAll"
+        @blur="() => props.forceValidation?.phone && emit('clearForceValidation', 'phone')"
       />
       
       <BaseInput
@@ -44,8 +45,9 @@
         :options="contactMethodOptions"
         hint="Как клиенты могут с вами связаться"
         :required="true"
-        :error="errors?.contact_method"
+        :error="errors?.contact_method || (props.forceValidation?.contact_method && !localContactMethod ? 'Способ связи обязателен' : '')"
         @update:modelValue="emitAll"
+        @change="() => props.forceValidation?.contact_method && emit('clearForceValidation', 'contact_method')"
       />
     </div>
   </div>
@@ -58,8 +60,8 @@ import BaseInput from '@/src/shared/ui/atoms/BaseInput/BaseInput.vue'
 import BaseSelect from '@/src/shared/ui/atoms/BaseSelect/BaseSelect.vue'
 
 const props = defineProps({
-  contacts: { 
-    type: Object, 
+  contacts: {
+    type: Object,
     default: () => ({
       phone: '',
       contact_method: 'any',
@@ -67,10 +69,17 @@ const props = defineProps({
       telegram: ''
     })
   },
-  errors: { type: Object, default: () => ({}) }
+  errors: { type: Object, default: () => ({}) },
+  forceValidation: {
+    type: Object,
+    default: () => ({
+      phone: false,
+      contact_method: false
+    })
+  }
 })
 
-const emit = defineEmits(['update:contacts'])
+const emit = defineEmits(['update:contacts', 'clearForceValidation'])
 
 // Локальная копия контактов для работы
 const localContacts = ref({ ...props.contacts })

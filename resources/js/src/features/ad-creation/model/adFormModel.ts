@@ -623,7 +623,7 @@ export function useAdFormModel(props: any, emit: any) {
       hair_color: form.parameters.hair_color,
       eye_color: form.parameters.eye_color,
       nationality: form.parameters.nationality,
-      // ✅ Извлекаем поля из contacts объекта для backend совместимости  
+      // ✅ Извлекаем поля из contacts объекта для backend совместимости
       phone: form.contacts.phone,
       contact_method: form.contacts.contact_method,
       whatsapp: form.contacts.whatsapp,
@@ -636,7 +636,10 @@ export function useAdFormModel(props: any, emit: any) {
       verification_expires_at: form.verification_expires_at,
       // ✅ Исправляем is_starting_price - backend ждет array, а не boolean
       is_starting_price: form.is_starting_price ? ['true'] : [],
-      category: props.category
+      category: props.category,
+      // ✅ МОДЕРАЦИЯ: Новые объявления создаются неопубликованными
+      is_published: false,
+      status: 'active' // Устанавливаем статус active для новых объявлений
     }
     
     console.log('📤 adFormModel: Подготовлены данные для отправки', {

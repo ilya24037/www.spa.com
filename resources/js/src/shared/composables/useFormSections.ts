@@ -78,12 +78,32 @@ export function useFormSections(sections: SectionConfig[], formData: any) {
       }
       return false
     }
-    
+
+    // Специальная логика для графика работы
+    if (sectionKey === 'schedule') {
+      const schedule = formData.schedule
+      // Пустой объект {} или null считаем как отсутствие данных
+      if (!schedule || (typeof schedule === 'object' && Object.keys(schedule).length === 0)) {
+        return false
+      }
+      // Проверяем есть ли реальные данные в расписании
+      for (const daySchedule of Object.values(schedule)) {
+        if (daySchedule && typeof daySchedule === 'object') {
+          const day = daySchedule as any
+          if (day.enabled || day.start || day.end) {
+            return true // Есть данные хотя бы для одного дня
+          }
+        }
+      }
+      return false
+    }
+
     // Для остальных секций проверяем поля
     return section.fields.some(field => {
       const value = getNestedValue(formData, field)
-      return value !== null && value !== undefined && value !== '' && 
-             (Array.isArray(value) ? value.length > 0 : true)
+      return value !== null && value !== undefined && value !== '' &&
+             (Array.isArray(value) ? value.length > 0 :
+              typeof value === 'object' ? Object.keys(value).length > 0 : true)
     })
   }
   

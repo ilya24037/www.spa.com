@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/www.spa.com/resources/js/src/features/ad-creation/ui/**)",
+      "Bash(php artisan test:*)",
+      "Read(//c/www.spa.com/tests/Unit/**)",
+      "Read(//c/www.spa.com/tests/e2e/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

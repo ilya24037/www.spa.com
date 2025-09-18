@@ -4,6 +4,7 @@ namespace App\Domain\Master\Services;
 
 use App\Domain\Master\Models\MasterProfile;
 use App\Domain\User\Repositories\UserRepository;
+use App\Jobs\AutoModerateAdJob;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -43,6 +44,7 @@ class MasterFullProfileService
                 'is_adult_content' => $data['is_adult_content'] ?? false,
                 'status' => 'active',
                 'is_active' => true,
+                'is_published' => false, // Новые объявления отправляются на модерацию
             ]);
 
             // Добавляем услуги
@@ -79,6 +81,10 @@ class MasterFullProfileService
 
             // Обновляем роль пользователя
             $this->updateUserRole($data['user']->id);
+
+            // Запускаем автоматическую модерацию через 5 минут
+            AutoModerateAdJob::dispatch($profile->id)
+                ->delay(now()->addMinutes(5));
 
             return $profile;
         });

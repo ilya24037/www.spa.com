@@ -1,0 +1,9 @@
+{
+  "id": "MSG-20250917092333",
+  "from": "CEO",
+  "to": "qa",
+  "message": "проверка связи",
+  "priority": "normal",
+  "timestamp": "2025-09-17T09:23:33.338045",
+  "status": "read"
+}

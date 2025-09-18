@@ -329,10 +329,6 @@
               <div class="flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-gray-800">
                   Проверочное фото
-                  <span class="text-sm font-normal text-gray-500 ml-2">(повышает доверие)</span>
-                  <span v-if="form.verification_photo" class="ml-2 px-2 py-1 text-xs bg-green-100 text-green-600 rounded-full">
-                    ✓ Загружено
-                  </span>
                 </h3>
                 <svg 
                   :class="[
@@ -406,9 +402,11 @@
         @toggle="toggleSection('contacts')"
         data-section="contacts"
       >
-        <ContactsSection 
+        <ContactsSection
           v-model:contacts="form.contacts"
           :errors="errors.contacts || {}"
+          :forceValidation="forceValidation.contacts"
+          @clearForceValidation="(field) => forceValidation.contacts[field] = false"
         />
       </CollapsibleSection>
     </form>
@@ -565,7 +563,12 @@ const forceValidation = reactive({
     outcall_1h: false
   },
   // Для секции географии
-  geo: false
+  geo: false,
+  // Для секции контактов
+  contacts: {
+    phone: false,
+    contact_method: false
+  }
 })
 
 // Состояние видимости секции "Опыт работы"
@@ -781,6 +784,14 @@ const scrollToFirstMissingField = () => {
         break
       case 'contacts':
         isEmpty = !form.contacts?.phone
+        // Устанавливаем подсветку валидации для полей контактов
+        if (isEmpty) {
+          forceValidation.contacts.phone = true
+        }
+        // Также проверяем и подсвечиваем способ связи
+        if (!form.contacts?.contact_method || form.contacts.contact_method === 'any') {
+          forceValidation.contacts.contact_method = true
+        }
         break
       case 'services':
         isEmpty = getTotalSelectedServices() === 0
@@ -805,8 +816,21 @@ const scrollToFirstMissingField = () => {
         isEmpty = !form.photos?.length || form.photos.length < 3
         break
       case 'geo':
-        // Проверяем наличие адреса в geo объекте
-        const geoData = typeof form.geo === 'string' ? JSON.parse(form.geo || '{}') : form.geo
+        // Проверяем наличие адреса в geo объекте с безопасным парсингом
+        let geoData = {}
+        if (typeof form.geo === 'string') {
+          try {
+            // Безопасный парсинг JSON с fallback на пустой объект
+            geoData = form.geo ? JSON.parse(form.geo) : {}
+          } catch (error) {
+            console.warn('Ошибка парсинга geo данных:', error)
+            // В случае ошибки используем пустой объект
+            geoData = {}
+          }
+        } else if (form.geo && typeof form.geo === 'object') {
+          // Если уже объект, используем его
+          geoData = form.geo
+        }
         isEmpty = !geoData?.address
         break
     }
@@ -940,8 +964,17 @@ const checkSectionFilled = (sectionKey: string): boolean => {
       return !!form.contacts?.phone
     
     case 'geo':
-      // Город больше не обязателен (убрали из валидации)
-      return !!form.geo?.city || !!form.geo?.address
+      // form.geo хранится как JSON-строка, нужно парсить для проверки
+      if (!form.geo || form.geo === '{}') return false
+
+      try {
+        const geoData = JSON.parse(form.geo)
+        // Проверяем наличие адреса или города в распарсенных данных
+        return !!(geoData.address || geoData.city)
+      } catch (error) {
+        // Если не удалось распарсить, значит данных нет
+        return false
+      }
     
     default:
       // Для остальных секций используем оригинальную проверку

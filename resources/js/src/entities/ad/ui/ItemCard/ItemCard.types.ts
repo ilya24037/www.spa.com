@@ -26,6 +26,7 @@ export interface AdItem {
   title?: string
   description?: string
   status: 'active' | 'draft' | 'inactive' | 'pending' | 'archived' | 'old' | 'waiting_payment'
+  is_published?: boolean // Флаг публикации (false = на модерации, true = опубликовано)
   photos?: ItemPhoto[] | string[]
   photo?: string
   price?: number | ItemPrice
@@ -34,6 +35,7 @@ export interface AdItem {
   favorites?: number
   messages?: number
   calls?: number
+  new_messages_count?: number // Количество новых сообщений
   created_at?: string
   updated_at?: string
   slug?: string

@@ -285,6 +285,10 @@ Route::middleware('auth')->group(function () {
     */
     Route::get('/additem', [AdController::class, 'create'])->name('additem');
     Route::post('/additem', [AdController::class, 'store'])->name('additem.store');
+
+    // Страница успешной публикации объявления
+    Route::get('/additem/success/{ad}', [AddItemController::class, 'success'])
+        ->name('additem.success');
     
     // 🔥 ДОБАВЛЕНО: дополнительные маршруты для полного функционала Dashboard
     Route::get('/messages', fn() => Inertia::render('Messages/Index'))->name('messages.index');

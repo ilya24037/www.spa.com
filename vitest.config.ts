@@ -8,6 +8,16 @@ export default defineConfig({
     globals: true,
     environment: 'happy-dom',
     setupFiles: ['./tests/setup.ts'],
+    css: {
+      // Обработка CSS файлов в тестах
+      modules: {
+        classNameStrategy: 'non-scoped'
+      }
+    },
+    deps: {
+      // Обработка CSS импортов в тестах
+      external: [/\.css$/]
+    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
@@ -29,7 +39,15 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./resources/js', import.meta.url))
+      '@': fileURLToPath(new URL('./resources/js', import.meta.url)),
+      '@/src': fileURLToPath(new URL('./resources/js/src', import.meta.url)),
+      '@/shared': fileURLToPath(new URL('./resources/js/src/shared', import.meta.url)),
+      '@/entities': fileURLToPath(new URL('./resources/js/src/entities', import.meta.url)),
+      '@/features': fileURLToPath(new URL('./resources/js/src/features', import.meta.url)),
+      '@/widgets': fileURLToPath(new URL('./resources/js/src/widgets', import.meta.url)),
+      '@/pages': fileURLToPath(new URL('./resources/js/src/pages', import.meta.url)),
+      '@/types': fileURLToPath(new URL('./resources/js/types', import.meta.url)),
+      '@/ymaps': fileURLToPath(new URL('./resources/js/src/features/map/ymaps-components', import.meta.url))
     }
   }
 })

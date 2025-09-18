@@ -86,14 +86,38 @@ class AddItemController extends Controller
     public function store(Request $request)
     {
         $result = $this->adCreationService->createFromRequest($request);
-        
+
         if (!$result['success']) {
             return back()->withErrors($result['errors'] ?? [])
                          ->with('error', $result['message']);
         }
 
-        return redirect()->route('dashboard')
-                        ->with('success', $result['message']);
+        // Перенаправляем на страницу успеха с данными объявления
+        return redirect()->route('additem.success', ['ad' => $result['master']->id]);
+    }
+
+    /**
+     * Страница успешной публикации объявления
+     */
+    public function success($ad)
+    {
+        // Загружаем объявление с необходимыми связями
+        $master = \App\Domain\Master\Models\MasterProfile::with(['user', 'services'])
+            ->findOrFail($ad);
+
+        // Проверяем, что пользователь имеет доступ к этому объявлению
+        if ($master->user_id !== auth()->id()) {
+            abort(403, 'Доступ запрещен');
+        }
+
+        return Inertia::render('AddItem/Success', [
+            'ad' => [
+                'id' => $master->id,
+                'title' => $master->display_name,
+                'status' => 'active',
+                'is_published' => false // На модерации
+            ]
+        ]);
     }
 
     /**

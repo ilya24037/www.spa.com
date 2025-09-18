@@ -1,5 +1,5 @@
 <template>
-  <div class="geo-section">
+  <div class="geo-section p-5">
     <!-- Секция карты и адреса -->
     <AddressMapSection 
       :initial-address="geoData.address"
@@ -160,7 +160,13 @@ const emitGeoData = () => {
     
     // Отправляем JSON строку как в оригинале
     const jsonData = toJson()
-    const parsedData = JSON.parse(jsonData)
+    let parsedData = {}
+    try {
+      parsedData = JSON.parse(jsonData)
+    } catch (error) {
+      console.error('❌ [GeoSection] Ошибка парсинга JSON:', error)
+      // Используем пустой объект если парсинг не удался
+    }
     console.log('📤 [GeoSection] Отправляем данные родителю:', {
       address: parsedData.address,
       zones: parsedData.zones,

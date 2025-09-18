@@ -1,298 +1,362 @@
-# 🚀 КАК ЗАПУСТИТЬ И ИСПОЛЬЗОВАТЬ VIRTUAL OFFICE
+# 📚 STEP-BY-STEP GUIDE: HOW TO START AND USE VIRTUAL OFFICE
 
-## 📋 БЫСТРЫЙ СТАРТ (3 ПРОСТЫХ ШАГА)
+## 🚀 STEP 1: START THE SYSTEM
 
-### ШАГ 1: Запустите Virtual Office
-```batch
-# Откройте командную строку или проводник
-# Перейдите в папку:
-C:\www.spa.com\.ai-team\
+### Option A: Full Start (RECOMMENDED)
+1. **Open Windows Explorer**
+2. **Navigate to:** `C:\www.spa.com\.ai-team\`
+3. **Double-click:** `START-VIRTUAL-OFFICE-EN.bat`
+4. **Wait for startup** (about 30 seconds):
+   - You'll see the main window with menu
+   - Dashboard opens in browser
+   - 5 agent windows appear
 
-# Дважды кликните на файл:
-START-VIRTUAL-OFFICE.bat
-```
-
-### ШАГ 2: Выберите режим работы
-После запуска увидите меню:
-```
-Что хотите сделать?
-  1. Открыть CEO Interface (Python) ← РЕКОМЕНДУЕТСЯ
-  2. Просмотреть System Monitor
-  3. Просто оставить работать в фоне
-  0. Выход
-
-Выберите опцию: _
-```
-
-**Нажмите 1** для управления командой или **3** для фоновой работы
-
-### ШАГ 3: Готово! Система работает
-- ✅ 5 AI агентов запущены
-- ✅ Dashboard открыт в браузере
-- ✅ Метрики обновляются автоматически
-- ✅ Каналы активны
+### Option B: Simple Start (for testing)
+1. Run `START-SIMPLE.bat`
+2. This starts only server and Dashboard without agents
 
 ---
 
-## 🎯 ОСНОВНЫЕ СПОСОБЫ УПРАВЛЕНИЯ
+## 📱 STEP 2: CHOOSE MANAGEMENT MODE
 
-### 1️⃣ CEO Interface (Рекомендуется)
-**Самый простой способ управления всей командой**
-
-После выбора опции 1 в меню запуска:
+After startup you'll see a menu:
 ```
-========== CEO CONTROL PANEL ==========
+What would you like to do?
+  1. Open CEO Interface (Python)
+  2. View System Monitor
+  3. Just keep everything running
+  0. Exit
 
-1. Create task (Создать задачу)
-2. View tasks (Посмотреть задачи)
-3. Send message (Отправить сообщение)
-4. View metrics (Посмотреть метрики)
-5. Generate report (Создать отчет)
-6. View agent status (Статус агентов)
+Select option: _
+```
+
+### Press "1" for CEO Interface (RECOMMENDED)
+### Or "3" to just keep system running
+
+---
+
+## 🎮 STEP 3: MANAGE TEAM THROUGH CEO INTERFACE
+
+After selecting option 1, the management menu opens:
+
+```
+========================================
+       CEO CONTROL PANEL
+       Virtual Office 3.2
+========================================
+
+1. Create task
+2. View tasks
+3. Send message
+4. View metrics
+5. Generate report
+6. View agent status
 0. Exit
 
-Выберите действие: _
+Select action: _
 ```
 
-#### Примеры использования:
+---
 
-**Создать задачу для Backend:**
+## 📝 STEP 4: HOW TO CREATE YOUR FIRST TASK
+
+### In CEO Interface press "1" and fill in:
+
 ```
-Выберите действие: 1
-Заголовок задачи: Создать API для экспорта
-Описание: Нужен endpoint /api/export для выгрузки данных в Excel
-Приоритет (high/medium/low): high
-Назначить (teamlead/backend/frontend/qa/devops): backend
-Дедлайн (YYYY-MM-DD или Enter для 7 дней): 2025-09-20
+Select action: 1
 
-✅ Задача создана и отправлена backend!
-```
+=== CREATE NEW TASK ===
+Task title: Create contact page
+Description: Need a page with contact form and map
+Priority (high/medium/low) [medium]: high
+Assign to (teamlead/backend/frontend/qa/devops): teamlead
+Deadline (days from now) [7]: [Enter]
 
-**Отправить сообщение Frontend:**
-```
-Выберите действие: 3
-От кого (например, ceo): ceo
-Кому (teamlead/backend/frontend/qa/devops/all): frontend
-Сообщение: Нужно обновить дизайн карточек мастеров
-
-✅ Сообщение отправлено!
+[SUCCESS] Task created and sent to teamlead!
+Task ID: task_20250917_143022
 ```
 
-**Посмотреть метрики команды:**
+### What happens next:
+1. **TeamLead** receives the task
+2. **TeamLead** automatically distributes subtasks:
+   - Backend creates API endpoint
+   - Frontend makes form and interface
+   - QA tests functionality
+3. **Agents** start working
+
+---
+
+## 💬 STEP 5: HOW TO COMMUNICATE WITH AGENTS VIA CHAT
+
+### Method 1: Through CEO Interface
+Press "3" (Send message):
 ```
-Выберите действие: 4
+Select action: 3
 
-📊 МЕТРИКИ КОМАНДЫ:
-TeamLead: Задач выполнено: 5, Сообщений: 23
-Backend: Задач выполнено: 12, Сообщений: 45
-Frontend: Задач выполнено: 8, Сообщений: 38
-QA: Багов найдено: 15, Тестов: 120
-DevOps: Деплоев: 3, Сообщений: 18
+=== SEND MESSAGE ===
+From (e.g., ceo): ceo
+To (teamlead/backend/frontend/qa/devops/all): backend
+Message: Add email validation to contact form
+
+[SUCCESS] Message sent to backend!
 ```
 
-### 2️⃣ Web Dashboard (Визуально)
-**Автоматически открывается при запуске**
+### Method 2: Through chat.md file
+1. Open file: `C:\www.spa.com\.ai-team\chat.md`
+2. Add to end of file:
+```
+[09:30] [CEO]: @backend add email validation to contact form
+[09:30] [CEO]: @frontend make form responsive for mobile
+[09:30] [CEO]: @qa test form submission
+[09:30] [CEO]: @all team meeting at 3pm
+```
+3. Save the file
+4. Agents will read and respond
 
-Откройте в браузере: http://localhost:8082
+---
 
-Что можно делать:
-- 📊 Смотреть метрики в реальном времени
-- 💬 Читать чат между агентами
-- 📋 Видеть список задач
-- 📈 Отслеживать активность
+## 🌐 STEP 6: USING WEB DASHBOARD
 
-### 3️⃣ PowerShell команды (Для продвинутых)
+### Open in browser: http://localhost:8082
 
-**Создать задачу напрямую:**
+### What you'll see:
+1. **Left Panel** - Status of all 5 agents:
+   - 🟢 Working - working on task
+   - 🟡 Idle - waiting for task
+   - 🔴 Offline - not active
+
+2. **Right Panel** - Team chat:
+   - Switch between channels (#general, #backend, #frontend, #qa, #devops)
+   - See all conversations in real-time
+
+3. **Bottom** - Message field:
+   - Select channel
+   - Write message
+   - Click "Send"
+
+---
+
+## 🎯 STEP 7: REAL COMMAND EXAMPLES
+
+### Example 1: Creating new feature
+```
+@teamlead create task for notification system
+@backend implement API for push notifications
+@frontend add bell icon to header
+@qa test notifications on all devices
+```
+
+### Example 2: Fixing a bug
+```
+@qa find why card payment isn't working
+@backend check payment gateway integration
+@frontend verify card number validation
+@all CRITICAL: payment broken, fix urgently!
+```
+
+### Example 3: Preparing for deployment
+```
+@qa run full regression testing
+@backend check all database migrations
+@frontend build production bundle
+@devops prepare server for v2.0 deployment
+@all deployment scheduled for 6pm
+```
+
+---
+
+## 📊 STEP 8: CHECK METRICS AND RESULTS
+
+### In CEO Interface press "4" (View metrics):
+```
+=== TEAM METRICS ===
+
+TEAMLEAD:
+  Tasks completed: 5
+  Messages processed: 23
+
+BACKEND:
+  Tasks completed: 12
+  Messages processed: 45
+
+FRONTEND:
+  Tasks completed: 8
+  Messages processed: 38
+
+QA:
+  Bugs found: 15
+  Tests run: 120
+
+DEVOPS:
+  Deployments: 3
+  Messages processed: 18
+```
+
+### Where to find results:
+- **Tasks:** `C:\www.spa.com\.ai-team\virtual-office\tasks\*.json`
+- **Chat:** `C:\www.spa.com\.ai-team\chat.md`
+- **Metrics:** `C:\www.spa.com\.ai-team\virtual-office\metrics\`
+- **Reports:** `C:\www.spa.com\.ai-team\virtual-office\reports\`
+
+---
+
+## 🛑 STEP 9: STOPPING THE SYSTEM
+
+### Proper shutdown:
+1. In main window select "0" (Exit)
+2. All agents automatically stop
+3. Server stops
+4. Data is saved
+
+### Emergency stop:
+- Press **Ctrl+C** in main window
+- Or close all windows
+
+---
+
+## 🔧 STEP 10: ADDITIONAL COMMANDS
+
+### PowerShell commands (for advanced users):
 ```powershell
+# Navigate to scripts folder
 cd C:\www.spa.com\.ai-team\scripts
-.\task-manager.ps1 -Action create -Title "Исправить баг в форме" -Assignee qa -Priority high
-```
 
-**Отправить сообщение:**
-```powershell
-.\message-router.ps1 -Action send -From ceo -To backend -Message "Проверь производительность API"
-```
+# Create task directly
+.\task-manager.ps1 -Action create -Title "Task name" -Assignee backend -Priority high
 
-**Обновить метрику:**
-```powershell
+# Send message
+.\message-router.ps1 -Action send -From ceo -To all -Message "Important message"
+
+# View tasks list
+.\task-manager.ps1 -Action list
+
+# Update metrics
 .\metrics-updater.ps1 -Agent qa -Action bug_found -Count 3
 ```
 
-**Посмотреть все задачи:**
-```powershell
-.\task-manager.ps1 -Action list
+---
+
+## ✅ READY TO WORK!
+
+Now you know how to:
+1. ✅ Start Virtual Office
+2. ✅ Create tasks for agents
+3. ✅ Communicate with team via chat
+4. ✅ Use Dashboard
+5. ✅ Check metrics and results
+
+### 💡 TIP TO START:
+Begin with a simple task for TeamLead, for example:
+"Create plan for adding new search feature"
+
+TeamLead will automatically distribute work among all agents!
+
+---
+
+## 🚨 TROUBLESHOOTING
+
+### If agents ask for theme selection:
+✅ **FIXED!** The system now includes:
+- Settings file at: `C:\www.spa.com\.ai-team\.claude\settings.json`
+- Launcher uses `--settings-file` parameter
+- Agents start without prompts
+
+### If chat server doesn't start:
+1. Check Node.js is installed: `node --version`
+2. Check port 8082 is free: `netstat -an | findstr 8082`
+3. Try running directly: `node C:\www.spa.com\.ai-team\ai-team-server.cjs`
+
+### If Python CEO Interface doesn't work:
+1. Check Python is installed: `python --version`
+2. Install required modules: `pip install pathlib`
+3. Run directly: `python C:\www.spa.com\.ai-team\virtual-office\ceo_interface_en.py`
+
+### If agents don't respond:
+1. Check 5 PowerShell windows are open
+2. Look for errors in agent windows
+3. Check chat.md is accessible
+4. Restart with `START-VIRTUAL-OFFICE-EN.bat`
+
+---
+
+## 👥 WHAT EACH AGENT DOES
+
+### TeamLead (Coordinator)
+- Distributes tasks among team
+- Conducts daily standups
+- Coordinates agent work
+- Tracks deadlines
+
+### Backend (Laravel Developer)
+- Creates API endpoints
+- Works with database
+- Implements business logic
+- Optimizes queries
+
+### Frontend (Vue.js Developer)
+- Creates UI components
+- Manages application state
+- Integrates with APIs
+- Optimizes performance
+
+### QA (Test Engineer)
+- Finds and documents bugs
+- Writes and runs tests
+- Verifies new features
+- Monitors code quality
+
+### DevOps (Infrastructure Engineer)
+- Sets up CI/CD
+- Deploys to servers
+- Monitors performance
+- Manages Docker containers
+
+---
+
+## 📝 TYPICAL USE SCENARIOS
+
+### Scenario 1: Add new feature
+```
+1. Start Virtual Office (START-VIRTUAL-OFFICE-EN.bat)
+2. Select option 1 (CEO Interface)
+3. Create task (option 1):
+   - Title: "Add PDF export"
+   - Assign to: teamlead
+   - TeamLead will auto-distribute subtasks
+4. Agents start working automatically
+5. Monitor progress in Dashboard
+```
+
+### Scenario 2: Fix critical bug
+```
+1. In CEO Interface select option 3 (Send message)
+2. Send to all: "CRITICAL: Payment not working!"
+3. QA automatically starts testing
+4. Backend fixes the issue
+5. DevOps deploys the fix
+```
+
+### Scenario 3: Daily operations
+```
+1. Start in background mode (option 3)
+2. Agents will:
+   - Post standups at 9:00
+   - Respond to chat messages
+   - Process tasks from inbox
+   - Update metrics
+3. Check Dashboard periodically
 ```
 
 ---
 
-## 👥 ЧТО ДЕЛАЕТ КАЖДЫЙ АГЕНТ
+## 💡 PRODUCTIVITY TIPS
 
-### TeamLead (Координатор)
-- Распределяет задачи между командой
-- Проводит ежедневные стендапы
-- Координирует работу агентов
-- Следит за дедлайнами
-
-### Backend (Laravel разработчик)
-- Создает API endpoints
-- Работает с базой данных
-- Реализует бизнес-логику
-- Оптимизирует запросы
-
-### Frontend (Vue.js разработчик)
-- Создает компоненты интерфейса
-- Работает с состоянием приложения
-- Интегрирует с API
-- Оптимизирует производительность
-
-### QA (Тестировщик)
-- Находит и документирует баги
-- Пишет и запускает тесты
-- Проверяет новый функционал
-- Следит за качеством кода
-
-### DevOps (Инженер инфраструктуры)
-- Настраивает CI/CD
-- Деплоит на сервера
-- Мониторит производительность
-- Управляет Docker контейнерами
+1. **Start with simple tasks** - let agents adapt
+2. **Use priorities** - high/medium/low for tasks
+3. **Monitor metrics** - they show activity
+4. **Give clear instructions** - agents work better with specific tasks
+5. **Check channels** - lots of useful information there
 
 ---
 
-## 📝 ТИПОВЫЕ СЦЕНАРИИ ИСПОЛЬЗОВАНИЯ
-
-### Сценарий 1: Добавить новую функцию
-```
-1. Запустите Virtual Office (START-VIRTUAL-OFFICE.bat)
-2. Выберите опцию 1 (CEO Interface)
-3. Создайте задачу (опция 1):
-   - Заголовок: "Добавить экспорт в PDF"
-   - Назначить: teamlead
-   - TeamLead автоматически распределит подзадачи
-4. Агенты начнут работать автоматически
-5. Следите за прогрессом в Dashboard
-```
-
-### Сценарий 2: Исправить критический баг
-```
-1. В CEO Interface выберите опцию 3 (Send message)
-2. Отправьте всем (all): "КРИТИЧНО: Не работает оплата!"
-3. QA автоматически начнет тестирование
-4. Backend исправит проблему
-5. DevOps задеплоит исправление
-```
-
-### Сценарий 3: Ежедневная работа
-```
-1. Запустите в фоновом режиме (опция 3)
-2. Агенты будут:
-   - В 9:00 постить стендапы
-   - Отвечать на сообщения в чате
-   - Обрабатывать задачи из inbox
-   - Обновлять метрики
-3. Проверяйте Dashboard периодически
-```
-
----
-
-## 🔧 ПОЛЕЗНЫЕ КОМАНДЫ
-
-### Остановить Virtual Office
-```batch
-# Нажмите Ctrl+C в окне запуска
-# Или выберите опцию 0 в меню
-```
-
-### Посмотреть логи
-```powershell
-# Последние сообщения чата
-Get-Content C:\www.spa.com\.ai-team\chat.md -Tail 50
-
-# Метрики агента
-Get-Content C:\www.spa.com\.ai-team\virtual-office\metrics\backend.json
-```
-
-### Очистить старые данные
-```powershell
-# Очистить выполненные задачи
-Remove-Item C:\www.spa.com\.ai-team\virtual-office\tasks\*.json -Include *completed*
-
-# Очистить старые сообщения
-Clear-Content C:\www.spa.com\.ai-team\chat.md
-```
-
----
-
-## ❓ ЧАСТЫЕ ВОПРОСЫ
-
-### Q: Агенты не отвечают?
-**A:** Проверьте что они запущены. Должно быть 5 окон PowerShell с агентами.
-
-### Q: Как добавить нового агента?
-**A:** Отредактируйте `system\agents.json` и создайте папку с промптом.
-
-### Q: Можно работать без Python?
-**A:** Да! Используйте PowerShell команды или Web Dashboard.
-
-### Q: Где хранятся данные?
-**A:**
-- Задачи: `virtual-office\tasks\`
-- Метрики: `virtual-office\metrics\`
-- Сообщения: `chat.md`
-
-### Q: Как изменить промпты агентов?
-**A:** Отредактируйте файлы:
-- `teamlead\CLAUDE-VIRTUAL-OFFICE.md`
-- `backend\CLAUDE-VIRTUAL-OFFICE.md`
-- И так далее...
-
----
-
-## 🎯 БЫСТРЫЕ КОМАНДЫ ДЛЯ КОПИРОВАНИЯ
-
-```batch
-:: Запуск Virtual Office
-C:\www.spa.com\.ai-team\START-VIRTUAL-OFFICE.bat
-
-:: CEO Interface (после запуска)
-python C:\www.spa.com\.ai-team\virtual-office\ceo_interface.py
-
-:: System Monitor
-python C:\www.spa.com\.ai-team\virtual-office\monitor.py
-
-:: Dashboard в браузере
-start http://localhost:8082
-```
-
----
-
-## 🚨 ЕСЛИ ЧТО-ТО НЕ РАБОТАЕТ
-
-1. **Убедитесь что установлены:**
-   - Python 3.8+
-   - Node.js 14+
-   - PowerShell 5+
-
-2. **Проверьте порты:**
-   - 8082 должен быть свободен
-
-3. **Права доступа:**
-   - Запускайте от имени администратора если нужно
-
-4. **Логи ошибок:**
-   - Смотрите в окнах PowerShell агентов
-
----
-
-## 💡 СОВЕТЫ ПО ЭФФЕКТИВНОМУ ИСПОЛЬЗОВАНИЮ
-
-1. **Начинайте с простых задач** - дайте агентам привыкнуть
-2. **Используйте приоритеты** - high/medium/low для задач
-3. **Следите за метриками** - они показывают активность
-4. **Давайте четкие инструкции** - агенты лучше работают с конкретными задачами
-5. **Проверяйте каналы** - там много полезной информации
-
----
-
-**Virtual Office 3.1** - Ваша AI команда готова к работе! 🚀
+**Virtual Office 3.2** - Your AI team is ready to work! 🚀

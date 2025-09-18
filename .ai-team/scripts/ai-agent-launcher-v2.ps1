@@ -10,43 +10,27 @@ $chatPath = "$basePath\chat.md"
 # Agent configurations
 $agents = @{
     "Backend" = @{
-        PromptFile = if ($Mode -eq "virtual-office") {
-            "$basePath\backend\CLAUDE-VIRTUAL-OFFICE.md"
-        } else {
-            "$basePath\backend\CLAUDE.md"
-        }
+        PromptFile = "$basePath\backend\CLAUDE-VIRTUAL-OFFICE.md"
         Color = "0A"
         CheckInterval = 10
     }
     "Frontend" = @{
-        PromptFile = if ($Mode -eq "virtual-office") {
-            "$basePath\frontend\CLAUDE-VIRTUAL-OFFICE.md"
-        } else {
-            "$basePath\frontend\CLAUDE.md"
-        }
+        PromptFile = "$basePath\frontend\CLAUDE-VIRTUAL-OFFICE.md"
         Color = "0B"
         CheckInterval = 10
     }
     "QA" = @{
-        PromptFile = "$basePath\qa\CLAUDE.md"
+        PromptFile = "$basePath\qa\CLAUDE-VIRTUAL-OFFICE.md"
         Color = "0C"
         CheckInterval = 10
     }
     "DevOps" = @{
-        PromptFile = if ($Mode -eq "virtual-office") {
-            "$basePath\devops\CLAUDE-VIRTUAL-OFFICE.md"
-        } else {
-            "$basePath\devops\CLAUDE.md"
-        }
+        PromptFile = "$basePath\devops\CLAUDE-VIRTUAL-OFFICE.md"
         Color = "0E"
         CheckInterval = 10
     }
     "TeamLead" = @{
-        PromptFile = if ($Mode -eq "virtual-office") {
-            "$basePath\teamlead\CLAUDE-VIRTUAL-OFFICE.md"
-        } else {
-            "$basePath\teamlead\CLAUDE.md"
-        }
+        PromptFile = "$basePath\teamlead\CLAUDE-VIRTUAL-OFFICE.md"
         Color = "0D"
         CheckInterval = 5
     }
@@ -63,9 +47,9 @@ $config = $agents[$Role]
 $promptContent = ""
 if (Test-Path $config.PromptFile) {
     $promptContent = Get-Content $config.PromptFile -Raw -Encoding UTF8
-    Write-Host "✅ Loaded prompt from: $($config.PromptFile)" -ForegroundColor Green
+    Write-Host "[OK] Loaded prompt from: $($config.PromptFile)" -ForegroundColor Green
 } else {
-    Write-Host "⚠️ Prompt file not found: $($config.PromptFile)" -ForegroundColor Yellow
+    Write-Host "[WARNING] Prompt file not found: $($config.PromptFile)" -ForegroundColor Yellow
     Write-Host "Using default prompt..." -ForegroundColor Yellow
 
     # Fallback prompt
@@ -97,8 +81,12 @@ CHANNEL INTEGRATION:
 - General updates to virtual-office/channels/general/
 "@
 
-# Create launcher script
+# Create launcher script with proper escaping
 $launcherPath = "$env:TEMP\launch_$($Role.ToLower())_v2_$(Get-Random).ps1"
+
+# Save prompt to a separate file to avoid escaping issues
+$promptFile = "$env:TEMP\prompt_$($Role.ToLower())_$(Get-Random).txt"
+$promptContent | Out-File -FilePath $promptFile -Encoding UTF8
 
 @"
 # AI $Role Agent V2
@@ -108,17 +96,22 @@ Write-Host 'Chat path: $chatPath' -ForegroundColor Cyan
 Write-Host 'Check interval: $($config.CheckInterval) seconds' -ForegroundColor Cyan
 Write-Host ''
 Write-Host 'Features enabled:' -ForegroundColor Yellow
-Write-Host '✅ Auto-reading prompts from files' -ForegroundColor Green
-Write-Host '✅ Auto-updating metrics' -ForegroundColor Green
-Write-Host '✅ Channel integration' -ForegroundColor Green
-Write-Host '✅ Inbox/Outbox system' -ForegroundColor Green
+Write-Host '[+] Auto-reading prompts from files' -ForegroundColor Green
+Write-Host '[+] Auto-updating metrics' -ForegroundColor Green
+Write-Host '[+] Channel integration' -ForegroundColor Green
+Write-Host '[+] Inbox/Outbox system' -ForegroundColor Green
 Write-Host ''
 Write-Host 'Launching Claude with Virtual Office capabilities...' -ForegroundColor Green
 
-# Start Claude with full prompt
-& claude --dangerously-skip-permissions @'
-$promptContent
-'@
+# Set working directory
+cd '$basePath'
+
+# Start Claude with prompt from file and explicit role
+Write-Host "ROLE: $Role" -ForegroundColor Yellow
+Write-Host "Loading prompt from: $promptFile" -ForegroundColor Cyan
+`$promptContent = Get-Content '$promptFile' -Raw
+Write-Host "Starting $Role agent..." -ForegroundColor Green
+claude chat --dangerously-skip-permissions "`$promptContent"
 "@ | Out-File -FilePath $launcherPath -Encoding UTF8
 
 # Start the agent

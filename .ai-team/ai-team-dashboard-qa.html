@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QA Dashboard - SPA Platform</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .critical { background: #ff4757; color: white; }
+        .warning { background: #ffa502; color: white; }
+        .success { background: #2ed573; color: white; }
+        .info { background: #5f27cd; color: white; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card h2 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .metric:last-child {
+            border-bottom: none;
+        }
+        .metric-label {
+            color: #666;
+            font-size: 14px;
+        }
+        .metric-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .bug-list {
+            list-style: none;
+        }
+        .bug-item {
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #ff4757;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .bug-item.fixed {
+            border-left-color: #2ed573;
+            opacity: 0.7;
+        }
+
+        .test-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .test-icon {
+            font-size: 24px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2ed573, #1e90ff);
+            transition: width 0.5s;
+        }
+
+        .timestamp {
+            color: #999;
+            font-size: 12px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .alert {
+            background: #ff4757;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                🧪 QA Dashboard
+                <span class="status-badge critical">CRITICAL BUGS FOUND</span>
+            </h1>
+        </div>
+
+        <div class="alert">
+            <span style="font-size: 24px;">⚠️</span>
+            <div>
+                <strong>БЛОКЕР PRODUCTION:</strong> JSON.parse без обработки ошибок в AdForm.vue:805
+                может крашить приложение. Требуется немедленное исправление!
+            </div>
+        </div>
+
+        <div class="grid">
+            <!-- Статус тестирования -->
+            <div class="card">
+                <h2>📊 Статус тестирования</h2>
+                <div class="metric">
+                    <span class="metric-label">Протестировано компонентов</span>
+                    <span class="metric-value">2 из 10</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 20%"></div>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Найдено багов</span>
+                    <span class="metric-value" style="color: #ff4757;">5</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Критических</span>
+                    <span class="metric-value" style="color: #ff4757;">2</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Исправлено</span>
+                    <span class="metric-value" style="color: #2ed573;">0</span>
+                </div>
+            </div>
+
+            <!-- Критические баги -->
+            <div class="card">
+                <h2>🐛 Критические баги</h2>
+                <ul class="bug-list">
+                    <li class="bug-item">
+                        <div>
+                            <strong>BUG-005</strong><br>
+                            <small>JSON.parse без try-catch</small>
+                        </div>
+                        <span class="status-badge critical">OPEN</span>
+                    </li>
+                    <li class="bug-item">
+                        <div>
+                            <strong>BUG-001</strong><br>
+                            <small>TypeScript any types</small>
+                        </div>
+                        <span class="status-badge critical">OPEN</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Покрытие тестами -->
+            <div class="card">
+                <h2>🎯 Покрытие тестами</h2>
+                <div class="metric">
+                    <span class="metric-label">AdForm.vue</span>
+                    <span class="metric-value" style="color: #ff4757;">0%</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">PhotoUploadZone.vue</span>
+                    <span class="metric-value" style="color: #ffa502;">0%</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Общее покрытие</span>
+                    <span class="metric-value" style="color: #ff4757;">~15%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 15%; background: #ff4757;"></div>
+                </div>
+            </div>
+
+            <!-- Созданные тесты -->
+            <div class="card">
+                <h2>✅ Созданные тесты</h2>
+                <div class="test-status">
+                    <span class="test-icon">📝</span>
+                    <div>
+                        <strong>Backend тесты</strong><br>
+                        <small>AdFormJsonParseTest.php (5 кейсов)</small>
+                    </div>
+                </div>
+                <div class="test-status">
+                    <span class="test-icon">🎨</span>
+                    <div>
+                        <strong>Frontend тесты</strong><br>
+                        <small>AdFormJsonParse.spec.ts (8 кейсов)</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Качество компонентов -->
+            <div class="card">
+                <h2>⭐ Качество компонентов</h2>
+                <div class="metric">
+                    <span class="metric-label">AdForm.vue</span>
+                    <span class="metric-value">
+                        <span style="color: #ff4757;">6/10</span>
+                        <small>(нужны исправления)</small>
+                    </span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">PhotoUploadZone.vue</span>
+                    <span class="metric-value">
+                        <span style="color: #2ed573;">9/10</span>
+                        <small>(отлично)</small>
+                    </span>
+                </div>
+            </div>
+
+            <!-- План действий -->
+            <div class="card">
+                <h2>📋 План действий</h2>
+                <ol style="padding-left: 20px; color: #666; font-size: 14px; line-height: 1.8;">
+                    <li>🔴 Исправить JSON.parse (BUG-005)</li>
+                    <li>🔴 Убрать any типы (BUG-001)</li>
+                    <li>🟠 Запустить тесты</li>
+                    <li>🟡 Регрессионное тестирование</li>
+                    <li>🟢 Подготовка к production</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="timestamp">
+            Последнее обновление: <span id="timestamp"></span> | QA Agent v2.0
+        </div>
+    </div>
+
+    <script>
+        // Обновление времени
+        function updateTimestamp() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('ru-RU');
+            document.getElementById('timestamp').textContent = timeStr;
+        }
+
+        updateTimestamp();
+        setInterval(updateTimestamp, 1000);
+
+        // Автообновление страницы каждые 30 секунд
+        setTimeout(() => location.reload(), 30000);
+    </script>
+</body>
+</html>

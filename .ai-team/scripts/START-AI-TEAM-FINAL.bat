@@ -21,12 +21,16 @@ timeout /t 2 >nul
 
 :: Step 2: Clear chat for fresh start
 echo [2/5] Preparing chat system...
-echo [%time:~0,5%] [SYSTEM]: AI Team startup initiated > .ai-team\chat.md
+cd ..
+echo [%time:~0,5%] [SYSTEM]: AI Team startup initiated > chat.md
+cd scripts
 echo.
 
 :: Step 3: Start chat server
 echo [3/5] Starting chat server on port 8082...
-start "Chat Server" /min powershell -WindowStyle Minimized -ExecutionPolicy Bypass -File "chat-server-clean.ps1" -Port 8082
+cd ..
+start "Chat Server" /min cmd /c "node ai-team-server.cjs"
+cd scripts
 timeout /t 3 >nul
 
 :: Step 4: Open dashboard
@@ -40,24 +44,24 @@ echo.
 
 :: Start TeamLead first
 echo   Starting TeamLead...
-start "TeamLead Launcher" /min powershell -ExecutionPolicy Bypass -File "ai-agent-launcher.ps1" -Role "TeamLead"
+start "TeamLead Launcher" /min powershell -ExecutionPolicy Bypass -File "ai-agent-launcher-v2.ps1" -Role "TeamLead"
 timeout /t 3 >nul
 
 :: Start other agents
 echo   Starting Backend...
-start "Backend Launcher" /min powershell -ExecutionPolicy Bypass -File "ai-agent-launcher.ps1" -Role "Backend"
+start "Backend Launcher" /min powershell -ExecutionPolicy Bypass -File "ai-agent-launcher-v2.ps1" -Role "Backend"
 timeout /t 2 >nul
 
 echo   Starting Frontend...
-start "Frontend Launcher" /min powershell -ExecutionPolicy Bypass -File "ai-agent-launcher.ps1" -Role "Frontend"
+start "Frontend Launcher" /min powershell -ExecutionPolicy Bypass -File "ai-agent-launcher-v2.ps1" -Role "Frontend"
 timeout /t 2 >nul
 
 echo   Starting QA...
-start "QA Launcher" /min powershell -ExecutionPolicy Bypass -File "ai-agent-launcher.ps1" -Role "QA"
+start "QA Launcher" /min powershell -ExecutionPolicy Bypass -File "ai-agent-launcher-v2.ps1" -Role "QA"
 timeout /t 2 >nul
 
 echo   Starting DevOps...
-start "DevOps Launcher" /min powershell -ExecutionPolicy Bypass -File "ai-agent-launcher.ps1" -Role "DevOps"
+start "DevOps Launcher" /min powershell -ExecutionPolicy Bypass -File "ai-agent-launcher-v2.ps1" -Role "DevOps"
 timeout /t 2 >nul
 
 :: Final message

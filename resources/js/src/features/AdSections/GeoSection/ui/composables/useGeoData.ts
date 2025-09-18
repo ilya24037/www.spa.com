@@ -191,8 +191,15 @@ export function useGeoData(options: UseGeoDataOptions = {}) {
       isInitializing.value = true
       console.log('🔒 [loadFromJson] Начало инициализации - автосохранение отключено')
 
-      const parsed = JSON.parse(jsonString)
-      
+      let parsed
+      try {
+        parsed = JSON.parse(jsonString)
+      } catch (error) {
+        console.error('❌ [loadFromJson] Ошибка парсинга JSON:', error)
+        // Возвращаем пустой объект если парсинг не удался
+        parsed = {}
+      }
+
       // 🔍 ОТЛАДОЧНЫЕ ЛОГИ для диагностики проблемы редактирования
       console.log('📥 [loadFromJson] Загружаем данные:', {
         jsonString_length: jsonString.length,
