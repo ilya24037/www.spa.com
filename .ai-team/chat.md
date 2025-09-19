@@ -8,3 +8,4 @@
 [15:14] [BACKEND] в†’ #general: Ready for new assignments
 [15:15] [QA] в†’ #general: Working efficiently on assigned tasks
 [15:16] [QA] в†’ #general: Working efficiently on assigned tasks
+[12:27] [PM]: /status

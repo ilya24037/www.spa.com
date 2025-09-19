@@ -1,0 +1,75 @@
+name: performance-optimization
+description: Оптимизация производительности Laravel/Vue приложения
+prompt: |
+  Выполни оптимизацию производительности по следующим направлениям:
+
+  1. АНАЛИЗ УЗКИХ МЕСТ:
+     - Профилирование с Laravel Debugbar/Telescope
+     - Chrome DevTools Performance tab
+     - Lighthouse аудит
+     - Анализ SQL запросов (N+1, missing indexes)
+
+  2. BACKEND ОПТИМИЗАЦИИ:
+
+     Database:
+     ✅ Eager loading для решения N+1
+     ✅ Индексы на часто используемые колонки
+     ✅ Query optimization (select only needed)
+     ✅ Database query caching
+
+     Laravel:
+     ✅ Route caching (php artisan route:cache)
+     ✅ Config caching (php artisan config:cache)
+     ✅ View caching (php artisan view:cache)
+     ✅ OPcache для PHP
+     ✅ Queue для тяжёлых операций
+
+     API:
+     ✅ Response caching с Redis
+     ✅ Rate limiting
+     ✅ Pagination вместо загрузки всех данных
+     ✅ Compression (gzip/brotli)
+
+  3. FRONTEND ОПТИМИЗАЦИИ:
+
+     Bundle:
+     ✅ Code splitting по роутам
+     ✅ Lazy loading компонентов
+     ✅ Tree shaking неиспользуемого кода
+     ✅ Минификация JS/CSS
+     ✅ Оптимизация изображений (webp, lazy load)
+
+     Vue:
+     ✅ v-once для статичного контента
+     ✅ v-memo для дорогих вычислений
+     ✅ computed вместо methods где возможно
+     ✅ shallowRef для больших объектов
+     ✅ Virtual scrolling для длинных списков
+
+     Network:
+     ✅ HTTP/2 push
+     ✅ Preload/prefetch критических ресурсов
+     ✅ Service Worker для offline
+     ✅ CDN для статики
+
+  4. МЕТРИКИ ПРОИЗВОДИТЕЛЬНОСТИ:
+     - Time to First Byte (TTFB) < 200ms
+     - First Contentful Paint (FCP) < 1.8s
+     - Largest Contentful Paint (LCP) < 2.5s
+     - First Input Delay (FID) < 100ms
+     - Cumulative Layout Shift (CLS) < 0.1
+
+  5. МОНИТОРИНГ:
+     - Sentry для отслеживания ошибок
+     - New Relic/Datadog для метрик
+     - Google Analytics для поведения
+
+  КРИТИЧЕСКИ ВАЖНО:
+  - Измерять ДО и ПОСЛЕ оптимизации
+  - Оптимизировать только реальные проблемы
+  - Не жертвовать читаемостью кода
+
+  Специфика проекта SPA Platform:
+  - Приоритет: скорость загрузки каталога мастеров
+  - Оптимизация изображений галереи
+  - Кеширование фильтров и результатов поиска

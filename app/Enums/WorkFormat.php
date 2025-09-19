@@ -10,7 +10,6 @@ enum WorkFormat: string
     case INDIVIDUAL = 'individual';
     case SALON = 'salon';
     case DUO = 'duo';
-    case GROUP = 'group';
 
     /**
      * Получить читаемое название формата работы
@@ -21,7 +20,6 @@ enum WorkFormat: string
             self::INDIVIDUAL => 'Индивидуально',
             self::SALON => 'Салон',
             self::DUO => 'В паре',
-            self::GROUP => 'Групповые услуги',
         };
     }
 
@@ -34,7 +32,6 @@ enum WorkFormat: string
             self::INDIVIDUAL => 'Работаю только индивидуально',
             self::SALON => 'Работаю в команде',
             self::DUO => 'Работаю в паре с другим специалистом',
-            self::GROUP => 'Провожу групповые сеансы для нескольких клиентов',
         };
     }
 

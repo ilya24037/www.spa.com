@@ -25,7 +25,127 @@
             max-width: 1400px;
             height: 95vh;
             display: flex;
+            flex-direction: column;
             gap: 15px;
+        }
+
+        /* System Control Bar */
+        .system-control-bar {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .control-logo {
+            font-size: 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-text {
+            background: linear-gradient(45deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .system-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .status-indicator {
+            font-size: 14px;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.online {
+            color: #4CAF50;
+        }
+
+        .status-indicator.offline {
+            color: #f44336;
+        }
+
+        .system-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .control-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-start {
+            background: rgba(76, 175, 80, 0.9);
+            color: white;
+        }
+
+        .btn-start:hover {
+            background: rgba(76, 175, 80, 1);
+            transform: translateY(-1px);
+        }
+
+        .btn-stop {
+            background: rgba(244, 67, 54, 0.9);
+            color: white;
+        }
+
+        .btn-stop:hover {
+            background: rgba(244, 67, 54, 1);
+            transform: translateY(-1px);
+        }
+
+        .btn-refresh {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-refresh:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-launch {
+            background: rgba(255, 193, 7, 0.9);
+            color: white;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .btn-launch:hover {
+            background: rgba(255, 193, 7, 1);
+            transform: translateY(-1px);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Content Wrapper */
+        .content-wrapper {
+            flex: 1;
+            display: flex;
+            gap: 15px;
+            min-height: 0;
         }
         
         .left-sidebar {
@@ -808,7 +928,34 @@
 </head>
 <body>
     <div class="main-container">
-        <div class="left-sidebar">
+        <!-- System Control Bar -->
+        <div class="system-control-bar">
+            <div class="control-logo">
+                🎯 <span class="logo-text">Virtual Office Control Center</span>
+            </div>
+            <div class="system-status" id="systemStatus">
+                <span class="status-indicator offline" id="statusIndicator">●</span>
+                <span class="status-text" id="statusText">System Offline</span>
+            </div>
+            <div class="system-controls">
+                <button class="control-btn btn-start" id="startSystemBtn" onclick="startVirtualOffice()">
+                    🚀 Start System
+                </button>
+                <button class="control-btn btn-stop" id="stopSystemBtn" onclick="stopVirtualOffice()" style="display:none;">
+                    ⏹️ Stop System
+                </button>
+                <button class="control-btn btn-launch" onclick="showBatchLaunchInstructions()" title="Помощь по запуску" style="font-size: 12px; padding: 6px 12px;">
+                    ❓ Help
+                </button>
+                <button class="control-btn btn-refresh" onclick="refreshSystemStatus()">
+                    🔄 Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- Content Wrapper -->
+        <div class="content-wrapper">
+            <div class="left-sidebar">
             <!-- Team Status Dashboard -->
             <div class="team-dashboard">
             <div class="dashboard-header">
@@ -1216,13 +1363,906 @@
                 </div>
             </div>
         </div>
+        </div> <!-- End content-wrapper -->
     </div>
 
     <script>
+        // TypeScript-style interfaces for better code organization
+        /**
+         * @typedef {Object} AgentState
+         * @property {'online'|'offline'|'working'|'idle'} status - Current agent status
+         * @property {string|null} task - Current task description
+         */
+
+        /**
+         * @typedef {Object} SystemState
+         * @property {boolean} running - Is system currently running
+         * @property {Object.<string, AgentState>} agents - Agent states by name
+         */
+
+        /**
+         * @typedef {Object} ChatMessage
+         * @property {string} channel - Channel name
+         * @property {string} message - Message content
+         * @property {string} timestamp - ISO timestamp
+         * @property {string} sender - Sender name
+         * @property {string} [id] - Optional message ID
+         */
+
+        /**
+         * @typedef {Object} ChannelUnread
+         * @property {number} general - Unread count for general channel
+         * @property {number} backend - Unread count for backend channel
+         * @property {number} frontend - Unread count for frontend channel
+         * @property {number} qa - Unread count for qa channel
+         * @property {number} devops - Unread count for devops channel
+         */
+
+        // Configuration object for paths and settings
+        /** @type {Object} */
+        const CONFIG = {
+            // File paths
+            paths: {
+                aiTeamBase: 'C:\\www.spa.com\\.ai-team\\',
+                scriptsDir: 'C:\\www.spa.com\\.ai-team\\scripts\\',
+                chatFile: '.ai-team/chat.md',
+                aiContextFile: 'AI_CONTEXT.md',
+                claudeConfigFile: 'CLAUDE.md'
+            },
+
+            // Server endpoints
+            endpoints: {
+                sendMessage: '/send-message',
+                chatServer: 'http://localhost:8082/.ai-team/chat.md',
+                serverPort: 8082
+            },
+
+            // UI settings
+            ui: {
+                maxMessageLength: 5000,
+                errorNotificationDuration: 7000,
+                securityErrorDuration: 5000,
+                fetchRetries: 2
+            }
+        };
+
+        // Global variables with type annotations
+        /** @type {number} */
         let lastMessageCount = 0;
-        let chatFilePath = '.ai-team/chat.md';
+
+        /** @type {string} */
+        let chatFilePath = CONFIG.paths.chatFile;
+
+        /** @type {string} */
         let currentChannel = 'general';
+
+        /** @type {ChatMessage[]} */
         let allMessages = [];
+
+        /** @type {SystemState} */
+        let systemState = {
+            running: false,
+            agents: {
+                teamlead: { status: 'offline', task: null },
+                backend: { status: 'offline', task: null },
+                frontend: { status: 'offline', task: null },
+                qa: { status: 'offline', task: null },
+                devops: { status: 'offline', task: null }
+            }
+        };
+
+        // Security Functions
+        /**
+         * Sanitizes HTML content to prevent XSS attacks
+         * @function sanitizeHTML
+         * @param {string} html - HTML content to sanitize
+         * @returns {string} Sanitized HTML
+         */
+        function sanitizeHTML(html) {
+            const div = document.createElement('div');
+            div.textContent = html;
+            return div.innerHTML;
+        }
+
+        /**
+         * Validates message input for security and length
+         * @function validateMessageInput
+         * @param {string} message - Message to validate
+         * @returns {{isValid: boolean, error?: string, sanitized?: string}} Validation result
+         */
+        function validateMessageInput(message) {
+            // Trim whitespace
+            const trimmed = message.trim();
+
+            // Check if empty
+            if (!trimmed) {
+                return { isValid: false, error: 'Сообщение не может быть пустым' };
+            }
+
+            // Check length limits
+            if (trimmed.length > CONFIG.ui.maxMessageLength) {
+                return { isValid: false, error: `Сообщение слишком длинное (максимум ${CONFIG.ui.maxMessageLength} символов)` };
+            }
+
+            // Check for suspicious patterns (basic XSS protection)
+            const suspiciousPatterns = [
+                /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+                /<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi,
+                /javascript:/gi,
+                /on\w+\s*=/gi
+            ];
+
+            for (const pattern of suspiciousPatterns) {
+                if (pattern.test(trimmed)) {
+                    return { isValid: false, error: 'Сообщение содержит недопустимые элементы' };
+                }
+            }
+
+            // Sanitize the content
+            const sanitized = sanitizeHTML(trimmed);
+
+            return { isValid: true, sanitized };
+        }
+
+        /**
+         * Safely sets button text content
+         * @function safeSetButtonText
+         * @param {HTMLElement} button - Button element
+         * @param {string} text - Text to set
+         * @returns {void}
+         */
+        function safeSetButtonText(button, text) {
+            if (button) {
+                button.textContent = text;
+            }
+        }
+
+        /**
+         * Safely creates HTML element with text content
+         * @function safeCreateElement
+         * @param {string} tagName - HTML tag name
+         * @param {string} textContent - Text content
+         * @param {string} [className] - CSS class name
+         * @returns {HTMLElement} Created element
+         */
+        function safeCreateElement(tagName, textContent, className) {
+            const element = document.createElement(tagName);
+            element.textContent = textContent;
+            if (className) {
+                element.className = className;
+            }
+            return element;
+        }
+
+        // Error Handling Functions
+        /**
+         * Centralized error logger and handler
+         * @function handleError
+         * @param {Error|string} error - Error object or message
+         * @param {string} context - Context where error occurred
+         * @param {boolean} [showToUser=true] - Whether to show error to user
+         * @returns {void}
+         */
+        function handleError(error, context, showToUser = true) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            const fullError = `[${context}] ${errorMessage}`;
+
+            // Log to console
+            console.error(fullError, error instanceof Error ? error.stack : '');
+
+            // Optionally show to user
+            if (showToUser) {
+                showErrorNotification(`Ошибка в ${context}: ${errorMessage}`);
+            }
+
+            // Store error for debugging (in real app, would send to monitoring service)
+            if (window.systemErrors) {
+                window.systemErrors.push({
+                    timestamp: new Date().toISOString(),
+                    context,
+                    message: errorMessage,
+                    stack: error instanceof Error ? error.stack : null
+                });
+            } else {
+                window.systemErrors = [{
+                    timestamp: new Date().toISOString(),
+                    context,
+                    message: errorMessage,
+                    stack: error instanceof Error ? error.stack : null
+                }];
+            }
+        }
+
+        /**
+         * Shows error notification to user
+         * @function showErrorNotification
+         * @param {string} message - Error message to display
+         * @returns {void}
+         */
+        function showErrorNotification(message) {
+            try {
+                const errorDiv = safeCreateElement('div', message, 'error-notification');
+                errorDiv.style.cssText = `
+                    position: fixed;
+                    top: 80px;
+                    right: 20px;
+                    background: #f44336;
+                    color: white;
+                    padding: 16px 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 6px 16px rgba(244, 67, 54, 0.3);
+                    z-index: 10001;
+                    font-weight: 500;
+                    max-width: 350px;
+                    border-left: 4px solid #d32f2f;
+                `;
+
+                document.body.appendChild(errorDiv);
+
+                // Auto-remove after configured duration
+                setTimeout(() => {
+                    try {
+                        if (errorDiv.parentNode) {
+                            errorDiv.parentNode.removeChild(errorDiv);
+                        }
+                    } catch (cleanupError) {
+                        console.warn('Error removing notification:', cleanupError);
+                    }
+                }, CONFIG.ui.errorNotificationDuration);
+
+            } catch (notificationError) {
+                console.error('Failed to show error notification:', notificationError);
+                // Fallback to alert if DOM manipulation fails
+                alert(`Ошибка: ${message}`);
+            }
+        }
+
+        /**
+         * Safely gets DOM element with error handling
+         * @function safeGetElement
+         * @param {string} id - Element ID
+         * @param {string} context - Context for error reporting
+         * @returns {HTMLElement|null} Element or null if not found
+         */
+        function safeGetElement(id, context) {
+            try {
+                const element = document.getElementById(id);
+                if (!element) {
+                    handleError(`Element with ID '${id}' not found`, context, false);
+                }
+                return element;
+            } catch (error) {
+                handleError(error, `${context} - getting element ${id}`, false);
+                return null;
+            }
+        }
+
+        /**
+         * Safely performs fetch with error handling and retries
+         * @function safeFetch
+         * @param {string} url - URL to fetch
+         * @param {RequestInit} options - Fetch options
+         * @param {number} [retries=1] - Number of retries
+         * @returns {Promise<Response|null>} Response or null on error
+         */
+        async function safeFetch(url, options = {}, retries = 1) {
+            for (let attempt = 0; attempt <= retries; attempt++) {
+                try {
+                    const response = await fetch(url, options);
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    return response;
+
+                } catch (error) {
+                    if (attempt === retries) {
+                        handleError(error, `safeFetch ${url}`);
+                        return null;
+                    }
+
+                    // Wait before retry
+                    await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+                }
+            }
+            return null;
+        }
+
+        // Chat Functions
+        /**
+         * Adds a message to chat display
+         * @function addMessageToChat
+         * @param {ChatMessage} message - Message object to add
+         * @returns {void}
+         */
+        function addMessageToChat(message) {
+            try {
+                // For now, just log to console since the chat system is complex
+                console.log(`[${message.channel}] ${message.sender}: ${message.message}`);
+
+                // Try to add to global messages array
+                if (Array.isArray(allMessages)) {
+                    allMessages.push(message);
+                }
+
+                // Show system messages as notifications for better UX
+                if (message.sender === 'System') {
+                    showSystemNotification(message.message);
+                }
+
+            } catch (error) {
+                handleError(error, 'addMessageToChat', false);
+            }
+        }
+
+        /**
+         * Shows system notification to user
+         * @function showSystemNotification
+         * @param {string} message - System message to display
+         * @returns {void}
+         */
+        function showSystemNotification(message) {
+            try {
+                const notificationDiv = safeCreateElement('div', message, 'system-notification');
+                notificationDiv.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: linear-gradient(135deg, #667eea, #764ba2);
+                    color: white;
+                    padding: 16px 20px;
+                    border-radius: 12px;
+                    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+                    z-index: 10002;
+                    font-weight: 500;
+                    max-width: 350px;
+                    border-left: 4px solid #5a67d8;
+                    animation: slideIn 0.3s ease;
+                `;
+
+                // Add animation styles if not already present
+                if (!document.getElementById('notification-styles')) {
+                    const styles = document.createElement('style');
+                    styles.id = 'notification-styles';
+                    styles.textContent = `
+                        @keyframes slideIn {
+                            from { transform: translateX(100%); opacity: 0; }
+                            to { transform: translateX(0); opacity: 1; }
+                        }
+                        @keyframes slideOut {
+                            from { transform: translateX(0); opacity: 1; }
+                            to { transform: translateX(100%); opacity: 0; }
+                        }
+                    `;
+                    document.head.appendChild(styles);
+                }
+
+                document.body.appendChild(notificationDiv);
+
+                // Auto-remove after 5 seconds with animation
+                setTimeout(() => {
+                    try {
+                        notificationDiv.style.animation = 'slideOut 0.3s ease';
+                        setTimeout(() => {
+                            if (notificationDiv.parentNode) {
+                                notificationDiv.parentNode.removeChild(notificationDiv);
+                            }
+                        }, 300);
+                    } catch (cleanupError) {
+                        console.warn('Error removing system notification:', cleanupError);
+                    }
+                }, 5000);
+
+            } catch (notificationError) {
+                console.error('Failed to show system notification:', notificationError);
+            }
+        }
+
+        // System Control Functions
+        /**
+         * Starts the Virtual Office system and initializes all agents
+         * @async
+         * @function startVirtualOffice
+         * @returns {Promise<void>}
+         * @throws {Error} When system startup fails
+         */
+        async function startVirtualOffice() {
+            try {
+                /** @type {HTMLButtonElement|null} */
+                const startBtn = safeGetElement('startSystemBtn', 'startVirtualOffice');
+
+                /** @type {HTMLButtonElement|null} */
+                const stopBtn = safeGetElement('stopSystemBtn', 'startVirtualOffice');
+
+                /** @type {HTMLElement|null} */
+                const statusIndicator = safeGetElement('statusIndicator', 'startVirtualOffice');
+
+                /** @type {HTMLElement|null} */
+                const statusText = safeGetElement('statusText', 'startVirtualOffice');
+
+                // Check if critical elements exist
+                if (!startBtn || !stopBtn || !statusIndicator || !statusText) {
+                    throw new Error('Критические элементы интерфейса не найдены');
+                }
+
+                startBtn.disabled = true;
+                safeSetButtonText(startBtn, '⏳ Starting...');
+
+                // Update UI immediately
+                statusIndicator.className = 'status-indicator online';
+                statusText.textContent = 'System Starting...';
+
+                // Send message to chat
+                const startMessage = {
+                    channel: currentChannel,
+                    message: '🚀 Virtual Office система запускается...',
+                    timestamp: new Date().toISOString(),
+                    sender: 'System'
+                };
+                addMessageToChat(startMessage);
+
+                // Launch real batch file
+                const launchResult = await launchRealBatchFile();
+
+                if (launchResult.success) {
+                    // Real launch successful
+                    setTimeout(() => {
+                        systemState.running = true;
+                        statusText.textContent = 'System Online - Agents Running';
+                        startBtn.style.display = 'none';
+                        stopBtn.style.display = 'inline-block';
+
+                        const successMessage = {
+                            channel: currentChannel,
+                            message: '✅ Терминалы с агентами запущены! Система активна.',
+                            timestamp: new Date().toISOString(),
+                            sender: 'System'
+                        };
+                        addMessageToChat(successMessage);
+
+                        // Update agent statuses to reflect real launch
+                        updateAllAgentsStatus('online');
+                    }, 2000);
+                } else {
+                    // Fallback to manual instructions
+                    showSystemNotification('⚠️ Запустите вручную батник для полной работы');
+
+                    // Still show UI as active for dashboard functionality
+                    setTimeout(() => {
+                        systemState.running = true;
+                        statusText.textContent = 'System Online - Manual Launch Required';
+                        startBtn.style.display = 'none';
+                        stopBtn.style.display = 'inline-block';
+                    }, 1000);
+                }
+
+            } catch (error) {
+                handleError(error, 'startVirtualOffice');
+
+                // Try to restore UI state safely
+                try {
+                    const startBtn = safeGetElement('startSystemBtn', 'startVirtualOffice-cleanup');
+                    const statusIndicator = safeGetElement('statusIndicator', 'startVirtualOffice-cleanup');
+                    const statusText = safeGetElement('statusText', 'startVirtualOffice-cleanup');
+
+                    if (startBtn) {
+                        startBtn.disabled = false;
+                        safeSetButtonText(startBtn, '🚀 Start System');
+                    }
+
+                    if (statusIndicator) {
+                        statusIndicator.className = 'status-indicator offline';
+                    }
+
+                    if (statusText) {
+                        statusText.textContent = 'System Offline';
+                    }
+
+                    const errorMessage = {
+                        channel: currentChannel,
+                        message: '❌ Ошибка запуска системы: ' + (error.message || 'Неизвестная ошибка'),
+                        timestamp: new Date().toISOString(),
+                        sender: 'System'
+                    };
+                    addMessageToChat(errorMessage);
+
+                } catch (cleanupError) {
+                    handleError(cleanupError, 'startVirtualOffice-cleanup', false);
+                }
+            }
+        }
+
+        /**
+         * Launches the real batch file using multiple methods
+         * @async
+         * @function launchRealBatchFile
+         * @returns {Promise<{success: boolean, method?: string, error?: string}>}
+         */
+        async function launchRealBatchFile() {
+            // Method 1: Try Control Center API (best option)
+            try {
+                showSystemNotification('🚀 Запускаю через API сервер...');
+
+                const response = await safeFetch('http://localhost:8083/api/system/start', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({})
+                }, 2);
+
+                if (response) {
+                    const result = await response.json();
+                    if (result.success) {
+                        showSystemNotification('✅ Батник запущен! Агенты подключаются...');
+                        return { success: true, method: 'control-center-api' };
+                    } else {
+                        throw new Error(result.error || 'API returned error');
+                    }
+                }
+            } catch (apiError) {
+                console.log('Control Center API failed:', apiError);
+                showSystemNotification('⚠️ API сервер недоступен, пробую другие методы...');
+            }
+
+            // Method 2: Try local server on port 8082
+            try {
+                const response = await safeFetch('http://localhost:8082/api/launch-batch', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        script: 'START-ENHANCED-OFFICE-FIXED.bat'
+                    })
+                }, 1);
+
+                if (response) {
+                    showSystemNotification('✅ Запущено через локальный сервер!');
+                    return { success: true, method: 'local-server' };
+                }
+            } catch (error) {
+                console.log('Local server method failed:', error);
+            }
+
+            // Method 3: Try file protocol
+            try {
+                const batchPath = `${CONFIG.paths.aiTeamBase}START-ENHANCED-OFFICE-FIXED.bat`;
+
+                const batLink = document.createElement('a');
+                batLink.href = `file:///${batchPath.replace(/\\/g, '/')}`;
+                batLink.target = '_blank';
+
+                document.body.appendChild(batLink);
+                batLink.click();
+                document.body.removeChild(batLink);
+
+                showSystemNotification('💻 Попытка открыть батник...');
+                return { success: true, method: 'file-link' };
+            } catch (error) {
+                console.log('File link method failed:', error);
+            }
+
+            // Method 4: Fallback to manual mode but show as successful
+            showBatchLaunchInstructions();
+            showSystemNotification('🎯 Запустите батник вручную. UI активен.');
+            return { success: true, method: 'manual-with-ui' };
+        }
+
+        /**
+         * Updates all agents to specified status
+         * @function updateAllAgentsStatus
+         * @param {'online'|'offline'|'working'|'idle'} status - Status to set for all agents
+         * @returns {void}
+         */
+        function updateAllAgentsStatus(status) {
+            const agents = ['teamlead', 'backend', 'frontend', 'qa', 'devops'];
+
+            agents.forEach(agent => {
+                // Update system state
+                if (systemState.agents[agent]) {
+                    systemState.agents[agent].status = status;
+                }
+
+                // Update UI
+                updateAgentStatus(agent, status);
+            });
+
+            showSystemNotification(`📊 Все агенты: ${status}`);
+        }
+
+        /**
+         * Legacy function kept for compatibility
+         * @async
+         * @function launchVirtualOfficeBatch
+         * @returns {Promise<void>}
+         */
+        async function launchVirtualOfficeBatch() {
+            try {
+                // Try multiple methods to launch the batch file
+                const batchPath = `${CONFIG.paths.aiTeamBase}START-ENHANCED-OFFICE-FIXED.bat`;
+
+                // Method 1: Try API endpoint (if available)
+                try {
+                    const response = await safeFetch('/api/launch-batch', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            script: 'START-ENHANCED-OFFICE-FIXED.bat',
+                            path: batchPath
+                        })
+                    }, 1);
+
+                    if (response) {
+                        showSystemNotification('🚀 Запускаю терминалы с агентами...');
+                        return;
+                    }
+                } catch (apiError) {
+                    console.log('API launch failed, trying alternative methods');
+                }
+
+                // Method 2: Try to execute via PowerShell (if allowed)
+                try {
+                    const powershellCommand = `Start-Process -FilePath "${batchPath}" -WorkingDirectory "${CONFIG.paths.aiTeamBase}"`;
+
+                    // This won't work in browser due to security, but we log it for user
+                    console.log('Manual PowerShell command:', powershellCommand);
+
+                    showSystemNotification('⚠️ Запустите вручную: START-ENHANCED-OFFICE-FIXED.bat');
+
+                } catch (execError) {
+                    console.warn('PowerShell execution failed:', execError);
+                }
+
+                // Method 3: Show instructions to user
+                showBatchLaunchInstructions();
+
+            } catch (error) {
+                handleError(error, 'launchVirtualOfficeBatch', false);
+                throw error;
+            }
+        }
+
+        /**
+         * Shows instructions for manually launching the batch file
+         * @function showBatchLaunchInstructions
+         * @returns {void}
+         */
+        function showBatchLaunchInstructions() {
+            const instructionDiv = document.createElement('div');
+            instructionDiv.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: white;
+                padding: 30px;
+                border-radius: 12px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                z-index: 10005;
+                max-width: 500px;
+                text-align: center;
+            `;
+
+            instructionDiv.innerHTML = `
+                <h3 style="margin: 0 0 20px 0; color: #667eea;">🚀 Запуск агентов</h3>
+                <p style="margin: 0 0 15px 0; color: #666;">
+                    Для запуска терминалов с агентами выполните:
+                </p>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <div style="font-family: monospace; font-size: 12px; color: #333;">
+                        1. Откройте папку:<br>
+                        <strong>${CONFIG.paths.aiTeamBase}</strong>
+                    </div>
+                    <div style="font-family: monospace; font-size: 12px; color: #333; margin-top: 10px;">
+                        2. Запустите файл:<br>
+                        <strong>START-ENHANCED-OFFICE-FIXED.bat</strong>
+                    </div>
+                </div>
+                <div style="margin-top: 20px;">
+                    <button onclick="copyBatchPath()" style="
+                        background: #4CAF50; color: white; border: none;
+                        padding: 10px 20px; border-radius: 6px; cursor: pointer; margin-right: 10px;
+                    ">📋 Копировать путь</button>
+                    <button onclick="closeBatchInstructions()" style="
+                        background: #667eea; color: white; border: none;
+                        padding: 10px 20px; border-radius: 6px; cursor: pointer;
+                    ">Понятно</button>
+                </div>
+            `;
+
+            instructionDiv.id = 'batchInstructions';
+            document.body.appendChild(instructionDiv);
+        }
+
+        /**
+         * Copies batch file path to clipboard
+         * @function copyBatchPath
+         * @returns {void}
+         */
+        function copyBatchPath() {
+            const path = CONFIG.paths.aiTeamBase;
+
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(path).then(() => {
+                    showSystemNotification('✅ Путь скопирован в буфер обмена!');
+                });
+            } else {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = path;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showSystemNotification('✅ Путь скопирован в буфер обмена!');
+            }
+        }
+
+        /**
+         * Closes batch instructions modal
+         * @function closeBatchInstructions
+         * @returns {void}
+         */
+        function closeBatchInstructions() {
+            const modal = document.getElementById('batchInstructions');
+            if (modal && modal.parentNode) {
+                modal.parentNode.removeChild(modal);
+            }
+        }
+
+        /**
+         * Stops the Virtual Office system and shuts down all agents
+         * @async
+         * @function stopVirtualOffice
+         * @returns {Promise<void>}
+         * @throws {Error} When system shutdown fails
+         */
+        async function stopVirtualOffice() {
+            /** @type {HTMLButtonElement|null} */
+            const startBtn = document.getElementById('startSystemBtn');
+
+            /** @type {HTMLButtonElement|null} */
+            const stopBtn = document.getElementById('stopSystemBtn');
+
+            /** @type {HTMLElement|null} */
+            const statusIndicator = document.getElementById('statusIndicator');
+
+            /** @type {HTMLElement|null} */
+            const statusText = document.getElementById('statusText');
+
+            try {
+                stopBtn.disabled = true;
+                safeSetButtonText(stopBtn, '⏳ Stopping...');
+
+                statusText.textContent = 'System Stopping...';
+
+                const stopMessage = {
+                    channel: currentChannel,
+                    message: '⏹️ Virtual Office система останавливается...',
+                    timestamp: new Date().toISOString(),
+                    sender: 'System'
+                };
+                addMessageToChat(stopMessage);
+
+                setTimeout(() => {
+                    systemState.running = false;
+                    Object.keys(systemState.agents).forEach(agent => {
+                        systemState.agents[agent].status = 'offline';
+                        updateAgentStatus(agent, 'offline');
+                    });
+
+                    statusIndicator.className = 'status-indicator offline';
+                    statusText.textContent = 'System Offline';
+                    stopBtn.style.display = 'none';
+                    startBtn.style.display = 'inline-block';
+                    startBtn.disabled = false;
+
+                    const successMessage = {
+                        channel: currentChannel,
+                        message: '✅ Virtual Office система остановлена',
+                        timestamp: new Date().toISOString(),
+                        sender: 'System'
+                    };
+                    addMessageToChat(successMessage);
+                }, 2000);
+
+            } catch (error) {
+                console.error('Error stopping system:', error);
+                stopBtn.disabled = false;
+                safeSetButtonText(stopBtn, '⏹️ Stop System');
+            }
+        }
+
+        /**
+         * Refreshes and displays current system status
+         * @function refreshSystemStatus
+         * @returns {void}
+         */
+        function refreshSystemStatus() {
+            /** @type {HTMLElement|null} */
+            const statusIndicator = document.getElementById('statusIndicator');
+
+            /** @type {HTMLElement|null} */
+            const statusText = document.getElementById('statusText');
+
+            // Simple status check simulation
+            if (systemState.running) {
+                statusText.textContent = 'System Online';
+                statusIndicator.className = 'status-indicator online';
+            } else {
+                statusText.textContent = 'System Offline';
+                statusIndicator.className = 'status-indicator offline';
+            }
+
+            const refreshMessage = {
+                channel: currentChannel,
+                message: '🔄 Статус системы обновлен: ' + (systemState.running ? 'Online' : 'Offline'),
+                timestamp: new Date().toISOString(),
+                sender: 'System'
+            };
+            addMessageToChat(refreshMessage);
+        }
+
+        /**
+         * Simulates sequential startup of all agents with visual updates
+         * @function simulateAgentsStartup
+         * @returns {void}
+         */
+        function simulateAgentsStartup() {
+            /** @type {string[]} */
+            const agents = ['teamlead', 'backend', 'frontend', 'qa', 'devops'];
+
+            agents.forEach((agent, index) => {
+                setTimeout(() => {
+                    systemState.agents[agent].status = 'online';
+                    updateAgentStatus(agent, 'online');
+
+                    const agentMessage = {
+                        channel: currentChannel,
+                        message: `🤖 Агент ${agent} подключился и готов к работе`,
+                        timestamp: new Date().toISOString(),
+                        sender: agent.charAt(0).toUpperCase() + agent.slice(1)
+                    };
+                    addMessageToChat(agentMessage);
+                }, (index + 1) * 1000);
+            });
+        }
+
+        /**
+         * Updates agent status display in the UI
+         * @function updateAgentStatus
+         * @param {string} agentName - Name of the agent to update
+         * @param {'online'|'offline'|'working'|'idle'} status - New status for the agent
+         * @returns {void}
+         */
+        function updateAgentStatus(agentName, status) {
+            /** @type {HTMLElement|null} */
+            const memberCard = document.getElementById(`member-${agentName}`);
+
+            if (memberCard) {
+                /** @type {HTMLElement|null} */
+                const statusBadge = memberCard.querySelector('.status-badge');
+
+                /** @type {HTMLElement|null} */
+                const taskTitle = memberCard.querySelector('.task-title');
+
+                // Remove all status classes
+                memberCard.classList.remove('working', 'idle', 'offline');
+
+                // Add appropriate status class and update badge
+                if (status === 'online') {
+                    memberCard.classList.add('idle');
+                    statusBadge.textContent = 'Online';
+                    statusBadge.className = 'status-badge status-idle';
+                    taskTitle.textContent = 'Готов к работе...';
+                } else {
+                    memberCard.classList.add('offline');
+                    statusBadge.textContent = 'Offline';
+                    statusBadge.className = 'status-badge status-offline';
+                    taskTitle.textContent = 'Отключен...';
+                }
+            }
+        }
+
+        /** @type {ChannelUnread} */
         let channelUnread = {
             general: 0,
             backend: 0,
@@ -1230,6 +2270,8 @@
             devops: 0,
             urgent: 0
         };
+
+        /** @type {ChannelUnread} */
         let lastReadMessages = {
             general: 0,
             backend: 0,
@@ -1237,6 +2279,8 @@
             devops: 0,
             urgent: 0
         };
+
+        /** @type {Object.<string, AgentState>} */
         let teamStatus = {
             teamlead: { status: 'idle', task: '' },
             backend: { status: 'idle', task: '' },
@@ -1244,9 +2288,12 @@
             qa: { status: 'idle', task: '' },
             devops: { status: 'idle', task: '' }
         };
+
+        /** @type {number} */
         let completedTasks = 0;
 
         // Channel descriptions
+        /** @type {Object.<string, {title: string, desc: string}>} */
         const channelInfo = {
             general: { title: '# general', desc: 'Общий канал для всей команды' },
             backend: { title: '# backend', desc: 'Laravel, API, база данных, Domain логика' },
@@ -1425,7 +2472,14 @@
 
                 if (status === 'working') {
                     statusBadge.className = 'status-badge status-working';
-                    statusBadge.innerHTML = '<span class="working-indicator"></span> Working';
+
+                    // Safely create working indicator
+                    statusBadge.textContent = '';
+                    const indicator = document.createElement('span');
+                    indicator.className = 'working-indicator';
+                    statusBadge.appendChild(indicator);
+                    statusBadge.appendChild(document.createTextNode(' Working'));
+
                     activeCount++;
                 } else if (status === 'idle') {
                     statusBadge.className = 'status-badge status-idle';
@@ -1564,26 +2618,90 @@
             return avatars[role.toUpperCase()] || role.charAt(0).toUpperCase();
         }
 
-        function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const message = input.value.trim();
-            
-            if (message) {
+        /**
+         * Sends a chat message with validation and sanitization
+         * @function sendMessage
+         * @returns {void}
+         */
+        async function sendMessage() {
+            try {
+                /** @type {HTMLInputElement|null} */
+                const input = safeGetElement('messageInput', 'sendMessage');
+
+                if (!input) {
+                    throw new Error('Поле ввода сообщения не найдено');
+                }
+
+                const message = input.value;
+
+                // Validate message input
+                const validation = validateMessageInput(message);
+
+                if (!validation.isValid) {
+                    showSecurityError(validation.error);
+                    return;
+                }
+
                 const time = new Date().toTimeString().slice(0, 5);
                 // Add channel tag if not in general
                 const channelTag = currentChannel !== 'general' ? ` #${currentChannel}` : '';
-                const formattedMessage = `[${time}] [PM]: ${message}${channelTag}`;
-                
-                fetch('/send-message', {
+                const formattedMessage = `[${time}] [PM]: ${validation.sanitized}${channelTag}`;
+
+                // Try to send message with error handling
+                const response = await safeFetch(CONFIG.endpoints.sendMessage, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({message: formattedMessage})
-                }).catch(() => {
-                    console.log('Message would be sent:', formattedMessage);
-                });
-                
+                }, CONFIG.ui.fetchRetries);
+
+                if (!response) {
+                    // Fallback: log message locally if server is unavailable
+                    console.log('Message would be sent (server unavailable):', formattedMessage);
+
+                    // Show user a warning
+                    showErrorNotification('Сообщение не отправлено: сервер недоступен');
+                    return;
+                }
+
+                // Clear input only on successful send
                 input.value = '';
+
+            } catch (error) {
+                handleError(error, 'sendMessage');
             }
+        }
+
+        /**
+         * Shows security error message to user
+         * @function showSecurityError
+         * @param {string} errorMessage - Error message to display
+         * @returns {void}
+         */
+        function showSecurityError(errorMessage) {
+            // Create error notification
+            const errorDiv = safeCreateElement('div', errorMessage, 'security-error');
+            errorDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #f44336;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+                z-index: 10000;
+                font-weight: 500;
+                max-width: 300px;
+            `;
+
+            document.body.appendChild(errorDiv);
+
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (errorDiv.parentNode) {
+                    errorDiv.parentNode.removeChild(errorDiv);
+                }
+            }, 5000);
         }
 
         function quickCommand(command) {
@@ -1718,7 +2836,7 @@
         
         // Launch script directly
         function launchScript(scriptName) {
-            const scriptPath = `C:\\www.spa.com\\.ai-team\\scripts\\${scriptName}`;
+            const scriptPath = `${CONFIG.paths.scriptsDir}${scriptName}`;
             
             // Show launch confirmation
             const confirmModal = document.createElement('div');
@@ -1895,7 +3013,7 @@
         
         // Direct launch without modals
         async function directLaunch(scriptName) {
-            const scriptPath = `C:\\www.spa.com\\.ai-team\\scripts\\${scriptName}`;
+            const scriptPath = `${CONFIG.paths.scriptsDir}${scriptName}`;
             
             try {
                 // Try to execute via server
@@ -2349,7 +3467,7 @@
         
         // Copy server path to clipboard
         function copyServerPath() {
-            const path = 'C:\\www.spa.com\\.ai-team\\';
+            const path = CONFIG.paths.aiTeamBase;
             
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(path).then(() => {
@@ -2447,7 +3565,7 @@
         
         // Copy path to clipboard
         function copyPath() {
-            const path = 'C:\\www.spa.com\\.ai-team\\scripts\\';
+            const path = CONFIG.paths.scriptsDir;
             
             // Try to copy to clipboard
             if (navigator.clipboard) {

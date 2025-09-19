@@ -41,7 +41,7 @@ class CreateAdRequest extends FormRequest
             // Основная информация - ОБЯЗАТЕЛЬНЫЕ
             'service_provider' => 'required|array|min:1',
             'service_provider.*' => 'string|max:100',
-            'work_format' => 'required|string|in:individual,duo,group',
+            'work_format' => 'required|string|in:individual,salon,duo',
             'clients' => 'required|array|min:1',
             'clients.*' => 'string|max:50',
             'client_age_from' => 'nullable|integer|min:18|max:120',
@@ -72,7 +72,6 @@ class CreateAdRequest extends FormRequest
             'travel_area' => 'nullable|string|max:200',
             
             // Остальные необязательные поля
-            'specialty' => 'nullable|string|max:200',
             'service_location' => 'nullable|array',
             'service_location.*' => 'string|in:home,salon,both',
             'outcall_locations' => 'nullable|array',
@@ -99,7 +98,7 @@ class CreateAdRequest extends FormRequest
             
             // Медиа
             'photos' => 'required|array|min:3|max:20',
-            'photos.*' => 'file|mimes:jpeg,jpg,png,bmp,gif,webp,heic,heif|max:10240',
+            'photos.*' => 'nullable',
             'video' => 'nullable|array',
             'show_photos_in_gallery' => 'nullable|boolean',
             'allow_download_photos' => 'nullable|boolean',
@@ -175,11 +174,10 @@ class CreateAdRequest extends FormRequest
             'prices.outcall_1h.numeric' => 'Цена должна быть числом',
             
             // Медиа
-            'photos.required' => 'Добавьте минимум 3 фотографии',
+            'photos.required' => 'Добавьте фотографии',
             'photos.min' => 'Минимум 3 фотографии',
             'photos.max' => 'Максимум 20 фотографий',
-            'photos.*.max' => 'Размер фото не должен превышать 10 МБ',
-            'photos.*.mimes' => 'Неподдерживаемый формат. Разрешены: JPG, PNG, BMP, GIF, WebP, HEIC',
+            'photos.*.max' => 'Слишком длинная строка фотографии',
             
             // Остальные поля
             'whatsapp.regex' => 'Некорректный формат номера WhatsApp',
@@ -195,13 +193,118 @@ class CreateAdRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
+        // Парсим JSON строки обратно в массивы (для FormData)
+        $fieldsToparse = ['services', 'service_provider', 'clients', 'features', 'schedule',
+                          'prices', 'geo', 'video', 'faq', 'media_settings', 'photos'];
+
+        foreach ($fieldsToparse as $field) {
+            if ($this->has($field)) {
+                $value = $this->input($field);
+                // Проверяем, что это JSON строка
+                if (is_string($value) && (str_starts_with($value, '[') || str_starts_with($value, '{'))) {
+                    try {
+                        $decoded = json_decode($value, true);
+                        if (json_last_error() === JSON_ERROR_NONE) {
+                            $this->merge([$field => $decoded]);
+                        }
+                    } catch (\Exception $e) {
+                        // Оставляем как есть если не удалось декодировать
+                    }
+                }
+            }
+        }
+
+        // === НОВЫЙ КОД: Обработка фотографий с отладкой ===
+        \Log::info('🔍 CreateAdRequest: Начало обработки фотографий', [
+            'all_files' => array_keys($this->files->all()),
+            'all_input_keys' => array_keys($this->all()),
+            'has_photos' => $this->has('photos'),
+            'photos_value' => $this->input('photos')
+        ]);
+
+        $photos = [];
+        $maxPhotos = 20; // Максимум по валидации
+
+        // Проверяем все возможные форматы
+        for ($index = 0; $index < $maxPhotos; $index++) {
+            $foundFile = false;
+
+            // Формат 1: photos_0_file
+            $fileKey1 = "photos_{$index}_file";
+            if ($this->hasFile($fileKey1)) {
+                $file = $this->file($fileKey1);
+                if ($file) {
+                    $photos[] = $file;
+                    $foundFile = true;
+                    \Log::info("✅ Найден файл: $fileKey1");
+                }
+            }
+
+            // Формат 2: photos[0]
+            $fileKey2 = "photos[{$index}]";
+            if (!$foundFile && $this->hasFile($fileKey2)) {
+                $file = $this->file($fileKey2);
+                if ($file) {
+                    $photos[] = $file;
+                    $foundFile = true;
+                    \Log::info("✅ Найден файл: $fileKey2");
+                }
+            }
+
+            // Формат 3: photos.0
+            $fileKey3 = "photos.{$index}";
+            if (!$foundFile && $this->hasFile($fileKey3)) {
+                $file = $this->file($fileKey3);
+                if ($file) {
+                    $photos[] = $file;
+                    $foundFile = true;
+                    \Log::info("✅ Найден файл: $fileKey3");
+                }
+            }
+
+            // Если ничего не нашли для этого индекса и это не первый индекс - прерываем
+            if (!$foundFile && $index > 0) {
+                break;
+            }
+        }
+
+        \Log::info('📸 CreateAdRequest: Результат сбора фотографий', [
+            'photos_count' => count($photos),
+            'photos_array' => array_map(fn($p) => $p->getClientOriginalName(), $photos)
+        ]);
+
+        // Если собрали файлы - устанавливаем их в photos
+        if (!empty($photos)) {
+            $this->files->set('photos', $photos);
+            \Log::info('✅ Установлен массив photos с ' . count($photos) . ' файлами');
+        }
+
+        // === ИСПРАВЛЕНИЕ: Обработка geo с отладкой ===
+        \Log::info('🌍 CreateAdRequest: Обработка geo', [
+            'has_geo' => $this->has('geo'),
+            'geo_value' => $this->input('geo'),
+            'geo_type' => gettype($this->input('geo'))
+        ]);
+
+        if ($this->has('geo')) {
+            $geoValue = $this->input('geo');
+            if (empty($geoValue) || $geoValue === '[]' || $geoValue === '{}' || $geoValue === 'null') {
+                $this->merge(['geo' => []]);
+                \Log::info('✅ geo преобразовано в пустой массив');
+            }
+        } else {
+            // Если geo не передано вообще - устанавливаем пустой массив
+            $this->merge(['geo' => []]);
+            \Log::info('✅ geo не передано, установлен пустой массив');
+        }
+
         // Очищаем номер телефона от лишних символов
         if ($this->has('phone') && $this->phone) {
             $this->merge([
                 'phone' => preg_replace('/[^\d+]/', '', $this->phone)
             ]);
         }
-        
+
         // Очищаем WhatsApp от лишних символов
         if ($this->has('whatsapp') && $this->whatsapp) {
             $this->merge([
@@ -245,6 +348,40 @@ class CreateAdRequest extends FormRequest
             
             if (!$hasSelectedService) {
                 $validator->errors()->add('services', 'Выберите хотя бы одну услугу');
+            }
+            
+            // Валидация фотографий - принимаем и файлы, и строки
+            $photos = $this->input('photos', []);
+            if (is_array($photos)) {
+                foreach ($photos as $index => $photo) {
+                    if ($photo !== null) {
+                        // Если это файл - проверяем его
+                        if ($photo instanceof \Illuminate\Http\UploadedFile) {
+                            if (!$photo->isValid()) {
+                                $validator->errors()->add("photos.{$index}", 'Некорректный файл фотографии');
+                            }
+                            if ($photo->getSize() > 10 * 1024 * 1024) {
+                                $validator->errors()->add("photos.{$index}", 'Размер фото не должен превышать 10 МБ');
+                            }
+                            $allowedMimes = ['jpeg', 'jpg', 'png', 'bmp', 'gif', 'webp', 'heic', 'heif'];
+                            if (!in_array($photo->getClientOriginalExtension(), $allowedMimes)) {
+                                $validator->errors()->add("photos.{$index}", 'Неподдерживаемый формат. Разрешены: JPG, PNG, BMP, GIF, WebP, HEIC');
+                            }
+                        }
+                        // Если это строка - проверяем что это base64 или URL
+                        elseif (is_string($photo)) {
+                            if (!empty($photo) && !str_starts_with($photo, 'data:image/') && !str_starts_with($photo, '/storage/') && !str_starts_with($photo, 'http')) {
+                                $validator->errors()->add("photos.{$index}", 'Некорректный формат фотографии');
+                            }
+                        }
+                        // Если это массив - проверяем структуру
+                        elseif (is_array($photo)) {
+                            if (!isset($photo['url']) && !isset($photo['preview'])) {
+                                $validator->errors()->add("photos.{$index}", 'Некорректный формат фотографии');
+                            }
+                        }
+                    }
+                }
             }
         });
     }

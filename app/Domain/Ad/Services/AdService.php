@@ -42,7 +42,8 @@ class AdService
         return DB::transaction(function () use ($data) {
             $adData = $this->prepareMainAdData($data);
             $adData['user_id'] = $data['user_id'];
-            $adData['status'] = AdStatus::DRAFT->value;
+            $adData['status'] = $data['status'] ?? AdStatus::DRAFT->value;
+            $adData['is_published'] = $data['is_published'] ?? false;
             
             $ad = $this->adRepository->create($adData);
             $this->createAdComponents($ad, $data);
@@ -299,7 +300,6 @@ class AdService
             'title' => 'title',
             'description' => 'description',
             'category' => 'category',
-            'specialty' => 'specialty',
             'clients' => 'clients',
             'service_provider' => 'service_provider',
             'work_format' => 'work_format',
@@ -338,6 +338,7 @@ class AdService
             'video' => 'video',
             'media_settings' => 'media_settings',
             'status' => 'status',
+            'is_published' => 'is_published',
             'user_id' => 'user_id'
         ];
         

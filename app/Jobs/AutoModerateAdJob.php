@@ -2,7 +2,8 @@
 
 namespace App\Jobs;
 
-use App\Domain\Master\Models\MasterProfile;
+use App\Domain\Ad\Models\Ad;
+use App\Domain\Ad\Enums\AdStatus;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -29,16 +30,16 @@ class AutoModerateAdJob implements ShouldQueue
     public int $timeout = 60;
 
     /**
-     * ID мастера/объявления для модерации
+     * ID объявления для модерации
      */
-    protected int $masterId;
+    protected int $adId;
 
     /**
      * Создать новый экземпляр job
      */
-    public function __construct(int $masterId)
+    public function __construct(int $adId)
     {
-        $this->masterId = $masterId;
+        $this->adId = $adId;
         $this->onQueue('moderation');
     }
 
@@ -49,52 +50,64 @@ class AutoModerateAdJob implements ShouldQueue
     {
         try {
             // Загружаем объявление
-            $master = MasterProfile::find($this->masterId);
+            $ad = Ad::find($this->adId);
 
-            if (!$master) {
+            if (!$ad) {
                 Log::warning('AutoModerateAdJob: Объявление не найдено', [
-                    'master_id' => $this->masterId
+                    'ad_id' => $this->adId
                 ]);
                 return;
             }
 
             // Проверяем, что объявление все еще ждет модерации
             // is_published должно быть false для объявлений на модерации
-            if ($master->is_published === true) {
-                Log::info('AutoModerateAdJob: Объявление уже опубликовано', [
-                    'master_id' => $this->masterId
+            // статус должен быть active (не draft, не archived)
+            if ($ad->status !== AdStatus::ACTIVE || $ad->is_published === true) {
+                Log::info('AutoModerateAdJob: Объявление уже опубликовано или не активно', [
+                    'ad_id' => $this->adId,
+                    'status' => $ad->status,
+                    'is_published' => $ad->is_published
                 ]);
                 return;
             }
 
             // Выполняем автоматическую проверку
-            if ($this->passesAutoModeration($master)) {
+            $passesModeration = $this->passesAutoModeration($ad);
+
+            Log::info('AutoModerateAdJob: Результат проверки модерации', [
+                'ad_id' => $this->adId,
+                'passes_moderation' => $passesModeration,
+                'title_length' => mb_strlen($ad->title ?? ''),
+                'description_length' => mb_strlen($ad->description ?? '')
+            ]);
+
+            if ($passesModeration) {
                 // Одобряем объявление - делаем его видимым в поиске
-                $master->update([
+                $ad->update([
                     'is_published' => true,
                     'moderated_at' => now()
                 ]);
 
                 Log::info('AutoModerateAdJob: Объявление автоматически одобрено', [
-                    'master_id' => $this->masterId,
+                    'ad_id' => $this->adId,
                     'moderated_at' => now()
                 ]);
 
                 // TODO: Отправить уведомление пользователю о прохождении модерации
-                // $this->sendApprovalNotification($master);
+                // $this->sendApprovalNotification($ad);
             } else {
                 // Объявление требует ручной модерации
                 Log::warning('AutoModerateAdJob: Объявление требует ручной модерации', [
-                    'master_id' => $this->masterId,
+                    'ad_id' => $this->adId,
                     'reason' => 'Найдены запрещенные слова или подозрительный контент'
                 ]);
 
                 // TODO: Создать задачу для модератора
-                // $this->createManualModerationTask($master);
+                // $this->createManualModerationTask($ad);
             }
         } catch (\Exception $e) {
             Log::error('AutoModerateAdJob: Ошибка при модерации', [
-                'master_id' => $this->masterId,
+                'ad_id' => $this->adId,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
@@ -107,7 +120,7 @@ class AutoModerateAdJob implements ShouldQueue
     /**
      * Проверить, проходит ли объявление автоматическую модерацию
      */
-    private function passesAutoModeration(MasterProfile $master): bool
+    private function passesAutoModeration(Ad $ad): bool
     {
         // Список запрещенных слов
         $bannedWords = [
@@ -127,16 +140,16 @@ class AutoModerateAdJob implements ShouldQueue
 
         // Собираем весь текст для проверки
         $textToCheck = mb_strtolower(
-            ($master->display_name ?? '') . ' ' .
-            ($master->description ?? '') . ' ' .
-            ($master->salon_name ?? '')
+            ($ad->title ?? '') . ' ' .
+            ($ad->description ?? '') . ' ' .
+            ($ad->services_additional_info ?? '')
         );
 
         // Проверяем на наличие запрещенных слов
         foreach ($bannedWords as $word) {
             if (mb_strpos($textToCheck, mb_strtolower($word)) !== false) {
                 Log::info('AutoModerateAdJob: Найдено запрещенное слово', [
-                    'master_id' => $this->masterId,
+                    'ad_id' => $this->adId,
                     'banned_word' => $word
                 ]);
                 return false;
@@ -146,10 +159,11 @@ class AutoModerateAdJob implements ShouldQueue
         // Дополнительные проверки
 
         // 1. Проверка на слишком короткое описание
-        if (mb_strlen($master->description) < 30) {
+        $description = $ad->description ?? '';
+        if (mb_strlen($description) < 30) {
             Log::info('AutoModerateAdJob: Слишком короткое описание', [
-                'master_id' => $this->masterId,
-                'description_length' => mb_strlen($master->description)
+                'ad_id' => $this->adId,
+                'description_length' => mb_strlen($description)
             ]);
             return false;
         }
@@ -157,18 +171,28 @@ class AutoModerateAdJob implements ShouldQueue
         // 2. Проверка на подозрительные символы или спам
         if (preg_match('/(.)\1{4,}/', $textToCheck)) {
             Log::info('AutoModerateAdJob: Обнаружен спам (повторяющиеся символы)', [
-                'master_id' => $this->masterId
+                'ad_id' => $this->adId
             ]);
             return false;
         }
 
         // 3. Проверка на слишком много заглавных букв (крик)
-        $uppercase = preg_match_all('/[А-ЯA-Z]/', $master->description, $matches);
-        $totalChars = mb_strlen($master->description);
+        $uppercase = preg_match_all('/[А-ЯA-Z]/u', $description, $matches);
+        $totalChars = mb_strlen($description);
+
         if ($totalChars > 0 && ($uppercase / $totalChars) > 0.5) {
             Log::info('AutoModerateAdJob: Слишком много заглавных букв', [
-                'master_id' => $this->masterId,
+                'ad_id' => $this->adId,
                 'uppercase_ratio' => $uppercase / $totalChars
+            ]);
+            return false;
+        }
+
+        // 4. Проверка на минимальную информативность заголовка
+        if (mb_strlen($ad->title ?? '') < 10) {
+            Log::info('AutoModerateAdJob: Слишком короткий заголовок', [
+                'ad_id' => $this->adId,
+                'title_length' => mb_strlen($ad->title ?? '')
             ]);
             return false;
         }
@@ -183,11 +207,11 @@ class AutoModerateAdJob implements ShouldQueue
     public function failed(\Throwable $exception): void
     {
         Log::error('AutoModerateAdJob: Job провалился после всех попыток', [
-            'master_id' => $this->masterId,
+            'ad_id' => $this->adId,
             'error' => $exception->getMessage()
         ]);
 
         // TODO: Уведомить администратора о проблеме с модерацией
-        // $this->notifyAdminAboutFailure($this->masterId, $exception);
+        // $this->notifyAdminAboutFailure($this->adId, $exception);
     }
 }

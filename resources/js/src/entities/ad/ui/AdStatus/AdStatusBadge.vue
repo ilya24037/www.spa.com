@@ -3,6 +3,7 @@
   <div :class="containerClasses">
     <AdStatus 
       :status="status" 
+      :is-published="isPublished"
       :show-icon="showIcon"
       :size="size"
     />
@@ -79,6 +80,10 @@ const props = defineProps({
     status: {
         type: String,
         required: true
+    },
+    isPublished: {
+        type: Boolean,
+        default: true
     },
     showIcon: {
         type: Boolean,

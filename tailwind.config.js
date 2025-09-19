@@ -13,7 +13,9 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Onest', ...defaultTheme.fontFamily.sans],
+                // Временно используем системные шрифты вместо Onest
+                // sans: ['Onest', ...defaultTheme.fontFamily.sans],
+                sans: [...defaultTheme.fontFamily.sans],
             },
         },
     },

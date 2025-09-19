@@ -25,7 +25,6 @@ class Ad extends Model
         'user_id',
         'category',
         'title',
-        'specialty',
         'clients',
         'client_age_from',
         'service_provider',
@@ -39,6 +38,11 @@ class Ad extends Model
         'schedule_notes',
         'online_booking',
         'address',
+        'travel_area',
+        'custom_travel_areas',
+        'travel_radius',
+        'travel_price',
+        'travel_price_type',
         'geo',
         'phone',
         'contact_method',
@@ -87,7 +91,10 @@ class Ad extends Model
         'verification_comment',
         'verification_metadata',
         // Поля архивации
-        'archived_at'
+        'archived_at',
+        // Поля модерации
+        'is_published',
+        'moderated_at'
     ];
 
     /**
@@ -100,6 +107,7 @@ class Ad extends Model
         'services',
         'schedule',
         'geo',
+        'custom_travel_areas',
         'photos',
         'video',
         'prices',
@@ -115,8 +123,10 @@ class Ad extends Model
         'allow_download_photos' => 'boolean',
         'watermark_photos' => 'boolean',
         'is_paid' => 'boolean',
+        'is_published' => 'boolean',
         'paid_at' => 'datetime',
         'expires_at' => 'datetime',
+        'moderated_at' => 'datetime',
         'views_count' => 'integer',
         'contacts_shown' => 'integer',
         'favorites_count' => 'integer',
@@ -137,6 +147,13 @@ class Ad extends Model
         return $this->belongsTo(\App\Domain\User\Models\User::class);
     }
 
+    /**
+     * Связь с профилем мастера (у одного пользователя может быть один профиль)
+     */
+    public function masterProfile(): BelongsTo
+    {
+        return $this->belongsTo(\App\Domain\Master\Models\MasterProfile::class, 'user_id', 'user_id');
+    }
 
     /**
      * Получить читаемый статус объявления
@@ -169,8 +186,16 @@ class Ad extends Model
      */
     public function isExpired(): bool
     {
-        return $this->status === AdStatus::EXPIRED || 
+        return $this->status === AdStatus::EXPIRED ||
                ($this->expires_at && $this->expires_at->isPast());
+    }
+
+    /**
+     * Проверка: архивировано ли объявление
+     */
+    public function isArchived(): bool
+    {
+        return $this->archived_at !== null;
     }
 
     /**
@@ -231,14 +256,30 @@ class Ad extends Model
     }
 
     /**
-     * Accessor для work_format - возвращает enum
+     * Accessor для work_format - возвращает строку для правильной сериализации
+     * При необходимости получить enum используйте $ad->work_format_enum
      */
-    public function getWorkFormatAttribute($value): ?WorkFormat
+    public function getWorkFormatAttribute($value): ?string
     {
         if (!$value) {
             return null;
         }
-        
+
+        // Возвращаем строковое значение для правильной работы с frontend
+        return $value;
+    }
+
+    /**
+     * Получить work_format как enum объект
+     */
+    public function getWorkFormatEnumAttribute(): ?WorkFormat
+    {
+        $value = $this->attributes['work_format'] ?? null;
+
+        if (!$value) {
+            return null;
+        }
+
         try {
             return WorkFormat::from($value);
         } catch (\ValueError $e) {

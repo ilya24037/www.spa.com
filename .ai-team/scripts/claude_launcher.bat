@@ -74,6 +74,7 @@ echo  File access permissions will be requested
 echo.
 echo  Starting...
 echo.
+cd /d "C:\www.spa.com"
 start cmd /k claude
 pause
 goto MENU
@@ -89,6 +90,7 @@ echo  Use only in trusted directories!
 echo.
 echo  Starting...
 echo.
+cd /d "C:\www.spa.com"
 start cmd /k claude --dangerously-skip-permissions
 pause
 goto MENU
@@ -101,6 +103,7 @@ echo ================================================================
 echo.
 echo  Restoring last session...
 echo.
+cd /d "C:\www.spa.com"
 start cmd /k claude -c
 pause
 goto MENU
@@ -113,6 +116,7 @@ echo ================================================================
 echo.
 echo  Interactive session list will open
 echo.
+cd /d "C:\www.spa.com"
 start cmd /k claude -r
 pause
 goto MENU
@@ -126,6 +130,7 @@ echo.
 echo  Balanced model (default)
 echo  Optimal for most tasks
 echo.
+cd /d "C:\www.spa.com"
 start cmd /k claude --model sonnet
 pause
 goto MENU
@@ -139,6 +144,7 @@ echo.
 echo  Most powerful model
 echo  Best for complex architectural tasks
 echo.
+cd /d "C:\www.spa.com"
 start cmd /k claude --model opus
 pause
 goto MENU
@@ -152,6 +158,7 @@ echo.
 echo  Fast model
 echo  Good for simple tasks and quick edits
 echo.
+cd /d "C:\www.spa.com"
 start cmd /k claude --model haiku
 pause
 goto MENU
@@ -165,6 +172,7 @@ echo.
 echo  Detailed debug information enabled
 echo  Useful for troubleshooting
 echo.
+cd /d "C:\www.spa.com"
 start cmd /k claude --debug
 pause
 goto MENU
@@ -178,6 +186,7 @@ echo.
 echo  Claude will only plan actions
 echo  without executing them automatically
 echo.
+cd /d "C:\www.spa.com"
 start cmd /k claude --permission-mode plan
 pause
 goto MENU
@@ -192,6 +201,7 @@ set /p prompt="Enter your prompt: "
 echo.
 echo Executing...
 echo.
+cd /d "C:\www.spa.com"
 claude -p "%prompt%"
 echo.
 pause
@@ -205,6 +215,7 @@ echo ================================================================
 echo.
 echo  Automatic connection to available IDE
 echo.
+cd /d "C:\www.spa.com"
 start cmd /k claude --ide
 pause
 goto MENU
@@ -220,6 +231,7 @@ echo  - claude config set -g theme dark
 echo  - claude config set -g autoSave true
 echo  - claude config list
 echo.
+cd /d "C:\www.spa.com"
 start cmd /k claude config
 pause
 goto MENU
@@ -232,6 +244,7 @@ echo ================================================================
 echo.
 echo  Model Context Protocol servers for extended functionality
 echo.
+cd /d "C:\www.spa.com"
 start cmd /k claude mcp
 pause
 goto MENU
@@ -244,6 +257,7 @@ echo ================================================================
 echo.
 echo  Checking status and configuration
 echo.
+cd /d "C:\www.spa.com"
 claude doctor
 echo.
 pause
@@ -257,6 +271,7 @@ echo ================================================================
 echo.
 echo  Checking for new versions...
 echo.
+cd /d "C:\www.spa.com"
 claude update
 echo.
 pause
@@ -268,6 +283,7 @@ echo ================================================================
 echo  Claude Code Version
 echo ================================================================
 echo.
+cd /d "C:\www.spa.com"
 claude --version
 echo.
 pause
@@ -279,6 +295,7 @@ echo ================================================================
 echo  Claude Code Help
 echo ================================================================
 echo.
+cd /d "C:\www.spa.com"
 claude --help
 echo.
 pause

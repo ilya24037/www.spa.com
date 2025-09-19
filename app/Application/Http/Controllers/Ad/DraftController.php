@@ -66,6 +66,21 @@ class DraftController extends Controller
         if ($request->has('starting_price')) {
             $data['starting_price'] = $request->starting_price ?: null;
         }
+
+        // КРИТИЧЕСКИ ВАЖНО: Логируем поля, которые исчезают
+        \Log::info("🔍 DraftController: ПРОВЕРКА ПРОБЛЕМНЫХ ПОЛЕЙ", [
+            'has_specialty' => $request->has('specialty'),
+            'specialty_value' => $request->input('specialty'),
+            'has_work_format' => $request->has('work_format'),
+            'work_format_value' => $request->input('work_format'),
+            'has_service_provider' => $request->has('service_provider'),
+            'service_provider_value' => $request->input('service_provider'),
+            'in_data_array' => [
+                'specialty' => $data['specialty'] ?? 'НЕТ В DATA',
+                'work_format' => $data['work_format'] ?? 'НЕТ В DATA',
+                'service_provider' => $data['service_provider'] ?? 'НЕТ В DATA'
+            ]
+        ]);
         
         // Логируем все входящие данные для отладки bikini_zone
         \Log::info("🔍 DraftController: Входящие данные для создания черновика", [
@@ -710,9 +725,12 @@ class DraftController extends Controller
             $this->authorize('update', $ad);
             \Log::info('🟢 DraftController::publish Авторизация пройдена');
             
-            // Используем AdService для публикации
-            $publishedAd = $this->adService->publish($ad);
-            \Log::info('🟢 DraftController::publish AdService::publish успешно', [
+            // Используем DraftService для публикации (простая логика)
+            $publishedAd = $this->draftService->saveOrUpdate([
+                'status' => 'active',
+                'is_published' => false // На модерацию
+            ], Auth::user(), $ad->id);
+            \Log::info('🟢 DraftController::publish DraftService::saveOrUpdate успешно', [
                 'published_ad_id' => $publishedAd->id,
                 'published_ad_status' => $publishedAd->status
             ]);
@@ -826,12 +844,21 @@ class DraftController extends Controller
      */
     private function processPhotosFromRequest(Request $request, int $maxPhotos = 50): array
     {
+        \Log::info('🔍 processPhotosFromRequest: НАЧАЛО', [
+            'request_all' => array_keys($request->all()),
+            'request_files' => array_keys($request->allFiles()),
+            'request_photos' => $request->input('photos'),
+            'request_photos_type' => gettype($request->input('photos'))
+        ]);
+        
         $uploadedPhotos = [];
         $existingPhotos = [];
         
-        // Проходим по всем возможным индексам
+        // 🔍 ИСПРАВЛЕННАЯ ЛОГИКА: Проверяем отдельные поля photos[0], photos[1], etc.
+        $photosData = [];
+        
+        // Собираем все поля photos[0], photos[1], etc.
         for ($index = 0; $index < $maxPhotos; $index++) {
-            // Проверяем оба формата: photos[0] и photos.0
             $bracketNotation = "photos[{$index}]";
             $dotNotation = "photos.{$index}";
             
@@ -844,7 +871,8 @@ class DraftController extends Controller
                     try {
                         $fileName = uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
                         $path = $file->storeAs('photos/' . Auth::id(), $fileName, 'public');
-                        $uploadedPhotos[] = '/storage/' . $path;
+                        $photosData[] = '/storage/' . $path;
+                        \Log::info("✅ Сохранен файл фото: {$path}");
                     } catch (\Exception $e) {
                         \Log::error('Ошибка загрузки фото: ' . $e->getMessage());
                     }
@@ -859,11 +887,13 @@ class DraftController extends Controller
                     if (str_starts_with($photoValue, 'data:image/')) {
                         $savedPath = $this->saveBase64Photo($photoValue);
                         if ($savedPath) {
-                            $existingPhotos[] = $savedPath;
+                            $photosData[] = $savedPath;
+                            \Log::info("✅ Сохранено base64 фото: {$savedPath}");
                         }
                     } else {
                         // Обычный URL
-                        $existingPhotos[] = $photoValue;
+                        $photosData[] = $photoValue;
+                        \Log::info("✅ Сохранен URL фото: {$photoValue}");
                     }
                 }
             } else {
@@ -872,6 +902,44 @@ class DraftController extends Controller
             }
         }
         
-        return array_merge($existingPhotos, $uploadedPhotos);
+        \Log::info('🔍 processPhotosFromRequest: Результат сбора фотографий', [
+            'photos_count' => count($photosData),
+            'photos_data' => $photosData
+        ]);
+        
+        // Если не нашли фотографии через отдельные поля, пробуем старую логику
+        if (empty($photosData)) {
+            \Log::info('🔍 processPhotosFromRequest: photos не массив, используем старую логику');
+            
+            // Старая логика для обратной совместимости
+            for ($index = 0; $index < $maxPhotos; $index++) {
+                $bracketNotation = "photos[{$index}]";
+                $dotNotation = "photos.{$index}";
+                
+                if ($request->hasFile($bracketNotation) || $request->hasFile($dotNotation)) {
+                    $file = $request->file($bracketNotation) ?: $request->file($dotNotation);
+                    
+                    if ($file && $file->getSize() <= 10 * 1024 * 1024) {
+                        try {
+                            $fileName = uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
+                            $path = $file->storeAs('photos/' . Auth::id(), $fileName, 'public');
+                            $uploadedPhotos[] = '/storage/' . $path;
+                        } catch (\Exception $e) {
+                            \Log::error('Ошибка загрузки фото: ' . $e->getMessage());
+                        }
+                    }
+                } else {
+                    break;
+                }
+            }
+        }
+        
+        $result = $photosData;
+        \Log::info('🔍 processPhotosFromRequest: РЕЗУЛЬТАТ', [
+            'photos_count' => count($result),
+            'result' => $result
+        ]);
+        
+        return $result;
     }
 }

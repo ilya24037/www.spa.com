@@ -137,23 +137,56 @@ export function usePhotoUpload() {
   }
 
   const initializeFromProps = (photos: Array<string | Photo>) => {
+    console.log('🔍 initializeFromProps: НАЧАЛО');
+    console.log('  photos:', photos);
+    console.log('  localPhotos.value.length:', localPhotos.value.length);
+    console.log('  photos.length:', photos.length);
+    
+    // КРИТИЧНО: Если photos пустой массив, НЕ инициализируем localPhotos
+    if (photos.length === 0) {
+      console.log('  ❌ photos пустой массив, НЕ инициализируем localPhotos');
+      localPhotos.value = []
+      return
+    }
+    
     if (localPhotos.value.length === 0 && photos.length > 0) {
+      console.log('  ✅ Инициализируем localPhotos');
       localPhotos.value = photos.map((photo, index) => {
-        if (typeof photo === 'string') {
-          return {
+        console.log(`  Фото ${index}:`, photo);
+        
+        if (typeof photo === 'string' && photo.trim() !== '') {
+          const result = {
             id: `existing-${index}`,
             url: photo,
             preview: photo,
             rotation: 0
           }
+          console.log(`    ✅ Строка -> объект:`, result);
+          return result
         }
-        const photoObj = photo as Partial<Photo>
-        return {
-          ...photoObj,
-          id: photoObj.id || `photo-${index}`,
-          rotation: photoObj.rotation || 0
-        } as Photo
-      })
+        
+        if (typeof photo === 'object' && photo !== null) {
+          const photoObj = photo as Partial<Photo>
+          // Проверяем, что есть url или preview
+          if (photoObj.url || photoObj.preview) {
+            const result = {
+              ...photoObj,
+              id: photoObj.id || `photo-${index}`,
+              rotation: photoObj.rotation || 0
+            } as Photo
+            console.log(`    ✅ Объект с URL -> объект:`, result);
+            return result
+          }
+        }
+        
+        // Если фото пустое или невалидное - пропускаем
+        console.log(`    ❌ Пустое/невалидное фото, пропускаем`);
+        return null
+      }).filter(Boolean) as Photo[] // Убираем null значения
+      
+      console.log('  ✅ localPhotos.value после инициализации:', localPhotos.value);
+    } else {
+      console.log('  ❌ Пропускаем инициализацию');
     }
   }
 

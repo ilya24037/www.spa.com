@@ -1,82 +1,121 @@
-{
-  "agents": {
-    "teamlead": {
-      "name": "TeamLead",
-      "role": "Координатор команды",
-      "skills": ["планирование", "координация", "распределение задач", "отчетность"],
-      "personality": "организованный, стратегический мыслитель, мотивирующий",
-      "reports_to": "CEO",
-      "manages": ["backend", "frontend", "qa", "devops"],
-      "check_interval": 5,
-      "inbox": "virtual-office/inbox/teamlead",
-      "outbox": "virtual-office/outbox/teamlead",
-      "prompt_file": "teamlead/CLAUDE.md",
-      "status": "active"
-    },
-    "backend": {
-      "name": "Backend",
-      "role": "Backend разработчик",
-      "skills": ["Laravel", "PHP", "PostgreSQL", "API", "DDD"],
-      "personality": "логичный, внимательный к деталям, системный подход",
-      "reports_to": "teamlead",
-      "check_interval": 10,
-      "inbox": "virtual-office/inbox/backend",
-      "outbox": "virtual-office/outbox/backend",
-      "prompt_file": "backend/CLAUDE.md",
-      "status": "active"
-    },
-    "frontend": {
-      "name": "Frontend",
-      "role": "Frontend разработчик",
-      "skills": ["Vue 3", "TypeScript", "Tailwind CSS", "Inertia.js", "UI/UX"],
-      "personality": "креативный, ориентирован на пользователя, перфекционист",
-      "reports_to": "teamlead",
-      "check_interval": 10,
-      "inbox": "virtual-office/inbox/frontend",
-      "outbox": "virtual-office/outbox/frontend",
-      "prompt_file": "frontend/CLAUDE.md",
-      "status": "active"
-    },
-    "qa": {
-      "name": "QA",
-      "role": "Инженер по тестированию",
-      "skills": ["тестирование", "автоматизация", "баг-репорты", "регрессия", "валидация"],
-      "personality": "дотошный, педантичный, критическое мышление",
-      "reports_to": "teamlead",
-      "check_interval": 10,
-      "inbox": "virtual-office/inbox/qa",
-      "outbox": "virtual-office/outbox/qa",
-      "prompt_file": "qa/CLAUDE.md",
-      "status": "active"
-    },
-    "devops": {
-      "name": "DevOps",
-      "role": "DevOps инженер",
-      "skills": ["Docker", "CI/CD", "nginx", "мониторинг", "безопасность"],
-      "personality": "практичный, ориентирован на стабильность, автоматизатор",
-      "reports_to": "teamlead",
-      "check_interval": 10,
-      "inbox": "virtual-office/inbox/devops",
-      "outbox": "virtual-office/outbox/devops",
-      "prompt_file": "devops/CLAUDE.md",
-      "status": "active"
-    }
-  },
-  "communication": {
-    "channels": {
-      "general": "virtual-office/channels/general",
-      "standup": "virtual-office/channels/standup",
-      "help": "virtual-office/channels/help"
-    },
-    "chat_file": "chat.md",
-    "reports_dir": "virtual-office/reports",
-    "tasks_dir": "virtual-office/tasks"
-  },
-  "settings": {
-    "auto_assign_tasks": true,
-    "daily_standup_time": "09:00",
-    "report_time": "18:00",
-    "max_concurrent_tasks": 3,
-    "task_timeout_hours": 24
-  }
+﻿{
+    "agents":  {
+                   "teamlead":  {
+                                    "name":  "TeamLead",
+                                    "role":  "РљРѕРѕСЂРґРёРЅР°С‚РѕСЂ РєРѕРјР°РЅРґС‹",
+                                    "skills":  [
+                                                   "РїР»Р°РЅРёСЂРѕРІР°РЅРёРµ",
+                                                   "РєРѕРѕСЂРґРёРЅР°С†РёСЏ",
+                                                   "СЂР°СЃРїСЂРµРґРµР»РµРЅРёРµ Р·Р°РґР°С‡",
+                                                   "РѕС‚С‡РµС‚РЅРѕСЃС‚СЊ"
+                                               ],
+                                    "personality":  "РѕСЂРіР°РЅРёР·РѕРІР°РЅРЅС‹Р№, СЃС‚СЂР°С‚РµРіРёС‡РµСЃРєРёР№ РјС‹СЃР»РёС‚РµР»СЊ, РјРѕС‚РёРІРёСЂСѓСЋС‰РёР№",
+                                    "reports_to":  "CEO",
+                                    "manages":  [
+                                                    "backend",
+                                                    "frontend",
+                                                    "qa",
+                                                    "devops"
+                                                ],
+                                    "check_interval":  5,
+                                    "inbox":  "virtual-office/inbox/teamlead",
+                                    "outbox":  "virtual-office/outbox/teamlead",
+                                    "prompt_file":  "teamlead/CLAUDE.md",
+                                    "status":  "active",
+                                    "knowledge_path":  "virtual-office/knowledge"
+                                },
+                   "backend":  {
+                                   "name":  "Backend",
+                                   "role":  "Backend СЂР°Р·СЂР°Р±РѕС‚С‡РёРє",
+                                   "skills":  [
+                                                  "Laravel",
+                                                  "PHP",
+                                                  "PostgreSQL",
+                                                  "API",
+                                                  "DDD"
+                                              ],
+                                   "personality":  "Р»РѕРіРёС‡РЅС‹Р№, РІРЅРёРјР°С‚РµР»СЊРЅС‹Р№ Рє РґРµС‚Р°Р»СЏРј, СЃРёСЃС‚РµРјРЅС‹Р№ РїРѕРґС…РѕРґ",
+                                   "reports_to":  "teamlead",
+                                   "check_interval":  10,
+                                   "inbox":  "virtual-office/inbox/backend",
+                                   "outbox":  "virtual-office/outbox/backend",
+                                   "prompt_file":  "backend/CLAUDE.md",
+                                   "status":  "active",
+                                   "knowledge_path":  "virtual-office/knowledge"
+                               },
+                   "frontend":  {
+                                    "name":  "Frontend",
+                                    "role":  "Frontend СЂР°Р·СЂР°Р±РѕС‚С‡РёРє",
+                                    "skills":  [
+                                                   "Vue 3",
+                                                   "TypeScript",
+                                                   "Tailwind CSS",
+                                                   "Inertia.js",
+                                                   "UI/UX"
+                                               ],
+                                    "personality":  "РєСЂРµР°С‚РёРІРЅС‹Р№, РѕСЂРёРµРЅС‚РёСЂРѕРІР°РЅ РЅР° РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ, РїРµСЂС„РµРєС†РёРѕРЅРёСЃС‚",
+                                    "reports_to":  "teamlead",
+                                    "check_interval":  10,
+                                    "inbox":  "virtual-office/inbox/frontend",
+                                    "outbox":  "virtual-office/outbox/frontend",
+                                    "prompt_file":  "frontend/CLAUDE.md",
+                                    "status":  "active",
+                                    "knowledge_path":  "virtual-office/knowledge"
+                                },
+                   "qa":  {
+                              "name":  "QA",
+                              "role":  "РРЅР¶РµРЅРµСЂ РїРѕ С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЋ",
+                              "skills":  [
+                                             "С‚РµСЃС‚РёСЂРѕРІР°РЅРёРµ",
+                                             "Р°РІС‚РѕРјР°С‚РёР·Р°С†РёСЏ",
+                                             "Р±Р°Рі-СЂРµРїРѕСЂС‚С‹",
+                                             "СЂРµРіСЂРµСЃСЃРёСЏ",
+                                             "РІР°Р»РёРґР°С†РёСЏ"
+                                         ],
+                              "personality":  "РґРѕС‚РѕС€РЅС‹Р№, РїРµРґР°РЅС‚РёС‡РЅС‹Р№, РєСЂРёС‚РёС‡РµСЃРєРѕРµ РјС‹С€Р»РµРЅРёРµ",
+                              "reports_to":  "teamlead",
+                              "check_interval":  10,
+                              "inbox":  "virtual-office/inbox/qa",
+                              "outbox":  "virtual-office/outbox/qa",
+                              "prompt_file":  "qa/CLAUDE.md",
+                              "status":  "active",
+                              "knowledge_path":  "virtual-office/knowledge"
+                          },
+                   "devops":  {
+                                  "name":  "DevOps",
+                                  "role":  "DevOps РёРЅР¶РµРЅРµСЂ",
+                                  "skills":  [
+                                                 "Docker",
+                                                 "CI/CD",
+                                                 "nginx",
+                                                 "РјРѕРЅРёС‚РѕСЂРёРЅРі",
+                                                 "Р±РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ"
+                                             ],
+                                  "personality":  "РїСЂР°РєС‚РёС‡РЅС‹Р№, РѕСЂРёРµРЅС‚РёСЂРѕРІР°РЅ РЅР° СЃС‚Р°Р±РёР»СЊРЅРѕСЃС‚СЊ, Р°РІС‚РѕРјР°С‚РёР·Р°С‚РѕСЂ",
+                                  "reports_to":  "teamlead",
+                                  "check_interval":  10,
+                                  "inbox":  "virtual-office/inbox/devops",
+                                  "outbox":  "virtual-office/outbox/devops",
+                                  "prompt_file":  "devops/CLAUDE.md",
+                                  "status":  "active",
+                                  "knowledge_path":  "virtual-office/knowledge"
+                              }
+               },
+    "communication":  {
+                          "channels":  {
+                                           "general":  "virtual-office/channels/general",
+                                           "standup":  "virtual-office/channels/standup",
+                                           "help":  "virtual-office/channels/help"
+                                       },
+                          "chat_file":  "chat.md",
+                          "reports_dir":  "virtual-office/reports",
+                          "tasks_dir":  "virtual-office/tasks"
+                      },
+    "settings":  {
+                     "auto_assign_tasks":  true,
+                     "daily_standup_time":  "09:00",
+                     "report_time":  "18:00",
+                     "max_concurrent_tasks":  3,
+                     "task_timeout_hours":  24
+                 }
 }

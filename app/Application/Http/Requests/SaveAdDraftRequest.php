@@ -32,7 +32,7 @@ class SaveAdDraftRequest extends FormRequest
             'service_location' => 'nullable|array',
             'outcall_locations' => 'nullable|array',
             'taxi_option' => 'nullable|string|in:separately,included',
-            'work_format' => 'nullable|string|in:individual,duo,group',
+            'work_format' => 'nullable|string|in:individual,salon,duo',
             'service_provider' => 'nullable|array',
             'experience' => 'nullable|string|in:3260137,3260142,3260146,3260149,3260152',
 

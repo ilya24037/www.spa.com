@@ -20,6 +20,7 @@ class UpdateAdRequest extends FormRequest
         return auth()->check() && auth()->id() === $ad->user_id;
     }
 
+
     /**
      * Правила валидации для запроса
      */
@@ -41,24 +42,21 @@ class UpdateAdRequest extends FormRequest
         return [
             'title' => $isActive ? 'nullable|string|max:255|min:2' : 'required|string|max:255|min:2',
             'specialty' => 'nullable|string|max:200',
-            'clients' => 'array',
-            'clients.*' => 'string|max:50',
+            'clients' => 'nullable',
             'client_age_from' => 'nullable|integer|min:18|max:120',
-            'service_location' => $isActive ? 'nullable|array' : 'required|array|min:1',
+            'service_location' => 'nullable|array',
             'service_location.*' => 'string|in:home,salon,both',
             'outcall_locations' => 'nullable|array',
             'outcall_locations.*' => 'string|max:100',
             'taxi_option' => 'nullable|string|in:separately,included',
-            'work_format' => $isActive ? 'nullable|string|in:individual,duo,group' : 'required|string|in:individual,duo,group',
-            'service_provider' => 'nullable|array',
-            'service_provider.*' => 'string|max:100',
-            'experience' => $isActive ? 'nullable|string' : 'required|string|in:3260137,3260142,3260146,3260149,3260152',
+            'work_format' => $isActive ? 'nullable|string|in:individual,salon,duo' : 'required|string|in:individual,salon,duo',
+            'service_provider' => 'nullable',
+            'experience' => 'nullable|string',
 
-            'features' => 'nullable|array',
-            'features.*' => 'string|max:100',
+            'features' => 'nullable',
             'additional_features' => 'nullable|string|max:1000',
-            'description' => $isActive ? 'nullable|string|max:5000' : 'required|string|min:50|max:5000',
-            'price' => $isActive ? 'nullable|numeric|min:0|max:1000000' : 'required|numeric|min:0|max:1000000',
+            'description' => 'nullable|string|max:5000',
+            'price' => 'nullable|numeric|min:0|max:1000000',
             'price_unit' => $isActive ? 'nullable|string|in:service,hour,minute,day' : 'required|string|in:service,hour,minute,day',
             'is_starting_price' => 'nullable|array',
             'contacts_per_hour' => 'nullable|string|in:1,2,3,4,5,6',
@@ -85,14 +83,14 @@ class UpdateAdRequest extends FormRequest
             'has_girlfriend' => 'nullable|boolean',
             
             // Услуги и расписание
-            'services' => 'nullable|array',
+            'services' => 'nullable',
             'services_additional_info' => 'nullable|string|max:2000',
-            'schedule' => 'nullable|array',
+            'schedule' => 'nullable',
             'schedule_notes' => 'nullable|string|max:1000',
             
             // Медиа
             'photos' => 'nullable|array|max:20',
-            'photos.*' => 'string|max:1000',
+            'photos.*' => 'nullable',
             'video' => 'nullable|array',
             'show_photos_in_gallery' => 'nullable|boolean',
             'allow_download_photos' => 'nullable|boolean',
@@ -101,6 +99,10 @@ class UpdateAdRequest extends FormRequest
             // FAQ
             'faq' => 'nullable|array',
             'faq.*' => 'nullable',
+
+            // Статус и публикация (для изменения статуса черновика)
+            'status' => 'nullable|string|in:draft,active,archived',
+            'is_published' => 'nullable|boolean',
         ];
     }
 
@@ -151,18 +153,118 @@ class UpdateAdRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
+        \Log::info('🔍 UpdateAdRequest::prepareForValidation НАЧАЛО', [
+            'all_data_keys' => array_keys($this->all()),
+            'has_status' => $this->has('status'),
+            'has_is_published' => $this->has('is_published'),
+            'status_value' => $this->input('status'),
+            'is_published_value' => $this->input('is_published')
+        ]);
+
+        // Обработка status из FormData
+        if ($this->has('status')) {
+            $this->merge(['status' => $this->input('status')]);
+            \Log::info('✅ UpdateAdRequest: status обработан', [
+                'status' => $this->input('status')
+            ]);
+        }
+
+        // Обработка is_published из FormData (преобразование строки в boolean)
+        if ($this->has('is_published')) {
+            $value = $this->input('is_published');
+            $boolValue = ($value === '1' || $value === 'true' || $value === true);
+            $this->merge(['is_published' => $boolValue]);
+            \Log::info('✅ UpdateAdRequest: is_published обработан', [
+                'original_value' => $value,
+                'bool_value' => $boolValue
+            ]);
+        }
+
+        // Парсим JSON строки обратно в массивы (для FormData)
+        $fieldsToparse = ['services', 'service_provider', 'clients', 'features', 'schedule',
+                          'prices', 'geo', 'video', 'faq', 'media_settings', 'photos'];
+
+        foreach ($fieldsToparse as $field) {
+            if ($this->has($field)) {
+                $value = $this->input($field);
+                // Проверяем, что это JSON строка
+                if (is_string($value) && (str_starts_with($value, '[') || str_starts_with($value, '{'))) {
+                    try {
+                        $decoded = json_decode($value, true);
+                        if (json_last_error() === JSON_ERROR_NONE) {
+                            $this->merge([$field => $decoded]);
+                            \Log::info("✅ UpdateAdRequest: {$field} распарсен из JSON", [
+                                'original_type' => gettype($value),
+                                'decoded_type' => gettype($decoded),
+                                'decoded_count' => is_array($decoded) ? count($decoded) : 'not_array'
+                            ]);
+                        }
+                    } catch (\Exception $e) {
+                        \Log::warning("⚠️ UpdateAdRequest: Ошибка парсинга {$field}: " . $e->getMessage());
+                    }
+                }
+            }
+        }
+
         // Очищаем номер телефона от лишних символов
         if ($this->has('phone') && $this->phone) {
             $this->merge([
                 'phone' => preg_replace('/[^\d+]/', '', $this->phone)
             ]);
         }
-        
+
         // Очищаем WhatsApp от лишних символов
         if ($this->has('whatsapp') && $this->whatsapp) {
             $this->merge([
                 'whatsapp' => preg_replace('/[^\d+]/', '', $this->whatsapp)
             ]);
         }
+
+        \Log::info('🔍 UpdateAdRequest::prepareForValidation ЗАВЕРШЕНО', [
+            'final_status' => $this->input('status'),
+            'final_is_published' => $this->input('is_published')
+        ]);
+    }
+
+    /**
+     * Дополнительная валидация
+     */
+    protected function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            // Валидация фотографий - принимаем и файлы, и строки
+            $photos = $this->input('photos', []);
+            if (is_array($photos)) {
+                foreach ($photos as $index => $photo) {
+                    if ($photo !== null) {
+                        // Если это файл - проверяем его
+                        if ($photo instanceof \Illuminate\Http\UploadedFile) {
+                            if (!$photo->isValid()) {
+                                $validator->errors()->add("photos.{$index}", 'Некорректный файл фотографии');
+                            }
+                            if ($photo->getSize() > 10 * 1024 * 1024) {
+                                $validator->errors()->add("photos.{$index}", 'Размер фото не должен превышать 10 МБ');
+                            }
+                            $allowedMimes = ['jpeg', 'jpg', 'png', 'bmp', 'gif', 'webp', 'heic', 'heif'];
+                            if (!in_array($photo->getClientOriginalExtension(), $allowedMimes)) {
+                                $validator->errors()->add("photos.{$index}", 'Неподдерживаемый формат. Разрешены: JPG, PNG, BMP, GIF, WebP, HEIC');
+                            }
+                        }
+                        // Если это строка - проверяем что это base64 или URL
+                        elseif (is_string($photo)) {
+                            if (!empty($photo) && !str_starts_with($photo, 'data:image/') && !str_starts_with($photo, '/storage/') && !str_starts_with($photo, 'http')) {
+                                $validator->errors()->add("photos.{$index}", 'Некорректный формат фотографии');
+                            }
+                        }
+                        // Если это массив - проверяем структуру
+                        elseif (is_array($photo)) {
+                            if (!isset($photo['url']) && !isset($photo['preview'])) {
+                                $validator->errors()->add("photos.{$index}", 'Некорректный формат фотографии');
+                            }
+                        }
+                    }
+                }
+            }
+        });
     }
 }

@@ -53,8 +53,8 @@
               Формат работы
               <span class="required-mark">*</span>
             </h3>
-            <WorkFormatSection 
-              v-model:workFormat="form.work_format" 
+            <WorkFormatSection
+              v-model:workFormat="form.work_format"
               :errors="errors"
               :forceValidation="forceValidation.work_format"
               @clearForceValidation="forceValidation.work_format = false"
@@ -443,6 +443,8 @@ import CollapsibleSection from '@/src/shared/ui/organisms/CollapsibleSection.vue
 // Используем существующую модель AdForm
 import { useAdFormModel } from '../model/adFormModel'
 
+// Логирование убрано - проблема решена
+
 // Импорт секций из существующей структуры
 import ParametersSection from '@/src/features/AdSections/ParametersSection/ui/ParametersSection.vue'
 import PricingSection from '@/src/features/AdSections/PricingSection/ui/PricingSection.vue'
@@ -539,6 +541,8 @@ const {
   handlePublish,
   handleCancel
 } = useAdFormModel(props, emit)
+
+// Логирование убрано - проблема решена
 
 // Объект для принудительной валидации полей при автопрокрутке
 const forceValidation = reactive({
@@ -831,7 +835,15 @@ const scrollToFirstMissingField = () => {
           // Если уже объект, используем его
           geoData = form.geo
         }
-        isEmpty = !geoData?.address
+        // Проверяем наличие адреса в разных возможных местах
+        isEmpty = !(
+          geoData?.address ||
+          geoData?.city ||
+          geoData?.current?.address ||
+          geoData?.current?.city ||
+          (geoData?.zones && Array.isArray(geoData.zones) && geoData.zones.length > 0) ||
+          (geoData?.metro_stations && Array.isArray(geoData.metro_stations) && geoData.metro_stations.length > 0)
+        )
         break
     }
     
@@ -916,21 +928,47 @@ const scrollToFirstMissingField = () => {
 
 // Обработчик публикации с валидацией и автоскроллом
 const handlePublishWithValidation = async () => {
+  console.log('🟢 AdForm: handlePublishWithValidation вызван')
+  console.log('📋 Текущие данные формы:', {
+    title: form.parameters?.title,
+    age: form.parameters?.age,
+    phone: form.contacts?.phone,
+    photosCount: form.photos?.length || 0,
+    servicesCount: form.services ? Object.keys(form.services).length : 0,
+    hasServices: !!form.services,
+    hasPrices: !!form.prices
+  })
+
+  console.log('🔍 Проверка isFormValid:', isFormValid.value)
+
   // Сначала проверяем валидность формы
   if (!isFormValid.value) {
+    console.log('❌ Форма не валидна, проверяем какие секции не заполнены:')
+
+    // Детальная проверка каждой секции
+    sectionsConfig.filter(s => s.required).forEach(section => {
+      const isFilled = section.key === 'basic'
+        ? checkBasicSectionFilled()
+        : checkSectionFilled(section.key)
+      console.log(`  ${isFilled ? '✅' : '❌'} ${section.title} (${section.key}): ${isFilled}`)
+    })
+
     const missingField = scrollToFirstMissingField()
     if (missingField) {
       const remainingFields = 15 - filledRequiredFields.value
       console.warn(`⚠️ Необходимо заполнить еще ${remainingFields} обязательных полей`)
-      
-      // Можно добавить визуальное уведомление (toast)
-      // toast.warning(`Заполните еще ${remainingFields} обязательных полей`)
+      console.warn(`⚠️ Первое незаполненное поле: ${missingField}`)
     }
     return
   }
-  
-  // Если форма валидна - выполняем публикацию
-  await handlePublishDirect()
+
+  console.log('✅ AdForm: Валидация пройдена, вызываем handleSubmit')
+  console.log('🚀 Передаем управление в adFormModel.handleSubmit()')
+
+  // Используем единую логику handleSubmit из adFormModel
+  await handleSubmit()
+
+  console.log('✅ AdForm: handleSubmit завершен')
 }
 
 // Переопределяем checkSectionFilled для новых требований
@@ -938,7 +976,7 @@ const checkSectionFilled = (sectionKey: string): boolean => {
   switch(sectionKey) {
     case 'parameters':
       // Проверяем все 6 обязательных полей параметров
-      return !!(
+      const paramsValid = !!(
         form.parameters?.title &&
         form.parameters?.age &&
         form.parameters?.height &&
@@ -946,37 +984,124 @@ const checkSectionFilled = (sectionKey: string): boolean => {
         form.parameters?.breast_size &&
         form.parameters?.hair_color
       )
+
+      console.log('🔍 checkSectionFilled parameters:', {
+        title: !!form.parameters?.title,
+        age: !!form.parameters?.age,
+        height: !!form.parameters?.height,
+        weight: !!form.parameters?.weight,
+        breast_size: !!form.parameters?.breast_size,
+        hair_color: !!form.parameters?.hair_color,
+        result: paramsValid
+      })
+
+      return paramsValid
     
     case 'services':
-      // Секция считается заполненной, если выбрана хотя бы одна услуга 
-      // ИЛИ заполнена хотя бы одна особенность мастера
-      return getTotalSelectedServices() > 0 || totalFaqSelected.value > 0
-    
+      // Секция считается заполненной, если выбрана хотя бы одна услуга
+      const servicesCount = getTotalSelectedServices()
+      const faqCount = totalFaqSelected.value
+      const servicesValid = servicesCount > 0 || faqCount > 0
+
+      console.log('🔍 checkSectionFilled services:', {
+        totalSelectedServices: servicesCount,
+        totalFaqSelected: faqCount,
+        result: servicesValid
+      })
+
+      return servicesValid
+
     case 'price':
       // Хотя бы одна цена за час (апартаменты или выезд)
-      return !!(
-        (form.prices?.apartments_1h && Number(form.prices.apartments_1h) > 0) ||
-        (form.prices?.outcall_1h && Number(form.prices.outcall_1h) > 0)
-      )
-    
+      const apartmentPrice = Number(form.prices?.apartments_1h) || 0
+      const outcallPrice = Number(form.prices?.outcall_1h) || 0
+      const priceValid = apartmentPrice > 0 || outcallPrice > 0
+
+      console.log('🔍 checkSectionFilled price:', {
+        apartments_1h: apartmentPrice,
+        outcall_1h: outcallPrice,
+        result: priceValid
+      })
+
+      return priceValid
+
     case 'contacts':
       // Телефон обязателен
-      return !!form.contacts?.phone
-    
-    case 'geo':
-      // form.geo хранится как JSON-строка, нужно парсить для проверки
-      if (!form.geo || form.geo === '{}') return false
+      const contactsValid = !!form.contacts?.phone
 
-      try {
-        const geoData = JSON.parse(form.geo)
-        // Проверяем наличие адреса или города в распарсенных данных
-        return !!(geoData.address || geoData.city)
-      } catch (error) {
-        // Если не удалось распарсить, значит данных нет
-        return false
+      console.log('🔍 checkSectionFilled contacts:', {
+        phone: form.contacts?.phone || 'нет',
+        hasPhone: !!form.contacts?.phone,
+        result: contactsValid
+      })
+
+      return contactsValid
+
+    case 'geo':
+      // form.geo может быть как JSON-строкой, так и объектом
+      let geoValid = false
+      let geoData: any = null
+
+      if (!form.geo || form.geo === '{}') {
+        geoValid = false
+      } else {
+        // Пытаемся работать с geo как с объектом или парсить как JSON
+        if (typeof form.geo === 'string') {
+          try {
+            geoData = JSON.parse(form.geo)
+          } catch (error) {
+            console.warn('Не удалось распарсить geo как JSON:', error)
+            geoValid = false
+          }
+        } else if (typeof form.geo === 'object' && !Array.isArray(form.geo)) {
+          // Если уже объект, используем напрямую
+          geoData = form.geo
+        }
+
+        // Проверяем наличие адреса в разных возможных местах
+        if (geoData) {
+          geoValid = !!(
+            geoData.address ||
+            geoData.city ||
+            geoData.current?.address ||
+            geoData.current?.city ||
+            (geoData.zones && Array.isArray(geoData.zones) && geoData.zones.length > 0) ||
+            (geoData.metro_stations && Array.isArray(geoData.metro_stations) && geoData.metro_stations.length > 0)
+          )
+        }
       }
-    
+
+      console.log('🔍 checkSectionFilled geo:', {
+        rawGeo: form.geo ? (typeof form.geo === 'string' ? form.geo.substring(0, 100) : 'объект с полями: ' + Object.keys(form.geo).join(', ')) : 'нет',
+        geoType: typeof form.geo,
+        parsedGeo: geoData,
+        hasAddress: geoData?.address ? true : false,
+        hasCity: geoData?.city ? true : false,
+        hasCurrentAddress: geoData?.current?.address ? true : false,
+        hasCurrentCity: geoData?.current?.city ? true : false,
+        hasZones: geoData?.zones?.length > 0 ? true : false,
+        hasMetroStations: geoData?.metro_stations?.length > 0 ? true : false,
+        result: geoValid
+      })
+
+      return geoValid
+
+    case 'media':
+      // Минимум 3 фотографии
+      const photosCount = form.photos?.length || 0
+      const mediaValid = photosCount >= 3
+
+      console.log('🔍 checkSectionFilled media:', {
+        photosCount: photosCount,
+        photosArray: form.photos ? 'есть' : 'нет',
+        minRequired: 3,
+        result: mediaValid
+      })
+
+      return mediaValid
+
     default:
+      console.log('🔍 checkSectionFilled default case для:', sectionKey)
       // Для остальных секций используем оригинальную проверку
       return checkSectionFilledOriginal(sectionKey)
   }
@@ -986,13 +1111,25 @@ const checkSectionFilled = (sectionKey: string): boolean => {
 const checkBasicSectionFilled = () => {
   // experience больше не обязательное поле (KISS принцип)
   const basicFields = ['service_provider', 'work_format', 'clients']
-  return basicFields.every(field => {
+  const basicValid = basicFields.every(field => {
     const value = form[field]
     if (Array.isArray(value)) {
       return value.length > 0
     }
     return value && value !== ''
   })
+
+  console.log('🔍 checkBasicSectionFilled:', {
+    service_provider: form.service_provider,
+    has_service_provider: Array.isArray(form.service_provider) ? form.service_provider.length > 0 : false,
+    work_format: form.work_format,
+    has_work_format: !!(form.work_format && form.work_format !== ''),
+    clients: form.clients,
+    has_clients: Array.isArray(form.clients) ? form.clients.length > 0 : false,
+    result: basicValid
+  })
+
+  return basicValid
 }
 
 // Подсчет общего количества выбранных услуг
@@ -1045,12 +1182,25 @@ const getMediaFilledCount = () => {
 // Валидация формы
 const isFormValid = computed(() => {
   const requiredSections = sectionsConfig.filter(s => s.required)
-  return requiredSections.every(section => {
+  const validationResults: Record<string, boolean> = {}
+
+  requiredSections.forEach(section => {
     if (section.key === 'basic') {
-      return checkBasicSectionFilled()
+      validationResults[section.key] = checkBasicSectionFilled()
+    } else {
+      validationResults[section.key] = checkSectionFilled(section.key)
     }
-    return checkSectionFilled(section.key)
   })
+
+  const allValid = Object.values(validationResults).every(v => v === true)
+
+  console.log('🔍 [isFormValid] Результаты валидации секций:', {
+    results: validationResults,
+    allValid: allValid,
+    requiredSectionsCount: requiredSections.length
+  })
+
+  return allValid
 })
 
 // Хук монтирования компонента (если нужна дополнительная инициализация)

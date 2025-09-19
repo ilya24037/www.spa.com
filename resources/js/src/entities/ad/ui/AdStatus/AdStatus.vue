@@ -33,7 +33,7 @@
     </svg>
     
     <svg 
-      v-if="showIcon && status === 'active'" 
+      v-if="showIcon && status === 'active' && isPublished" 
       :class="iconClasses" 
       fill="none" 
       stroke="currentColor" 
@@ -45,6 +45,15 @@
         stroke-width="2"
         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
       />
+    </svg>
+    
+    <svg 
+      v-if="showIcon && status === 'active' && !isPublished" 
+      :class="iconClasses" 
+      fill="currentColor" 
+      viewBox="0 0 20 20"
+    >
+      <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"/>
     </svg>
     
     <svg 
@@ -137,6 +146,10 @@ const props = defineProps({
         required: true,
         validator: (value) => Object.keys(AD_STATUSES).includes(value)
     },
+    isPublished: {
+        type: Boolean,
+        default: true
+    },
     showIcon: {
         type: Boolean,
         default: true
@@ -148,8 +161,18 @@ const props = defineProps({
     }
 })
 
-// Р’С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
-const statusConfig = computed(() => AD_STATUSES[props.status] || AD_STATUSES.draft)
+// Р'С‹С‡РёСЃР»СЏРµРјС‹Рµ СЃРІРѕР№СЃС‚РІР°
+const statusConfig = computed(() => {
+    // Специальная логика для статуса "На проверке"
+    if (props.status === 'active' && !props.isPublished) {
+        return {
+            label: 'На проверке',
+            color: 'bg-yellow-100 text-yellow-800'
+        }
+    }
+    
+    return AD_STATUSES[props.status] || AD_STATUSES.draft
+})
 
 const statusLabel = computed(() => statusConfig.value.label)
 

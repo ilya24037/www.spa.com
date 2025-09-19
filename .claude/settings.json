@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "model": "claude-opus-4-1-20250805",
+  "acceptMode": "manual",
+  "hooks": {
+    "pre-tool-use": [
+      {
+        "tool": "Write",
+        "patterns": ["*.env", "**/secrets/**", "*.production.*"],
+        "bash": "echo 'WARNING: Modifying sensitive file!' && exit 1"
+      }
+    ],
+    "post-tool-use": [
+      {
+        "tool": "Write",
+        "patterns": ["*.php"],
+        "bash": "echo 'PHP file updated: $FILEPATH'"
+      },
+      {
+        "tool": "Write",
+        "patterns": ["*.vue", "*.js", "*.ts"],
+        "bash": "echo 'Frontend file updated: $FILEPATH'"
+      }
+    ]
+  }
+}

@@ -6,6 +6,12 @@
 .mcp.json
 .phpactor.json
 .phpunit.result.cache
+# Claude Code
+.claude/settings.local.json
+.claude/shell-snapshots/
+.claude/ide/
+.claude/statsig/
+.claude/todos/
 # Временные папки Google Drive
 .tmp.driveupload*/
 .tmp.drivedownload*/

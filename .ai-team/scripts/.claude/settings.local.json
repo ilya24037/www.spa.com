@@ -21,7 +21,12 @@
       "Read(//c/Проект SPA/Av patern/**)",
       "Bash(php artisan migrate:*)",
       "Bash(findstr:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(find:*)",
+      "Bash(php artisan test:*)",
+      "WebFetch(domain:claude.com)",
+      "WebFetch(domain:docs.claude.com)",
+      "Read(//c/Users/user1/.claude/**)"
     ],
     "deny": [],
     "ask": []

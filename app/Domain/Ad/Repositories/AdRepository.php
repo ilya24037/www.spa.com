@@ -164,8 +164,7 @@ class AdRepository extends BaseRepository
             $query->where(function($q) use ($searchTerm) {
                 $q->whereHas('content', function($subQ) use ($searchTerm) {
                     $subQ->where('title', 'like', '%' . $searchTerm . '%')
-                         ->orWhere('description', 'like', '%' . $searchTerm . '%')
-                         ->orWhere('specialty', 'like', '%' . $searchTerm . '%');
+                         ->orWhere('description', 'like', '%' . $searchTerm . '%');
                 });
             });
         }

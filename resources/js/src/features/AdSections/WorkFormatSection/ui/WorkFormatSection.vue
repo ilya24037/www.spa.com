@@ -32,6 +32,8 @@ const props = defineProps({
 const emit = defineEmits(['update:workFormat', 'clearForceValidation'])
 const localWorkFormat = ref(props.workFormat)
 
+// Логирование убрано - проблема решена
+
 // Состояние для валидации
 const touched = ref(false)
 
@@ -41,35 +43,36 @@ const hasSelection = computed(() => !!localWorkFormat.value)
 // Показывать ошибку если поле тронуто, есть ошибка от родителя или принудительная валидация
 const showError = computed(() => touched.value || !!props.errors?.work_format || props.forceValidation)
 
-// Опции для радио-кнопок (согласно скриншоту и backend валидации)
+// Опции для радио-кнопок (согласно backend enum WorkFormat.php)
 const workFormatOptions = computed(() => [
-  { 
-    value: 'individual', 
+  {
+    value: 'individual',
     label: 'Частный мастер',
     description: 'Работаете в одиночку'
   },
-  { 
-    value: 'duo', 
+  {
+    value: 'salon',  // Исправлено: salon для салона
     label: 'Салон',
     description: 'У вас есть отдельное помещение и штат мастеров'
   },
-  { 
-    value: 'group', 
-    label: 'Сеть салонов',
-    description: 'У вас несколько филиалов с одним названием и концепцией'
+  {
+    value: 'duo',    // duo для работы в паре
+    label: 'В паре',
+    description: 'Работаете вдвоем с другим специалистом'
   }
 ])
 
-watch(() => props.workFormat, val => { 
-  localWorkFormat.value = val 
+watch(() => props.workFormat, val => {
+  localWorkFormat.value = val
 })
 
-const emitWorkFormat = () => {
+const emitWorkFormat = (value) => {
   touched.value = true // Помечаем что поле тронуто
-  emit('update:workFormat', localWorkFormat.value)
-  
+  localWorkFormat.value = value // Обновляем локальное значение
+  emit('update:workFormat', value) // Эмитим новое значение
+
   // Сбрасываем флаг принудительной валидации если выбрано значение
-  if (props.forceValidation && localWorkFormat.value) {
+  if (props.forceValidation && value) {
     emit('clearForceValidation')
   }
 }

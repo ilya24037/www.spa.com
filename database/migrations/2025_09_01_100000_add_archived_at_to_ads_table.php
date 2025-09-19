@@ -12,13 +12,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('ads', function (Blueprint $table) {
-            // Добавляем поле для даты архивации
-            $table->timestamp('archived_at')->nullable()->after('expires_at');
-            
-            // Индекс для быстрого поиска архивированных объявлений
-            $table->index('archived_at');
-        });
+        if (!Schema::hasColumn('ads', 'archived_at')) {
+            Schema::table('ads', function (Blueprint $table) {
+                // Добавляем поле для даты архивации
+                $table->timestamp('archived_at')->nullable()->after('expires_at');
+
+                // Индекс для быстрого поиска архивированных объявлений
+                $table->index('archived_at');
+            });
+        }
     }
 
     /**

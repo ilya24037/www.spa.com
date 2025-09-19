@@ -20,6 +20,16 @@ class AdResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        // 🔍 ПРОСТОЕ ЛОГИРОВАНИЕ
+        \Log::info('🔍 AdResource::toArray ВЫЗВАН', [
+            'ad_id' => $this->id,
+            'work_format' => $this->work_format,
+            'photos_raw' => $this->photos,
+            'photos_type' => gettype($this->photos),
+            'photos_is_array' => is_array($this->photos),
+            'photos_count' => is_array($this->photos) ? count($this->photos) : 'НЕ МАССИВ'
+        ]);
+        
         // Парсим JSON поля для корректной работы с формами
         $parsedData = $this->parseJsonFields();
         
@@ -30,7 +40,6 @@ class AdResource extends JsonResource
             'slug' => $this->slug,
             'status' => $this->status,
             'category' => $this->category,
-            'specialty' => $this->specialty,
             'description' => $this->description,
             
             // Контактная информация
@@ -73,6 +82,7 @@ class AdResource extends JsonResource
             // Ключевые поля для форм (с парсингом JSON)
             'clients' => $parsedData['clients'] ?? $this->clients,
             'service_provider' => $parsedData['service_provider'] ?? $this->service_provider,
+            'work_format' => $this->work_format,
             'schedule' => $parsedData['schedule'] ?? $this->schedule,
             'faq' => $parsedData['faq'] ?? $this->faq,
             
@@ -146,6 +156,16 @@ class AdResource extends JsonResource
             'can_book' => $this->canBePublished(), // Используем существующий метод
             'url' => route('ads.show', $this->id), // Используем id вместо slug
             
+            // Поля верификации
+            'verification_photo' => $this->verification_photo,
+            'verification_video' => $this->verification_video,
+            'verification_status' => $this->verification_status,
+            'verification_type' => $this->verification_type,
+            'verified_at' => $this->verified_at,
+            'verification_expires_at' => $this->verification_expires_at,
+            'verification_comment' => $this->verification_comment,
+            'verification_metadata' => $this->verification_metadata,
+            
             // Поля для владельца объявления
             $this->mergeWhen($this->isOwner($request->user()), [
                 'draft_data' => $this->draft_data,
@@ -165,16 +185,69 @@ class AdResource extends JsonResource
         $parsed = [];
         
         foreach ($jsonFields as $field) {
+            $value = $this->$field ?? null;
+            \Log::info("🔍 parseJsonFields: Обрабатываем поле {$field}", [
+                'value' => $value,
+                'value_type' => gettype($value),
+                'is_string' => is_string($value),
+                'is_array' => is_array($value)
+            ]);
+            
             if (isset($this->$field) && is_string($this->$field)) {
                 try {
                     $decoded = json_decode($this->$field, true);
                     if (is_array($decoded)) {
                         $parsed[$field] = $decoded;
+                        \Log::info("🔍 parseJsonFields: {$field} - строка, декодировали", [
+                            'decoded' => $decoded,
+                            'result' => $parsed[$field]
+                        ]);
                     }
                 } catch (\Exception $e) {
-                    // Если не удалось распарсить, оставляем как есть
+                    \Log::info("🔍 parseJsonFields: {$field} - ошибка декодирования", [
+                        'error' => $e->getMessage()
+                    ]);
                     continue;
                 }
+            } else {
+                // Для photos: обрабатываем как массив строк (путей к файлам) или объектов
+                if ($field === 'photos' && is_array($value)) {
+                    $processedPhotos = [];
+                    foreach ($value as $photo) {
+                        if (is_string($photo) && !empty($photo)) {
+                            // Это строка (путь к файлу) - преобразуем в объект
+                            $processedPhotos[] = [
+                                'url' => $photo,
+                                'preview' => $photo
+                            ];
+                        } elseif (is_array($photo) && !empty($photo) && (isset($photo['url']) || isset($photo['preview']))) {
+                            // Это уже объект с url/preview
+                            $processedPhotos[] = $photo;
+                        }
+                    }
+                    $parsed[$field] = $processedPhotos;
+                    \Log::info("🔍 parseJsonFields: {$field} - массив, обработали фотографии", [
+                        'original' => $value,
+                        'processed_count' => count($processedPhotos),
+                        'result' => $parsed[$field]
+                    ]);
+                } else {
+                    $parsed[$field] = $value ?? [];
+                    \Log::info("🔍 parseJsonFields: {$field} - не строка, используем как есть", [
+                        'result' => $parsed[$field]
+                    ]);
+                }
+            }
+        }
+        
+        // Специальная обработка для geo - синхронизируем адрес
+        if (!empty($this->address)) {
+            if (!isset($parsed['geo']['address']) || empty($parsed['geo']['address'])) {
+                $parsed['geo']['address'] = $this->address;
+                \Log::info("🔍 parseJsonFields: Синхронизирован адрес в geo", [
+                    'address' => $this->address,
+                    'geo_after' => $parsed['geo']
+                ]);
             }
         }
         

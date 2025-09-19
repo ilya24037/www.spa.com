@@ -62,11 +62,6 @@ class AdValidationService
             $errors['permission'] = 'Нет прав на редактирование этого объявления';
         }
 
-        // Проверка статуса объявления
-        if ($ad->isArchived() && !$user->isAdmin()) {
-            $errors['status'] = 'Нельзя редактировать архивированное объявление';
-        }
-
         // Валидация полей (аналогично create)
         if (isset($data['title']) && empty($data['title'])) {
             $errors['title'] = 'Заголовок не может быть пустым';

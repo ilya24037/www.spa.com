@@ -21,7 +21,7 @@ class MasterProfile extends Model
     protected $slugSource = 'display_name';
 
     protected $fillable = [
-        'user_id', 'display_name', 'slug', 'bio', 'avatar',
+        'user_id', 'display_name', 'slug', 'bio', 'description', 'avatar',
         'phone', 'whatsapp', 'telegram', 'show_contacts',
         'experience_years', 'certificates', 'education',
         'rating', 'reviews_count', 'completed_bookings',
@@ -33,7 +33,9 @@ class MasterProfile extends Model
         // Параметры внешности
         'hair_color', 'eye_color', 'nationality',
         // Особенности мастера
-        'features', 'medical_certificate', 'works_during_period', 'additional_features'
+        'features', 'medical_certificate', 'works_during_period', 'additional_features',
+        // Поля модерации
+        'is_published', 'moderated_at'
     ];
 
     protected $jsonFields = [
@@ -49,6 +51,9 @@ class MasterProfile extends Model
         'is_premium'    => 'boolean',
         'premium_until' => 'datetime',
         'rating'        => 'decimal:2',
+        // Поля модерации
+        'is_published'  => 'boolean',
+        'moderated_at'  => 'datetime',
     ];
 
     public function user(): BelongsTo
@@ -85,6 +90,14 @@ class MasterProfile extends Model
     public function photos(): HasMany
     {
         return $this->hasMany(\App\Domain\Media\Models\Photo::class, 'master_profile_id');
+    }
+
+    /**
+     * Связь с объявлениями (один мастер может иметь много объявлений)
+     */
+    public function ads(): HasMany
+    {
+        return $this->hasMany(\App\Domain\Ad\Models\Ad::class, 'user_id', 'user_id');
     }
 
     public function videos(): HasMany

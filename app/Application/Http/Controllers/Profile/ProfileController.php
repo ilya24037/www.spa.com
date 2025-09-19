@@ -64,7 +64,7 @@ class ProfileController extends Controller
             ->where('status', $status)
             ->select([
                 'id', 'title', 'status', 'prices', 'address',
-                'specialty', 'description', 'phone', 'contact_method',
+                'description', 'phone', 'contact_method',
                 'photos', 'views_count', 'geo',
                 'created_at', 'updated_at'
             ])

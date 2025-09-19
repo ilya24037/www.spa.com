@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('master_profiles', function (Blueprint $table) {
             // Добавляем только недостающие поля
-            $table->string('city')->nullable()->after('education');
+            $table->string('city')->nullable()->after('display_name');
             $table->string('district')->nullable()->after('city');
             $table->string('metro_station')->nullable()->after('district');
             $table->boolean('home_service')->default(false)->after('metro_station');

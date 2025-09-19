@@ -18,14 +18,39 @@ class DraftService
      */
     public function saveOrUpdate(array $data, User $user, mixed $adId = null): Ad
     {
-                // Подготавливаем данные
+        // Логируем входящие данные для отслеживания проблемных полей
+        Log::info('🔍 DraftService::saveOrUpdate - Входящие данные', [
+            'has_work_format' => isset($data['work_format']),
+            'work_format_value' => $data['work_format'] ?? null,
+            'has_service_provider' => isset($data['service_provider']),
+            'service_provider_value' => $data['service_provider'] ?? null,
+            'has_whatsapp' => isset($data['whatsapp']),
+            'whatsapp_value' => $data['whatsapp'] ?? null,
+            'has_telegram' => isset($data['telegram']),
+            'telegram_value' => $data['telegram'] ?? null,
+            'all_keys' => array_keys($data)
+        ]);
+
+        // Подготавливаем данные
         $data = $this->prepareData($data);
         $data['user_id'] = $user->id;
+
+        // Логируем данные после подготовки
+        Log::info('🔍 DraftService::saveOrUpdate - После prepareData', [
+            'has_work_format' => isset($data['work_format']),
+            'work_format_value' => $data['work_format'] ?? null,
+            'has_service_provider' => isset($data['service_provider']),
+            'service_provider_value' => $data['service_provider'] ?? null,
+            'has_whatsapp' => isset($data['whatsapp']),
+            'whatsapp_value' => $data['whatsapp'] ?? null,
+            'has_telegram' => isset($data['telegram']),
+            'telegram_value' => $data['telegram'] ?? null
+        ]);
         
         // Приводим ID к integer если он передан
         $adId = $adId ? (int) $adId : null;
 
-        // 🎯 ЛОГИКА КАК НА АВИТО: сохраняем статус активных объявлений
+        // 🎯 ЛОГИКА: используем переданный статус или draft по умолчанию
         if ($adId && $adId > 0) {
             $existingAd = Ad::find($adId);
             if ($existingAd && $existingAd->status !== 'draft') {
@@ -33,12 +58,12 @@ class DraftService
                 // Оставляем их статус как есть
                 unset($data['status']);
             } else {
-                // Для новых или черновых объявлений ставим draft
-                $data['status'] = 'draft';
+                // Для новых или черновых объявлений используем переданный статус или draft
+                $data['status'] = $data['status'] ?? 'draft';
             }
         } else {
-            // Новое объявление всегда draft
-            $data['status'] = 'draft';
+            // Новое объявление использует переданный статус или draft
+            $data['status'] = $data['status'] ?? 'draft';
         }
 
         // Если передан ID, ищем существующее объявление
@@ -50,8 +75,39 @@ class DraftService
                 ->first();
                 
             if ($ad) {
+                // Если статус меняется на 'active', устанавливаем is_published = false (на модерацию)
+                if (isset($data['status']) && $data['status'] === 'active') {
+                    $data['is_published'] = false;
+                    \Log::info('🟢 DraftService: Устанавливаем статус active и is_published = false', [
+                        'ad_id' => $ad->id,
+                        'old_status' => $ad->status,
+                        'new_status' => $data['status'],
+                        'is_published' => $data['is_published']
+                    ]);
+                }
+                
+                \Log::info('🟢 DraftService: Обновляем объявление', [
+                    'ad_id' => $ad->id,
+                    'data_keys' => array_keys($data),
+                    'status' => $data['status'] ?? 'не указан',
+                    'is_published' => $data['is_published'] ?? 'не указан'
+                ]);
+                
                 $ad->update($data);
                 $ad->wasRecentlyCreated = false; // Явно указываем что это обновление
+
+                // Перезагружаем модель для проверки сохранения
+                $ad->refresh();
+
+                \Log::info('🟢 DraftService: Объявление обновлено', [
+                    'ad_id' => $ad->id,
+                    'new_status' => $ad->status,
+                    'new_is_published' => $ad->is_published,
+                    'saved_specialty' => $ad->specialty,
+                    'saved_work_format' => $ad->work_format,
+                    'saved_service_provider' => $ad->service_provider
+                ]);
+                
                 return $ad;
             }
             
@@ -71,9 +127,28 @@ class DraftService
         }
         
         // Создаем новый черновик
+        Log::info('🟢 DraftService: Создание нового объявления', [
+            'data_keys' => array_keys($data),
+            'has_specialty' => isset($data['specialty']),
+            'specialty' => $data['specialty'] ?? null,
+            'has_work_format' => isset($data['work_format']),
+            'work_format' => $data['work_format'] ?? null,
+            'has_service_provider' => isset($data['service_provider']),
+            'service_provider' => $data['service_provider'] ?? null
+        ]);
+
         $ad = Ad::create($data);
         $ad->wasRecentlyCreated = true; // Явно указываем что это создание
-        
+
+        // Проверяем что сохранилось
+        $ad->refresh();
+        Log::info('✅ DraftService: Объявление создано и проверено', [
+            'ad_id' => $ad->id,
+            'saved_specialty' => $ad->specialty,
+            'saved_work_format' => $ad->work_format,
+            'saved_service_provider' => $ad->service_provider
+        ]);
+
         return $ad;
     }
 
@@ -96,8 +171,8 @@ class DraftService
         // ВАЖНО: Убедимся, что ID всегда присутствует и имеет правильный тип
         $data['id'] = (int) $ad->id;
         
-        // Декодируем JSON поля
-        $jsonFields = ['clients', 'services', 'features', 'photos', 'video', 'geo', 'prices', 'schedule', 'faq'];
+        // Декодируем JSON поля (включая service_provider для правильной загрузки при редактировании)
+        $jsonFields = ['clients', 'service_provider', 'services', 'features', 'photos', 'video', 'geo', 'prices', 'schedule', 'faq'];
         
         // Логируем данные schedule для отладки
         if (isset($data['schedule'])) {
@@ -288,75 +363,79 @@ class DraftService
      */
     private function prepareData(array $data): array
     {
+        // Логируем критические поля в начале обработки
+        Log::info('📋 DraftService::prepareData - НАЧАЛО', [
+            'work_format' => $data['work_format'] ?? 'НЕ ПЕРЕДАНО',
+            'service_provider' => $data['service_provider'] ?? 'НЕ ПЕРЕДАНО',
+            'whatsapp' => $data['whatsapp'] ?? 'НЕ ПЕРЕДАНО',
+            'telegram' => $data['telegram'] ?? 'НЕ ПЕРЕДАНО',
+            'photos' => $data['photos'] ?? 'НЕ ПЕРЕДАНО',
+            'photos_type' => isset($data['photos']) ? gettype($data['photos']) : 'НЕ ПЕРЕДАНО',
+            'photos_count' => isset($data['photos']) && is_array($data['photos']) ? count($data['photos']) : 'НЕ МАССИВ'
+        ]);
+
         // Валидация взаимоисключающих опций в FAQ
         if (isset($data['faq'])) {
             $data['faq'] = $this->validateFaqExclusivity($data['faq']);
         }
         
-        // Кодируем массивы в JSON
-        // Исключаем 'faq' из ручного кодирования, так как модель обрабатывает его автоматически через $jsonFields
-        $jsonFields = ['clients', 'service_provider', 'services', 'features', 'photos', 'video', 'geo', 'prices', 'schedule'];
-        
-        // Логируем данные schedule перед обработкой
-        if (isset($data['schedule'])) {
-            Log::info("📅 DraftService: Данные schedule перед JSON кодированием", [
-                'schedule_data' => $data['schedule'],
-                'schedule_type' => gettype($data['schedule']),
-                'schedule_is_array' => is_array($data['schedule'])
-            ]);
-        }
-        
+        // Обработка JSON полей
+        // ВАЖНО: Frontend может отправлять данные как JSON строки или как массивы
+        // Нужно проверить и декодировать JSON строки обратно в массивы
+        // ИСКЛЮЧАЕМ photos и video - они уже обработаны в AdController
+        $jsonFields = ['clients', 'service_provider', 'features', 'services', 'schedule',
+                       'geo', 'custom_travel_areas', 'prices', 'faq'];
+
         foreach ($jsonFields as $field) {
             if (isset($data[$field])) {
-                // Особая обработка для geo чтобы избежать двойного экранирования
-                if ($field === 'geo' && is_string($data[$field])) {
-                    // Проверяем, является ли строка валидным JSON
+                // Если это уже JSON строка - декодируем обратно в массив
+                if (is_string($data[$field])) {
                     $decoded = json_decode($data[$field], true);
                     if (json_last_error() === JSON_ERROR_NONE) {
-                        // Это уже JSON, оставляем как есть
-                        continue;
+                        $data[$field] = $decoded;
                     }
                 }
-                
-                if (!is_string($data[$field])) {
-                    // Для больших массивов используем более эффективное кодирование
-                    try {
-                        $encoded = json_encode($data[$field], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-                        
-                        // Проверяем размер закодированных данных
-                        if (strlen($encoded) > 65000) { // Ограничение для TEXT поля в MySQL
-                            // Для разных полей разные стратегии
-                            if ($field === 'photos' || $field === 'video') {
-                                // Для медиа оставляем пустой массив
-                                $data[$field] = '[]';
-                            } elseif ($field === 'services' || $field === 'features') {
-                                // Для сервисов и фич оставляем пустой объект/массив
-                                $data[$field] = in_array($field, ['services', 'prices', 'geo']) ? '{}' : '[]';
-                            } else {
-                                // Для остальных полей
-                                $data[$field] = in_array($field, ['services', 'prices', 'geo']) ? '{}' : '[]';
-                            }
-                        } else {
-                            $data[$field] = $encoded;
-                        }
-                        
-                        // Логируем результат JSON кодирования для schedule
-                        if ($field === 'schedule') {
-                            Log::info("📅 DraftService: Результат JSON кодирования schedule", [
-                                'encoded_schedule' => $data[$field],
-                                'encoded_length' => strlen($data[$field])
-                            ]);
-                        }
-                    } catch (\Exception $e) {
-                        // В случае ошибки кодирования устанавливаем пустое значение
-                        $data[$field] = in_array($field, ['services', 'prices', 'geo']) ? '{}' : '[]';
-                    }
-                } // Добавлена закрывающая скобка для if (!is_string($data[$field]))
+                // Теперь данные в виде массива, модель сама закодирует через JsonFieldsTrait
             }
         }
         
-        // Не устанавливаем значение по умолчанию для заголовка - оставляем пустым
+        // Данные schedule уже обработаны в первом цикле, дополнительное логирование не нужно
         
+        // Специальная обработка для photos и video - они уже обработаны в AdController
+        if (isset($data['photos']) && is_array($data['photos'])) {
+            // Фотографии уже обработаны в AdController::processPhotosFromRequest
+            // Просто убеждаемся что это массив строк (путей к файлам)
+            Log::info('📋 DraftService::prepareData - photos уже обработаны', [
+                'photos_count' => count($data['photos']),
+                'photos_sample' => array_slice($data['photos'], 0, 2)
+            ]);
+        }
+        
+        if (isset($data['video']) && is_array($data['video'])) {
+            // Видео уже обработаны в AdController::processVideoFromRequest
+            // Просто убеждаемся что это массив строк (путей к файлам)
+            Log::info('📋 DraftService::prepareData - video уже обработаны', [
+                'video_count' => count($data['video']),
+                'video_sample' => array_slice($data['video'], 0, 2)
+            ]);
+        }
+        
+        // KISS: Убрано лишнее кодирование JSON
+        // Модель Ad уже имеет JsonFieldsTrait который автоматически кодирует/декодирует JSON поля
+        // Нам нужно только убедиться что данные в виде массивов, а не строк
+        // Второй цикл кодирования создавал двойное кодирование и нарушал принцип KISS
+        
+        // Не устанавливаем значение по умолчанию для заголовка - оставляем пустым
+
+        // КРИТИЧЕСКИ ВАЖНО: Логируем финальные данные перед возвратом
+        Log::info('📋 DraftService::prepareData - РЕЗУЛЬТАТ', [
+            'work_format' => $data['work_format'] ?? 'ОТСУТСТВУЕТ',
+            'service_provider' => $data['service_provider'] ?? 'ОТСУТСТВУЕТ',
+            'whatsapp' => $data['whatsapp'] ?? 'ОТСУТСТВУЕТ',
+            'telegram' => $data['telegram'] ?? 'ОТСУТСТВУЕТ',
+            'all_keys' => array_keys($data)
+        ]);
+
         return $data;
     }
 }

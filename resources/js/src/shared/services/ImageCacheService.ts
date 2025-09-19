@@ -87,6 +87,12 @@ class ImageCacheService {
    * Получить изображение из кеша или загрузить
    */
   async getImage(url: string): Promise<string> {
+    // Проверяем, является ли URL base64 данными
+    if (url.startsWith('data:image/')) {
+      // Для base64 данных просто возвращаем URL как есть
+      return url
+    }
+    
     // 1. Проверяем memory cache
     if (this.memoryCache.has(url)) {
       return this.memoryCache.get(url)!
@@ -115,6 +121,12 @@ class ImageCacheService {
    * Загрузка изображения
    */
   private async loadImage(url: string): Promise<string> {
+    // Проверяем, является ли URL base64 данными
+    if (url.startsWith('data:image/')) {
+      // Для base64 данных просто возвращаем URL как есть
+      return url
+    }
+    
     // Пробуем получить из IndexedDB
     const cached = await this.getFromDB(url)
     

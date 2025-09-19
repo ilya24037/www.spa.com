@@ -287,7 +287,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/additem', [AdController::class, 'store'])->name('additem.store');
 
     // Страница успешной публикации объявления
-    Route::get('/additem/success/{ad}', [AddItemController::class, 'success'])
+    Route::get('/additem/success/{ad}', [AdController::class, 'success'])
         ->name('additem.success');
     
     // 🔥 ДОБАВЛЕНО: дополнительные маршруты для полного функционала Dashboard
@@ -339,6 +339,7 @@ Route::middleware('auth')->group(function () {
     // Маршруты для объявлений
     Route::get('/ads', [AdController::class, 'index'])->name('ads.index');
     Route::post('/ads', [AdController::class, 'store'])->name('ads.store');
+    Route::post('/ads/debug', [AdController::class, 'debugForm'])->name('ads.debug'); // ВРЕМЕННЫЙ для отладки
     Route::get('/ads/{ad}', [AdController::class, 'show'])->name('ads.show');
     Route::get('/ads/{ad}/edit', [AdController::class, 'edit'])->name('ads.edit');
     Route::put('/ads/{ad}', [AdController::class, 'update'])->name('ads.update');

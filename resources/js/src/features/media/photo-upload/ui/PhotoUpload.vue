@@ -152,13 +152,34 @@ const validationError = computed(() => {
 
 const isLoading = computed(() => props.isLoading || isUploading.value)
 
+// 🔍 ЛОГИРОВАНИЕ ДЛЯ ДИАГНОСТИКИ
+console.log('🔍 PhotoUpload: инициализация');
+console.log('  props.photos:', props.photos);
+console.log('  props.photos_type:', typeof props.photos);
+console.log('  props.photos_isArray:', Array.isArray(props.photos));
+console.log('  props.photos_length:', props.photos?.length);
+
 // УПРОЩЕНИЕ по принципу KISS: только инициализация при первой загрузке
 watch(() => props.photos, (newPhotos) => {
+  console.log('🔍 PhotoUpload: watch сработал');
+  console.log('  newPhotos:', newPhotos);
+  console.log('  localPhotos.value.length:', localPhotos.value.length);
+  
+  // КРИТИЧНО: Если newPhotos пустой массив, НЕ инициализируем localPhotos
+  if (!newPhotos || newPhotos.length === 0) {
+    console.log('  ❌ newPhotos пустой, НЕ инициализируем localPhotos');
+    localPhotos.value = []
+    return
+  }
+  
   // Инициализируем только если localPhotos пустой и есть новые фото
   if (localPhotos.value.length === 0 && 
       newPhotos && 
       newPhotos.length > 0) {
+    console.log('  ✅ Инициализируем из props');
     initializeFromProps(newPhotos)
+  } else {
+    console.log('  ❌ Пропускаем инициализацию');
   }
 }, { immediate: true })
 
@@ -182,11 +203,22 @@ const handleFilesSelected = async (files: File[]) => {
 
 // Обработка изменений от PhotoGrid (мобильные кнопки)
 const handlePhotosUpdate = (photos: Photo[]) => {
-  if (!photos) return
+  console.log('🔍 handlePhotosUpdate: НАЧАЛО');
+  console.log('  photos:', photos);
+  console.log('  photos.length:', photos?.length);
+  
+  if (!photos) {
+    console.log('  ❌ photos пустой, выходим');
+    return
+  }
+  
   // Обновляем localPhotos
   localPhotos.value = photos
+  console.log('  ✅ localPhotos.value обновлен:', localPhotos.value);
+  
   // Эмитим изменения в AdForm ОДИН РАЗ
   emit('update:photos', photos)
+  console.log('  ✅ emit update:photos вызван');
 }
 
 const handleRotatePhoto = (index: number) => {
