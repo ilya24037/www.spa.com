@@ -1,0 +1,193 @@
+# SPA Platform - Cursor Ignore
+
+## 🗂️ Системные файлы
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+*.log
+*.cache
+
+## 📦 Зависимости
+node_modules/
+vendor/
+composer.lock
+package-lock.json
+yarn.lock
+
+## 🗄️ База данных
+*.sqlite
+*.db
+database/database.sqlite
+storage/database.sqlite
+
+## 📁 Кэш и временные файлы
+storage/framework/cache/
+storage/framework/sessions/
+storage/framework/views/
+storage/logs/
+bootstrap/cache/
+.cache/
+.parcel-cache/
+
+## 🔧 Конфигурация
+.env
+.env.local
+.env.production
+.env.staging
+.env.testing
+.env.backup
+
+## 📊 Логи и отчеты
+*.log
+logs/
+storage/logs/
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+
+## 🐳 Docker
+docker-compose.override.yml
+.dockerignore
+Dockerfile.local
+
+## 🚀 Деплой
+deploy/
+deployment/
+.htaccess
+web.config
+
+## 📱 Мобильные приложения
+android/
+ios/
+*.apk
+*.ipa
+
+## 🧪 Тестирование
+tests/Browser/
+tests/Dusk/
+tests/Feature/
+tests/Unit/
+tests/Integration/
+tests/E2E/
+tests/Performance/
+
+## 📚 Документация (кроме основных)
+docs/api/
+docs/development/
+docs/deployment/
+docs/architecture/
+docs/design/
+
+## 🎨 Дизайн и ресурсы
+design/
+mockups/
+wireframes/
+assets/raw/
+assets/source/
+assets/psd/
+assets/figma/
+
+## 🔍 Аналитика и мониторинг
+analytics/
+monitoring/
+metrics/
+reports/
+dashboards/
+
+## 🛠️ Инструменты разработки
+.phpunit.result.cache
+.php-cs-fixer.cache
+.phpstan/
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+## 📦 Сборка
+dist/
+build/
+public/build/
+public/hot
+public/storage
+public/mix-manifest.json
+public/js/
+public/css/
+
+## 🔐 Безопасность
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+secrets/
+credentials/
+
+## 📊 Данные и экспорт
+exports/
+imports/
+backups/
+dumps/
+*.sql
+*.csv
+*.xlsx
+*.json
+
+## 🎯 Специфичные для проекта
+storage/app/public/
+storage/app/private/
+storage/app/temp/
+storage/app/uploads/
+storage/app/media/
+
+## 🧪 Тестовые данные
+storage/app/test/
+storage/app/demo/
+storage/app/fake/
+storage/app/mock/
+
+## 📱 PWA
+public/sw.js
+public/manifest.json
+public/offline.html
+
+## 🌐 CDN и статика
+public/cdn/
+public/static/
+public/assets/
+public/images/
+public/videos/
+public/audio/
+
+## 🔄 Git и версионирование
+.git/
+.gitignore
+.gitattributes
+.gitmodules
+.gitkeep
+
+## 📋 Другие
+*.md.bak
+*.txt.bak
+*.json.bak
+*.yml.bak
+*.yaml.bak
+*.xml.bak
+*.ini.bak
+*.conf.bak
+
+## 🚨 Критически важные файлы (НЕ игнорировать)
+README.md
+workflow.md
+conventions.md
+vision.md
+idea.md
+tasklist.md
+.env.example
+composer.json
+package.json
+vite.config.js
+tailwind.config.js
+tsconfig.json
