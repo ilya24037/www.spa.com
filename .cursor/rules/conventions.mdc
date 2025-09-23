@@ -1,10 +1,12 @@
 ---
 description: Coding Standards for SPA Platform
-globs: 
+globs:
 alwaysApply: true
 ---
 
 # Coding Standards (стандарты кодирования)
+
+## 📚 Полная версия с примерами: @.aidd/conventions.md
 
 ## Principles (принципы)
 - KISS - Keep it simple (делай просто)

@@ -11,6 +11,17 @@ class UsersSeeder extends Seeder
     public function run(): void
     {
         $users = [
+            // Администратор системы
+            [
+                'name' => 'Администратор',
+                'email' => 'admin',
+                'password' => Hash::make('admin'),
+                'phone' => '+7 (900) 000-00-00',
+                'folder_name' => 'admin',
+                'status' => 'active',
+                'role' => 'admin',
+            ],
+            // Обычные пользователи (мастера)
             [
                 'name' => 'Анна Петрова',
                 'email' => 'anna@spa.test',
@@ -18,6 +29,7 @@ class UsersSeeder extends Seeder
                 'phone' => '+7 (925) 123-45-67',
                 'folder_name' => 'anna_petrova',
                 'status' => 'active',
+                'role' => 'client',
             ],
             [
                 'name' => 'Мария Иванова',
@@ -26,6 +38,7 @@ class UsersSeeder extends Seeder
                 'phone' => '+7 (926) 234-56-78',
                 'folder_name' => 'maria_ivanova',
                 'status' => 'active',
+                'role' => 'client',
             ],
             [
                 'name' => 'Елена Смирнова',
@@ -34,6 +47,7 @@ class UsersSeeder extends Seeder
                 'phone' => '+7 (927) 345-67-89',
                 'folder_name' => 'elena_smirnova',
                 'status' => 'active',
+                'role' => 'client',
             ],
             [
                 'name' => 'Виктория Козлова',
@@ -42,6 +56,7 @@ class UsersSeeder extends Seeder
                 'phone' => '+7 (928) 456-78-90',
                 'folder_name' => 'viktoria_kozlova',
                 'status' => 'active',
+                'role' => 'client',
             ],
             [
                 'name' => 'Наталья Новикова',
@@ -50,6 +65,7 @@ class UsersSeeder extends Seeder
                 'phone' => '+7 (929) 567-89-01',
                 'folder_name' => 'natalia_novikova',
                 'status' => 'active',
+                'role' => 'client',
             ]
         ];
 

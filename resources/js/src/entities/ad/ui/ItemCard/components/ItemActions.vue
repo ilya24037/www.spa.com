@@ -109,17 +109,48 @@
         Удалить
       </Button>
     </template>
-    
+
+    <!-- Кнопки для объявлений, ожидающих действий (отклоненные, на модерации, истекшие) -->
+    <template v-else-if="['rejected', 'pending_moderation', 'expired'].includes(item.status)">
+      <Button
+        @click="$emit('publish')"
+        variant="primary"
+        size="sm"
+      >
+        Опубликовать
+      </Button>
+
+      <ActionDropdown aria-label="Дополнительные действия">
+        <ActionDropdownItem
+          text="Опубликовать"
+          @click="$emit('publish')"
+        />
+        <ActionDropdownItem
+          text="Редактировать"
+          @click="$emit('edit')"
+        />
+        <ActionDropdownItem
+          text="Удалить"
+          variant="danger"
+          @click="$emit('delete')"
+        />
+        <ActionDropdownItem
+          text="Уже не актуально"
+          @click="$emit('mark-irrelevant')"
+        />
+      </ActionDropdown>
+    </template>
+
     <!-- Кнопки для неактивных и прочих статусов -->
     <template v-else-if="item.status === 'inactive' || item.status === 'old'">
-      <Button 
+      <Button
         @click="$emit('edit')"
         variant="light"
         size="sm"
       >
         Редактировать
       </Button>
-      <Button 
+      <Button
         @click="$emit('delete')"
         variant="danger"
         size="sm"
@@ -150,6 +181,7 @@ defineEmits<{
   'mark-irrelevant': []
   book: []
   restore: []
+  publish: []
 }>()
 </script>
 

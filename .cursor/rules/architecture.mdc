@@ -1,0 +1,56 @@
+# Архитектурные принципы SPA Platform
+
+## Backend (Laravel + DDD)
+- Доменная структура в app/Domain/
+- Каждый домен: Models, Services, Repositories, DTOs, Actions, Events
+- Resource Controllers в app/Application/Http/Controllers/
+- Form Requests для валидации
+- API Resources для форматирования
+
+## Frontend (Vue 3 + FSD)
+- shared/ - переиспользуемые компоненты
+- entities/ - бизнес-сущности
+- features/ - функциональные модули
+- widgets/ - композитные блоки
+- pages/ - страницы приложения
+
+## База данных
+- Атомарные миграции
+- Индексы на foreign keys
+- Soft deletes для важных данных
+- Seeders для тестовых данных
+
+## Модульная архитектура
+- Каждый модуль независим
+- Свой store в Pinia
+- Свои API методы
+- Минимум внешних зависимостей
+
+## Принципы
+- KISS - Keep It Simple
+- YAGNI - You Aren't Gonna Need It
+- DRY - Don't Repeat Yourself
+- SOLID принципы
+
+## Структура модуля
+```
+FeatureName/
+├── index.vue         # Основной компонент
+├── components/       # Подкомпоненты
+├── store/           # Pinia store
+├── types/           # TypeScript типы
+├── api/             # API методы
+└── styles/          # Стили модуля
+```
+
+## Производительность
+- Lazy Loading компонентов
+- Code Splitting
+- Оптимизация изображений
+- Кеширование запросов
+
+## Безопасность
+- Валидация на frontend и backend
+- CSRF защита
+- XSS защита
+- SQL Injection защита

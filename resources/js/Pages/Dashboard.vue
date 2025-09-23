@@ -120,17 +120,115 @@
                 Настройки
               </Link>
               
-              <Link 
+              <Link
                 href="/services"
                 class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
               >
                 Платные услуги
               </Link>
             </div>
+
+            <!-- Админское меню -->
+            <div v-if="$page.props.auth?.user?.role === 'admin' || $page.props.auth?.user?.role === 'moderator'"
+                 class="px-4 mt-4 pt-4 border-t space-y-1">
+              <div class="px-3 mb-2">
+                <span class="text-xs font-semibold text-gray-500 uppercase">
+                  🛡️ Администрирование
+                </span>
+              </div>
+
+              <Link
+                href="/profile/moderation"
+                class="flex items-center justify-between px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+              >
+                <span>📝 Модерация объявлений</span>
+                <span v-if="$page.props.pendingCount" class="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full">
+                  {{ $page.props.pendingCount }}
+                </span>
+              </Link>
+
+              <Link
+                href="/profile/admin/ads"
+                class="flex items-center justify-between px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                :class="{ 'bg-gray-100': $page.url.includes('/admin/ads') }"
+              >
+                <span>📋 Все объявления</span>
+                <span v-if="props.stats?.all" class="bg-gray-100 text-gray-700 text-xs px-2 py-0.5 rounded-full">
+                  {{ props.stats.all }}
+                </span>
+              </Link>
+
+              <Link
+                href="/profile/reviews"
+                class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+              >
+                <span>⭐ Модерация отзывов</span>
+              </Link>
+
+              <Link
+                href="/profile/complaints"
+                class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+              >
+                <span>⚠️ Жалобы</span>
+              </Link>
+
+              <Link
+                v-if="$page.props.auth?.user?.role === 'admin'"
+                href="/profile/users"
+                class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+              >
+                <span>👥 Пользователи</span>
+              </Link>
+
+              <Link
+                v-if="$page.props.auth?.user?.role === 'admin'"
+                href="/profile/masters"
+                class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+              >
+                <span>💆 Мастера</span>
+              </Link>
+            </div>
+          </div>
+
+          <!-- Статистика модерации (для админов) -->
+          <div v-if="$page.props.auth?.user?.role === 'admin' && moderationStats" class="mt-6 p-4 bg-blue-50 rounded-lg">
+            <h3 class="text-sm font-semibold text-blue-900 mb-3">📊 Статистика модерации</h3>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between">
+                <span class="text-blue-700">На модерации:</span>
+                <span class="font-medium text-blue-900">{{ moderationStats.pending || 0 }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-blue-700">Обработано сегодня:</span>
+                <span class="font-medium text-green-700">{{ moderationStats.processedToday || 0 }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-blue-700">Отклонено сегодня:</span>
+                <span class="font-medium text-red-700">{{ moderationStats.rejectedToday || 0 }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-blue-700">Среднее время:</span>
+                <span class="font-medium text-blue-900">{{ moderationStats.avgTime || '~15 мин' }}</span>
+              </div>
+            </div>
+
+            <!-- Мини-график (опционально) -->
+            <div v-if="moderationStats.weekData" class="mt-3 pt-3 border-t border-blue-200">
+              <div class="flex items-end justify-between h-12 gap-1">
+                <div
+                  v-for="(count, day) in moderationStats.weekData"
+                  :key="day"
+                  class="flex-1 bg-blue-300 rounded-t transition-all hover:bg-blue-400"
+                  :style="`height: ${Math.min(100, count * 5)}%`"
+                  :title="`${day}: ${count}`"
+                ></div>
+              </div>
+              <div class="text-xs text-blue-600 mt-1">Последние 7 дней</div>
+            </div>
           </div>
         </nav>
       </SidebarWrapper>
-      
+
       <!-- Контент справа -->
       <section class="flex-1 space-y-6">
         
@@ -143,8 +241,8 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200">
           <div class="p-6">
             <!-- Навигация вкладок как на Авито -->
-            <div class="flex items-center space-x-8">
-              <Link 
+            <div v-if="!props.adminMode" class="flex items-center space-x-8">
+              <Link
                 href="/profile/items/inactive/all"
                 :class="[
                   'pb-2 text-base font-medium border-b-2 transition-colors',
@@ -204,25 +302,236 @@
                 </span>
               </Link>
             </div>
+
+            <!-- Админские табы -->
+            <div v-if="props.adminMode" class="flex items-center space-x-8 overflow-x-auto">
+              <Link
+                :href="`/profile/admin/ads?tab=all`"
+                :class="[
+                  'pb-2 text-base font-medium border-b-2 transition-colors whitespace-nowrap',
+                  activeTab === 'all'
+                    ? 'text-gray-900 border-gray-900'
+                    : 'text-gray-500 border-transparent hover:text-gray-700'
+                ]"
+              >
+                <span class="flex items-center gap-2">
+                  Все
+                  <sup v-if="props.stats?.all" class="text-sm font-normal">{{ props.stats.all }}</sup>
+                </span>
+              </Link>
+
+              <Link
+                :href="`/profile/admin/ads?tab=active`"
+                :class="[
+                  'pb-2 text-base font-medium border-b-2 transition-colors whitespace-nowrap',
+                  activeTab === 'active'
+                    ? 'text-gray-900 border-gray-900'
+                    : 'text-gray-500 border-transparent hover:text-gray-700'
+                ]"
+              >
+                <span class="flex items-center gap-2">
+                  Активные
+                  <sup v-if="props.stats?.active" class="text-sm font-normal">{{ props.stats.active }}</sup>
+                </span>
+              </Link>
+
+              <Link
+                :href="`/profile/admin/ads?tab=moderation`"
+                :class="[
+                  'pb-2 text-base font-medium border-b-2 transition-colors whitespace-nowrap',
+                  activeTab === 'moderation'
+                    ? 'text-gray-900 border-gray-900'
+                    : 'text-gray-500 border-transparent hover:text-gray-700'
+                ]"
+              >
+                <span class="flex items-center gap-2">
+                  На модерации
+                  <sup v-if="props.stats?.moderation" class="text-sm font-normal">{{ props.stats.moderation }}</sup>
+                </span>
+              </Link>
+
+              <Link
+                :href="`/profile/admin/ads?tab=draft`"
+                :class="[
+                  'pb-2 text-base font-medium border-b-2 transition-colors whitespace-nowrap',
+                  activeTab === 'draft'
+                    ? 'text-gray-900 border-gray-900'
+                    : 'text-gray-500 border-transparent hover:text-gray-700'
+                ]"
+              >
+                <span class="flex items-center gap-2">
+                  Черновики
+                  <sup v-if="props.stats?.draft" class="text-sm font-normal">{{ props.stats.draft }}</sup>
+                </span>
+              </Link>
+
+              <Link
+                :href="`/profile/admin/ads?tab=rejected`"
+                :class="[
+                  'pb-2 text-base font-medium border-b-2 transition-colors whitespace-nowrap',
+                  activeTab === 'rejected'
+                    ? 'text-gray-900 border-gray-900'
+                    : 'text-gray-500 border-transparent hover:text-gray-700'
+                ]"
+              >
+                <span class="flex items-center gap-2">
+                  Отклоненные
+                  <sup v-if="props.stats?.rejected" class="text-sm font-normal">{{ props.stats.rejected }}</sup>
+                </span>
+              </Link>
+
+              <Link
+                :href="`/profile/admin/ads?tab=archived`"
+                :class="[
+                  'pb-2 text-base font-medium border-b-2 transition-colors whitespace-nowrap',
+                  activeTab === 'archived'
+                    ? 'text-gray-900 border-gray-900'
+                    : 'text-gray-500 border-transparent hover:text-gray-700'
+                ]"
+              >
+                <span class="flex items-center gap-2">
+                  Архив
+                  <sup v-if="props.stats?.archived" class="text-sm font-normal">{{ props.stats.archived }}</sup>
+                </span>
+              </Link>
+            </div>
           </div>
-          
+
+          <!-- Панель массовых действий для админов -->
+          <div v-if="props.adminMode && selectedItems.size > 0" class="px-6 py-4 bg-blue-50 border-b border-blue-200">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-4">
+                <span class="text-sm font-medium text-blue-900">
+                  Выбрано: {{ selectedItems.size }} {{ getItemsLabel(selectedItems.size) }}
+                </span>
+                <button
+                  @click="clearSelection"
+                  class="text-sm text-blue-600 hover:text-blue-700 underline"
+                >
+                  Снять выделение
+                </button>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <button
+                  @click="bulkAction('approve')"
+                  :disabled="isBulkActionLoading"
+                  class="px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  ✅ Одобрить
+                </button>
+
+                <button
+                  @click="bulkAction('reject')"
+                  :disabled="isBulkActionLoading"
+                  class="px-4 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  ❌ Отклонить
+                </button>
+
+                <button
+                  @click="bulkAction('block')"
+                  :disabled="isBulkActionLoading"
+                  class="px-4 py-2 bg-orange-600 text-white text-sm rounded-md hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  🚫 Заблокировать
+                </button>
+
+                <button
+                  @click="bulkAction('archive')"
+                  :disabled="isBulkActionLoading"
+                  class="px-4 py-2 bg-gray-600 text-white text-sm rounded-md hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  📦 В архив
+                </button>
+
+                <button
+                  @click="bulkAction('delete')"
+                  :disabled="isBulkActionLoading"
+                  class="px-4 py-2 bg-red-800 text-white text-sm rounded-md hover:bg-red-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  🗑️ Удалить
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Выбрать все для админов -->
+          <div v-if="props.adminMode && profiles && profiles.length > 0" class="px-6 pt-4">
+            <label class="flex items-center gap-2 cursor-pointer hover:text-blue-600 transition-colors">
+              <input
+                type="checkbox"
+                :checked="isAllSelected"
+                @change="toggleSelectAll"
+                class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+              />
+              <span class="text-sm font-medium">
+                Выбрать все на странице
+              </span>
+            </label>
+          </div>
+
           <!-- Контент вкладки -->
           <div v-if="profiles && profiles.length > 0" class="space-y-6 p-6">
-            <ItemCard 
-              v-for="profile in profiles" 
+            <div
+              v-for="profile in profiles"
               :key="profile.id"
-              :item="profile"
-              @item-updated="handleItemUpdate"
-              @item-deleted="handleItemDelete"
-              @item-error="handleItemError"
-              @pay="handleItemPay"
-              @promote="handleItemPromote"
-              @edit="handleItemEdit"
-              @deactivate="handleItemDeactivate"
-              @delete="handleItemDelete"
-              @mark-irrelevant="handleItemMarkIrrelevant"
-              @book="handleItemBook"
-            />
+              class="relative"
+            >
+              <!-- Чекбокс для админов -->
+              <div v-if="props.adminMode" class="absolute top-4 left-4 z-10">
+                <input
+                  type="checkbox"
+                  :checked="selectedItems.has(profile.id)"
+                  @change="toggleItemSelection(profile.id)"
+                  class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
+                  :aria-label="`Выбрать объявление #${profile.id}`"
+                />
+              </div>
+
+              <!-- Карточка пользователя для режима управления -->
+              <div v-if="props.userManagementMode" class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <div class="flex items-center justify-between">
+                  <div class="flex-1">
+                    <h3 class="font-semibold text-gray-900">{{ profile.title }}</h3>
+                    <p class="text-sm text-gray-600 mt-1">{{ profile.email }}</p>
+                    <div class="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                      <span>Роль: <span class="font-medium">{{ profile.role }}</span></span>
+                      <span>Статус: <span class="font-medium" :class="profile.status === 'active' ? 'text-green-600' : 'text-red-600'">{{ profile.status }}</span></span>
+                      <span v-if="profile.email_verified_at" class="text-green-600">✓ Email подтверждён</span>
+                      <span v-else class="text-orange-600">⚠ Email не подтверждён</span>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <button
+                      @click="router.post(`/profile/users/${profile.id}/toggle`)"
+                      class="px-4 py-2 text-sm font-medium rounded-md transition-colors"
+                      :class="profile.status === 'active' ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-green-600 text-white hover:bg-green-700'"
+                    >
+                      {{ profile.status === 'active' ? 'Заблокировать' : 'Разблокировать' }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Стандартная карточка объявления -->
+              <ItemCard
+                v-else
+                :item="profile"
+                :class="{ 'pl-12': props.adminMode }"
+                @item-updated="handleItemUpdate"
+                @item-deleted="handleItemDelete"
+                @item-error="handleItemError"
+                @pay="handleItemPay"
+                @promote="handleItemPromote"
+                @edit="handleItemEdit"
+                @deactivate="handleItemDeactivate"
+                @delete="handleItemDelete"
+                @mark-irrelevant="handleItemMarkIrrelevant"
+                @book="handleItemBook"
+                @publish="handleItemPublish"
+              />
+            </div>
           </div>
           
           <!-- Пустое состояние как на Авито -->
@@ -255,7 +564,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { Head, Link, usePage } from '@inertiajs/vue3'
+import { Head, Link, usePage, router } from '@inertiajs/vue3'
 
 // FSD imports
 import { SidebarWrapper } from '@/src/shared/ui/layouts/SidebarWrapper'
@@ -281,6 +590,24 @@ interface DashboardPageProps {
   }
   activeTab?: string
   title?: string
+  moderationMode?: boolean
+  pendingCount?: number
+  isAdmin?: boolean
+  adminMode?: boolean
+  userManagementMode?: boolean
+  stats?: Record<string, number>
+  pagination?: {
+    total?: number
+    current?: number
+    per_page?: number
+  }
+  moderationStats?: {
+    pending?: number
+    processedToday?: number
+    rejectedToday?: number
+    avgTime?: string
+    weekData?: Record<string, number>
+  }
 }
 
 interface ToastInstance {
@@ -296,12 +623,18 @@ const props = withDefaults(defineProps<DashboardPageProps>(), {
   counts: () => ({}),
   userStats: () => ({}),
   activeTab: 'inactive',
-  title: 'Мои объявления'
+  title: 'Мои объявления',
+  moderationStats: () => ({})
 })
 
 // Состояние
 const showSidebar = ref(false)
 const toasts = ref<ToastInstance[]>([])
+const selectedItems = ref<Set<number>>(new Set())
+const isBulkActionLoading = ref(false)
+
+// Добавим реактивное свойство для статистики модерации
+const moderationStats = computed(() => props.moderationStats || {})
 
 // Пользователь
 const page = usePage()
@@ -393,6 +726,10 @@ const handleItemBook = (itemId: number) => {
   addToast(`Переход к бронированию объявления #${itemId}`, 'info')
 }
 
+const handleItemPublish = (itemId: number) => {
+  addToast(`Объявление #${itemId} отправлено на модерацию`, 'success')
+}
+
 // Управление Toast уведомлениями
 const addToast = (message: string, type: ToastType = 'success', duration = 5000) => {
   const id = Date.now()
@@ -402,6 +739,183 @@ const addToast = (message: string, type: ToastType = 'success', duration = 5000)
 const removeToast = (id: number) => {
   toasts.value = toasts.value.filter(toast => toast.id !== id)
 }
+
+// Методы для массовых действий
+const toggleItemSelection = (itemId: number) => {
+  if (selectedItems.value.has(itemId)) {
+    selectedItems.value.delete(itemId)
+  } else {
+    selectedItems.value.add(itemId)
+  }
+}
+
+const toggleSelectAll = () => {
+  if (isAllSelected.value) {
+    clearSelection()
+  } else {
+    props.profiles?.forEach(profile => {
+      selectedItems.value.add(profile.id)
+    })
+  }
+}
+
+const clearSelection = () => {
+  selectedItems.value.clear()
+}
+
+const isAllSelected = computed(() => {
+  if (!props.profiles || props.profiles.length === 0) return false
+  return props.profiles.every(profile => selectedItems.value.has(profile.id))
+})
+
+const getItemsLabel = (count: number) => {
+  if (count === 1) return 'объявление'
+  if (count >= 2 && count <= 4) return 'объявления'
+  return 'объявлений'
+}
+
+const bulkAction = async (action: string) => {
+  if (selectedItems.value.size === 0) {
+    addToast('Выберите объявления для действия', 'warning')
+    return
+  }
+
+  const confirmMessages: Record<string, string> = {
+    approve: `Одобрить ${selectedItems.value.size} ${getItemsLabel(selectedItems.value.size)}?`,
+    reject: `Отклонить ${selectedItems.value.size} ${getItemsLabel(selectedItems.value.size)}?`,
+    block: `Заблокировать ${selectedItems.value.size} ${getItemsLabel(selectedItems.value.size)}?`,
+    archive: `Переместить в архив ${selectedItems.value.size} ${getItemsLabel(selectedItems.value.size)}?`,
+    delete: `Удалить ${selectedItems.value.size} ${getItemsLabel(selectedItems.value.size)}? Это действие необратимо!`
+  }
+
+  if (!confirm(confirmMessages[action])) {
+    return
+  }
+
+  isBulkActionLoading.value = true
+
+  router.post('/profile/admin/ads/bulk', {
+    ids: Array.from(selectedItems.value),
+    action: action
+  }, {
+    preserveScroll: true,
+    preserveState: false,
+    onStart: () => {
+      isBulkActionLoading.value = true
+    },
+    onSuccess: (page) => {
+      const flash = (page.props as any).flash
+      addToast(flash?.success || `Действие выполнено успешно`, 'success')
+      clearSelection()
+      isBulkActionLoading.value = false
+    },
+    onError: (errors) => {
+      console.error('Bulk action error:', errors)
+      addToast('Ошибка при выполнении действия', 'error')
+      isBulkActionLoading.value = false
+    },
+    onFinish: () => {
+      isBulkActionLoading.value = false
+    }
+  })
+}
+
+// Горячие клавиши для модерации (только для админов)
+import { onMounted, onUnmounted } from 'vue'
+
+const setupHotkeys = () => {
+  // Проверяем, что пользователь админ или модератор
+  if (!user.value.role || !['admin', 'moderator'].includes(user.value.role)) {
+    return
+  }
+
+  const handleKeyPress = (e: KeyboardEvent) => {
+    // Игнорируем, если фокус в поле ввода
+    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+      return
+    }
+
+    // Проверяем режим модерации
+    const isModerationMode = props.moderationMode || page.url.includes('/moderation')
+    if (!isModerationMode) {
+      return
+    }
+
+    // Горячие клавиши
+    switch (e.key.toLowerCase()) {
+      case 'a': // Approve
+        e.preventDefault()
+        const approveBtn = document.querySelector('[data-action="approve"]') as HTMLElement
+        if (approveBtn) {
+          approveBtn.click()
+          addToast('✅ Объявление одобрено (клавиша A)', 'success')
+        }
+        break
+
+      case 'r': // Reject
+        e.preventDefault()
+        const rejectBtn = document.querySelector('[data-action="reject"]') as HTMLElement
+        if (rejectBtn) {
+          rejectBtn.click()
+          addToast('❌ Объявление отклонено (клавиша R)', 'error')
+        }
+        break
+
+      case 'n': // Next
+        e.preventDefault()
+        const nextItem = document.querySelector('[data-action="next"]') as HTMLElement
+        if (nextItem) {
+          nextItem.click()
+        } else {
+          // Переход к следующему объявлению
+          const currentIndex = props.profiles?.findIndex(p => p.id === (window as any).currentItemId) ?? -1
+          if (currentIndex >= 0 && currentIndex < (props.profiles?.length ?? 0) - 1) {
+            const nextProfile = props.profiles?.[currentIndex + 1]
+            if (nextProfile) {
+              ;(window as any).currentItemId = nextProfile.id
+              addToast(`➡️ Переход к объявлению #${nextProfile.id} (клавиша N)`, 'info')
+            }
+          }
+        }
+        break
+
+      case 'escape': // Закрыть модальное окно
+        e.preventDefault()
+        const modal = document.querySelector('[data-modal="active"]') as HTMLElement
+        if (modal) {
+          const closeBtn = modal.querySelector('[data-action="close"]') as HTMLElement
+          if (closeBtn) {
+            closeBtn.click()
+          }
+        }
+        break
+
+      case '?': // Показать подсказку
+        e.preventDefault()
+        addToast('⌨️ Горячие клавиши: A - одобрить, R - отклонить, N - следующее, ESC - закрыть', 'info', 8000)
+        break
+    }
+  }
+
+  window.addEventListener('keydown', handleKeyPress)
+
+  // Cleanup при размонтировании компонента
+  onUnmounted(() => {
+    window.removeEventListener('keydown', handleKeyPress)
+  })
+}
+
+// Инициализация горячих клавиш при монтировании
+onMounted(() => {
+  setupHotkeys()
+
+  // Показываем подсказку админу при первом входе
+  if (user.value.role === 'admin' && props.moderationMode) {
+    setTimeout(() => {
+      addToast('💡 Используйте горячие клавиши для быстрой модерации. Нажмите ? для справки', 'info', 7000)
+    }, 2000)
+  }
+})
 </script>
 
 <style scoped>

@@ -3,6 +3,7 @@
 namespace App\Domain\Ad\Services;
 
 use App\Domain\Ad\Models\Ad;
+use App\Domain\Ad\Enums\AdStatus;
 use App\Domain\User\Models\User;
 use Illuminate\Support\Facades\Log;
 
@@ -53,17 +54,26 @@ class DraftService
         // 🎯 ЛОГИКА: используем переданный статус или draft по умолчанию
         if ($adId && $adId > 0) {
             $existingAd = Ad::find($adId);
-            if ($existingAd && $existingAd->status !== 'draft') {
-                // Не меняем статус активных/модерируемых объявлений
-                // Оставляем их статус как есть
+
+            // Определяем статусы ожидания, для которых разрешаем изменение статуса
+            $waitingStatuses = [
+                AdStatus::REJECTED,
+                AdStatus::PENDING_MODERATION,
+                AdStatus::EXPIRED,
+                AdStatus::WAITING_PAYMENT
+            ];
+
+            if ($existingAd && $existingAd->status !== AdStatus::DRAFT && !in_array($existingAd->status, $waitingStatuses)) {
+                // Не меняем статус только для активных объявлений
+                // Для черновиков и статусов ожидания разрешаем изменение
                 unset($data['status']);
             } else {
-                // Для новых или черновых объявлений используем переданный статус или draft
-                $data['status'] = $data['status'] ?? 'draft';
+                // Для черновиков и статусов ожидания используем переданный статус или draft
+                $data['status'] = $data['status'] ?? AdStatus::DRAFT;
             }
         } else {
             // Новое объявление использует переданный статус или draft
-            $data['status'] = $data['status'] ?? 'draft';
+            $data['status'] = $data['status'] ?? AdStatus::DRAFT;
         }
 
         // Если передан ID, ищем существующее объявление
@@ -76,13 +86,14 @@ class DraftService
                 
             if ($ad) {
                 // Если статус меняется на 'active', устанавливаем is_published = false (на модерацию)
-                if (isset($data['status']) && $data['status'] === 'active') {
+                if (isset($data['status']) && ($data['status'] === AdStatus::ACTIVE || $data['status'] === 'active')) {
                     $data['is_published'] = false;
                     \Log::info('🟢 DraftService: Устанавливаем статус active и is_published = false', [
                         'ad_id' => $ad->id,
                         'old_status' => $ad->status,
                         'new_status' => $data['status'],
-                        'is_published' => $data['is_published']
+                        'is_published' => $data['is_published'],
+                        'status_type' => gettype($data['status'])
                     ]);
                 }
                 
@@ -314,7 +325,7 @@ class DraftService
     public function delete(Ad $ad): bool
     {
         // Только черновики можно удалять
-        if ($ad->status !== 'draft') {
+        if ($ad->status !== AdStatus::DRAFT) {
             throw new \InvalidArgumentException('Только черновики можно удалять');
         }
         

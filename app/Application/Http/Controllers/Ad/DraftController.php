@@ -6,6 +6,7 @@ use App\Application\Http\Controllers\Controller;
 use App\Domain\Ad\Services\AdService;
 use App\Domain\Ad\Services\DraftService;
 use App\Domain\Ad\Models\Ad;
+use App\Domain\Ad\Enums\AdStatus;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
@@ -727,7 +728,7 @@ class DraftController extends Controller
             
             // Используем DraftService для публикации (простая логика)
             $publishedAd = $this->draftService->saveOrUpdate([
-                'status' => 'active',
+                'status' => AdStatus::ACTIVE,
                 'is_published' => false // На модерацию
             ], Auth::user(), $ad->id);
             \Log::info('🟢 DraftController::publish DraftService::saveOrUpdate успешно', [
@@ -737,9 +738,9 @@ class DraftController extends Controller
             
             // Для Inertia запросов
             if ($request->header('X-Inertia')) {
-                \Log::info('🟢 DraftController::publish Inertia redirect');
+                \Log::info('🟢 DraftController::publish Inertia redirect на страницу успеха');
                 return redirect()
-                    ->to('/profile/items/active/all')
+                    ->route('additem.success', ['ad' => $publishedAd->id])
                     ->with('success', 'Объявление опубликовано!');
             }
             
@@ -750,7 +751,7 @@ class DraftController extends Controller
                 'message' => 'Объявление успешно опубликовано!',
                 'ad_id' => $publishedAd->id,
                 'status' => $publishedAd->status,
-                'redirect_url' => '/profile/items/active/all'
+                'redirect_url' => route('additem.success', ['ad' => $publishedAd->id])
             ]);
             
         } catch (\Exception $e) {

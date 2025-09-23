@@ -49,6 +49,46 @@ class AdPolicy
     }
 
     /**
+     * Determine whether the user can update any ad as admin.
+     */
+    public function updateAsAdmin(User $user, Ad $ad): bool
+    {
+        return $user->isStaff();
+    }
+
+    /**
+     * Determine whether the user can perform bulk actions.
+     */
+    public function bulkAction(User $user): bool
+    {
+        return $user->isStaff();
+    }
+
+    /**
+     * Determine whether the user can approve ads.
+     */
+    public function approve(User $user, Ad $ad): bool
+    {
+        return $user->hasPermission('moderate_ads') || $user->hasPermission('moderate_content');
+    }
+
+    /**
+     * Determine whether the user can reject ads.
+     */
+    public function reject(User $user, Ad $ad): bool
+    {
+        return $user->hasPermission('moderate_ads') || $user->hasPermission('moderate_content');
+    }
+
+    /**
+     * Determine whether the user can view all ads.
+     */
+    public function viewAllAds(User $user): bool
+    {
+        return $user->isStaff();
+    }
+
+    /**
      * Determine whether the user can restore the model.
      */
     public function restore(User $user, Ad $ad): bool

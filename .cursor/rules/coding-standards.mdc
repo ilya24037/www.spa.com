@@ -1,0 +1,64 @@
+# Стандарты кодирования SPA Platform
+
+## PHP (Laravel)
+- Resource Controllers для CRUD операций
+- Form Requests для валидации данных
+- Service Layer для бизнес-логики
+- Repository Pattern для работы с БД
+- Всегда добавлять поля в $fillable массив
+- JSON поля в $casts как 'array'
+
+## Vue.js
+- Composition API с <script setup>
+- Props типизация обязательна
+- Events через emit, не меняй props напрямую
+- Pinia stores для состояния модулей
+- Mobile-first подход в Tailwind CSS
+
+## Запрещено
+- Сложные вложенные структуры
+- Магические числа
+- Глобальные переменные
+- Дублирование кода
+
+## Обязательно
+- Обработка ошибок в try-catch
+- Валидация входных данных
+- Комментарии на английском языке
+- Тестирование после изменений
+
+## Примеры
+```php
+// ✅ Хорошо
+class AdController extends Controller
+{
+    private const ALLOWED_FIELDS = ['title', 'description', 'price'];
+    
+    public function store(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'price' => 'required|numeric|min:0'
+        ]);
+        
+        try {
+            $ad = $this->adService->create($validated);
+            return response()->json(['success' => true, 'data' => $ad]);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+}
+```
+
+## Структура модуля
+```
+FeatureName/
+├── index.vue         # Основной компонент
+├── components/       # Подкомпоненты
+├── store/           # Pinia store
+├── types/           # TypeScript типы
+├── api/             # API методы
+└── styles/          # Стили модуля
+```

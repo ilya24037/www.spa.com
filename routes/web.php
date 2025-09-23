@@ -297,6 +297,44 @@ Route::middleware('auth')->group(function () {
     Route::get('/services', fn() => Inertia::render('Services/Index'))->name('services.index');
     Route::get('/subscription', fn() => Inertia::render('Subscription/Index'))->name('subscription.index');
     Route::get('/settings', fn() => Inertia::render('Settings/Index'))->name('settings.index');
+
+    /*
+    | Административные маршруты (модерация)
+    */
+    Route::get('/profile/moderation', [ProfileController::class, 'moderation'])->name('profile.moderation');
+    Route::post('/profile/moderation/{ad}/approve', [ProfileController::class, 'approve'])->name('profile.moderation.approve');
+    Route::post('/profile/moderation/{ad}/reject', [ProfileController::class, 'reject'])->name('profile.moderation.reject');
+
+    // Админ-панель: все объявления
+    Route::get('/profile/admin/ads', [ProfileController::class, 'allAds'])->name('profile.admin.ads');
+    Route::get('/profile/admin/ads/{ad}/edit', [ProfileController::class, 'editAd'])->name('profile.admin.ads.edit');
+    Route::put('/profile/admin/ads/{ad}', [ProfileController::class, 'updateAd'])
+        ->middleware('throttle:30,1') // 30 редактирований в минуту
+        ->name('profile.admin.ads.update');
+    Route::post('/profile/admin/ads/bulk', [ProfileController::class, 'bulkAction'])
+        ->middleware('throttle:10,1') // Ограничение: 10 запросов в минуту
+        ->name('profile.admin.ads.bulk');
+
+    // Просмотр логов администраторов
+    Route::get('/profile/admin/logs', [ProfileController::class, 'adminLogs'])->name('profile.admin.logs');
+
+    // Управление пользователями (только admin)
+    Route::get('/profile/users', [ProfileController::class, 'users'])->name('profile.users');
+    Route::post('/profile/users/{user}/toggle', [ProfileController::class, 'toggleUserStatus'])
+        ->middleware('throttle:5,1') // 5 блокировок в минуту
+        ->name('profile.users.toggle');
+
+    // Система жалоб
+    Route::get('/profile/complaints', [ProfileController::class, 'complaints'])->name('profile.complaints');
+    Route::post('/profile/complaints/{ad}/resolve', [ProfileController::class, 'resolveComplaint'])->name('profile.complaints.resolve');
+
+    // Управление мастерами (только admin)
+    Route::get('/profile/masters', [ProfileController::class, 'masters'])->name('profile.masters');
+    Route::post('/profile/masters/{master}/verify', [ProfileController::class, 'toggleMasterVerification'])->name('profile.masters.verify');
+
+    // Модерация отзывов
+    Route::get('/profile/reviews', [ProfileController::class, 'reviews'])->name('profile.reviews');
+    Route::post('/profile/reviews/{review}/moderate', [ProfileController::class, 'moderateReview'])->name('profile.reviews.moderate');
 });
 
 /*
@@ -358,6 +396,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/ads/{ad}/archive', [AdStatusController::class, 'archive'])->name('ads.archive');
     Route::post('/ads/{ad}/restore', [AdStatusController::class, 'restore'])->name('ads.restore');
     Route::post('/ads/{ad}/publish', [AdStatusController::class, 'publish'])->name('ads.publish');
+    Route::post('/ads/{ad}/resubmit', [AdController::class, 'resubmit'])->name('ads.resubmit');
     
     // Маршруты для работы с медиа объявлений
     Route::prefix('ads/{ad}/media')->name('ads.media.')->group(function () {

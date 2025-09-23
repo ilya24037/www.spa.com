@@ -5,6 +5,7 @@ namespace App\Domain\Ad\Services;
 use App\Domain\Ad\Models\Ad;
 use App\Domain\Ad\Enums\AdStatus;
 use App\Domain\Ad\Repositories\AdRepository;
+use App\Domain\Admin\Traits\LogsAdminActions;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Collection;
 
@@ -13,6 +14,7 @@ use Illuminate\Support\Collection;
  */
 class AdModerationService
 {
+    use LogsAdminActions;
     private AdRepository $adRepository;
 
     // Стоп-слова для проверки контента
@@ -59,7 +61,7 @@ class AdModerationService
             } else {
                 // Отправка на ручную модерацию
                 $this->adRepository->updateAd($ad, [
-                    'status' => AdStatus::WAITING_PAYMENT->value
+                    'status' => AdStatus::PENDING_MODERATION->value
                 ]);
 
                 Log::info('Ad sent for manual moderation', [
@@ -96,18 +98,26 @@ class AdModerationService
         try {
             $updateData = [
                 'status' => AdStatus::ACTIVE->value,
-                'published_at' => now()
+                'is_published' => true,          // Устанавливаем флаг публикации
+                'published_at' => now(),
+                'moderated_at' => now(),         // Время модерации
+                'moderation_reason' => null      // Очищаем причину отклонения
             ];
-            
+
+            // Сохраняем старые значения для логирования
+            $oldValues = $ad->only(['status', 'is_published', 'published_at', 'moderated_at', 'moderation_reason']);
+
             $this->adRepository->updateAd($ad, $updateData);
-            
-            if ($moderatorNote) {
-                // Можно добавить поле для заметок модератора
-                Log::info('Moderator note', [
-                    'ad_id' => $ad->id,
-                    'note' => $moderatorNote
-                ]);
-            }
+
+            // Логируем действие администратора
+            $this->logAdminAction(
+                'approve',
+                $ad,
+                $oldValues,
+                $updateData,
+                "Объявление #{$ad->id} одобрено" . ($moderatorNote ? ": $moderatorNote" : ''),
+                ['moderator_note' => $moderatorNote]
+            );
 
             Log::info('Ad approved by moderator', ['ad_id' => $ad->id]);
 
@@ -132,10 +142,25 @@ class AdModerationService
     public function rejectAd(Ad $ad, string $reason): bool
     {
         try {
-            $this->adRepository->updateAd($ad, [
+            // Сохраняем старые значения для логирования
+            $oldValues = $ad->only(['status', 'moderation_reason']);
+
+            $updateData = [
                 'status' => AdStatus::REJECTED->value,
                 'moderation_reason' => $reason
-            ]);
+            ];
+
+            $this->adRepository->updateAd($ad, $updateData);
+
+            // Логируем действие администратора
+            $this->logAdminAction(
+                'reject',
+                $ad,
+                $oldValues,
+                $updateData,
+                "Объявление #{$ad->id} отклонено: {$reason}",
+                ['rejection_reason' => $reason]
+            );
 
             Log::info('Ad rejected by moderator', [
                 'ad_id' => $ad->id,
@@ -163,10 +188,25 @@ class AdModerationService
     public function block(Ad $ad, string $reason): bool
     {
         try {
-            $this->adRepository->updateAd($ad, [
+            // Сохраняем старые значения для логирования
+            $oldValues = $ad->only(['status', 'moderation_reason']);
+
+            $updateData = [
                 'status' => AdStatus::BLOCKED->value,
                 'moderation_reason' => $reason
-            ]);
+            ];
+
+            $this->adRepository->updateAd($ad, $updateData);
+
+            // Логируем действие администратора
+            $this->logAdminAction(
+                'block',
+                $ad,
+                $oldValues,
+                $updateData,
+                "Объявление #{$ad->id} заблокировано: {$reason}",
+                ['block_reason' => $reason]
+            );
 
             Log::warning('Ad blocked', [
                 'ad_id' => $ad->id,
@@ -236,13 +276,13 @@ class AdModerationService
     public function checkContent(Ad $ad): array
     {
         $issues = [];
-        $content = $ad->content;
 
-        if (!$content) {
+        // Проверяем наличие основных полей контента
+        if (!$ad->title && !$ad->description) {
             return ['Отсутствует контент объявления'];
         }
 
-        $textToCheck = strtolower($content->title . ' ' . $content->description . ' ' . $content->specialty);
+        $textToCheck = strtolower($ad->title . ' ' . $ad->description);
 
         // Проверка стоп-слов
         foreach ($this->bannedWords as $word) {
@@ -259,12 +299,12 @@ class AdModerationService
         }
 
         // Проверка длины описания
-        if ($content->description && mb_strlen($content->description) < 50) {
+        if ($ad->description && mb_strlen($ad->description) < 50) {
             $issues[] = 'Слишком короткое описание';
         }
 
         // Проверка на спам (много заглавных букв)
-        if ($content->title && $this->hasExcessiveCapitals($content->title)) {
+        if ($ad->title && $this->hasExcessiveCapitals($ad->title)) {
             $issues[] = 'Слишком много заглавных букв в заголовке';
         }
 
@@ -277,14 +317,10 @@ class AdModerationService
     private function checkPhotos(Ad $ad): array
     {
         $issues = [];
-        $media = $ad->media;
 
-        if (!$media) {
-            return [];
-        }
-
-        // Проверка количества фото
-        if ($media->getPhotosCountAttribute() === 0) {
+        // Проверка наличия фотографий
+        $photos = $ad->photos ? json_decode($ad->photos, true) : [];
+        if (empty($photos)) {
             $issues[] = 'Отсутствуют фотографии';
         }
 
@@ -300,19 +336,20 @@ class AdModerationService
     private function checkPricing(Ad $ad): array
     {
         $issues = [];
-        $pricing = $ad->pricing;
 
-        if (!$pricing) {
+        // Проверка наличия цен
+        $price = $ad->starting_price ?? 0;
+        if ($price == 0) {
             return ['Отсутствует информация о ценах'];
         }
 
         // Проверка на подозрительно низкие цены
-        if ($pricing->price < 100) {
+        if ($price < 100) {
             $issues[] = 'Подозрительно низкая цена';
         }
 
         // Проверка на подозрительно высокие цены
-        if ($pricing->price > 100000) {
+        if ($price > 100000) {
             $issues[] = 'Подозрительно высокая цена';
         }
 
@@ -388,8 +425,16 @@ class AdModerationService
      */
     public function getAdsForModeration(int $limit = 10): Collection
     {
-        return Ad::with(['content', 'pricing', 'media', 'user'])
-            ->where('status', AdStatus::WAITING_PAYMENT->value)
+        return Ad::with(['user'])
+            ->where(function($query) {
+                // Либо статус PENDING_MODERATION
+                $query->where('status', AdStatus::PENDING_MODERATION->value)
+                      // Либо активные, но не опубликованные (на модерации)
+                      ->orWhere(function($q) {
+                          $q->where('status', AdStatus::ACTIVE->value)
+                            ->where('is_published', false);
+                      });
+            })
             ->orderBy('created_at', 'asc')
             ->limit($limit)
             ->get();

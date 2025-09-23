@@ -9,6 +9,7 @@ use App\Support\Traits\JsonFieldsTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Log;
 
@@ -98,6 +99,11 @@ class Ad extends Model
     ];
 
     /**
+     * Атрибуты для добавления в JSON представление
+     */
+    protected $appends = ['complaints_count', 'has_unresolved_complaints'];
+
+    /**
      * JSON поля для использования с JsonFieldsTrait
      */
     protected $jsonFields = [
@@ -130,6 +136,7 @@ class Ad extends Model
         'views_count' => 'integer',
         'contacts_shown' => 'integer',
         'favorites_count' => 'integer',
+        // Включаем enum cast для status
         'status' => AdStatus::class,
         // work_format обрабатывается через mutator в app/Models/Ad.php
         // Поля верификации
@@ -145,6 +152,14 @@ class Ad extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(\App\Domain\User\Models\User::class);
+    }
+
+    /**
+     * Связь с жалобами
+     */
+    public function complaints(): HasMany
+    {
+        return $this->hasMany(Complaint::class);
     }
 
     /**
@@ -196,6 +211,24 @@ class Ad extends Model
     public function isArchived(): bool
     {
         return $this->archived_at !== null;
+    }
+
+    /**
+     * Получить количество жалоб на объявление
+     * @return int
+     */
+    public function getComplaintsCountAttribute(): int
+    {
+        return $this->complaints()->count();
+    }
+
+    /**
+     * Проверка: есть ли неразрешенные жалобы
+     * @return bool
+     */
+    public function getHasUnresolvedComplaintsAttribute(): bool
+    {
+        return $this->complaints()->where('status', 'pending')->exists();
     }
 
     /**
@@ -306,7 +339,7 @@ class Ad extends Model
         ];
 
         // Если значение в маппинге, используем преобразованное
-        if (isset($mapping[$value])) {
+        if (is_string($value) && isset($mapping[$value])) {
             $value = $mapping[$value];
         }
 

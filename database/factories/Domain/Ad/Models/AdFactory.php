@@ -3,149 +3,145 @@
 namespace Database\Factories\Domain\Ad\Models;
 
 use App\Domain\Ad\Models\Ad;
-use App\Domain\Ad\Enums\AdStatus;
 use App\Domain\User\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * Фабрика для создания тестовых объявлений
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Domain\Ad\Models\Ad>
  */
 class AdFactory extends Factory
 {
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var string
+     */
     protected $model = Ad::class;
 
     /**
-     * Определение модели по умолчанию
+     * Define the model's default state.
      *
-     * @return array
+     * @return array<string, mixed>
      */
-    public function definition()
+    public function definition(): array
     {
-        $services = [
-            'Классический массаж' => $this->faker->numberBetween(2000, 3000),
-            'Тайский массаж' => $this->faker->numberBetween(3000, 4000),
-            'Спортивный массаж' => $this->faker->numberBetween(2500, 3500),
-            'Лечебный массаж' => $this->faker->numberBetween(3000, 4000),
-            'Антицеллюлитный' => $this->faker->numberBetween(2500, 3500),
-            'СПА программы' => $this->faker->numberBetween(4000, 6000),
+        $categories = ['individual', 'salon', 'escort'];
+        // Статусы из базы данных: draft, active, paused, archived
+        $statuses = ['draft', 'active', 'paused', 'archived'];
+        $clients = ['men', 'women', 'couples'];
+        $serviceProviders = ['woman', 'man', 'trans'];
+        $workFormats = ['apartments', 'outcall', 'salon'];
+
+        // Генерируем случайные цены
+        $prices = [];
+        foreach ($workFormats as $format) {
+            if ($this->faker->boolean(70)) { // 70% шанс что формат доступен
+                $basePrice = $this->faker->numberBetween(2000, 10000);
+                $prices[$format . '_1h'] = $basePrice;
+                $prices[$format . '_2h'] = $basePrice * 1.8;
+                $prices[$format . '_night'] = $basePrice * 4;
+            }
+        }
+
+        // Генерируем фотографии
+        $photos = [];
+        $photoCount = $this->faker->numberBetween(1, 6);
+        for ($i = 0; $i < $photoCount; $i++) {
+            $photos[] = [
+                'url' => '/images/masters/demo-' . $this->faker->numberBetween(1, 4) . '.jpg',
+                'preview' => '/images/masters/demo-' . $this->faker->numberBetween(1, 4) . '.jpg'
+            ];
+        }
+
+        // Генерируем услуги
+        $allServices = [
+            'classic' => 'Классический массаж',
+            'erotic' => 'Эротический массаж',
+            'thai' => 'Тайский массаж',
+            'relax' => 'Расслабляющий массаж',
+            'tantric' => 'Тантрический массаж',
+            'body' => 'Боди массаж',
+            'striptease' => 'Стриптиз',
+            'escort' => 'Эскорт'
         ];
-        
-        $selectedServices = $this->faker->randomElements($services, $this->faker->numberBetween(2, 4), true);
-        
-        $districts = ['Центральный', 'Пресненский', 'Тверской', 'Арбат', 'Хамовники', 'Замоскворечье'];
-        $metros = ['Арбатская', 'Баррикадная', 'Тверская', 'Смоленская', 'Парк Культуры', 'Новокузнецкая'];
-        
-        $lat = $this->faker->randomFloat(4, 55.7000, 55.8000);
-        $lng = $this->faker->randomFloat(4, 37.5000, 37.7000);
-        $district = $this->faker->randomElement($districts);
-        
+        $services = $this->faker->randomElements(array_keys($allServices), $this->faker->numberBetween(2, 5));
+
+        // Генерируем район и метро
+        $districts = ['Центральный', 'Адмиралтейский', 'Василеостровский', 'Выборгский',
+                     'Калининский', 'Кировский', 'Колпинский', 'Красногвардейский'];
+        $metros = ['Невский проспект', 'Горьковская', 'Петроградская', 'Чернышевская',
+                  'Площадь Восстания', 'Маяковская', 'Сенная площадь', 'Спортивная'];
+
+        // Получаем случайного пользователя (не админа)
+        $userId = User::where('role', '!=', 'admin')
+            ->inRandomOrder()
+            ->value('id') ?? 2; // Если нет обычных пользователей, используем ID 2
+
         return [
-            'user_id' => User::factory(),
-            'title' => $this->faker->randomElement(['Профессиональный массаж', 'СПА услуги', 'Лечебный массаж']),
-            'description' => $this->faker->paragraph(3),
-            'category' => 'massage',
-            'specialty' => $this->faker->randomElement(['classic', 'thai', 'medical', 'spa']),
-            'status' => AdStatus::ACTIVE->value,
-            'price' => min($selectedServices),
-            'price_unit' => $this->faker->randomElement(['за час', 'за услугу', 'за сеанс']),
-            'prices' => json_encode($selectedServices),
-            'services' => json_encode(array_keys($selectedServices)),
-            'address' => $this->faker->streetAddress(),
-            'geo' => json_encode([
-                'lat' => $lat,
-                'lng' => $lng,
-                'district' => $district
-            ]),
+            'user_id' => $userId,
+            'category' => $this->faker->randomElement($categories),
+            'title' => $this->faker->name() . ' - ' . $this->faker->randomElement(['массажистка', 'мастер массажа']),
+            'clients' => $this->faker->randomElement($clients),
+            'client_age_from' => $this->faker->numberBetween(18, 30),
+            'service_provider' => $this->faker->randomElement($serviceProviders),
+            'services' => $services,
+            'prices' => $prices,
+            'work_format' => $this->faker->randomElements($workFormats, $this->faker->numberBetween(1, 3)),
+            'schedule' => [
+                'monday' => ['from' => '10:00', 'to' => '22:00'],
+                'tuesday' => ['from' => '10:00', 'to' => '22:00'],
+                'wednesday' => ['from' => '10:00', 'to' => '22:00'],
+                'thursday' => ['from' => '10:00', 'to' => '22:00'],
+                'friday' => ['from' => '10:00', 'to' => '22:00'],
+                'saturday' => ['from' => '12:00', 'to' => '20:00'],
+                'sunday' => ['from' => '12:00', 'to' => '20:00'],
+            ],
+            'photos' => $photos,
+            'description' => $this->faker->paragraph(5),
+            'address' => $this->faker->randomElement($districts) . ', м. ' . $this->faker->randomElement($metros),
             'phone' => $this->faker->phoneNumber(),
-            'photos' => json_encode([
-                ['url' => '/images/masters/загруженное.png'],
-                ['url' => '/images/masters/загруженное (4).png'],
-            ]),
-            'schedule' => json_encode([
-                'monday' => ['from' => '09:00', 'to' => '21:00'],
-                'tuesday' => ['from' => '09:00', 'to' => '21:00'],
-                'wednesday' => ['from' => '09:00', 'to' => '21:00'],
-                'thursday' => ['from' => '09:00', 'to' => '21:00'],
-                'friday' => ['from' => '09:00', 'to' => '21:00'],
-                'saturday' => ['from' => '10:00', 'to' => '18:00'],
-                'sunday' => ['from' => '10:00', 'to' => '18:00'],
-            ]),
-            'experience' => $this->faker->numberBetween(1, 15),
-            'service_location' => json_encode(['salon', 'home']),
-            'work_format' => 'individual',
-            'published_at' => now(),
-            'moderated_at' => now(),
+            'contact_method' => $this->faker->randomElement(['phone', 'whatsapp', 'telegram']),
+            'geo' => [
+                'lat' => $this->faker->latitude(59.8, 60.1),
+                'lng' => $this->faker->longitude(30.1, 30.5),
+                'district' => $this->faker->randomElement($districts),
+                'metro' => $this->faker->randomElement($metros)
+            ],
+            'status' => $this->faker->randomElement($statuses), // Используем реальные статусы из базы
+            'views_count' => $this->faker->numberBetween(0, 500),
+            'created_at' => $this->faker->dateTimeBetween('-2 months', 'now'),
+            'updated_at' => now(),
         ];
     }
 
+
     /**
-     * Указать, что объявление в статусе черновика
-     *
-     * @return Factory
+     * Indicate that the ad is active.
      */
-    public function draft()
+    public function active(): static
     {
-        return $this->state(function (array $attributes) {
-            return [
-                'status' => AdStatus::DRAFT->value,
-                'published_at' => null,
-                'moderated_at' => null,
-            ];
-        });
+        return $this->state(fn (array $attributes) => [
+            'status' => 'active',
+        ]);
     }
 
     /**
-     * Указать, что объявление архивировано
-     *
-     * @return Factory
+     * Indicate that the ad is draft.
      */
-    public function archived()
+    public function draft(): static
     {
-        return $this->state(function (array $attributes) {
-            return [
-                'status' => AdStatus::ARCHIVED->value,
-                'archived_at' => now(),
-            ];
-        });
+        return $this->state(fn (array $attributes) => [
+            'status' => 'draft',
+        ]);
     }
 
     /**
-     * Указать, что объявление на модерации
-     *
-     * @return Factory
+     * Indicate that the ad is waiting payment.
      */
-    public function moderation()
+    public function waitingPayment(): static
     {
-        return $this->state(function (array $attributes) {
-            return [
-                'status' => AdStatus::MODERATION->value,
-                'published_at' => now(),
-                'moderated_at' => null,
-            ];
-        });
-    }
-
-    /**
-     * Создать объявление с полными данными для главной страницы
-     *
-     * @return Factory
-     */
-    public function withFullData()
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'clients' => json_encode(['women', 'men']),
-                'features' => json_encode(['parking', 'wifi', 'tea']),
-                'height' => $this->faker->numberBetween(160, 180),
-                'weight' => $this->faker->numberBetween(50, 70),
-                'hair_color' => $this->faker->randomElement(['blonde', 'brunette', 'red']),
-                'eye_color' => $this->faker->randomElement(['blue', 'green', 'brown']),
-                'nationality' => 'Русская',
-                'new_client_discount' => $this->faker->numberBetween(10, 30),
-                'gift' => 'Бесплатная консультация',
-                'travel_radius' => $this->faker->numberBetween(5, 20),
-                'travel_price' => $this->faker->numberBetween(500, 2000),
-            ];
-        });
+        return $this->state(fn (array $attributes) => [
+            'status' => 'waiting_payment',
+        ]);
     }
 }

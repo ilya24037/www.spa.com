@@ -421,6 +421,7 @@
       :progress-hint="`Заполнено обязательных полей: ${filledRequiredFields} из 15 (${requiredFieldsProgress}%)`"
       :submit-label="isEditMode ? 'Обновить объявление' : 'Разместить объявление'"
       :is-active-ad="isActiveAd"
+      :is-waiting-status="isWaitingStatus"
       @submit="handleSubmit"
       @save-draft="handleSaveDraft"
       @publish="handlePublishWithValidation"
@@ -637,6 +638,11 @@ const handlePublishDirect = async () => {
 // Определяем активное объявление
 const isActiveAd = computed(() => {
   return isEditMode.value && props.initialData?.status === 'active'
+})
+
+// Определяем объявления в статусе ожидания действий
+const isWaitingStatus = computed(() => {
+  return isEditMode.value && ['rejected', 'pending_moderation', 'expired', 'waiting_payment'].includes(props.initialData?.status)
 })
 
 // Конфигурация секций
@@ -962,13 +968,24 @@ const handlePublishWithValidation = async () => {
     return
   }
 
-  console.log('✅ AdForm: Валидация пройдена, вызываем handleSubmit')
-  console.log('🚀 Передаем управление в adFormModel.handleSubmit()')
+  console.log('✅ AdForm: Валидация пройдена')
 
-  // Используем единую логику handleSubmit из adFormModel
-  await handleSubmit()
+  // Для черновиков используем прямую публикацию
+  if (isEditMode.value && props.initialData?.status === 'draft') {
+    console.log('🚀 AdForm: Это черновик - используем handlePublishDirect()')
+    await handlePublishDirect()
+  }
+  // Для статусов ожидания действий используем handleSubmit чтобы сохранить изменения
+  else if (isEditMode.value && ['rejected', 'pending_moderation', 'expired', 'waiting_payment'].includes(props.initialData?.status)) {
+    console.log('🚀 AdForm: Это объявление в статусе ожидания - используем handleSubmit() для сохранения изменений')
+    await handleSubmit()
+  }
+  else {
+    console.log('🚀 AdForm: Это новое объявление - используем handleSubmit()')
+    await handleSubmit()
+  }
 
-  console.log('✅ AdForm: handleSubmit завершен')
+  console.log('✅ AdForm: Публикация завершена')
 }
 
 // Переопределяем checkSectionFilled для новых требований

@@ -1,0 +1,48 @@
+План реализации с правильным статусом            │ │
+│ │ pending_moderation                               │ │
+│ │                                                  │ │
+│ │ 1. Добавить новый статус в enum AdStatus         │ │
+│ │                                                  │ │
+│ │ case PENDING_MODERATION = 'pending_moderation';  │ │
+│ │                                                  │ │
+│ │ 2. Создать миграцию для БД                       │ │
+│ │                                                  │ │
+│ │ ALTER TABLE ads MODIFY COLUMN status             │ │
+│ │ ENUM('draft', 'active', 'paused', 'archived',    │ │
+│ │ 'pending_moderation', 'rejected', 'blocked');    │ │
+│ │                                                  │ │
+│ │ 3. Обновить логику модерации                     │ │
+│ │                                                  │ │
+│ │ - Заменить WAITING_PAYMENT на PENDING_MODERATION │ │
+│ │  в AdModerationService                           │ │
+│ │ - Обновить все места где используется для        │ │
+│ │ модерации                                        │ │
+│ │                                                  │ │
+│ │ 4. Исправить workflow:                           │ │
+│ │                                                  │ │
+│ │ - Новое: draft → pending_moderation → active     │ │
+│ │ - Редактирование: active → pending_moderation    │ │
+│ │ (показываем старое) → active                     │ │
+│ │ - Из архива: archived → pending_moderation →     │ │
+│ │ active                                           │ │
+│ │ - После жалобы: active → pending_moderation →    │ │
+│ │ active/blocked                                   │ │
+│ │                                                  │ │
+│ │ 5. Обновить тестовые данные                      │ │
+│ │                                                  │ │
+│ │ - Изменить статус с 'paused' на                  │ │
+│ │ 'pending_moderation'                             │ │
+│ │ - Обновить AdFactory                             │ │
+│ │                                                  │ │
+│ │ 6. Оставить waiting_payment для будущего         │ │
+│ │                                                  │ │
+│ │ - Когда добавим платные объявления, статус уже   │ │
+│ │ будет готов                                      │ │
+│ │                                                  │ │
+│ │ Порядок выполнения:                              │ │
+│ │                                                  │ │
+│ │ 1. Добавлю PENDING_MODERATION в enum             │ │
+│ │ 2. Создам миграцию для БД                        │ │
+│ │ 3. Обновлю AdModerationService                   │ │
+│ │ 4. Исправлю существующие данные                  │ │
+│ │ 5. Протестирую модерацию         

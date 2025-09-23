@@ -20,13 +20,36 @@
 
       <!-- Статистика и действия (НЕ кликабельные) -->
       <div class="item-info-section">
+        <!-- Индикатор жалоб для админов -->
+        <div v-if="($page.props.adminMode || $page.props.complaintsMode) && item.complaints_count"
+             class="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-red-600">⚠️</span>
+              <span class="text-sm font-medium text-red-900">
+                Жалоб: {{ item.complaints_count }}
+              </span>
+              <span v-if="item.has_unresolved_complaints"
+                    class="px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded-full">
+                Неразрешенные
+              </span>
+            </div>
+            <button
+              @click="viewComplaints"
+              class="px-3 py-1 text-sm bg-white border border-red-300 text-red-700 rounded hover:bg-red-50 transition-colors"
+            >
+              👁️ Посмотреть
+            </button>
+          </div>
+        </div>
+
         <div class="item-info-top">
           <ItemStats :item="item" />
         </div>
         
         <!-- Действия на уровне низа фото -->
         <div class="item-actions-bottom">
-          <ItemActions 
+          <ItemActions
             :item="item"
             @pay="payItem"
             @promote="promoteItem"
@@ -36,7 +59,88 @@
             @mark-irrelevant="markIrrelevant"
             @book="bookItem"
             @restore="restoreItem"
+            @publish="publishItem"
           />
+        </div>
+
+        <!-- Кнопки модерации для админов -->
+        <div v-if="$page.props.moderationMode" class="flex gap-2 mt-4 pt-4 border-t">
+          <button
+            @click="approveItem"
+            data-action="approve"
+            class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            ✅ Одобрить
+          </button>
+          <button
+            @click="showRejectDialog = true"
+            data-action="reject"
+            class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+          >
+            ❌ Отклонить
+          </button>
+        </div>
+
+        <!-- Кнопки управления пользователями -->
+        <div v-if="$page.props.userManagementMode" class="flex gap-2 mt-4 pt-4 border-t">
+          <button
+            @click="toggleUserBlock"
+            :class="[
+              'flex-1 px-4 py-2 rounded-lg transition-colors',
+              item.status === 'blocked'
+                ? 'bg-green-600 text-white hover:bg-green-700'
+                : 'bg-yellow-600 text-white hover:bg-yellow-700'
+            ]"
+          >
+            {{ item.status === 'blocked' ? '🔓 Разблокировать' : '🔒 Заблокировать' }}
+          </button>
+        </div>
+
+        <!-- Кнопки обработки жалоб -->
+        <div v-if="$page.props.complaintsMode" class="flex gap-2 mt-4 pt-4 border-t">
+          <button
+            @click="resolveComplaint('accept')"
+            class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            ✅ Оправдать
+          </button>
+          <button
+            @click="resolveComplaint('block')"
+            class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+          >
+            🚫 Заблокировать
+          </button>
+        </div>
+
+        <!-- Кнопки управления мастерами -->
+        <div v-if="$page.props.mastersMode" class="flex gap-2 mt-4 pt-4 border-t">
+          <button
+            @click="toggleMasterVerification"
+            :class="[
+              'flex-1 px-4 py-2 rounded-lg transition-colors',
+              item.is_verified
+                ? 'bg-yellow-600 text-white hover:bg-yellow-700'
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+            ]"
+          >
+            {{ item.is_verified ? '❌ Снять верификацию' : '✅ Верифицировать' }}
+          </button>
+        </div>
+
+        <!-- Кнопки модерации отзывов -->
+        <div v-if="$page.props.reviewsMode" class="flex gap-2 mt-4 pt-4 border-t">
+          <button
+            @click="approveReview"
+            class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            ✅ Одобрить отзыв
+          </button>
+          <button
+            @click="deleteReview"
+            class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+          >
+            🗑️ Удалить отзыв
+          </button>
         </div>
       </div>
     </div>
@@ -52,6 +156,27 @@
     variant="danger"
     @confirm="deleteItem"
   />
+
+  <!-- Диалог отклонения для модерации -->
+  <div v-if="showRejectDialog" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg max-w-md w-full">
+      <h3 class="text-lg font-semibold mb-4">Причина отклонения</h3>
+      <textarea
+        v-model="rejectReason"
+        class="w-full p-2 border rounded"
+        rows="3"
+        placeholder="Укажите причину..."
+      ></textarea>
+      <div class="flex gap-2 mt-4">
+        <button @click="rejectItem" class="flex-1 px-4 py-2 bg-red-600 text-white rounded">
+          Отклонить
+        </button>
+        <button @click="showRejectDialog = false" class="flex-1 px-4 py-2 bg-gray-200 rounded">
+          Отмена
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -74,6 +199,8 @@ const emit = defineEmits<ItemCardEmits>()
 // Состояние компонента
 const showDeleteModal = ref(false)
 const isArchiving = ref(false)
+const showRejectDialog = ref(false)
+const rejectReason = ref('')
 
 // Вычисляемые свойства
 const itemUrl = computed(() => {
@@ -95,9 +222,61 @@ const promoteItem = () => {
 }
 
 const editItem = () => {
-  // Для всех объявлений (включая черновики) используем один роут
-  router.visit(`/ads/${props.item.id}/edit`)
+  // Если админ редактирует чужое объявление
+  if ($page.props.adminMode) {
+    router.visit(`/profile/admin/ads/${props.item.id}/edit`)
+  } else {
+    // Для обычных пользователей - стандартный роут
+    router.visit(`/ads/${props.item.id}/edit`)
+  }
   emit('edit', props.item.id)
+}
+
+/**
+ * Публикация объявления (повторная отправка на модерацию)
+ * Для отклоненных и истекших объявлений
+ */
+const publishItem = () => {
+  // Frontend валидация входных данных
+  if (!props.item.id || typeof props.item.id !== 'number') {
+    console.error('Некорректный ID объявления:', props.item.id)
+    return
+  }
+
+  // Для rejected/expired - повторная отправка на модерацию
+  if (['rejected', 'expired'].includes(props.item.status)) {
+    router.post(`/ads/${props.item.id}/resubmit`, {}, {
+      preserveState: false,
+      preserveScroll: true,
+      onSuccess: () => {
+        emit('item-updated', props.item.id, { status: 'pending_moderation' })
+        emit('publish', props.item.id)
+      },
+      onError: (errors) => {
+        console.error('Ошибка при отправке на модерацию:', errors)
+        emit('item-error', props.item.id, 'Не удалось отправить на модерацию')
+      }
+    })
+  }
+  // Для pending_moderation - уже на модерации
+  else if (props.item.status === 'pending_moderation') {
+    emit('item-error', props.item.id, 'Объявление уже находится на модерации')
+  }
+  // Для draft - публикация
+  else if (props.item.status === 'draft') {
+    router.post(`/draft/${props.item.id}/publish`, {}, {
+      preserveState: false,
+      preserveScroll: true,
+      onSuccess: () => {
+        emit('item-updated', props.item.id, { status: 'active' })
+        emit('publish', props.item.id)
+      },
+      onError: (errors) => {
+        console.error('Ошибка при публикации:', errors)
+        emit('item-error', props.item.id, 'Не удалось опубликовать объявление')
+      }
+    })
+  }
 }
 
 /**
@@ -131,6 +310,15 @@ const restoreItem = () => {
       emit('item-error', props.item.id, 'Не удалось восстановить объявление')
     }
   })
+}
+
+/**
+ * Просмотр жалоб на объявление
+ * Для админов и модераторов
+ */
+const viewComplaints = () => {
+  // Переход на страницу жалоб для конкретного объявления
+  router.visit(`/profile/complaints/ad/${props.item.id}`)
 }
 
 /**
@@ -214,6 +402,71 @@ const deleteItem = () => {
       console.error('Ошибка при удалении:', errors)
       alert('Ошибка при удалении объявления')
     }
+  })
+}
+
+// Методы модерации
+const approveItem = () => {
+  router.post(`/profile/moderation/${props.item.id}/approve`, {}, {
+    preserveState: false,
+    preserveScroll: true,
+    onSuccess: () => {
+      // Объявление исчезнет после перезагрузки страницы
+      emit('item-approved', props.item.id)
+    }
+  })
+}
+
+const rejectItem = () => {
+  router.post(`/profile/moderation/${props.item.id}/reject`, {
+    reason: rejectReason.value
+  }, {
+    preserveState: false,
+    preserveScroll: true,
+    onSuccess: () => {
+      showRejectDialog.value = false
+      rejectReason.value = ''
+      emit('item-rejected', props.item.id)
+    }
+  })
+}
+
+// Методы управления пользователями
+const toggleUserBlock = () => {
+  router.post(`/profile/users/${props.item.id}/toggle`, {}, {
+    preserveState: false,
+    preserveScroll: true
+  })
+}
+
+// Методы обработки жалоб
+const resolveComplaint = (action: string) => {
+  router.post(`/profile/complaints/${props.item.id}/resolve`, { action }, {
+    preserveState: false,
+    preserveScroll: true
+  })
+}
+
+// Методы управления мастерами
+const toggleMasterVerification = () => {
+  router.post(`/profile/masters/${props.item.id}/verify`, {}, {
+    preserveState: false,
+    preserveScroll: true
+  })
+}
+
+// Методы модерации отзывов
+const approveReview = () => {
+  router.post(`/profile/reviews/${props.item.id}/moderate`, { action: 'approve' }, {
+    preserveState: false,
+    preserveScroll: true
+  })
+}
+
+const deleteReview = () => {
+  router.post(`/profile/reviews/${props.item.id}/moderate`, { action: 'delete' }, {
+    preserveState: false,
+    preserveScroll: true
   })
 }
 </script>

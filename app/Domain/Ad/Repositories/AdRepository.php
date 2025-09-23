@@ -244,7 +244,15 @@ class AdRepository extends BaseRepository
     public function getPendingModeration(int $perPage = 15): LengthAwarePaginator
     {
         return Ad::with(['user'])
-            ->where('status', AdStatus::WAITING_PAYMENT)
+            ->where(function($query) {
+                // Либо статус PENDING_MODERATION
+                $query->where('status', AdStatus::PENDING_MODERATION)
+                      // Либо активные, но не опубликованные (на модерации)
+                      ->orWhere(function($q) {
+                          $q->where('status', AdStatus::ACTIVE)
+                            ->where('is_published', false);
+                      });
+            })
             ->orderBy('created_at', 'asc')
             ->paginate($perPage);
     }

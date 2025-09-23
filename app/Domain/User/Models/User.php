@@ -25,6 +25,16 @@ class User extends Authenticatable implements MustVerifyEmail
     use HasRoles, HasProfile, HasMasterProfile;
 
     /**
+     * Create a new factory instance for the model.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory<static>
+     */
+    protected static function newFactory()
+    {
+        return \Database\Factories\UserFactory::new();
+    }
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
@@ -151,7 +161,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function isAdmin(): bool
     {
-        return $this->role === 'admin' || $this->is_admin === true;
+        return $this->role === UserRole::ADMIN || $this->is_admin === true;
     }
     
     /**

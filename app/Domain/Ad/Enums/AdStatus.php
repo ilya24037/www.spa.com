@@ -9,6 +9,7 @@ namespace App\Domain\Ad\Enums;
 enum AdStatus: string
 {
     case DRAFT = 'draft';
+    case PENDING_MODERATION = 'pending_moderation';
     case WAITING_PAYMENT = 'waiting_payment';
     case ACTIVE = 'active';
     case ARCHIVED = 'archived';
@@ -23,6 +24,7 @@ enum AdStatus: string
     {
         return match($this) {
             self::DRAFT => 'Черновик',
+            self::PENDING_MODERATION => 'На модерации',
             self::WAITING_PAYMENT => 'Ждет оплаты',
             self::ACTIVE => 'Активное',
             self::ARCHIVED => 'В архиве',
@@ -39,6 +41,7 @@ enum AdStatus: string
     {
         return match($this) {
             self::DRAFT => '#6B7280',         // gray
+            self::PENDING_MODERATION => '#3B82F6', // blue
             self::WAITING_PAYMENT => '#F59E0B', // amber
             self::ACTIVE => '#10B981',        // green
             self::ARCHIVED => '#6B7280',      // gray
@@ -65,7 +68,7 @@ enum AdStatus: string
     public function isEditable(): bool
     {
         return match($this) {
-            self::DRAFT, self::WAITING_PAYMENT, self::ARCHIVED => true,
+            self::DRAFT, self::PENDING_MODERATION, self::WAITING_PAYMENT, self::ARCHIVED, self::REJECTED => true,
             default => false,
         };
     }
@@ -87,11 +90,12 @@ enum AdStatus: string
     public function getNextPossibleStatuses(): array
     {
         return match($this) {
-            self::DRAFT => [self::WAITING_PAYMENT, self::ARCHIVED],
+            self::DRAFT => [self::PENDING_MODERATION, self::ARCHIVED],
+            self::PENDING_MODERATION => [self::ACTIVE, self::REJECTED, self::ARCHIVED],
             self::WAITING_PAYMENT => [self::ACTIVE, self::ARCHIVED, self::REJECTED],
-            self::ACTIVE => [self::ARCHIVED, self::EXPIRED, self::BLOCKED],
-            self::ARCHIVED => [self::DRAFT, self::WAITING_PAYMENT],
-            self::EXPIRED => [self::WAITING_PAYMENT, self::ARCHIVED],
+            self::ACTIVE => [self::PENDING_MODERATION, self::ARCHIVED, self::EXPIRED, self::BLOCKED],
+            self::ARCHIVED => [self::PENDING_MODERATION, self::DRAFT],
+            self::EXPIRED => [self::PENDING_MODERATION, self::ARCHIVED],
             self::REJECTED => [self::DRAFT, self::ARCHIVED],
             self::BLOCKED => [self::ARCHIVED],
         };

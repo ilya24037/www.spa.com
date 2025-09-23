@@ -768,27 +768,22 @@ export function useAdFormModel(props: any, emit: any) {
 
     // Добавляем массивы как JSON
     try {
-      // Передаем массив clients через FormData
+      // ИСПРАВЛЕНО: Передаем массивы как JSON-строки для правильной обработки на backend
+      // Основано на опыте из DRAFT_FIELDS_SAVING_FIX_REPORT.md
       if (form.clients && Array.isArray(form.clients)) {
-        form.clients.forEach((client, index) => {
-          formData.append(`clients[${index}]`, client)
-        })
+        formData.append('clients', JSON.stringify(form.clients))
       }
       if (form.client_age_from !== null && form.client_age_from !== undefined) {
         formData.append('client_age_from', String(form.client_age_from))
       }
-      // Передаем массив service_provider через FormData
+      // Передаем массив service_provider как JSON
       if (form.service_provider && Array.isArray(form.service_provider)) {
-        form.service_provider.forEach((provider, index) => {
-          formData.append(`service_provider[${index}]`, provider)
-        })
+        formData.append('service_provider', JSON.stringify(form.service_provider))
       }
       if (form.services) formData.append('services', JSON.stringify(form.services))
-      // Передаем массив features через FormData
+      // Передаем массив features как JSON
       if (form.features && Array.isArray(form.features)) {
-        form.features.forEach((feature, index) => {
-          formData.append(`features[${index}]`, feature)
-        })
+        formData.append('features', JSON.stringify(form.features))
       }
       if (form.schedule) {
         formData.append('schedule', JSON.stringify(form.schedule))
@@ -796,10 +791,11 @@ export function useAdFormModel(props: any, emit: any) {
       if (form.media_settings) formData.append('media_settings', JSON.stringify(form.media_settings))
       if (form.faq) formData.append('faq', JSON.stringify(form.faq))
 
-      // Геолокация - всегда отправляем как массив (даже пустой)
+      // Геолокация отправляется как вложенные поля для правильной валидации
       const geoData = form.geo || {}
-      formData.append('geo[city]', geoData.city || '')
-      formData.append('geo[address]', geoData.address || '')
+      // Backend ожидает geo как массив с вложенными полями
+      if (geoData.city) formData.append('geo[city]', geoData.city)
+      if (geoData.address) formData.append('geo[address]', geoData.address)
       if (geoData.coordinates) {
         formData.append('geo[coordinates]', JSON.stringify(geoData.coordinates))
       }
@@ -812,6 +808,23 @@ export function useAdFormModel(props: any, emit: any) {
     } catch (err) {
       console.error('❌ adFormModel: Ошибка сериализации данных', err)
     }
+
+    // Добавим отладку для проверки что все критические поля присутствуют
+    console.log('🔍 Проверка критических полей в FormData:', {
+      service_provider: formData.get('service_provider'),
+      clients: formData.get('clients'),
+      features: formData.get('features'),
+      services: formData.get('services')?.substring(0, 100),
+      'geo[city]': formData.get('geo[city]'),
+      'geo[address]': formData.get('geo[address]'),
+      title: formData.get('title'),
+      age: formData.get('age'),
+      height: formData.get('height'),
+      weight: formData.get('weight'),
+      phone: formData.get('phone'),
+      breast_size: formData.get('breast_size'),
+      hair_color: formData.get('hair_color')
+    })
 
     // Обрабатываем фотографии как отдельные поля photos[0], photos[1], etc.
     if (form.photos && Array.isArray(form.photos)) {
@@ -1186,27 +1199,22 @@ export function useAdFormModel(props: any, emit: any) {
     
     // Добавляем массивы как JSON
     try {
-      // Передаем массив clients через FormData
+      // ИСПРАВЛЕНО: Передаем массивы как JSON-строки для правильной обработки на backend
+      // Основано на опыте из DRAFT_FIELDS_SAVING_FIX_REPORT.md
       if (form.clients && Array.isArray(form.clients)) {
-        form.clients.forEach((client, index) => {
-          formData.append(`clients[${index}]`, client)
-        })
+        formData.append('clients', JSON.stringify(form.clients))
       }
       if (form.client_age_from !== null && form.client_age_from !== undefined) {
         formData.append('client_age_from', String(form.client_age_from))
       }
-      // Передаем массив service_provider через FormData
+      // Передаем массив service_provider как JSON
       if (form.service_provider && Array.isArray(form.service_provider)) {
-        form.service_provider.forEach((provider, index) => {
-          formData.append(`service_provider[${index}]`, provider)
-        })
+        formData.append('service_provider', JSON.stringify(form.service_provider))
       }
       if (form.services) formData.append('services', JSON.stringify(form.services))
-      // Передаем массив features через FormData
+      // Передаем массив features как JSON
       if (form.features && Array.isArray(form.features)) {
-        form.features.forEach((feature, index) => {
-          formData.append(`features[${index}]`, feature)
-        })
+        formData.append('features', JSON.stringify(form.features))
       }
       if (form.schedule) {
         formData.append('schedule', JSON.stringify(form.schedule))

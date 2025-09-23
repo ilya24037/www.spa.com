@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Team Chat - SPA Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-container {
+            width: 90%;
+            max-width: 1200px;
+            height: 90vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            display: flex;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: #2c3e50;
+            padding: 20px;
+            color: white;
+        }
+
+        .team-header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #34495e;
+            margin-bottom: 20px;
+        }
+
+        .team-header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .team-members {
+            margin-bottom: 30px;
+        }
+
+        .member {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #34495e;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .member:hover {
+            background: #3d5068;
+        }
+
+        .member-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-right: 12px;
+        }
+
+        .member-avatar.claude {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .member-avatar.cursor {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+        }
+
+        .member-avatar.user {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+        }
+
+        .member-info {
+            flex: 1;
+        }
+
+        .member-name {
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .member-status {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            background: #2ecc71;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .chat-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .chat-subtitle {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .messages-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #fafbfc;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+
+        .message-author {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .message-time {
+            color: #7f8c8d;
+            font-size: 12px;
+        }
+
+        .message-content {
+            margin-left: 42px;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .message.claude .message-content {
+            background: linear-gradient(135deg, #667eea15, #764ba215);
+            border-left: 3px solid #667eea;
+        }
+
+        .message.cursor .message-content {
+            background: linear-gradient(135deg, #f093fb15, #f5576c15);
+            border-left: 3px solid #f093fb;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #4facfe15, #00f2fe15);
+            border-left: 3px solid #4facfe;
+        }
+
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+
+        .file-tag {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+
+        .status-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .status-tag.completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-tag.in-progress {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-tag.pending {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            border-radius: 25px;
+            padding: 5px 5px 5px 20px;
+        }
+
+        .message-input {
+            flex: 1;
+            border: none;
+            background: none;
+            outline: none;
+            font-size: 14px;
+            padding: 10px 0;
+        }
+
+        .send-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+
+        .send-button:hover {
+            transform: scale(1.1);
+        }
+
+        .send-button:active {
+            transform: scale(0.95);
+        }
+
+        .task-list {
+            background: #34495e;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .task-list h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .task-item {
+            font-size: 12px;
+            padding: 5px 0;
+            opacity: 0.8;
+        }
+
+        .task-item.completed {
+            text-decoration: line-through;
+            opacity: 0.5;
+        }
+
+        /* Scrollbar styling */
+        .messages-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .messages-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .messages-container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        .messages-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="sidebar">
+            <div class="team-header">
+                <h1>🚀 AI Team</h1>
+                <div style="font-size: 12px; opacity: 0.8;">SPA Platform Development</div>
+            </div>
+
+            <div class="team-members">
+                <div class="member" onclick="filterMessages('all')">
+                    <div class="member-avatar user">👤</div>
+                    <div class="member-info">
+                        <div class="member-name">You</div>
+                        <div class="member-status">
+                            <span class="status-indicator"></span>
+                            Online
+                        </div>
+                    </div>
+                </div>
+
+                <div class="member" onclick="filterMessages('claude')">
+                    <div class="member-avatar claude">🤖</div>
+                    <div class="member-info">
+                        <div class="member-name">Claude</div>
+                        <div class="member-status">
+                            <span class="status-indicator"></span>
+                            Active
+                        </div>
+                    </div>
+                </div>
+
+                <div class="member" onclick="filterMessages('cursor')">
+                    <div class="member-avatar cursor">⚡</div>
+                    <div class="member-info">
+                        <div class="member-name">Cursor AI</div>
+                        <div class="member-status">
+                            <span class="status-indicator"></span>
+                            Ready
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="task-list">
+                <h3>📋 Current Tasks</h3>
+                <div id="taskList"></div>
+            </div>
+        </div>
+
+        <div class="chat-main">
+            <div class="chat-header">
+                <div class="chat-title">Team Chat</div>
+                <div class="chat-subtitle">Collaborative development workspace</div>
+            </div>
+
+            <div class="messages-container" id="messages">
+                <!-- Messages will be loaded here -->
+            </div>
+
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <input
+                        type="text"
+                        class="message-input"
+                        id="messageInput"
+                        placeholder="Type your message... (@ to mention, / for commands)"
+                        onkeypress="handleKeyPress(event)"
+                    >
+                    <button class="send-button" onclick="sendMessage()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load messages from agent-chat.md
+        let messages = [];
+        let currentFilter = 'all';
+
+        // Parse and load existing messages
+        function loadMessages() {
+            // This would normally fetch from agent-chat.md
+            // For now, we'll add sample messages
+            const sampleMessages = [
+                {
+                    author: 'Claude',
+                    type: 'claude',
+                    time: '2025-01-22 10:00',
+                    content: 'Создал общий файл коммуникации `.aidd/agent-chat.md` для синхронизации работы между агентами.',
+                    status: 'completed',
+                    files: ['.aidd/agent-chat.md', '.aidd/workflow.md']
+                },
+                {
+                    author: 'Cursor AI',
+                    type: 'cursor',
+                    time: '2025-01-22 10:15',
+                    content: 'Создал правила работы с agent-chat.md для Cursor AI, настроил автоматическое чтение правил.',
+                    status: 'completed',
+                    files: ['.cursor/rules/agent-communication.mdc']
+                },
+                {
+                    author: 'You',
+                    type: 'user',
+                    time: '2025-01-22 10:30',
+                    content: 'Отлично! Теперь у нас есть общий канал коммуникации. Давайте протестируем синхронизацию.',
+                    status: null
+                }
+            ];
+
+            messages = sampleMessages;
+            displayMessages();
+        }
+
+        function displayMessages() {
+            const container = document.getElementById('messages');
+            container.innerHTML = '';
+
+            const filteredMessages = currentFilter === 'all'
+                ? messages
+                : messages.filter(m => m.type === currentFilter);
+
+            filteredMessages.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${msg.type}`;
+
+                let filesHtml = '';
+                if (msg.files && msg.files.length > 0) {
+                    filesHtml = msg.files.map(f => `<span class="file-tag">📄 ${f}</span>`).join('');
+                }
+
+                let statusHtml = '';
+                if (msg.status) {
+                    statusHtml = `<span class="status-tag ${msg.status}">${
+                        msg.status === 'completed' ? '✅ Completed' :
+                        msg.status === 'in-progress' ? '🔄 In Progress' :
+                        '⏳ Pending'
+                    }</span>`;
+                }
+
+                const avatar = msg.type === 'claude' ? '🤖' :
+                              msg.type === 'cursor' ? '⚡' : '👤';
+
+                const avatarClass = msg.type === 'claude' ? 'claude' :
+                                   msg.type === 'cursor' ? 'cursor' : 'user';
+
+                messageDiv.innerHTML = `
+                    <div class="message-header">
+                        <div class="message-avatar ${avatarClass}">${avatar}</div>
+                        <div class="message-author">${msg.author}</div>
+                        <div class="message-time">${msg.time}</div>
+                        ${statusHtml}
+                    </div>
+                    <div class="message-content">
+                        ${msg.content}
+                        ${filesHtml ? `<div style="margin-top: 10px;">${filesHtml}</div>` : ''}
+                    </div>
+                `;
+
+                container.appendChild(messageDiv);
+            });
+
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function filterMessages(type) {
+            currentFilter = type;
+            displayMessages();
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const content = input.value.trim();
+
+            if (!content) return;
+
+            const now = new Date();
+            const time = now.toISOString().replace('T', ' ').substring(0, 16);
+
+            messages.push({
+                author: 'You',
+                type: 'user',
+                time: time,
+                content: content,
+                status: null
+            });
+
+            displayMessages();
+            input.value = '';
+
+            // Simulate AI response
+            if (content.includes('@Claude')) {
+                setTimeout(() => {
+                    messages.push({
+                        author: 'Claude',
+                        type: 'claude',
+                        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+                        content: 'Понял, приступаю к выполнению задачи...',
+                        status: 'in-progress'
+                    });
+                    displayMessages();
+                }, 1000);
+            }
+
+            if (content.includes('@Cursor')) {
+                setTimeout(() => {
+                    messages.push({
+                        author: 'Cursor AI',
+                        type: 'cursor',
+                        time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+                        content: 'Готов к работе, анализирую контекст...',
+                        status: 'in-progress'
+                    });
+                    displayMessages();
+                }, 1500);
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function loadTasks() {
+            const taskList = document.getElementById('taskList');
+            const tasks = [
+                { text: '✅ Синхронизация документации', completed: true },
+                { text: '🔄 Система бронирования (60%)', completed: false },
+                { text: '⏳ Поиск мастеров (0%)', completed: false },
+                { text: '⏳ Система отзывов', completed: false }
+            ];
+
+            taskList.innerHTML = tasks.map(task =>
+                `<div class="task-item ${task.completed ? 'completed' : ''}">${task.text}</div>`
+            ).join('');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMessages();
+            loadTasks();
+        });
+
+        // Auto-reload messages every 5 seconds (simulating real-time updates)
+        setInterval(() => {
+            // In real implementation, this would check agent-chat.md for updates
+            console.log('Checking for new messages...');
+        }, 5000);
+    </script>
+</body>
+</html>

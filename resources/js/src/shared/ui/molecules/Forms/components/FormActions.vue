@@ -1,8 +1,8 @@
 <template>
   <div class="mt-8 px-6 py-6 bg-gray-50/80 rounded-xl border border-gray-200">
     <div class="flex gap-4 justify-end items-center sm:flex-row flex-col-reverse">
-      <!-- Кнопки для активных объявлений (ТОЧНАЯ КОПИЯ ЧЕРНОВИКОВ) -->
-      <template v-if="isActiveAd">
+      <!-- Кнопки для статусов ожидания действий (rejected, pending_moderation, expired) -->
+      <template v-if="isWaitingStatus">
         <button
           type="button"
           @click="$emit('cancel')"
@@ -11,7 +11,29 @@
         >
           Отменить и выйти
         </button>
-        
+
+        <button
+          type="button"
+          @click="$emit('publish')"
+          class="px-6 py-3 rounded-lg text-base font-semibold cursor-pointer transition-all duration-200 flex items-center gap-2 min-w-[140px] justify-center bg-gradient-to-br from-blue-500 to-blue-700 text-white border-0 hover:from-blue-600 hover:to-blue-800 hover:-translate-y-px disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none sm:w-auto w-full"
+          :disabled="publishing"
+        >
+          <span v-if="publishing" class="w-4 h-4 border-2 border-transparent border-t-current rounded-full animate-spin"></span>
+          {{ publishing ? 'Сохранение...' : 'Сохранить изменения' }}
+        </button>
+      </template>
+
+      <!-- Кнопки для активных объявлений -->
+      <template v-else-if="isActiveAd">
+        <button
+          type="button"
+          @click="$emit('cancel')"
+          class="px-6 py-3 rounded-lg text-base font-semibold cursor-pointer transition-all duration-200 flex items-center gap-2 min-w-[140px] justify-center bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none sm:w-auto w-full"
+          :disabled="savingDraft"
+        >
+          Отменить и выйти
+        </button>
+
         <button
           type="button"
           @click="() => { console.log('🔵 Кнопка СОХРАНИТЬ ИЗМЕНЕНИЯ нажата!'); $emit('submit') }"
@@ -66,6 +88,7 @@ interface Props {
   showProgress?: boolean
   progressHint?: string
   isActiveAd?: boolean
+  isWaitingStatus?: boolean
 }
 
 withDefaults(defineProps<Props>(), {
@@ -76,7 +99,8 @@ withDefaults(defineProps<Props>(), {
   publishing: false,
   showProgress: false,
   progressHint: '',
-  isActiveAd: false
+  isActiveAd: false,
+  isWaitingStatus: false
 })
 
 defineEmits<{

@@ -8,6 +8,7 @@ use App\Application\Http\Requests\Ad\UpdateAdRequest;
 use App\Application\Http\Resources\Ad\AdResource;
 use App\Domain\Ad\Services\AdService;
 use App\Domain\Ad\Services\DraftService;
+use App\Domain\Ad\Services\AdModerationService;
 use App\Domain\Ad\Models\Ad;
 use App\Domain\Ad\DTOs\CreateAdDTO;
 use Illuminate\Http\RedirectResponse;
@@ -26,7 +27,8 @@ class AdController extends Controller
 {
     public function __construct(
         private AdService $adService,
-        private DraftService $draftService
+        private DraftService $draftService,
+        private AdModerationService $moderationService
     ) {}
 
     /**
@@ -240,6 +242,15 @@ class AdController extends Controller
         $processedVideo = $this->processVideoFromRequest($request);
         $processedVerificationPhoto = $this->processVerificationPhotoFromRequest($request);
         
+        // Обработка полей prices (они приходят как prices[key]) - как в DraftController
+        $prices = [];
+        foreach ($request->all() as $key => $value) {
+            if (str_starts_with($key, 'prices[')) {
+                $fieldName = str_replace(['prices[', ']'], '', $key);
+                $prices[$fieldName] = $value;
+            }
+        }
+        
         // Используем DraftService для обновления (как черновики)
         $data = array_merge(
             $request->validated(),
@@ -249,6 +260,17 @@ class AdController extends Controller
                 'verification_photo' => $processedVerificationPhoto // Добавляем обработанное проверочное фото
             ]
         );
+        
+        // Добавляем prices если есть
+        if (!empty($prices)) {
+            $data['prices'] = $prices;
+        }
+        
+        \Log::info('🟢 AdController::update Обработка prices полей', [
+            'prices_found' => !empty($prices),
+            'prices_data' => $prices,
+            'prices_count' => count($prices)
+        ]);
         
         \Log::info('🟢 AdController::update Данные после валидации', [
             'data_keys' => array_keys($data),
@@ -799,5 +821,44 @@ class AdController extends Controller
         ]);
         
         return $verificationPhoto;
+    }
+
+    /**
+     * Повторная отправка объявления на модерацию
+     * Для отклоненных и истекших объявлений
+     */
+    public function resubmit(Ad $ad): RedirectResponse
+    {
+        // Проверка владельца
+        if ($ad->user_id !== Auth::id()) {
+            abort(403, 'У вас нет прав для этого действия');
+        }
+
+        // Проверка статуса - можно переотправить только rejected или expired
+        if (!in_array($ad->status->value, ['rejected', 'expired'])) {
+            return back()->with('error', 'Это объявление нельзя отправить на модерацию повторно');
+        }
+
+        try {
+            // Отправка на модерацию через сервис модерации
+            $result = $this->moderationService->submitForModeration($ad);
+
+            if ($result['success']) {
+                $message = $result['status'] === 'approved'
+                    ? 'Объявление автоматически одобрено и опубликовано'
+                    : 'Объявление отправлено на модерацию';
+
+                return back()->with('success', $message);
+            } else {
+                return back()->with('error', $result['error'] ?? 'Не удалось отправить на модерацию');
+            }
+        } catch (\Exception $e) {
+            Log::error('Ошибка при повторной отправке на модерацию', [
+                'ad_id' => $ad->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return back()->with('error', 'Произошла ошибка при отправке на модерацию');
+        }
     }
 }

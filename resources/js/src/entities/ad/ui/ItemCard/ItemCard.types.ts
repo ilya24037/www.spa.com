@@ -25,8 +25,9 @@ export interface AdItem {
   name: string
   title?: string
   description?: string
-  status: 'active' | 'draft' | 'inactive' | 'pending' | 'archived' | 'old' | 'waiting_payment'
+  status: 'active' | 'draft' | 'inactive' | 'pending' | 'archived' | 'old' | 'waiting_payment' | 'rejected' | 'pending_moderation' | 'expired'
   is_published?: boolean // Флаг публикации (false = на модерации, true = опубликовано)
+  moderation_reason?: string // Причина отклонения модерацией
   photos?: ItemPhoto[] | string[]
   photo?: string
   price?: number | ItemPrice
@@ -36,6 +37,8 @@ export interface AdItem {
   messages?: number
   calls?: number
   new_messages_count?: number // Количество новых сообщений
+  complaints_count?: number // Количество жалоб
+  has_unresolved_complaints?: boolean // Есть неразрешенные жалобы
   created_at?: string
   updated_at?: string
   slug?: string
@@ -58,4 +61,7 @@ export interface ItemCardEmits {
   (e: 'mark-irrelevant', itemId: number): void
   (e: 'book', itemId: number): void
   (e: 'restore', itemId: number): void
+  (e: 'publish', itemId: number): void
+  (e: 'item-approved', itemId: number): void
+  (e: 'item-rejected', itemId: number): void
 }

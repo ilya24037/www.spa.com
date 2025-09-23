@@ -10,9 +10,10 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UsersSeeder::class,
-            AdsSeeder::class,
-            MassageCategorySeeder::class, // Добавьте эту строку ПЕРЕД MasterSeeder
-            MasterSeeder::class,
+            // AdsSeeder::class, // Закомментировано - использует старую структуру
+            // MassageCategorySeeder::class, // Закомментировано - таблица не существует
+            // MasterSeeder::class, // Закомментировано - не нужен для тестирования модерации
+            GenerateAdsSeeder::class, // Новый сидер для генерации объявлений
         ]);
     }
 }

@@ -1,10 +1,13 @@
 ---
 description: Development Workflow for SPA Platform
-globs: 
+globs:
 alwaysApply: true
 ---
 
 # Development Process (процесс разработки)
+
+## 📚 Полный процесс работы: @.aidd/workflow.md
+## 📋 Текущие задачи: @.aidd/tasklist.md
 
 ## Workflow (рабочий процесс)
 1. Analyze task (анализируй задачу)
