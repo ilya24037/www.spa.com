@@ -7,13 +7,13 @@ use App\Domain\User\Services\UserService;
 use App\Domain\User\Models\User;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Traits\SafeRefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 class UserServiceTest extends TestCase
 {
-    use RefreshDatabase;
+    use SafeRefreshDatabase;
 
     private UserService $userService;
 

@@ -91,8 +91,14 @@
           class="w-10 h-10 border-2 border-gray-300 flex items-center justify-center text-gray-500 hover:text-blue-600 hover:bg-blue-50 hover:border-gray-400 rounded-lg transition-all flex-shrink-0 focus:outline-none"
           title="Добавить 1000₽"
         >
-          <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
-            <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <svg width="20"
+               height="20"
+               viewBox="0 0 16 16"
+               fill="none">
+            <path d="M8 3v10M3 8h10"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"/>
           </svg>
         </button>
         
@@ -144,8 +150,15 @@
             title="Скрыть комментарий"
             aria-label="Скрыть комментарий"
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg width="16"
+                 height="16"
+                 viewBox="0 0 16 16"
+                 fill="none">
+              <path d="M12 4L4 12M4 4L12 12"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"/>
             </svg>
           </button>
         </template>

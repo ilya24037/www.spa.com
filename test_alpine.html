@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Alpine.js Test</title>
+</head>
+<body>
+    <h1>Testing Alpine.js $persist</h1>
+
+    <div id="test-app"></div>
+
+    <script src="/build/js/app-CndMvJb6.js"></script>
+
+    <script>
+        // Проверяем доступность Alpine
+        console.log('Alpine object:', window.Alpine);
+        console.log('Alpine.$persist:', window.Alpine ? window.Alpine.$persist : 'Alpine not found');
+
+        // Тест persist функции
+        if (window.Alpine && window.Alpine.$persist) {
+            console.log('✅ Alpine.$persist доступен!');
+
+            // Тест использования
+            try {
+                let testValue = window.Alpine.$persist('test value').as('testKey');
+                console.log('✅ Persist test passed:', testValue);
+            } catch (e) {
+                console.error('❌ Persist test failed:', e);
+            }
+        } else {
+            console.error('❌ Alpine.$persist не найден!');
+        }
+    </script>
+</body>
+</html>

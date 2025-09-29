@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('password');
             $table->string('phone')->nullable();
             $table->string('folder_name')->nullable();
-            $table->enum('status', ['active', 'blocked', 'deleted'])->default('active');
+            $table->enum('status', ['active', 'inactive', 'pending', 'suspended', 'banned', 'deleted'])->default('pending');
             $table->rememberToken();
             $table->timestamps();
             

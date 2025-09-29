@@ -17,12 +17,27 @@
       "WebSearch",
       "WebFetch(domain:support.avito.ru)",
       "Bash(npm run build:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(composer show:*)",
+      "Bash(C:Usersuser1.configherdbinphp.bat C:ProgramDataComposerSetupbincomposer.phar show filament/filament)",
+      "WebFetch(domain:filamentphp.com)",
+      "Bash(C:Usersuser1.configherdbinphp.bat artisan test --filter=user_resource)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run lint:check:*)",
+      "Bash(tree:*)",
+      "Bash(find:*)",
+      "Bash(xargs ls:*)"
     ],
     "deny": [],
     "ask": [],
     "defaultMode": "acceptEdits"
   },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "brave-search"
+  ],
+  "language": "ru",
+  "communicationLanguage": "Русский",
   "autoSave": true,
   "confirmBeforeDelete": true,
   "showLineNumbers": true,

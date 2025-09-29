@@ -1,0 +1,517 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use App\Domain\Booking\Models\Booking;
+use App\Domain\Booking\Enums\BookingStatus;
+use App\Domain\Booking\Enums\BookingType;
+use App\Filament\Resources\BookingResource\Pages;
+use Filament\Forms;
+use Filament\Resources\Resource;
+use UnitEnum;
+use BackedEnum;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Schemas\Schema;
+use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Filament\Notifications\Notification;
+
+class BookingResource extends Resource
+{
+    protected static ?string $model = Booking::class;
+
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-calendar-days';
+
+    protected static string|null $modelLabel = 'Бронирование';
+
+    protected static string|null $pluralModelLabel = 'Бронирования';
+
+    protected static UnitEnum|string|null $navigationGroup = 'Контент';
+
+    protected static ?int $navigationSort = 2;
+
+
+    public static function getNavigationBadge(): ?string
+    {
+        return Booking::whereIn('status', ['pending', 'confirmed'])
+            ->whereDate('booking_date', '>=', today())
+            ->count();
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'success';
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
+            ->schema([
+                Forms\Components\Section::make('Основная информация')
+                    ->schema([
+                        Forms\Components\TextInput::make('booking_number')
+                            ->label('Номер бронирования')
+                            ->required()
+                            ->maxLength(255),
+
+                        Forms\Components\Select::make('client_id')
+                            ->label('Клиент')
+                            ->relationship('client', 'email')
+                            ->searchable()
+                            ->required(),
+
+                        Forms\Components\Select::make('master_id')
+                            ->label('Мастер')
+                            ->relationship('master', 'email')
+                            ->searchable()
+                            ->required(),
+
+                        Forms\Components\Select::make('service_id')
+                            ->label('Услуга')
+                            ->relationship('service', 'name')
+                            ->searchable(),
+
+                        Forms\Components\Select::make('type')
+                            ->label('Тип бронирования')
+                            ->options(BookingType::options())
+                            ->required(),
+
+                        Forms\Components\Select::make('status')
+                            ->label('Статус')
+                            ->options(BookingStatus::options())
+                            ->required(),
+                    ])
+                    ->columns(2),
+
+                Forms\Components\Section::make('Дата и время')
+                    ->schema([
+                        Forms\Components\DatePicker::make('booking_date')
+                            ->label('Дата бронирования')
+                            ->required(),
+
+                        Forms\Components\TimePicker::make('start_time')
+                            ->label('Время начала')
+                            ->required(),
+
+                        Forms\Components\TimePicker::make('end_time')
+                            ->label('Время окончания'),
+
+                        Forms\Components\TextInput::make('duration_minutes')
+                            ->label('Длительность (мин)')
+                            ->numeric()
+                            ->suffix('мин'),
+                    ])
+                    ->columns(2),
+
+                Forms\Components\Section::make('Финансовая информация')
+                    ->schema([
+                        Forms\Components\TextInput::make('base_price')
+                            ->label('Базовая цена')
+                            ->numeric()
+                            ->prefix('₽'),
+
+                        Forms\Components\TextInput::make('service_price')
+                            ->label('Цена услуги')
+                            ->numeric()
+                            ->prefix('₽'),
+
+                        Forms\Components\TextInput::make('travel_fee')
+                            ->label('Доплата за выезд')
+                            ->numeric()
+                            ->prefix('₽'),
+
+                        Forms\Components\TextInput::make('discount_amount')
+                            ->label('Размер скидки')
+                            ->numeric()
+                            ->prefix('₽'),
+
+                        Forms\Components\TextInput::make('total_price')
+                            ->label('Итоговая цена')
+                            ->numeric()
+                            ->prefix('₽')
+                            ->required(),
+
+                        Forms\Components\Select::make('payment_method')
+                            ->label('Способ оплаты')
+                            ->options([
+                                'cash' => 'Наличные',
+                                'card' => 'Банковская карта',
+                                'online' => 'Онлайн',
+                                'transfer' => 'Перевод',
+                            ]),
+                    ])
+                    ->columns(2),
+
+                Forms\Components\Section::make('Контактная информация')
+                    ->schema([
+                        Forms\Components\TextInput::make('client_name')
+                            ->label('Имя клиента')
+                            ->maxLength(255),
+
+                        Forms\Components\TextInput::make('client_phone')
+                            ->label('Телефон клиента')
+                            ->tel()
+                            ->maxLength(20),
+
+                        Forms\Components\TextInput::make('client_email')
+                            ->label('Email клиента')
+                            ->email()
+                            ->maxLength(255),
+
+                        Forms\Components\TextInput::make('address')
+                            ->label('Адрес')
+                            ->maxLength(500),
+                    ])
+                    ->columns(2),
+
+                Forms\Components\Section::make('Дополнительная информация')
+                    ->schema([
+                        Forms\Components\Toggle::make('is_home_service')
+                            ->label('Выездная услуга')
+                            ->default(false),
+
+                        Forms\Components\Textarea::make('client_comment')
+                            ->label('Комментарий клиента')
+                            ->rows(2),
+
+                        Forms\Components\Textarea::make('notes')
+                            ->label('Заметки')
+                            ->rows(2),
+
+                        Forms\Components\Textarea::make('internal_notes')
+                            ->label('Внутренние заметки')
+                            ->rows(2),
+
+                        Forms\Components\Textarea::make('cancellation_reason')
+                            ->label('Причина отмены')
+                            ->rows(2)
+                            ->visible(fn (Forms\Get $get): bool => in_array($get('status'), ['cancelled_by_client', 'cancelled_by_master', 'no_show'])),
+                    ])
+                    ->columns(1),
+
+                Forms\Components\Section::make('Временные метки')
+                    ->schema([
+                        Forms\Components\DateTimePicker::make('confirmed_at')
+                            ->label('Время подтверждения'),
+
+                        Forms\Components\DateTimePicker::make('cancelled_at')
+                            ->label('Время отмены'),
+
+                        Forms\Components\DateTimePicker::make('completed_at')
+                            ->label('Время завершения'),
+                    ])
+                    ->columns(3),
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('booking_number')
+                    ->label('Номер')
+                    ->searchable()
+                    ->sortable()
+                    ->copyable(),
+
+                Tables\Columns\TextColumn::make('client.email')
+                    ->label('Клиент')
+                    ->searchable()
+                    ->copyable()
+                    ->icon('heroicon-o-user')
+                    ->iconColor('blue'),
+
+                Tables\Columns\TextColumn::make('master.email')
+                    ->label('Мастер')
+                    ->searchable()
+                    ->copyable()
+                    ->icon('heroicon-o-user-circle')
+                    ->iconColor('green'),
+
+                Tables\Columns\TextColumn::make('service.name')
+                    ->label('Услуга')
+                    ->limit(30)
+                    ->tooltip(function (Tables\Columns\TextColumn $column): ?string {
+                        $name = $column->getState();
+                        return strlen($name) > 30 ? $name : null;
+                    }),
+
+                Tables\Columns\BadgeColumn::make('type')
+                    ->label('Тип')
+                    ->colors([
+                        'info' => 'salon_service',
+                        'warning' => 'home_service',
+                        'success' => 'online_service',
+                    ])
+                    ->formatStateUsing(fn (string $state): string => BookingType::from($state)->getLabel()),
+
+                Tables\Columns\BadgeColumn::make('status')
+                    ->label('Статус')
+                    ->colors([
+                        'warning' => 'pending',
+                        'success' => 'confirmed',
+                        'info' => 'in_progress',
+                        'secondary' => 'completed',
+                        'danger' => 'cancelled_by_client',
+                        'danger' => 'no_show',
+                    ])
+                    ->formatStateUsing(fn (string $state): string => BookingStatus::from($state)->getLabel()),
+
+                Tables\Columns\TextColumn::make('booking_date')
+                    ->label('Дата')
+                    ->date('d.m.Y')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('start_time')
+                    ->label('Время')
+                    ->time('H:i')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('total_price')
+                    ->label('Цена')
+                    ->money('RUB')
+                    ->sortable(),
+
+                Tables\Columns\IconColumn::make('is_home_service')
+                    ->label('Выезд')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-truck')
+                    ->falseIcon('heroicon-o-building-storefront')
+                    ->trueColor('warning')
+                    ->falseColor('info'),
+
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Создано')
+                    ->dateTime('d.m.Y H:i')
+                    ->sortable(),
+            ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('status')
+                    ->label('Статус')
+                    ->multiple()
+                    ->options(BookingStatus::options()),
+
+                Tables\Filters\SelectFilter::make('type')
+                    ->label('Тип')
+                    ->multiple()
+                    ->options(BookingType::options()),
+
+                Tables\Filters\TernaryFilter::make('is_home_service')
+                    ->label('Выездные услуги')
+                    ->placeholder('Все')
+                    ->trueLabel('Только выездные')
+                    ->falseLabel('Только в салоне'),
+
+                Tables\Filters\Filter::make('booking_date')
+                    ->label('Дата бронирования')
+                    ->form([
+                        Forms\Components\DatePicker::make('date_from')
+                            ->label('С'),
+                        Forms\Components\DatePicker::make('date_until')
+                            ->label('По'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['date_from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('booking_date', '>=', $date),
+                            )
+                            ->when(
+                                $data['date_until'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('booking_date', '<=', $date),
+                            );
+                    }),
+
+                Tables\Filters\Filter::make('today')
+                    ->label('Сегодня')
+                    ->query(fn (Builder $query): Builder => $query->whereDate('booking_date', today())),
+
+                Tables\Filters\Filter::make('upcoming')
+                    ->label('Предстоящие')
+                    ->query(fn (Builder $query): Builder => $query->where('booking_date', '>=', today())),
+            ])
+            ->actions([
+                Tables\Actions\ViewAction::make(),
+                Tables\Actions\EditAction::make(),
+
+                // Кнопка подтверждения
+                Action::make('confirm')
+                    ->label('Подтвердить')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->visible(fn (Booking $record): bool => $record->canConfirm())
+                    ->action(function (Booking $record): void {
+                        $record->confirm();
+                        Notification::make()
+                            ->title('Бронирование подтверждено')
+                            ->success()
+                            ->send();
+                    }),
+
+                // Кнопка отмены
+                Action::make('cancel')
+                    ->label('Отменить')
+                    ->icon('heroicon-o-x-circle')
+                    ->color('danger')
+                    ->form([
+                        Forms\Components\Textarea::make('reason')
+                            ->label('Причина отмены')
+                            ->required(),
+                    ])
+                    ->visible(fn (Booking $record): bool => $record->canCancel())
+                    ->action(function (Booking $record, array $data): void {
+                        $record->cancel($data['reason'], auth()->id(), false);
+                        Notification::make()
+                            ->title('Бронирование отменено')
+                            ->warning()
+                            ->send();
+                    }),
+
+                // Кнопка завершения
+                Action::make('complete')
+                    ->label('Завершить')
+                    ->icon('heroicon-o-check')
+                    ->color('info')
+                    ->requiresConfirmation()
+                    ->visible(fn (Booking $record): bool => $record->canComplete())
+                    ->action(function (Booking $record): void {
+                        $record->complete();
+                        Notification::make()
+                            ->title('Бронирование завершено')
+                            ->success()
+                            ->send();
+                    }),
+
+                // Кнопка перенесения
+                Action::make('reschedule')
+                    ->label('Перенести')
+                    ->icon('heroicon-o-calendar')
+                    ->color('warning')
+                    ->form([
+                        Forms\Components\DatePicker::make('new_date')
+                            ->label('Новая дата')
+                            ->required(),
+                        Forms\Components\TimePicker::make('new_time')
+                            ->label('Новое время')
+                            ->required(),
+                        Forms\Components\Textarea::make('reason')
+                            ->label('Причина переноса'),
+                    ])
+                    ->visible(fn (Booking $record): bool => $record->canModify())
+                    ->action(function (Booking $record, array $data): void {
+                        $record->update([
+                            'booking_date' => $data['new_date'],
+                            'start_time' => $data['new_date'] . ' ' . $data['new_time'],
+                        ]);
+
+                        Notification::make()
+                            ->title('Бронирование перенесено')
+                            ->success()
+                            ->send();
+                    }),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    // Массовое подтверждение
+                    BulkAction::make('bulk_confirm')
+                        ->label('Подтвердить выбранные')
+                        ->icon('heroicon-o-check-circle')
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->deselectRecordsAfterCompletion()
+                        ->action(function (Collection $records): void {
+                            $confirmedCount = 0;
+                            foreach ($records as $record) {
+                                if ($record->canConfirm() && $record->confirm()) {
+                                    $confirmedCount++;
+                                }
+                            }
+
+                            Notification::make()
+                                ->title("Подтверждено бронирований: {$confirmedCount}")
+                                ->success()
+                                ->send();
+                        }),
+
+                    // Массовая отмена
+                    BulkAction::make('bulk_cancel')
+                        ->label('Отменить выбранные')
+                        ->icon('heroicon-o-x-circle')
+                        ->color('danger')
+                        ->form([
+                            Forms\Components\Textarea::make('reason')
+                                ->label('Причина отмены')
+                                ->required(),
+                        ])
+                        ->deselectRecordsAfterCompletion()
+                        ->action(function (Collection $records, array $data): void {
+                            $cancelledCount = 0;
+                            foreach ($records as $record) {
+                                if ($record->canCancel() && $record->cancel($data['reason'], auth()->id(), false)) {
+                                    $cancelledCount++;
+                                }
+                            }
+
+                            Notification::make()
+                                ->title("Отменено бронирований: {$cancelledCount}")
+                                ->warning()
+                                ->send();
+                        }),
+
+                    // Экспорт в CSV
+                    BulkAction::make('export')
+                        ->label('Экспорт в CSV')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->color('gray')
+                        ->deselectRecordsAfterCompletion()
+                        ->action(function (Collection $records): void {
+                            // Здесь должна быть логика экспорта
+                            Notification::make()
+                                ->title('Экспорт начат')
+                                ->info()
+                                ->send();
+                        }),
+
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ])
+            ->defaultSort('booking_date', 'desc')
+            ->poll('30s');
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListBookings::route('/'),
+            'create' => Pages\CreateBooking::route('/create'),
+            'edit' => Pages\EditBooking::route('/{record}/edit'),
+            'view' => Pages\ViewBooking::route('/{record}'),
+        ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->with(['client', 'master', 'service']);
+    }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['booking_number', 'client.email', 'master.email', 'service.name', 'client_name', 'client_phone'];
+    }
+}

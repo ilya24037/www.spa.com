@@ -7,11 +7,14 @@ use App\Domain\User\Traits\HasRoles;
 use App\Domain\User\Traits\HasMasterProfile;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Laravel\Scout\Searchable;
 
 /**
  * Основная модель пользователя (Clean Architecture V2)
@@ -19,9 +22,9 @@ use Laravel\Sanctum\HasApiTokens;
  * ✅ Интеграция с доменами через UserIntegrationService
  * ✅ Соблюдается Single Responsibility Principle
  */
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements MustVerifyEmail, FilamentUser
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, Searchable;
     use HasRoles, HasProfile, HasMasterProfile;
 
     /**
@@ -40,11 +43,14 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array<int, string>
      */
     protected $fillable = [
+        'name',
         'email',
         'password',
         'role',
         'status',
         'email_verified_at',
+        'phone',
+        'avatar_url',
     ];
 
     /**
@@ -94,6 +100,22 @@ class User extends Authenticatable implements MustVerifyEmail
     public function ads()
     {
         return $this->hasMany(\App\Domain\Ad\Models\Ad::class);
+    }
+
+    /**
+     * Проверка доступа к панели Filament
+     * Реализация интерфейса FilamentUser
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        // Разрешаем доступ только администраторам и модераторам
+        // Проверяем и enum значения, и строковые значения для совместимости
+        if ($this->role instanceof UserRole) {
+            return in_array($this->role, [UserRole::ADMIN, UserRole::MODERATOR], true);
+        }
+
+        // Если роль хранится как строка (например, при проблемах с cast)
+        return in_array($this->role, [UserRole::ADMIN->value, UserRole::MODERATOR->value], true);
     }
 
     // ✅ АРХИТЕКТУРНЫЙ РЕФАКТОРИНГ ЗАВЕРШЕН (V2):
@@ -170,5 +192,21 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getReceivedReviews()
     {
         return $this->integration()->getReceivedReviews($this);
+    }
+
+    /**
+     * Получить массив данных для индексации в поисковой системе
+     */
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'email' => $this->email,
+            'phone' => $this->phone,
+            'role' => $this->role,
+            'status' => $this->status,
+            'created_at' => $this->created_at,
+        ];
     }
 }

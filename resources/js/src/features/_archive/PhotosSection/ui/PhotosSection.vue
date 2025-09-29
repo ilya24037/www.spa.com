@@ -63,7 +63,12 @@
                 type="button"
                 title="Повернуть"
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                <svg viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="2"
+                     width="20"
+                     height="20">
                   <polyline points="23,4 23,10 17,10"/>
                   <path d="M20.49,15a9,9,0,1,1-2.12-9.36L23,10"/>
                 </svg>
@@ -75,7 +80,12 @@
                 type="button"
                 title="Удалить"
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                <svg viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="2"
+                     width="20"
+                     height="20">
                   <polyline points="3,6 5,6 21,6"/>
                   <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2v2"/>
                 </svg>
@@ -99,9 +109,19 @@
             class="hidden-input"
           />
           <div class="add-photo-content">
-            <svg class="add-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"/>
-              <line x1="5" y1="12" x2="19" y2="12"/>
+            <svg class="add-icon"
+                 viewBox="0 0 24 24"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="2">
+              <line x1="12"
+                    y1="5"
+                    x2="12"
+                    y2="19"/>
+              <line x1="5"
+                    y1="12"
+                    x2="19"
+                    y2="12"/>
             </svg>
           </div>
         </label>
@@ -111,8 +131,17 @@
       <div v-else class="empty-state" @click="triggerFileInput">
         <div class="empty-content">
           <div class="upload-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="48" height="48">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <svg viewBox="0 0 24 24"
+                 fill="none"
+                 stroke="currentColor"
+                 width="48"
+                 height="48">
+              <rect x="3"
+                    y="3"
+                    width="18"
+                    height="18"
+                    rx="2"
+                    ry="2"/>
               <circle cx="8.5" cy="8.5" r="1.5"/>
               <polyline points="21,15 16,10 5,21"/>
             </svg>
@@ -126,10 +155,17 @@
       <div v-if="isDragOver && draggedIndex === null" class="drag-overlay">
         <div class="drag-content">
           <div class="drag-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="48" height="48">
+            <svg viewBox="0 0 24 24"
+                 fill="none"
+                 stroke="currentColor"
+                 width="48"
+                 height="48">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
               <polyline points="7,10 12,15 17,10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
+              <line x1="12"
+                    y1="15"
+                    x2="12"
+                    y2="3"/>
             </svg>
           </div>
           <p class="drag-text">Перетащите сюда изображения</p>

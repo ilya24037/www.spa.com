@@ -6,12 +6,12 @@ use Tests\TestCase;
 use App\Domain\User\Models\User;
 use App\Domain\Ad\Models\Ad;
 use App\Domain\Review\Models\Review;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Traits\SafeRefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 
 class ReviewApiTest extends TestCase
 {
-    use RefreshDatabase;
+    use SafeRefreshDatabase;
 
     private User $authUser;
     private User $targetUser;

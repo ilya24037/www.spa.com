@@ -41,6 +41,9 @@ class AdResource extends JsonResource
             'status' => $this->status,
             'category' => $this->category,
             'description' => $this->description,
+
+            // Простое поле цены для карточек (как было в архиве)
+            'price' => $this->price_per_hour ?? $this->price ?? null,
             
             // Контактная информация
             'contact' => [
@@ -85,6 +88,9 @@ class AdResource extends JsonResource
             'work_format' => $this->work_format,
             'schedule' => $parsedData['schedule'] ?? $this->schedule,
             'faq' => $parsedData['faq'] ?? $this->faq,
+
+            // Возвращаем prices на корневой уровень (как было в архиве)
+            'prices' => $parsedData['prices'] ?? $this->prices,
             
             // Параметры (для форм редактирования)
             'title' => $this->title, // Дублируем для совместимости

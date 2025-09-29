@@ -11,6 +11,8 @@ enum PaymentMethod: string
     case TRANSFER = 'transfer';
     case CARD = 'card';
     case ELECTRONIC = 'electronic';
+    case YANDEX_MONEY = 'yandex_money';
+    case SBERBANK = 'sberbank';
 
     /**
      * Получить читаемое название способа оплаты
@@ -22,6 +24,8 @@ enum PaymentMethod: string
             self::TRANSFER => 'Перевод',
             self::CARD => 'Банковская карта',
             self::ELECTRONIC => 'Электронные деньги',
+            self::YANDEX_MONEY => 'ЮMoney',
+            self::SBERBANK => 'Сбербанк Онлайн',
         };
     }
 

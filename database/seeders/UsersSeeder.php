@@ -11,16 +11,6 @@ class UsersSeeder extends Seeder
     public function run(): void
     {
         $users = [
-            // Администратор системы
-            [
-                'name' => 'Администратор',
-                'email' => 'admin',
-                'password' => Hash::make('admin'),
-                'phone' => '+7 (900) 000-00-00',
-                'folder_name' => 'admin',
-                'status' => 'active',
-                'role' => 'admin',
-            ],
             // Обычные пользователи (мастера)
             [
                 'name' => 'Анна Петрова',

@@ -11,14 +11,14 @@ use App\Domain\Ad\Models\AdPricing;
 use App\Domain\Ad\DTOs\CreateAdDTO;
 use App\Domain\Ad\Enums\AdStatus;
 use App\Domain\User\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Traits\SafeRefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Mockery;
 
 class AdServiceTest extends TestCase
 {
-    use RefreshDatabase;
+    use SafeRefreshDatabase;
 
     private AdService $service;
     private AdRepository $repository;

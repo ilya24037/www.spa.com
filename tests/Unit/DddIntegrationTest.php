@@ -9,7 +9,7 @@ use App\Application\Services\Integration\UserAdsIntegrationService;
 use App\Domain\Favorite\Events\FavoriteAdded;
 use App\Domain\Review\Events\ReviewCreated;
 use App\Domain\Ad\Events\AdCreated;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Traits\SafeRefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
 
@@ -19,7 +19,7 @@ use Tests\TestCase;
  */
 class DddIntegrationTest extends TestCase
 {
-    use RefreshDatabase;
+    use SafeRefreshDatabase;
 
     private User $user;
 

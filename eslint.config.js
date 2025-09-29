@@ -106,7 +106,7 @@ export default [
     },
     rules: {
       // Vue правила
-      ...vue.configs['vue3-recommended'].rules,
+      ...(vue.configs['vue3-recommended']?.rules || {}),
       'vue/multi-word-component-names': 'off',
       'vue/html-indent': ['error', 2],
       'vue/max-attributes-per-line': ['error', {

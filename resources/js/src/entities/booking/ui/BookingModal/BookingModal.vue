@@ -236,7 +236,10 @@
                 name="client_email"
                 type="email"
                 label="Email"
-                placeholder="Р"Р»СЏ РѕС‚РїСЂР°РІРєРё РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ"
+                placeholder="Р"
+                Р»СЏ
+                РѕС‚РїСЂР°РІРєРё
+                РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ"
                 :error="formErrors.client_email"
               />
             </div>

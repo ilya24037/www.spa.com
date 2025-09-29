@@ -11,14 +11,14 @@ use App\Domain\Ad\Models\AdPricing;
 use App\Domain\Ad\Models\AdLocation;
 use App\Domain\Ad\Models\AdMedia;
 use App\Domain\Ad\Enums\AdStatus;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Traits\SafeRefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Mockery;
 
 class PublishAdActionTest extends TestCase
 {
-    use RefreshDatabase;
+    use SafeRefreshDatabase;
 
     private PublishAdAction $action;
     private AdRepository $repository;

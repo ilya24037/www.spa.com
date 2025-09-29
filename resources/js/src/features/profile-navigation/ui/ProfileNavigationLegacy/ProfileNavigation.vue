@@ -51,7 +51,7 @@ const page = usePage()
 // РџСѓРЅРєС‚С‹ РјРµРЅСЋ
 const menuItems = [
     { href: '/bookings', label: 'Р—Р°РєР°Р·С‹', count: 0 },
-    { href: '/profile/reviews', label: 'РњРѕРё РѕС‚Р·С‹РІС‹', count: 0 },
+    { href: '/reviews', label: 'РњРѕРё РѕС‚Р·С‹РІС‹', count: 0 },
     { href: '/favorites', label: 'РР·Р±СЂР°РЅРЅРѕРµ', count: props.counts?.favorites || 0 },
     { href: '/messages', label: 'РЎРѕРѕР±С‰РµРЅРёСЏ', count: 0 },
     { href: '/notifications', label: 'РЈРІРµРґРѕРјР»РµРЅРёСЏ', count: 0 },

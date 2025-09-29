@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->web(append: [
+            \App\Http\Middleware\CacheHeaders::class,
             \App\Application\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
             // \App\Application\Http\Middleware\PerformanceMiddleware::class, // Временно отключено
@@ -29,6 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'guest' => \App\Application\Http\Middleware\RedirectIfAuthenticated::class,
             'cors' => \App\Http\Middleware\CorsMiddleware::class,
+            'filament.admin' => \App\Http\Middleware\FilamentAdminAccess::class,
         ]);
 
         // Глобальные middleware (временно отключено)

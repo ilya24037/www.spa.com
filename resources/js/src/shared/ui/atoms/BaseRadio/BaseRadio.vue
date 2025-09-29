@@ -37,7 +37,10 @@
       <div v-if="label" class="text-sm text-gray-700 font-medium leading-tight" :class="{ 'text-gray-500': disabled }">
         {{ label }}
       </div>
-      <div v-if="description" :id="`${radioId}-description`" class="text-xs text-gray-500 leading-tight mt-1" :class="{ 'text-gray-300': disabled }">
+      <div v-if="description"
+           :id="`${radioId}-description`"
+           class="text-xs text-gray-500 leading-tight mt-1"
+           :class="{ 'text-gray-300': disabled }">
         {{ description }}
       </div>
       <slot />

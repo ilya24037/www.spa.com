@@ -27,10 +27,20 @@
       
       <!-- Рекомендации для Chromium -->
       <div v-if="isChromiumBased" class="chromium-warning">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <svg width="16"
+             height="16"
+             viewBox="0 0 24 24"
+             fill="none"
+             stroke="currentColor">
           <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-          <line x1="12" y1="9" x2="12" y2="13"/>
-          <line x1="12" y1="17" x2="12.01" y2="17"/>
+          <line x1="12"
+                y1="9"
+                x2="12"
+                y2="13"/>
+          <line x1="12"
+                y1="17"
+                x2="12.01"
+                y2="17"/>
         </svg>
         <span>
           Ваш браузер (Chromium) имеет ограниченную поддержку MP4. 
@@ -94,7 +104,10 @@
               class="control-btn delete-btn"
               title="Удалить видео"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg viewBox="0 0 24 24"
+                   fill="none"
+                   stroke="currentColor"
+                   stroke-width="2">
                 <polyline points="3,6 5,6 21,6"/>
                 <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2v2"/>
               </svg>
@@ -115,9 +128,19 @@
         class="add-video-btn"
         @click="triggerVideoInput"
       >
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <svg width="32"
+             height="32"
+             viewBox="0 0 24 24"
+             fill="none"
+             stroke="currentColor">
           <polygon points="23,7 16,12 23,17" stroke-width="2"/>
-          <rect x="1" y="5" width="15" height="14" rx="2" ry="2" stroke-width="2"/>
+          <rect x="1"
+                y="5"
+                width="15"
+                height="14"
+                rx="2"
+                ry="2"
+                stroke-width="2"/>
         </svg>
         <span>Добавить видео</span>
         <div class="format-hint">

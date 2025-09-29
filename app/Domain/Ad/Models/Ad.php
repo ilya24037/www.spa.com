@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Log;
+use Laravel\Scout\Searchable;
 
 /**
  * Основная модель объявления
@@ -21,6 +22,7 @@ class Ad extends Model
 {
     use HasFactory;
     use JsonFieldsTrait;
+    use Searchable;
 
     protected $fillable = [
         'user_id',
@@ -211,6 +213,27 @@ class Ad extends Model
     public function isArchived(): bool
     {
         return $this->archived_at !== null;
+    }
+
+    /**
+     * Получить массив данных для индексации в поисковой системе
+     */
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'description' => $this->description,
+            'category' => $this->category,
+            'specialty' => $this->specialty,
+            'service_provider' => $this->service_provider,
+            'work_format' => $this->work_format,
+            'address' => $this->address,
+            'price' => $this->price,
+            'phone' => $this->phone,
+            'status' => $this->status,
+            'created_at' => $this->created_at,
+        ];
     }
 
     /**

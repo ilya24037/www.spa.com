@@ -6,12 +6,12 @@ use Tests\TestCase;
 use App\Domain\Ad\Models\Ad;
 use App\Domain\Master\Models\MasterProfile;
 use App\Domain\User\Models\UserSettings;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Traits\SafeRefreshDatabase;
 use Illuminate\Support\Facades\Log;
 
 class JsonFieldsTraitTest extends TestCase
 {
-    use RefreshDatabase;
+    use SafeRefreshDatabase;
 
     protected function setUp(): void
     {

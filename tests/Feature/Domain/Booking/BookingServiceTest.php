@@ -10,11 +10,11 @@ use App\Domain\Master\Models\MasterProfile;
 use App\Enums\BookingStatus;
 use App\Enums\UserRole;
 use App\Enums\MasterStatus;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Traits\SafeRefreshDatabase;
 
 class BookingServiceTest extends TestCase
 {
-    use RefreshDatabase;
+    use SafeRefreshDatabase;
 
     private BookingService $bookingService;
     private User $client;

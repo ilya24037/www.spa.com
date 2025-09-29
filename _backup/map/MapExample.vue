@@ -40,9 +40,15 @@
         @drag-end="onMarkerDragEnd"
       >
         <div class="custom-marker">
-          <svg width="32" height="40" viewBox="0 0 32 40" fill="none">
+          <svg width="32"
+               height="40"
+               viewBox="0 0 32 40"
+               fill="none">
             <path d="M16 0C7.164 0 0 7.164 0 16C0 24.836 16 40 16 40S32 24.836 32 16C32 7.164 24.836 0 16 0Z" fill="#FF0000"/>
-            <circle cx="16" cy="16" r="6" fill="white"/>
+            <circle cx="16"
+                    cy="16"
+                    r="6"
+                    fill="white"/>
           </svg>
         </div>
       </yandex-map-marker>

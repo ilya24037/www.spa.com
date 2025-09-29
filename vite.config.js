@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import vue from '@vitejs/plugin-vue';
+// import tailwindcss from '@tailwindcss/vite'; // Временно отключаем из-за проблем с v4
 import { resolve } from 'path';
 import { globSync } from 'glob';
 
@@ -10,12 +11,18 @@ export default defineConfig({
         'import.meta.env.VITE_YANDEX_MAPS_API_KEY': JSON.stringify(process.env.YANDEX_MAPS_API_KEY || '23ff8acc-835f-4e99-8b19-d33c5d346e18')
     },
     plugins: [
+        // tailwindcss(), // Временно отключаем Vite плагин, используем PostCSS
         laravel({
             input: [
                 'resources/js/app.js',
+                'resources/css/filament/admin/theme.css',
                 ...globSync('resources/js/Pages/**/*.vue')
             ],
-            refresh: true,
+            refresh: [
+                'app/Filament/**',
+                'resources/views/**',
+                'resources/css/filament/**'
+            ],
         }),
         vue({
             template: {
@@ -160,7 +167,8 @@ export default defineConfig({
                 // Отключаем предупреждения о deprecated функциях
                 silenceDeprecations: ['legacy-js-api']
             }
-        }
+        },
+        // Настройки PostCSS упрощены для совместимости с Tailwind CSS v4
     },
     
     // Оптимизация зависимостей

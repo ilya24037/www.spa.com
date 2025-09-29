@@ -1,0 +1,553 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use App\Domain\Service\Models\Service;
+use App\Domain\Service\Models\MassageCategory;
+use App\Filament\Resources\ServiceResource\Pages;
+use Filament\Forms;
+use Filament\Resources\Resource;
+use UnitEnum;
+use BackedEnum;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Filament\Schemas\Schema;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Str;
+
+class ServiceResource extends Resource
+{
+    protected static ?string $model = Service::class;
+
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-sparkles';
+
+    protected static string|null $modelLabel = 'Услуга';
+
+    protected static string|null $pluralModelLabel = 'Услуги';
+
+    protected static UnitEnum|string|null $navigationGroup = 'Контент';
+
+    protected static ?int $navigationSort = 4;
+
+    public static function getNavigationBadge(): ?string
+    {
+        return Service::where('status', 'pending')->count();
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'warning';
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
+            ->schema([
+                Forms\Components\Section::make('Основная информация')
+                    ->schema([
+                        Forms\Components\Select::make('master_profile_id')
+                            ->label('Мастер')
+                            ->relationship('masterProfile', 'business_name')
+                            ->searchable()
+                            ->required(),
+
+                        Forms\Components\Select::make('massage_category_id')
+                            ->label('Категория')
+                            ->relationship('category', 'name')
+                            ->searchable()
+                            ->required(),
+
+                        Forms\Components\TextInput::make('name')
+                            ->label('Название услуги')
+                            ->required()
+                            ->maxLength(255)
+                            ->reactive()
+                            ->afterStateUpdated(fn (string $state, Forms\Set $set) =>
+                                $set('slug', Str::slug($state))
+                            ),
+
+                        Forms\Components\TextInput::make('slug')
+                            ->label('URL слаг')
+                            ->unique(ignoreRecord: true)
+                            ->maxLength(255),
+
+                        Forms\Components\Select::make('status')
+                            ->label('Статус')
+                            ->options([
+                                'active' => 'Активна',
+                                'inactive' => 'Неактивна',
+                                'pending' => 'На модерации',
+                                'rejected' => 'Отклонена',
+                            ])
+                            ->required()
+                            ->default('active'),
+                    ])
+                    ->columns(2),
+
+                Forms\Components\Section::make('Описание')
+                    ->schema([
+                        Forms\Components\Textarea::make('description')
+                            ->label('Описание услуги')
+                            ->rows(4)
+                            ->maxLength(2000),
+
+                        Forms\Components\Repeater::make('included_services')
+                            ->label('Что входит в услугу')
+                            ->schema([
+                                Forms\Components\TextInput::make('item')
+                                    ->label('Пункт')
+                                    ->required(),
+                            ])
+                            ->collapsible()
+                            ->cloneable(),
+
+                        Forms\Components\Repeater::make('contraindications')
+                            ->label('Противопоказания')
+                            ->schema([
+                                Forms\Components\TextInput::make('item')
+                                    ->label('Противопоказание')
+                                    ->required(),
+                            ])
+                            ->collapsible()
+                            ->cloneable(),
+
+                        Forms\Components\Repeater::make('preparation')
+                            ->label('Подготовка к процедуре')
+                            ->schema([
+                                Forms\Components\TextInput::make('item')
+                                    ->label('Рекомендация')
+                                    ->required(),
+                            ])
+                            ->collapsible()
+                            ->cloneable(),
+                    ])
+                    ->columns(1),
+
+                Forms\Components\Section::make('Ценообразование')
+                    ->schema([
+                        Forms\Components\TextInput::make('price')
+                            ->label('Базовая цена')
+                            ->numeric()
+                            ->prefix('₽')
+                            ->required(),
+
+                        Forms\Components\TextInput::make('price_home')
+                            ->label('Цена с выездом')
+                            ->numeric()
+                            ->prefix('₽')
+                            ->helperText('Оставьте пустым, если выезд не предоставляется'),
+
+                        Forms\Components\TextInput::make('price_sale')
+                            ->label('Цена со скидкой')
+                            ->numeric()
+                            ->prefix('₽')
+                            ->helperText('Акционная цена'),
+
+                        Forms\Components\TextInput::make('sale_percentage')
+                            ->label('Процент скидки')
+                            ->numeric()
+                            ->suffix('%')
+                            ->min(0)
+                            ->max(100),
+
+                        Forms\Components\DateTimePicker::make('sale_until')
+                            ->label('Скидка действует до')
+                            ->helperText('Оставьте пустым для бессрочной скидки'),
+                    ])
+                    ->columns(2),
+
+                Forms\Components\Section::make('Параметры услуги')
+                    ->schema([
+                        Forms\Components\TextInput::make('duration_minutes')
+                            ->label('Длительность (мин)')
+                            ->numeric()
+                            ->required()
+                            ->suffix('мин'),
+
+                        Forms\Components\Toggle::make('is_complex')
+                            ->label('Комплексная услуга')
+                            ->default(false)
+                            ->helperText('Состоит из нескольких процедур'),
+
+                        Forms\Components\Toggle::make('is_featured')
+                            ->label('Рекомендуемая')
+                            ->default(false)
+                            ->helperText('Показывать в рекомендуемых'),
+
+                        Forms\Components\Toggle::make('is_new')
+                            ->label('Новая услуга')
+                            ->default(false)
+                            ->helperText('Помечать как "новинка"'),
+
+                        Forms\Components\Toggle::make('instant_booking')
+                            ->label('Мгновенное бронирование')
+                            ->default(false)
+                            ->helperText('Можно бронировать без подтверждения'),
+
+                        Forms\Components\TextInput::make('advance_booking_hours')
+                            ->label('Заблаговременность бронирования (часы)')
+                            ->numeric()
+                            ->default(24)
+                            ->suffix('ч')
+                            ->helperText('За сколько часов можно бронировать'),
+
+                        Forms\Components\TextInput::make('cancellation_hours')
+                            ->label('Время отмены (часы)')
+                            ->numeric()
+                            ->default(24)
+                            ->suffix('ч')
+                            ->helperText('За сколько часов можно отменить без штрафа'),
+                    ])
+                    ->columns(2),
+
+                Forms\Components\Section::make('SEO')
+                    ->schema([
+                        Forms\Components\TextInput::make('meta_title')
+                            ->label('Meta Title')
+                            ->maxLength(60)
+                            ->helperText('Заголовок для поисковых систем'),
+
+                        Forms\Components\Textarea::make('meta_description')
+                            ->label('Meta Description')
+                            ->maxLength(160)
+                            ->rows(3)
+                            ->helperText('Описание для поисковых систем'),
+                    ])
+                    ->columns(1),
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('id')
+                    ->label('ID')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('masterProfile.business_name')
+                    ->label('Мастер')
+                    ->searchable()
+                    ->limit(30)
+                    ->tooltip(function (Tables\Columns\TextColumn $column): ?string {
+                        $name = $column->getState();
+                        return strlen($name) > 30 ? $name : null;
+                    }),
+
+                Tables\Columns\TextColumn::make('category.name')
+                    ->label('Категория')
+                    ->searchable()
+                    ->badge()
+                    ->color('info'),
+
+                Tables\Columns\TextColumn::make('name')
+                    ->label('Название')
+                    ->searchable()
+                    ->limit(40)
+                    ->tooltip(function (Tables\Columns\TextColumn $column): ?string {
+                        $name = $column->getState();
+                        return strlen($name) > 40 ? $name : null;
+                    }),
+
+                Tables\Columns\BadgeColumn::make('status')
+                    ->label('Статус')
+                    ->colors([
+                        'success' => 'active',
+                        'secondary' => 'inactive',
+                        'warning' => 'pending',
+                        'danger' => 'rejected',
+                    ])
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'active' => 'Активна',
+                        'inactive' => 'Неактивна',
+                        'pending' => 'На модерации',
+                        'rejected' => 'Отклонена',
+                        default => $state,
+                    }),
+
+                Tables\Columns\TextColumn::make('price')
+                    ->label('Цена')
+                    ->money('RUB')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('price_sale')
+                    ->label('Цена со скидкой')
+                    ->money('RUB')
+                    ->sortable()
+                    ->placeholder('—'),
+
+                Tables\Columns\TextColumn::make('duration_minutes')
+                    ->label('Длительность')
+                    ->formatStateUsing(fn (int $state): string => $state . ' мин')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('rating')
+                    ->label('Рейтинг')
+                    ->formatStateUsing(fn (?float $state): string => $state ? number_format($state, 1) . ' ★' : '—')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('bookings_count')
+                    ->label('Бронирований')
+                    ->numeric()
+                    ->sortable(),
+
+                Tables\Columns\IconColumn::make('is_featured')
+                    ->label('Рекомендуемая')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-star')
+                    ->falseIcon('heroicon-o-minus')
+                    ->trueColor('warning')
+                    ->falseColor('gray'),
+
+                Tables\Columns\IconColumn::make('instant_booking')
+                    ->label('Мгн. бронирование')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-bolt')
+                    ->falseIcon('heroicon-o-minus')
+                    ->trueColor('success')
+                    ->falseColor('gray'),
+
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Создана')
+                    ->dateTime('d.m.Y H:i')
+                    ->sortable(),
+            ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('status')
+                    ->label('Статус')
+                    ->multiple()
+                    ->options([
+                        'active' => 'Активна',
+                        'inactive' => 'Неактивна',
+                        'pending' => 'На модерации',
+                        'rejected' => 'Отклонена',
+                    ]),
+
+                Tables\Filters\SelectFilter::make('massage_category_id')
+                    ->label('Категория')
+                    ->relationship('category', 'name')
+                    ->searchable(),
+
+                Tables\Filters\TernaryFilter::make('is_featured')
+                    ->label('Рекомендуемые')
+                    ->placeholder('Все услуги')
+                    ->trueLabel('Только рекомендуемые')
+                    ->falseLabel('Обычные'),
+
+                Tables\Filters\TernaryFilter::make('instant_booking')
+                    ->label('Мгновенное бронирование')
+                    ->placeholder('Все услуги')
+                    ->trueLabel('С мгновенным бронированием')
+                    ->falseLabel('Без мгновенного бронирования'),
+
+                Tables\Filters\Filter::make('on_sale')
+                    ->label('Со скидкой')
+                    ->query(fn (Builder $query): Builder =>
+                        $query->whereNotNull('price_sale')
+                              ->where('sale_until', '>', now())),
+
+                Tables\Filters\Filter::make('price_range')
+                    ->label('Диапазон цен')
+                    ->form([
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('price_from')
+                                    ->label('От')
+                                    ->numeric()
+                                    ->prefix('₽'),
+                                Forms\Components\TextInput::make('price_to')
+                                    ->label('До')
+                                    ->numeric()
+                                    ->prefix('₽'),
+                            ]),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['price_from'],
+                                fn (Builder $query, $price): Builder => $query->where('price', '>=', $price),
+                            )
+                            ->when(
+                                $data['price_to'],
+                                fn (Builder $query, $price): Builder => $query->where('price', '<=', $price),
+                            );
+                    }),
+            ])
+            ->actions([
+                Tables\Actions\ViewAction::make(),
+                Tables\Actions\EditAction::make(),
+
+                // Кнопка активации
+                Action::make('activate')
+                    ->label('Активировать')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->visible(fn (Service $record): bool => $record->status !== 'active')
+                    ->action(function (Service $record): void {
+                        $record->update(['status' => 'active']);
+
+                        Notification::make()
+                            ->title('Услуга активирована')
+                            ->success()
+                            ->send();
+                    }),
+
+                // Кнопка деактивации
+                Action::make('deactivate')
+                    ->label('Деактивировать')
+                    ->icon('heroicon-o-x-circle')
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->visible(fn (Service $record): bool => $record->status === 'active')
+                    ->action(function (Service $record): void {
+                        $record->update(['status' => 'inactive']);
+
+                        Notification::make()
+                            ->title('Услуга деактивирована')
+                            ->warning()
+                            ->send();
+                    }),
+
+                // Кнопка рекомендации
+                Action::make('toggle_featured')
+                    ->label(fn (Service $record): string => $record->is_featured ? 'Убрать из рекомендуемых' : 'Добавить в рекомендуемые')
+                    ->icon('heroicon-o-star')
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->action(function (Service $record): void {
+                        $record->update(['is_featured' => !$record->is_featured]);
+
+                        $status = $record->is_featured ? 'добавлена в рекомендуемые' : 'убрана из рекомендуемых';
+                        Notification::make()
+                            ->title("Услуга {$status}")
+                            ->info()
+                            ->send();
+                    }),
+
+                // Кнопка обновления рейтинга
+                Action::make('update_rating')
+                    ->label('Обновить рейтинг')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('info')
+                    ->action(function (Service $record): void {
+                        $record->updateRating();
+
+                        Notification::make()
+                            ->title('Рейтинг обновлен')
+                            ->success()
+                            ->send();
+                    }),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    // Массовая активация
+                    BulkAction::make('bulk_activate')
+                        ->label('Активировать выбранные')
+                        ->icon('heroicon-o-check-circle')
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->deselectRecordsAfterCompletion()
+                        ->action(function (Collection $records): void {
+                            $activatedCount = $records->where('status', '!=', 'active')->count();
+                            $records->each(fn (Service $service) => $service->update(['status' => 'active']));
+
+                            Notification::make()
+                                ->title("Активировано услуг: {$activatedCount}")
+                                ->success()
+                                ->send();
+                        }),
+
+                    // Массовая деактивация
+                    BulkAction::make('bulk_deactivate')
+                        ->label('Деактивировать выбранные')
+                        ->icon('heroicon-o-x-circle')
+                        ->color('warning')
+                        ->requiresConfirmation()
+                        ->deselectRecordsAfterCompletion()
+                        ->action(function (Collection $records): void {
+                            $deactivatedCount = $records->where('status', 'active')->count();
+                            $records->each(fn (Service $service) => $service->update(['status' => 'inactive']));
+
+                            Notification::make()
+                                ->title("Деактивировано услуг: {$deactivatedCount}")
+                                ->warning()
+                                ->send();
+                        }),
+
+                    // Массовое добавление в рекомендуемые
+                    BulkAction::make('bulk_feature')
+                        ->label('Добавить в рекомендуемые')
+                        ->icon('heroicon-o-star')
+                        ->color('warning')
+                        ->requiresConfirmation()
+                        ->deselectRecordsAfterCompletion()
+                        ->action(function (Collection $records): void {
+                            $featuredCount = $records->where('is_featured', false)->count();
+                            $records->each(fn (Service $service) => $service->update(['is_featured' => true]));
+
+                            Notification::make()
+                                ->title("Добавлено в рекомендуемые: {$featuredCount}")
+                                ->info()
+                                ->send();
+                        }),
+
+                    // Массовое обновление рейтинга
+                    BulkAction::make('bulk_update_rating')
+                        ->label('Обновить рейтинги')
+                        ->icon('heroicon-o-arrow-path')
+                        ->color('info')
+                        ->requiresConfirmation()
+                        ->deselectRecordsAfterCompletion()
+                        ->action(function (Collection $records): void {
+                            $records->each(fn (Service $service) => $service->updateRating());
+
+                            Notification::make()
+                                ->title("Обновлено рейтингов: {$records->count()}")
+                                ->success()
+                                ->send();
+                        }),
+
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ])
+            ->defaultSort('created_at', 'desc')
+            ->poll('60s');
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListServices::route('/'),
+            'create' => Pages\CreateService::route('/create'),
+            'edit' => Pages\EditService::route('/{record}/edit'),
+            'view' => Pages\ViewService::route('/{record}'),
+        ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->with(['masterProfile', 'category']);
+    }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'description', 'masterProfile.business_name', 'category.name'];
+    }
+}

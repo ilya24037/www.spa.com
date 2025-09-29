@@ -223,4 +223,16 @@ enum BookingType: string
             self::ONLINE_SERVICE,
         ];
     }
+
+    /**
+     * Получить опции для выбора в формах
+     */
+    public static function options(): array
+    {
+        $options = [];
+        foreach (self::cases() as $type) {
+            $options[$type->value] = $type->getLabel();
+        }
+        return $options;
+    }
 }

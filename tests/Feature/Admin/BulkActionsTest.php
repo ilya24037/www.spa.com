@@ -6,11 +6,11 @@ use Tests\TestCase;
 use App\Domain\User\Models\User;
 use App\Domain\Ad\Models\Ad;
 use App\Domain\Ad\Enums\AdStatus;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Traits\SafeRefreshDatabase;
 
 class BulkActionsTest extends TestCase
 {
-    use RefreshDatabase;
+    use SafeRefreshDatabase;
 
     private User $admin;
     private User $regularUser;

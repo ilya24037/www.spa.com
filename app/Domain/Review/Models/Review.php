@@ -12,10 +12,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Scout\Searchable;
 
 class Review extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, Searchable;
 
     /**
      * The attributes that are mass assignable.
@@ -44,6 +45,7 @@ class Review extends Model
      */
     protected $casts = [
         'rating' => 'integer',
+        'status' => \App\Enums\ReviewStatus::class,
         'is_visible' => 'boolean',
         'is_verified' => 'boolean',
         'verified_at' => 'datetime',
@@ -107,5 +109,24 @@ class Review extends Model
     public function getFormattedRatingAttribute(): string
     {
         return number_format($this->rating, 1);
+    }
+
+    /**
+     * Get the indexable data array for the model.
+     *
+     * @return array<string, mixed>
+     */
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'rating' => $this->rating,
+            'comment' => $this->comment,
+            'master_reply' => $this->master_reply,
+            'status' => $this->status,
+            'is_verified' => $this->is_verified,
+            'reviewer_name' => $this->reviewer?->name,
+            'reviewer_email' => $this->reviewer?->email,
+        ];
     }
 }

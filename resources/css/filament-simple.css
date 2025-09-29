@@ -1,0 +1,11 @@
+/* Простой Tailwind для Filament Admin - KISS принцип */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Базовые стили для Filament */
+@layer components {
+  .filament-body {
+    @apply font-sans antialiased;
+  }
+}

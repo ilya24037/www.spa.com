@@ -3,15 +3,15 @@
 namespace Tests\Feature\Review;
 
 use Tests\TestCase;
+use Tests\Traits\SafeRefreshDatabase;
 use App\Domain\User\Models\User;
 use App\Domain\Ad\Models\Ad;
 use App\Domain\Review\Models\Review;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 
 class ReviewModerationTest extends TestCase
 {
-    use RefreshDatabase;
+    use SafeRefreshDatabase;
 
     private User $admin;
     private User $user;

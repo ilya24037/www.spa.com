@@ -7,11 +7,11 @@ use App\Domain\Ad\Services\AdService;
 use App\Domain\Ad\DTOs\AdData;
 use App\Domain\User\Models\User;
 use App\Domain\Ad\Enums\AdStatus;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Traits\SafeRefreshDatabase;
 
 class AdServiceTest extends TestCase
 {
-    use RefreshDatabase;
+    use SafeRefreshDatabase;
 
     private AdService $adService;
     private User $user;

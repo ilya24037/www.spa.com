@@ -1,0 +1,41 @@
+/**
+ * Yandex Maps CSS Isolation
+ * Изоляция стилей для vue-yandex-maps от Tailwind CSS v4
+ */
+
+/* Изоляция стилей Yandex Maps */
+.yandex-map-container {
+  /* Сброс Tailwind стилей для контейнера карты */
+  all: initial;
+  font-family: inherit;
+}
+
+/* Переопределение конфликтующих стилей */
+.yandex-map-container * {
+  box-sizing: border-box;
+}
+
+/* Защита от Tailwind reset */
+.yandex-map-container button,
+.yandex-map-container input,
+.yandex-map-container select,
+.yandex-map-container textarea {
+  background-color: initial;
+  border: initial;
+  color: initial;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  margin: initial;
+  padding: initial;
+}
+
+/* Специфичные стили для элементов Yandex Maps */
+.yandex-map-container .ymaps3x0--map {
+  position: relative !important;
+}
+
+.yandex-map-container .ymaps3x0--controls {
+  position: absolute !important;
+  z-index: 1000 !important;
+}

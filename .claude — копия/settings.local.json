@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(php artisan tinker:*)",
+      "Bash(php:*)",
+      "Bash(C:Usersuser1.configherdbinphp.bat test_data_storage.php)",
+      "Bash(cmd /c:*)",
+      "Bash(dir:*)",
+      "Read(//c/Backup/Document/Рефакторинг/app/**)",
+      "Bash(C:Usersuser1.configherdbinphp.bat artisan tinker --execute=\"echo ''Checking Ad table columns:'' . PHP_EOL; $columns = DB::select(''SHOW COLUMNS FROM ads''); foreach($columns as $col) { if(in_array($col->Field, [''specialty'', ''work_format'', ''service_provider''])) { echo $col->Field . '' => Type: '' . $col->Type . '', Null: '' . $col->Null . PHP_EOL; } }\")",
+      "Bash(powershell:*)",
+      "WebFetch(domain:habr.com)",
+      "Read(//c/Users/user1/.claude/**)",
+      "Read(//c/**)",
+      "Bash(findstr:*)",
+      "WebSearch",
+      "WebFetch(domain:support.avito.ru)",
+      "Bash(npm run build:*)",
+      "Bash(ls:*)",
+      "Bash(composer show:*)"
+    ],
+    "deny": [],
+    "ask": [],
+    "defaultMode": "acceptEdits"
+  },
+  "autoSave": true,
+  "confirmBeforeDelete": true,
+  "showLineNumbers": true,
+  "theme": "dark"
+}

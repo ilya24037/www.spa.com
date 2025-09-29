@@ -946,10 +946,19 @@ export function useAdFormModel(props: any, emit: any) {
 
         router.post(`/ads/${adId}`, formData as any, {
           forceFormData: true,
+          preserveState: false,
+          preserveScroll: true,
+          only: ['profiles', 'counts', 'flash'],  // Принудительно запросить обновленные данные
           onSuccess: (response: any) => {
             saving.value = false
             console.log('✅ adFormModel: Объявление успешно обновлено')
-            // Backend сам делает редирект через AdController
+            // Если Backend не вернул новые данные, принудительно перезагрузить
+            if (!response.props?.profiles) {
+              router.reload({
+                only: ['profiles', 'counts'],
+                preserveScroll: true
+              } as any)
+            }
           },
           onError: (errors) => {
             saving.value = false
@@ -995,10 +1004,19 @@ export function useAdFormModel(props: any, emit: any) {
         })
 
         router.put(`/ads/${adId}`, plainData, {
+          preserveState: false,
+          preserveScroll: true,
+          only: ['profiles', 'counts', 'flash'],  // Принудительно запросить обновленные данные
           onSuccess: (response: any) => {
             saving.value = false
             console.log('✅ adFormModel: Объявление успешно обновлено')
-            // Backend сам делает редирект через AdController
+            // Если Backend не вернул новые данные, принудительно перезагрузить
+            if (!response.props?.profiles) {
+              router.reload({
+                only: ['profiles', 'counts'],
+                preserveScroll: true
+              } as any)
+            }
           },
           onError: (errors) => {
             saving.value = false
@@ -1027,6 +1045,8 @@ export function useAdFormModel(props: any, emit: any) {
         // С файлами - используем FormData
         router.post('/ads', formData as any, {
           forceFormData: true,
+          preserveState: false,
+          preserveScroll: true,
           onSuccess: (response: any) => {
             saving.value = false
             console.log('✅ adFormModel: Объявление успешно создано')
@@ -1087,6 +1107,8 @@ export function useAdFormModel(props: any, emit: any) {
         })
 
         router.post('/ads', plainData, {
+          preserveState: false,
+          preserveScroll: true,
           onSuccess: (response: any) => {
             saving.value = false
             console.log('✅ adFormModel: Объявление успешно создано')
@@ -1388,6 +1410,7 @@ export function useAdFormModel(props: any, emit: any) {
         // Отправка с файлами через FormData
         
         router.post(`/draft/${adId}`, formData as any, {
+          preserveState: false,
           preserveScroll: true,
           forceFormData: true,
           onSuccess: () => {
@@ -1446,6 +1469,7 @@ export function useAdFormModel(props: any, emit: any) {
         
         
         router.put(`/draft/${adId}`, plainData, {
+          preserveState: false,
           preserveScroll: true,
           onSuccess: () => {
             saving.value = false
@@ -1466,6 +1490,7 @@ export function useAdFormModel(props: any, emit: any) {
       // Создание нового черновика
       
       router.post('/draft', formData as any, {
+        preserveState: false,
         preserveScroll: true,
         forceFormData: true,
         onSuccess: () => {

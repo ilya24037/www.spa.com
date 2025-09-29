@@ -5,6 +5,7 @@ namespace App\Domain\Ad\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Domain\User\Models\User;
+use Laravel\Scout\Searchable;
 
 /**
  * Модель жалоб на объявления
@@ -12,6 +13,7 @@ use App\Domain\User\Models\User;
  */
 class Complaint extends Model
 {
+    use Searchable;
     protected $fillable = [
         'ad_id',
         'user_id',
@@ -130,5 +132,24 @@ class Complaint extends Model
         }
 
         return $query;
+    }
+
+    /**
+     * Get the indexable data array for the model.
+     *
+     * @return array<string, mixed>
+     */
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'reason' => $this->reason,
+            'resolution_note' => $this->resolution_note,
+            'status' => $this->status,
+            'ad_title' => $this->ad?->title,
+            'user_name' => $this->user?->name,
+            'user_email' => $this->user?->email,
+            'resolver_name' => $this->resolver?->name,
+        ];
     }
 }

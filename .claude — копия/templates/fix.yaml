@@ -1,0 +1,130 @@
+name: bug-fix
+description: Исправление багов с регрессионными тестами
+prompt: |
+  Исправь баг следуя систематическому подходу:
+  
+  ## 1. ВОСПРОИЗВЕДЕНИЕ:
+  - Шаги для воспроизведения
+  - Ожидаемое поведение
+  - Фактическое поведение
+  - Окружение (браузер, ОС, версии)
+  
+  ## 2. ДИАГНОСТИКА:
+  
+  ### Проверка логов:
+  ```bash
+  # Laravel логи
+  tail -n 100 storage/logs/laravel.log | grep ERROR
+  
+  # JavaScript ошибки
+  # Browser DevTools → Console
+  
+  # Network ошибки
+  # Browser DevTools → Network → Filter: XHR
+  ```
+  
+  ### Проверка данных:
+  ```php
+  // Добавить временный debug
+  \Log::info('Debug data:', [
+      'request' => $request->all(),
+      'user' => auth()->user(),
+      'result' => $result
+  ]);
+  ```
+  
+  ### Проверка Git истории:
+  ```bash
+  # Последние изменения в проблемной области
+  git log -p --since="2 days ago" -- path/to/file
+  
+  # Кто последний менял
+  git blame path/to/file
+  ```
+  
+  ## 3. ЛОКАЛИЗАЦИЯ ПРОБЛЕМЫ:
+  
+  Проверить по цепочке:
+  - [ ] Frontend: данные корректно формируются?
+  - [ ] API запрос: payload правильный?
+  - [ ] Backend валидация: проходит?
+  - [ ] Бизнес-логика: отрабатывает корректно?
+  - [ ] База данных: данные сохраняются?
+  - [ ] Ответ API: структура правильная?
+  - [ ] Frontend: ответ обрабатывается корректно?
+  
+  ## 4. ИСПРАВЛЕНИЕ:
+  
+  ### Минимальное решение:
+  - Исправить только корневую причину
+  - Не рефакторить попутно
+  - Добавить защитные проверки
+  
+  ### Обработка edge cases:
+  ```typescript
+  // Защита от undefined/null
+  const safeValue = data?.field ?? defaultValue
+  
+  // Проверка массивов
+  if (Array.isArray(items) && items.length > 0) {
+    // обработка
+  }
+  
+  // Try/catch для async
+  try {
+    const result = await riskyOperation()
+  } catch (error) {
+    console.error('Operation failed:', error)
+    // fallback behavior
+  }
+  ```
+  
+  ## 5. ТЕСТИРОВАНИЕ ИСПРАВЛЕНИЯ:
+  
+  ### Написать регрессионный тест:
+  ```php
+  public function test_bug_fix_description()
+  {
+      // Arrange: подготовка данных
+      $data = [...];
+      
+      // Act: воспроизведение бага
+      $response = $this->post('/api/endpoint', $data);
+      
+      // Assert: проверка исправления
+      $response->assertOk();
+      $this->assertDatabaseHas('table', [...]);
+  }
+  ```
+  
+  ### Проверить сценарии:
+  - [ ] Основной сценарий работает
+  - [ ] Edge cases обработаны
+  - [ ] Старый функционал не сломан
+  - [ ] Производительность не упала
+  
+  ## 6. ДОКУМЕНТИРОВАНИЕ:
+  
+  В коммите указать:
+  ```
+  fix(module): краткое описание исправления
+  
+  Проблема: что было сломано
+  Причина: почему было сломано
+  Решение: как исправлено
+  
+  Fixes #123
+  ```
+  
+  ## 7. ПРЕДОТВРАЩЕНИЕ:
+  
+  - Добавить валидацию на уровне формы
+  - Добавить проверки в критических местах
+  - Улучшить error handling
+  - Добавить мониторинг/алерты
+  
+  СПЕЦИФИКА SPA Platform:
+  - Проверить Vue реактивность
+  - Проверить Inertia.js props
+  - Проверить Laravel policies
+  - Проверить TypeScript типы

@@ -1,0 +1,429 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use App\Domain\Payment\Models\Payment;
+use App\Domain\Payment\Enums\PaymentStatus;
+use App\Domain\Payment\Enums\PaymentMethod;
+use App\Domain\Payment\Enums\PaymentType;
+use App\Filament\Resources\PaymentResource\Pages;
+use Filament\Forms;
+use Filament\Resources\Resource;
+use UnitEnum;
+use BackedEnum;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Filament\Schemas\Schema;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Filament\Notifications\Notification;
+
+class PaymentResource extends Resource
+{
+    protected static ?string $model = Payment::class;
+
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-credit-card';
+
+    protected static string|null $modelLabel = 'Платеж';
+
+    protected static string|null $pluralModelLabel = 'Платежи';
+
+    protected static UnitEnum|string|null $navigationGroup = 'Финансы';
+
+    protected static ?int $navigationSort = 1;
+
+    public static function getNavigationBadge(): ?string
+    {
+        return Payment::where('status', 'pending')->count();
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'warning';
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
+            ->schema([
+                Forms\Components\Section::make('Основная информация')
+                    ->schema([
+                        Forms\Components\TextInput::make('payment_number')
+                            ->label('Номер платежа')
+                            ->required()
+                            ->maxLength(255),
+
+                        Forms\Components\Select::make('user_id')
+                            ->label('Пользователь')
+                            ->relationship('user', 'email')
+                            ->searchable()
+                            ->required(),
+
+                        Forms\Components\Select::make('type')
+                            ->label('Тип платежа')
+                            ->options(PaymentType::options())
+                            ->required(),
+
+                        Forms\Components\Select::make('method')
+                            ->label('Способ оплаты')
+                            ->options(PaymentMethod::options())
+                            ->required(),
+
+                        Forms\Components\Select::make('status')
+                            ->label('Статус')
+                            ->options(PaymentStatus::options())
+                            ->required(),
+                    ])
+                    ->columns(2),
+
+                Forms\Components\Section::make('Финансовые данные')
+                    ->schema([
+                        Forms\Components\TextInput::make('amount')
+                            ->label('Сумма')
+                            ->numeric()
+                            ->prefix('₽')
+                            ->required(),
+
+                        Forms\Components\TextInput::make('fee')
+                            ->label('Комиссия')
+                            ->numeric()
+                            ->prefix('₽'),
+
+                        Forms\Components\TextInput::make('total_amount')
+                            ->label('Итого к оплате')
+                            ->numeric()
+                            ->prefix('₽'),
+
+                        Forms\Components\TextInput::make('currency')
+                            ->label('Валюта')
+                            ->default('RUB')
+                            ->maxLength(3),
+                    ])
+                    ->columns(2),
+
+                Forms\Components\Section::make('Детали платежа')
+                    ->schema([
+                        Forms\Components\Textarea::make('description')
+                            ->label('Описание')
+                            ->rows(2),
+
+                        Forms\Components\TextInput::make('external_id')
+                            ->label('Внешний ID')
+                            ->maxLength(255),
+
+                        Forms\Components\TextInput::make('gateway')
+                            ->label('Платежный шлюз')
+                            ->maxLength(100),
+
+                        Forms\Components\Textarea::make('notes')
+                            ->label('Примечания')
+                            ->rows(2),
+                    ])
+                    ->columns(2),
+
+                Forms\Components\Section::make('Временные метки')
+                    ->schema([
+                        Forms\Components\DateTimePicker::make('processed_at')
+                            ->label('Обработан'),
+
+                        Forms\Components\DateTimePicker::make('confirmed_at')
+                            ->label('Подтвержден'),
+
+                        Forms\Components\DateTimePicker::make('failed_at')
+                            ->label('Отклонен'),
+
+                        Forms\Components\DateTimePicker::make('refunded_at')
+                            ->label('Возвращен'),
+                    ])
+                    ->columns(2),
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('payment_number')
+                    ->label('Номер')
+                    ->searchable()
+                    ->sortable()
+                    ->copyable(),
+
+                Tables\Columns\TextColumn::make('user.email')
+                    ->label('Пользователь')
+                    ->searchable()
+                    ->copyable()
+                    ->icon('heroicon-o-user')
+                    ->iconColor('gray'),
+
+                Tables\Columns\BadgeColumn::make('type')
+                    ->label('Тип')
+                    ->colors([
+                        'info' => PaymentType::AD_PLACEMENT->value,
+                        'success' => PaymentType::SERVICE_PAYMENT->value,
+                        'warning' => PaymentType::SUBSCRIPTION->value,
+                        'secondary' => PaymentType::REFUND->value,
+                    ])
+                    ->formatStateUsing(fn (string $state): string => PaymentType::from($state)->getLabel()),
+
+                Tables\Columns\BadgeColumn::make('method')
+                    ->label('Способ')
+                    ->colors([
+                        'info' => PaymentMethod::CARD->value,
+                        'warning' => PaymentMethod::YANDEX_MONEY->value,
+                        'success' => PaymentMethod::SBERBANK->value,
+                        'secondary' => PaymentMethod::CASH->value,
+                    ])
+                    ->formatStateUsing(fn (string $state): string => PaymentMethod::from($state)->getLabel()),
+
+                Tables\Columns\BadgeColumn::make('status')
+                    ->label('Статус')
+                    ->colors([
+                        'warning' => PaymentStatus::PENDING->value,
+                        'info' => PaymentStatus::PROCESSING->value,
+                        'success' => PaymentStatus::COMPLETED->value,
+                        'danger' => PaymentStatus::FAILED->value,
+                        'secondary' => PaymentStatus::CANCELLED->value,
+                    ])
+                    ->formatStateUsing(fn (string $state): string => PaymentStatus::from($state)->getLabel()),
+
+                Tables\Columns\TextColumn::make('total_amount')
+                    ->label('Сумма')
+                    ->money('RUB')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('gateway')
+                    ->label('Шлюз')
+                    ->badge()
+                    ->color('gray'),
+
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Создан')
+                    ->dateTime('d.m.Y H:i')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('confirmed_at')
+                    ->label('Подтвержден')
+                    ->dateTime('d.m.Y H:i')
+                    ->sortable()
+                    ->placeholder('—'),
+            ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('status')
+                    ->label('Статус')
+                    ->multiple()
+                    ->options(PaymentStatus::options()),
+
+                Tables\Filters\SelectFilter::make('method')
+                    ->label('Способ оплаты')
+                    ->multiple()
+                    ->options(PaymentMethod::options()),
+
+                Tables\Filters\SelectFilter::make('type')
+                    ->label('Тип платежа')
+                    ->multiple()
+                    ->options(PaymentType::options()),
+
+                Tables\Filters\Filter::make('amount_range')
+                    ->label('Диапазон суммы')
+                    ->form([
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('amount_from')
+                                    ->label('От')
+                                    ->numeric()
+                                    ->prefix('₽'),
+                                Forms\Components\TextInput::make('amount_to')
+                                    ->label('До')
+                                    ->numeric()
+                                    ->prefix('₽'),
+                            ]),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['amount_from'],
+                                fn (Builder $query, $amount): Builder => $query->where('total_amount', '>=', $amount),
+                            )
+                            ->when(
+                                $data['amount_to'],
+                                fn (Builder $query, $amount): Builder => $query->where('total_amount', '<=', $amount),
+                            );
+                    }),
+
+                Tables\Filters\Filter::make('date_range')
+                    ->label('Период')
+                    ->form([
+                        Forms\Components\DatePicker::make('created_from')
+                            ->label('С'),
+                        Forms\Components\DatePicker::make('created_until')
+                            ->label('По'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['created_from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['created_until'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                            );
+                    }),
+            ])
+            ->actions([
+                Tables\Actions\ViewAction::make(),
+                Tables\Actions\EditAction::make(),
+
+                // Кнопка подтверждения платежа
+                Action::make('confirm')
+                    ->label('Подтвердить')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->visible(fn (Payment $record): bool => $record->status === PaymentStatus::PENDING)
+                    ->action(function (Payment $record): void {
+                        $record->confirm();
+                        Notification::make()
+                            ->title('Платеж подтвержден')
+                            ->success()
+                            ->send();
+                    }),
+
+                // Кнопка отклонения платежа
+                Action::make('fail')
+                    ->label('Отклонить')
+                    ->icon('heroicon-o-x-circle')
+                    ->color('danger')
+                    ->form([
+                        Forms\Components\Textarea::make('reason')
+                            ->label('Причина отклонения')
+                            ->required(),
+                    ])
+                    ->visible(fn (Payment $record): bool => $record->status === PaymentStatus::PENDING)
+                    ->action(function (Payment $record, array $data): void {
+                        $record->fail($data['reason']);
+                        Notification::make()
+                            ->title('Платеж отклонен')
+                            ->warning()
+                            ->send();
+                    }),
+
+                // Кнопка возврата
+                Action::make('refund')
+                    ->label('Возврат')
+                    ->icon('heroicon-o-arrow-uturn-left')
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->visible(fn (Payment $record): bool => $record->isRefundable())
+                    ->action(function (Payment $record): void {
+                        // Здесь должна быть логика возврата через соответствующий сервис
+                        Notification::make()
+                            ->title('Возврат обрабатывается')
+                            ->info()
+                            ->send();
+                    }),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    // Массовое подтверждение
+                    BulkAction::make('bulk_confirm')
+                        ->label('Подтвердить выбранные')
+                        ->icon('heroicon-o-check-circle')
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->deselectRecordsAfterCompletion()
+                        ->action(function (Collection $records): void {
+                            $confirmedCount = 0;
+                            foreach ($records as $record) {
+                                if ($record->status === PaymentStatus::PENDING && $record->confirm()) {
+                                    $confirmedCount++;
+                                }
+                            }
+
+                            Notification::make()
+                                ->title("Подтверждено платежей: {$confirmedCount}")
+                                ->success()
+                                ->send();
+                        }),
+
+                    // Массовое отклонение
+                    BulkAction::make('bulk_fail')
+                        ->label('Отклонить выбранные')
+                        ->icon('heroicon-o-x-circle')
+                        ->color('danger')
+                        ->form([
+                            Forms\Components\Textarea::make('reason')
+                                ->label('Причина отклонения')
+                                ->required(),
+                        ])
+                        ->deselectRecordsAfterCompletion()
+                        ->action(function (Collection $records, array $data): void {
+                            $failedCount = 0;
+                            foreach ($records as $record) {
+                                if ($record->status === PaymentStatus::PENDING && $record->fail($data['reason'])) {
+                                    $failedCount++;
+                                }
+                            }
+
+                            Notification::make()
+                                ->title("Отклонено платежей: {$failedCount}")
+                                ->warning()
+                                ->send();
+                        }),
+
+                    // Экспорт в CSV
+                    BulkAction::make('export')
+                        ->label('Экспорт в CSV')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->color('gray')
+                        ->deselectRecordsAfterCompletion()
+                        ->action(function (Collection $records): void {
+                            // Здесь должна быть логика экспорта
+                            Notification::make()
+                                ->title('Экспорт начат')
+                                ->info()
+                                ->send();
+                        }),
+
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ])
+            ->defaultSort('created_at', 'desc')
+            ->poll('60s');
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListPayments::route('/'),
+            'create' => Pages\CreatePayment::route('/create'),
+            'edit' => Pages\EditPayment::route('/{record}/edit'),
+            'view' => Pages\ViewPayment::route('/{record}'),
+        ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->with(['user']);
+    }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['payment_number', 'external_id', 'user.email', 'description'];
+    }
+}

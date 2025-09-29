@@ -60,7 +60,11 @@
                   class="w-8 h-8 sm:w-7 sm:h-7 rounded-md bg-white/95 border border-gray-300 flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-white hover:shadow-lg"
                   title="Повернуть"
                 >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 sm:w-3.5 sm:h-3.5 text-gray-600 hover:text-blue-500 transition-colors">
+                  <svg viewBox="0 0 24 24"
+                       fill="none"
+                       stroke="currentColor"
+                       stroke-width="2"
+                       class="w-4 h-4 sm:w-3.5 sm:h-3.5 text-gray-600 hover:text-blue-500 transition-colors">
                     <polyline points="23,4 23,10 17,10"/>
                     <path d="M20.49,15a9,9,0,1,1-2.12-9.36L23,10"/>
                   </svg>
@@ -72,7 +76,11 @@
                   class="w-8 h-8 sm:w-7 sm:h-7 rounded-md bg-white/95 border border-gray-300 flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-white hover:shadow-lg"
                   title="Удалить"
                 >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 text-gray-600 hover:text-red-500 transition-colors">
+                  <svg viewBox="0 0 24 24"
+                       fill="none"
+                       stroke="currentColor"
+                       stroke-width="2"
+                       class="w-4 h-4 text-gray-600 hover:text-red-500 transition-colors">
                     <polyline points="3,6 5,6 21,6"/>
                     <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2v2"/>
                   </svg>
@@ -95,17 +103,40 @@
         class="w-[266px] h-[200px] sm:w-full sm:h-[150px] border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center gap-2 cursor-pointer transition-all duration-300 bg-gray-50 hover:border-blue-500 hover:bg-blue-50 mt-4"
         @click="triggerPhotoInput"
       >
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="text-gray-600">
-          <line x1="12" y1="5" x2="12" y2="19" stroke-width="2"/>
-          <line x1="5" y1="12" x2="19" y2="12" stroke-width="2"/>
+        <svg width="32"
+             height="32"
+             viewBox="0 0 24 24"
+             fill="none"
+             stroke="currentColor"
+             class="text-gray-600">
+          <line x1="12"
+                y1="5"
+                x2="12"
+                y2="19"
+                stroke-width="2"/>
+          <line x1="5"
+                y1="12"
+                x2="19"
+                y2="12"
+                stroke-width="2"/>
         </svg>
         <span class="text-sm text-gray-600">Добавить фото</span>
       </div>
 
       <!-- Пустое состояние -->
       <div v-else class="flex flex-col items-center justify-center min-h-[200px] cursor-pointer p-8" @click="triggerPhotoInput">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="text-gray-400 mb-4">
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+        <svg width="48"
+             height="48"
+             viewBox="0 0 24 24"
+             fill="none"
+             stroke="currentColor"
+             class="text-gray-400 mb-4">
+          <rect x="3"
+                y="3"
+                width="18"
+                height="18"
+                rx="2"
+                ry="2"/>
           <circle cx="8.5" cy="8.5" r="1.5"/>
           <polyline points="21,15 16,10 5,21"/>
         </svg>
@@ -116,10 +147,18 @@
       <!-- Оверлей для drag-and-drop -->
       <div v-if="isDragOver" class="absolute inset-0 bg-blue-500/10 rounded-lg flex items-center justify-center pointer-events-none">
         <div class="text-center">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="text-blue-500 mb-4">
+          <svg width="48"
+               height="48"
+               viewBox="0 0 24 24"
+               fill="none"
+               stroke="currentColor"
+               class="text-blue-500 mb-4">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
             <polyline points="7,10 12,15 17,10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
+            <line x1="12"
+                  y1="15"
+                  x2="12"
+                  y2="3"/>
           </svg>
           <p class="text-lg font-medium text-blue-500">Перетащите сюда изображения</p>
         </div>

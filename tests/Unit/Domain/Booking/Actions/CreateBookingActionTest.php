@@ -11,7 +11,7 @@ use App\Domain\Booking\Models\Booking;
 use App\Domain\Booking\Models\BookingHistory;
 use App\Domain\Master\Models\MasterProfile;
 use App\Domain\Booking\Enums\BookingStatus;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Traits\SafeRefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
@@ -19,7 +19,7 @@ use Mockery;
 
 class CreateBookingActionTest extends TestCase
 {
-    use RefreshDatabase;
+    use SafeRefreshDatabase;
 
     private CreateBookingAction $action;
     private BookingRepository $bookingRepository;

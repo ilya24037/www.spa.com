@@ -132,9 +132,17 @@
         @drag-end="(e) => onMarkerDragEnd(e, index)"
       >
         <div class="service-marker" @click="removePoint(index)">
-          <svg width="32" height="40" viewBox="0 0 32 40" fill="none">
+          <svg width="32"
+               height="40"
+               viewBox="0 0 32 40"
+               fill="none">
             <path d="M16 0C7.164 0 0 7.164 0 16C0 24.836 16 40 16 40S32 24.836 32 16C32 7.164 24.836 0 16 0Z" :fill="selectedColor"/>
-            <text x="16" y="21" text-anchor="middle" fill="white" font-size="14" font-weight="bold">{{ index + 1 }}</text>
+            <text x="16"
+                  y="21"
+                  text-anchor="middle"
+                  fill="white"
+                  font-size="14"
+                  font-weight="bold">{{ index + 1 }}</text>
           </svg>
           <div class="remove-hint">Клик для удаления</div>
         </div>

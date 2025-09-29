@@ -8,12 +8,12 @@ use App\Domain\Ad\Services\AdModerationService;
 use App\Domain\Ad\Models\Ad;
 use App\Domain\Ad\Enums\AdStatus;
 use App\Domain\User\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Traits\SafeRefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 
 class AdminActionsServiceTest extends TestCase
 {
-    use RefreshDatabase;
+    use SafeRefreshDatabase;
 
     private AdminActionsService $service;
     private User $admin;

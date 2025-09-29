@@ -6,7 +6,7 @@ use Tests\TestCase;
 use App\Domain\Media\Repositories\MediaStatisticsRepository;
 use App\Domain\Media\Models\Media;
 use App\Enums\{MediaType, MediaStatus};
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Traits\SafeRefreshDatabase;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Collection;
  */
 class MediaStatisticsRepositoryTest extends TestCase
 {
-    use RefreshDatabase;
+    use SafeRefreshDatabase;
 
     private MediaStatisticsRepository $repository;
 

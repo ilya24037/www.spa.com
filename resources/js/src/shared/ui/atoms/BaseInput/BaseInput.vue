@@ -121,7 +121,10 @@
     </div>
     
     <!-- Ошибка -->
-    <div v-if="error" :id="`${inputId}-error`" class="mt-0 text-sm text-red-600" role="alert">
+    <div v-if="error"
+         :id="`${inputId}-error`"
+         class="mt-0 text-sm text-red-600"
+         role="alert">
       {{ error }}
     </div>
     

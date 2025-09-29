@@ -24,8 +24,14 @@
     <!-- Локация -->
     <div v-if="displayLocation" class="item-location">
       <svg class="location-icon" viewBox="0 0 16 16" fill="none">
-        <path d="M8 8.5C9.10457 8.5 10 7.60457 10 6.5C10 5.39543 9.10457 4.5 8 4.5C6.89543 4.5 6 5.39543 6 6.5C6 7.60457 6.89543 8.5 8 8.5Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M8 1.5C4.5 1.5 2 4 2 7C2 10.5 8 14.5 8 14.5C8 14.5 14 10.5 14 7C14 4 11.5 1.5 8 1.5Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M8 8.5C9.10457 8.5 10 7.60457 10 6.5C10 5.39543 9.10457 4.5 8 4.5C6.89543 4.5 6 5.39543 6 6.5C6 7.60457 6.89543 8.5 8 8.5Z"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"/>
+        <path d="M8 1.5C4.5 1.5 2 4 2 7C2 10.5 8 14.5 8 14.5C8 14.5 14 10.5 14 7C14 4 11.5 1.5 8 1.5Z"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"/>
       </svg>
       <span>{{ displayLocation }}</span>
     </div>

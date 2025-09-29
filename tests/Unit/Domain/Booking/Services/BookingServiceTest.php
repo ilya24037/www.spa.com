@@ -22,14 +22,14 @@ use App\Domain\User\Models\User;
 use App\Enums\BookingType;
 use App\Enums\BookingStatus;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Traits\SafeRefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
 use Mockery;
 
 class BookingServiceTest extends TestCase
 {
-    use RefreshDatabase;
+    use SafeRefreshDatabase;
 
     private BookingService $service;
     private BookingRepository $repository;

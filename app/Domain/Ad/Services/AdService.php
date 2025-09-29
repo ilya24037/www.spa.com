@@ -145,8 +145,9 @@ class AdService
         }
         
         $ad = $this->adRepository->updateAd($ad, [
-            'status' => AdStatus::ACTIVE->value,
-            'published_at' => now()
+            'status' => AdStatus::PENDING_MODERATION->value,
+            'published_at' => now(),
+            'is_published' => false // Требует модерации
         ]);
         
         Log::info('Ad published successfully', [
@@ -199,9 +200,11 @@ class AdService
      */
     public function restore(Ad $ad): Ad
     {
+        // При восстановлении объявление идет на повторную модерацию
         return $this->adRepository->updateAd($ad, [
-            'status' => AdStatus::ACTIVE->value,
-            'archived_at' => null
+            'status' => AdStatus::PENDING_MODERATION->value,
+            'archived_at' => null,
+            'is_published' => false
         ]);
     }
 

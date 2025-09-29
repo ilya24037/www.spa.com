@@ -269,9 +269,9 @@ const getAdditionalCount = (optionValue: string): number => {
 
 <style scoped>
 .filter-panel {
-  width: 320px;
-  min-width: 320px;
+  width: 100%;
   max-width: 320px;
+  min-width: 280px;
   max-height: calc(100vh - 120px);
   overflow-y: auto;
   overflow-x: hidden;
@@ -300,5 +300,14 @@ const getAdditionalCount = (optionValue: string): number => {
 
 .filter-panel::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 1024px) {
+  .filter-panel {
+    width: 100%;
+    max-width: none;
+    max-height: none;
+  }
 }
 </style>

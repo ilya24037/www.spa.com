@@ -6,71 +6,77 @@
       <!-- Уровень 1: Основная навигация -->
       <div class="border-b border-gray-200 px-6">
         <div class="flex items-center justify-between h-16">
-            <!-- Левая часть -->
-            <div class="flex items-center flex-1">
-              <Logo />
-              <div class="ml-8 flex-1 max-w-3xl">
-                <SearchBar @toggle-catalog="toggleCatalog" />
-              </div>
+          <!-- Левая часть -->
+          <div class="flex items-center flex-1">
+            <Logo />
+            <div class="ml-8 flex-1 max-w-3xl">
+              <SearchBar @toggle-catalog="toggleCatalog" />
             </div>
+          </div>
 
-            <!-- Правая часть -->
-            <div class="flex items-center ml-8 gap-4">
-              <!-- Избранное (из оригинального FavoritesButton) -->
-              <Link href="/favorites" class="flex items-center gap-1 text-gray-700 hover:text-gray-900 transition">
-                <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"/>
-                </svg>
-                <span v-if="favoritesCount > 0" class="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
-                  {{ favoritesCount }}
-                </span>
-                <span class="text-sm">Избранное</span>
+          <!-- Правая часть -->
+          <div class="flex items-center ml-8 gap-4">
+            <!-- Избранное (из оригинального FavoritesButton) -->
+            <Link href="/favorites" class="flex items-center gap-1 text-gray-700 hover:text-gray-900 transition">
+              <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"/>
+              </svg>
+              <span v-if="favoritesCount > 0" class="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                {{ favoritesCount }}
+              </span>
+              <span class="text-sm">Избранное</span>
+            </Link>
+
+            <!-- Сравнить (из оригинального CompareButton) -->
+            <Link href="/compare" class="flex items-center gap-1 text-gray-700 hover:text-gray-900 transition">
+              <svg class="w-5 h-5"
+                   fill="none"
+                   stroke="currentColor"
+                   viewBox="0 0 24 24">
+                <path stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+              </svg>
+              <span v-if="compareCount > 0" class="text-red-500 text-xs font-bold">
+                {{ compareCount }}
+              </span>
+              <span class="text-sm">Сравнить</span>
+            </Link>
+
+            <!-- Для авторизованных пользователей -->
+            <template v-if="isAuthenticated">
+              <!-- Меню пользователя (аватар без дублей избранного) -->
+              <UserActions 
+                :user="user"
+                :is-authenticated="isAuthenticated"
+              />
+
+              <!-- Кнопка разместить объявление -->
+              <Link 
+                href="/additem"
+                class="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition font-medium whitespace-nowrap"
+              >
+                Разместить объявление
               </Link>
+            </template>
 
-              <!-- Сравнить (из оригинального CompareButton) -->
-              <Link href="/compare" class="flex items-center gap-1 text-gray-700 hover:text-gray-900 transition">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                </svg>
-                <span v-if="compareCount > 0" class="text-red-500 text-xs font-bold">
-                  {{ compareCount }}
-                </span>
-                <span class="text-sm">Сравнить</span>
-              </Link>
-
-              <!-- Для авторизованных пользователей -->
-              <template v-if="isAuthenticated">
-                <!-- Меню пользователя (аватар без дублей избранного) -->
-                <UserActions 
-                  :user="user"
-                  :is-authenticated="isAuthenticated"
-                />
-
-                <!-- Кнопка разместить объявление -->
-                <Link 
-                  href="/additem"
-                  class="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition font-medium whitespace-nowrap"
-                >
-                  Разместить объявление
-                </Link>
-              </template>
-
-              <!-- Для неавторизованных -->
-              <template v-else>
-                <button 
-                  @click="showLoginModal = true"
-                  class="text-gray-700 px-4 py-2.5 rounded-lg hover:bg-gray-100 transition font-medium"
-                >
-                  Войти
-                </button>
-                <button 
-                  @click="showRegisterModal = true"
-                  class="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition font-medium"
-                >
-                  Регистрация
-                </button>
-              </template>
-            </div>
+            <!-- Для неавторизованных -->
+            <template v-else>
+              <button 
+                @click="showLoginModal = true"
+                class="text-gray-700 px-4 py-2.5 rounded-lg hover:bg-gray-100 transition font-medium"
+              >
+                Войти
+              </button>
+              <button 
+                @click="showRegisterModal = true"
+                class="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition font-medium"
+              >
+                Регистрация
+              </button>
+            </template>
+          </div>
         </div>
       </div>
       

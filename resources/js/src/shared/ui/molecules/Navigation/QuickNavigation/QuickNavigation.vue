@@ -58,13 +58,13 @@
         </svg>
       </component>
       
-              <!-- Показать больше/меньше (если есть скрытые ссылки) -->
+      <!-- Показать больше/меньше (если есть скрытые ссылки) -->
       <button
         v-if="hasMoreLinks"
         type="button"
         :class="moreButtonClasses"
         :aria-expanded="showAll"
-                  :aria-label="showAll ? 'Скрыть дополнительные ссылки' : 'Показать дополнительные ссылки'"
+        :aria-label="showAll ? 'Скрыть дополнительные ссылки' : 'Показать дополнительные ссылки'"
         @click="toggleShowAll"
       >
         <span>{{ showAll ? 'РЎРєСЂС‹С‚СЊ' : `+${hiddenLinksCount}` }}</span>

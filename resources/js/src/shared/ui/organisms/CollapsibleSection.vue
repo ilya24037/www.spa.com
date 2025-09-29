@@ -1,9 +1,10 @@
 <template>
-  <div class="mb-3 border rounded-xl overflow-visible" :class="[
-    isRequired ? 'border-blue-500' : 'border-gray-200',
-    isFilled ? 'border-green-500' : '',
-    hasErrors ? 'border-red-500' : ''
-  ]">
+  <div class="mb-3 border rounded-xl overflow-visible"
+       :class="[
+         isRequired ? 'border-blue-500' : 'border-gray-200',
+         isFilled ? 'border-green-500' : '',
+         hasErrors ? 'border-red-500' : ''
+       ]">
     <div 
       class="px-5 py-4 bg-gray-50/80 cursor-pointer flex justify-between items-center select-none transition-colors duration-200 rounded-t-xl hover:bg-gray-100/90"
       :class="{ 'bg-blue-50/90': isOpen }"

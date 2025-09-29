@@ -84,10 +84,19 @@
         @drag-end="onMarkerDragEnd"
       >
         <div class="address-marker">
-          <svg width="40" height="48" viewBox="0 0 40 48" fill="none">
+          <svg width="40"
+               height="48"
+               viewBox="0 0 40 48"
+               fill="none">
             <path d="M20 0C8.954 0 0 8.954 0 20C0 31.046 20 48 20 48S40 31.046 40 20C40 8.954 31.046 0 20 0Z" fill="#4285F4"/>
-            <circle cx="20" cy="20" r="8" fill="white"/>
-            <circle cx="20" cy="20" r="3" fill="#4285F4"/>
+            <circle cx="20"
+                    cy="20"
+                    r="8"
+                    fill="white"/>
+            <circle cx="20"
+                    cy="20"
+                    r="3"
+                    fill="#4285F4"/>
           </svg>
         </div>
       </yandex-map-marker>
@@ -102,9 +111,22 @@
         }"
       >
         <div class="metro-marker" :title="metro.name">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="11" fill="#D52B1E" stroke="white" stroke-width="2"/>
-            <text x="12" y="16" text-anchor="middle" fill="white" font-size="14" font-weight="bold">М</text>
+          <svg width="24"
+               height="24"
+               viewBox="0 0 24 24"
+               fill="none">
+            <circle cx="12"
+                    cy="12"
+                    r="11"
+                    fill="#D52B1E"
+                    stroke="white"
+                    stroke-width="2"/>
+            <text x="12"
+                  y="16"
+                  text-anchor="middle"
+                  fill="white"
+                  font-size="14"
+                  font-weight="bold">М</text>
           </svg>
         </div>
       </yandex-map-marker>

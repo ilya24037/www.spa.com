@@ -1,0 +1,1 @@
+export { default as MastersCatalog } from './MastersCatalog.vue'

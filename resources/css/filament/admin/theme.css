@@ -1,0 +1,236 @@
+/* Filament Admin Panel Theme - v4.0 */
+
+/* Import base Filament theme */
+@import '/vendor/filament/filament/resources/css/theme.css';
+
+/* Custom CSS Variables for SPA Platform */
+@layer base {
+  :root {
+    /* Primary Colors - Matching your brand */
+    --filament-primary-50: rgb(239, 246, 255);
+    --filament-primary-100: rgb(219, 234, 254);
+    --filament-primary-200: rgb(191, 219, 254);
+    --filament-primary-300: rgb(147, 197, 253);
+    --filament-primary-400: rgb(96, 165, 250);
+    --filament-primary-500: rgb(59, 130, 246);
+    --filament-primary-600: rgb(37, 99, 235);
+    --filament-primary-700: rgb(29, 78, 216);
+    --filament-primary-800: rgb(30, 64, 175);
+    --filament-primary-900: rgb(30, 58, 138);
+    --filament-primary-950: rgb(23, 37, 84);
+
+    /* Danger Colors */
+    --filament-danger-50: rgb(254, 242, 242);
+    --filament-danger-100: rgb(254, 226, 226);
+    --filament-danger-200: rgb(254, 202, 202);
+    --filament-danger-300: rgb(252, 165, 165);
+    --filament-danger-400: rgb(248, 113, 113);
+    --filament-danger-500: rgb(239, 68, 68);
+    --filament-danger-600: rgb(220, 38, 38);
+    --filament-danger-700: rgb(185, 28, 28);
+    --filament-danger-800: rgb(153, 27, 27);
+    --filament-danger-900: rgb(127, 29, 29);
+    --filament-danger-950: rgb(69, 10, 10);
+
+    /* Gray Colors */
+    --filament-gray-50: rgb(249, 250, 251);
+    --filament-gray-100: rgb(243, 244, 246);
+    --filament-gray-200: rgb(229, 231, 235);
+    --filament-gray-300: rgb(209, 213, 219);
+    --filament-gray-400: rgb(156, 163, 175);
+    --filament-gray-500: rgb(107, 114, 128);
+    --filament-gray-600: rgb(75, 85, 99);
+    --filament-gray-700: rgb(55, 65, 81);
+    --filament-gray-800: rgb(31, 41, 55);
+    --filament-gray-900: rgb(17, 24, 39);
+    --filament-gray-950: rgb(3, 7, 18);
+
+    /* Success Colors */
+    --filament-success-50: rgb(240, 253, 244);
+    --filament-success-100: rgb(220, 252, 231);
+    --filament-success-200: rgb(187, 247, 208);
+    --filament-success-300: rgb(134, 239, 172);
+    --filament-success-400: rgb(74, 222, 128);
+    --filament-success-500: rgb(34, 197, 94);
+    --filament-success-600: rgb(22, 163, 74);
+    --filament-success-700: rgb(21, 128, 61);
+    --filament-success-800: rgb(22, 101, 52);
+    --filament-success-900: rgb(20, 83, 45);
+    --filament-success-950: rgb(5, 46, 22);
+
+    /* Warning Colors */
+    --filament-warning-50: rgb(255, 251, 235);
+    --filament-warning-100: rgb(254, 243, 199);
+    --filament-warning-200: rgb(253, 230, 138);
+    --filament-warning-300: rgb(252, 211, 77);
+    --filament-warning-400: rgb(251, 191, 36);
+    --filament-warning-500: rgb(245, 158, 11);
+    --filament-warning-600: rgb(217, 119, 6);
+    --filament-warning-700: rgb(180, 83, 9);
+    --filament-warning-800: rgb(146, 64, 14);
+    --filament-warning-900: rgb(120, 53, 15);
+    --filament-warning-950: rgb(69, 26, 3);
+
+    /* Info Colors */
+    --filament-info-50: rgb(239, 246, 255);
+    --filament-info-100: rgb(219, 234, 254);
+    --filament-info-200: rgb(191, 219, 254);
+    --filament-info-300: rgb(147, 197, 253);
+    --filament-info-400: rgb(96, 165, 250);
+    --filament-info-500: rgb(59, 130, 246);
+    --filament-info-600: rgb(37, 99, 235);
+    --filament-info-700: rgb(29, 78, 216);
+    --filament-info-800: rgb(30, 64, 175);
+    --filament-info-900: rgb(30, 58, 138);
+    --filament-info-950: rgb(23, 37, 84);
+  }
+
+  /* Dark Mode Support */
+  .dark {
+    --filament-gray-50: rgb(17, 24, 39);
+    --filament-gray-100: rgb(31, 41, 55);
+    --filament-gray-200: rgb(55, 65, 81);
+    --filament-gray-300: rgb(75, 85, 99);
+    --filament-gray-400: rgb(107, 114, 128);
+    --filament-gray-500: rgb(156, 163, 175);
+    --filament-gray-600: rgb(209, 213, 219);
+    --filament-gray-700: rgb(229, 231, 235);
+    --filament-gray-800: rgb(243, 244, 246);
+    --filament-gray-900: rgb(249, 250, 251);
+    --filament-gray-950: rgb(255, 255, 255);
+  }
+}
+
+/* Custom Styling for SPA Platform */
+@layer components {
+  .filament-sidebar-nav-item-icon {
+    @apply text-blue-600;
+  }
+
+  .dark .filament-sidebar-nav-item-icon {
+    @apply text-blue-400;
+  }
+
+  .filament-stats-overview-widget-card {
+    @apply shadow-sm transition-shadow duration-200;
+  }
+
+  .filament-stats-overview-widget-card:hover {
+    @apply shadow-md;
+  }
+
+  .filament-tables-table-container {
+    @apply rounded-xl shadow-sm;
+  }
+
+  /* Fix for Section components */
+  .filament-form-component-section > * + * {
+    @apply mt-4;
+  }
+
+  /* Fix for grid layouts */
+  .filament-form-component-grid {
+    @apply gap-4;
+  }
+
+  /* Custom badge colors using Tailwind v3 classes */
+  .filament-badge-color-success {
+    @apply bg-green-100 text-green-800;
+  }
+
+  .dark .filament-badge-color-success {
+    @apply bg-green-800 text-green-100;
+  }
+
+  .filament-badge-color-warning {
+    @apply bg-yellow-100 text-yellow-800;
+  }
+
+  .dark .filament-badge-color-warning {
+    @apply bg-yellow-800 text-yellow-100;
+  }
+
+  .filament-badge-color-danger {
+    @apply bg-red-100 text-red-800;
+  }
+
+  .dark .filament-badge-color-danger {
+    @apply bg-red-800 text-red-100;
+  }
+
+  .filament-badge-color-info {
+    @apply bg-blue-100 text-blue-800;
+  }
+
+  .dark .filament-badge-color-info {
+    @apply bg-blue-800 text-blue-100;
+  }
+
+  /* Custom styles for domain-specific elements */
+  .master-profile-badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .ad-status-indicator {
+    @apply inline-block w-2 h-2 rounded-full;
+  }
+
+  /* Status indicators */
+  .ad-status-indicator.active {
+    @apply bg-green-500;
+  }
+
+  .ad-status-indicator.pending {
+    @apply bg-yellow-500;
+  }
+
+  .ad-status-indicator.inactive {
+    @apply bg-gray-400;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .filament-main-content {
+      @apply px-4;
+    }
+
+    .filament-form-component-section {
+      @apply px-4 py-3;
+    }
+  }
+}
+
+/* Custom utility classes */
+@layer utilities {
+  /* Spacing utilities for Filament components */
+  .filament-section-spacing {
+    @apply space-y-6;
+  }
+
+  .filament-form-spacing {
+    @apply space-y-4;
+  }
+
+  /* Typography utilities */
+  .filament-heading {
+    @apply text-2xl font-bold text-gray-900 dark:text-white;
+  }
+
+  .filament-subheading {
+    @apply text-lg font-semibold text-gray-700 dark:text-gray-200;
+  }
+
+  .filament-body {
+    @apply text-base text-gray-600 dark:text-gray-300;
+  }
+
+  /* Animation utilities */
+  .filament-transition {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  /* Shadow utilities */
+  .filament-shadow-soft {
+    @apply shadow-sm hover:shadow-md transition-shadow duration-200;
+  }
+}

@@ -1,27 +1,29 @@
 <!-- ItemCard - карточка объявления в стиле Avito -->
 <template>
-  <div class="avito-item-snippet hover:shadow-lg transition-shadow">
-    <div class="item-snippet-content">
-      <!-- Изображение в стиле Ozon (кликабельное) -->
-      <Link :href="itemUrl" class="item-image-container relative cursor-pointer">
-        <ItemImage 
-          :item="item"
-          :item-url="itemUrl"
-        />
-      </Link>
+  <!-- Общий контейнер для всех элементов компонента -->
+  <div>
+    <div class="avito-item-snippet hover:shadow-lg transition-shadow">
+      <div class="item-snippet-content">
+        <!-- Изображение в стиле Ozon (кликабельное) -->
+        <Link :href="itemUrl" class="item-image-container relative cursor-pointer">
+          <ItemImage
+            :item="item"
+            :item-url="itemUrl"
+          />
+        </Link>
 
-      <!-- Основной контент (кликабельный) -->
-      <Link :href="itemUrl" class="item-content-link cursor-pointer">
-        <ItemContent 
-          :item="item"
-          :item-url="itemUrl"
-        />
-      </Link>
+        <!-- Основной контент (кликабельный) -->
+        <Link :href="itemUrl" class="item-content-link cursor-pointer">
+          <ItemContent
+            :item="item"
+            :item-url="itemUrl"
+          />
+        </Link>
 
-      <!-- Статистика и действия (НЕ кликабельные) -->
-      <div class="item-info-section">
+        <!-- Статистика и действия (НЕ кликабельные) -->
+        <div class="item-info-section">
         <!-- Индикатор жалоб для админов -->
-        <div v-if="($page.props.adminMode || $page.props.complaintsMode) && item.complaints_count"
+        <div v-if="(page.props.adminMode || page.props.complaintsMode) && item.complaints_count"
              class="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -43,10 +45,33 @@
           </div>
         </div>
 
+        <!-- Информация об авторе для админа -->
+        <div v-if="page.props.adminMode && item.user" class="mb-3 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+          <div class="flex items-center justify-between text-sm">
+            <div class="flex items-center gap-4">
+              <span class="text-gray-600">👤 Автор:</span>
+              <span class="font-medium text-gray-900">{{ item.user.email }}</span>
+              <span class="text-gray-500">(ID: {{ item.user.id }})</span>
+              <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
+                {{ item.user.role === 'master' ? 'Мастер' : item.user.role === 'admin' ? 'Админ' : 'Клиент' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
         <div class="item-info-top">
           <ItemStats :item="item" />
         </div>
-        
+
+        <!-- Статистика просмотров и даты для админа -->
+        <div v-if="page.props.adminMode" class="flex items-center gap-4 mt-2 px-3 text-sm text-gray-600">
+          <span>👁️ {{ item.views || 0 }} просмотров</span>
+          <span v-if="item.created_at">📅 Создано: {{ item.created_at }}</span>
+          <span v-if="item.updated_at && item.updated_at !== item.created_at">
+            ✏️ Изменено: {{ item.updated_at }}
+          </span>
+        </div>
+
         <!-- Действия на уровне низа фото -->
         <div class="item-actions-bottom">
           <ItemActions
@@ -64,7 +89,7 @@
         </div>
 
         <!-- Кнопки модерации для админов -->
-        <div v-if="$page.props.moderationMode" class="flex gap-2 mt-4 pt-4 border-t">
+        <div v-if="page.props.moderationMode" class="flex gap-2 mt-4 pt-4 border-t">
           <button
             @click="approveItem"
             data-action="approve"
@@ -82,7 +107,7 @@
         </div>
 
         <!-- Кнопки управления пользователями -->
-        <div v-if="$page.props.userManagementMode" class="flex gap-2 mt-4 pt-4 border-t">
+        <div v-if="page.props.userManagementMode" class="flex gap-2 mt-4 pt-4 border-t">
           <button
             @click="toggleUserBlock"
             :class="[
@@ -97,7 +122,7 @@
         </div>
 
         <!-- Кнопки обработки жалоб -->
-        <div v-if="$page.props.complaintsMode" class="flex gap-2 mt-4 pt-4 border-t">
+        <div v-if="page.props.complaintsMode" class="flex gap-2 mt-4 pt-4 border-t">
           <button
             @click="resolveComplaint('accept')"
             class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
@@ -113,7 +138,7 @@
         </div>
 
         <!-- Кнопки управления мастерами -->
-        <div v-if="$page.props.mastersMode" class="flex gap-2 mt-4 pt-4 border-t">
+        <div v-if="page.props.mastersMode" class="flex gap-2 mt-4 pt-4 border-t">
           <button
             @click="toggleMasterVerification"
             :class="[
@@ -128,7 +153,7 @@
         </div>
 
         <!-- Кнопки модерации отзывов -->
-        <div v-if="$page.props.reviewsMode" class="flex gap-2 mt-4 pt-4 border-t">
+        <div v-if="page.props.reviewsMode" class="flex gap-2 mt-4 pt-4 border-t">
           <button
             @click="approveReview"
             class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
@@ -146,8 +171,8 @@
     </div>
   </div>
 
-  <!-- Модальное окно подтверждения удаления -->
-  <ConfirmModal
+    <!-- Модальное окно подтверждения удаления -->
+    <ConfirmModal
     v-model="showDeleteModal"
     title="Удалить объявление?"
     message="Это действие нельзя отменить. Объявление будет удалено навсегда."
@@ -155,10 +180,10 @@
     cancel-text="Отмена"
     variant="danger"
     @confirm="deleteItem"
-  />
+    />
 
-  <!-- Диалог отклонения для модерации -->
-  <div v-if="showRejectDialog" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <!-- Диалог отклонения для модерации -->
+    <div v-if="showRejectDialog" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white p-6 rounded-lg max-w-md w-full">
       <h3 class="text-lg font-semibold mb-4">Причина отклонения</h3>
       <textarea
@@ -177,11 +202,12 @@
       </div>
     </div>
   </div>
+  </div> <!-- Закрываем общий контейнер -->
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { router, Link } from '@inertiajs/vue3'
+import { router, Link, usePage } from '@inertiajs/vue3'
 import ItemImage from '@/src/shared/ui/molecules/ItemImage.vue'
 import ItemContent from '@/src/shared/ui/molecules/ItemContent.vue'
 import ItemStats from './components/ItemStats.vue'
@@ -195,6 +221,7 @@ interface Props {
 
 const props = defineProps<Props>()
 const emit = defineEmits<ItemCardEmits>()
+const page = usePage()
 
 // Состояние компонента
 const showDeleteModal = ref(false)
@@ -223,8 +250,9 @@ const promoteItem = () => {
 
 const editItem = () => {
   // Если админ редактирует чужое объявление
-  if ($page.props.adminMode) {
-    router.visit(`/profile/admin/ads/${props.item.id}/edit`)
+  if (page.props.adminMode) {
+    // Перенаправляем на новую админ-панель Filament
+    window.location.href = `/admin/ads/${props.item.id}/edit`
   } else {
     // Для обычных пользователей - стандартный роут
     router.visit(`/ads/${props.item.id}/edit`)
@@ -317,8 +345,8 @@ const restoreItem = () => {
  * Для админов и модераторов
  */
 const viewComplaints = () => {
-  // Переход на страницу жалоб для конкретного объявления
-  router.visit(`/profile/complaints/ad/${props.item.id}`)
+  // Перенаправляем на новую админ-панель Filament
+  window.location.href = `/admin/complaints`
 }
 
 /**
@@ -368,6 +396,8 @@ const deactivateItem = () => {
 
 const markIrrelevant = () => {
   router.post(`/ads/${props.item.id}/mark-irrelevant`, {}, {
+    preserveState: false,
+    preserveScroll: true,
     onSuccess: () => {
       emit('item-updated', props.item.id, { status: 'archived' })
       emit('mark-irrelevant', props.item.id)
@@ -405,20 +435,24 @@ const deleteItem = () => {
   })
 }
 
-// Методы модерации
+// Методы модерации - перенаправляем на новую админ-панель
 const approveItem = () => {
-  router.post(`/profile/moderation/${props.item.id}/approve`, {}, {
+  // Перенаправляем на новую админ-панель Filament
+  window.location.href = `/admin/ads/${props.item.id}/edit`
+  /*router.post(`/profile/moderation/${props.item.id}/approve`, {}, {
     preserveState: false,
     preserveScroll: true,
     onSuccess: () => {
       // Объявление исчезнет после перезагрузки страницы
       emit('item-approved', props.item.id)
     }
-  })
+  })*/
 }
 
 const rejectItem = () => {
-  router.post(`/profile/moderation/${props.item.id}/reject`, {
+  // Перенаправляем на новую админ-панель Filament
+  window.location.href = `/admin/ads/${props.item.id}/edit`
+  /*router.post(`/profile/moderation/${props.item.id}/reject`, {
     reason: rejectReason.value
   }, {
     preserveState: false,
@@ -428,46 +462,56 @@ const rejectItem = () => {
       rejectReason.value = ''
       emit('item-rejected', props.item.id)
     }
-  })
+  })*/
 }
 
-// Методы управления пользователями
+// Методы управления пользователями - перенаправляем на новую админ-панель
 const toggleUserBlock = () => {
-  router.post(`/profile/users/${props.item.id}/toggle`, {}, {
+  // Перенаправляем на новую админ-панель Filament
+  window.location.href = '/admin/users'
+  /*router.post(`/profile/users/${props.item.id}/toggle`, {}, {
     preserveState: false,
     preserveScroll: true
-  })
+  })*/
 }
 
-// Методы обработки жалоб
+// Методы обработки жалоб - перенаправляем на новую админ-панель
 const resolveComplaint = (action: string) => {
-  router.post(`/profile/complaints/${props.item.id}/resolve`, { action }, {
+  // Перенаправляем на новую админ-панель Filament
+  window.location.href = '/admin/complaints'
+  /*router.post(`/profile/complaints/${props.item.id}/resolve`, { action }, {
     preserveState: false,
     preserveScroll: true
-  })
+  })*/
 }
 
-// Методы управления мастерами
+// Методы управления мастерами - перенаправляем на новую админ-панель
 const toggleMasterVerification = () => {
-  router.post(`/profile/masters/${props.item.id}/verify`, {}, {
+  // Перенаправляем на новую админ-панель Filament
+  window.location.href = '/admin/master-profiles'
+  /*router.post(`/profile/masters/${props.item.id}/verify`, {}, {
     preserveState: false,
     preserveScroll: true
-  })
+  })*/
 }
 
-// Методы модерации отзывов
+// Методы модерации отзывов - перенаправляем на новую админ-панель
 const approveReview = () => {
-  router.post(`/profile/reviews/${props.item.id}/moderate`, { action: 'approve' }, {
+  // Перенаправляем на новую админ-панель Filament
+  window.location.href = '/admin/reviews'
+  /*router.post(`/profile/reviews/${props.item.id}/moderate`, { action: 'approve' }, {
     preserveState: false,
     preserveScroll: true
-  })
+  })*/
 }
 
 const deleteReview = () => {
-  router.post(`/profile/reviews/${props.item.id}/moderate`, { action: 'delete' }, {
+  // Перенаправляем на новую админ-панель Filament
+  window.location.href = '/admin/reviews'
+  /*router.post(`/profile/reviews/${props.item.id}/moderate`, { action: 'delete' }, {
     preserveState: false,
     preserveScroll: true
-  })
+  })*/
 }
 </script>
 

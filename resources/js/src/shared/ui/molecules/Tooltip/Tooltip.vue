@@ -38,8 +38,15 @@
           class="tooltip-close"
           aria-label="Закрыть"
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <svg width="16"
+               height="16"
+               viewBox="0 0 16 16"
+               fill="none"
+               xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 4L4 12M4 4l8 8"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"/>
           </svg>
         </button>
       </div>
@@ -66,9 +73,20 @@
               {{ content }}
             </slot>
           </div>
-          <button v-if="trigger === 'click'" @click="closeTooltip" type="button" class="tooltip-close" aria-label="Закрыть">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <button v-if="trigger === 'click'"
+                  @click="closeTooltip"
+                  type="button"
+                  class="tooltip-close"
+                  aria-label="Закрыть">
+            <svg width="16"
+                 height="16"
+                 viewBox="0 0 16 16"
+                 fill="none"
+                 xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 4L4 12M4 4l8 8"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"/>
             </svg>
           </button>
         </div>

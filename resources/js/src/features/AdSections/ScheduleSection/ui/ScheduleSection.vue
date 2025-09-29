@@ -1,88 +1,88 @@
 <template>
-    <div class="schedule-section">
-        <h2 class="form-group-title">График работы</h2>
+  <div class="schedule-section">
+    <h2 class="form-group-title">График работы</h2>
         
-        <!-- Онлайн запись -->
-        <div class="online-booking-section">
-            <h3 class="subtitle-form">Онлайн запись</h3>
-            <p class="subsection-description">
-                Разрешить клиентам записываться к вам онлайн через сайт
-            </p>
-            <div class="radio-group">
-                <BaseRadio
-                    v-model="localOnlineBooking"
-                    :value="true"
-                    name="online_booking"
-                    label="Да"
-                    description="Клиенты смогут записываться онлайн"
-                    @update:modelValue="emitOnlineBooking"
-                />
-                <BaseRadio
-                    v-model="localOnlineBooking"
-                    :value="false"
-                    name="online_booking"
-                    label="Нет"
-                    description="Только запись по телефону"
-                    @update:modelValue="emitOnlineBooking"
-                />
-            </div>
-        </div>
-
-        <div class="schedule-container">
-            <div class="quick-actions" style="margin-bottom: 20px;">
-                <SecondaryButton @click="setFullWeek">
-                    Круглосуточно всю неделю
-                </SecondaryButton>
-                <SecondaryButton @click="setWorkdays">
-                    Будни 9:00-18:00
-                </SecondaryButton>
-                <SecondaryButton @click="clearAll">
-                    Очистить всё
-                </SecondaryButton>
-            </div>
-            <div class="days-list">
-                <div v-for="day in days" :key="day.id" class="day-item">
-                    <div class="day-name">{{ day.name }}</div>
-                    <div class="day-schedule">
-                        <div class="work-toggle">
-                            <BaseCheckbox
-                                v-model="localSchedule[day.id].enabled"
-                                :name="`schedule_${day.id}`"
-                                :label="localSchedule[day.id].enabled ? 'Работаю' : 'Выходной'"
-                                @update:modelValue="toggleDay(day.id)"
-                            />
-                        </div>
-                        <div v-if="localSchedule[day.id].enabled" class="time-selection">
-                            <BaseSelect
-                                v-model="localSchedule[day.id].from"
-                                label="С"
-                                :options="timeOptionsFrom"
-                                @update:modelValue="emitSchedule"
-                                class="time-field"
-                            />
-                            <BaseSelect
-                                v-if="localSchedule[day.id].from !== '24:00'"
-                                v-model="localSchedule[day.id].to"
-                                label="До"
-                                :options="timeOptionsTo"
-                                @update:modelValue="emitSchedule"
-                                class="time-field"
-                            />
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="additional-info">
-                <BaseTextarea
-                    v-model="localNotes"
-                    label="Дополнительная информация о графике работы"
-                    placeholder="Например: возможны изменения графика по договоренности, предварительная запись обязательна и т.д."
-                    :rows="3"
-                    @update:modelValue="emitNotes"
-                />
-            </div>
-        </div>
+    <!-- Онлайн запись -->
+    <div class="online-booking-section">
+      <h3 class="subtitle-form">Онлайн запись</h3>
+      <p class="subsection-description">
+        Разрешить клиентам записываться к вам онлайн через сайт
+      </p>
+      <div class="radio-group">
+        <BaseRadio
+          v-model="localOnlineBooking"
+          :value="true"
+          name="online_booking"
+          label="Да"
+          description="Клиенты смогут записываться онлайн"
+          @update:modelValue="emitOnlineBooking"
+        />
+        <BaseRadio
+          v-model="localOnlineBooking"
+          :value="false"
+          name="online_booking"
+          label="Нет"
+          description="Только запись по телефону"
+          @update:modelValue="emitOnlineBooking"
+        />
+      </div>
     </div>
+
+    <div class="schedule-container">
+      <div class="quick-actions" style="margin-bottom: 20px;">
+        <SecondaryButton @click="setFullWeek">
+          Круглосуточно всю неделю
+        </SecondaryButton>
+        <SecondaryButton @click="setWorkdays">
+          Будни 9:00-18:00
+        </SecondaryButton>
+        <SecondaryButton @click="clearAll">
+          Очистить всё
+        </SecondaryButton>
+      </div>
+      <div class="days-list">
+        <div v-for="day in days" :key="day.id" class="day-item">
+          <div class="day-name">{{ day.name }}</div>
+          <div class="day-schedule">
+            <div class="work-toggle">
+              <BaseCheckbox
+                v-model="localSchedule[day.id].enabled"
+                :name="`schedule_${day.id}`"
+                :label="localSchedule[day.id].enabled ? 'Работаю' : 'Выходной'"
+                @update:modelValue="toggleDay(day.id)"
+              />
+            </div>
+            <div v-if="localSchedule[day.id].enabled" class="time-selection">
+              <BaseSelect
+                v-model="localSchedule[day.id].from"
+                label="С"
+                :options="timeOptionsFrom"
+                @update:modelValue="emitSchedule"
+                class="time-field"
+              />
+              <BaseSelect
+                v-if="localSchedule[day.id].from !== '24:00'"
+                v-model="localSchedule[day.id].to"
+                label="До"
+                :options="timeOptionsTo"
+                @update:modelValue="emitSchedule"
+                class="time-field"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="additional-info">
+        <BaseTextarea
+          v-model="localNotes"
+          label="Дополнительная информация о графике работы"
+          placeholder="Например: возможны изменения графика по договоренности, предварительная запись обязательна и т.д."
+          :rows="3"
+          @update:modelValue="emitNotes"
+        />
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">

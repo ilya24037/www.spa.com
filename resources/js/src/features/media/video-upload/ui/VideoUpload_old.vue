@@ -48,8 +48,13 @@
 
     <!-- Empty state (если нет видео) -->
     <div v-if="isEmpty" class="text-center py-6 border-2 border-dashed border-gray-300 rounded-lg">
-      <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+      <svg class="w-12 h-12 mx-auto mb-3 text-gray-300"
+           fill="none"
+           viewBox="0 0 24 24"
+           stroke="currentColor">
+        <path stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2" 
               d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 00-2-2V8a2 2 0 00-2 2v8a2 2 0 002 2z" />
       </svg>
       <p class="text-gray-500 mb-3 text-sm">Перетащите видео или нажмите для выбора</p>

@@ -17,6 +17,7 @@ enum PaymentType: string
     case PENALTY = 'penalty';                  // Штраф
     case BONUS = 'bonus';                      // Бонус
     case PROMOTION = 'promotion';              // Промо-платеж
+    case AD_PLACEMENT = 'ad_placement';        // Размещение объявления
 
     /**
      * Получить читаемое название типа
@@ -34,6 +35,7 @@ enum PaymentType: string
             self::PENALTY => 'Штраф',
             self::BONUS => 'Бонус',
             self::PROMOTION => 'Промо-платеж',
+            self::AD_PLACEMENT => 'Размещение объявления',
         };
     }
 
@@ -53,6 +55,7 @@ enum PaymentType: string
             self::PENALTY => 'Штрафные санкции за нарушения',
             self::BONUS => 'Бонусные начисления за активность',
             self::PROMOTION => 'Платеж по промо-акции или скидке',
+            self::AD_PLACEMENT => 'Оплата за размещение объявления на платформе',
         };
     }
 
@@ -72,6 +75,7 @@ enum PaymentType: string
             self::PENALTY => '⚠️',
             self::BONUS => '🎁',
             self::PROMOTION => '🎉',
+            self::AD_PLACEMENT => '📢',
         };
     }
 
@@ -91,6 +95,7 @@ enum PaymentType: string
             self::PENALTY => '#DC2626',            // red-600
             self::BONUS => '#7C3AED',              // violet-600
             self::PROMOTION => '#F97316',          // orange
+            self::AD_PLACEMENT => '#0F766E',       // teal-600
         };
     }
 
@@ -102,10 +107,11 @@ enum PaymentType: string
         return match($this) {
             self::SERVICE_PAYMENT, 
             self::BOOKING_DEPOSIT, 
-            self::SUBSCRIPTION, 
-            self::TOP_UP, 
-            self::BONUS, 
-            self::PROMOTION => true,
+            self::SUBSCRIPTION,
+            self::TOP_UP,
+            self::BONUS,
+            self::PROMOTION,
+            self::AD_PLACEMENT => true,
             default => false,
         };
     }

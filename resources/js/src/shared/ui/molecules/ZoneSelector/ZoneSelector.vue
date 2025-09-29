@@ -14,8 +14,14 @@
             {{ selectedZones.join(', ') }}
           </div>
         </div>
-        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        <svg class="w-5 h-5 text-gray-400"
+             fill="none"
+             stroke="currentColor"
+             viewBox="0 0 24 24">
+          <path stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"></path>
         </svg>
       </div>
     </button>
@@ -26,23 +32,42 @@
         <div class="flex items-center justify-between p-4 border-b border-gray-200">
           <h3 class="text-lg font-semibold text-gray-900">Районы</h3>
           <button @click="closeModal" class="p-1 text-gray-400 hover:text-gray-600 rounded">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            <svg class="w-6 h-6"
+                 fill="none"
+                 stroke="currentColor"
+                 viewBox="0 0 24 24">
+              <path stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"></path>
             </svg>
           </button>
         </div>
         <div class="p-4 border-b border-gray-100">
           <div class="relative">
-            <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
+                 fill="none"
+                 stroke="currentColor"
+                 viewBox="0 0 24 24">
+              <path stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
-            <input v-model="searchQuery" type="text" placeholder="Поиск" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none" />
+            <input v-model="searchQuery"
+                   type="text"
+                   placeholder="Поиск"
+                   class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none" />
           </div>
         </div>
         <div class="flex-1 overflow-y-auto p-4">
           <div class="space-y-2">
             <label v-for="zone in filteredZones" :key="zone" class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer group">
-              <input type="checkbox" :value="zone" :checked="tempSelectedZones.includes(zone)" @change="toggleZone(zone)" class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+              <input type="checkbox"
+                     :value="zone"
+                     :checked="tempSelectedZones.includes(zone)"
+                     @change="toggleZone(zone)"
+                     class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
               <span class="text-sm text-gray-900 group-hover:text-blue-600">{{ zone }}</span>
             </label>
           </div>

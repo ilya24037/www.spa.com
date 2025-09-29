@@ -41,6 +41,11 @@ Route::get('/test/fibonacci-design', function() {
     return Inertia::render('Test/FibonacciDesignTest');
 })->name('test.fibonacci');
 
+// Тестовая страница для Tailwind CSS v4
+Route::get('/test/tailwind', function() {
+    return Inertia::render('TailwindTest');
+})->name('test.tailwind');
+
 // Статические файлы карты с CORS
 Route::get('/maps/{path}', function($path) {
     $filePath = public_path('maps/' . $path);
@@ -299,42 +304,63 @@ Route::middleware('auth')->group(function () {
     Route::get('/settings', fn() => Inertia::render('Settings/Index'))->name('settings.index');
 
     /*
-    | Административные маршруты (модерация)
+    | УСТАРЕВШИЕ АДМИНИСТРАТИВНЫЕ МАРШРУТЫ - ЗАМЕНЕНЫ НА FILAMENT ADMIN PANEL
+    |
+    | Эти маршруты теперь обрабатываются через современную админ-панель Filament v3
+    | Доступ к новой админке: /admin
+    |
+    | ДОСТУП К АДМИН-ПАНЕЛИ:
+    | URL: /admin
+    | Email: admin@spa.com
+    | Password: admin123
+    |
+    | Все функции администрирования перенесены в Filament:
+    | - Модерация объявлений → /admin/ads
+    | - Управление пользователями → /admin/users
+    | - Система жалоб → /admin/complaints
+    | - Управление мастерами → /admin/master-profiles
+    | - Модерация отзывов → /admin/reviews
+    | - Просмотр логов → /admin/admin-logs
     */
-    Route::get('/profile/moderation', [ProfileController::class, 'moderation'])->name('profile.moderation');
-    Route::post('/profile/moderation/{ad}/approve', [ProfileController::class, 'approve'])->name('profile.moderation.approve');
-    Route::post('/profile/moderation/{ad}/reject', [ProfileController::class, 'reject'])->name('profile.moderation.reject');
 
-    // Админ-панель: все объявления
-    Route::get('/profile/admin/ads', [ProfileController::class, 'allAds'])->name('profile.admin.ads');
-    Route::get('/profile/admin/ads/{ad}/edit', [ProfileController::class, 'editAd'])->name('profile.admin.ads.edit');
-    Route::put('/profile/admin/ads/{ad}', [ProfileController::class, 'updateAd'])
-        ->middleware('throttle:30,1') // 30 редактирований в минуту
-        ->name('profile.admin.ads.update');
-    Route::post('/profile/admin/ads/bulk', [ProfileController::class, 'bulkAction'])
-        ->middleware('throttle:10,1') // Ограничение: 10 запросов в минуту
-        ->name('profile.admin.ads.bulk');
+    // BACKWARD COMPATIBILITY ROUTES - ПЕРЕНАПРАВЛЯЮТ НА НОВУЮ АДМИН-ПАНЕЛЬ FILAMENT
+    // Все эти маршруты теперь перенаправляют на /admin вместо старого интерфейса
+    // Закомментированы для полного перехода на Filament v4
 
-    // Просмотр логов администраторов
-    Route::get('/profile/admin/logs', [ProfileController::class, 'adminLogs'])->name('profile.admin.logs');
+    // Route::get('/profile/moderation', [ProfileController::class, 'moderationRedirect'])->name('profile.moderation');
+    // Route::post('/profile/moderation/{ad}/approve', [ProfileController::class, 'approveRedirect'])->name('profile.moderation.approve');
+    // Route::post('/profile/moderation/{ad}/reject', [ProfileController::class, 'rejectRedirect'])->name('profile.moderation.reject');
 
-    // Управление пользователями (только admin)
-    Route::get('/profile/users', [ProfileController::class, 'users'])->name('profile.users');
-    Route::post('/profile/users/{user}/toggle', [ProfileController::class, 'toggleUserStatus'])
-        ->middleware('throttle:5,1') // 5 блокировок в минуту
-        ->name('profile.users.toggle');
+    // // Админ-панель: все объявления
+    // Route::get('/profile/admin/ads', [ProfileController::class, 'allAdsRedirect'])->name('profile.admin.ads');
+    // Route::get('/profile/admin/ads/{ad}/edit', [ProfileController::class, 'editAdRedirect'])->name('profile.admin.ads.edit');
+    // Route::put('/profile/admin/ads/{ad}', [ProfileController::class, 'editAdRedirect'])
+    //     ->middleware('throttle:30,1') // 30 редактирований в минуту
+    //     ->name('profile.admin.ads.update');
+    // Route::post('/profile/admin/ads/bulk', [ProfileController::class, 'bulkActionRedirect'])
+    //     ->middleware('throttle:10,1') // Ограничение: 10 запросов в минуту
+    //     ->name('profile.admin.ads.bulk');
 
-    // Система жалоб
-    Route::get('/profile/complaints', [ProfileController::class, 'complaints'])->name('profile.complaints');
-    Route::post('/profile/complaints/{ad}/resolve', [ProfileController::class, 'resolveComplaint'])->name('profile.complaints.resolve');
+    // // Просмотр логов администраторов
+    // Route::get('/profile/admin/logs', [ProfileController::class, 'adminLogsRedirect'])->name('profile.admin.logs');
 
-    // Управление мастерами (только admin)
-    Route::get('/profile/masters', [ProfileController::class, 'masters'])->name('profile.masters');
-    Route::post('/profile/masters/{master}/verify', [ProfileController::class, 'toggleMasterVerification'])->name('profile.masters.verify');
+    // // Управление пользователями (только admin)
+    // Route::get('/profile/users', [ProfileController::class, 'usersRedirect'])->name('profile.users');
+    // Route::post('/profile/users/{user}/toggle', [ProfileController::class, 'toggleUserStatusRedirect'])
+    //     ->middleware('throttle:5,1') // 5 блокировок в минуту
+    //     ->name('profile.users.toggle');
 
-    // Модерация отзывов
-    Route::get('/profile/reviews', [ProfileController::class, 'reviews'])->name('profile.reviews');
-    Route::post('/profile/reviews/{review}/moderate', [ProfileController::class, 'moderateReview'])->name('profile.reviews.moderate');
+    // // Система жалоб
+    // Route::get('/profile/complaints', [ProfileController::class, 'complaintsRedirect'])->name('profile.complaints');
+    // Route::post('/profile/complaints/{ad}/resolve', [ProfileController::class, 'resolveComplaintRedirect'])->name('profile.complaints.resolve');
+
+    // // Управление мастерами (только admin)
+    // Route::get('/profile/masters', [ProfileController::class, 'mastersRedirect'])->name('profile.masters');
+    // Route::post('/profile/masters/{master}/verify', [ProfileController::class, 'toggleMasterVerificationRedirect'])->name('profile.masters.verify');
+
+    // // Модерация отзывов
+    // Route::get('/profile/reviews', [ProfileController::class, 'reviewsRedirect'])->name('profile.reviews');
+    // Route::post('/profile/reviews/{review}/moderate', [ProfileController::class, 'moderateReviewRedirect'])->name('profile.reviews.moderate');
 });
 
 /*

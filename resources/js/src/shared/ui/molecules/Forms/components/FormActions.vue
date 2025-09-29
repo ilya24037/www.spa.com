@@ -36,12 +36,12 @@
 
         <button
           type="button"
-          @click="() => { console.log('🔵 Кнопка СОХРАНИТЬ ИЗМЕНЕНИЯ нажата!'); $emit('submit') }"
+          @click="$emit('publish')"
           class="px-6 py-3 rounded-lg text-base font-semibold cursor-pointer transition-all duration-200 flex items-center gap-2 min-w-[140px] justify-center bg-gradient-to-br from-blue-500 to-blue-700 text-white border-0 hover:from-blue-600 hover:to-blue-800 hover:-translate-y-px disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none sm:w-auto w-full"
-          :disabled="submitting"
+          :disabled="publishing"
         >
-          <span v-if="submitting" class="w-4 h-4 border-2 border-transparent border-t-current rounded-full animate-spin"></span>
-          {{ submitting ? 'Сохранение...' : 'Сохранить изменения' }}
+          <span v-if="publishing" class="w-4 h-4 border-2 border-transparent border-t-current rounded-full animate-spin"></span>
+          {{ publishing ? 'Сохранение...' : 'Сохранить изменения' }}
         </button>
       </template>
       
@@ -49,7 +49,7 @@
       <template v-else>
         <button
           type="button"
-@click="$emit('save-draft')"
+          @click="$emit('save-draft')"
           class="px-6 py-3 rounded-lg text-base font-semibold cursor-pointer transition-all duration-200 flex items-center gap-2 min-w-[140px] justify-center bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none sm:w-auto w-full"
           :disabled="savingDraft"
         >
@@ -60,7 +60,7 @@
         <!-- Новая кнопка "Разместить объявление" -->
         <button
           type="button"
-@click="$emit('publish')"
+          @click="$emit('publish')"
           class="px-6 py-3 rounded-lg text-base font-semibold cursor-pointer transition-all duration-200 flex items-center gap-2 min-w-[180px] justify-center bg-gradient-to-br from-green-500 to-green-700 text-white border-0 hover:from-green-600 hover:to-green-800 hover:-translate-y-px disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none sm:w-auto w-full"
           :disabled="publishing"
         >

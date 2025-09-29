@@ -308,6 +308,7 @@ class ProfileController extends Controller
 
     /**
      * Страница модерации объявлений (только для админов и модераторов)
+     * @deprecated Используйте /admin/ads с фильтром по статусу модерации
      */
     public function moderation()
     {
@@ -324,6 +325,7 @@ class ProfileController extends Controller
 
     /**
      * Просмотр всех объявлений для администратора
+     * @deprecated Используйте /admin/ads в новой админ-панели Filament
      */
     public function allAds(Request $request)
     {
@@ -395,6 +397,9 @@ class ProfileController extends Controller
                 'address' => $ad->address ?? '',
                 'phone' => $ad->phone,
                 'views' => $ad->views_count ?? 0,
+                // Добавляем даты создания и обновления
+                'created_at' => $ad->created_at->format('d.m.Y H:i'),
+                'updated_at' => $ad->updated_at->format('d.m.Y H:i'),
                 // Добавляем информацию о жалобах
                 'complaints_count' => $ad->complaints_count,
                 'has_unresolved_complaints' => $ad->has_unresolved_complaints,
@@ -527,6 +532,7 @@ class ProfileController extends Controller
 
     /**
      * Управление пользователями (только для админов)
+     * @deprecated Используйте /admin/users в новой админ-панели Filament
      */
     public function users(Request $request)
     {
@@ -592,7 +598,7 @@ class ProfileController extends Controller
      */
     public function complaints()
     {
-        abort_if(!auth()->user()->hasPermission('manage_complaints'), 403);
+        abort_if(auth()->user()->role->value !== 'admin', 403);
 
         // Используем поле rejection_reason для хранения жалоб
         $complaints = Ad::whereNotNull('rejection_reason')
@@ -660,6 +666,7 @@ class ProfileController extends Controller
 
     /**
      * Управление мастерами (только для админов)
+     * @deprecated Используйте /admin/master-profiles в новой админ-панели Filament
      */
     public function masters()
     {
@@ -748,5 +755,185 @@ class ProfileController extends Controller
         }
 
         return back()->with('success', 'Отзыв обработан');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | BACKWARD COMPATIBILITY REDIRECT METHODS
+    |--------------------------------------------------------------------------
+    |
+    | Эти методы обеспечивают совместимость со старыми роутами, перенаправляя
+    | пользователей на новую админ-панель Filament вместо старого интерфейса.
+    | Все административные функции теперь доступны по адресу /admin
+    |
+    */
+
+    /**
+     * Перенаправление модерации на новую админ-панель
+     * Старый роут: /profile/moderation → Новый: /admin/ads
+     */
+    public function moderationRedirect()
+    {
+        // Редирект с фильтром по статусу модерации
+        return redirect('/admin/ads?tableFilters[status][value]=pending_moderation')
+            ->with('info', 'Модерация объявлений теперь доступна в новой админ-панели Filament');
+    }
+
+    /**
+     * Перенаправление управления объявлениями на новую админ-панель
+     * Старый роут: /profile/admin/ads → Новый: /admin/ads
+     */
+    public function allAdsRedirect(Request $request)
+    {
+        // Формируем параметры для редиректа в Filament
+        $params = [];
+
+        // Конвертируем tab в фильтр по статусу
+        $tab = $request->get('tab', 'all');
+        if ($tab !== 'all') {
+            $statusMap = [
+                'active' => 'active',
+                'moderation' => 'pending_moderation',
+                'draft' => 'draft',
+                'rejected' => 'rejected',
+                'expired' => 'expired',
+                'archived' => 'archived',
+                'blocked' => 'blocked',
+            ];
+
+            if (isset($statusMap[$tab])) {
+                $params['tableFilters[status][value]'] = $statusMap[$tab];
+            }
+        }
+
+        // Конвертируем поиск
+        if ($search = $request->get('search')) {
+            $params['tableSearch'] = $search;
+        }
+
+        $url = '/admin/ads';
+        if (!empty($params)) {
+            $url .= '?' . http_build_query($params);
+        }
+
+        return redirect($url)
+            ->with('info', 'Управление объявлениями теперь доступно в новой админ-панели Filament');
+    }
+
+    /**
+     * Перенаправление редактирования объявлений на новую админ-панель
+     * Старый роут: /profile/admin/ads/{id}/edit → Новый: /admin/ads/{id}/edit
+     */
+    public function editAdRedirect(Ad $ad)
+    {
+        return redirect("/admin/ads/{$ad->id}/edit")
+            ->with('info', 'Редактирование объявлений теперь доступно в новой админ-панели');
+    }
+
+    /**
+     * Перенаправление управления пользователями на новую админ-панель
+     * Старый роут: /profile/users → Новый: /admin/users
+     */
+    public function usersRedirect(Request $request)
+    {
+        // Конвертируем параметры поиска
+        $params = [];
+
+        if ($search = $request->get('search')) {
+            $params['tableSearch'] = $search;
+        }
+
+        $url = '/admin/users';
+        if (!empty($params)) {
+            $url .= '?' . http_build_query($params);
+        }
+
+        return redirect($url)
+            ->with('info', 'Управление пользователями теперь доступно в новой админ-панели Filament');
+    }
+
+    /**
+     * Перенаправление системы жалоб на новую админ-панель
+     * Старый роут: /profile/complaints → Новый: /admin/complaints
+     */
+    public function complaintsRedirect()
+    {
+        return redirect('/admin/complaints')
+            ->with('info', 'Система жалоб теперь доступна в новой админ-панели');
+    }
+
+    /**
+     * Перенаправление управления мастерами на новую админ-панель
+     * Старый роут: /profile/masters → Новый: /admin/master-profiles
+     */
+    public function mastersRedirect()
+    {
+        return redirect('/admin/master-profiles')
+            ->with('info', 'Управление мастерами теперь доступно в новой админ-панели');
+    }
+
+    /**
+     * Перенаправление модерации отзывов на новую админ-панель
+     * Старый роут: /profile/reviews → Новый: /admin/reviews
+     */
+    public function reviewsRedirect()
+    {
+        return redirect('/admin/reviews')
+            ->with('info', 'Модерация отзывов теперь доступна в новой админ-панели');
+    }
+
+    /**
+     * Перенаправление логов на новую админ-панель
+     * Старый роут: /profile/admin/logs → Новый: /admin/admin-logs
+     */
+    public function adminLogsRedirect(Request $request)
+    {
+        return redirect('/admin/admin-logs')
+            ->with('info', 'Просмотр логов теперь доступен в новой админ-панели');
+    }
+
+    /**
+     * Обработчики POST-запросов также перенаправляют на админ-панель
+     */
+    public function approveRedirect(Ad $ad)
+    {
+        return redirect('/admin/ads')
+            ->with('info', 'Одобрение объявлений теперь доступно в новой админ-панели');
+    }
+
+    public function rejectRedirect(Ad $ad)
+    {
+        return redirect('/admin/ads')
+            ->with('info', 'Отклонение объявлений теперь доступно в новой админ-панели');
+    }
+
+    public function bulkActionRedirect(BulkActionRequest $request)
+    {
+        return redirect('/admin/ads')
+            ->with('info', 'Массовые действия теперь доступны в новой админ-панели');
+    }
+
+    public function toggleUserStatusRedirect(User $user)
+    {
+        return redirect('/admin/users')
+            ->with('info', 'Управление статусом пользователей теперь доступно в новой админ-панели');
+    }
+
+    public function resolveComplaintRedirect(Ad $ad, Request $request)
+    {
+        return redirect('/admin/complaints')
+            ->with('info', 'Обработка жалоб теперь доступна в новой админ-панели');
+    }
+
+    public function toggleMasterVerificationRedirect($masterId)
+    {
+        return redirect('/admin/master-profiles')
+            ->with('info', 'Верификация мастеров теперь доступна в новой админ-панели');
+    }
+
+    public function moderateReviewRedirect($reviewId, Request $request)
+    {
+        return redirect('/admin/reviews')
+            ->with('info', 'Модерация отзывов теперь доступна в новой админ-панели');
     }
 }

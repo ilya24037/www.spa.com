@@ -9,10 +9,8 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            UsersSeeder::class,
-            // AdsSeeder::class, // Закомментировано - использует старую структуру
-            // MassageCategorySeeder::class, // Закомментировано - таблица не существует
-            // MasterSeeder::class, // Закомментировано - не нужен для тестирования модерации
+            AdminSeeder::class, // Создание администраторов и модераторов
+            UsersSeeder::class, // Создание тестовых пользователей (мастеров)
             GenerateAdsSeeder::class, // Новый сидер для генерации объявлений
         ]);
     }

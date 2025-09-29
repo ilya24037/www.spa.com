@@ -13,59 +13,59 @@
     >
 
 
-    <!-- Если нет фото - показываем основную зону -->
-    <PhotoUploadZone
-      v-if="safePhotosCount === 0"
-      ref="uploadZone"
-      :max-size="maxSize"
-      :accepted-formats="acceptedFormats"
-      @files-selected="handleFilesSelected"
-    />
-    
-    <!-- Если есть фото - показываем сетку + доп зону -->
-    <div v-else class="space-y-3">
-      <!-- Обертка для сетки фото -->
-      <div class="border-2 border-dashed border-gray-300 rounded-lg pt-4 px-4 pb-2">
-        <!-- Сетка фотографий -->
-        <PhotoGrid
-          :photos="safePhotos"
-          :dragged-index="draggedIndex"
-          :drag-over-index="dragOverIndex"
-          @update:photos="handlePhotosUpdate"
-          @rotate="handleRotatePhoto"
-          @remove="handleRemovePhoto"
-          @dragstart="handleDragStart"
-          @dragover="handleDragOver"
-          @drop="onDragDrop"
-          @dragend="onDragEnd"
-        />
-      </div>
-      
-      <!-- Дополнительная зона загрузки (как у видео) -->
+      <!-- Если нет фото - показываем основную зону -->
       <PhotoUploadZone
-        v-if="safePhotosCount < props.maxFiles"
-        ref="additionalUploadZone"
+        v-if="safePhotosCount === 0"
+        ref="uploadZone"
         :max-size="maxSize"
         :accepted-formats="acceptedFormats"
         @files-selected="handleFilesSelected"
       />
-    </div>
     
-    <!-- Информация об ограничениях -->
-    <div class="text-sm text-gray-800 space-y-1">
-      <p>• Минимум 3 фото, максимум 20</p>
-      <p>• Без водяных знаков других сайтов</p>
-      <p>• На фото не должны быть видны гениталии</p>
-      <p>• Фото должны соответствовать услугам</p>
-    </div>
+      <!-- Если есть фото - показываем сетку + доп зону -->
+      <div v-else class="space-y-3">
+        <!-- Обертка для сетки фото -->
+        <div class="border-2 border-dashed border-gray-300 rounded-lg pt-4 px-4 pb-2">
+          <!-- Сетка фотографий -->
+          <PhotoGrid
+            :photos="safePhotos"
+            :dragged-index="draggedIndex"
+            :drag-over-index="dragOverIndex"
+            @update:photos="handlePhotosUpdate"
+            @rotate="handleRotatePhoto"
+            @remove="handleRemovePhoto"
+            @dragstart="handleDragStart"
+            @dragover="handleDragOver"
+            @drop="onDragDrop"
+            @dragend="onDragEnd"
+          />
+        </div>
+      
+        <!-- Дополнительная зона загрузки (как у видео) -->
+        <PhotoUploadZone
+          v-if="safePhotosCount < props.maxFiles"
+          ref="additionalUploadZone"
+          :max-size="maxSize"
+          :accepted-formats="acceptedFormats"
+          @files-selected="handleFilesSelected"
+        />
+      </div>
+    
+      <!-- Информация об ограничениях -->
+      <div class="text-sm text-gray-800 space-y-1">
+        <p>• Минимум 3 фото, максимум 20</p>
+        <p>• Без водяных знаков других сайтов</p>
+        <p>• На фото не должны быть видны гениталии</p>
+        <p>• Фото должны соответствовать услугам</p>
+      </div>
     
 
     
-    <!-- Ошибки -->
-    <div v-if="error || validationError" class="rounded-md bg-red-50 p-3">
-      <p v-if="error" class="text-sm text-red-800">{{ error }}</p>
-      <p v-if="validationError" class="text-sm text-red-800">{{ validationError }}</p>
-    </div>
+      <!-- Ошибки -->
+      <div v-if="error || validationError" class="rounded-md bg-red-50 p-3">
+        <p v-if="error" class="text-sm text-red-800">{{ error }}</p>
+        <p v-if="validationError" class="text-sm text-red-800">{{ validationError }}</p>
+      </div>
     </section>
   </ErrorBoundary>
 </template>

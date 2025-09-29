@@ -13,7 +13,7 @@
       :width="line.width"
       :animated="line.animated"
       :custom-class="line.customClass"
-              :aria-label="`Загрузка строки ${index + 1} из ${linesArray.length}`"
+      :aria-label="`Загрузка строки ${index + 1} из ${linesArray.length}`"
     />
   </div>
 </template>

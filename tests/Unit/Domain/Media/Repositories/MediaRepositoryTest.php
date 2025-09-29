@@ -11,14 +11,14 @@ use App\Domain\Media\Repositories\{
 };
 use App\Domain\Media\Models\Media;
 use App\Enums\{MediaType, MediaStatus};
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Traits\SafeRefreshDatabase;
 
 /**
  * Тест главного MediaRepository фасада согласно CLAUDE.md
  */
 class MediaRepositoryTest extends TestCase
 {
-    use RefreshDatabase;
+    use SafeRefreshDatabase;
 
     private MediaRepository $repository;
     private MediaCrudRepository $crudRepository;

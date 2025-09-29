@@ -37,9 +37,10 @@ return [
             'database' => env('DB_DATABASE', database_path('database.sqlite')),
             'prefix' => '',
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
-            'busy_timeout' => null,
-            'journal_mode' => null,
-            'synchronous' => null,
+            'busy_timeout' => 5000, // 5 seconds to avoid SQLITE_BUSY errors
+            'journal_mode' => 'WAL', // Write-Ahead Logging for better concurrency
+            'synchronous' => 'NORMAL',
+            'transaction_mode' => env('DB_TRANSACTION_MODE', 'IMMEDIATE'), // For PHP 8.4 compatibility
         ],
 
         'mysql' => [

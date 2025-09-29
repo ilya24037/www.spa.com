@@ -2,6 +2,18 @@ import '../css/app.css';
 import './src/shared/styles/variables.css'; // CSS переменные для дизайн-системы
 import './bootstrap';
 
+// Alpine.js закомментирован для Filament Admin Panel
+// Filament v4 использует свой встроенный Alpine.js от Livewire 3
+// Раскомментируйте только если нужен Alpine для фронтенда (не админки)
+//
+// import Alpine from 'alpinejs';
+// import persist from '@alpinejs/persist';
+// Alpine.plugin(persist);
+// window.Alpine = Alpine;
+// if (!Alpine.started) {
+//     Alpine.start();
+// }
+
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h } from 'vue';
@@ -17,7 +29,7 @@ import { Ziggy } from './ziggy';
 import { route } from 'ziggy-js';
 import { logger } from '@/src/shared/utils/logger';
 
-// Импорт vue-yandex-maps
+// Импорт vue-yandex-maps (с изоляцией стилей)
 import { createYmaps } from 'vue-yandex-maps';
 
 
@@ -159,8 +171,8 @@ createInertiaApp({
         app.config.performance = true;
         
         // Регистрация Service Worker для кеширования
-        // ВРЕМЕННО ОТКЛЮЧЕНО для диагностики конфликта с Yandex Maps Web Workers
-        if (false && 'serviceWorker' in navigator && import.meta.env.PROD) {
+        // Включено для оптимизации производительности SPA
+        if ('serviceWorker' in navigator && import.meta.env.PROD) {
             navigator.serviceWorker.register('/service-worker.js')
                 .then(registration => {
                     // Service Worker registered successfully

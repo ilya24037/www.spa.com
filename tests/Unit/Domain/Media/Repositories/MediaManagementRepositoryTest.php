@@ -7,7 +7,7 @@ use App\Domain\Media\Repositories\MediaManagementRepository;
 use App\Domain\Media\Models\Media;
 use App\Enums\{MediaType, MediaStatus};
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Traits\SafeRefreshDatabase;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Collection;
  */
 class MediaManagementRepositoryTest extends TestCase
 {
-    use RefreshDatabase;
+    use SafeRefreshDatabase;
 
     private MediaManagementRepository $repository;
     private User $testUser;

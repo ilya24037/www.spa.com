@@ -9,12 +9,14 @@ use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany, HasOne, MorphMan
 use App\Domain\Master\Traits\HasSlug;
 use App\Domain\Master\Traits\GeneratesMetaTags;
 use App\Support\Traits\JsonFieldsTrait;
+use Laravel\Scout\Searchable;
 class MasterProfile extends Model
 {
     use HasFactory;
     use HasSlug;
     use GeneratesMetaTags;
     use JsonFieldsTrait;
+    use Searchable;
 
 
     protected $slugField  = 'slug';
@@ -54,6 +56,8 @@ class MasterProfile extends Model
         // Поля модерации
         'is_published'  => 'boolean',
         'moderated_at'  => 'datetime',
+        // Enum cast для status
+        'status' => \App\Enums\MasterStatus::class,
     ];
 
     public function user(): BelongsTo
@@ -203,5 +207,31 @@ class MasterProfile extends Model
         return $q->whereHas('activeLocations', function($query) use ($district) {
             $query->where('district', $district);
         });
+    }
+
+    /**
+     * Get the indexable data array for the model.
+     *
+     * @return array<string, mixed>
+     */
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'display_name' => $this->display_name,
+            'bio' => $this->bio,
+            'description' => $this->description,
+            'phone' => $this->phone,
+            'experience_years' => $this->experience_years,
+            'rating' => $this->rating,
+            'status' => $this->status,
+            'is_verified' => $this->is_verified,
+            'is_premium' => $this->is_premium,
+            'hair_color' => $this->hair_color,
+            'eye_color' => $this->eye_color,
+            'nationality' => $this->nationality,
+            'user_name' => $this->user?->name,
+            'user_email' => $this->user?->email,
+        ];
     }
 }

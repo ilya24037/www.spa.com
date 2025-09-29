@@ -7,13 +7,13 @@ use App\Domain\Ad\Repositories\AdRepository;
 use App\Domain\Ad\Models\Ad;
 use App\Domain\Ad\Enums\AdStatus;
 use App\Domain\User\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Traits\SafeRefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Carbon\Carbon;
 
 class AdRepositoryTest extends TestCase
 {
-    use RefreshDatabase;
+    use SafeRefreshDatabase;
 
     private AdRepository $repository;
     private User $user;

@@ -7,14 +7,14 @@ use App\Domain\Ad\Actions\ArchiveAdAction;
 use App\Domain\Ad\Repositories\AdRepository;
 use App\Domain\Ad\Models\Ad;
 use App\Domain\Ad\Enums\AdStatus;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Traits\SafeRefreshDatabase;
 use Illuminate\Support\Facades\Log;
 use Mockery;
 use Carbon\Carbon;
 
 class ArchiveAdActionTest extends TestCase
 {
-    use RefreshDatabase;
+    use SafeRefreshDatabase;
 
     private ArchiveAdAction $action;
     private AdRepository $repository;

@@ -211,11 +211,41 @@
       <div class="spiral-container">
         <svg viewBox="0 0 610 377" class="fibonacci-spiral">
           <!-- Прямоугольники -->
-          <rect x="0" y="0" width="233" height="233" fill="none" stroke="#fbbf24" stroke-width="2"/>
-          <rect x="233" y="0" width="144" height="144" fill="none" stroke="#fcd34d" stroke-width="2"/>
-          <rect x="233" y="144" width="89" height="89" fill="none" stroke="#fde68a" stroke-width="2"/>
-          <rect x="322" y="144" width="55" height="55" fill="none" stroke="#fef3c7" stroke-width="2"/>
-          <rect x="322" y="199" width="34" height="34" fill="none" stroke="#fef3c7" stroke-width="2"/>
+          <rect x="0"
+                y="0"
+                width="233"
+                height="233"
+                fill="none"
+                stroke="#fbbf24"
+                stroke-width="2"/>
+          <rect x="233"
+                y="0"
+                width="144"
+                height="144"
+                fill="none"
+                stroke="#fcd34d"
+                stroke-width="2"/>
+          <rect x="233"
+                y="144"
+                width="89"
+                height="89"
+                fill="none"
+                stroke="#fde68a"
+                stroke-width="2"/>
+          <rect x="322"
+                y="144"
+                width="55"
+                height="55"
+                fill="none"
+                stroke="#fef3c7"
+                stroke-width="2"/>
+          <rect x="322"
+                y="199"
+                width="34"
+                height="34"
+                fill="none"
+                stroke="#fef3c7"
+                stroke-width="2"/>
           
           <!-- Спираль -->
           <path d="M 233,233 Q 0,233 0,0 Q 0,0 377,0 Q 377,0 377,144 Q 377,144 322,144 Q 322,144 322,199 Q 322,199 356,199" 
@@ -238,6 +268,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* Стили для Fibonacci теста */
 .fibonacci-test-page {
   max-width: 1200px;
   margin: 0 auto;

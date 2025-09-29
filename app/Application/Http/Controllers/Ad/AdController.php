@@ -117,8 +117,8 @@ class AdController extends Controller
             $request->validated(),
             [
                 'user_id' => Auth::id(),
-                'status' => 'active',
-                'is_published' => false, // На модерацию
+                'status' => 'pending_moderation', // На модерацию
+                'is_published' => false, // Не опубликовано до одобрения
                 'photos' => $processedPhotos, // Добавляем обработанные фотографии
                 'video' => $processedVideo, // Добавляем обработанные видео
                 'verification_photo' => $processedVerificationPhoto // Добавляем обработанное проверочное фото
@@ -260,7 +260,18 @@ class AdController extends Controller
                 'verification_photo' => $processedVerificationPhoto // Добавляем обработанное проверочное фото
             ]
         );
-        
+
+        // Если редактируется активное объявление - отправляем на модерацию
+        if ($ad->status->value === 'active') {
+            $data['status'] = 'pending_moderation';
+            $data['is_published'] = false;
+            \Log::info('🟢 AdController::update Активное объявление отправлено на модерацию', [
+                'ad_id' => $ad->id,
+                'old_status' => $ad->status->value,
+                'new_status' => 'pending_moderation'
+            ]);
+        }
+
         // Добавляем prices если есть
         if (!empty($prices)) {
             $data['prices'] = $prices;
@@ -305,15 +316,23 @@ class AdController extends Controller
                 ->route('additem.success', ['ad' => $updatedAd->id]);
         }
 
-        // Для активных объявлений перенаправляем на страницу активных
+        // Для активных объявлений используем Inertia для сохранения реактивности
         if ($updatedAd->status === \App\Domain\Ad\Enums\AdStatus::ACTIVE) {
-            \Log::info('🟢 AdController::update АКТИВНОЕ объявление - перенаправляем на /profile/items/active/all', [
+            \Log::info('🟢 AdController::update АКТИВНОЕ объявление - используем Inertia::location', [
                 'ad_id' => $updatedAd->id,
                 'redirect_to' => '/profile/items/active/all'
             ]);
-            return redirect()
-                ->to('/profile/items/active/all')
-                ->with('success', 'Изменения сохранены!');
+            // Используем Inertia::location для корректного обновления данных
+            return Inertia::location('/profile/items/active/all');
+        }
+
+        // Для объявлений на модерации также перенаправляем в активные (они там показываются со статусом "На проверке")
+        if ($updatedAd->status === \App\Domain\Ad\Enums\AdStatus::PENDING_MODERATION) {
+            \Log::info('🟢 AdController::update Объявление на модерации - перенаправляем в активные', [
+                'ad_id' => $updatedAd->id,
+                'redirect_to' => '/profile/items/active/all'
+            ]);
+            return Inertia::location('/profile/items/active/all');
         }
         
         // Для остальных объявлений переходим к просмотру

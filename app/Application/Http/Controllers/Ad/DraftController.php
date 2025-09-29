@@ -728,8 +728,8 @@ class DraftController extends Controller
             
             // Используем DraftService для публикации (простая логика)
             $publishedAd = $this->draftService->saveOrUpdate([
-                'status' => AdStatus::ACTIVE,
-                'is_published' => false // На модерацию
+                'status' => AdStatus::PENDING_MODERATION, // На модерацию
+                'is_published' => false // Не опубликовано до одобрения
             ], Auth::user(), $ad->id);
             \Log::info('🟢 DraftController::publish DraftService::saveOrUpdate успешно', [
                 'published_ad_id' => $publishedAd->id,

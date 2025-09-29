@@ -6,7 +6,7 @@ use Tests\TestCase;
 use App\Domain\Media\Repositories\MediaCrudRepository;
 use App\Domain\Media\Models\Media;
 use App\Enums\{MediaType, MediaStatus};
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Traits\SafeRefreshDatabase;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Collection;
  */
 class MediaCrudRepositoryTest extends TestCase
 {
-    use RefreshDatabase;
+    use SafeRefreshDatabase;
 
     private MediaCrudRepository $repository;
     private Media $testMedia;

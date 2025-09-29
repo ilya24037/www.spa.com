@@ -26,17 +26,17 @@ class MyAdsController extends Controller
     {
         $tab = $request->get('tab', 'waiting');
         $user = $request->user();
-        
+
         // Маппинг табов на статусы
         $statusMap = [
             'waiting' => 'waiting_payment',
-            'active' => 'active', 
+            'active' => ['active', 'pending_moderation'], // Активные включают и на модерации
             'drafts' => 'draft',
             'archived' => 'archived'
         ];
-        
+
         $status = $statusMap[$tab] ?? 'waiting_payment';
-        
+
         // Получаем объявления через сервис
         $profiles = $this->adProfileService->getUserAdsByStatus($user, $status);
         
@@ -95,14 +95,21 @@ class MyAdsController extends Controller
         try {
             $wasDraft = $ad->status === 'draft' || $ad->status === \App\Domain\Ad\Enums\AdStatus::DRAFT;
             $this->adService->delete($ad);
-            
+
             $message = $wasDraft ? 'Черновик удален' : 'Объявление удалено';
-            
+
+            // Для черновиков редиректим на страницу черновиков
+            if ($wasDraft) {
+                return redirect()
+                    ->to('/profile/items/draft/all')
+                    ->with('success', 'Черновик удален');
+            }
+
             // Возвращаем успешный ответ для Inertia
             if (request()->header('X-Inertia')) {
                 return back()->with('success', $message);
             }
-            
+
             return back()->with('success', $message);
         } catch (\Exception $e) {
             if (request()->header('X-Inertia')) {

@@ -6,7 +6,7 @@ use App\Domain\User\Models\User;
 use App\Application\Services\Integration\UserFavoritesIntegrationService;
 use App\Application\Services\Integration\UserReviewsIntegrationService;
 use App\Application\Services\Integration\UserAdsIntegrationService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Traits\SafeRefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -15,7 +15,7 @@ use Tests\TestCase;
  */
 class UserIntegrationTraitsTest extends TestCase
 {
-    use RefreshDatabase;
+    use SafeRefreshDatabase;
 
     private User $user;
 

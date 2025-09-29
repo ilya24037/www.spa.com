@@ -108,7 +108,7 @@
         </button>
       </div>
 
-              <!-- Кнопка "Показать больше" -->
+      <!-- Кнопка "Показать больше" -->
       <button
         v-if="availableDates.length > maxVisibleDates && !showAll"
         class="mobile-date-list-show-more"

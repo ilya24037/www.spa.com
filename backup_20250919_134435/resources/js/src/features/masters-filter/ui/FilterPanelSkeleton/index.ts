@@ -1,0 +1,1 @@
+export { default as FilterPanelSkeleton } from './FilterPanelSkeleton.vue'

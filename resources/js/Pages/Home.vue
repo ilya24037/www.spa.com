@@ -3,7 +3,8 @@
   <div>
     <Head :title="`Массаж в ${currentCity || 'городе'} — найти мастера`" />
     
-    <div>
+    <!-- Контентная обертка с правильными отступами -->
+    <div class="py-6 lg:py-8">
       <!-- Заголовок -->
       <div class="mb-6">
         <h1 class="text-3xl font-bold text-gray-900">
@@ -62,8 +63,14 @@
             <transition name="slide-up">
               <div v-if="mapSelectedMaster" class="absolute bottom-5 left-5 right-5 max-w-[400px] bg-white rounded-xl p-4 shadow-xl z-10 sm:left-5 sm:right-5 sm:max-w-none">
                 <button @click="mapSelectedMaster = null" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-gray-100 border-0 flex items-center justify-center cursor-pointer transition-colors hover:bg-gray-200 z-10">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  <svg class="w-5 h-5"
+                       fill="none"
+                       stroke="currentColor"
+                       viewBox="0 0 24 24">
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
                 <MasterCard

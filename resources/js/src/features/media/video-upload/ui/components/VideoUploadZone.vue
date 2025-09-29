@@ -22,8 +22,13 @@
     <div class="text-center py-3 px-4" @click="openFileDialog">
       <!-- Иконка и текст над кнопкой -->
       <div class="flex items-center justify-center space-x-2 mb-3">
-        <svg class="h-5 w-5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+        <svg class="h-5 w-5 text-gray-400 flex-shrink-0"
+             fill="none"
+             viewBox="0 0 24 24"
+             stroke="currentColor">
+          <path stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2" 
                 d="M7 4v16M17 4v16M3 8h4m10 0h4M3 16h4m10 0h4M4 4h16a1 1 0 011 1v14a1 1 0 01-1 1H4a1 1 0 01-1-1V5a1 1 0 011-1z" />
         </svg>
         <span class="text-sm text-gray-500">

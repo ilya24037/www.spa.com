@@ -137,56 +137,83 @@
                 </span>
               </div>
 
-              <Link
-                href="/profile/moderation"
+              <a
+                href="/admin/ads"
                 class="flex items-center justify-between px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                title="Модерация объявлений (новая админ-панель Filament)"
               >
                 <span>📝 Модерация объявлений</span>
                 <span v-if="$page.props.pendingCount" class="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full">
                   {{ $page.props.pendingCount }}
                 </span>
-              </Link>
+              </a>
 
-              <Link
-                href="/profile/admin/ads"
+              <a
+                href="/admin/ads"
                 class="flex items-center justify-between px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
                 :class="{ 'bg-gray-100': $page.url.includes('/admin/ads') }"
+                title="Управление объявлениями (новая админ-панель Filament)"
               >
                 <span>📋 Все объявления</span>
                 <span v-if="props.stats?.all" class="bg-gray-100 text-gray-700 text-xs px-2 py-0.5 rounded-full">
                   {{ props.stats.all }}
                 </span>
-              </Link>
+              </a>
 
-              <Link
-                href="/profile/reviews"
+              <a
+                href="/admin/reviews"
                 class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                title="Модерация отзывов (новая админ-панель Filament)"
               >
                 <span>⭐ Модерация отзывов</span>
-              </Link>
+              </a>
 
-              <Link
-                href="/profile/complaints"
+              <a
+                href="/admin/complaints"
                 class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                title="Система жалоб (новая админ-панель Filament)"
               >
                 <span>⚠️ Жалобы</span>
-              </Link>
+              </a>
 
-              <Link
+              <a
                 v-if="$page.props.auth?.user?.role === 'admin'"
-                href="/profile/users"
+                href="/admin/users"
                 class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                title="Управление пользователями (новая админ-панель Filament)"
               >
                 <span>👥 Пользователи</span>
-              </Link>
+              </a>
 
-              <Link
+              <a
                 v-if="$page.props.auth?.user?.role === 'admin'"
-                href="/profile/masters"
+                href="/admin/master-profiles"
                 class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                title="Управление мастерами (новая админ-панель Filament)"
               >
                 <span>💆 Мастера</span>
-              </Link>
+              </a>
+
+              <!-- Кнопка перехода в полную админ-панель -->
+              <div class="mt-4 px-3">
+                <a
+                  href="/admin"
+                  target="_blank"
+                  class="flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors"
+                  title="Открыть полную админ-панель Filament"
+                >
+                  <svg class="w-4 h-4 mr-2"
+                       fill="none"
+                       stroke="currentColor"
+                       viewBox="0 0 24 24">
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                  </svg>
+                  Полная админ-панель
+                </a>
+              </div>
             </div>
           </div>
 
@@ -305,95 +332,65 @@
 
             <!-- Админские табы -->
             <div v-if="props.adminMode" class="flex items-center space-x-8 overflow-x-auto">
-              <Link
-                :href="`/profile/admin/ads?tab=all`"
-                :class="[
-                  'pb-2 text-base font-medium border-b-2 transition-colors whitespace-nowrap',
-                  activeTab === 'all'
-                    ? 'text-gray-900 border-gray-900'
-                    : 'text-gray-500 border-transparent hover:text-gray-700'
-                ]"
+              <a
+                href="/admin/ads"
+                class="pb-2 text-base font-medium border-b-2 transition-colors whitespace-nowrap text-gray-500 border-transparent hover:text-gray-700"
               >
                 <span class="flex items-center gap-2">
-                  Все
+                  Все (в админ-панели)
                   <sup v-if="props.stats?.all" class="text-sm font-normal">{{ props.stats.all }}</sup>
                 </span>
-              </Link>
+              </a>
 
-              <Link
-                :href="`/profile/admin/ads?tab=active`"
-                :class="[
-                  'pb-2 text-base font-medium border-b-2 transition-colors whitespace-nowrap',
-                  activeTab === 'active'
-                    ? 'text-gray-900 border-gray-900'
-                    : 'text-gray-500 border-transparent hover:text-gray-700'
-                ]"
+              <a
+                href="/admin/ads"
+                class="pb-2 text-base font-medium border-b-2 transition-colors whitespace-nowrap text-gray-500 border-transparent hover:text-gray-700"
               >
                 <span class="flex items-center gap-2">
-                  Активные
+                  Активные (в админ-панели)
                   <sup v-if="props.stats?.active" class="text-sm font-normal">{{ props.stats.active }}</sup>
                 </span>
-              </Link>
+              </a>
 
-              <Link
-                :href="`/profile/admin/ads?tab=moderation`"
-                :class="[
-                  'pb-2 text-base font-medium border-b-2 transition-colors whitespace-nowrap',
-                  activeTab === 'moderation'
-                    ? 'text-gray-900 border-gray-900'
-                    : 'text-gray-500 border-transparent hover:text-gray-700'
-                ]"
+              <a
+                href="/admin/ads"
+                class="pb-2 text-base font-medium border-b-2 transition-colors whitespace-nowrap text-gray-500 border-transparent hover:text-gray-700"
               >
                 <span class="flex items-center gap-2">
-                  На модерации
+                  На модерации (в админ-панели)
                   <sup v-if="props.stats?.moderation" class="text-sm font-normal">{{ props.stats.moderation }}</sup>
                 </span>
-              </Link>
+              </a>
 
-              <Link
-                :href="`/profile/admin/ads?tab=draft`"
-                :class="[
-                  'pb-2 text-base font-medium border-b-2 transition-colors whitespace-nowrap',
-                  activeTab === 'draft'
-                    ? 'text-gray-900 border-gray-900'
-                    : 'text-gray-500 border-transparent hover:text-gray-700'
-                ]"
+              <a
+                href="/admin/ads"
+                class="pb-2 text-base font-medium border-b-2 transition-colors whitespace-nowrap text-gray-500 border-transparent hover:text-gray-700"
               >
                 <span class="flex items-center gap-2">
-                  Черновики
+                  Черновики (в админ-панели)
                   <sup v-if="props.stats?.draft" class="text-sm font-normal">{{ props.stats.draft }}</sup>
                 </span>
-              </Link>
+              </a>
 
-              <Link
-                :href="`/profile/admin/ads?tab=rejected`"
-                :class="[
-                  'pb-2 text-base font-medium border-b-2 transition-colors whitespace-nowrap',
-                  activeTab === 'rejected'
-                    ? 'text-gray-900 border-gray-900'
-                    : 'text-gray-500 border-transparent hover:text-gray-700'
-                ]"
+              <a
+                href="/admin/ads"
+                class="pb-2 text-base font-medium border-b-2 transition-colors whitespace-nowrap text-gray-500 border-transparent hover:text-gray-700"
               >
                 <span class="flex items-center gap-2">
-                  Отклоненные
+                  Отклоненные (в админ-панели)
                   <sup v-if="props.stats?.rejected" class="text-sm font-normal">{{ props.stats.rejected }}</sup>
                 </span>
-              </Link>
+              </a>
 
-              <Link
-                :href="`/profile/admin/ads?tab=archived`"
-                :class="[
-                  'pb-2 text-base font-medium border-b-2 transition-colors whitespace-nowrap',
-                  activeTab === 'archived'
-                    ? 'text-gray-900 border-gray-900'
-                    : 'text-gray-500 border-transparent hover:text-gray-700'
-                ]"
+              <a
+                href="/admin/ads"
+                class="pb-2 text-base font-medium border-b-2 transition-colors whitespace-nowrap text-gray-500 border-transparent hover:text-gray-700"
               >
                 <span class="flex items-center gap-2">
-                  Архив
+                  Архив (в админ-панели)
                   <sup v-if="props.stats?.archived" class="text-sm font-normal">{{ props.stats.archived }}</sup>
                 </span>
-              </Link>
+              </a>
             </div>
           </div>
 
@@ -504,7 +501,7 @@
                   </div>
                   <div class="flex items-center gap-2">
                     <button
-                      @click="router.post(`/profile/users/${profile.id}/toggle`)"
+                      @click="window.location.href = '/admin/users'"
                       class="px-4 py-2 text-sm font-medium rounded-md transition-colors"
                       :class="profile.status === 'active' ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-green-600 text-white hover:bg-green-700'"
                     >
@@ -538,8 +535,14 @@
           <div v-else class="text-center py-16">
             <div class="max-w-md mx-auto">
               <div class="w-20 h-20 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
-                <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <svg class="w-10 h-10 text-gray-400"
+                     fill="none"
+                     stroke="currentColor"
+                     viewBox="0 0 24 24">
+                  <path stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
               <h3 class="text-xl font-medium text-gray-900 mb-3">{{ getEmptyStateTitle(activeTab) }}</h3>
@@ -688,10 +691,20 @@ const getEmptyStateDescription = (tab: string) => {
 // Обработчики событий
 const handleItemUpdate = (itemId: number) => {
   addToast(`Объявление #${itemId} обновлено`, 'success')
+  // Обновляем данные страницы для отображения изменений
+  router.reload({
+    only: ['profiles', 'counts'],
+    preserveScroll: true
+  } as any)
 }
 
 const handleItemDelete = (itemId: number) => {
   addToast(`Объявление #${itemId} удалено`, 'info')
+  // Обновляем данные страницы после удаления
+  router.reload({
+    only: ['profiles', 'counts'],
+    preserveScroll: true
+  } as any)
 }
 
 /**
@@ -716,10 +729,20 @@ const handleItemEdit = (itemId: number) => {
 
 const handleItemDeactivate = (itemId: number) => {
   addToast(`Объявление #${itemId} перемещено в архив`, 'success')
+  // Обновляем список после деактивации
+  router.reload({
+    only: ['profiles', 'counts'],
+    preserveScroll: true
+  } as any)
 }
 
 const handleItemMarkIrrelevant = (itemId: number) => {
   addToast(`Объявление #${itemId} помечено как неактуальное`, 'info')
+  // Обновляем список после изменения статуса
+  router.reload({
+    only: ['profiles', 'counts'],
+    preserveScroll: true
+  } as any)
 }
 
 const handleItemBook = (itemId: number) => {
@@ -728,6 +751,14 @@ const handleItemBook = (itemId: number) => {
 
 const handleItemPublish = (itemId: number) => {
   addToast(`Объявление #${itemId} отправлено на модерацию`, 'success')
+  // Обновляем страницу для отображения новых черновиков
+  router.reload({
+    only: ['profiles', 'counts'],
+    preserveScroll: true,
+    onSuccess: () => {
+      console.log('Страница обновлена после публикации черновика')
+    }
+  } as any)
 }
 
 // Управление Toast уведомлениями
@@ -794,7 +825,11 @@ const bulkAction = async (action: string) => {
 
   isBulkActionLoading.value = true
 
-  router.post('/profile/admin/ads/bulk', {
+  // Перенаправляем на новую админ-панель Filament для массовых действий
+  window.location.href = '/admin/ads'
+  return;
+
+  /*router.post('/profile/admin/ads/bulk', {
     ids: Array.from(selectedItems.value),
     action: action
   }, {
@@ -817,7 +852,7 @@ const bulkAction = async (action: string) => {
     onFinish: () => {
       isBulkActionLoading.value = false
     }
-  })
+  })*/
 }
 
 // Горячие клавиши для модерации (только для админов)

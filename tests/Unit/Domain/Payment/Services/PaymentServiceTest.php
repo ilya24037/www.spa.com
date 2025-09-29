@@ -14,7 +14,7 @@ use App\Domain\Payment\Enums\PaymentType;
 use App\Domain\Payment\Contracts\PaymentProcessorInterface;
 use App\Domain\User\Models\User;
 use App\Domain\Ad\Models\Ad;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Traits\SafeRefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
@@ -22,7 +22,7 @@ use Mockery;
 
 class PaymentServiceTest extends TestCase
 {
-    use RefreshDatabase;
+    use SafeRefreshDatabase;
 
     private PaymentService $service;
     private PaymentRepository $repository;

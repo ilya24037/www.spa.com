@@ -85,10 +85,10 @@ class DraftService
                 ->first();
                 
             if ($ad) {
-                // Если статус меняется на 'active', устанавливаем is_published = false (на модерацию)
-                if (isset($data['status']) && ($data['status'] === AdStatus::ACTIVE || $data['status'] === 'active')) {
+                // Если статус меняется на модерацию, устанавливаем is_published = false
+                if (isset($data['status']) && ($data['status'] === AdStatus::PENDING_MODERATION || $data['status'] === 'pending_moderation')) {
                     $data['is_published'] = false;
-                    \Log::info('🟢 DraftService: Устанавливаем статус active и is_published = false', [
+                    \Log::info('🟢 DraftService: Устанавливаем статус pending_moderation и is_published = false', [
                         'ad_id' => $ad->id,
                         'old_status' => $ad->status,
                         'new_status' => $data['status'],

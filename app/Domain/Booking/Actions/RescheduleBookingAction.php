@@ -5,7 +5,7 @@ namespace App\Domain\Booking\Actions;
 use App\Domain\Booking\Models\Booking;
 use App\Domain\User\Models\User;
 use App\Domain\Booking\Services\RescheduleValidator;
-use App\Domain\Booking\Services\AvailabilityChecker;
+use App\Domain\Master\Services\ScheduleAvailabilityChecker;
 use App\Domain\Booking\Services\RescheduleExecutor;
 use App\Domain\Booking\Services\RescheduleNotificationHandler;
 use Carbon\Carbon;
@@ -19,7 +19,7 @@ class RescheduleBookingAction
 {
     public function __construct(
         private RescheduleValidator $validator,
-        private AvailabilityChecker $availabilityChecker,
+        private ScheduleAvailabilityChecker $availabilityChecker,
         private RescheduleExecutor $executor,
         private RescheduleNotificationHandler $notificationHandler
     ) {}

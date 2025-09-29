@@ -8,12 +8,12 @@ use App\Domain\Master\Models\MasterProfile;
 use App\Domain\User\Models\User;
 use App\Enums\MasterStatus;
 use App\Enums\MasterLevel;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Traits\SafeRefreshDatabase;
 use Carbon\Carbon;
 
 class MasterRepositoryTest extends TestCase
 {
-    use RefreshDatabase;
+    use SafeRefreshDatabase;
 
     private MasterRepository $repository;
 

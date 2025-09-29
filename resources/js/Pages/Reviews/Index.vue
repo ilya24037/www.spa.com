@@ -51,7 +51,7 @@
               </Link>
                             
               <Link 
-                href="/profile/reviews"
+                href="/reviews"
                 class="flex items-center px-3 py-2 text-sm bg-blue-50 text-blue-700 font-medium rounded-md transition-colors"
               >
                 Мои отзывы

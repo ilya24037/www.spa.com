@@ -6,12 +6,12 @@ use Tests\TestCase;
 use App\Domain\User\Models\User;
 use App\Domain\Ad\Models\Ad;
 use App\Domain\Ad\Enums\AdStatus;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Traits\SafeRefreshDatabase;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 
 class AdStatusControllerTest extends TestCase
 {
-    use RefreshDatabase;
+    use SafeRefreshDatabase;
 
     private User $user;
     private Ad $ad;

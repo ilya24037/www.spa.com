@@ -120,8 +120,8 @@
       </CollapsibleSection>
 
       <!-- Параметры -->
-       <CollapsibleSection
-         title="Параметры"
+      <CollapsibleSection
+        title="Параметры"
         :is-open="sectionsState.parameters"
         :is-required="true"
         :is-filled="checkSectionFilled('parameters')"
@@ -212,7 +212,10 @@
                     stroke="currentColor" 
                     viewBox="0 0 24 24"
                   >
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
               </div>
@@ -278,7 +281,10 @@
                   stroke="currentColor" 
                   viewBox="0 0 24 24"
                 >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  <path stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 9l-7 7-7-7" />
                 </svg>
               </div>
             </div>
@@ -311,7 +317,10 @@
                   stroke="currentColor" 
                   viewBox="0 0 24 24"
                 >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  <path stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 9l-7 7-7-7" />
                 </svg>
               </div>
             </div>
@@ -339,7 +348,10 @@
                   stroke="currentColor" 
                   viewBox="0 0 24 24"
                 >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  <path stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 9l-7 7-7-7" />
                 </svg>
               </div>
             </div>
@@ -620,6 +632,7 @@ const handlePublishDirect = async () => {
   
   // Используем Inertia router вместо fetch
   router.post(`/draft/${props.adId}/publish`, {}, {
+    preserveState: false,
     preserveScroll: true,
     onSuccess: (page) => {
       // Inertia сам перенаправит по redirect из контроллера

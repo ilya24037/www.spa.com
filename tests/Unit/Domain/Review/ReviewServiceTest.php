@@ -9,14 +9,14 @@ use App\Domain\Review\DTOs\CreateReviewDTO;
 use App\Domain\Review\DTOs\UpdateReviewDTO;
 use App\Domain\User\Models\User;
 use App\Domain\Ad\Models\Ad;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Traits\SafeRefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Validation\ValidationException;
 use Mockery;
 
 class ReviewServiceTest extends TestCase
 {
-    use RefreshDatabase;
+    use SafeRefreshDatabase;
 
     private ReviewService $reviewService;
     private User $reviewer;

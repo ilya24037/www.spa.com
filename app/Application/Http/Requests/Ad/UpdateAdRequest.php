@@ -101,7 +101,7 @@ class UpdateAdRequest extends FormRequest
             'faq.*' => 'nullable',
 
             // Статус и публикация (для изменения статуса черновика)
-            'status' => 'nullable|string|in:draft,active,archived',
+            'status' => 'nullable|string|in:draft,active,archived,pending_moderation',
             'is_published' => 'nullable|boolean',
         ];
     }

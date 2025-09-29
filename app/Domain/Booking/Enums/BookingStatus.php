@@ -180,4 +180,16 @@ enum BookingStatus: string
             'expired' => self::EXPIRED,
         ];
     }
+
+    /**
+     * Получить опции для выбора в формах
+     */
+    public static function options(): array
+    {
+        $options = [];
+        foreach (self::cases() as $status) {
+            $options[$status->value] = $status->getLabel();
+        }
+        return $options;
+    }
 }
