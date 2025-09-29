@@ -52,6 +52,7 @@ class AdminPanelProvider extends PanelProvider
                 \App\Filament\Pages\Backup::class,
             ])
             ->widgets([
+                \App\Filament\Widgets\QuickActionsWidget::class,
                 \App\Filament\Widgets\StatsOverviewWidget::class,
                 \App\Filament\Widgets\RecentAds::class,
                 \App\Filament\Widgets\RecentComplaints::class,

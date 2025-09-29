@@ -6,6 +6,7 @@ use App\Domain\Ad\Models\Ad;
 use App\Domain\Ad\Enums\AdStatus;
 use App\Domain\Ad\Repositories\AdRepository;
 use App\Domain\Admin\Traits\LogsAdminActions;
+use App\Domain\Moderation\Services\StopWordService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Collection;
 
@@ -16,14 +17,9 @@ class AdModerationService
 {
     use LogsAdminActions;
     private AdRepository $adRepository;
+    private StopWordService $stopWordService;
 
-    // Стоп-слова для проверки контента
-    private array $bannedWords = [
-        'наркотики', 'оружие', 'проституция', 'интим', 'секс', 'эскорт',
-        // Добавить другие стоп-слова по необходимости
-    ];
-
-    // Подозрительные фразы
+    // Подозрительные фразы (оставляем для дополнительных проверок)
     private array $suspiciousPatterns = [
         '/\b(только|лишь)\s+(сегодня|завтра)\b/iu',
         '/\b100%\s+(гарантия|результат)\b/iu',
@@ -31,9 +27,12 @@ class AdModerationService
         '/\b(звони|пиши)\s+(срочно|быстро)\b/iu',
     ];
 
-    public function __construct(AdRepository $adRepository)
-    {
+    public function __construct(
+        AdRepository $adRepository,
+        StopWordService $stopWordService
+    ) {
         $this->adRepository = $adRepository;
+        $this->stopWordService = $stopWordService;
     }
 
     /**
@@ -282,18 +281,30 @@ class AdModerationService
             return ['Отсутствует контент объявления'];
         }
 
-        $textToCheck = strtolower($ad->title . ' ' . $ad->description);
+        $textToCheck = $ad->title . ' ' . $ad->description . ' ' . ($ad->services_additional_info ?? '');
 
-        // Проверка стоп-слов
-        foreach ($this->bannedWords as $word) {
-            if (strpos($textToCheck, strtolower($word)) !== false) {
-                $issues[] = 'Обнаружено запрещенное слово: ' . $word;
+        // Используем новый сервис стоп-слов
+        $stopWordCheck = $this->stopWordService->checkText($textToCheck, 'ads');
+        
+        if (!$stopWordCheck['passed']) {
+            foreach ($stopWordCheck['found_words'] as $foundWord) {
+                $issues[] = sprintf(
+                    'Обнаружено запрещенное слово "%s" (категория: %s, серьезность: %s)',
+                    $foundWord['word'],
+                    $foundWord['category'],
+                    $foundWord['severity']
+                );
+            }
+            
+            // Если нужно сразу блокировать
+            if ($stopWordCheck['should_block']) {
+                $issues[] = '⛔ КРИТИЧЕСКОЕ НАРУШЕНИЕ - автоматическая блокировка';
             }
         }
 
-        // Проверка подозрительных паттернов
+        // Проверка подозрительных паттернов (дополнительно)
         foreach ($this->suspiciousPatterns as $pattern) {
-            if (preg_match($pattern, $textToCheck)) {
+            if (preg_match($pattern, mb_strtolower($textToCheck))) {
                 $issues[] = 'Обнаружена подозрительная фраза';
             }
         }
