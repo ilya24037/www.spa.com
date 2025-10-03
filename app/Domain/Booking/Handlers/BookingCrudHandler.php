@@ -43,7 +43,7 @@ class BookingCrudHandler
      */
     public function findWithRelations(int $bookingId): ?Booking
     {
-        return Booking::with(['masterProfile.user', 'service', 'client'])->find($bookingId);
+        return Booking::with(['master', 'service', 'client'])->find($bookingId);
     }
 
     /**
