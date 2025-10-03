@@ -25,13 +25,13 @@ class FavoritesController extends Controller
             
             // Получаем избранное с связанными данными
             $favorites = UserFavorite::where('user_id', $user->id)
-                ->with(['ad', 'masterProfile'])
+                ->with(['ad', 'user'])
                 ->orderBy('created_at', 'desc')
                 ->get()
                 ->map(function ($favorite) {
                     $item = null;
                     $type = 'unknown';
-                    
+
                     // Определяем тип и получаем данные
                     if ($favorite->ad_id) {
                         $type = 'ad';
@@ -44,23 +44,23 @@ class FavoritesController extends Controller
                             'location' => $favorite->ad->district ?? null,
                             'description' => $favorite->ad->description ?? null
                         ] : null;
-                    } elseif ($favorite->master_profile_id) {
-                        $type = 'master';
-                        $item = $favorite->masterProfile ? [
-                            'id' => $favorite->masterProfile->id,
-                            'name' => $favorite->masterProfile->display_name ?? 'Мастер',
-                            'image' => $favorite->masterProfile->main_photo ?? null,
-                            'rating' => $favorite->masterProfile->rating ?? 0,
-                            'price' => $favorite->masterProfile->price_from ?? 0,
-                            'location' => $favorite->masterProfile->district ?? null,
-                            'description' => $favorite->masterProfile->description ?? null
+                    } elseif ($favorite->favorited_user_id) {
+                        $type = 'user';
+                        $item = $favorite->user ? [
+                            'id' => $favorite->user->id,
+                            'name' => $favorite->user->name ?? 'Пользователь',
+                            'image' => $favorite->user->avatar ?? null,
+                            'rating' => $favorite->user->rating ?? 0,
+                            'price' => $favorite->user->price_from ?? 0,
+                            'location' => $favorite->user->district ?? null,
+                            'description' => $favorite->user->description ?? null
                         ] : null;
                     }
-                    
+
                     return [
                         'id' => $favorite->id,
                         'type' => $type,
-                        'itemId' => $favorite->ad_id ?? $favorite->master_profile_id,
+                        'itemId' => $favorite->ad_id ?? $favorite->favorited_user_id,
                         'addedAt' => $favorite->created_at->toISOString(),
                         'item' => $item
                     ];
@@ -99,32 +99,32 @@ class FavoritesController extends Controller
             
             // Проверяем что элемент еще не в избранном
             $existingFavorite = UserFavorite::where('user_id', $user->id);
-            
-            if ($type === 'master') {
-                $existingFavorite->where('master_profile_id', $itemId);
+
+            if ($type === 'user') {
+                $existingFavorite->where('favorited_user_id', $itemId);
             } elseif ($type === 'ad') {
                 $existingFavorite->where('ad_id', $itemId);
             } else {
                 return response()->json(['error' => 'Неподдерживаемый тип'], 400);
             }
-            
+
             if ($existingFavorite->exists()) {
                 return response()->json(['error' => 'Уже в избранном'], 409);
             }
-            
+
             // Создаем запись
             $favoriteData = ['user_id' => $user->id];
-            
-            if ($type === 'master') {
-                $favoriteData['master_profile_id'] = $itemId;
+
+            if ($type === 'user') {
+                $favoriteData['favorited_user_id'] = $itemId;
             } elseif ($type === 'ad') {
                 $favoriteData['ad_id'] = $itemId;
             }
-            
+
             $favorite = UserFavorite::create($favoriteData);
-            
+
             // Загружаем связанные данные для ответа
-            $favorite->load(['ad', 'masterProfile']);
+            $favorite->load(['ad', 'user']);
             
             return response()->json([
                 'favorite' => [
@@ -212,9 +212,9 @@ class FavoritesController extends Controller
             }
             
             $query = UserFavorite::where('user_id', $user->id);
-            
-            if ($type === 'master') {
-                $query->whereNotNull('master_profile_id');
+
+            if ($type === 'user') {
+                $query->whereNotNull('favorited_user_id');
             } elseif ($type === 'ad') {
                 $query->whereNotNull('ad_id');
             } else {
@@ -248,9 +248,9 @@ class FavoritesController extends Controller
             }
             
             $favorites = UserFavorite::where('user_id', $user->id)
-                ->with(['ad', 'masterProfile'])
+                ->with(['ad', 'user'])
                 ->get();
-            
+
             $exportData = [
                 'exported_at' => now()->toISOString(),
                 'user_id' => $user->id,
@@ -258,8 +258,8 @@ class FavoritesController extends Controller
                 'favorites' => $favorites->map(function ($favorite) {
                     return [
                         'id' => $favorite->id,
-                        'type' => $favorite->ad_id ? 'ad' : 'master',
-                        'item_id' => $favorite->ad_id ?? $favorite->master_profile_id,
+                        'type' => $favorite->ad_id ? 'ad' : 'user',
+                        'item_id' => $favorite->ad_id ?? $favorite->favorited_user_id,
                         'added_at' => $favorite->created_at->toISOString()
                     ];
                 })

@@ -25,7 +25,7 @@ class BookingSlotController extends Controller
     public function availableSlots(Request $request)
     {
         $request->validate([
-            'master_profile_id' => 'required|exists:master_profiles,id',
+            'user_id' => 'required|exists:users,id',
             'service_id' => 'required|exists:services,id',
             'date' => 'nullable|date|after_or_equal:today'
         ]);
@@ -49,7 +49,7 @@ class BookingSlotController extends Controller
     protected function getSlotsForDate(Request $request)
     {
         $slots = $this->bookingService->getSlotsForDate(
-            $request->master_profile_id,
+            $request->user_id,
             $request->service_id,
             $request->date
         );
@@ -63,7 +63,7 @@ class BookingSlotController extends Controller
     protected function getSlotsForMultipleDays(Request $request)
     {
         $slots = $this->bookingService->getAvailableSlots(
-            $request->master_profile_id,
+            $request->user_id,
             $request->service_id
         );
 
@@ -76,7 +76,7 @@ class BookingSlotController extends Controller
     public function checkAvailability(Request $request)
     {
         $request->validate([
-            'master_profile_id' => 'required|exists:master_profiles,id',
+            'user_id' => 'required|exists:users,id',
             'service_id' => 'required|exists:services,id',
             'date' => 'required|date|after_or_equal:today',
             'time' => 'required|date_format:H:i'
@@ -84,7 +84,7 @@ class BookingSlotController extends Controller
 
         try {
             $isAvailable = $this->bookingService->checkSlotAvailability(
-                $request->master_profile_id,
+                $request->user_id,
                 $request->date,
                 $request->time,
                 $request->service_id
@@ -108,14 +108,14 @@ class BookingSlotController extends Controller
     public function busySlots(Request $request)
     {
         $request->validate([
-            'master_profile_id' => 'required|exists:master_profiles,id',
+            'user_id' => 'required|exists:users,id',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date'
         ]);
 
         try {
             $busySlots = $this->bookingService->getBusySlots(
-                $request->master_profile_id,
+                $request->user_id,
                 $request->start_date,
                 $request->end_date
             );
@@ -135,13 +135,13 @@ class BookingSlotController extends Controller
     public function nextAvailable(Request $request)
     {
         $request->validate([
-            'master_profile_id' => 'required|exists:master_profiles,id',
+            'user_id' => 'required|exists:users,id',
             'service_id' => 'required|exists:services,id',
         ]);
 
         try {
             $nextSlot = $this->bookingService->getNextAvailableSlot(
-                $request->master_profile_id,
+                $request->user_id,
                 $request->service_id
             );
 
@@ -169,14 +169,14 @@ class BookingSlotController extends Controller
     public function masterSchedule(Request $request)
     {
         $request->validate([
-            'master_profile_id' => 'required|exists:master_profiles,id',
+            'user_id' => 'required|exists:users,id',
             'week_offset' => 'nullable|integer|min:0|max:4'
         ]);
 
         try {
             $weekOffset = $request->get('week_offset', 0);
             $schedule = $this->bookingService->getMasterWeekSchedule(
-                $request->master_profile_id,
+                $request->user_id,
                 $weekOffset
             );
 

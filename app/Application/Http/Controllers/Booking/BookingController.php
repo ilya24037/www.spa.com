@@ -5,7 +5,7 @@ namespace App\Application\Http\Controllers\Booking;
 use App\Application\Http\Controllers\Controller;
 use App\Application\Http\Requests\Booking\CreateBookingRequest;
 use App\Domain\Booking\Models\Booking;
-use App\Domain\Master\Models\MasterProfile;
+use App\Domain\User\Models\User;
 use App\Domain\Service\Models\Service;
 use App\Domain\Booking\Services\BookingService;
 use Illuminate\Http\Request;
@@ -44,26 +44,26 @@ class BookingController extends Controller
      */
     public function create(Request $request)
     {
-        $masterProfileId = $request->get('master_id');
+        $userId = $request->get('master_id');
         $serviceId = $request->get('service_id');
-        
-        if (!$masterProfileId || !$serviceId) {
+
+        if (!$userId || !$serviceId) {
             return redirect()->route('home')
                 ->with('error', 'Выберите мастера и услугу');
         }
 
         try {
             // Валидируем запрос через сервис
-            $validated = $this->bookingService->validateBookingRequest($masterProfileId, $serviceId);
-            
+            $validated = $this->bookingService->validateBookingRequest($userId, $serviceId);
+
             // Получаем доступные слоты через сервис
             $availableSlots = $this->bookingService->getAvailableSlots(
-                $validated['masterProfile']->id,
+                $validated['user']->id,
                 $validated['service']->id
             );
 
             return Inertia::render('Bookings/NewBooking', [
-                'masterProfile' => $validated['masterProfile'],
+                'user' => $validated['user'],
                 'service' => $validated['service'],
                 'availableSlots' => $availableSlots
             ]);
@@ -123,8 +123,8 @@ class BookingController extends Controller
         $user = $request->user();
         return Inertia::render('Bookings/Show', [
             'booking' => $bookingWithRelations,
-            'canManage' => $user->getMasterProfile() && 
-                          $bookingWithRelations->master_profile_id === $user->getMasterProfile()->id
+            'canManage' => $user->role === 'master' &&
+                          $bookingWithRelations->master_id === $user->id
         ]);
     }
 
