@@ -162,12 +162,14 @@ const handleImageError = () => {
 }
 
 const goToProfile = () => {
-    router.visit(`/masters/${props.master.id}`)
+    // Используем slug для навигации к профилю пользователя
+    const slug = props.master.slug || `user-${props.master.id}`
+    router.visit(`/users/${slug}`)
 }
 
 const toggleFavorite = () => {
     router.post('/api/favorites/toggle', {
-        master_profile_id: props.master.id
+        user_id: props.master.id
     }, {
         preserveState: true,
         preserveScroll: true
@@ -175,6 +177,8 @@ const toggleFavorite = () => {
 }
 
 const openBooking = () => {
-    router.visit(`/masters/${props.master.id}?booking=true`)
+    // Используем slug для навигации к профилю пользователя
+    const slug = props.master.slug || `user-${props.master.id}`
+    router.visit(`/users/${slug}?booking=true`)
 }
 </script>

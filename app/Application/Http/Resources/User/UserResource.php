@@ -22,20 +22,21 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
-            'avatar' => $this->avatar,
+            'avatar' => $this->avatar_url,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
 
-            // Профиль пользователя (если загружен)
+            // Публичные данные профиля (объединены из MasterProfile в User)
+            'slug' => $this->slug,
+            'rating' => $this->rating,
+            'reviews_count' => $this->reviews_count,
+            'views_count' => $this->views_count,
+            'is_verified' => $this->is_verified,
+            'join_date' => $this->created_at?->format('Y-m-d'),
+
+            // Профиль пользователя (если загружен - deprecated, используйте поля выше)
             'profile' => $this->whenLoaded('profile'),
 
-            // Профиль мастера (если загружен)
-            'masterProfile' => $this->whenLoaded('masterProfile'),
-
-            // Публичные данные
-            'is_verified' => $this->email_verified_at !== null,
-            'join_date' => $this->created_at?->format('Y-m-d'),
-            
             // Приватные данные только для владельца аккаунта
             $this->mergeWhen($this->isOwner($request->user()), [
                 'email' => $this->email,

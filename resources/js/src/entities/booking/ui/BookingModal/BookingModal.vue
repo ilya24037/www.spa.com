@@ -366,7 +366,7 @@ const toast = useToast()
 
 // Р¤РѕСЂРјР° Р±СЂРѕРЅРёСЂРѕРІР°РЅРёСЏ СЃ С‚РёРїРёР·Р°С†РёРµР№
 const form = ref<BookingFormData>({
-    master_profile_id: props.master.id,
+    user_id: props.master.id,
     service_id: props.service?.id || '',
     booking_date: null,
     start_time: '',
@@ -512,7 +512,7 @@ const fetchAvailableSlots = async (): Promise<void> => {
     try {
         const response: AxiosResponse<AvailableSlotsResponse> = await axios.get('/api/bookings/available-slots', {
             params: {
-                master_profile_id: props.master.id,
+                user_id: props.master.id,
                 service_id: form.value.service_id,
                 date: form.value.booking_date
             }

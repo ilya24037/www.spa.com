@@ -185,15 +185,6 @@
                 <span>👥 Пользователи</span>
               </a>
 
-              <a
-                v-if="$page.props.auth?.user?.role === 'admin'"
-                href="/admin/master-profiles"
-                class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
-                title="Управление мастерами (новая админ-панель Filament)"
-              >
-                <span>💆 Мастера</span>
-              </a>
-
               <!-- Кнопка перехода в полную админ-панель -->
               <div class="mt-4 px-3">
                 <a
