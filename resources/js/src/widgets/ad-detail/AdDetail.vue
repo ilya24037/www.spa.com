@@ -191,8 +191,8 @@
               <div v-if="adData.user" class="bg-white rounded-lg p-6 shadow-sm">
                 <!-- Кликабельная версия (если есть профиль мастера) -->
                 <Link
-                  v-if="masterProfileId"
-                  :href="`/masters/${masterSlug}-${masterProfileId}`"
+                  v-if="adData.user"
+                  :href="`/users/${masterSlug}`"
                   class="block mb-4"
                 >
                   <div class="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors">
@@ -409,15 +409,13 @@ const adData = computed(() => {
     if (!props.ad) return {} as Ad
     const data = (props.ad as any).data || props.ad
 
-    // 🔍 DEBUG: Check user and masterProfile data
-    console.log('🔍 AdDetail DEBUG:', {
-        hasUser: !!data.user,
-        userName: data.user?.name,
-        hasMasterProfile: !!data.user?.masterProfile,
-        masterProfileId: data.user?.masterProfile?.id,
-        masterProfileSlug: data.user?.masterProfile?.slug,
-        userKeys: data.user ? Object.keys(data.user) : []
-    })
+    // DEBUG: Проверяем данные пользователя (slug теперь в user, не в masterProfile)
+    // console.log('AdDetail:', {
+    //     hasUser: !!data.user,
+    //     userName: data.user?.name,
+    //     userSlug: data.user?.slug,
+    //     userId: data.user?.id,
+    // })
 
     return data
 })
@@ -439,8 +437,8 @@ const adLocation = computed(() => {
 })
 
 // Master profile ID and slug for navigation
-const masterProfileId = computed(() => adData.value.user?.masterProfile?.id || null)
-const masterSlug = computed(() => adData.value.user?.masterProfile?.slug || 'master')
+// Slug теперь находится в user, не в masterProfile
+const masterSlug = computed(() => adData.value.user?.slug || `user-${adData.value.user?.id || 'unknown'}`)
 
 // Format registration year
 const formatRegistrationYear = computed(() => {

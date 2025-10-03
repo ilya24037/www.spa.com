@@ -88,7 +88,8 @@ class AdController extends Controller
         // Увеличиваем просмотры
         $this->adService->incrementViews($ad);
 
-        $ad->load(['user.masterProfile']);
+        // Загружаем пользователя (slug, rating теперь в users)
+        $ad->load(['user']);
 
         // 🔍 DEBUG: Проверяем RAW данные перед AdResource
         Log::info('📸 AdController::show - RAW AD DATA', [
