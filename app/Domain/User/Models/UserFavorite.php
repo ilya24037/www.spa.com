@@ -5,31 +5,30 @@ namespace App\Domain\User\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Domain\Ad\Models\Ad;
-use App\Domain\Master\Models\MasterProfile;
 
 class UserFavorite extends Model
 {
     protected $table = 'user_favorites';
-    
+
     protected $fillable = [
         'user_id',
         'ad_id',
-        'master_profile_id',
+        'favorited_user_id',
     ];
-    
+
     protected $dates = [
         'created_at',
         'updated_at'
     ];
-    
+
     /**
-     * Связь с пользователем
+     * Связь с пользователем (владелец избранного)
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
-    
+
     /**
      * Связь с объявлением
      */
@@ -37,12 +36,12 @@ class UserFavorite extends Model
     {
         return $this->belongsTo(Ad::class);
     }
-    
+
     /**
-     * Связь с мастером
+     * Связь с избранным пользователем (мастером)
      */
-    public function masterProfile(): BelongsTo
+    public function favoritedUser(): BelongsTo
     {
-        return $this->belongsTo(MasterProfile::class);
+        return $this->belongsTo(User::class, 'favorited_user_id');
     }
 }
