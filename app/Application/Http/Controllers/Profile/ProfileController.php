@@ -257,9 +257,11 @@ class ProfileController extends Controller
                 'id' => $request->user()->id,
                 'email' => $request->user()->email,
                 'role' => $request->user()->role,
+                'slug' => $request->user()->slug,
+                'rating' => $request->user()->rating,
+                'reviews_count' => $request->user()->reviews_count,
+                'is_verified' => $request->user()->is_verified,
                 'profile' => $request->user()->getProfile(),
-                'master_profile' => $request->user()->getMasterProfile(),
-                'can_create_master_profile' => $request->user()->canCreateMasterProfile(),
             ]
         ]);
     }

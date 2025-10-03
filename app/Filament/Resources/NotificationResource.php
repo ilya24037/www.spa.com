@@ -425,10 +425,12 @@ class NotificationResource extends Resource
                                 $users = User::all();
                                 break;
                             case 'masters':
-                                $users = User::whereHas('masterProfile')->get();
+                                // Мастера - пользователи с объявлениями
+                                $users = User::whereHas('ads')->get();
                                 break;
                             case 'clients':
-                                $users = User::whereDoesntHave('masterProfile')->get();
+                                // Клиенты - пользователи без объявлений
+                                $users = User::whereDoesntHave('ads')->get();
                                 break;
                             case 'active':
                                 $users = User::where('last_login_at', '>=', now()->subDays(30))->get();

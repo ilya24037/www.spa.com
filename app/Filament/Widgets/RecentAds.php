@@ -22,7 +22,7 @@ class RecentAds extends BaseWidget
         return $table
             ->query(
                 Ad::query()
-                    ->with(['user', 'masterProfile'])
+                    ->with(['user'])
                     ->latest()
                     ->limit(10)
             )
