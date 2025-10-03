@@ -47,7 +47,7 @@ class BookingService implements BookingServiceInterface
             $this->validationService->validateTimeSlotAvailability($data, $type);
         } else {
             $this->validationService->validateTimeSlot(
-                $data['master_profile_id'] ?? $data['master_id'],
+                $data['master_id'],
                 $data['booking_date'] ?? Carbon::parse($data['start_time'])->format('Y-m-d'),
                 $data['booking_time'] ?? Carbon::parse($data['start_time'])->format('H:i'),
                 $data['service_id']
@@ -279,7 +279,7 @@ class BookingService implements BookingServiceInterface
     {
         try {
             $bookingData['client_id'] = $clientId;
-            $bookingData['master_profile_id'] = $masterId;
+            $bookingData['master_id'] = $masterId;
             $this->validationService->validateCreate($bookingData);
             return true;
         } catch (\Exception $e) {
