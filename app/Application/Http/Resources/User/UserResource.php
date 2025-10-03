@@ -25,10 +25,13 @@ class UserResource extends JsonResource
             'avatar' => $this->avatar,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            
+
             // Профиль пользователя (если загружен)
             'profile' => $this->whenLoaded('profile'),
-            
+
+            // Профиль мастера (если загружен)
+            'masterProfile' => $this->whenLoaded('masterProfile'),
+
             // Публичные данные
             'is_verified' => $this->email_verified_at !== null,
             'join_date' => $this->created_at?->format('Y-m-d'),

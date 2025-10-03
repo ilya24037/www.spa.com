@@ -59,8 +59,32 @@ class MasterController extends Controller
         // Безопасная обработка reviews (всегда Collection в DTO)
         $reviews = $masterDTO->reviews->take(10)->toArray();
 
+        // Загружаем объявления мастера
+        $masterAds = \App\Domain\Ad\Models\Ad::where('user_id', $profile->user_id)
+            ->whereIn('status', ['active', 'completed'])
+            ->with(['photos'])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($ad) {
+                return [
+                    'id' => $ad->id,
+                    'title' => $ad->title,
+                    'description' => $ad->description,
+                    'price' => $ad->price,
+                    'status' => $ad->status->value ?? $ad->status,
+                    'photos' => $ad->photos,
+                    'city' => $ad->city,
+                    'address' => $ad->address,
+                    'created_at' => $ad->created_at?->format('d.m.Y'),
+                    'views' => $ad->views_count ?? 0,
+                ];
+            });
+
         return Inertia::render('Masters/Show', [
-            'master'         => $masterDTO->toArray(),
+            'master'         => array_merge($masterDTO->toArray(), [
+                'ads' => $masterAds,
+                'phone' => $profile->phone ?? null,
+            ]),
             'gallery'        => $masterDTO->gallery,
             'meta'           => $meta,
             'similarMasters' => $this->masterService->getSimilarMasters($profile->id, $profile->city, 5),
