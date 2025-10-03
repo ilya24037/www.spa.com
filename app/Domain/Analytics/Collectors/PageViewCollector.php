@@ -76,18 +76,18 @@ class PageViewCollector
     }
 
     /**
-     * Собрать просмотр мастера
+     * Собрать просмотр профиля мастера (пользователя)
      */
-    public function collectMasterView(Request $request, int $masterProfileId, ?string $masterName = null): ?PageView
+    public function collectMasterView(Request $request, int $userId, ?string $userName = null): ?PageView
     {
         return $this->collect(
             request: $request,
-            viewableType: \App\Domain\Master\Models\MasterProfile::class,
-            viewableId: $masterProfileId,
-            title: $masterName ? "Профиль мастера: {$masterName}" : 'Профиль мастера',
+            viewableType: \App\Domain\User\Models\User::class,
+            viewableId: $userId,
+            title: $userName ? "Профиль: {$userName}" : 'Профиль пользователя',
             metadata: [
-                'content_type' => 'master_profile',
-                'master_id' => $masterProfileId,
+                'content_type' => 'user_profile',
+                'user_id' => $userId,
             ]
         );
     }

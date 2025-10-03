@@ -76,17 +76,16 @@ class BookingSearchHandler
      */
     public function getBookingsForUser($user, int $perPage = 10)
     {
-        return Booking::with(['masterProfile.user', 'service', 'client'])
+        return Booking::with(['master', 'service', 'client'])
             ->where(function($query) use ($user) {
                 // Показываем бронирования где пользователь - клиент
                 $query->where('client_id', $user->id);
-                
-                // Или где пользователь - мастер
-                if ($user->masterProfile) {
-                    $query->orWhere('master_profile_id', $user->masterProfile->id);
+
+                // Или где пользователь - мастер (role === 'master')
+                if ($user->role === 'master') {
+                    $query->orWhere('master_id', $user->id);
                 }
             })
-            ->orderBy('booking_date', 'desc')
             ->orderBy('start_time', 'desc')
             ->paginate($perPage);
     }
