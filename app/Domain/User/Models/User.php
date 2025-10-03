@@ -28,6 +28,31 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
     use HasRoles, HasProfile, HasMasterProfile;
 
     /**
+     * Bootstrap the model and its traits.
+     * Автогенерация slug при создании пользователя
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Создаём slug при создании нового пользователя
+        static::creating(function ($user) {
+            if (!$user->slug && $user->name) {
+                $baseSlug = \Illuminate\Support\Str::slug($user->name);
+                $user->slug = $baseSlug . '-' . mt_rand(1000, 9999);
+            }
+        });
+
+        // Обновляем slug если изменилось имя (опционально)
+        static::updating(function ($user) {
+            if ($user->isDirty('name') && !$user->isDirty('slug') && $user->name) {
+                $baseSlug = \Illuminate\Support\Str::slug($user->name);
+                $user->slug = $baseSlug . '-' . $user->id;
+            }
+        });
+    }
+
+    /**
      * Create a new factory instance for the model.
      *
      * @return \Illuminate\Database\Eloquent\Factories\Factory<static>
@@ -51,6 +76,14 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
         'email_verified_at',
         'phone',
         'avatar_url',
+        'folder_name',
+
+        // Поля из MasterProfile (объединение профилей)
+        'slug',
+        'rating',
+        'reviews_count',
+        'views_count',
+        'is_verified',
     ];
 
     /**
@@ -75,6 +108,12 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
             'password' => 'hashed',
             'role' => UserRole::class,
             'status' => UserStatus::class,
+
+            // Поля из MasterProfile
+            'rating' => 'decimal:2',
+            'reviews_count' => 'integer',
+            'views_count' => 'integer',
+            'is_verified' => 'boolean',
         ];
     }
 
@@ -207,6 +246,11 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
             'role' => $this->role,
             'status' => $this->status,
             'created_at' => $this->created_at,
+
+            // Поля из MasterProfile для поиска
+            'slug' => $this->slug,
+            'rating' => $this->rating,
+            'is_verified' => $this->is_verified,
         ];
     }
 }
