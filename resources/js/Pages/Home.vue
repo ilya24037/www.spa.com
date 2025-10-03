@@ -271,16 +271,16 @@ const toggleFavorite = async (masterId: number) => {
 
 const handleBooking = (masterOrId: number | Master) => {
   const masterId = typeof masterOrId === 'number' ? masterOrId : masterOrId.id
-  
-  // Отслеживаем намерение бронирования
+
+  // Track contact intent
   RecommendationService.trackBooking(masterId)
-  
+
   if (typeof masterOrId === 'number') {
-    // Переход на страницу мастера с модальным окном бронирования
-    window.location.href = `/masters/${masterOrId}?booking=true`
+    // Navigate to ad detail page with contact modal
+    window.location.href = `/ads/${masterOrId}?contact=true`
   } else {
-    // Из Quick View передается объект Master
-    window.location.href = `/masters/${masterOrId.id}?booking=true`
+    // From Quick View - pass Master object
+    window.location.href = `/ads/${masterOrId.id}?contact=true`
   }
 }
 

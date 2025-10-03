@@ -86,11 +86,11 @@
       />
     </svg>
     
-    <svg 
-      v-if="showIcon && (status === 'rejected' || status === 'blocked')" 
-      :class="iconClasses" 
-      fill="none" 
-      stroke="currentColor" 
+    <svg
+      v-if="showIcon && (status === 'rejected' || status === 'blocked')"
+      :class="iconClasses"
+      fill="none"
+      stroke="currentColor"
       viewBox="0 0 24 24"
     >
       <path
@@ -98,6 +98,21 @@
         stroke-linejoin="round"
         stroke-width="2"
         d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+      />
+    </svg>
+
+    <svg
+      v-if="showIcon && status === 'pending_moderation'"
+      :class="iconClasses"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
       />
     </svg>
 
@@ -137,6 +152,10 @@ const AD_STATUSES = {
     blocked: {
         label: 'Р—Р°Р±Р»РѕРєРёСЂРѕРІР°РЅРѕ',
         color: 'bg-red-200 text-red-900'
+    },
+    pending_moderation: {
+        label: 'На проверке',
+        color: 'bg-blue-100 text-blue-800'
     }
 }
 
@@ -144,7 +163,7 @@ const props = defineProps({
     status: {
         type: String,
         required: true,
-        validator: (value) => Object.keys(AD_STATUSES).includes(value)
+        validator: (value) => Object.keys(AD_STATUSES).includes(value) || value === 'pending_moderation'
     },
     isPublished: {
         type: Boolean,

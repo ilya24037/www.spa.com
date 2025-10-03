@@ -515,6 +515,7 @@
               <ItemCard
                 v-else
                 :item="profile"
+                :key="`${profile.id}-${profile.status}`"
                 :class="{ 'pl-12': props.adminMode }"
                 @item-updated="handleItemUpdate"
                 @item-deleted="handleItemDelete"
@@ -625,7 +626,7 @@ const props = withDefaults(defineProps<DashboardPageProps>(), {
   profiles: () => [],
   counts: () => ({}),
   userStats: () => ({}),
-  activeTab: 'inactive',
+  activeTab: 'active', // По умолчанию показываем активные
   title: 'Мои объявления',
   moderationStats: () => ({})
 })

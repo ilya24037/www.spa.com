@@ -388,23 +388,25 @@ Route::get('/masters/{master}/video/poster/{filename}', [MasterMediaController::
 Route::get('/masters/{master}/avatar', [MasterMediaController::class, 'avatar'])->name('master.avatar');
 Route::get('/masters/{master}/avatar/thumb', [MasterMediaController::class, 'avatarThumb'])->name('master.avatar.thumb');
 
+// Публичный просмотр объявлений (доступен всем)
+Route::get('/ads/{ad}', [AdController::class, 'show'])->name('ads.show');
+
 // Маршруты для загрузки медиа (только для авторизованных)
 Route::middleware('auth')->group(function () {
     Route::post('/masters/{master}/upload/avatar', [MediaUploadController::class, 'uploadAvatar'])->name('master.upload.avatar');
     Route::post('/masters/{master}/upload/photos', [MediaUploadController::class, 'uploadPhotos'])->name('master.upload.photos');
     Route::post('/masters/{master}/upload/video', [MediaUploadController::class, 'uploadVideo'])->name('master.upload.video');
-    
+
     Route::delete('/photos/{photo}', [MediaUploadController::class, 'deletePhoto'])->name('master.delete.photo');
     Route::delete('/videos/{video}', [MediaUploadController::class, 'deleteVideo'])->name('master.delete.video');
-    
+
     Route::post('/masters/{master}/photos/reorder', [MediaUploadController::class, 'reorderPhotos'])->name('master.reorder.photos');
     Route::post('/photos/{photo}/set-main', [MediaUploadController::class, 'setMainPhoto'])->name('master.set.main.photo');
-    
-    // Маршруты для объявлений
+
+    // Маршруты для объявлений (требуют авторизации)
     Route::get('/ads', [AdController::class, 'index'])->name('ads.index');
     Route::post('/ads', [AdController::class, 'store'])->name('ads.store');
     Route::post('/ads/debug', [AdController::class, 'debugForm'])->name('ads.debug'); // ВРЕМЕННЫЙ для отладки
-    Route::get('/ads/{ad}', [AdController::class, 'show'])->name('ads.show');
     Route::get('/ads/{ad}/edit', [AdController::class, 'edit'])->name('ads.edit');
     Route::put('/ads/{ad}', [AdController::class, 'update'])->name('ads.update');
     Route::delete('/ads/{ad}', [AdController::class, 'destroy'])->name('ads.destroy');

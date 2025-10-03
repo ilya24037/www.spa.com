@@ -51,18 +51,74 @@ class AdController extends Controller
      */
     public function show(Ad $ad): Response
     {
-        // Проверяем доступ
-        if (!$ad->isActive() && (!auth()->check() || auth()->id() !== $ad->user_id)) {
+        Log::info('🔍 AdController::show - Попытка просмотра объявления', [
+            'ad_id' => $ad->id,
+            'status' => $ad->status->value ?? 'null',
+            'is_published' => $ad->is_published,
+            'is_paid' => $ad->is_paid ?? false,
+            'user_id' => $ad->user_id,
+            'auth_user_id' => auth()->id(),
+            'auth_check' => auth()->check(),
+        ]);
+
+        // Проверяем доступ к объявлению
+        // Показываем если:
+        // 1. Статус active И объявление опубликовано (прошло модерацию)
+        // 2. ИЛИ текущий пользователь - владелец объявления
+        $canView = ($ad->status->value === 'active' && $ad->is_published === true)
+                || (auth()->check() && auth()->id() === $ad->user_id);
+
+        Log::info('🔍 AdController::show - Результат проверки доступа', [
+            'canView' => $canView,
+            'condition1_status_active' => $ad->status->value === 'active',
+            'condition2_is_published' => $ad->is_published === true,
+            'condition3_is_owner' => auth()->check() && auth()->id() === $ad->user_id,
+        ]);
+
+        if (!$canView) {
+            Log::warning('❌ AdController::show - Доступ запрещен (404)', [
+                'ad_id' => $ad->id,
+                'reason' => 'Объявление не активно или не опубликовано, и пользователь не владелец'
+            ]);
             abort(404);
         }
+
+        Log::info('✅ AdController::show - Доступ разрешен, показываем объявление');
 
         // Увеличиваем просмотры
         $this->adService->incrementViews($ad);
 
         $ad->load(['user.profile']);
 
+        // 🔍 DEBUG: Проверяем RAW данные перед AdResource
+        Log::info('📸 AdController::show - RAW AD DATA', [
+            'ad_id' => $ad->id,
+            'photos_type' => gettype($ad->photos),
+            'photos_count' => is_array($ad->photos) ? count($ad->photos) : 'NOT ARRAY',
+            'photos_sample' => is_array($ad->photos) ? array_slice($ad->photos, 0, 2) : $ad->photos,
+            'services_type' => gettype($ad->services),
+            'prices_type' => gettype($ad->prices),
+            'prices_sample' => is_array($ad->prices) ? $ad->prices : 'NOT ARRAY'
+        ]);
+
+        $adResource = new AdResource($ad);
+        $adResourceArray = $adResource->toArray(request());
+
+        // 🔍 DEBUG: Проверяем данные после AdResource
+        Log::info('📸 AdController::show - ADRESOURCE DATA', [
+            'photos_exists' => isset($adResourceArray['photos']),
+            'photos_type' => gettype($adResourceArray['photos'] ?? null),
+            'photos_count' => isset($adResourceArray['photos']) && is_array($adResourceArray['photos']) ? count($adResourceArray['photos']) : 'NOT ARRAY',
+            'photos_sample' => isset($adResourceArray['photos']) && is_array($adResourceArray['photos']) ? array_slice($adResourceArray['photos'], 0, 2) : ($adResourceArray['photos'] ?? 'NULL'),
+            'services_exists' => isset($adResourceArray['services']),
+            'services_type' => gettype($adResourceArray['services'] ?? null),
+            'prices_exists' => isset($adResourceArray['prices']),
+            'prices_type' => gettype($adResourceArray['prices'] ?? null),
+            'resource_keys' => array_keys($adResourceArray)
+        ]);
+
         return Inertia::render('Ads/Show', [
-            'ad' => new AdResource($ad),
+            'ad' => $adResource,
             'similarAds' => AdResource::collection(
                 $this->adService->getSimilarAds($ad, limit: 4)
             )
@@ -237,10 +293,60 @@ class AdController extends Controller
         $this->authorize('update', $ad);
         \Log::info('🟢 AdController::update авторизация пройдена');
 
+        // ВАЖНО: Получаем существующие фото из БД для объединения со новыми
+        $currentPhotos = [];
+        if ($ad->photos) {
+            if (is_array($ad->photos)) {
+                $currentPhotos = $ad->photos;
+            } elseif (is_string($ad->photos)) {
+                $decoded = json_decode($ad->photos, true);
+                if (is_array($decoded)) {
+                    $currentPhotos = $decoded;
+                }
+            }
+        }
+
+        \Log::info('📸 AdController::update - Существующие фото из БД', [
+            'current_photos_count' => count($currentPhotos),
+            'current_photos_sample' => array_slice($currentPhotos, 0, 2)
+        ]);
+
         // Обрабатываем фотографии, видео и проверочное фото перед передачей в DraftService
         $processedPhotos = $this->processPhotosFromRequest($request);
         $processedVideo = $this->processVideoFromRequest($request);
         $processedVerificationPhoto = $this->processVerificationPhotoFromRequest($request);
+
+        \Log::info('📸 AdController::update - Новые загруженные фото', [
+            'processed_photos_count' => count($processedPhotos),
+            'processed_photos_sample' => array_slice($processedPhotos, 0, 2)
+        ]);
+
+        // КРИТИЧЕСКИ ВАЖНО: Объединяем старые + новые фотографии
+        // ПРОБЛЕМА: processPhotosFromRequest() уже добавляет старые URL в массив!
+        // РЕШЕНИЕ: Используем processedPhotos напрямую, если там есть старые URL
+
+        $finalPhotos = [];
+
+        // Проверяем что вернул processPhotosFromRequest
+        if (!empty($processedPhotos)) {
+            // processPhotosFromRequest уже содержит старые URL + новые файлы
+            $finalPhotos = $processedPhotos;
+
+            \Log::info('📸 AdController::update - Используем processedPhotos', [
+                'photos_count' => count($finalPhotos)
+            ]);
+        } else {
+            // Fallback: если processPhotosFromRequest вернул пустой массив - берем из БД
+            if (!empty($currentPhotos)) {
+                $finalPhotos = $currentPhotos;
+                \Log::info('📸 AdController::update - Fallback: используем фото из БД');
+            }
+        }
+
+        \Log::info('📸 AdController::update - ИТОГОВЫЙ набор фотографий', [
+            'final_photos_count' => count($finalPhotos),
+            'final_photos' => $finalPhotos
+        ]);
         
         // Обработка полей prices (они приходят как prices[key]) - как в DraftController
         $prices = [];
@@ -255,20 +361,21 @@ class AdController extends Controller
         $data = array_merge(
             $request->validated(),
             [
-                'photos' => $processedPhotos, // Добавляем обработанные фотографии
+                'photos' => $finalPhotos, // ИСПОЛЬЗУЕМ ФИНАЛЬНЫЙ набор (старые + новые)
                 'video' => $processedVideo, // Добавляем обработанные видео
                 'verification_photo' => $processedVerificationPhoto // Добавляем обработанное проверочное фото
             ]
         );
 
-        // Если редактируется активное объявление - отправляем на модерацию
-        if ($ad->status->value === 'active') {
+        // Если редактируется активное или отклоненное объявление - отправляем на модерацию
+        if (in_array($ad->status->value, ['active', 'rejected'])) {
             $data['status'] = 'pending_moderation';
             $data['is_published'] = false;
-            \Log::info('🟢 AdController::update Активное объявление отправлено на модерацию', [
+            \Log::info('🟢 AdController::update Объявление отправлено на модерацию', [
                 'ad_id' => $ad->id,
                 'old_status' => $ad->status->value,
-                'new_status' => 'pending_moderation'
+                'new_status' => 'pending_moderation',
+                'reason' => $ad->status->value === 'rejected' ? 'После отклонения' : 'Редактирование активного'
             ]);
         }
 
@@ -318,12 +425,12 @@ class AdController extends Controller
 
         // Для активных объявлений используем Inertia для сохранения реактивности
         if ($updatedAd->status === \App\Domain\Ad\Enums\AdStatus::ACTIVE) {
-            \Log::info('🟢 AdController::update АКТИВНОЕ объявление - используем Inertia::location', [
+            \Log::info('🟢 AdController::update АКТИВНОЕ объявление - перенаправляем в активные', [
                 'ad_id' => $updatedAd->id,
                 'redirect_to' => '/profile/items/active/all'
             ]);
-            // Используем Inertia::location для корректного обновления данных
-            return Inertia::location('/profile/items/active/all');
+            // Используем redirect для корректного типа возврата
+            return redirect('/profile/items/active/all');
         }
 
         // Для объявлений на модерации также перенаправляем в активные (они там показываются со статусом "На проверке")
@@ -332,7 +439,7 @@ class AdController extends Controller
                 'ad_id' => $updatedAd->id,
                 'redirect_to' => '/profile/items/active/all'
             ]);
-            return Inertia::location('/profile/items/active/all');
+            return redirect('/profile/items/active/all');
         }
         
         // Для остальных объявлений переходим к просмотру

@@ -36,16 +36,7 @@ import { createYmaps } from 'vue-yandex-maps';
 // Делаем route доступным глобально
 window.route = route;
 
-if (import.meta.env.DEV) {
-    console.log('🚀 [APP] Начало инициализации приложения');
-    console.log('🔧 [APP] Imports загружены успешно');
-}
-
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
-
-if (import.meta.env.DEV) {
-    console.log('⚙️ [APP] Создание Inertia App...');
-}
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

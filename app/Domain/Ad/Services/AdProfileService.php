@@ -14,14 +14,22 @@ class AdProfileService
     /**
      * Получить объявления пользователя по статусу
      */
-    public function getUserAdsByStatus(User $user, string $status, int $limit = 100): array
+    public function getUserAdsByStatus(User $user, string|array $status, int $limit = 100): array
     {
-        $ads = Ad::where('user_id', $user->id)
-            ->where('status', $status)
+        $query = Ad::where('user_id', $user->id);
+
+        // Поддержка массива статусов
+        if (is_array($status)) {
+            $query->whereIn('status', $status);
+        } else {
+            $query->where('status', $status);
+        }
+
+        $ads = $query
             ->with('user.masterProfile') // Загружаем связь с профилем мастера
             ->select([
-                'id', 'title', 'status', 'price', 'address', 'travel_area', 
-                'specialty', 'description', 'phone', 'contact_method', 
+                'id', 'title', 'status', 'price', 'address', 'travel_area',
+                'description', 'phone', 'contact_method',
                 'photos', 'service_location', 'views_count',
                 'user_id', // Добавляем user_id для связи
                 'created_at', 'updated_at'
@@ -43,15 +51,16 @@ class AdProfileService
             ->groupBy('status')
             ->pluck('count', 'status')
             ->toArray();
-            
+
         return [
-            'active' => $countsQuery['active'] ?? 0,
+            // Активные включают и объявления на модерации
+            'active' => ($countsQuery['active'] ?? 0) + ($countsQuery['pending_moderation'] ?? 0),
             'draft' => $countsQuery['draft'] ?? 0,
             'waiting_payment' => $countsQuery['waiting_payment'] ?? 0,
             'old' => $countsQuery['archived'] ?? 0,
             'archived' => $countsQuery['archived'] ?? 0,
-            'bookings' => $user->getBookings()->where('status', 'pending')->count(),
-            'favorites' => $user->getFavoritesCount(),
+            'bookings' => 0, // TODO: Добавить подсчет бронирований когда будет готов функционал
+            'favorites' => 0, // TODO: Добавить подсчет избранного когда будет готов функционал
             'unreadMessages' => 0,
         ];
     }
@@ -63,7 +72,7 @@ class AdProfileService
     {
         return [
             'rating' => 0,
-            'reviewsCount' => $user->getReceivedReviewsCount(),
+            'reviewsCount' => 0, // TODO: Добавить подсчет отзывов когда будет готов функционал
             'balance' => $user->balance ?? 0,
         ];
     }
@@ -87,9 +96,9 @@ class AdProfileService
                 'id' => $ad->id,
                 'slug' => Str::slug($ad->title),
                 'name' => $ad->title,
-                'status' => $ad->status,
-                'waiting_payment' => $ad->status === 'waiting_payment',
-                'is_active' => $ad->status === 'active',
+                'status' => is_object($ad->status) ? $ad->status->value : $ad->status,
+                'waiting_payment' => (is_object($ad->status) ? $ad->status->value : $ad->status) === 'waiting_payment',
+                'is_active' => (is_object($ad->status) ? $ad->status->value : $ad->status) === 'active',
                 'price_from' => $ad->price ?? 0,
                 'views_count' => $ad->views_count ?? 0,
                 'photos_count' => $photosCount,
@@ -100,10 +109,10 @@ class AdProfileService
                 'address' => $ad->address ?? '',
                 'district' => $ad->travel_area ?? '',
                 'home_service' => $this->hasHomeService($ad),
-                'availability' => $ad->status === 'active' ? 'Доступен' : 'Недоступен',
+                'availability' => (is_object($ad->status) ? $ad->status->value : $ad->status) === 'active' ? 'Доступен' : 'Недоступен',
                 'messages_count' => 0,
                 'new_messages_count' => 0,
-                'services_list' => $ad->specialty ?? '',
+                'services_list' => '', // Специальность больше не используется
                 'full_address' => $ad->address ?? 'Адрес не указан',
                 // Добавляем данные о мастере для перехода на страницу мастера
                 'master_profile_id' => $masterProfile?->id,

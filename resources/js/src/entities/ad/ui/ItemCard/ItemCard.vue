@@ -209,7 +209,7 @@
 import { ref, computed } from 'vue'
 import { router, Link, usePage } from '@inertiajs/vue3'
 import ItemImage from '@/src/shared/ui/molecules/ItemImage.vue'
-import ItemContent from '@/src/shared/ui/molecules/ItemContent.vue'
+import ItemContent from './components/ItemContent.vue'
 import ItemStats from './components/ItemStats.vue'
 import ItemActions from './components/ItemActions.vue'
 import ConfirmModal from '@/src/shared/ui/molecules/Modal/ConfirmModal.vue'

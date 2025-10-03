@@ -63,13 +63,28 @@ class DraftService
                 AdStatus::WAITING_PAYMENT
             ];
 
-            if ($existingAd && $existingAd->status !== AdStatus::DRAFT && !in_array($existingAd->status, $waitingStatuses)) {
-                // Не меняем статус только для активных объявлений
-                // Для черновиков и статусов ожидания разрешаем изменение
-                unset($data['status']);
+            // Разрешаем изменение статуса если:
+            // 1. Это черновик или статус ожидания
+            // 2. ИЛИ активное/отклоненное объявление переходит на модерацию (редактирование)
+            if ($existingAd && isset($data['status'])) {
+                // Разрешаем переход на модерацию при редактировании активных или отклоненных
+                if (in_array($existingAd->status->value, ['active', 'rejected']) &&
+                    $data['status'] === AdStatus::PENDING_MODERATION->value) {
+                    // Разрешаем переход active/rejected -> pending_moderation при редактировании
+                    // Статус остается в $data и будет применен
+                } elseif ($existingAd->status !== AdStatus::DRAFT &&
+                         !in_array($existingAd->status, $waitingStatuses)) {
+                    // Для остальных случаев активных объявлений не меняем статус
+                    unset($data['status']);
+                } else {
+                    // Для черновиков и статусов ожидания используем переданный статус или draft
+                    $data['status'] = $data['status'] ?? AdStatus::DRAFT;
+                }
             } else {
-                // Для черновиков и статусов ожидания используем переданный статус или draft
-                $data['status'] = $data['status'] ?? AdStatus::DRAFT;
+                // Если статус не передан, используем draft для новых и черновиков
+                if (!$existingAd || $existingAd->status === AdStatus::DRAFT) {
+                    $data['status'] = $data['status'] ?? AdStatus::DRAFT;
+                }
             }
         } else {
             // Новое объявление использует переданный статус или draft

@@ -9,12 +9,12 @@ use App\Domain\Ad\Enums\AdStatus;
 use App\Services\AdminActionLogger;
 use App\Filament\Resources\AdResource\Pages;
 use Filament\Forms;
+use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Actions\ViewAction;
 use Filament\Actions\EditAction;
-use Filament\Schemas\Schema;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -74,12 +74,18 @@ class AdResource extends Resource
                     ->schema([
                         Forms\Components\TextInput::make('title')
                             ->label('Название')
-                            ->required()
+                            ->maxLength(255),
+
+                        Forms\Components\TextInput::make('category')
+                            ->label('Категория')
+                            ->maxLength(255),
+
+                        Forms\Components\TextInput::make('specialty')
+                            ->label('Специализация')
                             ->maxLength(255),
 
                         Forms\Components\Textarea::make('description')
                             ->label('Описание')
-                            ->required()
                             ->maxLength(5000)
                             ->rows(5),
 
@@ -94,11 +100,43 @@ class AdResource extends Resource
                     ])
                     ->columns(2),
 
-                Forms\Components\Section::make('Цены и услуги')
+                Forms\Components\Section::make('Параметры мастера')
                     ->columnSpanFull()
                     ->schema([
-                        Forms\Components\TextInput::make('starting_price')
-                            ->label('Цена от')
+                        Forms\Components\TextInput::make('age')
+                            ->label('Возраст')
+                            ->maxLength(50),
+
+                        Forms\Components\TextInput::make('height')
+                            ->label('Рост')
+                            ->maxLength(50),
+
+                        Forms\Components\TextInput::make('weight')
+                            ->label('Вес')
+                            ->maxLength(50),
+
+                        Forms\Components\TextInput::make('nationality')
+                            ->label('Национальность')
+                            ->maxLength(255),
+
+                        Forms\Components\TextInput::make('experience')
+                            ->label('Опыт работы')
+                            ->maxLength(255),
+
+                        Forms\Components\Select::make('work_format')
+                            ->label('Формат работы')
+                            ->options([
+                                'individual' => 'Индивидуально',
+                                'group' => 'В группе',
+                            ]),
+                    ])
+                    ->columns(3),
+
+                Forms\Components\Section::make('Цены и условия')
+                    ->columnSpanFull()
+                    ->schema([
+                        Forms\Components\TextInput::make('price')
+                            ->label('Цена')
                             ->numeric()
                             ->prefix('₽'),
 
@@ -107,17 +145,26 @@ class AdResource extends Resource
                             ->numeric()
                             ->prefix('₽'),
 
-                        Forms\Components\TextInput::make('minimum_duration')
+                        Forms\Components\TextInput::make('outcall_price')
+                            ->label('Выезд')
+                            ->numeric()
+                            ->prefix('₽'),
+
+                        Forms\Components\TextInput::make('price_two_hours')
+                            ->label('2 часа')
+                            ->numeric()
+                            ->prefix('₽'),
+
+                        Forms\Components\TextInput::make('min_duration')
                             ->label('Минимальная продолжительность (мин)')
                             ->numeric()
                             ->suffix('мин'),
 
-                        Forms\Components\TextInput::make('location_radius')
-                            ->label('Радиус выезда (км)')
-                            ->numeric()
-                            ->suffix('км'),
+                        Forms\Components\TextInput::make('discount')
+                            ->label('Скидка')
+                            ->maxLength(255),
                     ])
-                    ->columns(2),
+                    ->columns(3),
 
                 Forms\Components\Section::make('Контакты и локация')
                     ->columnSpanFull()
@@ -126,21 +173,28 @@ class AdResource extends Resource
                             ->label('Телефон')
                             ->tel(),
 
+                        Forms\Components\TextInput::make('whatsapp')
+                            ->label('WhatsApp')
+                            ->tel(),
+
+                        Forms\Components\TextInput::make('telegram')
+                            ->label('Telegram'),
+
                         Forms\Components\TextInput::make('address')
                             ->label('Адрес')
                             ->maxLength(255),
 
-                        Forms\Components\TextInput::make('district')
-                            ->label('Район')
-                            ->maxLength(100),
+                        Forms\Components\TextInput::make('travel_area')
+                            ->label('Район выезда')
+                            ->maxLength(255),
 
-                        Forms\Components\TextInput::make('metro')
-                            ->label('Метро')
-                            ->maxLength(100),
+                        Forms\Components\TextInput::make('travel_radius')
+                            ->label('Радиус выезда')
+                            ->maxLength(255),
                     ])
                     ->columns(2),
 
-                Forms\Components\Section::make('Информация об авторе')
+                Forms\Components\Section::make('Администрирование')
                     ->columnSpanFull()
                     ->schema([
                         Forms\Components\Select::make('user_id')
@@ -149,12 +203,166 @@ class AdResource extends Resource
                             ->searchable()
                             ->required(),
 
-                        Forms\Components\Textarea::make('moderation_reason')
-                            ->label('Причина модерации/отклонения')
-                            ->rows(3),
+                        Forms\Components\Toggle::make('is_paid')
+                            ->label('Оплачено'),
+
+                        Forms\Components\DateTimePicker::make('paid_at')
+                            ->label('Дата оплаты'),
+
+                        Forms\Components\DateTimePicker::make('expires_at')
+                            ->label('Истекает'),
                     ])
-                    ->columns(1)
-                    ->columnSpanFull(),
+                    ->columns(2),
+            ]);
+    }
+
+    public static function infolist(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
+    {
+        return $schema
+            ->schema([
+                \Filament\Schemas\Components\Section::make('Основная информация')
+                    ->schema([
+                        \Filament\Infolists\Components\TextEntry::make('title')
+                            ->label('Название')
+                            ->columnSpanFull(),
+                        \Filament\Infolists\Components\TextEntry::make('category')
+                            ->label('Категория'),
+                        \Filament\Infolists\Components\TextEntry::make('specialty')
+                            ->label('Специализация'),
+                        \Filament\Infolists\Components\TextEntry::make('status')
+                            ->label('Статус')
+                            ->badge()
+                            ->formatStateUsing(fn ($state) => self::getStatusOptions()[$state instanceof AdStatus ? $state->value : $state] ?? $state),
+                        \Filament\Infolists\Components\IconEntry::make('is_published')
+                            ->label('Опубликовано')
+                            ->boolean(),
+                        \Filament\Infolists\Components\TextEntry::make('description')
+                            ->label('Описание')
+                            ->columnSpanFull()
+                            ->prose()
+                            ->markdown()
+                            ->default('Описание отсутствует'),
+                    ])
+                    ->columns(2),
+
+                \Filament\Schemas\Components\Section::make('Фото и медиа')
+                    ->schema([
+                        \Filament\Infolists\Components\TextEntry::make('photos')
+                            ->label('Фотографии')
+                            ->getStateUsing(function ($record) {
+                                // Generate HTML grid from photos array
+                                // Note: Using custom HTML because ImageEntry expects disk-relative paths,
+                                // but our DB stores full paths like "/storage/photos/3/file.webp"
+                                $photos = $record->photos;
+
+                                if (!is_array($photos) || empty($photos)) {
+                                    return 'Нет фото';
+                                }
+
+                                $html = '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px;">';
+                                foreach ($photos as $photo) {
+                                    $url = asset($photo);
+                                    $html .= '<div>';
+                                    $html .= '<a href="' . $url . '" target="_blank">';
+                                    $html .= '<img src="' . $url . '" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; border: 1px solid #e5e7eb;">';
+                                    $html .= '</a>';
+                                    $html .= '</div>';
+                                }
+                                $html .= '</div>';
+
+                                return $html;
+                            })
+                            ->html()
+                            ->columnSpanFull(),
+                        \Filament\Infolists\Components\TextEntry::make('video')
+                            ->label('Видео')
+                            ->default('Нет')
+                            ->placeholder('Видео не добавлено'),
+                    ])
+                    ->collapsed(false)
+                    ->columns(1),
+
+                \Filament\Schemas\Components\Section::make('Параметры мастера')
+                    ->schema([
+                        \Filament\Infolists\Components\TextEntry::make('age')
+                            ->label('Возраст'),
+                        \Filament\Infolists\Components\TextEntry::make('height')
+                            ->label('Рост'),
+                        \Filament\Infolists\Components\TextEntry::make('weight')
+                            ->label('Вес'),
+                        \Filament\Infolists\Components\TextEntry::make('nationality')
+                            ->label('Национальность'),
+                        \Filament\Infolists\Components\TextEntry::make('experience')
+                            ->label('Опыт работы'),
+                        \Filament\Infolists\Components\TextEntry::make('work_format')
+                            ->label('Формат работы'),
+                    ])
+                    ->columns(3),
+
+                \Filament\Schemas\Components\Section::make('Цены и условия')
+                    ->schema([
+                        \Filament\Infolists\Components\TextEntry::make('price')
+                            ->label('Цена')
+                            ->money('RUB')
+                            ->default('Не указана'),
+                        \Filament\Infolists\Components\TextEntry::make('price_per_hour')
+                            ->label('Цена за час')
+                            ->money('RUB')
+                            ->default('Не указана'),
+                        \Filament\Infolists\Components\TextEntry::make('outcall_price')
+                            ->label('Выезд')
+                            ->money('RUB')
+                            ->default('Не указана'),
+                        \Filament\Infolists\Components\TextEntry::make('price_two_hours')
+                            ->label('2 часа')
+                            ->money('RUB')
+                            ->default('Не указана'),
+                        \Filament\Infolists\Components\TextEntry::make('min_duration')
+                            ->label('Мин. продолжительность')
+                            ->suffix(' мин')
+                            ->default('Не указано'),
+                        \Filament\Infolists\Components\TextEntry::make('discount')
+                            ->label('Скидка')
+                            ->default('Нет'),
+                    ])
+                    ->columns(3),
+
+                \Filament\Schemas\Components\Section::make('Контакты и локация')
+                    ->schema([
+                        \Filament\Infolists\Components\TextEntry::make('phone')
+                            ->label('Телефон'),
+                        \Filament\Infolists\Components\TextEntry::make('whatsapp')
+                            ->label('WhatsApp'),
+                        \Filament\Infolists\Components\TextEntry::make('telegram')
+                            ->label('Telegram'),
+                        \Filament\Infolists\Components\TextEntry::make('address')
+                            ->label('Адрес'),
+                        \Filament\Infolists\Components\TextEntry::make('travel_area')
+                            ->label('Район выезда'),
+                        \Filament\Infolists\Components\TextEntry::make('travel_radius')
+                            ->label('Радиус выезда'),
+                    ])
+                    ->columns(2),
+
+                \Filament\Schemas\Components\Section::make('Информация об авторе')
+                    ->schema([
+                        \Filament\Infolists\Components\TextEntry::make('user.email')
+                            ->label('Email автора'),
+                        \Filament\Infolists\Components\TextEntry::make('created_at')
+                            ->label('Создано')
+                            ->dateTime('d.m.Y H:i'),
+                        \Filament\Infolists\Components\TextEntry::make('updated_at')
+                            ->label('Обновлено')
+                            ->dateTime('d.m.Y H:i'),
+                        \Filament\Infolists\Components\TextEntry::make('views_count')
+                            ->label('Просмотров'),
+                        \Filament\Infolists\Components\TextEntry::make('favorites_count')
+                            ->label('В избранном'),
+                        \Filament\Infolists\Components\IconEntry::make('is_paid')
+                            ->label('Оплачено')
+                            ->boolean(),
+                    ])
+                    ->columns(3),
             ]);
     }
 
@@ -210,10 +418,16 @@ class AdResource extends Resource
                     ->label('Опубликовано')
                     ->boolean(),
 
-                Tables\Columns\TextColumn::make('starting_price')
-                    ->label('Цена от')
+                Tables\Columns\TextColumn::make('price')
+                    ->label('Цена')
                     ->money('RUB')
                     ->sortable(),
+
+                Tables\Columns\TextColumn::make('price_per_hour')
+                    ->label('Цена/час')
+                    ->money('RUB')
+                    ->sortable()
+                    ->toggleable(),
 
                 Tables\Columns\TextColumn::make('views_count')
                     ->label('Просмотры')

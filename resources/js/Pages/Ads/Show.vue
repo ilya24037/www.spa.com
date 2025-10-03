@@ -9,7 +9,7 @@
         <div class="flex items-start justify-between">
           <div>
             <h1 class="text-3xl font-bold text-gray-900 mb-2">
-              {{ ad.title }}
+              {{ ad.value.title }}
             </h1>
             <!-- specialty скрыто - поле теперь необязательное -->
             <div class="flex items-center gap-4 text-sm text-gray-500">
@@ -39,9 +39,9 @@
         <!-- Левая колонка - основная информация -->
         <div class="lg:col-span-2 space-y-6">
           <!-- Фотографии через универсальную галерею -->
-          <div v-if="ad.photos && ad.photos.length > 0" class="bg-white rounded-lg p-6 shadow-sm">
-            <PhotoGallery 
-              :photos="ad.photos"
+          <div v-if="normalizedPhotos.length > 0" class="bg-white rounded-lg p-6 shadow-sm">
+            <PhotoGallery
+              :photos="normalizedPhotos"
               mode="grid"
               title="Фотографии"
               :enable-lightbox="true"
@@ -55,8 +55,46 @@
             </h2>
             <div class="prose max-w-none">
               <p class="text-gray-600 leading-relaxed whitespace-pre-line">
-                {{ ad.description || 'Описание не указано' }}
+                {{ ad.value.description || 'Описание не указано' }}
               </p>
+            </div>
+          </div>
+
+          <!-- Услуги -->
+          <div v-if="normalizedServices.length > 0" class="bg-white rounded-lg p-6 shadow-sm">
+            <h2 class="text-xl font-semibold mb-4 text-gray-900">
+              Предоставляемые услуги
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div
+                v-for="(service, idx) in normalizedServices"
+                :key="idx"
+                class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+              >
+                <span class="text-gray-700 capitalize">{{ service.name }}</span>
+                <span v-if="service.price" class="text-gray-900 font-semibold">
+                  {{ formatPrice(service.price) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Прайс-лист -->
+          <div v-if="normalizedPrices.length > 0" class="bg-white rounded-lg p-6 shadow-sm">
+            <h2 class="text-xl font-semibold mb-4 text-gray-900">
+              Прайс-лист
+            </h2>
+            <div class="space-y-2">
+              <div
+                v-for="(price, idx) in normalizedPrices"
+                :key="idx"
+                class="flex items-center justify-between p-3 border-b border-gray-200 last:border-b-0"
+              >
+                <span class="text-gray-700 capitalize">{{ price.name }}</span>
+                <span class="text-gray-900 font-semibold">
+                  {{ formatPrice(price.value) }}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -71,7 +109,7 @@
                   Опыт работы
                 </dt>
                 <dd class="text-gray-600">
-                  {{ ad.experience || 'Не указан' }}
+                  {{ ad.value.experience || 'Не указан' }}
                 </dd>
               </div>
               <div>
@@ -79,18 +117,18 @@
                   Формат работы
                 </dt>
                 <dd class="text-gray-600">
-                  {{ ad.work_format || 'Не указан' }}
+                  {{ ad.value.work_format || 'Не указан' }}
                 </dd>
               </div>
-              <div v-if="ad.clients && ad.clients.length > 0">
+              <div v-if="ad.value.clients && ad.clients.length > 0">
                 <dt class="text-sm font-medium text-gray-500">
                   Категории клиентов
                 </dt>
                 <dd class="text-gray-600">
-                  {{ ad.clients.join(', ') }}
+                  {{ ad.value.clients.join(', ') }}
                 </dd>
               </div>
-              <div v-if="ad.service_location && ad.service_location.length > 0">
+              <div v-if="ad.value.service_location && ad.service_location.length > 0">
                 <dt class="text-sm font-medium text-gray-500">
                   Места оказания услуг
                 </dt>
@@ -114,7 +152,7 @@
               </div>
             </div>
             <p class="text-sm text-gray-600 mt-3">
-              {{ ad.address || 'Адрес не указан' }}
+              {{ ad.value.address || 'Адрес не указан' }}
             </p>
           </div>
         </div>
@@ -132,9 +170,9 @@
             <p class="text-gray-600">
               {{ getPriceUnitText(ad.price_unit) }}
             </p>
-            <div v-if="ad.discount" class="mt-2">
+            <div v-if="ad.value.discount" class="mt-2">
               <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                Скидка {{ ad.discount }}%
+                Скидка {{ ad.value.discount }}%
               </span>
             </div>
           </div>
@@ -145,15 +183,15 @@
               Контактная информация
             </h2>
             <div class="space-y-3">
-              <div v-if="ad.phone">
+              <div v-if="ad.value.phone">
                 <dt class="text-sm font-medium text-gray-500">
                   Телефон
                 </dt>
                 <dd class="text-gray-600">
-                  {{ ad.phone }}
+                  {{ ad.value.phone }}
                 </dd>
               </div>
-              <div v-if="ad.contact_method">
+              <div v-if="ad.value.contact_method">
                 <dt class="text-sm font-medium text-gray-500">
                   Способ связи
                 </dt>
@@ -161,12 +199,12 @@
                   {{ getContactMethodText(ad.contact_method) }}
                 </dd>
               </div>
-              <div v-if="ad.address">
+              <div v-if="ad.value.address">
                 <dt class="text-sm font-medium text-gray-500">
                   Адрес
                 </dt>
                 <dd class="text-gray-600">
-                  {{ ad.address }}
+                  {{ ad.value.address }}
                 </dd>
               </div>
             </div>
@@ -183,7 +221,7 @@
                   Просмотры
                 </dt>
                 <dd class="text-gray-600">
-                  {{ ad.views_count || 0 }}
+                  {{ ad.value.views_count || 0 }}
                 </dd>
               </div>
               <div class="flex justify-between">
@@ -191,7 +229,7 @@
                   В избранном
                 </dt>
                 <dd class="text-gray-600">
-                  {{ ad.favorites_count || 0 }}
+                  {{ ad.value.favorites_count || 0 }}
                 </dd>
               </div>
               <div class="flex justify-between">
@@ -199,7 +237,7 @@
                   Показы контактов
                 </dt>
                 <dd class="text-gray-600">
-                  {{ ad.contacts_shown || 0 }}
+                  {{ ad.value.contacts_shown || 0 }}
                 </dd>
               </div>
             </dl>
@@ -227,20 +265,126 @@ const props = defineProps({
     }
 })
 
+// 🔍 DEBUG: Log received props
+console.log('=== Show.vue DEBUG ===')
+console.log('Props.ad:', props.ad)
+console.log('Props.ad.data:', props.ad.data)
+console.log('Props.ad.photos:', props.ad.photos)
+console.log('Props.ad.data?.photos:', props.ad.data?.photos)
+console.log('=====================')
+
+// 🔧 FIX: Unwrap data if nested
+const ad = computed(() => props.ad.data || props.ad)
+
 // Computed свойства
 const adLocation = computed(() => {
     // Пытаемся получить координаты из объявления
-    if (props.ad.coordinates) {
-        return [props.ad.coordinates.lat, props.ad.coordinates.lng]
+    if (ad.value.coordinates) {
+        return [ad.value.coordinates.lat, ad.value.coordinates.lng]
     }
-    
+
     // Альтернативный формат координат
-    if (props.ad.lat && props.ad.lng) {
-        return [props.ad.lat, props.ad.lng]
+    if (ad.value.lat && ad.value.lng) {
+        return [ad.value.lat, ad.value.lng]
     }
-    
+
     // Если координат нет, карта не отображается
     return null
+})
+
+// Normalize photos format for PhotoGallery component
+const normalizedPhotos = computed(() => {
+    console.log('🔍 normalizedPhotos computed running...')
+    console.log('  ad.value.photos:', ad.value.photos)
+    console.log('  isArray:', Array.isArray(ad.value.photos))
+
+    if (!ad.value.photos || !Array.isArray(ad.value.photos)) {
+        console.log('❌ Photos not array or empty, returning []')
+        return []
+    }
+
+    const result = ad.value.photos.map(photo => {
+        // If photo is already an object with url property, return as is
+        if (typeof photo === 'object' && photo.url) {
+            console.log('✅ Photo is object with url:', photo.url)
+            return photo
+        }
+
+        // If photo is a string (URL), convert to object format
+        if (typeof photo === 'string') {
+            console.log('✅ Photo is string, converting:', photo)
+            return {
+                url: photo,
+                preview: photo,
+                alt: ad.value.title
+            }
+        }
+
+        console.log('⚠️ Photo unknown format:', photo)
+        return null
+    }).filter(Boolean)
+
+    console.log('📸 normalizedPhotos result:', result)
+    console.log('📸 normalizedPhotos count:', result.length)
+    return result
+})
+
+// Normalize services for display
+const normalizedServices = computed(() => {
+    console.log('🔍 normalizedServices computed running...')
+    console.log('  ad.value.services:', ad.value.services)
+
+    if (!ad.value.services) {
+        console.log('❌ No services, returning []')
+        return []
+    }
+
+    const services = []
+    // services is a nested object structure
+    Object.entries(ad.value.services).forEach(([category, items]) => {
+        if (typeof items === 'object') {
+            Object.entries(items).forEach(([serviceKey, serviceData]) => {
+                if (serviceData && serviceData.enabled) {
+                    console.log('✅ Found enabled service:', serviceKey, serviceData)
+                    services.push({
+                        name: serviceKey.replace(/_/g, ' '),
+                        price: serviceData.price || null,
+                        comment: serviceData.price_comment || null
+                    })
+                }
+            })
+        }
+    })
+
+    console.log('💼 normalizedServices result:', services)
+    console.log('💼 normalizedServices count:', services.length)
+    return services
+})
+
+// Normalize prices for display
+const normalizedPrices = computed(() => {
+    console.log('🔍 normalizedPrices computed running...')
+    console.log('  ad.value.prices:', ad.value.prices)
+
+    if (!ad.value.prices) {
+        console.log('❌ No prices, returning []')
+        return []
+    }
+
+    const prices = []
+    Object.entries(ad.value.prices).forEach(([key, value]) => {
+        if (value && value !== '0' && value !== 0) {
+            console.log('✅ Found price:', key, value)
+            prices.push({
+                name: key.replace(/_/g, ' '),
+                value: value
+            })
+        }
+    })
+
+    console.log('💰 normalizedPrices result:', prices)
+    console.log('💰 normalizedPrices count:', prices.length)
+    return prices
 })
 
 // Утилиты форматирования
@@ -254,8 +398,11 @@ const formatDate = (dateString: any) => {
 }
 
 const formatPrice = (price: any) => {
-    if (!price) return 'Цена не указана'
-    return new Intl.NumberFormat('ru-RU').format(price) + ' ₽'
+    if (!price || price === '0' || price === 0) return 'Цена не указана'
+    // Convert string to number if needed
+    const priceNum = typeof price === 'string' ? parseInt(price, 10) : price
+    if (isNaN(priceNum)) return 'Цена не указана'
+    return new Intl.NumberFormat('ru-RU').format(priceNum) + ' ₽'
 }
 
 const getStatusClass = (status: any) => {

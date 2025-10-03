@@ -75,7 +75,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->maxContentWidth('full')
             ->breadcrumbs(true)
-            ->globalSearch(true)
-            ->spa();
+            ->globalSearch(true);
+            // ->spa(); // Отключен из-за конфликта с CSRF токенами Livewire
     }
 }

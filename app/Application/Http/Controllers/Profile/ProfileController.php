@@ -61,7 +61,7 @@ class ProfileController extends Controller
         
         // Определяем таб из URL
         $currentPath = $request->path();
-        $tab = 'inactive'; // По умолчанию
+        $tab = 'active'; // По умолчанию показываем активные
         
         if (str_contains($currentPath, '/active/')) {
             $tab = 'active';
@@ -75,14 +75,14 @@ class ProfileController extends Controller
             $tab = 'archive';
         } else {
             // Если запрос из параметра
-            $tab = $request->get('tab', 'inactive');
+            $tab = $request->get('tab', 'active');
         }
         
         // Маппинг табов на статусы
         $statusMap = [
             'waiting' => 'waiting_payment',
-            'inactive' => ['rejected', 'pending_moderation', 'expired', 'waiting_payment'], // Ждут действий
-            'active' => ['active', 'published'],
+            'inactive' => ['rejected', 'expired', 'waiting_payment'], // Ждут действий (БЕЗ pending_moderation)
+            'active' => ['active', 'published', 'pending_moderation'], // Активные включают на модерации
             'drafts' => 'draft',
             'draft' => 'draft',
             'archived' => 'archived',
@@ -168,7 +168,7 @@ class ProfileController extends Controller
                 // Идентификация
                 'id' => $ad->id,
                 'title' => $ad->title,
-                'status' => $ad->status,
+                'status' => is_object($ad->status) ? $ad->status->value : $ad->status,
                 'is_published' => $ad->is_published,
                 'moderation_reason' => $ad->moderation_reason,
 
@@ -202,7 +202,8 @@ class ProfileController extends Controller
             ->toArray();
         
         $counts = [
-            'active' => $countsQuery['active'] ?? 0,
+            // Активные включают и объявления на модерации
+            'active' => ($countsQuery['active'] ?? 0) + ($countsQuery['pending_moderation'] ?? 0),
             'draft' => $countsQuery['draft'] ?? 0,
             'waiting_payment' => $countsQuery['waiting_payment'] ?? 0,
             'old' => $countsQuery['archived'] ?? 0,

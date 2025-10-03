@@ -1,1 +1,0 @@
-export const hoverLift = { mounted(el) { el.style.transition = "transform 0.2s ease"; el.addEventListener("mouseenter", () => { el.style.transform = "translateY(-2px)" }); el.addEventListener("mouseleave", () => { el.style.transform = "translateY(0)" }) } }

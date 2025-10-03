@@ -1,16 +1,6 @@
 <!-- ItemContent - содержимое карточки объявления -->
 <template>
   <div class="item-content">
-    <!-- Статус и ожидание оплаты -->
-    <div v-if="item.status === 'inactive' || item.status === 'waiting_payment'" class="item-status-badge">
-      <span v-if="item.status === 'waiting_payment'" class="badge-payment">
-        Ожидает оплаты
-      </span>
-      <span v-else-if="item.status === 'inactive'" class="badge-inactive">
-        Неактивно
-      </span>
-    </div>
-    
     <!-- Заголовок -->
     <h3 class="item-title">
       {{ item.title || 'Без названия' }}
@@ -53,6 +43,7 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+
 
 // Форматирование цены
 const displayPrice = computed(() => {
@@ -117,29 +108,6 @@ const formatDate = (dateString?: string) => {
 <style scoped>
 .item-content {
   padding: 12px 0;
-}
-
-.item-status-badge {
-  margin-bottom: 8px;
-}
-
-.badge-payment,
-.badge-inactive {
-  display: inline-block;
-  padding: 4px 8px;
-  font-size: 12px;
-  font-weight: 500;
-  border-radius: 4px;
-}
-
-.badge-payment {
-  background: #fff3cd;
-  color: #856404;
-}
-
-.badge-inactive {
-  background: #f8d7da;
-  color: #721c24;
 }
 
 .item-title {

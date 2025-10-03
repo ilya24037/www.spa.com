@@ -38,6 +38,7 @@ yarn-error.log
 # Отладочные и тестовые файлы
 debug*.php
 test*.php
+check_*.php
 debug*.js
 test*.js
 *.debug.php
@@ -48,8 +49,30 @@ test*.js
 # Резервные копии
 /Backap/
 /Backup/
+/_backup/
+/backup/
+backup_*/
 *.backup
 *.bak
+*.old
+
+# Временные файлы PowerShell
+nul
+count()
+toArray()
+value}
+value)
+
+# Скрипты разработки
+run_*.bat
+stop*.bat
+spa-claude.bat
+spa-claude.ps1
+
+# Временные файлы Word
+~$*.doc*
+~$*.xls*
+~$*.ppt*
 
 # Chrome и браузерные файлы
 *.dll

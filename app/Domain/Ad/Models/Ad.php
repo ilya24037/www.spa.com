@@ -56,6 +56,12 @@ class Ad extends Model
         'is_starting_price',
         'prices',
         'starting_price',
+        'price',
+        'price_per_hour',
+        'outcall_price',
+        'express_price',
+        'price_two_hours',
+        'price_night',
         'min_duration',
         'contacts_per_hour',
         'has_girlfriend',
@@ -147,6 +153,98 @@ class Ad extends Model
         // Поля архивации
         'archived_at' => 'datetime',
     ];
+
+    /**
+     * Автоматический маппинг цен из JSON в отдельные поля
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // При создании
+        static::creating(function ($ad) {
+            self::mapPricesToFields($ad);
+        });
+
+        // При обновлении
+        static::updating(function ($ad) {
+            self::mapPricesToFields($ad);
+
+            // Логируем изменения важных полей
+            $watchedFields = ['service_provider', 'clients'];
+            $changes = [];
+
+            foreach ($watchedFields as $field) {
+                if ($ad->isDirty($field)) {
+                    $changes[$field] = [
+                        'old' => $ad->getOriginal($field),
+                        'new' => $ad->getAttribute($field)
+                    ];
+                }
+            }
+
+            if (!empty($changes)) {
+                Log::info('🟢 Ad Model: Изменения важных полей', [
+                    'ad_id' => $ad->id,
+                    'changes' => $changes
+                ]);
+            }
+        });
+
+        // Логируем результат после обновления
+        static::updated(function ($ad) {
+            Log::info('🟢 Ad Model: Объявление обновлено в БД', [
+                'ad_id' => $ad->id,
+                'service_provider' => $ad->service_provider,
+                'clients' => $ad->clients
+            ]);
+        });
+    }
+
+    /**
+     * Маппинг цен из JSON поля prices в отдельные поля БД
+     */
+    private static function mapPricesToFields($ad)
+    {
+        if ($ad->prices && is_array($ad->prices)) {
+            // Маппинг цен за 1 час
+            if (isset($ad->prices['apartments_1h'])) {
+                $ad->price_per_hour = $ad->prices['apartments_1h'];
+            }
+
+            // Маппинг цен за 2 часа
+            if (isset($ad->prices['apartments_2h'])) {
+                $ad->price_two_hours = $ad->prices['apartments_2h'];
+            }
+
+            // Маппинг цены выезда
+            if (isset($ad->prices['outcall_1h'])) {
+                $ad->outcall_price = $ad->prices['outcall_1h'];
+            }
+
+            // Маппинг экспресс цены
+            if (isset($ad->prices['apartments_express'])) {
+                $ad->express_price = $ad->prices['apartments_express'];
+            }
+
+            // Маппинг ночной цены
+            if (isset($ad->prices['apartments_night'])) {
+                $ad->price_night = $ad->prices['apartments_night'];
+            }
+
+            // Устанавливаем минимальную цену как базовую
+            $allPrices = array_filter([
+                $ad->prices['apartments_1h'] ?? null,
+                $ad->prices['apartments_2h'] ?? null,
+                $ad->prices['outcall_1h'] ?? null,
+                $ad->prices['outcall_2h'] ?? null,
+            ]);
+
+            if (!empty($allPrices)) {
+                $ad->price = min($allPrices);
+            }
+        }
+    }
 
     /**
      * Связь с пользователем
@@ -489,45 +587,6 @@ class Ad extends Model
     public function scopeArchived($query)
     {
         return $query->where('status', AdStatus::ARCHIVED);
-    }
-    
-    /**
-     * Boot метод для добавления событий модели
-     */
-    protected static function boot()
-    {
-        parent::boot();
-        
-        // Логируем изменения важных полей
-        static::updating(function ($ad) {
-            $watchedFields = ['service_provider', 'clients'];
-            $changes = [];
-            
-            foreach ($watchedFields as $field) {
-                if ($ad->isDirty($field)) {
-                    $changes[$field] = [
-                        'old' => $ad->getOriginal($field),
-                        'new' => $ad->getAttribute($field)
-                    ];
-                }
-            }
-            
-            if (!empty($changes)) {
-                Log::info('🟢 Ad Model: Изменения важных полей', [
-                    'ad_id' => $ad->id,
-                    'changes' => $changes
-                ]);
-            }
-        });
-        
-        // Логируем результат после обновления
-        static::updated(function ($ad) {
-            Log::info('🟢 Ad Model: Объявление обновлено в БД', [
-                'ad_id' => $ad->id,
-                'service_provider' => $ad->service_provider,
-                'clients' => $ad->clients
-            ]);
-        });
     }
 
     // ============= МЕТОДЫ ВЕРИФИКАЦИИ =============
