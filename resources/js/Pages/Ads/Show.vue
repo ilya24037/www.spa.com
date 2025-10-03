@@ -265,14 +265,6 @@ const props = defineProps({
     }
 })
 
-// 🔍 DEBUG: Log received props
-console.log('=== Show.vue DEBUG ===')
-console.log('Props.ad:', props.ad)
-console.log('Props.ad.data:', props.ad.data)
-console.log('Props.ad.photos:', props.ad.photos)
-console.log('Props.ad.data?.photos:', props.ad.data?.photos)
-console.log('=====================')
-
 // 🔧 FIX: Unwrap data if nested
 const ad = computed(() => props.ad.data || props.ad)
 
@@ -294,25 +286,18 @@ const adLocation = computed(() => {
 
 // Normalize photos format for PhotoGallery component
 const normalizedPhotos = computed(() => {
-    console.log('🔍 normalizedPhotos computed running...')
-    console.log('  ad.value.photos:', ad.value.photos)
-    console.log('  isArray:', Array.isArray(ad.value.photos))
-
     if (!ad.value.photos || !Array.isArray(ad.value.photos)) {
-        console.log('❌ Photos not array or empty, returning []')
         return []
     }
 
     const result = ad.value.photos.map(photo => {
         // If photo is already an object with url property, return as is
         if (typeof photo === 'object' && photo.url) {
-            console.log('✅ Photo is object with url:', photo.url)
             return photo
         }
 
         // If photo is a string (URL), convert to object format
         if (typeof photo === 'string') {
-            console.log('✅ Photo is string, converting:', photo)
             return {
                 url: photo,
                 preview: photo,
@@ -320,22 +305,15 @@ const normalizedPhotos = computed(() => {
             }
         }
 
-        console.log('⚠️ Photo unknown format:', photo)
         return null
     }).filter(Boolean)
 
-    console.log('📸 normalizedPhotos result:', result)
-    console.log('📸 normalizedPhotos count:', result.length)
     return result
 })
 
 // Normalize services for display
 const normalizedServices = computed(() => {
-    console.log('🔍 normalizedServices computed running...')
-    console.log('  ad.value.services:', ad.value.services)
-
     if (!ad.value.services) {
-        console.log('❌ No services, returning []')
         return []
     }
 
@@ -345,7 +323,6 @@ const normalizedServices = computed(() => {
         if (typeof items === 'object') {
             Object.entries(items).forEach(([serviceKey, serviceData]) => {
                 if (serviceData && serviceData.enabled) {
-                    console.log('✅ Found enabled service:', serviceKey, serviceData)
                     services.push({
                         name: serviceKey.replace(/_/g, ' '),
                         price: serviceData.price || null,
@@ -356,25 +333,18 @@ const normalizedServices = computed(() => {
         }
     })
 
-    console.log('💼 normalizedServices result:', services)
-    console.log('💼 normalizedServices count:', services.length)
     return services
 })
 
 // Normalize prices for display
 const normalizedPrices = computed(() => {
-    console.log('🔍 normalizedPrices computed running...')
-    console.log('  ad.value.prices:', ad.value.prices)
-
     if (!ad.value.prices) {
-        console.log('❌ No prices, returning []')
         return []
     }
 
     const prices = []
     Object.entries(ad.value.prices).forEach(([key, value]) => {
         if (value && value !== '0' && value !== 0) {
-            console.log('✅ Found price:', key, value)
             prices.push({
                 name: key.replace(/_/g, ' '),
                 value: value
@@ -382,8 +352,6 @@ const normalizedPrices = computed(() => {
         }
     })
 
-    console.log('💰 normalizedPrices result:', prices)
-    console.log('💰 normalizedPrices count:', prices.length)
     return prices
 })
 

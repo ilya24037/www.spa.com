@@ -41,33 +41,22 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
     resolve: async (name) => {
-        if (import.meta.env.DEV) {
-            console.log(`📄 [APP] Загружаю страницу: ${name}`);
-        }
-        
         try {
             const page = await resolvePageComponent(
                 `./Pages/${name}.vue`,
                 import.meta.glob('./Pages/**/*.vue')
             );
-            
-            if (import.meta.env.DEV) {
-                console.log(`✅ [APP] Страница ${name} загружена успешно`);
-            }
 
             // Применяем AppLayout только к страницам, которые его уже не имеют
             // Исключаем TestEncoding и страницы с явным AppLayout
             const pagesWithLayout = ['Home', 'Dashboard', 'TestEncoding'];
 
             if (pagesWithLayout.includes(name.split('/').pop())) {
-                if (import.meta.env.DEV) {
-                    console.log(`🎨 [APP] Применяю MainLayout для ${name}`);
-                }
                 // Импортируем единый FSD-лайаут динамически
                 const MainLayout = (await import('@/src/shared/layouts/MainLayout/MainLayout.vue')).default;
                 page.default.layout = MainLayout;
             }
-            
+
             return page;
         } catch (error) {
             console.error(`❌ [APP] Ошибка загрузки страницы ${name}:`, error);
@@ -75,60 +64,33 @@ createInertiaApp({
         }
     },
     setup({ el, App, props, plugin }) {
-        if (import.meta.env.DEV) {
-            console.log('🔧 [APP] Начало setup функции');
-            console.log('🏷️ [APP] Props:', props);
-            // НЕ выводим Element, так как он содержит все данные страницы
-            // console.log('🎯 [APP] Element:', el);
-        }
-        
         const pinia = createPinia();
         pinia.use(piniaPluginPersistedstate);
-        if (import.meta.env.DEV) {
-            console.log('🗂️ [APP] Pinia инициализирован');
-        }
-        
+
         // Глобальная инициализация Yandex Maps API для предотвращения конфликтов Web Workers
         if (!window.__YANDEX_MAPS_INITIALIZED) {
             window.__YANDEX_MAPS_INITIALIZED = true;
             // Предотвращаем множественные инициализации векторного движка
             window.__YANDEX_MAPS_SINGLETON = true;
-            if (import.meta.env.DEV) {
-                console.log('🗺️ [APP] Yandex Maps глобально инициализирован');
-            }
         }
-        
+
         try {
             // Запускаем предзагрузку критических компонентов
             preloadCriticalComponents();
-            if (import.meta.env.DEV) {
-                console.log('⚡ [APP] Критические компоненты предзагружены');
-            }
 
             // Предзагрузка компонентов на основе текущего маршрута
             if (props.initialPage?.component) {
                 const routeName = props.initialPage.url || '';
                 preloadRouteComponents(routeName);
-                if (import.meta.env.DEV) {
-                    console.log(`🚀 [APP] Компоненты для ${routeName} предзагружены`);
-                }
             }
         } catch (error) {
             console.error('⚠️ [APP] Ошибка предзагрузки компонентов:', error);
         }
-        
-        if (import.meta.env.DEV) {
-            console.log('🎭 [APP] Создание Vue приложения...');
-        }
-        
+
         const app = createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(pinia)
             .use(ZiggyVue, Ziggy)
-            
-        if (import.meta.env.DEV) {
-            console.log('🔌 [APP] Основные плагины подключены');
-        }
             
         try {
             // Глобальная инициализация vue-yandex-maps с корректными параметрами
@@ -139,21 +101,15 @@ createInertiaApp({
                 // Убираем неподдерживаемые параметры initializeOnMount и singleInstance
                 // Глобальная инициализация будет работать через window.__YANDEX_MAPS_SINGLETON
             }));
-            if (import.meta.env.DEV) {
-                console.log('🗺️ [APP] Vue-Yandex-Maps подключен');
-            }
         } catch (error) {
             console.error('❌ [APP] Ошибка подключения Yandex Maps:', error);
         }
-            
+
         try {
             // Регистрируем глобальные директивы
             app.directive('hover-lift', hoverLift);
             app.directive('fade-in', fadeIn);
             app.directive('ripple', ripple);
-            if (import.meta.env.DEV) {
-                console.log('📐 [APP] Директивы зарегистрированы');
-            }
         } catch (error) {
             console.error('❌ [APP] Ошибка регистрации директив:', error);
         }
@@ -177,34 +133,24 @@ createInertiaApp({
         app.config.errorHandler = (err, instance, info) => {
             console.error('❌ [VUE] Ошибка компонента:', err, info);
             console.error('🔍 [VUE] Instance:', instance);
-            
+
             try {
                 logger.error('Vue error:', err, info);
             } catch (loggerError) {
                 console.error('❌ [LOGGER] Ошибка логирования:', loggerError);
             }
-            
+
             // Отправка ошибок в систему мониторинга
             if (typeof window !== 'undefined' && window.performance) {
                 // Component error logging removed for production
             }
         };
-        
-        if (import.meta.env.DEV) {
-            console.log('🎯 [APP] Монтирование приложения...');
-        }
-        
+
         try {
             const mountedApp = app.mount(el);
-            if (import.meta.env.DEV) {
-                console.log('✅ [APP] Приложение успешно смонтировано!');
-            }
             return mountedApp;
         } catch (error) {
             console.error('❌ [APP] КРИТИЧЕСКАЯ ОШИБКА монтирования:', error);
-            if (import.meta.env.DEV) {
-                console.error('🔍 [APP] Element для монтирования:', el);
-            }
             throw error;
         }
     },
@@ -238,19 +184,15 @@ function fallbackCopyTextToClipboard(text) {
 
 // Глобальный обработчик ошибок JavaScript
 window.addEventListener('error', (event) => {
-    if (import.meta.env.DEV) {
-        console.error('❌ [GLOBAL] JavaScript ошибка:', event.error);
-        console.error('🔍 [GLOBAL] Файл:', event.filename);
-        console.error('🔍 [GLOBAL] Строка:', event.lineno, 'Колонка:', event.colno);
-        console.error('🔍 [GLOBAL] Message:', event.message);
-    }
+    console.error('❌ [GLOBAL] JavaScript ошибка:', event.error);
+    console.error('🔍 [GLOBAL] Файл:', event.filename);
+    console.error('🔍 [GLOBAL] Строка:', event.lineno, 'Колонка:', event.colno);
+    console.error('🔍 [GLOBAL] Message:', event.message);
 });
 
 // Обработчик необработанных Promise rejection
 window.addEventListener('unhandledrejection', (event) => {
-    if (import.meta.env.DEV) {
-        console.error('❌ [PROMISE] Необработанное отклонение Promise:', event.reason);
-        console.error('🔍 [PROMISE] Event:', event);
-    }
+    console.error('❌ [PROMISE] Необработанное отклонение Promise:', event.reason);
+    console.error('🔍 [PROMISE] Event:', event);
     event.preventDefault();
 });

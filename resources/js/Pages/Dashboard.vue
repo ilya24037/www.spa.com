@@ -755,10 +755,7 @@ const handleItemPublish = (itemId: number) => {
   // Обновляем страницу для отображения новых черновиков
   router.reload({
     only: ['profiles', 'counts'],
-    preserveScroll: true,
-    onSuccess: () => {
-      console.log('Страница обновлена после публикации черновика')
-    }
+    preserveScroll: true
   } as any)
 }
 

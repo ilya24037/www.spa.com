@@ -243,7 +243,6 @@ const mapSelectedMaster = ref<Master | null>(null)
 // Обработчик клика по маркеру на карте
 const handleMapMarkerClick = (master: any) => {
   mapSelectedMaster.value = master
-  console.log('🎯 [Home] Выбран мастер на карте:', master.name)
 }
 
 // Computed
