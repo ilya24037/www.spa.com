@@ -46,9 +46,9 @@
               <div v-if="normalizedPhotos.length > 0" class="bg-white rounded-lg p-6 shadow-sm">
                 <PhotoGallery
                   :photos="normalizedPhotos"
-                  mode="grid"
+                  layout="vertical"
                   title="Фотографии"
-                  :enable-lightbox="true"
+                  :show-thumbnails="true"
                 />
               </div>
 

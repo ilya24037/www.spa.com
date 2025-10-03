@@ -1,0 +1,202 @@
+app/Application/Http/Controllers/Booking/BookingController.php:127:                          $bookingWithRelations->master_profile_id === $user->getMasterProfile()->id
+app/Application/Http/Controllers/Booking/BookingSlotController.php:28:            'master_profile_id' => 'required|exists:master_profiles,id',
+app/Application/Http/Controllers/Booking/BookingSlotController.php:52:            $request->master_profile_id,
+app/Application/Http/Controllers/Booking/BookingSlotController.php:66:            $request->master_profile_id,
+app/Application/Http/Controllers/Booking/BookingSlotController.php:79:            'master_profile_id' => 'required|exists:master_profiles,id',
+app/Application/Http/Controllers/Booking/BookingSlotController.php:87:                $request->master_profile_id,
+app/Application/Http/Controllers/Booking/BookingSlotController.php:111:            'master_profile_id' => 'required|exists:master_profiles,id',
+app/Application/Http/Controllers/Booking/BookingSlotController.php:118:                $request->master_profile_id,
+app/Application/Http/Controllers/Booking/BookingSlotController.php:138:            'master_profile_id' => 'required|exists:master_profiles,id',
+app/Application/Http/Controllers/Booking/BookingSlotController.php:144:                $request->master_profile_id,
+app/Application/Http/Controllers/Booking/BookingSlotController.php:172:            'master_profile_id' => 'required|exists:master_profiles,id',
+app/Application/Http/Controllers/Booking/BookingSlotController.php:179:                $request->master_profile_id,
+app/Application/Http/Controllers/Media/MasterPhotoController.php:60:        if ($photo->master_profile_id !== $master->id) {
+app/Application/Http/Controllers/Media/MasterPhotoController.php:87:        if ($photo->master_profile_id !== $master->id) {
+app/Application/Http/Controllers/User/FavoritesController.php:47:                    } elseif ($favorite->master_profile_id) {
+app/Application/Http/Controllers/User/FavoritesController.php:63:                        'itemId' => $favorite->ad_id ?? $favorite->master_profile_id,
+app/Application/Http/Controllers/User/FavoritesController.php:104:                $existingFavorite->where('master_profile_id', $itemId);
+app/Application/Http/Controllers/User/FavoritesController.php:119:                $favoriteData['master_profile_id'] = $itemId;
+app/Application/Http/Controllers/User/FavoritesController.php:217:                $query->whereNotNull('master_profile_id');
+app/Application/Http/Controllers/User/FavoritesController.php:262:                        'item_id' => $favorite->ad_id ?? $favorite->master_profile_id,
+app/Application/Http/Requests/Booking/CreateBookingRequest.php:27:            'master_profile_id' => 'required|exists:master_profiles,id',
+app/Application/Http/Requests/Booking/CreateBookingRequest.php:53:            'master_profile_id.required' => 'Необходимо выбрать мастера',
+app/Application/Http/Requests/Booking/CreateBookingRequest.php:54:            'master_profile_id.exists' => 'Выбранный мастер не найден',
+app/Application/Http/Requests/Booking/CreateBookingRequest.php:130:            if ($this->has('master_profile_id') && $this->has('service_id')) {
+app/Application/Http/Requests/Booking/CreateBookingRequest.php:131:                $masterProfile = \App\Domain\Master\Models\MasterProfile::find($this->master_profile_id);
+app/Application/Http/Requests/Booking/CreateBookingRequest.php:156:            'master_profile_id' => $this->master_profile_id,
+app/Application/Services/Integration/ReviewValidator.php:85:        // Получаем master_profile_id для целевого пользователя
+app/Application/Services/Integration/ReviewValidator.php:96:            ->where('master_profile_id', $masterProfileId)
+app/Application/Services/Integration/UserReviewsReader.php:20:        // Получаем master_profile_id для пользователя
+app/Application/Services/Integration/UserReviewsReader.php:31:            ->where('master_profile_id', $masterProfileId)
+app/Application/Services/Integration/UserReviewsReader.php:65:            ->where('master_profile_id', $masterProfileId)
+app/Application/Services/Integration/UserReviewsReader.php:95:            ->where('master_profile_id', $masterProfileId)
+app/Application/Services/Integration/UserReviewsReader.php:116:            ->where('master_profile_id', $masterProfileId)
+app/Application/Services/Integration/UserReviewsReader.php:143:            ->where('master_profile_id', $masterProfileId)
+app/Application/Services/Integration/UserReviewsReader.php:187:            ->where('master_profile_id', $masterProfileId)
+app/Application/Services/Integration/UserReviewsReader.php:218:            ->where('master_profile_id', $masterProfileId)
+app/Application/Services/Integration/UserReviewsWriter.php:43:            // Получаем master_profile_id для целевого пользователя
+app/Application/Services/Integration/UserReviewsWriter.php:55:                'master_profile_id' => $masterProfileId,
+app/Application/Services/Integration/UserReviewsWriter.php:127:                // Получаем user_id мастера из master_profile_id
+app/Application/Services/Integration/UserReviewsWriter.php:129:                    ->where('id', $review->master_profile_id)
+app/Application/Services/Integration/UserReviewsWriter.php:179:                // Получаем user_id мастера из master_profile_id
+app/Application/Services/Integration/UserReviewsWriter.php:181:                    ->where('id', $review->master_profile_id)
+app/Console/Commands/AddMasterPhotos.php:104:                    'master_profile_id' => $masterId,
+app/Console/Commands/CreateMasterSchedules.php:45:                    'master_profile_id' => $master->id,
+app/Console/Commands/CreateMasterSchedules.php:58:                    'master_profile_id' => $master->id,
+app/Console/Commands/CreateMasterSchedules.php:71:                    'master_profile_id' => $master->id,
+app/Console/Commands/CreateMasterSchedules.php:84:                    'master_profile_id' => $master->id,
+app/Console/Commands/CreateMasterSchedules.php:97:                    'master_profile_id' => $master->id,
+app/Console/Commands/CreateMasterSchedules.php:110:                    'master_profile_id' => $master->id,
+app/Console/Commands/CreateMasterSchedules.php:123:                    'master_profile_id' => $master->id,
+app/Console/Commands/TestBookingSystem.php:101:                            'master_profile_id' => $master->id,
+app/Domain/Ad/DTOs/AdHomePageDTO.php:27:    public ?int $master_profile_id;
+app/Domain/Ad/DTOs/AdHomePageDTO.php:51:        $this->master_profile_id = $data['master_profile_id'] ?? null;
+app/Domain/Ad/DTOs/AdHomePageDTO.php:82:            'master_profile_id' => $this->master_profile_id,
+app/Domain/Ad/Services/AdProfileService.php:118:                'master_profile_id' => $masterProfile?->id,
+app/Domain/Ad/Services/AdTransformService.php:84:            'master_profile_id' => $masterProfile?->id,
+app/Domain/Booking/Actions/Services/BookingConfirmationValidator.php:31:                     ($booking->master_profile_id && $master->masterProfile && 
+app/Domain/Booking/Actions/Services/BookingConfirmationValidator.php:32:                      $booking->master_profile_id === $master->masterProfile->id) ||
+app/Domain/Booking/Handlers/BookingSearchHandler.php:86:                    $query->orWhere('master_profile_id', $user->masterProfile->id);
+app/Domain/Booking/Models/Booking.php:36:        'master_profile_id',
+app/Domain/Booking/Repositories/BookingRepository.php:302:        return $this->model->where('master_profile_id', $masterId)
+app/Domain/Booking/Repositories/BookingRepository.php:313:        return $this->model->where('master_profile_id', $masterId)
+app/Domain/Booking/Services/BookingService.php:50:                $data['master_profile_id'] ?? $data['master_id'],
+app/Domain/Booking/Services/BookingService.php:282:            $bookingData['master_profile_id'] = $masterId;
+app/Domain/Booking/Services/BookingValidationService.php:391:        $masterId = $data['master_profile_id'] ?? $data['master_id'] ?? 0;
+app/Domain/Master/Models/MasterLocation.php:19:        'master_profile_id', 'type', 'name', 'address', 'city', 'district',
+app/Domain/Master/Models/MasterMedia.php:21:        return $this->hasMany(\App\Domain\Media\Models\Photo::class, 'master_profile_id');
+app/Domain/Master/Models/MasterMedia.php:29:        return $this->hasMany(\App\Domain\Media\Models\Video::class, 'master_profile_id');
+app/Domain/Master/Models/MasterMedia.php:37:        return $this->hasOne(\App\Domain\Media\Models\Photo::class, 'master_profile_id')
+app/Domain/Master/Models/MasterMedia.php:46:        return $this->hasOne(\App\Domain\Media\Models\Video::class, 'master_profile_id')
+app/Domain/Master/Models/MasterMedia.php:66:        return \App\Domain\Media\Models\Photo::where('master_profile_id', $masterProfileId)
+app/Domain/Master/Models/MasterMedia.php:87:        return \App\Domain\Media\Models\Video::where('master_profile_id', $masterProfileId)
+app/Domain/Master/Models/MasterProfile.php:96:        return $this->hasMany(\App\Domain\Media\Models\Photo::class, 'master_profile_id');
+app/Domain/Master/Models/MasterProfile.php:109:        return $this->hasMany(\App\Domain\Media\Models\Video::class, 'master_profile_id');
+app/Domain/Master/Models/MasterProfile.php:114:        return $this->hasMany(\App\Domain\Master\Models\MasterService::class, 'master_profile_id');
+app/Domain/Master/Models/MasterSchedule.php:19:        return $this->hasMany(\App\Domain\Master\Models\Schedule::class, 'master_profile_id');
+app/Domain/Master/Models/MasterSchedule.php:27:        return $this->hasMany(\App\Domain\Master\Models\ScheduleException::class, 'master_profile_id');
+app/Domain/Master/Models/MasterSchedule.php:43:        $schedule = \App\Domain\Master\Models\Schedule::where('master_profile_id', $masterProfileId)
+app/Domain/Master/Models/MasterSchedule.php:50:            return \App\Domain\Master\Models\WorkZone::where('master_profile_id', $masterProfileId)
+app/Domain/Master/Models/MasterSchedule.php:63:        return \App\Domain\Master\Models\Schedule::where('master_profile_id', $masterProfileId)
+app/Domain/Master/Models/MasterSchedule.php:73:        return \App\Domain\Master\Models\ScheduleException::where('master_profile_id', $masterProfileId)
+app/Domain/Master/Models/MasterService.php:19:        'master_profile_id', 'name', 'description', 'price', 'price_to',
+app/Domain/Master/Models/MasterSubscription.php:18: * @property int $master_profile_id
+app/Domain/Master/Models/MasterSubscription.php:44:        'master_profile_id',
+app/Domain/Master/Models/Schedule.php:15:        'master_profile_id', 'day_of_week', 'start_time', 'end_time',
+app/Domain/Master/Models/WorkZone.php:16:        'master_profile_id', 'city', 'district', 'metro_station',
+app/Domain/Master/Repositories/MasterQueryRepository.php:271:                $query->leftJoin('master_service_prices', 'master_profiles.id', '=', 'master_service_prices.master_profile_id')
+app/Domain/Master/Repositories/ScheduleRepository.php:50:        $query = MasterSchedule::where('master_profile_id', $masterId);
+app/Domain/Master/Repositories/ScheduleRepository.php:64:        return MasterSchedule::where('master_profile_id', $masterId)
+app/Domain/Master/Repositories/ScheduleRepository.php:75:        return MasterSchedule::where('master_profile_id', $masterId)->delete();
+app/Domain/Master/Repositories/ScheduleRepository.php:92:        return MasterSchedule::where('master_profile_id', $masterId)
+app/Domain/Master/Repositories/ScheduleRepository.php:118:                $scheduleData['master_profile_id'] = $masterId;
+app/Domain/Master/Services/MasterSearchService.php:190:                $query->leftJoin('master_services', 'master_profiles.id', '=', 'master_services.master_profile_id')
+app/Domain/Master/Services/MasterSearchService.php:194:                $query->leftJoin('master_services', 'master_profiles.id', '=', 'master_services.master_profile_id')
+app/Domain/Master/Services/ScheduleService.php:50:        $scheduleData['master_profile_id'] = $masterId;
+app/Domain/Master/Services/ScheduleService.php:72:        $this->cacheManager->clearMasterSchedule($schedule->master_profile_id);
+app/Domain/Master/Services/ScheduleService.php:76:            'master_id' => $schedule->master_profile_id
+app/Domain/Master/Services/ScheduleService.php:220:        $this->cacheManager->clearMasterSchedule($schedule->master_profile_id);
+app/Domain/Master/Services/ScheduleService.php:224:            'master_id' => $schedule->master_profile_id,
+app/Domain/Master/Services/ScheduleService.php:242:        $masterId = $schedule->master_profile_id;
+app/Domain/Master/Services/SubscriptionManager.php:32:            'master_profile_id' => $master->id,
+app/Domain/Master/Services/SubscriptionTrialService.php:40:            'master_profile_id' => $master->id,
+app/Domain/Media/Models/Photo.php:19:        'master_profile_id',
+app/Domain/Media/Models/Video.php:19:        'master_profile_id',
+app/Domain/Media/Repositories/PhotoRepository.php:42:        return $this->model->where('master_profile_id', $masterProfileId)
+app/Domain/Media/Repositories/PhotoRepository.php:52:        return $this->model->where('master_profile_id', $masterProfileId)
+app/Domain/Media/Repositories/PhotoRepository.php:63:            ->where('master_profile_id', $masterProfileId)
+app/Domain/Media/Repositories/PhotoRepository.php:72:        return $this->model->where('master_profile_id', $masterProfileId)
+app/Domain/Media/Repositories/PhotoRepository.php:87:                ->where('master_profile_id', $masterProfileId)
+app/Domain/Media/Repositories/PhotoRepository.php:100:                ->where('master_profile_id', $masterProfileId)
+app/Domain/Media/Repositories/PhotoRepository.php:161:            ->where('master_profile_id', $masterProfileId)
+app/Domain/Media/Repositories/PhotoRepository.php:170:        return $this->model->where('master_profile_id', $masterProfileId)->count();
+app/Domain/Media/Repositories/PhotoRepository.php:178:        $maxOrder = $this->model->where('master_profile_id', $masterProfileId)
+app/Domain/Media/Repositories/VideoRepository.php:42:        return $this->model->where('master_profile_id', $masterProfileId)
+app/Domain/Media/Repositories/VideoRepository.php:53:            ->where('master_profile_id', $masterProfileId)
+app/Domain/Media/Repositories/VideoRepository.php:65:                ->where('master_profile_id', $masterProfileId)
+app/Domain/Media/Repositories/VideoRepository.php:115:        return $this->model->where('master_profile_id', $masterProfileId)->count();
+app/Domain/Media/Repositories/VideoRepository.php:123:        return $this->model->where('master_profile_id', $masterProfileId)
+app/Domain/Media/Repositories/VideoRepository.php:132:        return $this->model->where('master_profile_id', $masterProfileId)
+app/Domain/Media/Repositories/VideoRepository.php:144:            ->where('master_profile_id', $masterProfileId)
+app/Domain/Media/Services/ImageProcessor.php:70:            'master_profile_id' => $master->id,
+app/Domain/Media/Services/ImageProcessor.php:125:        $this->photoRepository->deletePhoto($photo->id, $photo->master_profile_id);
+app/Domain/Media/Services/MediaFactoryService.php:45:            $photos = \App\Domain\Media\Models\Photo::where('master_profile_id', $entityId)->get();
+app/Domain/Media/Services/MediaFactoryService.php:46:            $videos = \App\Domain\Media\Models\Video::where('master_profile_id', $entityId)->get();
+app/Domain/Media/Services/VideoProcessor.php:69:            'master_profile_id' => $master->id,
+app/Domain/Media/Services/VideoProcessor.php:100:        $this->videoRepository->deleteVideo($video->id, $video->master_profile_id);
+app/Domain/Review/Services/RatingCalculator.php:40:                'master_profile_id' => $masterProfileId,
+app/Domain/Review/Services/RatingCalculator.php:53:                'master_profile_id' => $masterProfileId,
+app/Domain/Review/Services/RatingCalculator.php:125:                        'master_profile_id' => $master->id,
+app/Domain/Service/Models/Service.php:25:        'master_profile_id',
+app/Domain/User/Models/UserFavorite.php:17:        'master_profile_id',
+app/Filament/Pages/Reports.php:189:            ->join('bookings', 'master_profiles.id', '=', 'bookings.master_profile_id')
+app/Infrastructure/Adapters/BookingServiceAdapter.php:49:            // Находим master_id по master_profile_id (legacy)
+app/Infrastructure/Adapters/BookingServiceAdapter.php:121:        // Конвертация master_profile_id в master_id
+app/Infrastructure/Adapters/BookingServiceAdapter.php:123:        if (!$masterId && isset($data['master_profile_id'])) {
+app/Infrastructure/Adapters/BookingServiceAdapter.php:124:            $masterProfile = \App\Models\MasterProfile::find($data['master_profile_id']);
+app/Infrastructure/Cache/QueryOptimizer.php:46:                'photos:id,master_profile_id,path,is_main',
+app/Infrastructure/Cache/QueryOptimizer.php:54:                'photos:id,master_profile_id,path,is_main,order',
+app/Infrastructure/Cache/QueryOptimizer.php:55:                'videos:id,master_profile_id,path,thumbnail',
+app/Infrastructure/Cache/QueryOptimizer.php:218:                'INDEX(master_profile_id, status)'
+app/Infrastructure/Cache/QueryOptimizer.php:229:                'INDEX(master_profile_id, status)',
+app/Infrastructure/Cache/Strategies/AdCacheStrategy.php:38:            if ($identifier->master_profile_id) {
+app/Infrastructure/Cache/Strategies/AdCacheStrategy.php:39:                $tags[] = "master:{$identifier->master_profile_id}";
+app/Infrastructure/Handlers/UserProfile/ProfileSyncHandler.php:105:                'master_profile_id' => $masterProfile->id,
+app/Infrastructure/Listeners/Master/HandleMasterProfileCreated.php:77:                    'master_profile_id' => $masterProfile->id,
+app/Infrastructure/Listeners/Master/HandleMasterProfileCreated.php:169:            'master_profile_id' => $masterProfile->id,
+app/Infrastructure/Listeners/Master/HandleMasterProfileCreated.php:226:                'master_profile_id' => $masterProfile->id,
+app/Infrastructure/Listeners/Master/HandleMasterProfileCreated.php:253:                    'master_profile_id' => $masterProfile->id,
+app/Infrastructure/Listeners/Master/HandleMasterProfileCreated.php:281:                    'master_profile_id' => $masterProfile->id,
+app/Infrastructure/Listeners/Master/HandleMasterProfileCreated.php:306:                'master_profile_id' => $masterProfile->id,
+app/Infrastructure/Listeners/Master/HandleMasterProfileCreated.php:311:                'master_profile_id' => $masterProfile->id,
+app/Infrastructure/Listeners/Master/HandleMasterProfileCreated.php:345:                'master_profile_id' => $masterProfile->id,
+app/Infrastructure/Listeners/Master/HandleMasterProfileCreated.php:350:                'master_profile_id' => $masterProfile->id,
+app/Infrastructure/Listeners/Master/HandleMasterProfileUpdated.php:86:                    'master_profile_id' => $event->masterProfileId,
+app/Infrastructure/Listeners/Master/HandleMasterProfileUpdated.php:94:                    'master_profile_id' => $event->masterProfileId,
+app/Infrastructure/Listeners/Master/HandleMasterProfileUpdated.php:150:                'master_profile_id' => $masterProfile->id,
+app/Infrastructure/Listeners/Master/HandleMasterProfileUpdated.php:162:            'master_profile_id' => $masterProfile->id,
+app/Infrastructure/Listeners/Master/HandleMasterProfileUpdated.php:198:                'master_profile_id' => $masterProfile->id,
+app/Infrastructure/Listeners/Master/HandleMasterStatusChanged.php:84:                    'master_profile_id' => $event->masterProfileId,
+app/Infrastructure/Listeners/Master/HandleMasterStatusChanged.php:94:                    'master_profile_id' => $event->masterProfileId,
+app/Infrastructure/Listeners/Master/HandleMasterStatusChanged.php:138:                'master_profile_id' => $masterProfile->id,
+app/Infrastructure/Listeners/Master/HandleMasterStatusChanged.php:151:            'master_profile_id' => $masterProfile->id,
+app/Infrastructure/Listeners/Master/Processors/ProfileMediaProcessor.php:52:                    'master_profile_id' => $masterProfile->id,
+app/Infrastructure/Listeners/Master/Services/NotificationHandler.php:59:                'master_profile_id' => $masterProfile->id,
+app/Infrastructure/Listeners/Master/Services/StatusActionHandler.php:67:                'master_profile_id' => $masterProfile->id,
+app/Infrastructure/Listeners/Master/Services/StatusActionHandler.php:101:            'master_profile_id' => $masterProfile->id,
+app/Infrastructure/Listeners/Master/Services/StatusActionHandler.php:119:            'master_profile_id' => $masterProfile->id,
+app/Infrastructure/Listeners/Master/Services/StatusActionHandler.php:134:            'master_profile_id' => $masterProfile->id,
+app/Infrastructure/Listeners/Review/UpdateMasterRating.php:51:                'master_profile_id' => $review->reviewable_id,
+database/migrations/2025_08_19_094959_create_master_services_table.php:16:            $table->unsignedBigInteger('master_profile_id');
+database/migrations/2025_08_19_094959_create_master_services_table.php:35:            $table->index('master_profile_id');
+database/migrations/2025_08_19_094959_create_master_services_table.php:37:            $table->index(['master_profile_id', 'is_active']);
+database/migrations/2025_08_19_094959_create_master_services_table.php:44:            $table->foreign('master_profile_id')
+database/migrations/2025_08_19_101836_create_master_photos_table.php:16:            $table->unsignedBigInteger('master_profile_id');
+database/migrations/2025_08_19_101836_create_master_photos_table.php:28:            $table->index('master_profile_id');
+database/migrations/2025_08_19_101836_create_master_photos_table.php:34:            $table->foreign('master_profile_id')
+database/migrations/2025_08_19_101900_create_master_videos_table.php:16:            $table->unsignedBigInteger('master_profile_id');
+database/migrations/2025_08_19_101900_create_master_videos_table.php:30:            $table->index('master_profile_id');
+database/migrations/2025_08_19_101900_create_master_videos_table.php:36:            $table->foreign('master_profile_id')
+database/migrations/2025_08_19_103622_create_work_zones_table.php:16:            $table->unsignedBigInteger('master_profile_id');
+database/migrations/2025_08_19_103622_create_work_zones_table.php:32:            $table->index('master_profile_id');
+database/migrations/2025_08_19_103622_create_work_zones_table.php:40:            $table->foreign('master_profile_id')
+database/migrations/2025_08_19_103658_create_schedules_table.php:16:            $table->unsignedBigInteger('master_profile_id');
+database/migrations/2025_08_19_103658_create_schedules_table.php:30:            $table->index('master_profile_id');
+database/migrations/2025_08_19_103658_create_schedules_table.php:33:            $table->index(['master_profile_id', 'day_of_week']);
+database/migrations/2025_08_19_103658_create_schedules_table.php:36:            $table->foreign('master_profile_id')
+database/migrations/2025_08_19_103731_create_master_subscriptions_table.php:16:            $table->unsignedBigInteger('master_profile_id');
+database/migrations/2025_08_19_103731_create_master_subscriptions_table.php:34:            $table->index('master_profile_id');
+database/migrations/2025_08_19_103731_create_master_subscriptions_table.php:38:            $table->index(['master_profile_id', 'status']);
+database/migrations/2025_08_19_103731_create_master_subscriptions_table.php:41:            $table->foreign('master_profile_id')
+database/migrations/2025_08_19_103805_create_master_locations_table.php:16:            $table->unsignedBigInteger('master_profile_id');
+database/migrations/2025_08_19_103805_create_master_locations_table.php:36:            $table->index('master_profile_id');
+database/migrations/2025_08_19_103805_create_master_locations_table.php:44:            $table->index(['master_profile_id', 'type']);
+database/migrations/2025_08_19_103805_create_master_locations_table.php:47:            $table->foreign('master_profile_id')
+database/seeders/MasterPhotosSeeder.php:30:            DB::table('master_photos')->where('master_profile_id', $master->id)->delete();
+database/seeders/MasterPhotosSeeder.php:68:                    'master_profile_id' => $master->id,
+database/seeders/MasterPhotosSeeder.php:85:            DB::table('master_videos')->where('master_profile_id', $master->id)->delete();
+database/seeders/MasterPhotosSeeder.php:88:                'master_profile_id' => $master->id,
+database/seeders/MasterSeeder.php:160:            Service::where('master_profile_id', $masterProfile->id)->delete();
+database/seeders/MasterSeeder.php:170:        'master_profile_id' => $masterProfile->id,
+database/seeders/MasterServicesSeeder.php:75:                    ->where('master_profile_id', $master->id)
+database/seeders/MasterServicesSeeder.php:81:                        'master_profile_id' => $master->id,
