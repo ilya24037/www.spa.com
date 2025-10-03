@@ -263,14 +263,6 @@ class Ad extends Model
     }
 
     /**
-     * Связь с профилем мастера (у одного пользователя может быть один профиль)
-     */
-    public function masterProfile(): BelongsTo
-    {
-        return $this->belongsTo(\App\Domain\Master\Models\MasterProfile::class, 'user_id', 'user_id');
-    }
-
-    /**
      * Получить читаемый статус объявления
      */
     public function getReadableStatusAttribute()

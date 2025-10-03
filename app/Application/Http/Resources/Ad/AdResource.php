@@ -153,8 +153,7 @@ class AdResource extends JsonResource
             
             // Связанные данные (загружаются при необходимости)
             'user' => new UserResource($this->whenLoaded('user')),
-            'master_profile' => $this->whenLoaded('masterProfile'),
-            
+
             // Вычисляемые поля
             'is_active' => $this->isActive(),
             'is_expired' => $this->isExpired(),

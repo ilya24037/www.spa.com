@@ -33,7 +33,6 @@ class Booking extends Model
         'booking_number',
         'client_id',
         'master_id',
-        'master_profile_id',
         'service_id',
         'type',
         'status',
@@ -132,11 +131,6 @@ class Booking extends Model
     public function master(): BelongsTo
     {
         return $this->belongsTo(User::class, 'master_id');
-    }
-
-    public function masterProfile(): BelongsTo
-    {
-        return $this->belongsTo(MasterProfile::class);
     }
 
     public function service(): BelongsTo
