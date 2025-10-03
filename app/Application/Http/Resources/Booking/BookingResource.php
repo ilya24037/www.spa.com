@@ -5,7 +5,6 @@ namespace App\Application\Http\Resources\Booking;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Application\Http\Resources\User\UserResource;
-use App\Application\Http\Resources\Master\MasterResource;
 use App\Application\Http\Resources\Service\ServiceResource;
 use App\Application\Http\Resources\Payment\PaymentResource;
 
@@ -102,8 +101,7 @@ class BookingResource extends JsonResource
             
             // Связанные данные (загружаются при необходимости)
             'client' => new UserResource($this->whenLoaded('client')),
-            'master' => new UserResource($this->whenLoaded('master')),
-            'master_profile' => new MasterResource($this->whenLoaded('masterProfile')),
+            'user' => new UserResource($this->whenLoaded('master')),
             'service' => new ServiceResource($this->whenLoaded('service')),
             'payments' => PaymentResource::collection($this->whenLoaded('payments')),
             'review' => $this->whenLoaded('review'),

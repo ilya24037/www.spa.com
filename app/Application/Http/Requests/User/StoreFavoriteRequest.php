@@ -20,7 +20,7 @@ class StoreFavoriteRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'type' => 'required|string|in:master,ad,service',
+            'type' => 'required|string|in:user,ad,service',
             'item_id' => 'required|integer|min:1',
             'item_data' => 'nullable|array'
         ];

@@ -24,7 +24,7 @@ class CreateBookingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'master_profile_id' => 'required|exists:master_profiles,id',
+            'user_id' => 'required|exists:users,id',
             'service_id' => 'required|exists:services,id',
             'booking_date' => 'required|date|after_or_equal:today',
             'booking_time' => 'required|date_format:H:i',
@@ -50,8 +50,8 @@ class CreateBookingRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'master_profile_id.required' => 'Необходимо выбрать мастера',
-            'master_profile_id.exists' => 'Выбранный мастер не найден',
+            'user_id.required' => 'Необходимо выбрать мастера',
+            'user_id.exists' => 'Выбранный мастер не найден',
             'service_id.required' => 'Необходимо выбрать услугу',
             'service_id.exists' => 'Выбранная услуга не найдена',
             'booking_date.required' => 'Необходимо выбрать дату',
@@ -127,13 +127,13 @@ class CreateBookingRequest extends FormRequest
             }
 
             // Проверяем, что услуга принадлежит выбранному мастеру
-            if ($this->has('master_profile_id') && $this->has('service_id')) {
-                $masterProfile = \App\Domain\Master\Models\MasterProfile::find($this->master_profile_id);
-                if ($masterProfile) {
-                    $serviceExists = $masterProfile->services()
+            if ($this->has('user_id') && $this->has('service_id')) {
+                $user = \App\Domain\User\Models\User::find($this->user_id);
+                if ($user && $user->role === 'master') {
+                    $serviceExists = $user->services()
                         ->where('id', $this->service_id)
                         ->exists();
-                    
+
                     if (!$serviceExists) {
                         $validator->errors()->add('service_id', 'Выбранная услуга недоступна у этого мастера');
                     }
@@ -153,7 +153,7 @@ class CreateBookingRequest extends FormRequest
     public function getBookingData(): array
     {
         return [
-            'master_profile_id' => $this->master_profile_id,
+            'master_id' => $this->user_id,
             'service_id' => $this->service_id,
             'booking_date' => $this->booking_date,
             'booking_time' => $this->booking_time,
