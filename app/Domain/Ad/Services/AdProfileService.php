@@ -26,7 +26,7 @@ class AdProfileService
         }
 
         $ads = $query
-            ->with('user.masterProfile') // Загружаем связь с профилем мастера
+            ->with('user') // Загружаем данные пользователя
             ->select([
                 'id', 'title', 'status', 'price', 'address', 'travel_area',
                 'description', 'phone', 'contact_method',
@@ -87,11 +87,11 @@ class AdProfileService
             $mainImage = $this->extractMainImage($ad);
             $photosCount = $this->getPhotosCount($ad);
             
-            // Получаем данные о профиле мастера
-            $masterProfile = $ad->user?->masterProfile;
-            // Используем slug из профиля мастера или генерируем из title
-            $masterSlug = $masterProfile?->slug ?: ($masterProfile ? Str::slug($ad->title) : null);
-            
+            // Получаем данные пользователя
+            $user = $ad->user;
+            // Используем slug пользователя или генерируем fallback
+            $userSlug = $user?->slug ?: ($user ? 'user-' . $user->id : null);
+
             return [
                 'id' => $ad->id,
                 'slug' => Str::slug($ad->title),
@@ -114,10 +114,10 @@ class AdProfileService
                 'new_messages_count' => 0,
                 'services_list' => '', // Специальность больше не используется
                 'full_address' => $ad->address ?? 'Адрес не указан',
-                // Добавляем данные о мастере для перехода на страницу мастера
-                'master_profile_id' => $masterProfile?->id,
-                'master_slug' => $masterSlug,
-                'has_master_profile' => $masterProfile !== null,
+                // Данные пользователя для навигации
+                'user_id' => $user?->id,
+                'user_slug' => $userSlug,
+                'has_user' => $user !== null,
                 'rejection_reason' => null,
                 'bookings_count' => 0,
                 'reviews_count' => 0,

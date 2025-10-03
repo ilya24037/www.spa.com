@@ -388,8 +388,8 @@ class BookingValidationService
     {
         $bookingDate = $data['booking_date'] ?? Carbon::parse($data['start_time'] ?? 'now')->format('Y-m-d');
         $bookingTime = $data['booking_time'] ?? Carbon::parse($data['start_time'] ?? 'now')->format('H:i');
-        $masterId = $data['master_profile_id'] ?? $data['master_id'] ?? 0;
-        
+        $masterId = $data['master_id'] ?? 0;
+
         $this->validateTimeSlot($masterId, $bookingDate, $bookingTime, $data['service_id'] ?? 0);
         
         // Дополнительная валидация в зависимости от типа
