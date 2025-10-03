@@ -1,0 +1,65 @@
+
+
+    
+
+<!DOCTYPE html><html lang="ru"><head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1">
+  <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+  <link rel="stylesheet" href="https://cdn1.ozone.ru/s3/abt-complaints/static/v1/common.css">
+  <title>Antibot Challenge Page</title>
+  <link rel="stylesheet" href="https://cdn2.ozone.ru/s3/abt-challenge/style_v26.css">
+</head>
+
+<body>
+<noscript>
+  <div class="container">
+    <div class="message">
+      <div class="variant">
+        <h2 class="title">Пожалуйста, включите JavaScript для продолжения</h2>
+        <span class="subtitle">Нам нужно убедиться, что вы не робот.</span>
+      </div>
+      <div class="variant" lang="en">
+        <h2 class="title">Please, enable JavaScript to continue</h2>
+        <span class="subtitle">We need to make sure that you are not a robot.</span>
+      </div>
+    </div>
+    <div class="details">
+      <span class="details-text"><b>ID:</b> fab_chlg_20250813051208_01K2GXFG83XQ3Z2BYT11MCV2SQ</span>,
+      <span class="details-text"><b>IP:</b> 46.246.9.220</span>,
+      <span class="details-text">Wednesday, 13-Aug-2025 05:12:08 UTC</span>
+    </div>
+  </div>
+</noscript>
+<div class="container">
+  <div class="content">
+    <input id="challenge" type="hidden" value="wwkMjYsZmFiX2NobGdfMjAyNTA4MTMwNTEyMDhfMDFLMkdYRkc4M1hRM1oyQllUMTFNQ1YyU1Esc2M6UlprWm4wQjJ5dEIxN0J6bGJRYUxvdzo2dy1sVnpBWU1vTTJiYmZSM3FJMjBLNGpCYlphU2N5a05hdi03dllfel9iaTZIWTN2RGowX2VnZVItMVRTRHpLWEdFa3dKRHM2UlFmYUp5aVN5YktWV0FWUzVfOUlDUDhhV0k2dDRjOEtKNVgyTFZLeHJ1d01NVHl5cVB3Si1jSEZhQWdrTEtIMXBkbElnRHlvWWxFejRMQmtNeVBRUU9RNVQxY0FuUERqT005OTh2T2RkVTlvSUxtTW10dm1wVk1Qczl3Yk8tbzE0cExQRkpMWWpLSkQ1XzhCb1dhc1JEbldtVHJlU0ZmUTF5R0stcG1pSmZ4X21RWWpEQnJsbDA4Z0QzZ3h2WEMwMTRUcWZjWXVlYXFkQ0F2Z0Rpb2trZi1iVC1UY3F3cHhqNnUwQ1RRa0lfYm5KN3U3YXpiMW9mbXZpQ1Nla29TNnFOWHY3LWFrNV9TWDl2c08xWkwwSjVCOUQzX0JaUmN2dHY5ckg1alIyOGJIWUN3V21BYXlpYndmQTUwb3dwdnBEdUtXRlZOVUFXRTFkUlJmS2wtMkRUZ04wQlBHdjZZeXI2d0pIVGJVbkhnTzRENDdsTGV1MXc4UElaSkl0Tm1RdUJmZlc0WFVwb3dJcE5fWjQtSWROV3RvRmtoYTVqaVJndGs4dFZ5Z3ZCbmdXRTlROC1VTEx2ck1ENk80R2YxWjVXbXFiM0ZwM3JKOWpWUVJPelgxQjFrOFNHU19GZGtHY3hvX3k1bUdjM000bXNWMktldG1nRHBUeDlOQ3JYdVBLRXN1MHRLZU90TTFodjJfZUhQcXBQaU1wYTFxYzcwcDFqTmlOOWI3dUd3R25ueFNEVHlvMUdESFd4blBxcm5OSWh0X1JTb2p3TWVHNUVqc3BmWlZ2d3VpMU5HSFBrR21FN3ZWNHFXTFVIOWtNYWt0M3hjRV9TZlhpM3N6MDVsQ3RyNF9JQTFINU1zdmJwR0RyTkNOVlB4SEJIbGFLQm9OWjZWOUlvVTVFLU9lcmoza2JFV21nY3QtVW9IQXhBaWZlQ0FaQlRfZ1pKWV9Vb1FBS2pvbURTbXhvODM5TldDZWtudkxNQWdwZUhlTC1wc0ROeE5iU1BwMVBYZnExNlFyOEZQN1RLVG5ONU9XXzBBYnk3ZFBZbV9mbHJxS01PSktzZTBGcENpYjlxR08waFFYbEoyM1Z6M3dRRklSUDFhbVpXeUI2WTJLZ3dyRXpoZXJzUk42cXlXQ0RDTXV1cm1DcV8yVXRqRjdUQzc3SHBEOVpzWUwtTk5hSmVxR1NDdEVIZW1vZy1rRGhtS3FEeEh5Z2poS052WFhnLXR1XzE0X2c1d2gtbXcyNTF5QWNTTUJMNWNfZ0ZPOFZEOFA1d3hGRmNTM3BXTGphWWJzaDVJeDNDb2VqbWoxV0dLWG5nMUJCeVdmRWxoSGNpNzNpR1d0NzlBN2VXaHdjZ21CcnpBQkF1ay01TWpaMmJSRi1DLUVaSUZQc1h3d0xjWXdZOHc0TUFGZHNqRm9jTzJhbTZaNDRjWlN5WVU4MnF3R1ZvQ0FuajRSMFQ0NnJ6NklVblE2UDZENG81dWF5Ul9RZEFrRXJMTXV3TUwyTlVoc0hpTmpZWE11VXpiZlJFd2c4M3hLZXNmaUIwNzItX282dW5CbjRqQlVmeUoxYk9zSkRoeDRDOE12U0o2dmhZMmZzbF94eFVKTWJkNTdFVFFDRnlkVFB0c19wUDJ5bjc5TXc4b2RuaXhpOVJsei13OHJZdDFPbkR3UkpBLTlRWjR5UktSLXp4N0FvNXpObHJ1TlJGSmNxVW1pUVVMUHNnVGFRZ1pBbF9FXzFCeVZJaWtrbWJyWjc1aTM0ci1KalBhYjhBWEZXWlFHU0FDR25FV0lJS3BvSThMTzQzeGgyMUxTZHlxUHU0N3I5LUU4aFNEUkpmNEkzdVN0YUZ3Y3JSRTlDbUUzTXV4dFdiSU5qUlg2VDVEeTh0Y1hULVA5a082UFN3cmxTOFM3TTNUcjAwdVFDSjUwOXdvejlxVVRtQ3pGZ1hhN3BGakNRSW9RREpIZk16X01WNUhSQVFodWdYZjRjQ3pmSlQ3QVBvMExxb2hGZFBUV055ZWU3UGVKeTc3dXFudFVMNkRwQnU5YXNrcGgyNkF2MzZHS21tZEZVZ2hXWjVhQ0puQnEtSXAyOVlUZWlELWc4WmgyWkVCak9HN1p2WGFHWXc2VzhTS21GX2pzaGdnZFAyMllWYlJjWnNEaEp3emRZVjVhX21OY3VKd3cyd2hEZ3V2dXlsSlZzLXdoM2E3dFg4X0dyQzlXblM0dHN4b1pGUnVWUndrVHhiblQwTkZ6b2dxTXotOTcwT3EyVk9fX1NjNWRIWEpfZlpVLUdBSV93eF9JdHgxNEVjV09NQ1ctbEpMNXdMUW1aRHNyMm9Tcy1FU2xiN2lQSGIzSWhZYkRLcWdSeVFjenF1ZXZtU2JOOVo0U3NuRl9yeDRaS3ZuVHRkSEF5d1ZIdWxTZG95bnJ1MXZoV240VjRGVndoU25qLVJjeEJVNjR1WjNyOThYM19UYXQxOHNnZkhWdFFyMDdxT2Q4a2RqVVpQUlJVdzlvN3VkZVZOZ0hWLXJ2Tzlyc0Q4aGFrdkNFcGZjNlBJMDZldktkSVdGaUxmdlhvaXg4b1lQc25PSldCX1pEcDIxTHgxSHo5YjNRQlIzTGdra0hUeFlNSTEwTDhDS3h3TkxibkpERzBkOW5xRG5Yd3ZTS1VqS2FPQjJJWGZyX0d2ZzFLOUZabTBUUVhCRWNianJfUkRJQS00YVoxSVVPaFFaVV8xRDhpbVRoUEZ4eGowQTFPLWpMMUZYY3luUDFqUm5xTGxKTGJ4T2NnWFVlTi1Kdk5qUEd3VUk0R0pSV093bU1lS09GcGI1WFZHcEg5VUc2TmhpUGt4MWhjNFhFdnJoeUVnZFA1YlZBYkwyZkZoNEpUQlpuRzB1cHpFVlFFa2VJMXJNMEZ1NTV3VGhRZFAyczRqV0hRYjJmQVk1WE1ad3VUZm1GUW5PelVaSldRLWdNYVUtV1B0MTZSV3lFZkhyN1RBRHNKZFlRTGlrMDgyWTQwdTY4aUxkbzMzTEdORDVDb0pfQ0VZXzV3ZGZSb3pBXzhFejhCVXUyTktLOFBNakgzc2VBQnBHNHNrWHc4bG4ycVhFT1d3YzREalFNRm5aYWoyOFA2dUZ4RnBIYjhwdkR3UnZpRFRmQjNyOHc0V2NpekhGYUhPR0RzaEZYZ3ZwUEF1RlpURGNZelRnTEZPVkpBQlZEZ1J3UUZDM1pJY0VaM0lZX01qM19xaTdBN0Rnb250Q2RMM1FiQW9ia0tnV0JjVTA4U2ZJbm9MVkJOVUlITUVITkRkVU5ZZjluMTJWWlRKRjB2ZUxzTmpVTGpmRWNNWURIbnlHdGs4NlltRERydHA3azI2S0ZnaUJLSnNBQngxSGdKRTcwSWZtMVJtLUc5amY0WE16em5wajNBb1QwckRFV1FzMHh5RVJNQkFmSERpN2dKWWVXNFA0N3RiWXVJSm53dkJUWS1ZQ2d2Q2J4Nk1JWDEwUEJYVEJ3b2RGWTF2U0N2WlFqN0RNMDJ0TVQ4a1VBWXVIbVdEeXJFendQWVZla2NEN1JxRFhpNmZJcFUxaGxoRlNpa2JNdl9hSmk0RGxfR01WaEZaT2FiOG1OUDZicm5ERExDTDYtRTJJaGVhSXVNdDVrUFRSemltUHlBcEtkV2FlUUE4SE9QRWpaMTZ6WUNIcm9iVk5Db1pLRm85dloyRm1PQVFyMU5pVWREOXpLdlNvQjUwdko4aVo5YjFhVGlaRjhuYnlrT0JLc0tsXzl5RGlEbjhKS1lqTW1YMHZDeVJVaFRXanJ3MmVCX25zZ0FvZ3h4TWlteTRsZHJ1Mm5aRFVINklUNXVXUS1iMElpMUphVWxuZFktWGpLclA3Z0FyUkpZeU9uNlhCWVpMVlI2Y2tEWHpMc1RYaVF5LTl1MHA0MHhBV0RVbVVTQUtUZWVxV0k0S2lEVTVnX0taY0ZrSHVKUmpVeWI4UzF3Yjd1YzNWZTRGS2ZrSE5zX3Z2b0FyYXBJUnJHQnREWkNRZ1EwcERva0ctOHFjMnBoT1E5VHhRUnhHRU9meGNobHk2bUZCblhUSjdBNFRIczhucnFZZURnUlN2QzVTZDlzdGdhcHl5RTl2cDVsT09kNlAxa283SEtUNnk5bDRLWFpNWmJhQ0dwUlBkejZad2NWVkMyRTVFOXBqSkc0RW5DbUFrdDlNVDBfR19OMmFYV2c0ZXhXSHozdjBaRUhEbUE3WUQzbEZfR2hwTU9WN3QzX3ZnUGxxVmFwUHgwbXpyYnNkTElwamVKOXM0aDVtRzdtNUttSUJWSGFNbFl3OmV5SndlaUk2SWpFMkluMA==">
+    <input id="incident" type="hidden" value="fab_chlg_20250813051208_01K2GXFG83XQ3Z2BYT11MCV2SQ">
+    <input id="complaints-token" type="hidden" value="1.4f2ME95o-g-aD0VNVgjzqYFJ13WLLcUrOq3Zta6R2ny8XeBX-cUYKHA50ovgNb9-OqCeom1V-PZ0zfGNcRFXW3H0yJA4ecc5uixIZTe7aVxS6PXfrrbc8n0iQc9FUO6XUiXOtLMWBkVH7w35aO3Tzv8JZrR1kJH3OXLxOzXxEofbdXRX1Atyo56WA_tUnei8KeGOsEWEvfYSfpZDox2SpyZMe_ercC2LpJoIATb5uOwa4UzvtE_dIRR0cfR6-NmZwQyvtFXurscHy9jYqCma5Poo-SxEmuy_Wl-SwijZy9ofzKWArAlEIytbsEF2fVcSdvi0vZK1jQEKJw">
+    <input id="challenge-ip" type="hidden" value="46.246.9.220">
+    <input id="challenge-date" type="hidden" value="Wednesday, 13-Aug-2025 05:12:08 UTC">
+    <input id="complain-new-window" type="hidden" value="">
+    <div class="message">
+      <div class="loader">
+        <div class="loader-ellipse"></div>
+        <div class="loader-ellipse"></div>
+        <div class="loader-ellipse"></div>
+        <div class="loader-ellipse"></div>
+      </div>
+    </div>
+    <div class="challenge-data">
+      <div class="details">
+        <span class="details-text">fab_chlg_20250813051208_01K2GXFG83XQ3Z2BYT11MCV2SQ</span>
+      </div>
+      <div class="run-status-box">
+        <span id="run-status"></span>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://cdn2.ozone.ru/s3/abt-challenge/script_v26.js"></script>
+
+</body></html>
+
+

@@ -91,4 +91,5 @@ chrome.dll
 *.mov
 *.zip
 *.rar
-*.7z
+*.7zПатерны/
+temp_files.txt
