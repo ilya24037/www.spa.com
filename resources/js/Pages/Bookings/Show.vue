@@ -168,25 +168,25 @@
                   {{ getContactName }}
                 </h4>
                                 
-                <div v-if="!canManage && booking.master_profile" class="flex items-center gap-1 text-sm text-gray-500 mt-1">
+                <div v-if="!canManage && booking.user" class="flex items-center gap-1 text-sm text-gray-500 mt-1">
                   <StarIcon class="w-4 h-4 text-yellow-400 fill-current" />
-                  <span>{{ booking.master_profile.rating }}</span>
-                  <span class="text-gray-500">({{ booking.master_profile.reviews_count }} отзывов)</span>
+                  <span>{{ booking.user.rating }}</span>
+                  <span class="text-gray-500">({{ booking.user.reviews_count }} отзывов)</span>
                 </div>
-                                
+
                 <!-- Контакты показываем только после подтверждения -->
                 <div v-if="booking.status !== 'pending'" class="mt-3 space-y-2">
                   <a :href="`tel:${getContactPhone}`" class="flex items-center gap-2 text-blue-600 hover:underline">
                     <PhoneIcon class="w-4 h-4" />
                     {{ getContactPhone }}
                   </a>
-                                    
-                  <Link 
-                    v-if="!canManage"
-                    :href="route('masters.show', booking.master_profile_id)"
+
+                  <Link
+                    v-if="!canManage && booking.user"
+                    :href="`/users/${booking.user.slug || 'user-' + booking.user_id}`"
                     class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-500"
                   >
-                    Перейти в профиль мастера
+                    Перейти в профиль
                     <ChevronRightIcon class="w-4 h-4" />
                   </Link>
                 </div>
@@ -447,21 +447,21 @@ const getContactName = computed(() => {
     if (props.canManage) {
         return props.booking.client_name
     }
-    return props.booking.master_profile?.user?.name || 'Мастер'
+    return props.booking.user?.name || 'Пользователь'
 })
 
 const getContactPhone = computed(() => {
     if (props.canManage) {
         return props.booking.client_phone
     }
-    return props.booking.master_profile?.phone || ''
+    return props.booking.user?.phone || ''
 })
 
 const getContactAvatar = computed(() => {
     if (props.canManage) {
         return props.booking.client?.avatar_url || '/images/default-avatar.png'
     }
-    return props.booking.master_profile?.user?.avatar_url || '/images/default-avatar.png'
+    return props.booking.user?.avatar_url || '/images/default-avatar.png'
 })
 
 // Методы для статусов

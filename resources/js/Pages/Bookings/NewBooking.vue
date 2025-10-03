@@ -9,8 +9,8 @@
           Р“Р»Р°РІРЅР°СЏ
         </Link>
         <span class="mx-2 text-gray-500">/</span>
-        <Link :href="route('masters.show', masterProfile.id)" class="text-gray-500 hover:text-gray-500">
-          {{ masterProfile.user.name }}
+        <Link :href="`/users/${user.slug || 'user-' + user.id}`" class="text-gray-500 hover:text-gray-500">
+          {{ user.name }}
         </Link>
         <span class="mx-2 text-gray-500">/</span>
         <span class="text-gray-500">Р‘СЂРѕРЅРёСЂРѕРІР°РЅРёРµ</span>
@@ -115,7 +115,7 @@
                 </label>
 
                 <label
-                  v-if="masterProfile.salon_name" 
+                  v-if="user.salon_name" 
                   class="flex items-start p-4 border rounded-lg cursor-pointer hover:bg-gray-500 transition"
                   :class="form.service_location === 'salon' ? 'border-blue-500 bg-blue-50' : 'border-gray-500'"
                 >
@@ -127,8 +127,8 @@
                   >
                   <div class="ml-3">
                     <p class="font-medium">Р’ СЃР°Р»РѕРЅРµ</p>
-                    <p class="text-sm text-gray-500">{{ masterProfile.salon_name }}</p>
-                    <p class="text-sm text-gray-500">{{ masterProfile.salon_address }}</p>
+                    <p class="text-sm text-gray-500">{{ user.salon_name }}</p>
+                    <p class="text-sm text-gray-500">{{ user.salon_address }}</p>
                   </div>
                 </label>
               </div>
@@ -278,18 +278,18 @@
             <!-- РРЅС„РѕСЂРјР°С†РёСЏ Рѕ РјР°СЃС‚РµСЂРµ -->
             <div class="flex items-start gap-4 mb-6 pb-6 border-b">
               <img 
-                :src="masterProfile.user?.avatar_url || '/images/default-avatar.png'"
-                :alt="masterProfile.user.name"
+                :src="user.avatar_url || '/images/default-avatar.png'"
+                :alt="user.name"
                 class="w-16 h-16 rounded-full object-cover"
               >
               <div>
                 <h3 class="font-semibold">
-                  {{ masterProfile.user.name }}
+                  {{ user.name }}
                 </h3>
                 <div class="flex items-center gap-1 text-sm text-gray-500">
                   <StarIcon class="w-4 h-4 text-yellow-400 fill-current" />
-                  <span>{{ masterProfile.rating }}</span>
-                  <span class="text-gray-500">({{ masterProfile.reviews_count }} отзывов)</span>
+                  <span>{{ user.rating }}</span>
+                  <span class="text-gray-500">({{ user.reviews_count }} отзывов)</span>
                 </div>
               </div>
             </div>
@@ -372,7 +372,7 @@ interface Service {
 }
 
 interface BookingProps {
-    masterProfile: MasterProfile
+    user: MasterProfile // TODO: Переименовать MasterProfile в User после полного рефакторинга
     service: Service
     availableSlots: Record<string, any>
 }
@@ -381,7 +381,7 @@ const props = defineProps<BookingProps>()
 
 // Р¤РѕСЂРјР°
 const form = useForm({
-    master_profile_id: props.masterProfile?.id || 0,
+    user_id: props.user?.id || 0,
     service_id: props.service?.id || 0,
     booking_date: null,
     booking_time: null,
