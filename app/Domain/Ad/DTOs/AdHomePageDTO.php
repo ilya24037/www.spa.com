@@ -23,11 +23,11 @@ class AdHomePageDTO
     public int $experience_years;
     public bool $is_verified;
     public bool $is_premium;
-    // Данные о профиле мастера
-    public ?int $master_profile_id;
-    public ?string $master_slug;
+    // Данные о пользователе (владельце объявления)
+    public ?int $user_id;
+    public ?string $user_slug;
     public ?string $slug;
-    public bool $has_master_profile;
+    public bool $has_user;
     
     public function __construct(array $data)
     {
@@ -47,11 +47,11 @@ class AdHomePageDTO
         $this->experience_years = $data['experience_years'] ?? 1;
         $this->is_verified = $data['is_verified'] ?? false;
         $this->is_premium = $data['is_premium'] ?? false;
-        // Инициализация полей профиля мастера
-        $this->master_profile_id = $data['master_profile_id'] ?? null;
-        $this->master_slug = $data['master_slug'] ?? null;
+        // Инициализация полей пользователя
+        $this->user_id = $data['user_id'] ?? null;
+        $this->user_slug = $data['user_slug'] ?? $data['master_slug'] ?? null; // Backward compatibility
         $this->slug = $data['slug'] ?? null;
-        $this->has_master_profile = $data['has_master_profile'] ?? false;
+        $this->has_user = $data['has_user'] ?? $data['has_master_profile'] ?? false; // Backward compatibility
     }
     
     /**
@@ -78,11 +78,14 @@ class AdHomePageDTO
             'experience_years' => $this->experience_years,
             'is_verified' => $this->is_verified,
             'is_premium' => $this->is_premium,
-            // Добавляем поля профиля мастера
-            'master_profile_id' => $this->master_profile_id,
-            'master_slug' => $this->master_slug,
+            // Данные пользователя
+            'user_id' => $this->user_id,
+            'user_slug' => $this->user_slug,
             'slug' => $this->slug,
-            'has_master_profile' => $this->has_master_profile,
+            'has_user' => $this->has_user,
+            // Backward compatibility
+            'master_slug' => $this->user_slug,
+            'has_master_profile' => $this->has_user,
         ];
     }
     
